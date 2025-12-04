@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useState, useEffect } from 'react'
-import { User, Calendar, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles } from 'lucide-react'
+import { User, Calendar, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles, Stethoscope, GraduationCap, Medal } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useDoctorLevel, DOCTOR_LEVELS, DoctorLevel } from '@/contexts/DoctorContext'
 
 export interface BasicInfoData {
     name: string
@@ -21,6 +22,7 @@ export interface BasicInfoData {
 }
 
 export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: BasicInfoData) => void, initialData?: BasicInfoData }) {
+    const { doctorLevel, setDoctorLevel } = useDoctorLevel()
     const [formData, setFormData] = useState<BasicInfoData>(initialData || {
         name: '',
         age: '',
@@ -88,18 +90,66 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                 <p className="text-emerald-50 opacity-90">Please provide your basic details to help us diagnose you accurately.</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="p-6 space-y-8">
+                {/* Doctor Level Selection */}
+                <div className="space-y-4">
+                    <Label className="text-stone-600 font-medium flex items-center gap-2 text-lg">
+                        <Stethoscope className="w-5 h-5 text-emerald-600" />
+                        Choose Your TCM Doctor
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {(Object.keys(DOCTOR_LEVELS) as DoctorLevel[]).map((level) => {
+                            const info = DOCTOR_LEVELS[level]
+                            const isSelected = doctorLevel === level
+
+                            return (
+                                <div
+                                    key={level}
+                                    onClick={() => setDoctorLevel(level)}
+                                    className={`
+                                        relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200
+                                        ${isSelected
+                                            ? `${info.borderColor} ${info.bgColor} shadow-md scale-[1.02]`
+                                            : 'border-stone-100 bg-white hover:border-stone-200 hover:bg-stone-50'
+                                        }
+                                    `}
+                                >
+                                    <div className="flex items-start justify-between mb-2">
+                                        <span className="text-2xl">{info.icon}</span>
+                                        {isSelected && (
+                                            <div className={`h-5 w-5 rounded-full bg-gradient-to-r ${info.color} flex items-center justify-center`}>
+                                                <Check className="w-3 h-3 text-white" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <h3 className={`font-bold ${isSelected ? info.textColor : 'text-stone-700'}`}>
+                                        {info.name}
+                                    </h3>
+                                    <p className="text-xs text-stone-500 mt-1">
+                                        {info.description}
+                                    </p>
+                                    {isSelected && (
+                                        <div className={`absolute inset-0 rounded-xl ring-2 ring-offset-2 ring-transparent ${info.borderColor.replace('border', 'ring')}`} />
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+
+                <div className="h-px bg-stone-100" />
+
                 <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2 col-span-2 md:col-span-1">
                         <Label htmlFor="name" className="text-stone-600 font-medium">Full Name</Label>
                         <div className="relative">
-                            <User className="absolute left-3 top-2.5 h-4 w-4 text-emerald-600/70" />
+                            <User className="absolute left-3 top-3.5 h-4 w-4 text-emerald-600/70" />
                             <Input
                                 id="name"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 placeholder="Enter your name"
-                                className="pl-10 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
+                                className="pl-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
                                 required
                             />
                         </div>
@@ -112,16 +162,17 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
                             </div>
                             <Select
-                                id="gender"
                                 value={formData.gender}
-                                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                                required
-                                className="pl-10 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50"
+                                onValueChange={(val) => setFormData({ ...formData, gender: val })}
                             >
-                                <option value="">Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
+                                <SelectTrigger id="gender" className="pl-10 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50">
+                                    <SelectValue placeholder="Select Gender" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="male">Male</SelectItem>
+                                    <SelectItem value="female">Female</SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
                             </Select>
                         </div>
                     </div>
@@ -129,17 +180,18 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                     <div className="space-y-2">
                         <Label htmlFor="age" className="text-stone-600 font-medium">Age</Label>
                         <div className="relative">
-                            <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-emerald-600/70" />
+                            <Calendar className="absolute left-3 top-3.5 h-4 w-4 text-emerald-600/70" />
                             <Input
                                 id="age"
                                 type="number"
+                                inputMode="numeric"
                                 min="0"
                                 max="120"
                                 list="age-suggestions"
                                 value={formData.age}
                                 onChange={(e) => setFormData({ ...formData, age: e.target.value })}
                                 placeholder="Age"
-                                className="pl-10 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
+                                className="pl-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
                                 required
                             />
                             <datalist id="age-suggestions">
@@ -153,10 +205,11 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                     <div className="space-y-2">
                         <Label htmlFor="weight" className="text-stone-600 font-medium">Weight (kg)</Label>
                         <div className="relative">
-                            <Scale className="absolute left-3 top-2.5 h-4 w-4 text-emerald-600/70" />
+                            <Scale className="absolute left-3 top-3.5 h-4 w-4 text-emerald-600/70" />
                             <Input
                                 id="weight"
                                 type="number"
+                                inputMode="decimal"
                                 min="1"
                                 max="500"
                                 step="0.1"
@@ -164,7 +217,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                                 value={formData.weight}
                                 onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
                                 placeholder="kg"
-                                className="pl-10 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
+                                className="pl-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
                                 required
                             />
                             <datalist id="weight-suggestions">
@@ -178,10 +231,11 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                     <div className="space-y-2">
                         <Label htmlFor="height" className="text-stone-600 font-medium">Height (cm)</Label>
                         <div className="relative">
-                            <Ruler className="absolute left-3 top-2.5 h-4 w-4 text-emerald-600/70" />
+                            <Ruler className="absolute left-3 top-3.5 h-4 w-4 text-emerald-600/70" />
                             <Input
                                 id="height"
                                 type="number"
+                                inputMode="decimal"
                                 min="1"
                                 max="300"
                                 step="0.1"
@@ -189,7 +243,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                                 value={formData.height}
                                 onChange={(e) => setFormData({ ...formData, height: e.target.value })}
                                 placeholder="cm"
-                                className="pl-10 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
+                                className="pl-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
                                 required
                             />
                             <datalist id="height-suggestions">
@@ -207,23 +261,24 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                                 <Clock className="h-4 w-4" />
                             </div>
                             <Select
-                                id="symptomDuration"
                                 value={formData.symptomDuration}
-                                onChange={(e) => setFormData({ ...formData, symptomDuration: e.target.value })}
-                                required
-                                className="pl-10 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50"
+                                onValueChange={(val) => setFormData({ ...formData, symptomDuration: val })}
                             >
-                                <option value="">How long?</option>
-                                <option value="less-than-1-day">Less than 1 day</option>
-                                <option value="1-3-days">1-3 days</option>
-                                <option value="4-7-days">4-7 days</option>
-                                <option value="1-2-weeks">1-2 weeks</option>
-                                <option value="2-4-weeks">2-4 weeks</option>
-                                <option value="1-3-months">1-3 months</option>
-                                <option value="3-6-months">3-6 months</option>
-                                <option value="6-12-months">6-12 months</option>
-                                <option value="over-1-year">Over 1 year</option>
-                                <option value="chronic">Chronic (ongoing)</option>
+                                <SelectTrigger id="symptomDuration" className="pl-10 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50">
+                                    <SelectValue placeholder="How long?" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="less-than-1-day">Less than 1 day</SelectItem>
+                                    <SelectItem value="1-3-days">1-3 days</SelectItem>
+                                    <SelectItem value="4-7-days">4-7 days</SelectItem>
+                                    <SelectItem value="1-2-weeks">1-2 weeks</SelectItem>
+                                    <SelectItem value="2-4-weeks">2-4 weeks</SelectItem>
+                                    <SelectItem value="1-3-months">1-3 months</SelectItem>
+                                    <SelectItem value="3-6-months">3-6 months</SelectItem>
+                                    <SelectItem value="6-12-months">6-12 months</SelectItem>
+                                    <SelectItem value="over-1-year">Over 1 year</SelectItem>
+                                    <SelectItem value="chronic">Chronic (ongoing)</SelectItem>
+                                </SelectContent>
                             </Select>
                         </div>
                     </div>
@@ -243,14 +298,14 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => handleSymptomClick(symptom)}
                                 className={`
-                                    px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 border
+                                    px-4 py-3 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 border min-h-[44px]
                                     ${selectedSymptoms.includes(symptom)
                                         ? "bg-emerald-100 border-emerald-200 text-emerald-800 shadow-sm"
                                         : "bg-white border-stone-200 text-stone-600 hover:border-emerald-200 hover:bg-emerald-50"
                                     }
                                 `}
                             >
-                                {selectedSymptoms.includes(symptom) && <Check className="w-3 h-3" />}
+                                {selectedSymptoms.includes(symptom) && <Check className="w-4 h-4" />}
                                 {symptom}
                             </motion.button>
                         ))}

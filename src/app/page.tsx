@@ -2,10 +2,13 @@
 
 import DiagnosisWizard from '@/components/diagnosis/DiagnosisWizard'
 import { useEffect, useState } from 'react'
-import { FlaskConical } from 'lucide-react'
+import { FlaskConical, User } from 'lucide-react'
+import Link from 'next/link'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function Home() {
   const [isDev, setIsDev] = useState(false)
+  const { user, profile, loading } = useAuth()
 
   useEffect(() => {
     // Check if running on localhost (development)
@@ -36,9 +39,22 @@ export default function Home() {
               Test
             </button>
           )}
-          <button className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium transition-all border border-white/20">
-            Login / Sign up
-          </button>
+          {!loading && (
+            user ? (
+              <Link href={`/${profile?.role || 'patient'}`}>
+                <button className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-full text-sm font-medium transition-all shadow-lg hover:shadow-xl hover:scale-105">
+                  <User className="w-4 h-4" />
+                  Dashboard
+                </button>
+              </Link>
+            ) : (
+              <Link href="/login">
+                <button className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium transition-all border border-white/20">
+                  Login / Sign up
+                </button>
+              </Link>
+            )
+          )}
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto space-y-4">

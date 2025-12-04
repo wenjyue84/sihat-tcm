@@ -5,10 +5,10 @@ export const maxDuration = 60;
 
 export async function POST(req: Request) {
     const startTime = Date.now();
-    console.log('[test-gemini] Request started at:', new Date().toISOString());
 
     try {
-        const { prompt } = await req.json();
+        const { prompt, model = 'gemini-2.0-flash' } = await req.json();
+        console.log(`[test-gemini] Testing model: ${model}`);
         console.log('[test-gemini] Prompt:', prompt?.substring(0, 100) + '...');
 
         if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
@@ -16,17 +16,17 @@ export async function POST(req: Request) {
         }
         console.log('[test-gemini] API key found, length:', process.env.GOOGLE_GENERATIVE_AI_API_KEY.length);
 
-        console.log('[test-gemini] Calling Gemini 2.0 Flash...');
+        console.log(`[test-gemini] Calling ${model}...`);
         const { text } = await generateText({
-            model: google('gemini-2.0-flash'),
+            model: google(model),
             prompt: prompt,
         });
 
         const duration = Date.now() - startTime;
-        console.log(`[test-gemini] Success! Response received in ${duration}ms`);
+        console.log(`[test-gemini] Success with ${model}! Response received in ${duration}ms`);
         console.log('[test-gemini] Response length:', text?.length);
 
-        return Response.json({ result: text, durationMs: duration });
+        return Response.json({ result: text, durationMs: duration, model });
     } catch (error: any) {
         const duration = Date.now() - startTime;
         console.error(`[test-gemini] FAILED after ${duration}ms:`, error.message);

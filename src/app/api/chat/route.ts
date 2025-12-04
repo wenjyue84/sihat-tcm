@@ -1,21 +1,37 @@
 import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
+import { supabase } from '@/lib/supabase';
 
 export const maxDuration = 30;
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { messages, basicInfo } = body;
+        const { messages, basicInfo, model = 'gemini-2.5-flash' } = body;
 
         console.log("[API /api/chat] Request received:", {
             messageCount: messages?.length,
             hasBasicInfo: !!basicInfo,
-            firstMsgRole: messages?.[0]?.role
+            firstMsgRole: messages?.[0]?.role,
+            model: model
         });
 
+        // Fetch custom system prompt
+        let customPrompt = '';
+        try {
+            const { data } = await supabase
+                .from('system_prompts')
+                .select('prompt_text')
+                .eq('role', 'doctor')
+                .single();
+            if (data) customPrompt = data.prompt_text;
+        } catch (e) {
+            console.error("Error fetching system prompt", e);
+        }
+
         // Build the system prompt with basic patient info context
-        let systemPrompt = `You are an experienced 老中医 (traditional Chinese medicine practitioner) with decades of clinical experience. 
+        let systemPrompt = customPrompt || `You are an experienced 老中医 (traditional Chinese medicine practitioner) with decades of clinical experience. 
 Your goal is to conduct a thorough inquiry (问诊 Wèn Zhěn) to gather complete information for an accurate TCM diagnosis.
 
 **CRITICAL CONSULTATION PROTOCOL:**
@@ -109,7 +125,7 @@ Use this information as context for your questions. Do NOT repeat this informati
         }
 
         const result = streamText({
-            model: google('gemini-2.0-flash'),
+            model: google(model),
             system: systemPrompt,
             messages: filteredMessages,
         });

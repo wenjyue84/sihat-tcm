@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { BasicInfoData } from './BasicInfoForm'
 import { Loader2, Send, Upload, X } from 'lucide-react'
+import { useDoctorLevel } from '@/contexts/DoctorContext'
 
 interface FileData {
     name: string
@@ -26,6 +27,8 @@ export function InquiryStep({
     onComplete: (data: { inquiryText: string, chatHistory: any[], files: FileData[] }) => void,
     basicInfo?: BasicInfoData
 }) {
+    const { getDoctorInfo } = useDoctorLevel()
+    const doctorInfo = getDoctorInfo()
     const [files, setFiles] = useState<FileData[]>([])
     const [messages, setMessages] = useState<Message[]>([])
     const [localInput, setLocalInput] = useState('')
@@ -34,6 +37,7 @@ export function InquiryStep({
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const scrollAreaRef = useRef<HTMLDivElement>(null)
+    const inputRef = useRef<HTMLInputElement>(null)
 
     // Construct the initial system message based on basic info
     const systemMessage = basicInfo
@@ -80,7 +84,8 @@ CRITICAL INSTRUCTIONS:
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     messages: currentMessages.map(m => ({ role: m.role, content: m.content })),
-                    basicInfo
+                    basicInfo,
+                    model: doctorInfo.model
                 })
             })
 
@@ -127,7 +132,7 @@ CRITICAL INSTRUCTIONS:
         } finally {
             setIsLoading(false)
         }
-    }, [messages, systemMessage, basicInfo])
+    }, [messages, systemMessage, basicInfo, doctorInfo.model])
 
     // Trigger the first question from AI doctor when component mounts
     useEffect(() => {
@@ -163,12 +168,25 @@ CRITICAL INSTRUCTIONS:
         }
     }, [messages])
 
+    // Keep focus on input field - refocus when loading finishes or messages change
+    useEffect(() => {
+        if (!isLoading) {
+            // Small delay to ensure DOM is updated before focusing
+            const timer = setTimeout(() => {
+                inputRef.current?.focus()
+            }, 100)
+            return () => clearTimeout(timer)
+        }
+    }, [isLoading, messages])
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!localInput.trim() || isLoading) return
         const userInput = localInput
         setLocalInput('')
         await sendMessage(userInput)
+        // Auto-focus the input field after sending message
+        inputRef.current?.focus()
     }
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,42 +261,62 @@ CRITICAL INSTRUCTIONS:
     )
 
     return (
-        <Card className="p-6 h-[600px] flex flex-col gap-4">
-            <div className="flex justify-between items-center border-b pb-4">
+        <Card className="p-4 md:p-6 h-[calc(100vh-180px)] min-h-[500px] max-h-[800px] flex flex-col gap-3 md:gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b pb-3 md:pb-4">
                 <div>
-                    <h2 className="text-xl font-semibold text-emerald-800">Wen (Inquiry) - Consultation</h2>
-                    <p className="text-stone-600 text-sm">Chat with the AI assistant to describe your condition.</p>
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-lg md:text-xl font-semibold text-emerald-800">Wen (Inquiry) - Consultation</h2>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${doctorInfo.bgColor} ${doctorInfo.borderColor} ${doctorInfo.textColor}`}>
+                            {doctorInfo.icon} {doctorInfo.name}
+                        </span>
+                    </div>
+                    <p className="text-stone-600 text-xs md:text-sm">Chat with the AI assistant to describe your condition.</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="h-10 text-sm">
                     <Upload className="w-4 h-4 mr-2" />
                     Upload Reports
                 </Button>
             </div>
 
-            {/* Basic Information Summary with BMI */}
+            {doctorInfo.id === 'master' && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-3 text-sm text-amber-800">
+                    <span className="text-xl">⏳</span>
+                    <div>
+                        <p className="font-medium">Master Level Analysis</p>
+                        <p className="text-amber-700/80 text-xs mt-0.5">
+                            The Master physician performs deep reasoning and analysis. Responses may take slightly longer to generate as it considers multiple TCM theories.
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Basic Information Summary with BMI - Collapsible hint on mobile */}
             {basicInfo && basicInfo.weight && basicInfo.height && (
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-lg border border-emerald-200 space-y-3">
-                    <h3 className="font-semibold text-emerald-800 text-sm">Patient Information Summary</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                <details className="bg-gradient-to-r from-emerald-50 to-teal-50 p-3 md:p-4 rounded-lg border border-emerald-200 group">
+                    <summary className="font-semibold text-emerald-800 text-sm cursor-pointer flex items-center justify-between">
+                        Patient Information
+                        <span className="text-xs text-emerald-600 group-open:hidden">Tap to expand</span>
+                    </summary>
+                    <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 text-sm">
                         <div>
-                            <span className="text-stone-500">Name:</span>
-                            <p className="font-medium text-stone-800">{basicInfo.name}</p>
+                            <span className="text-stone-500 text-xs">Name:</span>
+                            <p className="font-medium text-stone-800 text-sm">{basicInfo.name}</p>
                         </div>
                         <div>
-                            <span className="text-stone-500">Age:</span>
-                            <p className="font-medium text-stone-800">{basicInfo.age} years</p>
+                            <span className="text-stone-500 text-xs">Age:</span>
+                            <p className="font-medium text-stone-800 text-sm">{basicInfo.age} years</p>
                         </div>
                         <div>
-                            <span className="text-stone-500">Gender:</span>
-                            <p className="font-medium text-stone-800 capitalize">{basicInfo.gender}</p>
+                            <span className="text-stone-500 text-xs">Gender:</span>
+                            <p className="font-medium text-stone-800 text-sm capitalize">{basicInfo.gender}</p>
                         </div>
                         <div>
-                            <span className="text-stone-500">Weight:</span>
-                            <p className="font-medium text-stone-800">{basicInfo.weight} kg</p>
+                            <span className="text-stone-500 text-xs">Weight:</span>
+                            <p className="font-medium text-stone-800 text-sm">{basicInfo.weight} kg</p>
                         </div>
                         <div>
-                            <span className="text-stone-500">Height:</span>
-                            <p className="font-medium text-stone-800">{basicInfo.height} cm</p>
+                            <span className="text-stone-500 text-xs">Height:</span>
+                            <p className="font-medium text-stone-800 text-sm">{basicInfo.height} cm</p>
                         </div>
                         <div className="col-span-2 md:col-span-3">
                             {(() => {
@@ -289,12 +327,11 @@ CRITICAL INSTRUCTIONS:
                                     const bmiInfo = getBMICategory(bmi)
                                     return (
                                         <div>
-                                            <span className="text-stone-500">BMI Status:</span>
-                                            <div className={`inline-flex items-center gap-2 mt-1 px-3 py-1 rounded-full border ${bmiInfo.color}`}>
+                                            <span className="text-stone-500 text-xs">BMI Status:</span>
+                                            <div className={`inline-flex items-center gap-2 mt-1 px-2 py-0.5 rounded-full border text-xs ${bmiInfo.color}`}>
                                                 <span className="font-bold">{bmi.toFixed(1)}</span>
-                                                <span className="text-xs">•</span>
+                                                <span>•</span>
                                                 <span className="font-semibold">{bmiInfo.category}</span>
-                                                <span className="text-xs opacity-75">({bmiInfo.description})</span>
                                             </div>
                                         </div>
                                     )
@@ -303,7 +340,7 @@ CRITICAL INSTRUCTIONS:
                             })()}
                         </div>
                     </div>
-                </div>
+                </details>
             )}
 
             {/* Chat Messages Area with Scrollbar */}
@@ -353,22 +390,23 @@ CRITICAL INSTRUCTIONS:
             <div className="flex gap-2 pt-2 border-t">
                 <form onSubmit={handleSubmit} className="flex-1 flex gap-2">
                     <Input
+                        ref={inputRef}
                         value={localInput}
                         onChange={(e) => setLocalInput(e.target.value)}
                         placeholder="Type your response..."
-                        className="flex-1"
+                        className="flex-1 h-12 text-base"
                         autoFocus
                         disabled={isLoading}
                     />
-                    <Button type="submit" disabled={isLoading || !localInput?.trim()}>
-                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    <Button type="submit" disabled={isLoading || !localInput?.trim()} className="h-12 w-12 p-0">
+                        {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                     </Button>
                 </form>
             </div>
 
             <Button
                 onClick={handleComplete}
-                className="w-full bg-emerald-800 hover:bg-emerald-900 mt-2"
+                className="w-full h-12 bg-emerald-800 hover:bg-emerald-900 text-base"
                 disabled={displayMessages.length < 2}
             >
                 Finish Inquiry & Continue

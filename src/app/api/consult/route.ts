@@ -9,10 +9,11 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { data, prompt } = body;
+    const { data, prompt, model = 'gemini-2.5-flash' } = body;
 
     console.log('[consult] Received prompt:', prompt?.substring(0, 50));
     console.log('[consult] Patient name:', data?.basic_info?.name);
+    console.log('[consult] Using model:', model);
 
     // Build a comprehensive text summary of all the data
     const { basic_info } = data;
@@ -69,7 +70,7 @@ JSON structure:
     console.log('[consult] Calling Gemini streamText...');
 
     const result = streamText({
-      model: google('gemini-2.0-flash'),
+      model: google(model),
       system: systemPrompt,
       prompt: diagnosisInfo,
     });

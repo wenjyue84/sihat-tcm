@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
 import { CameraCapture } from './CameraCapture'
 import { AudioRecorder } from './AudioRecorder'
 
@@ -14,6 +16,7 @@ import { AnalysisLoadingScreen } from './AnalysisLoadingScreen'
 import { ProgressStepper } from './ProgressStepper'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft } from 'lucide-react'
+import { useDoctorLevel } from '@/contexts/DoctorContext'
 
 export type DiagnosisStep = 'basic_info' | 'wen_inquiry' | 'wang_tongue' | 'wang_face' | 'wang_part' | 'wen_audio' | 'qie' | 'processing' | 'report'
 
@@ -27,6 +30,7 @@ const STEPS = [
 ]
 
 export default function DiagnosisWizard() {
+    const { getModel } = useDoctorLevel()
     const [step, setStep] = useState<DiagnosisStep>('basic_info')
     const [data, setData] = useState<any>({
         basic_info: null,
@@ -38,6 +42,23 @@ export default function DiagnosisWizard() {
         wen_chat: [],
         qie: null
     })
+    const { user, profile } = useAuth()
+
+    useEffect(() => {
+        if (profile && !data.basic_info) {
+            setData((prev: any) => ({
+                ...prev,
+                basic_info: {
+                    name: profile.full_name,
+                    age: profile.age,
+                    gender: profile.gender,
+                    height: profile.height,
+                    weight: profile.weight,
+                    // medical_history: profile.medical_history // BasicInfoForm might not have this field yet, but good to have
+                }
+            }))
+        }
+    }, [profile])
 
     // Manual state management instead of useCompletion
     const [completion, setCompletion] = useState('')
@@ -84,7 +105,8 @@ export default function DiagnosisWizard() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     prompt: 'Analyze this patient data and provide TCM diagnosis',
-                    data: data
+                    data: data,
+                    model: getModel()
                 })
             })
 
@@ -114,6 +136,23 @@ export default function DiagnosisWizard() {
             console.log('[DiagnosisWizard] Final text length:', fullText.length)
             console.log('[DiagnosisWizard] Preview:', fullText.substring(0, 300))
             setCompletion(fullText)
+
+            // Auto-save to Supabase if valid JSON
+            try {
+                const cleanJson = fullText.replace(/```json\n?|\n?```/g, '').trim();
+                const resultData = JSON.parse(cleanJson);
+                if (user) {
+                    await supabase.from('inquiries').insert({
+                        user_id: user.id,
+                        symptoms: data.basic_info?.symptoms || 'Not provided',
+                        diagnosis_report: resultData,
+                        created_at: new Date().toISOString()
+                    });
+                    console.log('[DiagnosisWizard] Saved to Supabase');
+                }
+            } catch (e) {
+                console.error('[DiagnosisWizard] Failed to auto-save:', e);
+            }
         } catch (err: any) {
             console.error('[DiagnosisWizard] Error:', err)
             setError(err)
@@ -130,17 +169,17 @@ export default function DiagnosisWizard() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-4 md:p-6">
+        <div className="max-w-4xl mx-auto p-3 md:p-6 pb-8">
             {step !== 'processing' && step !== 'report' && (
                 <ProgressStepper currentStep={getCurrentStepperId()} steps={STEPS} />
             )}
 
-            <div className="relative min-h-[600px]">
+            <div className="relative min-h-[400px] md:min-h-[600px]">
                 {step !== 'basic_info' && step !== 'processing' && step !== 'report' && (
                     <Button
                         variant="ghost"
                         onClick={() => prevStep(step)}
-                        className="absolute -top-12 left-0 text-stone-500 hover:text-stone-800 hover:bg-stone-100"
+                        className="absolute -top-10 md:-top-12 left-0 text-stone-500 hover:text-stone-800 hover:bg-stone-100 h-10 px-3"
                     >
                         <ChevronLeft className="w-4 h-4 mr-1" />
                         Back
