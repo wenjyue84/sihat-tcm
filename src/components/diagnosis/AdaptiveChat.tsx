@@ -25,7 +25,7 @@ export function AdaptiveChat({ onComplete, basicInfo }: { onComplete: (data: any
     // Trigger the first question from AI when the component mounts
     useEffect(() => {
         if (messages.length === 1 && messages[0].role === 'system') {
-            reload()
+            append({ role: 'user', content: 'Please start the diagnosis.' })
         }
     }, [])
 
@@ -40,7 +40,7 @@ export function AdaptiveChat({ onComplete, basicInfo }: { onComplete: (data: any
         <Card className="p-6 space-y-4 h-[500px] flex flex-col">
             <h2 className="text-xl font-semibold">Wen (Inquiry)</h2>
             <ScrollArea className="flex-1 p-4 border rounded-lg">
-                {messages.filter((m: any) => m.role !== 'system').map((m: any) => (
+                {messages.filter((m: any) => m.role !== 'system' && m.content !== 'Please start the diagnosis.').map((m: any) => (
                     <div key={m.id} className={`mb-4 ${m.role === 'user' ? 'text-right' : 'text-left'}`}>
                         <span className={`inline-block p-2 rounded-lg ${m.role === 'user' ? 'bg-emerald-100' : 'bg-gray-100'}`}>
                             {m.content}
