@@ -46,36 +46,45 @@ export async function POST(req: Request) {
   const pulseInfo = data.qie ? `Pulse BPM: ${data.qie.bpm}` : 'Pulse not measured';
   userContent.push({ type: 'text', text: `\nPulse Palpation:\n${pulseInfo}` });
 
-  const systemPrompt = `
-    You are a highly experienced Traditional Chinese Medicine (TCM) practitioner.
-    Your task is to perform the "Four Examinations" based on the provided multimodal data.
+  const { basic_info } = data;
+  const prompt = `
+      You are a highly experienced Traditional Chinese Medicine (TCM) practitioner.
+      Analyze the following patient data and provide a diagnosis, body constitution analysis, and food recommendations.
 
-    1. Wang (Inspection): Analyze the tongue image for color, coating, and shape.
-    2. Wen (Listening): Analyze the voice audio for tonality (weak/strong) and breath patterns.
-    3. Wen (Inquiry): Consider the user's chat responses.
-    4. Qie (Palpation): Consider the estimated pulse BPM and regularity.
+      Patient Profile:
+      - Name: ${basic_info?.name || 'Unknown'}
+      - Age: ${basic_info?.age || 'Unknown'}
+      - Gender: ${basic_info?.gender || 'Unknown'}
+      - Reported Symptoms: ${basic_info?.symptoms || 'None'}
 
-    Output a JSON object with the following structure:
-    {
-      "diagnosis": {
-        "tongue_analysis": "...",
-        "voice_analysis": "...",
-        "pulse_analysis": "...",
-        "symptoms_summary": "..."
-      },
-      "constitution": "...",
-      "recommendations": {
-        "food": ["..."],
-        "lifestyle": ["..."]
+      1. Wang (Inspection):
+      - Image provided (Tongue analysis required).
+
+      2. Wen (Listening):
+      - Audio provided (Voice/Breath analysis required).
+
+      3. Wen (Inquiry):
+      - Chat History: ${chatHistory}
+
+      4. Qie (Palpation):
+      - Estimated Pulse BPM: ${pulseInfo}
+
+      Please provide a detailed report in JSON format with the following structure:
+      {
+        "diagnosis": "Main TCM diagnosis (e.g., Qi Deficiency)",
+        "constitution": "Body Constitution Type",
+        "analysis": "Detailed analysis of symptoms and signs",
+        "recommendations": {
+          "food": ["List of recommended foods"],
+          "avoid": ["List of foods to avoid"],
+          "lifestyle": ["Lifestyle advice"]
+        }
       }
-    }
-    Ensure the tone is empathetic and professional.
-    Disclaimer: This is for wellness advice only, not a medical diagnosis.
   `;
 
   const result = streamText({
     model: google('gemini-1.5-pro-latest'),
-    system: systemPrompt,
+    system: prompt,
     messages: [
       { role: 'user', content: userContent }
     ],
