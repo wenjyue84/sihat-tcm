@@ -1,20 +1,33 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useChat } from '@ai-sdk/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 
-export function AdaptiveChat({ onComplete }: { onComplete: (data: any) => void }) {
+export function AdaptiveChat({ onComplete, basicInfo }: { onComplete: (data: any) => void, basicInfo: any }) {
     const [input, setInput] = useState('')
-    const { messages, append } = useChat({
+
+    // Construct the initial system message based on basic info
+    const systemMessage = `You are a TCM assistant. The patient is a ${basicInfo?.age}-year-old ${basicInfo?.gender} named ${basicInfo?.name}. 
+    They have reported the following symptoms: "${basicInfo?.symptoms}".
+    Your goal is to ask relevant follow-up questions to gather more details for a TCM diagnosis. 
+    Focus on the "Ten Questions" (Shi Wen) of TCM. Ask one question at a time. Keep it brief and professional.`
+
+    const { messages, append, setMessages, reload } = useChat({
         api: '/api/chat',
         initialMessages: [
-            { id: '1', role: 'system', content: 'You are a TCM assistant. Ask relevant follow-up questions about symptoms. Keep it brief.' },
-            { id: '2', role: 'assistant', content: 'Do you have any specific symptoms you would like to mention?' }
+            { id: '1', role: 'system', content: systemMessage }
         ]
     } as any) as any
+
+    // Trigger the first question from AI when the component mounts
+    useEffect(() => {
+        if (messages.length === 1 && messages[0].role === 'system') {
+            reload()
+        }
+    }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()

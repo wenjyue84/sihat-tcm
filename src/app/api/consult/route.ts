@@ -11,28 +11,29 @@ export async function POST(req: Request) {
     { type: 'text', text: 'Please perform a TCM diagnosis based on the following inputs:' }
   ];
 
-  if (data.wang?.image) {
-    // data.wang.image is a base64 string like "data:image/jpeg;base64,..."
-    // We need to strip the prefix for some SDKs, but Vercel AI SDK's google provider usually handles data URLs or expects specific format.
-    // The google provider supports 'image' part with a URL or base64.
+  if (data.wang_tongue?.image) {
+    userContent.push({ type: 'text', text: '\n1. Wang (Inspection) - Tongue:' });
+    userContent.push({ type: 'image', image: data.wang_tongue.image });
+  } else if (data.wang?.image) {
+    // Fallback for legacy data structure if any
+    userContent.push({ type: 'text', text: '\n1. Wang (Inspection) - Tongue:' });
     userContent.push({ type: 'image', image: data.wang.image });
+  }
+
+  if (data.wang_face?.image) {
+    userContent.push({ type: 'text', text: '\n2. Wang (Inspection) - Face:' });
+    userContent.push({ type: 'image', image: data.wang_face.image });
+  }
+
+  if (data.wang_part?.image) {
+    userContent.push({ type: 'text', text: '\n3. Wang (Inspection) - Specific Area (e.g., Skin/Injury):' });
+    userContent.push({ type: 'image', image: data.wang_part.image });
   }
 
   if (data.wen_audio?.audio) {
     // data.wen_audio.audio is a base64 string
-    // Currently Vercel AI SDK Core might not fully support audio parts in the standard 'messages' array for all providers yet, 
-    // but Gemini supports it. We might need to check if the SDK supports 'file' or specific audio part.
-    // As of recent versions, 'file' part with mimeType is supported.
-    // Let's try passing it as a file part if possible, or just describe it if not supported.
-    // Actually, for Gemini, we can pass audio.
-    // If the SDK doesn't support it directly in the types, we might need to cast or use a workaround.
-    // Let's assume 'file' type works or we skip audio for now if it breaks, but the requirement is Audio AI.
-    // We will try to pass it as a text description if we can't pass audio directly, but we should try.
-    // The 'experimental_attachments' or similar might be needed.
-    // For now, let's assume we can pass it as a 'file' part if the SDK allows, or just rely on the image and text if audio is tricky.
-    // Wait, the prompt explicitly asked for Audio AI.
-    // Let's try to use the 'file' part.
     const audioBase64 = data.wen_audio.audio.split(',')[1];
+    userContent.push({ type: 'text', text: '\n4. Wen (Listening) - Audio:' });
     userContent.push({
       type: 'file',
       data: audioBase64,
@@ -41,10 +42,10 @@ export async function POST(req: Request) {
   }
 
   const chatHistory = data.wen_chat?.chat?.map((m: any) => `${m.role}: ${m.content}`).join('\n') || 'No chat history';
-  userContent.push({ type: 'text', text: `\nPatient Inquiry History:\n${chatHistory}` });
+  userContent.push({ type: 'text', text: `\n5. Wen (Inquiry) - Chat History:\n${chatHistory}` });
 
   const pulseInfo = data.qie ? `Pulse BPM: ${data.qie.bpm}` : 'Pulse not measured';
-  userContent.push({ type: 'text', text: `\nPulse Palpation:\n${pulseInfo}` });
+  userContent.push({ type: 'text', text: `\n6. Qie (Palpation) - Pulse:\n${pulseInfo}` });
 
   const { basic_info } = data;
   const prompt = `
@@ -57,27 +58,25 @@ export async function POST(req: Request) {
       - Gender: ${basic_info?.gender || 'Unknown'}
       - Reported Symptoms: ${basic_info?.symptoms || 'None'}
 
-      1. Wang (Inspection):
-      - Image provided (Tongue analysis required).
+      The user has provided the following inputs (images, audio, chat, pulse).
+      Please analyze ALL provided modalities.
+      
+      For the images:
+      - Analyze the Tongue for color, coating, shape, and moisture.
+      - Analyze the Face for complexion and sheen (Shen).
+      - Analyze any Specific Area images if provided (e.g., for skin conditions or injuries).
 
-      2. Wen (Listening):
-      - Audio provided (Voice/Breath analysis required).
+      CRITICAL: You MUST return the result as a VALID JSON object. Do not include any markdown formatting (like \`\`\`json) or additional text outside the JSON object.
 
-      3. Wen (Inquiry):
-      - Chat History: ${chatHistory}
-
-      4. Qie (Palpation):
-      - Estimated Pulse BPM: ${pulseInfo}
-
-      Please provide a detailed report in JSON format with the following structure:
+    The JSON structure must be exactly as follows:
       {
         "diagnosis": "Main TCM diagnosis (e.g., Qi Deficiency)",
         "constitution": "Body Constitution Type",
-        "analysis": "Detailed analysis of symptoms and signs",
+        "analysis": "A comprehensive and meaningful analysis of the patient's condition, explaining how the symptoms and signs (Wang, Wen, Wen, Qie) lead to the diagnosis. Use professional yet accessible language.",
         "recommendations": {
-          "food": ["List of recommended foods"],
-          "avoid": ["List of foods to avoid"],
-          "lifestyle": ["Lifestyle advice"]
+          "food": ["List of 3-5 specific recommended foods"],
+          "avoid": ["List of 3-5 specific foods to avoid"],
+          "lifestyle": ["List of 3-5 specific lifestyle recommendations"]
         }
       }
   `;

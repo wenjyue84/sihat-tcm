@@ -22,6 +22,19 @@ export function BasicInfoForm({ onComplete }: { onComplete: (data: BasicInfoData
         symptoms: ''
     })
 
+    const commonSymptoms = [
+        "Fever", "Cough", "Headache", "Fatigue",
+        "Stomach Pain", "Sore Throat", "Shortness of Breath"
+    ]
+
+    const handleSymptomClick = (symptom: string) => {
+        const currentSymptoms = formData.symptoms
+        const newSymptoms = currentSymptoms
+            ? `${currentSymptoms}, ${symptom}`
+            : symptom
+        setFormData({ ...formData, symptoms: newSymptoms })
+    }
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         if (formData.name && formData.age && formData.gender) {
@@ -70,6 +83,23 @@ export function BasicInfoForm({ onComplete }: { onComplete: (data: BasicInfoData
                             <option value="female">Female</option>
                             <option value="other">Other</option>
                         </select>
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <Label>Common Symptoms</Label>
+                    <div className="flex flex-wrap gap-2">
+                        {commonSymptoms.map((symptom) => (
+                            <Button
+                                key={symptom}
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleSymptomClick(symptom)}
+                            >
+                                {symptom}
+                            </Button>
+                        ))}
                     </div>
                 </div>
 

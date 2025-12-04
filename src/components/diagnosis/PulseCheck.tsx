@@ -6,6 +6,7 @@ import { useState, useRef } from 'react'
 export function PulseCheck({ onComplete }: { onComplete: (data: any) => void }) {
     const [taps, setTaps] = useState<number[]>([])
     const [bpm, setBpm] = useState<number | null>(null)
+    const [showGuide, setShowGuide] = useState(false)
 
     const handleTap = () => {
         const now = Date.now()
@@ -30,7 +31,39 @@ export function PulseCheck({ onComplete }: { onComplete: (data: any) => void }) 
 
     return (
         <Card className="p-6 space-y-4">
-            <h2 className="text-xl font-semibold">Qie (Palpation)</h2>
+            <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Qie (Palpation)</h2>
+                <Button variant="ghost" size="sm" onClick={() => setShowGuide(!showGuide)}>
+                    {showGuide ? 'Hide Guide' : 'How to use?'}
+                </Button>
+            </div>
+
+            {showGuide && (
+                <div className="bg-slate-50 p-4 rounded-lg space-y-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                        <div className="space-y-2">
+                            <h3 className="font-medium">How to measure:</h3>
+                            <ol className="list-decimal list-inside space-y-1 text-slate-600">
+                                <li>Place index & middle fingers on wrist artery</li>
+                                <li>Feel your pulse rhythm</li>
+                                <li>Tap the button in sync with each beat</li>
+                                <li>Continue for 10-15 seconds</li>
+                            </ol>
+                        </div>
+                        <div className="relative aspect-video rounded-md overflow-hidden border">
+                            <img
+                                src="/pulse-check-instruction.png"
+                                alt="Pulse Check Method"
+                                className="object-cover w-full h-full"
+                            />
+                        </div>
+                    </div>
+                    <div className="text-xs text-slate-500 border-t pt-2">
+                        <strong>Principle:</strong> The system calculates your heart rate (BPM) by measuring the time intervals between your manual taps.
+                    </div>
+                </div>
+            )}
+
             <p>Tap the button in rhythm with your pulse for 10-15 seconds.</p>
             <div className="h-32 flex flex-col items-center justify-center space-y-4">
                 <Button
