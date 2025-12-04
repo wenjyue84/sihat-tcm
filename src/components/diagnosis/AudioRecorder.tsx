@@ -57,7 +57,14 @@ export function AudioRecorder({ onComplete }: { onComplete: (data: any) => void 
                 const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
                 const url = URL.createObjectURL(blob)
                 setAudioUrl(url)
-                onComplete({ audio: blob }) // Pass the actual blob
+
+                // Convert to Base64
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => {
+                    const base64data = reader.result;
+                    onComplete({ audio: base64data });
+                }
 
                 // Cleanup visualization
                 if (animationFrameRef.current) {
@@ -155,6 +162,15 @@ export function AudioRecorder({ onComplete }: { onComplete: (data: any) => void 
             >
                 {isRecording ? "Stop & Continue" : "Start Recording"}
             </Button>
+            {process.env.NODE_ENV === 'development' && (
+                <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => onComplete({ audio: 'data:audio/webm;base64,UklGRi4AAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=' })}
+                >
+                    Debug: Skip
+                </Button>
+            )}
         </Card>
     )
 }
