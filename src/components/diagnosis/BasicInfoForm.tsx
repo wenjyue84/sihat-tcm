@@ -4,14 +4,20 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { User, Calendar, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 export interface BasicInfoData {
     name: string
     age: string
     gender: string
+    weight: string // in kg
+    height: string // in cm
     symptoms: string
+    symptomDuration: string // how long they've had symptoms
 }
 
 export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: BasicInfoData) => void, initialData?: BasicInfoData }) {
@@ -19,7 +25,10 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
         name: '',
         age: '',
         gender: '',
-        symptoms: ''
+        weight: '',
+        height: '',
+        symptoms: '',
+        symptomDuration: ''
     })
 
     const commonSymptoms = [
@@ -27,93 +36,248 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
         "Stomach Pain", "Sore Throat", "Shortness of Breath"
     ]
 
+    const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
+
+    // Listen for test data fill event (only works in development on localhost)
+    useEffect(() => {
+        const handleFillTestData = () => {
+            const testData: BasicInfoData = {
+                name: 'John Doe',
+                age: '35',
+                gender: 'male',
+                weight: '72',
+                height: '175',
+                symptoms: 'Headache, Fatigue, feeling tired and dizzy for the past week',
+                symptomDuration: '1-2-weeks'
+            }
+            setFormData(testData)
+            setSelectedSymptoms(['Headache', 'Fatigue'])
+        }
+
+        window.addEventListener('fill-test-data', handleFillTestData)
+        return () => window.removeEventListener('fill-test-data', handleFillTestData)
+    }, [])
+
     const handleSymptomClick = (symptom: string) => {
-        const currentSymptoms = formData.symptoms
-        const newSymptoms = currentSymptoms
-            ? `${currentSymptoms}, ${symptom}`
-            : symptom
-        setFormData({ ...formData, symptoms: newSymptoms })
+        let newSelection: string[]
+        if (selectedSymptoms.includes(symptom)) {
+            newSelection = selectedSymptoms.filter(s => s !== symptom)
+        } else {
+            newSelection = [...selectedSymptoms, symptom]
+        }
+        setSelectedSymptoms(newSelection)
+        setFormData({ ...formData, symptoms: newSelection.join(', ') })
     }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        if (formData.name && formData.age && formData.gender) {
+        if (formData.name && formData.age && formData.gender && formData.weight && formData.height) {
             onComplete(formData)
         }
     }
 
     return (
-        <Card className="p-6 space-y-4">
-            <h2 className="text-xl font-semibold">Basic Information</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="Enter your name"
-                        required
-                    />
+        <Card className="overflow-hidden border-none shadow-2xl bg-white/90 backdrop-blur-sm ring-1 ring-stone-900/5">
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                        <User className="w-6 h-6 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-bold">Patient Profile</h2>
+                </div>
+                <p className="text-emerald-50 opacity-90">Please provide your basic details to help us diagnose you accurately.</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                <div className="grid gap-6 md:grid-cols-2">
+                    <div className="space-y-2 col-span-2 md:col-span-1">
+                        <Label htmlFor="name" className="text-stone-600 font-medium">Full Name</Label>
+                        <div className="relative">
+                            <User className="absolute left-3 top-2.5 h-4 w-4 text-emerald-600/70" />
+                            <Input
+                                id="name"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder="Enter your name"
+                                className="pl-10 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2 col-span-2 md:col-span-1">
+                        <Label htmlFor="gender" className="text-stone-600 font-medium">Gender</Label>
+                        <div className="relative">
+                            <div className="absolute left-3 top-3 h-4 w-4 text-emerald-600/70 z-10 pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
+                            </div>
+                            <Select
+                                id="gender"
+                                value={formData.gender}
+                                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                                required
+                                className="pl-10 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50"
+                            >
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="age" className="text-stone-600 font-medium">Age</Label>
+                        <div className="relative">
+                            <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-emerald-600/70" />
+                            <Input
+                                id="age"
+                                type="number"
+                                min="0"
+                                max="120"
+                                list="age-suggestions"
+                                value={formData.age}
+                                onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                                placeholder="Age"
+                                className="pl-10 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
+                                required
+                            />
+                            <datalist id="age-suggestions">
+                                {[1, 5, 10, 15, 18, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90].map((age) => (
+                                    <option key={age} value={age} />
+                                ))}
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="weight" className="text-stone-600 font-medium">Weight (kg)</Label>
+                        <div className="relative">
+                            <Scale className="absolute left-3 top-2.5 h-4 w-4 text-emerald-600/70" />
+                            <Input
+                                id="weight"
+                                type="number"
+                                min="1"
+                                max="500"
+                                step="0.1"
+                                list="weight-suggestions"
+                                value={formData.weight}
+                                onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                                placeholder="kg"
+                                className="pl-10 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
+                                required
+                            />
+                            <datalist id="weight-suggestions">
+                                {[40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120].map((weight) => (
+                                    <option key={weight} value={weight} />
+                                ))}
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="height" className="text-stone-600 font-medium">Height (cm)</Label>
+                        <div className="relative">
+                            <Ruler className="absolute left-3 top-2.5 h-4 w-4 text-emerald-600/70" />
+                            <Input
+                                id="height"
+                                type="number"
+                                min="1"
+                                max="300"
+                                step="0.1"
+                                list="height-suggestions"
+                                value={formData.height}
+                                onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+                                placeholder="cm"
+                                className="pl-10 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
+                                required
+                            />
+                            <datalist id="height-suggestions">
+                                {[140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200].map((height) => (
+                                    <option key={height} value={height} />
+                                ))}
+                            </datalist>
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="symptomDuration" className="text-stone-600 font-medium">Duration</Label>
+                        <div className="relative">
+                            <div className="absolute left-3 top-3 h-4 w-4 text-emerald-600/70 z-10 pointer-events-none">
+                                <Clock className="h-4 w-4" />
+                            </div>
+                            <Select
+                                id="symptomDuration"
+                                value={formData.symptomDuration}
+                                onChange={(e) => setFormData({ ...formData, symptomDuration: e.target.value })}
+                                required
+                                className="pl-10 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50"
+                            >
+                                <option value="">How long?</option>
+                                <option value="less-than-1-day">Less than 1 day</option>
+                                <option value="1-3-days">1-3 days</option>
+                                <option value="4-7-days">4-7 days</option>
+                                <option value="1-2-weeks">1-2 weeks</option>
+                                <option value="2-4-weeks">2-4 weeks</option>
+                                <option value="1-3-months">1-3 months</option>
+                                <option value="3-6-months">3-6 months</option>
+                                <option value="6-12-months">6-12 months</option>
+                                <option value="over-1-year">Over 1 year</option>
+                                <option value="chronic">Chronic (ongoing)</option>
+                            </Select>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="age">Age</Label>
-                        <Input
-                            id="age"
-                            type="number"
-                            value={formData.age}
-                            onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                            placeholder="Age"
-                            required
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="gender">Gender</Label>
-                        <select
-                            id="gender"
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            value={formData.gender}
-                            onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                            required
-                        >
-                            <option value="">Select Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Common Symptoms</Label>
+                <div className="space-y-3">
+                    <Label className="text-stone-600 font-medium flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-emerald-600" />
+                        Common Symptoms
+                    </Label>
                     <div className="flex flex-wrap gap-2">
                         {commonSymptoms.map((symptom) => (
-                            <Button
+                            <motion.button
                                 key={symptom}
                                 type="button"
-                                variant="outline"
-                                size="sm"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                                 onClick={() => handleSymptomClick(symptom)}
+                                className={`
+                                    px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 border
+                                    ${selectedSymptoms.includes(symptom)
+                                        ? "bg-emerald-100 border-emerald-200 text-emerald-800 shadow-sm"
+                                        : "bg-white border-stone-200 text-stone-600 hover:border-emerald-200 hover:bg-emerald-50"
+                                    }
+                                `}
                             >
+                                {selectedSymptoms.includes(symptom) && <Check className="w-3 h-3" />}
                                 {symptom}
-                            </Button>
+                            </motion.button>
                         ))}
                     </div>
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="symptoms">General Symptoms / Concerns</Label>
+                    <Label htmlFor="symptoms" className="text-stone-600 font-medium flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-emerald-600" />
+                        Detailed Symptoms / Concerns
+                    </Label>
                     <Textarea
                         id="symptoms"
                         value={formData.symptoms}
                         onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })}
-                        placeholder="Briefly describe your main complaints..."
+                        placeholder="Please describe your main complaints, feelings, and any other relevant details..."
+                        className="min-h-[100px] border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50 resize-none"
                     />
                 </div>
 
-                <Button type="submit" className="w-full">Start Diagnosis</Button>
+                <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-200/50 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+                >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Start Diagnosis
+                </Button>
             </form>
         </Card>
     )

@@ -1,9 +1,6 @@
 'use client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-'use client'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { useRef, useState, useEffect } from 'react'
 
 interface CameraCaptureProps {

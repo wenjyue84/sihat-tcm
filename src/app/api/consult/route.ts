@@ -1,111 +1,101 @@
 import { google } from '@ai-sdk/google';
-import { streamText } from 'ai';
+import { generateText, streamText } from 'ai';
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
-  const { data } = await req.json();
+  const startTime = Date.now();
+  console.log('[consult] Request started');
 
-  // Construct multimodal messages
-  const userContent: any[] = [
-    { type: 'text', text: 'Please perform a TCM diagnosis based on the following inputs:' }
-  ];
+  try {
+    const body = await req.json();
+    const { data, prompt } = body;
 
-  if (data.wen_inquiry) {
-    if (data.wen_inquiry.inquiryText) {
-      userContent.push({ type: 'text', text: `\nDetailed Inquiry/History:\n${data.wen_inquiry.inquiryText}` });
+    console.log('[consult] Received prompt:', prompt?.substring(0, 50));
+    console.log('[consult] Patient name:', data?.basic_info?.name);
+
+    // Build a comprehensive text summary of all the data
+    const { basic_info } = data;
+
+    let diagnosisInfo = `
+=== PATIENT PROFILE ===
+Name: ${basic_info?.name || 'Unknown'}
+Age: ${basic_info?.age || 'Unknown'}
+Gender: ${basic_info?.gender || 'Unknown'}
+Weight: ${basic_info?.weight || 'Unknown'} kg
+Height: ${basic_info?.height || 'Unknown'} cm
+Reported Symptoms: ${basic_info?.symptoms || 'None'}
+Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
+
+=== INQUIRY DATA ===
+`;
+
+    if (data.wen_inquiry?.inquiryText) {
+      diagnosisInfo += `Detailed Notes: ${data.wen_inquiry.inquiryText}\n`;
     }
-    if (data.wen_inquiry.files && Array.isArray(data.wen_inquiry.files)) {
-      data.wen_inquiry.files.forEach((file: any) => {
-        const base64Data = file.data.split(',')[1];
-        if (file.type.startsWith('image/')) {
-          userContent.push({ type: 'text', text: `\nAttached Image (${file.name}):` });
-          userContent.push({ type: 'image', image: base64Data });
-        } else if (file.type === 'application/pdf') {
-          userContent.push({ type: 'text', text: `\nAttached Document (${file.name}):` });
-          userContent.push({ type: 'file', data: base64Data, mimeType: 'application/pdf' });
-        }
-      });
+
+    if (data.wen_chat?.chat && Array.isArray(data.wen_chat.chat)) {
+      const chatHistory = data.wen_chat.chat.map((m: any) => `${m.role}: ${m.content}`).join('\n');
+      diagnosisInfo += `Chat History:\n${chatHistory}\n`;
+    } else {
+      diagnosisInfo += `Chat History: No chat recorded\n`;
     }
-  }
 
-  if (data.wang_tongue?.image) {
-    userContent.push({ type: 'text', text: '\n1. Wang (Inspection) - Tongue:' });
-    userContent.push({ type: 'image', image: data.wang_tongue.image });
-  } else if (data.wang?.image) {
-    // Fallback for legacy data structure if any
-    userContent.push({ type: 'text', text: '\n1. Wang (Inspection) - Tongue:' });
-    userContent.push({ type: 'image', image: data.wang.image });
-  }
+    diagnosisInfo += `\n=== PULSE DATA ===\n`;
+    diagnosisInfo += data.qie ? `Pulse BPM: ${data.qie.bpm}` : 'Pulse not measured';
 
-  if (data.wang_face?.image) {
-    userContent.push({ type: 'text', text: '\n2. Wang (Inspection) - Face:' });
-    userContent.push({ type: 'image', image: data.wang_face.image });
-  }
+    diagnosisInfo += `\n\n=== OBSERVATION NOTES ===\n`;
+    diagnosisInfo += data.wang_tongue?.image ? 'Tongue image provided\n' : 'No tongue image\n';
+    diagnosisInfo += data.wang_face?.image ? 'Face image provided\n' : 'No face image\n';
+    diagnosisInfo += data.wen_audio?.audio ? 'Voice recording provided\n' : 'No voice recording\n';
 
-  if (data.wang_part?.image) {
-    userContent.push({ type: 'text', text: '\n3. Wang (Inspection) - Specific Area (e.g., Skin/Injury):' });
-    userContent.push({ type: 'image', image: data.wang_part.image });
-  }
+    const systemPrompt = `You are a highly experienced Traditional Chinese Medicine (TCM) practitioner.
+Analyze the patient data and provide a diagnosis.
 
-  if (data.wen_audio?.audio) {
-    // data.wen_audio.audio is a base64 string
-    const audioBase64 = data.wen_audio.audio.split(',')[1];
-    userContent.push({ type: 'text', text: '\n4. Wen (Listening) - Audio:' });
-    userContent.push({
-      type: 'file',
-      data: audioBase64,
-      mimeType: 'audio/webm'
+CRITICAL: Return ONLY a valid JSON object with NO additional text or markdown formatting.
+
+JSON structure:
+{
+  "diagnosis": "Primary TCM Pattern diagnosis",
+  "constitution": "Body constitution type",
+  "analysis": "Detailed analysis using TCM principles",
+  "recommendations": {
+    "food": ["food recommendation 1", "food recommendation 2", "food recommendation 3"],
+    "avoid": ["avoid item 1", "avoid item 2", "avoid item 3"],
+    "lifestyle": ["lifestyle tip 1", "lifestyle tip 2", "lifestyle tip 3"]
+  }
+}`;
+
+    console.log('[consult] Calling Gemini streamText...');
+
+    const result = streamText({
+      model: google('gemini-2.0-flash'),
+      system: systemPrompt,
+      prompt: diagnosisInfo,
+    });
+
+    const duration = Date.now() - startTime;
+    console.log(`[consult] Returning stream response after ${duration}ms setup`);
+
+    return result.toTextStreamResponse();
+  } catch (error: any) {
+    const duration = Date.now() - startTime;
+    console.error(`[consult] FAILED after ${duration}ms:`, error.message);
+
+    // Return a valid JSON response even on error
+    const errorResponse = {
+      diagnosis: "Analysis Error",
+      constitution: "Unable to determine",
+      analysis: `An error occurred: ${error.message}. Please try again.`,
+      recommendations: {
+        food: ["Please retry the analysis"],
+        avoid: ["N/A"],
+        lifestyle: ["Please try again with the diagnosis"]
+      }
+    };
+    return new Response(JSON.stringify(errorResponse), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
     });
   }
-
-  const chatHistory = data.wen_chat?.chat?.map((m: any) => `${m.role}: ${m.content}`).join('\n') || 'No chat history';
-  userContent.push({ type: 'text', text: `\n5. Wen (Inquiry) - Chat History:\n${chatHistory}` });
-
-  const pulseInfo = data.qie ? `Pulse BPM: ${data.qie.bpm}` : 'Pulse not measured';
-  userContent.push({ type: 'text', text: `\n6. Qie (Palpation) - Pulse:\n${pulseInfo}` });
-
-  const { basic_info } = data;
-  const prompt = `
-      You are a highly experienced Traditional Chinese Medicine (TCM) practitioner.
-      Analyze the following patient data and provide a diagnosis, body constitution analysis, and food recommendations.
-
-      Patient Profile:
-      - Name: ${basic_info?.name || 'Unknown'}
-      - Age: ${basic_info?.age || 'Unknown'}
-      - Gender: ${basic_info?.gender || 'Unknown'}
-      - Reported Symptoms: ${basic_info?.symptoms || 'None'}
-
-      The user has provided the following inputs (images, audio, chat, pulse).
-      Please analyze ALL provided modalities.
-      
-      For the images:
-      - Analyze the Tongue for color, coating, shape, and moisture.
-      - Analyze the Face for complexion and sheen (Shen).
-      - Analyze any Specific Area images if provided (e.g., for skin conditions or injuries).
-
-      CRITICAL: You MUST return the result as a VALID JSON object. Do not include any markdown formatting (like \`\`\`json) or additional text outside the JSON object.
-
-    The JSON structure must be exactly as follows:
-      {
-        "diagnosis": "Main TCM diagnosis (e.g., Qi Deficiency)",
-        "constitution": "Body Constitution Type",
-        "analysis": "A comprehensive and meaningful analysis of the patient's condition, explaining how the symptoms and signs (Wang, Wen, Wen, Qie) lead to the diagnosis. Use professional yet accessible language.",
-        "recommendations": {
-          "food": ["List of 3-5 specific recommended foods"],
-          "avoid": ["List of 3-5 specific foods to avoid"],
-          "lifestyle": ["List of 3-5 specific lifestyle recommendations"]
-        }
-      }
-  `;
-
-  const result = streamText({
-    model: google('gemini-2.0-flash'),
-    system: prompt,
-    messages: [
-      { role: 'user', content: userContent }
-    ],
-  });
-
-  return result.toTextStreamResponse();
 }
