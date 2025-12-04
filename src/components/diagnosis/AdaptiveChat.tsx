@@ -1,4 +1,5 @@
 'use client'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useChat } from '@ai-sdk/react'
@@ -6,13 +7,21 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 
 export function AdaptiveChat({ onComplete }: { onComplete: (data: any) => void }) {
-    const { messages, input, handleInputChange, handleSubmit } = useChat({
+    const [input, setInput] = useState('')
+    const { messages, append } = useChat({
         api: '/api/chat',
         initialMessages: [
             { id: '1', role: 'system', content: 'You are a TCM assistant. Ask relevant follow-up questions about symptoms. Keep it brief.' },
             { id: '2', role: 'assistant', content: 'Do you have any specific symptoms you would like to mention?' }
         ]
-    })
+    } as any) as any
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!input.trim()) return
+        await append({ role: 'user', content: input })
+        setInput('')
+    }
 
     return (
         <Card className="p-6 space-y-4 h-[500px] flex flex-col">
@@ -27,7 +36,7 @@ export function AdaptiveChat({ onComplete }: { onComplete: (data: any) => void }
                 ))}
             </ScrollArea>
             <form onSubmit={handleSubmit} className="flex gap-2">
-                <Input value={input} onChange={handleInputChange} placeholder="Type your answer..." />
+                <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type your answer..." />
                 <Button type="submit">Send</Button>
             </form>
             <Button variant="outline" onClick={() => onComplete({ chat: messages })}>Finish Chat</Button>
