@@ -11,6 +11,24 @@ export async function POST(req: Request) {
     { type: 'text', text: 'Please perform a TCM diagnosis based on the following inputs:' }
   ];
 
+  if (data.wen_inquiry) {
+    if (data.wen_inquiry.inquiryText) {
+      userContent.push({ type: 'text', text: `\nDetailed Inquiry/History:\n${data.wen_inquiry.inquiryText}` });
+    }
+    if (data.wen_inquiry.files && Array.isArray(data.wen_inquiry.files)) {
+      data.wen_inquiry.files.forEach((file: any) => {
+        const base64Data = file.data.split(',')[1];
+        if (file.type.startsWith('image/')) {
+          userContent.push({ type: 'text', text: `\nAttached Image (${file.name}):` });
+          userContent.push({ type: 'image', image: base64Data });
+        } else if (file.type === 'application/pdf') {
+          userContent.push({ type: 'text', text: `\nAttached Document (${file.name}):` });
+          userContent.push({ type: 'file', data: base64Data, mimeType: 'application/pdf' });
+        }
+      });
+    }
+  }
+
   if (data.wang_tongue?.image) {
     userContent.push({ type: 'text', text: '\n1. Wang (Inspection) - Tongue:' });
     userContent.push({ type: 'image', image: data.wang_tongue.image });

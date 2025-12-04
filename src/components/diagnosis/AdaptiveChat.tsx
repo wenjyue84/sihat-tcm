@@ -6,7 +6,7 @@ import { useChat } from '@ai-sdk/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 
-export function AdaptiveChat({ onComplete, basicInfo }: { onComplete: (data: any) => void, basicInfo: any }) {
+export function AdaptiveChat({ onComplete, basicInfo, initialMessages }: { onComplete: (data: any) => void, basicInfo: any, initialMessages?: any[] }) {
     const [input, setInput] = useState('')
 
     // Construct the initial system message based on basic info
@@ -17,7 +17,7 @@ export function AdaptiveChat({ onComplete, basicInfo }: { onComplete: (data: any
 
     const { messages, append, setMessages, reload } = useChat({
         api: '/api/chat',
-        initialMessages: [
+        initialMessages: initialMessages && initialMessages.length > 0 ? initialMessages : [
             { id: '1', role: 'system', content: systemMessage }
         ]
     } as any) as any

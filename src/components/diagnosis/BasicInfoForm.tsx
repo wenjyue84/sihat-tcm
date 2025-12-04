@@ -14,8 +14,8 @@ export interface BasicInfoData {
     symptoms: string
 }
 
-export function BasicInfoForm({ onComplete }: { onComplete: (data: BasicInfoData) => void }) {
-    const [formData, setFormData] = useState<BasicInfoData>({
+export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: BasicInfoData) => void, initialData?: BasicInfoData }) {
+    const [formData, setFormData] = useState<BasicInfoData>(initialData || {
         name: '',
         age: '',
         gender: '',

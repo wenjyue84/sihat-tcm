@@ -7,16 +7,18 @@ import { AudioRecorder } from './AudioRecorder'
 import { AdaptiveChat } from './AdaptiveChat'
 import { BasicInfoForm } from './BasicInfoForm'
 import { PulseCheck } from './PulseCheck'
+import { InquiryStep, InquiryData } from './InquiryStep'
 import { Card } from '@/components/ui/card'
 import { useCompletion } from '@ai-sdk/react'
 import { DiagnosisReport } from './DiagnosisReport'
 
-export type DiagnosisStep = 'basic_info' | 'wang_tongue' | 'wang_face' | 'wang_part' | 'wen_audio' | 'wen_chat' | 'qie' | 'processing' | 'report'
+export type DiagnosisStep = 'basic_info' | 'wen_inquiry' | 'wang_tongue' | 'wang_face' | 'wang_part' | 'wen_audio' | 'wen_chat' | 'qie' | 'processing' | 'report'
 
 export default function DiagnosisWizard() {
     const [step, setStep] = useState<DiagnosisStep>('basic_info')
     const [data, setData] = useState<any>({
         basic_info: null,
+        wen_inquiry: null,
         wang_tongue: null,
         wang_face: null,
         wang_part: null,
@@ -31,7 +33,8 @@ export default function DiagnosisWizard() {
 
     const nextStep = (current: DiagnosisStep) => {
         switch (current) {
-            case 'basic_info': setStep('wang_tongue'); break;
+            case 'basic_info': setStep('wen_inquiry'); break;
+            case 'wen_inquiry': setStep('wang_tongue'); break;
             case 'wang_tongue': setStep('wang_face'); break;
             case 'wang_face': setStep('wang_part'); break;
             case 'wang_part': setStep('wen_audio'); break;
@@ -41,6 +44,19 @@ export default function DiagnosisWizard() {
                 setStep('processing');
                 submitConsultation();
                 break;
+            default: break;
+        }
+    }
+
+    const prevStep = (current: DiagnosisStep) => {
+        switch (current) {
+            case 'wen_inquiry': setStep('basic_info'); break;
+            case 'wang_tongue': setStep('wen_inquiry'); break;
+            case 'wang_face': setStep('wang_tongue'); break;
+            case 'wang_part': setStep('wang_face'); break;
+            case 'wen_audio': setStep('wang_part'); break;
+            case 'wen_chat': setStep('wen_audio'); break;
+            case 'qie': setStep('wen_chat'); break;
             default: break;
         }
     }
@@ -55,65 +71,47 @@ export default function DiagnosisWizard() {
 
     return (
         <div className="max-w-2xl mx-auto p-4">
+            {step !== 'basic_info' && step !== 'processing' && step !== 'report' && (
+                <button
+                    onClick={() => prevStep(step)}
+                    className="mb-4 px-3 py-1 text-sm text-stone-500 hover:text-stone-700 flex items-center gap-1 transition-colors"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m15 18-6-6 6-6" />
+                    </svg>
+                    Back
+                </button>
+            )}
             <AnimatePresence mode="wait">
                 {step === 'basic_info' && (
                     <motion.div key="basic_info" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                        <BasicInfoForm onComplete={(result) => {
-                            setData((prev: any) => ({ ...prev, basic_info: result }));
-                            setTimeout(() => nextStep('basic_info'), 0)
-                        }} />
-                    </motion.div>
-                )}
-                {step === 'wang_tongue' && (
-                    <motion.div key="wang_tongue" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                        <CameraCapture
-                            title="Wang (Inspection) - Tongue"
-                            instruction="Please take a clear photo of your tongue."
+                        <BasicInfoForm
+                            initialData={data.basic_info}
                             onComplete={(result) => {
-                                setData((prev: any) => ({ ...prev, wang_tongue: result }));
-                                setTimeout(() => nextStep('wang_tongue'), 0)
-                            }}
-                        />
+                                setData((prev: any) => ({ ...prev, basic_info: result }));
+                                setTimeout(() => nextStep('basic_info'), 0)
+                            }} />
                     </motion.div>
                 )}
-                {step === 'wang_face' && (
-                    <motion.div key="wang_face" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                        <CameraCapture
-                            title="Wang (Inspection) - Face"
-                            instruction="Please take a clear photo of your face."
+                {step === 'wen_inquiry' && (
+                    <motion.div key="wen_inquiry" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                        <InquiryStep
+                            initialData={data.wen_inquiry}
                             onComplete={(result) => {
-                                setData((prev: any) => ({ ...prev, wang_face: result }));
-                                setTimeout(() => nextStep('wang_face'), 0)
-                            }}
-                        />
-                    </motion.div>
-                )}
-                {step === 'wang_part' && (
-                    <motion.div key="wang_part" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                        <CameraCapture
-                            title="Wang (Inspection) - Specific Area"
-                            instruction="If you have a specific area of concern (e.g., skin rash, injury), please take a photo of it. Otherwise, you can capture your face again or skip."
-                            onComplete={(result) => {
-                                setData((prev: any) => ({ ...prev, wang_part: result }));
-                                setTimeout(() => nextStep('wang_part'), 0)
-                            }}
-                        />
-                    </motion.div>
-                )}
-                {step === 'wen_audio' && (
-                    <motion.div key="wen_audio" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                        <AudioRecorder onComplete={(result) => {
-                            setData((prev: any) => ({ ...prev, wen_audio: result }));
-                            setTimeout(() => nextStep('wen_audio'), 0)
-                        }} />
+                                setData((prev: any) => ({ ...prev, wen_inquiry: result }));
+                                setTimeout(() => nextStep('wen_inquiry'), 0)
+                                setData((prev: any) => ({ ...prev, wen_audio: result }));
+                                setTimeout(() => nextStep('wen_audio'), 0)
+                            }} />
                     </motion.div>
                 )}
                 {step === 'wen_chat' && (
                     <motion.div key="wen_chat" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
                         <AdaptiveChat
                             basicInfo={data.basic_info}
+                            initialMessages={data.wen_chat}
                             onComplete={(result) => {
-                                setData((prev: any) => ({ ...prev, wen_chat: result }));
+                                setData((prev: any) => ({ ...prev, wen_chat: result.chat }));
                                 setTimeout(() => nextStep('wen_chat'), 0)
                             }} />
                     </motion.div>
@@ -163,6 +161,7 @@ export default function DiagnosisWizard() {
                                                 onRestart={() => {
                                                     setData({
                                                         basic_info: null,
+                                                        wen_inquiry: null,
                                                         wang_tongue: null,
                                                         wang_face: null,
                                                         wang_part: null,
