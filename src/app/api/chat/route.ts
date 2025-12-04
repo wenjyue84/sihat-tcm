@@ -4,11 +4,18 @@ import { streamText } from 'ai';
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-    const { messages, basicInfo } = await req.json();
-    console.log("API /api/chat received request:", { messageCount: messages?.length, hasBasicInfo: !!basicInfo });
+    try {
+        const body = await req.json();
+        const { messages, basicInfo } = body;
 
-    // Build the system prompt with basic patient info context
-    let systemPrompt = `You are an experienced 老中医 (traditional Chinese medicine practitioner) with decades of clinical experience. 
+        console.log("[API /api/chat] Request received:", {
+            messageCount: messages?.length,
+            hasBasicInfo: !!basicInfo,
+            firstMsgRole: messages?.[0]?.role
+        });
+
+        // Build the system prompt with basic patient info context
+        let systemPrompt = `You are an experienced 老中医 (traditional Chinese medicine practitioner) with decades of clinical experience. 
 Your goal is to conduct a thorough inquiry (问诊 Wèn Zhěn) to gather complete information for an accurate TCM diagnosis.
 
 **CRITICAL CONSULTATION PROTOCOL:**
@@ -72,9 +79,9 @@ When you feel you have gathered sufficient information for an accurate diagnosis
 **SAFETY FIRST:**
 If symptoms suggest emergency conditions (severe chest pain, stroke signs, acute abdomen, difficulty breathing), immediately advise seeking emergency medical care.`;
 
-    // Add basic patient info if provided
-    if (basicInfo) {
-        systemPrompt += `\n\n**PATIENT INFORMATION RECEIVED:**
+        // Add basic patient info if provided
+        if (basicInfo) {
+            systemPrompt += `\n\n**PATIENT INFORMATION RECEIVED:**
 Name: ${basicInfo.name || 'Not provided'}
 Age: ${basicInfo.age || 'Not provided'}
 Gender: ${basicInfo.gender || 'Not provided'}
@@ -85,13 +92,36 @@ Chief Complaint: ${basicInfo.symptoms || 'Not provided'}
 Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
 
 Use this information as context for your questions. Do NOT repeat this information back to the patient unless confirming something specific.`;
+        }
+
+        // Filter out system messages from the messages array (we'll use our own system prompt)
+        const filteredMessages = messages?.filter((m: any) => m.role !== 'system') || [];
+
+        console.log("[API /api/chat] Filtered messages count:", filteredMessages.length);
+        console.log("[API /api/chat] First filtered message:", filteredMessages[0]);
+
+        // If no messages, create a default initial message
+        if (filteredMessages.length === 0) {
+            filteredMessages.push({
+                role: 'user',
+                content: 'Please start the consultation by asking me relevant questions about my symptoms.'
+            });
+        }
+
+        const result = streamText({
+            model: google('gemini-2.0-flash'),
+            system: systemPrompt,
+            messages: filteredMessages,
+        });
+
+        return result.toTextStreamResponse();
+    } catch (error: any) {
+        console.error("[API /api/chat] Error:", error);
+        return new Response(JSON.stringify({
+            error: error.message || 'Chat API error'
+        }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
-
-    const result = streamText({
-        model: google('gemini-2.0-flash-exp'),
-        system: systemPrompt,
-        messages,
-    });
-
-    return result.toTextStreamResponse();
 }

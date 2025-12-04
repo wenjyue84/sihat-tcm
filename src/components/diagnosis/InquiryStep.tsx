@@ -1,17 +1,22 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { useChat } from '@ai-sdk/react'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { BasicInfoData } from './BasicInfoForm'
+import { Loader2, Send, Upload, X } from 'lucide-react'
 
 interface FileData {
     name: string
     type: string
     data: string
+}
+
+interface Message {
+    id: string
+    role: 'user' | 'assistant' | 'system'
+    content: string
 }
 
 export function InquiryStep({
@@ -22,6 +27,11 @@ export function InquiryStep({
     basicInfo?: BasicInfoData
 }) {
     const [files, setFiles] = useState<FileData[]>([])
+    const [messages, setMessages] = useState<Message[]>([])
+    const [localInput, setLocalInput] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const [hasRequestedInitialQuestion, setHasRequestedInitialQuestion] = useState(false)
+
     const fileInputRef = useRef<HTMLInputElement>(null)
     const scrollAreaRef = useRef<HTMLDivElement>(null)
 
@@ -44,20 +54,84 @@ CRITICAL INSTRUCTIONS:
 7. When you have sufficient information, acknowledge it and say you're ready to proceed with diagnosis`
         : `You are an experienced Traditional Chinese Medicine practitioner (老中医). Please ask the patient relevant questions to understand their condition better. Ask only one question at a time.`
 
-    const { messages, sendMessage, setMessages, isLoading, error } = useChat({
-        api: '/api/chat',
-        initialMessages: [
-            { id: '1', role: 'system', content: systemMessage }
-        ],
-        onError: (err: any) => console.error("useChat error:", err),
-    } as any) as any
+    // Send message to API with manual streaming
+    const sendMessage = useCallback(async (userMessage: string, isInitialPrompt = false) => {
+        setIsLoading(true)
 
-    const [localInput, setLocalInput] = useState('')
-    const [hasRequestedInitialQuestion, setHasRequestedInitialQuestion] = useState(false)
+        // Add user message to state (skip if it's the initial prompt)
+        const userMsg: Message = {
+            id: Date.now().toString(),
+            role: 'user',
+            content: userMessage
+        }
+
+        const currentMessages = isInitialPrompt
+            ? [{ role: 'system', content: systemMessage }]
+            : [...messages, userMsg]
+
+        if (!isInitialPrompt) {
+            setMessages(prev => [...prev, userMsg])
+        }
+
+        try {
+            console.log('[InquiryStep] Sending message to /api/chat')
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: currentMessages.map(m => ({ role: m.role, content: m.content })),
+                    basicInfo
+                })
+            })
+
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`)
+            }
+
+            // Read streaming response
+            const reader = response.body?.getReader()
+            const decoder = new TextDecoder()
+            let fullText = ''
+
+            // Create placeholder for assistant message
+            const assistantMsgId = (Date.now() + 1).toString()
+            setMessages(prev => [...prev, { id: assistantMsgId, role: 'assistant', content: '' }])
+
+            if (reader) {
+                console.log('[InquiryStep] Starting to read stream...')
+                while (true) {
+                    const { done, value } = await reader.read()
+                    if (done) {
+                        console.log('[InquiryStep] Stream complete!')
+                        break
+                    }
+                    const chunk = decoder.decode(value, { stream: true })
+                    fullText += chunk
+
+                    // Update assistant message in real-time
+                    setMessages(prev => prev.map(m =>
+                        m.id === assistantMsgId ? { ...m, content: fullText } : m
+                    ))
+                }
+            }
+
+            console.log('[InquiryStep] Final response length:', fullText.length)
+        } catch (err: any) {
+            console.error('[InquiryStep] Error:', err)
+            // Add error message
+            setMessages(prev => [...prev, {
+                id: Date.now().toString(),
+                role: 'assistant',
+                content: 'Sorry, I encountered an error. Please try again.'
+            }])
+        } finally {
+            setIsLoading(false)
+        }
+    }, [messages, systemMessage, basicInfo])
 
     // Trigger the first question from AI doctor when component mounts
     useEffect(() => {
-        if (!hasRequestedInitialQuestion && messages.length === 1 && messages[0].role === 'system') {
+        if (!hasRequestedInitialQuestion && messages.length === 0) {
             setHasRequestedInitialQuestion(true)
 
             // Generate a more specific prompt based on symptoms
@@ -78,29 +152,23 @@ CRITICAL INSTRUCTIONS:
             }
 
             // Send the prompt to trigger the AI doctor's first question
-            sendMessage({ role: 'user', content: prompt })
+            sendMessage(prompt, true)
         }
-    }, [messages, hasRequestedInitialQuestion, basicInfo, sendMessage])
+    }, [hasRequestedInitialQuestion, messages.length, basicInfo, sendMessage])
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
         if (scrollAreaRef.current) {
-            const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]')
-            if (scrollContainer) {
-                scrollContainer.scrollTop = scrollContainer.scrollHeight
-            }
+            scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
         }
     }, [messages])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!localInput.trim()) return
-        try {
-            await sendMessage({ role: 'user', content: localInput })
-            setLocalInput('')
-        } catch (e) {
-            console.error('SendMessage error:', e)
-        }
+        if (!localInput.trim() || isLoading) return
+        const userInput = localInput
+        setLocalInput('')
+        await sendMessage(userInput)
     }
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,10 +223,9 @@ CRITICAL INSTRUCTIONS:
 
     const handleComplete = () => {
         // Compile the chat history into a text format for the "inquiryText" field
-        // Filter out the initial system message and the trigger prompt
         const chatSummary = messages
-            .filter((m: any) => m.role !== 'system' && m.content !== 'Please start the consultation.' && !m.content.startsWith('The patient mentioned'))
-            .map((m: any) => `${m.role === 'user' ? 'Patient' : 'Doctor'}: ${m.content}`)
+            .filter((m) => m.role !== 'system')
+            .map((m) => `${m.role === 'user' ? 'Patient' : 'Doctor'}: ${m.content}`)
             .join('\n');
 
         onComplete({
@@ -168,6 +235,13 @@ CRITICAL INSTRUCTIONS:
         })
     }
 
+    // Filter messages for display (hide system messages and initial prompts)
+    const displayMessages = messages.filter(m =>
+        m.role !== 'system' &&
+        !m.content.startsWith('The patient mentioned') &&
+        m.content !== 'Please start the consultation.'
+    )
+
     return (
         <Card className="p-6 h-[600px] flex flex-col gap-4">
             <div className="flex justify-between items-center border-b pb-4">
@@ -176,11 +250,7 @@ CRITICAL INSTRUCTIONS:
                     <p className="text-stone-600 text-sm">Chat with the AI assistant to describe your condition.</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="17 8 12 3 7 8" />
-                        <line x1="12" x2="12" y1="3" y2="15" />
-                    </svg>
+                    <Upload className="w-4 h-4 mr-2" />
                     Upload Reports
                 </Button>
             </div>
@@ -236,29 +306,36 @@ CRITICAL INSTRUCTIONS:
                 </div>
             )}
 
-            <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
-                <div className="space-y-4">
-                    {messages
-                        .filter((m: any) => m.role !== 'system' && m.content !== 'Please start the consultation.' && !m.content.startsWith('The patient mentioned'))
-                        .map((m: any) => (
-                            <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[80%] p-3 rounded-lg whitespace-pre-wrap ${m.role === 'user'
-                                    ? 'bg-emerald-600 text-white rounded-br-none'
-                                    : 'bg-stone-100 text-stone-800 rounded-bl-none'
-                                    }`}>
-                                    {m.content}
-                                </div>
+            {/* Chat Messages Area with Scrollbar */}
+            <div
+                ref={scrollAreaRef}
+                className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-emerald-300 scrollbar-track-stone-100"
+                style={{
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#6ee7b7 #f5f5f4'
+                }}
+            >
+                <div className="space-y-4 p-2">
+                    {displayMessages.map((m) => (
+                        <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`max-w-[80%] p-3 rounded-lg whitespace-pre-wrap ${m.role === 'user'
+                                ? 'bg-emerald-600 text-white rounded-br-none'
+                                : 'bg-stone-100 text-stone-800 rounded-bl-none'
+                                }`}>
+                                {m.content || (isLoading ? '...' : '')}
                             </div>
-                        ))}
-                    {isLoading && (
+                        </div>
+                    ))}
+                    {isLoading && displayMessages.length === 0 && (
                         <div className="flex justify-start">
-                            <div className="bg-stone-100 text-stone-500 p-3 rounded-lg rounded-bl-none italic text-sm">
-                                Typing...
+                            <div className="bg-stone-100 text-stone-500 p-3 rounded-lg rounded-bl-none flex items-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <span className="italic text-sm">Doctor is typing...</span>
                             </div>
                         </div>
                     )}
                 </div>
-            </ScrollArea>
+            </div>
 
             {files.length > 0 && (
                 <div className="flex gap-2 overflow-x-auto py-2 border-t border-stone-100">
@@ -266,7 +343,7 @@ CRITICAL INSTRUCTIONS:
                         <div key={index} className="flex items-center gap-2 bg-stone-50 px-3 py-1 rounded-full border border-stone-200 text-xs whitespace-nowrap">
                             <span className="truncate max-w-[100px]">{file.name}</span>
                             <button onClick={() => removeFile(index)} className="text-stone-400 hover:text-red-500">
-                                ×
+                                <X className="w-3 h-3" />
                             </button>
                         </div>
                     ))}
@@ -281,14 +358,19 @@ CRITICAL INSTRUCTIONS:
                         placeholder="Type your response..."
                         className="flex-1"
                         autoFocus
+                        disabled={isLoading}
                     />
                     <Button type="submit" disabled={isLoading || !localInput?.trim()}>
-                        Send
+                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                     </Button>
                 </form>
             </div>
 
-            <Button onClick={handleComplete} className="w-full bg-emerald-800 hover:bg-emerald-900 mt-2">
+            <Button
+                onClick={handleComplete}
+                className="w-full bg-emerald-800 hover:bg-emerald-900 mt-2"
+                disabled={displayMessages.length < 2}
+            >
                 Finish Inquiry & Continue
             </Button>
 

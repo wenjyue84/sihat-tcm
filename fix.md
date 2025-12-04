@@ -107,3 +107,130 @@ export async function POST(req: Request) {
 
 ## Date
 December 4, 2024
+
+---
+
+# Fix: AI Chat Not Working in Inquiry Step (Wen 问诊)
+
+## Problem
+The AI doctor chat in the Inquiry step was not displaying any messages. The chat area remained empty even though the component rendered correctly with patient information.
+
+## Root Cause
+Same issue as the diagnosis report - the `useChat` hook from `@ai-sdk/react` was silently failing to capture streamed responses.
+
+### Evidence
+- Server logs showed API errors: `GenerateContentRequest.contents: contents is not specified`
+- The `useChat` hook wasn't properly sending messages to the API
+- Messages array was incorrectly formatted with system messages
+
+## Solution
+Applied the same fix pattern: replaced `useChat` hook with manual `fetch()` + `ReadableStream` handling.
+
+### Before (Broken)
+```tsx
+import { useChat } from '@ai-sdk/react'
+
+const { messages, sendMessage, isLoading } = useChat({
+    api: '/api/chat',
+    initialMessages: [{ id: '1', role: 'system', content: systemMessage }],
+    onError: (err) => console.error("useChat error:", err),
+})
+
+// Trigger
+sendMessage({ role: 'user', content: prompt })
+```
+
+### After (Working)
+```tsx
+const [messages, setMessages] = useState<Message[]>([])
+const [isLoading, setIsLoading] = useState(false)
+
+const sendMessage = useCallback(async (userMessage: string, isInitialPrompt = false) => {
+    setIsLoading(true)
+    
+    // Add user message to state
+    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: userMessage }
+    if (!isInitialPrompt) {
+        setMessages(prev => [...prev, userMsg])
+    }
+
+    try {
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: currentMessages, basicInfo })
+        })
+
+        // Read streaming response
+        const reader = response.body?.getReader()
+        const decoder = new TextDecoder()
+        let fullText = ''
+        
+        // Create placeholder for assistant message
+        const assistantMsgId = (Date.now() + 1).toString()
+        setMessages(prev => [...prev, { id: assistantMsgId, role: 'assistant', content: '' }])
+
+        if (reader) {
+            while (true) {
+                const { done, value } = await reader.read()
+                if (done) break
+                fullText += decoder.decode(value, { stream: true })
+                
+                // Update assistant message in real-time (streaming effect!)
+                setMessages(prev => prev.map(m => 
+                    m.id === assistantMsgId ? { ...m, content: fullText } : m
+                ))
+            }
+        }
+    } catch (err) {
+        console.error('[InquiryStep] Error:', err)
+    } finally {
+        setIsLoading(false)
+    }
+}, [messages, basicInfo])
+```
+
+## API Route Fixes (`/api/chat/route.ts`)
+
+```typescript
+// Filter out system messages (we use our own system prompt)
+const filteredMessages = messages?.filter((m: any) => m.role !== 'system') || [];
+
+// If no messages, create a default initial message
+if (filteredMessages.length === 0) {
+    filteredMessages.push({
+        role: 'user',
+        content: 'Please start the consultation by asking me about my symptoms.'
+    });
+}
+
+const result = streamText({
+    model: google('gemini-2.0-flash'),  // Changed from gemini-2.0-flash-exp
+    system: systemPrompt,
+    messages: filteredMessages,
+});
+
+return result.toTextStreamResponse();
+```
+
+## Key Learnings
+
+1. **Same pattern applies to `useChat`** - Both `useCompletion` and `useChat` from `@ai-sdk/react` have similar streaming issues.
+
+2. **Filter system messages** - The API expects user/assistant messages only. System prompt should be passed separately via the `system` parameter.
+
+3. **Real-time streaming UX** - Updating the UI on each chunk creates a nice "typing" effect that shows the AI is responding.
+
+4. **Add fallback messages** - If the messages array is empty, provide a default prompt to prevent API errors.
+
+5. **Use stable model names** - Changed from `gemini-2.0-flash-exp` to `gemini-2.0-flash` for more reliable responses.
+
+## Files Modified
+- `src/components/diagnosis/InquiryStep.tsx` - Replaced useChat with manual fetch + streaming
+- `src/app/api/chat/route.ts` - Added message filtering, error handling, fallback logic
+
+## Result
+The AI doctor now interactively asks follow-up questions based on TCM's traditional "Ten Questions" (十问歌) methodology, collecting detailed patient information for accurate diagnosis.
+
+## Date
+December 4, 2024
