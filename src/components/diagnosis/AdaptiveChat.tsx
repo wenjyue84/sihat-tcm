@@ -15,24 +15,29 @@ export function AdaptiveChat({ onComplete, basicInfo, initialMessages }: { onCom
     Your goal is to ask relevant follow-up questions to gather more details for a TCM diagnosis. 
     Focus on the "Ten Questions" (Shi Wen) of TCM. Ask one question at a time. Keep it brief and professional.`
 
-    const { messages, append, setMessages, reload } = useChat({
+    const { messages, sendMessage, setMessages, reload, error } = useChat({
         api: '/api/chat',
         initialMessages: initialMessages && initialMessages.length > 0 ? initialMessages : [
             { id: '1', role: 'system', content: systemMessage }
-        ]
+        ],
+        onError: (err: any) => console.error("useChat error:", err),
     } as any) as any
 
     // Trigger the first question from AI when the component mounts
     useEffect(() => {
         if (messages.length === 1 && messages[0].role === 'system') {
-            append({ role: 'user', content: 'Please start the diagnosis.' })
+            sendMessage({ role: 'user', content: 'Please start the diagnosis.' })
         }
     }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!input.trim()) return
-        await append({ role: 'user', content: input })
+        try {
+            await sendMessage({ role: 'user', content: input })
+        } catch (e) {
+            console.error('SendMessage error:', e)
+        }
         setInput('')
     }
 

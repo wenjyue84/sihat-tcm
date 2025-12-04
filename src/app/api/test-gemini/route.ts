@@ -12,7 +12,7 @@ export async function POST(req: Request) {
         }
 
         const { text } = await generateText({
-            model: google('gemini-1.5-pro-latest'),
+            model: google('gemini-3-pro-preview'),
             prompt: prompt,
         });
 

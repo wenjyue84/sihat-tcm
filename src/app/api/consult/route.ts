@@ -100,7 +100,7 @@ export async function POST(req: Request) {
   `;
 
   const result = streamText({
-    model: google('gemini-1.5-pro-latest'),
+    model: google('gemini-2.0-flash'),
     system: prompt,
     messages: [
       { role: 'user', content: userContent }
