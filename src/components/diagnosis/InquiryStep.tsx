@@ -25,10 +25,12 @@ interface Message {
 
 export function InquiryStep({
     onComplete,
-    basicInfo
+    basicInfo,
+    onBack
 }: {
     onComplete: (data: { inquiryText: string, chatHistory: any[], files: FileData[] }) => void,
-    basicInfo?: BasicInfoData
+    basicInfo?: BasicInfoData,
+    onBack?: () => void
 }) {
     const { getDoctorInfo } = useDoctorLevel()
     const { t, language } = useLanguage()
@@ -417,13 +419,24 @@ CRITICAL INSTRUCTIONS:
                 </form>
             </div>
 
-            <Button
-                onClick={handleComplete}
-                className="w-full h-12 bg-emerald-800 hover:bg-emerald-900 text-base"
-                disabled={displayMessages.length < 2}
-            >
-                {t.inquiry.finishChat}
-            </Button>
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 md:static md:bg-transparent md:border-none md:shadow-none md:p-0 flex gap-3">
+                {onBack && (
+                    <Button
+                        variant="outline"
+                        onClick={onBack}
+                        className="flex-1 md:flex-none md:w-auto border-stone-300 text-stone-600 hover:bg-stone-100"
+                    >
+                        {t.common.back}
+                    </Button>
+                )}
+                <Button
+                    onClick={handleComplete}
+                    className="flex-1 h-10 md:h-12 bg-emerald-800 hover:bg-emerald-900 text-base"
+                    disabled={displayMessages.length < 2}
+                >
+                    {t.inquiry.finishChat}
+                </Button>
+            </div>
 
             <input
                 type="file"

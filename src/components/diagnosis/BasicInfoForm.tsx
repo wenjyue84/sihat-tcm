@@ -319,7 +319,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                 <p className="text-emerald-50 opacity-90">{t.basicInfo.subtitle}</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-8">
+            <form onSubmit={handleSubmit} className="p-6 space-y-8 pb-24 md:pb-6">
                 <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2 col-span-2 md:col-span-1">
                         <Label htmlFor="name" className="text-stone-600 font-medium">{t.basicInfo.fullName}</Label>
@@ -527,13 +527,15 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                     </div>
                 </div>
 
-                <Button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-200/50 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
-                >
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    {t.basicInfo.startDiagnosis}
-                </Button>
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 md:static md:bg-transparent md:border-none md:shadow-none md:p-0">
+                    <Button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-200/50 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+                    >
+                        <Sparkles className="w-5 h-5 mr-2" />
+                        {t.basicInfo.startDiagnosis}
+                    </Button>
+                </div>
             </form>
         </Card>
     )

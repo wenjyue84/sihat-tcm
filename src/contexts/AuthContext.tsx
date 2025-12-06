@@ -35,7 +35,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        supabase.auth.getSession().then(({ data, error }) => {
+            if (error) {
+                console.error('Error getting session:', error)
+                setLoading(false)
+                return
+            }
+            const session = data?.session
             setSession(session)
             setUser(session?.user ?? null)
             if (session?.user) {
@@ -43,6 +49,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             } else {
                 setLoading(false)
             }
+        }).catch((err) => {
+            console.error('Unexpected error getting session:', err)
+            setLoading(false)
         })
 
         const {

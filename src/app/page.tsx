@@ -56,7 +56,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-stone-50 to-emerald-50/30 text-stone-800 font-sans selection:bg-emerald-100">
-      <header className="relative overflow-hidden bg-emerald-900 text-white py-16 px-6 text-center">
+      <header className="relative overflow-hidden bg-emerald-900 text-white py-8 md:py-16 px-4 md:px-6 text-center">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
 
 
@@ -117,19 +117,19 @@ export default function Home() {
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto space-y-4">
-          <div className="inline-block px-3 py-1 rounded-full bg-emerald-800 text-emerald-100 text-sm font-medium mb-2">
+          <div className="inline-block px-3 py-1 rounded-full bg-emerald-800 text-emerald-100 text-xs md:text-sm font-medium mb-2">
             {t.common.appTagline}
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-200 to-teal-100">
+          <h1 className="text-3xl md:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-200 to-teal-100">
             {t.common.appName}
           </h1>
-          <p className="text-lg md:text-xl text-emerald-100 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base md:text-xl text-emerald-100 max-w-2xl mx-auto leading-relaxed">
             {t.common.appDescription}
           </p>
         </div>
       </header>
 
-      <section className="container mx-auto py-12 px-4 -mt-8 relative z-20">
+      <section className="container mx-auto py-6 md:py-12 px-4 -mt-6 md:-mt-8 relative z-20">
         <div className="bg-white rounded-2xl shadow-xl border border-stone-100 overflow-hidden">
           <DiagnosisWizard />
         </div>

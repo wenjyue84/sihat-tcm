@@ -17,8 +17,9 @@ export function CameraCapture({
     onComplete,
     title,
     instruction,
-    required = false
-}: CameraCaptureProps) {
+    required = false,
+    onBack
+}: CameraCaptureProps & { onBack?: () => void }) {
     const { t } = useLanguage()
     const videoRef = useRef<HTMLVideoElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -110,7 +111,7 @@ export function CameraCapture({
     }
 
     return (
-        <Card className="p-4 md:p-6 space-y-4">
+        <Card className="p-4 md:p-6 space-y-4 pb-48 md:pb-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                 <div className="text-center md:text-left">
                     <h2 className="text-xl font-semibold text-emerald-800">{displayTitle}</h2>
@@ -150,9 +151,18 @@ export function CameraCapture({
                 )}
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 md:static md:bg-transparent md:border-none md:shadow-none md:p-0 flex flex-col gap-3">
                 {capturedImage ? (
                     <div className="flex gap-3">
+                        {onBack && (
+                            <Button
+                                variant="outline"
+                                onClick={onBack}
+                                className="h-12 w-12 p-0 flex-shrink-0 border-stone-300 text-stone-600 hover:bg-stone-100 md:hidden"
+                            >
+                                <RotateCcw className="w-5 h-5 rotate-180" /> {/* Using RotateCcw as Back icon for consistency if ChevronLeft not imported */}
+                            </Button>
+                        )}
                         <Button
                             onClick={handleRetake}
                             variant="outline"
@@ -171,16 +181,27 @@ export function CameraCapture({
                     </div>
                 ) : (
                     <>
-                        <Button
-                            onClick={captureImage}
-                            disabled={!stream}
-                            className="w-full h-14 text-base bg-emerald-600 hover:bg-emerald-700"
-                        >
-                            <Camera className="w-5 h-5 mr-2" />
-                            {t.camera.capturePhoto}
-                        </Button>
+                        <div className="flex gap-2">
+                            {onBack && (
+                                <Button
+                                    variant="outline"
+                                    onClick={onBack}
+                                    className="h-14 w-14 p-0 flex-shrink-0 border-stone-300 text-stone-600 hover:bg-stone-100 md:hidden"
+                                >
+                                    <span className="text-xl">←</span>
+                                </Button>
+                            )}
+                            <Button
+                                onClick={captureImage}
+                                disabled={!stream}
+                                className="flex-1 h-14 text-base bg-emerald-600 hover:bg-emerald-700"
+                            >
+                                <Camera className="w-5 h-5 mr-2" />
+                                {t.camera.capturePhoto}
+                            </Button>
+                        </div>
 
-                        <div className="relative">
+                        <div className="relative md:block hidden">
                             <div className="absolute inset-0 flex items-center">
                                 <span className="w-full border-t" />
                             </div>

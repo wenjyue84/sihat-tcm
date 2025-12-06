@@ -401,7 +401,9 @@ export default function DiagnosisWizard() {
                                         wen_chat: { chat: result.chatHistory }
                                     }));
                                     setTimeout(() => nextStep('wen_inquiry'), 0)
-                                }} />
+                                }}
+                                onBack={() => prevStep('wen_inquiry')}
+                            />
                         </motion.div>
                     )}
                     {step === 'wang_tongue' && (
