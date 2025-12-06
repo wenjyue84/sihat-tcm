@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { useState, useRef } from 'react'
 import { Heart, Activity, CheckCircle2, ChevronRight, Info, AlertCircle, Stethoscope } from 'lucide-react'
 import { ShowPromptButton } from './ShowPromptButton'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 // TCM Pulse Quality Types (脉象类型)
 const tcmPulseQualities = [
@@ -23,6 +24,7 @@ const tcmPulseQualities = [
 ]
 
 export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => void, onBack?: () => void }) {
+    const { t, language } = useLanguage()
     const [taps, setTaps] = useState<number[]>([])
     const [bpm, setBpm] = useState<number | null>(null)
     const [manualBpm, setManualBpm] = useState<string>('')
@@ -32,23 +34,10 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
     const [selectedPulseQualities, setSelectedPulseQualities] = useState<string[]>([])
 
 
-    const steps = [
-        {
-            title: "Find Your Pulse Point",
-            description: "Turn your palm facing up. Place your index and middle fingers on your wrist, just below the base of your thumb.",
-            tip: "Don't use your thumb - it has its own pulse!"
-        },
-        {
-            title: "Feel the Beat",
-            description: "Press gently until you feel the rhythmic pulsing of your radial artery. This is your pulse.",
-            tip: "If you can't feel it, try moving your fingers slightly or pressing a bit harder."
-        },
-        {
-            title: "Count for 60 Seconds",
-            description: "Count how many beats you feel in 60 seconds. This number is your heart rate in BPM (beats per minute).",
-            tip: "Alternatively, count for 15 seconds and multiply by 4 for a quick estimate."
-        }
-    ]
+
+    // Get guide steps from translations, with fallback
+    const guideSteps = t.pulse.guideSteps || []
+    const steps = guideSteps as Array<{ title: string; description: string; tip: string }>
 
     const handleTap = () => {
         const now = Date.now()
@@ -123,8 +112,8 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
                         <Heart className="w-6 h-6 text-rose-500" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-semibold">切 Qie (Palpation)</h2>
-                        <p className="text-sm text-slate-500">Pulse Diagnosis</p>
+                        <h2 className="text-xl font-semibold">{t.pulse.title}</h2>
+                        <p className="text-sm text-slate-500">{t.pulse.pulseDiagnosis}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -135,7 +124,7 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
                         onClick={() => setShowGuide(!showGuide)}
                         className="text-emerald-600 hover:text-emerald-700"
                     >
-                        {showGuide ? 'Hide Guide' : 'Show Guide'}
+                        {showGuide ? t.pulse.hideGuide : t.pulse.showGuide}
                     </Button>
                 </div>
             </div>
@@ -190,14 +179,14 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
                     className={`flex-1 ${inputMode === 'manual' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}`}
                     onClick={() => setInputMode('manual')}
                 >
-                    Enter BPM Manually
+                    {t.pulse.enterBpmManually}
                 </Button>
                 <Button
                     variant={inputMode === 'tap' ? 'default' : 'outline'}
                     className={`flex-1 ${inputMode === 'tap' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}`}
                     onClick={() => { setInputMode('tap'); resetTaps(); }}
                 >
-                    Tap to Measure
+                    {t.pulse.tapToMeasure}
                 </Button>
             </div>
 
@@ -207,7 +196,7 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
                     <div className="space-y-4">
                         <div className="text-center">
                             <p className="text-slate-600 mb-4">
-                                After counting your pulse for 60 seconds, enter your heart rate below:
+                                {t.pulse.afterCounting}
                             </p>
                             <div className="flex items-center justify-center gap-3">
                                 <Input
@@ -215,20 +204,20 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
                                     type="text"
                                     inputMode="numeric"
                                     pattern="[0-9]*"
-                                    placeholder="Enter BPM"
+                                    placeholder={t.pulse.enterBpm}
                                     value={manualBpm}
                                     onChange={handleManualInput}
                                     className="w-32 text-center text-2xl font-bold h-16 border-2 border-emerald-200 focus:border-emerald-500"
                                 />
-                                <span className="text-xl font-semibold text-slate-500">BPM</span>
+                                <span className="text-xl font-semibold text-slate-500">{t.pulse.bpm}</span>
                             </div>
                             {manualBpm && (
                                 <div className="mt-3 flex items-center justify-center gap-2 text-emerald-600">
                                     <CheckCircle2 className="w-5 h-5" />
                                     <span className="font-medium">
-                                        {parseInt(manualBpm) < 60 ? 'Low (Bradycardia)' :
-                                            parseInt(manualBpm) > 100 ? 'High (Tachycardia)' :
-                                                'Normal Range'}
+                                        {parseInt(manualBpm) < 60 ? t.pulse.lowBpm :
+                                            parseInt(manualBpm) > 100 ? t.pulse.highBpm :
+                                                t.pulse.normalBpm}
                                     </span>
                                 </div>
                             )}
@@ -237,7 +226,7 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
                 ) : (
                     <div className="text-center space-y-4">
                         <p className="text-slate-600">
-                            Tap the button in rhythm with your pulse for 10-15 seconds:
+                            {t.pulse.tapInRhythm}
                         </p>
                         <div className="flex flex-col items-center gap-4">
                             <Button
@@ -251,7 +240,7 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
                                 <Heart className={`w-10 h-10 ${taps.length > 0 ? 'text-rose-500' : 'text-emerald-500'}`} />
                             </Button>
                             <div className="text-sm text-slate-500">
-                                Taps: {taps.length}
+                                {t.pulse.taps}: {taps.length}
                             </div>
                             {bpm && (
                                 <div className="text-3xl font-bold text-emerald-600 flex items-center gap-2">
@@ -261,7 +250,7 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
                             )}
                             {taps.length > 0 && (
                                 <Button variant="ghost" size="sm" onClick={resetTaps}>
-                                    Reset
+                                    {t.pulse.reset}
                                 </Button>
                             )}
                         </div>
@@ -349,7 +338,7 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
                     className="flex-1 h-12 text-lg font-semibold transition-all bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg"
                 >
                     <span className="flex items-center gap-2">
-                        Complete Pulse Check
+                        {t.pulse.completePulseCheck}
                         <ChevronRight className="w-5 h-5" />
                     </span>
                 </Button>

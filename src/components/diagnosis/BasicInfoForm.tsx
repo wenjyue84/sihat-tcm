@@ -7,10 +7,13 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useState, useEffect, useRef } from 'react'
-import { User, Calendar as CalendarIcon, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles, Stethoscope, Minus, Plus } from 'lucide-react'
+import { User, Calendar as CalendarIcon, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles, Stethoscope, Minus, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useDoctorLevel, DOCTOR_LEVELS, DoctorLevel } from '@/contexts/DoctorContext'
 import { useLanguage } from '@/contexts/LanguageContext'
+
+// Total number of wizard steps
+const TOTAL_STEPS = 5
 
 // Mobile-friendly numeric input with slider and increment/decrement buttons
 interface MobileNumericInputProps {
@@ -197,9 +200,58 @@ export interface BasicInfoData {
     symptomDuration: string
 }
 
+// Step progress indicator component
+function StepProgress({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) {
+    const { t } = useLanguage()
+
+    return (
+        <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-stone-600">
+                    {t.basicInfo.wizardSteps?.stepProgress?.replace('{current}', String(currentStep)).replace('{total}', String(totalSteps))
+                        || `Step ${currentStep} of ${totalSteps}`}
+                </span>
+                <span className="text-sm text-emerald-600 font-semibold">
+                    {Math.round((currentStep / totalSteps) * 100)}%
+                </span>
+            </div>
+            <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
+                <motion.div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-500"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                />
+            </div>
+        </div>
+    )
+}
+
+// Animation variants for step transitions
+const stepVariants = {
+    enter: (direction: number) => ({
+        x: direction > 0 ? 100 : -100,
+        opacity: 0
+    }),
+    center: {
+        x: 0,
+        opacity: 1
+    },
+    exit: (direction: number) => ({
+        x: direction < 0 ? 100 : -100,
+        opacity: 0
+    })
+}
+
 export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: BasicInfoData) => void, initialData?: BasicInfoData }) {
     const { doctorLevel, setDoctorLevel } = useDoctorLevel()
     const { t, language } = useLanguage()
+
+    // Wizard step state
+    const [currentStep, setCurrentStep] = useState(1)
+    const [direction, setDirection] = useState(0)
+    const [stepError, setStepError] = useState<string | null>(null)
+
     const [formData, setFormData] = useState<BasicInfoData>(initialData || {
         name: 'Anonymous',
         age: '',
@@ -210,8 +262,6 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
         symptomDuration: ''
     })
 
-
-
     // Symptom keys for translation
     const symptomKeys: Array<keyof typeof t.basicInfo.symptoms> = [
         'fever', 'cough', 'headache', 'fatigue',
@@ -219,7 +269,17 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
     ]
 
     const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
-    const [errors, setErrors] = useState<string[]>([])
+
+    // Age quick-select values
+    const ageRanges = [
+        { label: t.basicInfo.ageRanges?.under18 || 'Under 18', value: 15 },
+        { label: t.basicInfo.ageRanges?.['18-25'] || '18-25', value: 22 },
+        { label: t.basicInfo.ageRanges?.['26-35'] || '26-35', value: 30 },
+        { label: t.basicInfo.ageRanges?.['36-45'] || '36-45', value: 40 },
+        { label: t.basicInfo.ageRanges?.['46-55'] || '46-55', value: 50 },
+        { label: t.basicInfo.ageRanges?.['56-65'] || '56-65', value: 60 },
+        { label: t.basicInfo.ageRanges?.over65 || 'Over 65', value: 70 },
+    ]
 
     // Load patient profile data from localStorage
     useEffect(() => {
@@ -293,48 +353,63 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
         setFormData({ ...formData, symptoms: translatedSymptoms.join(', ') })
     }
 
+    // Validate current step before proceeding
+    const validateStep = (step: number): boolean => {
+        setStepError(null)
 
+        switch (step) {
+            case 1:
+                if (!formData.gender) {
+                    setStepError(t.basicInfo.gender + ' ' + (t.errors?.requiredField || 'is required'))
+                    return false
+                }
+                return true
+            case 2:
+                if (!formData.age) {
+                    setStepError(t.basicInfo.age + ' ' + (t.errors?.requiredField || 'is required'))
+                    return false
+                }
+                return true
+            case 3:
+                if (!formData.weight || !formData.height) {
+                    const missing = []
+                    if (!formData.weight) missing.push(t.basicInfo.weight)
+                    if (!formData.height) missing.push(t.basicInfo.height)
+                    setStepError(missing.join(', ') + ' ' + (t.errors?.requiredField || 'is required'))
+                    return false
+                }
+                return true
+            case 4:
+                if (!formData.symptomDuration) {
+                    setStepError(t.basicInfo.duration + ' ' + (t.errors?.requiredField || 'is required'))
+                    return false
+                }
+                return true
+            case 5:
+                return true
+            default:
+                return true
+        }
+    }
+
+    const goToNextStep = () => {
+        if (validateStep(currentStep)) {
+            setDirection(1)
+            setCurrentStep(prev => Math.min(prev + 1, TOTAL_STEPS))
+        }
+    }
+
+    const goToPreviousStep = () => {
+        setStepError(null)
+        setDirection(-1)
+        setCurrentStep(prev => Math.max(prev - 1, 1))
+    }
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-
-        const missingFields: string[] = []
-        if (!formData.name) missingFields.push('name')
-        if (!formData.gender) missingFields.push('gender')
-        if (!formData.age) missingFields.push('age')
-        if (!formData.weight) missingFields.push('weight')
-        if (!formData.height) missingFields.push('height')
-        if (!formData.symptomDuration) missingFields.push('symptomDuration')
-
-        if (missingFields.length > 0) {
-            const fieldNames: Record<string, string> = {
-                name: t.basicInfo.fullName,
-                gender: t.basicInfo.gender,
-                age: t.basicInfo.age,
-                weight: t.basicInfo.weight,
-                height: t.basicInfo.height,
-                symptomDuration: t.basicInfo.duration
-            }
-
-            setErrors(missingFields.map(field => `${fieldNames[field]} ${t.errors?.requiredField || 'is required'}`))
-
-            // Scroll to the first missing field
-            const firstFieldId = missingFields[0]
-            // Check for wrapper first (for Selects), then direct ID (for Inputs)
-            const element = document.getElementById(`${firstFieldId}-wrapper`) || document.getElementById(firstFieldId)
-
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                // Try to focus if it's an input
-                if (element.tagName === 'INPUT') {
-                    element.focus()
-                }
-            }
-            return
+        if (validateStep(currentStep)) {
+            onComplete(formData)
         }
-
-        setErrors([])
-        onComplete(formData)
     }
 
     // Get translated doctor level info
@@ -345,6 +420,356 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
             master: { name: t.doctorLevels.masterPhysician.name, description: t.doctorLevels.masterPhysician.description },
         }
         return levelMap[level]
+    }
+
+    // Get step title and subtitle
+    const getStepInfo = (step: number) => {
+        const stepInfo = {
+            1: {
+                title: t.basicInfo.wizardSteps?.step1Title || "Who are you?",
+                subtitle: t.basicInfo.wizardSteps?.step1Subtitle || "Let's start with your identity"
+            },
+            2: {
+                title: t.basicInfo.wizardSteps?.step2Title || "How old are you?",
+                subtitle: t.basicInfo.wizardSteps?.step2Subtitle || "Select your age"
+            },
+            3: {
+                title: t.basicInfo.wizardSteps?.step3Title || "Body measurements",
+                subtitle: t.basicInfo.wizardSteps?.step3Subtitle || "Help us calculate your health metrics"
+            },
+            4: {
+                title: t.basicInfo.wizardSteps?.step4Title || "What's bothering you?",
+                subtitle: t.basicInfo.wizardSteps?.step4Subtitle || "Describe your symptoms"
+            },
+            5: {
+                title: t.basicInfo.wizardSteps?.step5Title || "Choose your doctor",
+                subtitle: t.basicInfo.wizardSteps?.step5Subtitle || "Select your TCM practitioner level"
+            }
+        }
+        return stepInfo[step as keyof typeof stepInfo] || { title: '', subtitle: '' }
+    }
+
+    // Render step content
+    const renderStepContent = () => {
+        const stepInfo = getStepInfo(currentStep)
+
+        return (
+            <AnimatePresence mode="wait" custom={direction}>
+                <motion.div
+                    key={currentStep}
+                    custom={direction}
+                    variants={stepVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="space-y-6"
+                >
+                    {/* Step Header */}
+                    <div className="text-center mb-8">
+                        <h3 className="text-2xl font-bold text-stone-800 mb-2">{stepInfo.title}</h3>
+                        <p className="text-stone-500">{stepInfo.subtitle}</p>
+                    </div>
+
+                    {/* Step Content */}
+                    {currentStep === 1 && (
+                        <div className="space-y-6">
+                            {/* Name Input */}
+                            <div className="space-y-2">
+                                <Label htmlFor="name" className="text-stone-600 font-medium">{t.basicInfo.fullName}</Label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-3.5 h-4 w-4 text-emerald-600/70" />
+                                    <Input
+                                        id="name"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        placeholder={t.basicInfo.fullNamePlaceholder}
+                                        className="pl-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50 text-stone-900"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Gender Selection - Icon Buttons */}
+                            <div className="space-y-3">
+                                <Label className="text-stone-600 font-medium">{t.basicInfo.gender}</Label>
+                                <div className="grid grid-cols-3 gap-3">
+                                    {[
+                                        { value: 'male', label: t.basicInfo.male, icon: '♂️', color: 'from-blue-500 to-blue-600' },
+                                        { value: 'female', label: t.basicInfo.female, icon: '♀️', color: 'from-pink-500 to-pink-600' },
+                                        { value: 'other', label: t.basicInfo.other, icon: '⚧️', color: 'from-purple-500 to-purple-600' }
+                                    ].map(gender => (
+                                        <motion.button
+                                            key={gender.value}
+                                            type="button"
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={() => setFormData({ ...formData, gender: gender.value })}
+                                            className={`
+                                                relative p-4 rounded-xl border-2 transition-all duration-200 min-h-[100px] flex flex-col items-center justify-center gap-2
+                                                ${formData.gender === gender.value
+                                                    ? 'border-emerald-400 bg-emerald-50 shadow-md'
+                                                    : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50'
+                                                }
+                                            `}
+                                        >
+                                            <span className="text-3xl">{gender.icon}</span>
+                                            <span className={`text-sm font-medium ${formData.gender === gender.value ? 'text-emerald-700' : 'text-stone-600'}`}>
+                                                {gender.label}
+                                            </span>
+                                            {formData.gender === gender.value && (
+                                                <motion.div
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    className="absolute top-2 right-2 h-5 w-5 rounded-full bg-emerald-500 flex items-center justify-center"
+                                                >
+                                                    <Check className="w-3 h-3 text-white" />
+                                                </motion.div>
+                                            )}
+                                        </motion.button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {currentStep === 2 && (
+                        <div className="space-y-6">
+                            {/* Age Input with Quick Select */}
+                            <div className="space-y-4">
+                                <Label htmlFor="age" className="text-stone-600 font-medium">{t.basicInfo.age}</Label>
+
+                                {/* Quick Age Range Pills */}
+                                <div className="flex flex-wrap gap-2 justify-center">
+                                    {ageRanges.map((range) => (
+                                        <motion.button
+                                            key={range.label}
+                                            type="button"
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => setFormData({ ...formData, age: String(range.value) })}
+                                            className={`
+                                                px-4 py-3 rounded-full text-sm font-medium transition-all duration-200 min-h-[44px]
+                                                ${parseInt(formData.age) >= range.value - 5 && parseInt(formData.age) <= range.value + 5
+                                                    ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-300 shadow-sm'
+                                                    : 'bg-white text-stone-600 border border-stone-200 hover:border-emerald-200 hover:bg-emerald-50'
+                                                }
+                                            `}
+                                        >
+                                            {range.label}
+                                        </motion.button>
+                                    ))}
+                                </div>
+
+                                {/* Or enter exact age */}
+                                <div className="text-center text-stone-400 text-sm my-4">— {t.common.or} —</div>
+
+                                {/* Precise Age Input */}
+                                <MobileNumericInput
+                                    id="age"
+                                    value={formData.age}
+                                    onChange={(val) => setFormData({ ...formData, age: val })}
+                                    placeholder={t.basicInfo.agePlaceholder}
+                                    icon={<CalendarIcon className="h-4 w-4" />}
+                                    min={1}
+                                    max={120}
+                                    step={1}
+                                    quickValues={[18, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70]}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {currentStep === 3 && (
+                        <div className="space-y-6">
+                            {/* Height */}
+                            <div className="space-y-2">
+                                <Label htmlFor="height" className="text-stone-600 font-medium flex items-center gap-2">
+                                    <Ruler className="w-4 h-4 text-emerald-600" />
+                                    {t.basicInfo.height}
+                                </Label>
+                                <MobileNumericInput
+                                    id="height"
+                                    value={formData.height}
+                                    onChange={(val) => setFormData({ ...formData, height: val })}
+                                    placeholder={t.basicInfo.heightPlaceholder}
+                                    icon={<Ruler className="h-4 w-4" />}
+                                    min={100}
+                                    max={220}
+                                    step={1}
+                                    unit="cm"
+                                    quickValues={[150, 155, 160, 165, 170, 175, 180, 185, 190]}
+                                    required
+                                />
+                            </div>
+
+                            {/* Weight */}
+                            <div className="space-y-2">
+                                <Label htmlFor="weight" className="text-stone-600 font-medium flex items-center gap-2">
+                                    <Scale className="w-4 h-4 text-emerald-600" />
+                                    {t.basicInfo.weight}
+                                </Label>
+                                <MobileNumericInput
+                                    id="weight"
+                                    value={formData.weight}
+                                    onChange={(val) => setFormData({ ...formData, weight: val })}
+                                    placeholder={t.basicInfo.weightPlaceholder}
+                                    icon={<Scale className="h-4 w-4" />}
+                                    min={20}
+                                    max={200}
+                                    step={1}
+                                    unit="kg"
+                                    quickValues={[45, 50, 55, 60, 65, 70, 75, 80, 85, 90]}
+                                    required
+                                />
+                            </div>
+
+                            {/* BMI Preview */}
+                            {formData.height && formData.weight && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 text-center"
+                                >
+                                    <span className="text-stone-500 text-sm">BMI: </span>
+                                    <span className="text-emerald-700 font-bold text-lg">
+                                        {(parseFloat(formData.weight) / Math.pow(parseFloat(formData.height) / 100, 2)).toFixed(1)}
+                                    </span>
+                                </motion.div>
+                            )}
+                        </div>
+                    )}
+
+                    {currentStep === 4 && (
+                        <div className="space-y-6">
+                            {/* Common Symptoms */}
+                            <div className="space-y-3">
+                                <Label className="text-stone-600 font-medium flex items-center gap-2">
+                                    <Activity className="w-4 h-4 text-emerald-600" />
+                                    {t.basicInfo.commonSymptoms}
+                                </Label>
+                                <div className="flex flex-wrap gap-2">
+                                    {symptomKeys.map((symptomKey) => (
+                                        <motion.button
+                                            key={symptomKey}
+                                            type="button"
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            onClick={() => handleSymptomClick(symptomKey)}
+                                            className={`
+                                                px-4 py-3 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 border min-h-[44px]
+                                                ${selectedSymptoms.includes(symptomKey)
+                                                    ? "bg-emerald-100 border-emerald-200 text-emerald-800 shadow-sm"
+                                                    : "bg-white border-stone-200 text-stone-600 hover:border-emerald-200 hover:bg-emerald-50"
+                                                }
+                                            `}
+                                        >
+                                            {selectedSymptoms.includes(symptomKey) && <Check className="w-4 h-4" />}
+                                            {t.basicInfo.symptoms[symptomKey]}
+                                        </motion.button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Symptom Duration */}
+                            <div className="space-y-2" id="symptomDuration-wrapper">
+                                <Label htmlFor="symptomDuration" className="text-stone-600 font-medium flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-emerald-600" />
+                                    {t.basicInfo.duration}
+                                </Label>
+                                <Select
+                                    value={formData.symptomDuration}
+                                    onValueChange={(val) => setFormData({ ...formData, symptomDuration: val })}
+                                >
+                                    <SelectTrigger id="symptomDuration" className="h-12 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50 text-stone-900">
+                                        <SelectValue placeholder={t.basicInfo.durationPlaceholder} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="less-than-1-day">{t.basicInfo.durationOptions.lessThan1Day}</SelectItem>
+                                        <SelectItem value="1-3-days">{t.basicInfo.durationOptions['1-3days']}</SelectItem>
+                                        <SelectItem value="4-7-days">{t.basicInfo.durationOptions['4-7days']}</SelectItem>
+                                        <SelectItem value="1-2-weeks">{t.basicInfo.durationOptions['1-2weeks']}</SelectItem>
+                                        <SelectItem value="2-4-weeks">{t.basicInfo.durationOptions['2-4weeks']}</SelectItem>
+                                        <SelectItem value="1-3-months">{t.basicInfo.durationOptions['1-3months']}</SelectItem>
+                                        <SelectItem value="3-6-months">{t.basicInfo.durationOptions['3-6months']}</SelectItem>
+                                        <SelectItem value="6-12-months">{t.basicInfo.durationOptions['6-12months']}</SelectItem>
+                                        <SelectItem value="over-1-year">{t.basicInfo.durationOptions.over1Year}</SelectItem>
+                                        <SelectItem value="chronic">{t.basicInfo.durationOptions.chronic}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Detailed Symptoms */}
+                            <div className="space-y-2">
+                                <Label htmlFor="symptoms" className="text-stone-600 font-medium flex items-center gap-2">
+                                    <FileText className="w-4 h-4 text-emerald-600" />
+                                    {t.basicInfo.detailedSymptoms}
+                                </Label>
+                                <Textarea
+                                    id="symptoms"
+                                    value={formData.symptoms}
+                                    onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })}
+                                    placeholder={t.basicInfo.detailedSymptomsPlaceholder}
+                                    className="min-h-[100px] border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50 resize-none"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {currentStep === 5 && (
+                        <div className="space-y-4">
+                            <Label className="text-stone-600 font-medium flex items-center gap-2 text-lg">
+                                <Stethoscope className="w-5 h-5 text-emerald-600" />
+                                {t.basicInfo.chooseTcmDoctor}
+                            </Label>
+                            <div className="space-y-3">
+                                {(Object.keys(DOCTOR_LEVELS) as DoctorLevel[]).map((level) => {
+                                    const info = DOCTOR_LEVELS[level]
+                                    const translatedInfo = getDoctorLevelInfo(level)
+                                    const isSelected = doctorLevel === level
+
+                                    return (
+                                        <motion.div
+                                            key={level}
+                                            whileHover={{ scale: 1.01 }}
+                                            whileTap={{ scale: 0.99 }}
+                                            onClick={() => setDoctorLevel(level)}
+                                            className={`
+                                                relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200
+                                                ${isSelected
+                                                    ? `${info.borderColor} ${info.bgColor} shadow-md`
+                                                    : 'border-stone-100 bg-white hover:border-stone-200 hover:bg-stone-50'
+                                                }
+                                            `}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-3xl">{info.icon}</span>
+                                                <div className="flex-1">
+                                                    <h3 className={`font-bold ${isSelected ? info.textColor : 'text-stone-700'}`}>
+                                                        {translatedInfo.name}
+                                                    </h3>
+                                                    <p className="text-xs text-stone-500 mt-0.5">
+                                                        {translatedInfo.description}
+                                                    </p>
+                                                </div>
+                                                {isSelected && (
+                                                    <motion.div
+                                                        initial={{ scale: 0 }}
+                                                        animate={{ scale: 1 }}
+                                                        className={`h-6 w-6 rounded-full bg-gradient-to-r ${info.color} flex items-center justify-center`}
+                                                    >
+                                                        <Check className="w-4 h-4 text-white" />
+                                                    </motion.div>
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
+            </AnimatePresence>
+        )
     }
 
     return (
@@ -359,238 +784,67 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                 <p className="text-emerald-50 opacity-90">{t.basicInfo.subtitle}</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-8 pb-24 md:pb-6" noValidate>
-                <div className="grid gap-6 lg:grid-cols-2">
-                    <div className="space-y-2 col-span-2 lg:col-span-1">
-                        <Label htmlFor="name" className="text-stone-600 font-medium">{t.basicInfo.fullName}</Label>
-                        <div className="relative">
-                            <User className="absolute left-3 top-3.5 h-4 w-4 text-emerald-600/70" />
-                            <Input
-                                id="name"
-                                value={formData.name}
-                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                placeholder={t.basicInfo.fullNamePlaceholder}
-                                className="pl-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50 text-stone-900"
-                                required
-                            />
-                        </div>
-                    </div>
+            <form onSubmit={handleSubmit} className="p-6 pb-24 md:pb-6" noValidate>
+                {/* Progress Indicator */}
+                <StepProgress currentStep={currentStep} totalSteps={TOTAL_STEPS} />
 
-                    <div className="space-y-2 col-span-2 lg:col-span-1" id="gender-wrapper">
-                        <Label htmlFor="gender" className="text-stone-600 font-medium">{t.basicInfo.gender}</Label>
-                        <div className="relative">
-                            <div className="absolute left-3 top-3 h-4 w-4 text-emerald-600/70 z-10 pointer-events-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
-                            </div>
-                            <Select
-                                value={formData.gender}
-                                onValueChange={(val) => setFormData({ ...formData, gender: val })}
-                            >
-                                <SelectTrigger id="gender" className="pl-10 h-12 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50 text-stone-900">
-                                    <SelectValue placeholder={t.basicInfo.selectGender} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="male">{t.basicInfo.male}</SelectItem>
-                                    <SelectItem value="female">{t.basicInfo.female}</SelectItem>
-                                    <SelectItem value="other">{t.basicInfo.other}</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="age" className="text-stone-600 font-medium">{t.basicInfo.age}</Label>
-                        <MobileNumericInput
-                            id="age"
-                            value={formData.age}
-                            onChange={(val) => setFormData({ ...formData, age: val })}
-                            placeholder={t.basicInfo.agePlaceholder}
-                            icon={<CalendarIcon className="h-4 w-4" />}
-                            min={1}
-                            max={120}
-                            step={1}
-                            quickValues={[18, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70]}
-                            required
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="weight" className="text-stone-600 font-medium">{t.basicInfo.weight}</Label>
-                        <MobileNumericInput
-                            id="weight"
-                            value={formData.weight}
-                            onChange={(val) => setFormData({ ...formData, weight: val })}
-                            placeholder={t.basicInfo.weightPlaceholder}
-                            icon={<Scale className="h-4 w-4" />}
-                            min={20}
-                            max={200}
-                            step={1}
-                            unit="kg"
-                            quickValues={[45, 50, 55, 60, 65, 70, 75, 80, 85, 90]}
-                            required
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="height" className="text-stone-600 font-medium">{t.basicInfo.height}</Label>
-                        <MobileNumericInput
-                            id="height"
-                            value={formData.height}
-                            onChange={(val) => setFormData({ ...formData, height: val })}
-                            placeholder={t.basicInfo.heightPlaceholder}
-                            icon={<Ruler className="h-4 w-4" />}
-                            min={100}
-                            max={220}
-                            step={1}
-                            unit="cm"
-                            quickValues={[150, 155, 160, 165, 170, 175, 180, 185, 190]}
-                            required
-                        />
-                    </div>
-
-                    <div className="space-y-2 relative z-10" id="symptomDuration-wrapper">
-                        <Label htmlFor="symptomDuration" className="text-stone-600 font-medium">{t.basicInfo.duration}</Label>
-                        <div className="relative">
-                            <div className="absolute left-3 top-3 h-4 w-4 text-emerald-600/70 z-10 pointer-events-none">
-                                <Clock className="h-4 w-4" />
-                            </div>
-                            <Select
-                                value={formData.symptomDuration}
-                                onValueChange={(val) => setFormData({ ...formData, symptomDuration: val })}
-                            >
-                                <SelectTrigger id="symptomDuration" className="pl-10 h-12 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50 text-stone-900">
-                                    <SelectValue placeholder={t.basicInfo.durationPlaceholder} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="less-than-1-day">{t.basicInfo.durationOptions.lessThan1Day}</SelectItem>
-                                    <SelectItem value="1-3-days">{t.basicInfo.durationOptions['1-3days']}</SelectItem>
-                                    <SelectItem value="4-7-days">{t.basicInfo.durationOptions['4-7days']}</SelectItem>
-                                    <SelectItem value="1-2-weeks">{t.basicInfo.durationOptions['1-2weeks']}</SelectItem>
-                                    <SelectItem value="2-4-weeks">{t.basicInfo.durationOptions['2-4weeks']}</SelectItem>
-                                    <SelectItem value="1-3-months">{t.basicInfo.durationOptions['1-3months']}</SelectItem>
-                                    <SelectItem value="3-6-months">{t.basicInfo.durationOptions['3-6months']}</SelectItem>
-                                    <SelectItem value="6-12-months">{t.basicInfo.durationOptions['6-12months']}</SelectItem>
-                                    <SelectItem value="over-1-year">{t.basicInfo.durationOptions.over1Year}</SelectItem>
-                                    <SelectItem value="chronic">{t.basicInfo.durationOptions.chronic}</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
+                {/* Step Content */}
+                <div className="min-h-[350px]">
+                    {renderStepContent()}
                 </div>
 
-
-
-                <div className="space-y-3">
-                    <Label className="text-stone-600 font-medium flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-emerald-600" />
-                        {t.basicInfo.commonSymptoms}
-                    </Label>
-                    <div className="flex flex-wrap gap-2">
-                        {symptomKeys.map((symptomKey) => (
-                            <motion.button
-                                key={symptomKey}
-                                type="button"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => handleSymptomClick(symptomKey)}
-                                className={`
-                                    px-4 py-3 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 border min-h-[44px]
-                                    ${selectedSymptoms.includes(symptomKey)
-                                        ? "bg-emerald-100 border-emerald-200 text-emerald-800 shadow-sm"
-                                        : "bg-white border-stone-200 text-stone-600 hover:border-emerald-200 hover:bg-emerald-50"
-                                    }
-                                `}
-                            >
-                                {selectedSymptoms.includes(symptomKey) && <Check className="w-4 h-4" />}
-                                {t.basicInfo.symptoms[symptomKey]}
-                            </motion.button>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="symptoms" className="text-stone-600 font-medium flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-emerald-600" />
-                        {t.basicInfo.detailedSymptoms}
-                    </Label>
-                    <Textarea
-                        id="symptoms"
-                        value={formData.symptoms}
-                        onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })}
-                        placeholder={t.basicInfo.detailedSymptomsPlaceholder}
-                        className="min-h-[100px] border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50 resize-none"
-                    />
-                </div>
-
-                {/* Doctor Level Selection */}
-                <div className="space-y-4">
-                    <Label className="text-stone-600 font-medium flex items-center gap-2 text-lg">
-                        <Stethoscope className="w-5 h-5 text-emerald-600" />
-                        {t.basicInfo.chooseTcmDoctor}
-                    </Label>
-                    <div className="flex overflow-x-auto pb-4 gap-4 md:grid md:grid-cols-3 md:overflow-visible md:pb-0 snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 scrollbar-hide">
-                        {(Object.keys(DOCTOR_LEVELS) as DoctorLevel[]).map((level) => {
-                            const info = DOCTOR_LEVELS[level]
-                            const translatedInfo = getDoctorLevelInfo(level)
-                            const isSelected = doctorLevel === level
-
-                            return (
-                                <div
-                                    key={level}
-                                    onClick={() => setDoctorLevel(level)}
-                                    className={`
-                                        relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200 min-w-[260px] md:min-w-0 flex-shrink-0 snap-center
-                                        ${isSelected
-                                            ? `${info.borderColor} ${info.bgColor} shadow-md scale-[1.02]`
-                                            : 'border-stone-100 bg-white hover:border-stone-200 hover:bg-stone-50'
-                                        }
-                                    `}
-                                >
-                                    <div className="flex items-start justify-between mb-2">
-                                        <span className="text-2xl">{info.icon}</span>
-                                        {isSelected && (
-                                            <div className={`h-5 w-5 rounded-full bg-gradient-to-r ${info.color} flex items-center justify-center`}>
-                                                <Check className="w-3 h-3 text-white" />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <h3 className={`font-bold ${isSelected ? info.textColor : 'text-stone-700'}`}>
-                                        {translatedInfo.name}
-                                    </h3>
-                                    <p className="text-xs text-stone-500 mt-1">
-                                        {translatedInfo.description}
-                                    </p>
-                                    {isSelected && (
-                                        <div className={`absolute inset-0 rounded-xl ring-2 ring-offset-2 ring-transparent ${info.borderColor.replace('border', 'ring')}`} />
-                                    )}
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
-
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30 md:static md:bg-transparent md:border-none md:shadow-none md:p-0">
-                    {errors.length > 0 && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600 animate-in fade-in slide-in-from-bottom-2">
-                            <p className="font-medium mb-1">{t.errors?.validationError || 'Please check the following fields:'}</p>
-                            <ul className="list-disc list-inside">
-                                {errors.map((error, index) => (
-                                    <li key={index}>{error}</li>
-                                ))}
-                            </ul>
-                        </div>
+                {/* Error Message */}
+                <AnimatePresence>
+                    {stepError && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600"
+                        >
+                            {stepError}
+                        </motion.div>
                     )}
-                    <Button
-                        type="submit"
-                        className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-200/50 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
-                    >
-                        <Sparkles className="w-5 h-5 mr-2" />
-                        {t.basicInfo.startDiagnosis}
-                    </Button>
+                </AnimatePresence>
+
+                {/* Navigation Buttons */}
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30 md:static md:bg-transparent md:border-none md:shadow-none md:p-0 md:mt-8">
+                    <div className="flex gap-3">
+                        {/* Back Button */}
+                        {currentStep > 1 && (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={goToPreviousStep}
+                                className="flex-1 h-12 text-stone-600 border-stone-200 hover:bg-stone-50"
+                            >
+                                <ChevronLeft className="w-4 h-4 mr-2" />
+                                {t.common.back}
+                            </Button>
+                        )}
+
+                        {/* Next / Submit Button */}
+                        {currentStep < TOTAL_STEPS ? (
+                            <Button
+                                type="button"
+                                onClick={goToNextStep}
+                                className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-200/50 h-12 text-lg font-medium rounded-xl transition-all duration-300"
+                            >
+                                {t.common.next}
+                                <ChevronRight className="w-4 h-4 ml-2" />
+                            </Button>
+                        ) : (
+                            <Button
+                                type="submit"
+                                className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-200/50 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+                            >
+                                <Sparkles className="w-5 h-5 mr-2" />
+                                {t.basicInfo.startDiagnosis}
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </form>
-
-
         </Card>
     )
 }

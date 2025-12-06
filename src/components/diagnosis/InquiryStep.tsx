@@ -40,7 +40,7 @@ export function InquiryStep({
     const [messages, setMessages] = useState<Message[]>([])
     const [localInput, setLocalInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
-    const [hasRequestedInitialQuestion, setHasRequestedInitialQuestion] = useState(false)
+    const hasRequestedInitialQuestion = useRef(false)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const scrollAreaRef = useRef<HTMLDivElement>(null)
@@ -152,8 +152,8 @@ Duration: ${basicInfo.symptomDuration}
     // NOTE: sendMessage is intentionally NOT in the dependency array to prevent duplicate API calls.
     // The hasRequestedInitialQuestion flag ensures this only runs once.
     useEffect(() => {
-        if (!hasRequestedInitialQuestion && messages.length === 0) {
-            setHasRequestedInitialQuestion(true)
+        if (!hasRequestedInitialQuestion.current && messages.length === 0) {
+            hasRequestedInitialQuestion.current = true
 
             // Initial prompt in the selected language
             // Uses the component-level initialPrompts constant
@@ -165,7 +165,7 @@ Duration: ${basicInfo.symptomDuration}
             sendMessage(prompt, true)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [hasRequestedInitialQuestion, messages.length, basicInfo, language])
+    }, [messages.length, basicInfo, language])
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {

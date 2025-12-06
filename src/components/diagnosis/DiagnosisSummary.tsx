@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ChevronRight, ChevronLeft, Edit2, Check, User, FileText, Activity, Settings, ChevronDown, ChevronUp } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface DiagnosisSummaryProps {
     data: any
@@ -54,6 +55,7 @@ interface ReportOptions {
 }
 
 export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryProps) {
+    const { t } = useLanguage()
     const [summaries, setSummaries] = useState<Record<string, string>>({})
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
         patientInfo: true,
@@ -108,58 +110,55 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
         // Basic Info
         if (data.basic_info) {
             const info = data.basic_info
-            initialSummaries['basic_info'] = `Name: ${info.name}\nAge: ${info.age}\nGender: ${info.gender}\nHeight: ${info.height}cm\nWeight: ${info.weight}kg\nSymptoms: ${info.symptoms || 'None'}`
+            initialSummaries['basic_info'] = `${t.basicInfo.fullName}: ${info.name}\n${t.basicInfo.age}: ${info.age}\n${t.basicInfo.gender}: ${info.gender}\n${t.basicInfo.height}: ${info.height}cm\n${t.basicInfo.weight}: ${info.weight}kg\n${t.report.symptoms}: ${info.symptoms || t.common.none}`
         }
 
         // Inquiry
         if (data.wen_inquiry) {
-            // If there's a specific summary field, use it. Otherwise, summarize the chat or just say "Completed".
-            // Assuming data.wen_inquiry might have a summary or we just list the main points if available.
-            // For now, let's try to extract a summary or default to a placeholder.
-            initialSummaries['wen_inquiry'] = data.wen_inquiry.summary || "Patient inquiry completed."
+            initialSummaries['wen_inquiry'] = data.wen_inquiry.summary || t.diagnosisSummary.defaultMessages.inquiryCompleted
         }
 
         // Tongue
         if (data.wang_tongue) {
-            initialSummaries['wang_tongue'] = data.wang_tongue.observation || "No observation recorded."
+            initialSummaries['wang_tongue'] = data.wang_tongue.observation || t.diagnosisSummary.defaultMessages.noObservation
         }
 
         // Face
         if (data.wang_face) {
-            initialSummaries['wang_face'] = data.wang_face.observation || "No observation recorded."
+            initialSummaries['wang_face'] = data.wang_face.observation || t.diagnosisSummary.defaultMessages.noObservation
         }
 
         // Body Part
         if (data.wang_part) {
-            initialSummaries['wang_part'] = data.wang_part.observation || "No observation recorded."
+            initialSummaries['wang_part'] = data.wang_part.observation || t.diagnosisSummary.defaultMessages.noObservation
         }
 
         // Audio
         if (data.wen_audio) {
-            initialSummaries['wen_audio'] = data.wen_audio.transcription || data.wen_audio.analysis || "Audio analysis completed."
+            initialSummaries['wen_audio'] = data.wen_audio.transcription || data.wen_audio.analysis || t.diagnosisSummary.defaultMessages.audioCompleted
         }
 
         // Pulse
         if (data.qie) {
-            const qualities = data.qie.pulseQualities?.map((q: any) => q.nameEn).join(', ') || 'None'
-            initialSummaries['qie'] = `BPM: ${data.qie.bpm}\nPulse Qualities: ${qualities}`
+            const qualities = data.qie.pulseQualities?.map((q: any) => q.nameEn).join(', ') || t.common.none
+            initialSummaries['qie'] = `BPM: ${data.qie.bpm}\n${t.pulse.tcmPulseQualities}: ${qualities}`
         }
 
         // Smart Connect
         if (data.smart_connect) {
             const sc = data.smart_connect
             const metrics = []
-            if (sc.pulseRate) metrics.push(`Pulse Rate: ${sc.pulseRate} BPM`)
-            if (sc.bloodPressure) metrics.push(`Blood Pressure: ${sc.bloodPressure} mmHg`)
-            if (sc.bloodOxygen) metrics.push(`Blood Oxygen: ${sc.bloodOxygen}%`)
-            if (sc.bodyTemp) metrics.push(`Temperature: ${sc.bodyTemp}°C`)
+            if (sc.pulseRate) metrics.push(`${t.pulse.pulseRate}: ${sc.pulseRate} BPM`)
+            if (sc.bloodPressure) metrics.push(`${t.pulse.bloodPressure}: ${sc.bloodPressure} mmHg`)
+            if (sc.bloodOxygen) metrics.push(`${t.pulse.bloodOxygen}: ${sc.bloodOxygen}%`)
+            if (sc.bodyTemp) metrics.push(`${t.pulse.bodyTemperature}: ${sc.bodyTemp}°C`)
             if (sc.hrv) metrics.push(`HRV: ${sc.hrv} ms`)
             if (sc.stressLevel) metrics.push(`Stress Level: ${sc.stressLevel}`)
-            initialSummaries['smart_connect'] = metrics.length > 0 ? metrics.join('\n') : 'No device data connected.'
+            initialSummaries['smart_connect'] = metrics.length > 0 ? metrics.join('\n') : t.diagnosisSummary.defaultMessages.noDeviceData
         }
 
         setSummaries(initialSummaries)
-    }, [data])
+    }, [data, t])
 
     const handleSummaryChange = (key: string, value: string) => {
         setSummaries(prev => ({ ...prev, [key]: value }))
@@ -176,21 +175,21 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
     }
 
     const sections = [
-        { id: 'basic_info', title: 'Basic Information' },
-        { id: 'wen_inquiry', title: 'Inquiry (Wen)' },
-        { id: 'wang_tongue', title: 'Tongue Diagnosis (Wang)' },
-        { id: 'wang_face', title: 'Face Diagnosis (Wang)' },
-        { id: 'wang_part', title: 'Body Part Diagnosis (Wang)' },
-        { id: 'wen_audio', title: 'Audio Analysis (Wen)' },
-        { id: 'qie', title: 'Pulse Diagnosis (Qie)' },
-        { id: 'smart_connect', title: 'Smart Connect Health Metrics' },
+        { id: 'basic_info', title: t.diagnosisSummary.sections.basicInfo },
+        { id: 'wen_inquiry', title: t.diagnosisSummary.sections.wenInquiry },
+        { id: 'wang_tongue', title: t.diagnosisSummary.sections.wangTongue },
+        { id: 'wang_face', title: t.diagnosisSummary.sections.wangFace },
+        { id: 'wang_part', title: t.diagnosisSummary.sections.wangPart },
+        { id: 'wen_audio', title: t.diagnosisSummary.sections.wenAudio },
+        { id: 'qie', title: t.diagnosisSummary.sections.qie },
+        { id: 'smart_connect', title: t.diagnosisSummary.sections.smartConnect },
     ]
 
     return (
         <Card className="p-6 space-y-6 pb-24 md:pb-6 max-w-3xl mx-auto">
             <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-emerald-800">Diagnostic Summary</h2>
-                <p className="text-slate-600">Please review and edit the collected information before generating the final report.</p>
+                <h2 className="text-2xl font-bold text-emerald-800">{t.diagnosisSummary.title}</h2>
+                <p className="text-slate-600">{t.diagnosisSummary.subtitle}</p>
             </div>
 
             <ScrollArea className="h-[500px] pr-4">
@@ -218,9 +217,9 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                     <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-4 rounded-xl space-y-4 mt-6 border border-emerald-100">
                         <h3 className="font-bold text-emerald-800 flex items-center gap-2 text-lg">
                             <Settings className="w-5 h-5" />
-                            Report Options
+                            {t.diagnosisSummary.reportOptions.title}
                         </h3>
-                        <p className="text-sm text-slate-600">Customize what information to include in your diagnosis report</p>
+                        <p className="text-sm text-slate-600">{t.diagnosisSummary.reportOptions.subtitle}</p>
 
                         {/* Patient Information Section */}
                         <div className="bg-white/70 rounded-lg border border-emerald-100 overflow-hidden">
@@ -231,8 +230,8 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                             >
                                 <div className="flex items-center gap-2">
                                     <User className="w-4 h-4 text-emerald-600" />
-                                    <span className="font-semibold text-slate-800">Patient Information</span>
-                                    <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Demographics</span>
+                                    <span className="font-semibold text-slate-800">{t.diagnosisSummary.reportOptions.patientInfo}</span>
+                                    <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{t.diagnosisSummary.reportOptions.demographics}</span>
                                 </div>
                                 {expandedSections.patientInfo ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                             </button>
@@ -240,27 +239,27 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                                 <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-3 border-t border-emerald-100 pt-3">
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includePatientName" checked={options.includePatientName} onCheckedChange={(checked) => handleOptionChange('includePatientName', checked as boolean)} />
-                                        <Label htmlFor="includePatientName" className="text-sm">Patient Name</Label>
+                                        <Label htmlFor="includePatientName" className="text-sm">{t.diagnosisSummary.reportOptions.patientName}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includePatientAge" checked={options.includePatientAge} onCheckedChange={(checked) => handleOptionChange('includePatientAge', checked as boolean)} />
-                                        <Label htmlFor="includePatientAge" className="text-sm">Age</Label>
+                                        <Label htmlFor="includePatientAge" className="text-sm">{t.diagnosisSummary.reportOptions.age}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includePatientGender" checked={options.includePatientGender} onCheckedChange={(checked) => handleOptionChange('includePatientGender', checked as boolean)} />
-                                        <Label htmlFor="includePatientGender" className="text-sm">Gender</Label>
+                                        <Label htmlFor="includePatientGender" className="text-sm">{t.diagnosisSummary.reportOptions.gender}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includePatientContact" checked={options.includePatientContact} onCheckedChange={(checked) => handleOptionChange('includePatientContact', checked as boolean)} />
-                                        <Label htmlFor="includePatientContact" className="text-sm text-slate-500">Contact Information</Label>
+                                        <Label htmlFor="includePatientContact" className="text-sm text-slate-500">{t.diagnosisSummary.reportOptions.contactInfo}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includePatientAddress" checked={options.includePatientAddress} onCheckedChange={(checked) => handleOptionChange('includePatientAddress', checked as boolean)} />
-                                        <Label htmlFor="includePatientAddress" className="text-sm text-slate-500">Address</Label>
+                                        <Label htmlFor="includePatientAddress" className="text-sm text-slate-500">{t.diagnosisSummary.reportOptions.address}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeEmergencyContact" checked={options.includeEmergencyContact} onCheckedChange={(checked) => handleOptionChange('includeEmergencyContact', checked as boolean)} />
-                                        <Label htmlFor="includeEmergencyContact" className="text-sm text-slate-500">Emergency Contact</Label>
+                                        <Label htmlFor="includeEmergencyContact" className="text-sm text-slate-500">{t.diagnosisSummary.reportOptions.emergencyContact}</Label>
                                     </div>
                                 </div>
                             )}
@@ -275,8 +274,8 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                             >
                                 <div className="flex items-center gap-2">
                                     <Activity className="w-4 h-4 text-rose-500" />
-                                    <span className="font-semibold text-slate-800">Vital Signs & Measurements</span>
-                                    <span className="text-xs text-slate-500 bg-rose-50 px-2 py-0.5 rounded-full">Health Data</span>
+                                    <span className="font-semibold text-slate-800">{t.diagnosisSummary.reportOptions.vitalSigns}</span>
+                                    <span className="text-xs text-slate-500 bg-rose-50 px-2 py-0.5 rounded-full">{t.diagnosisSummary.reportOptions.healthData}</span>
                                 </div>
                                 {expandedSections.vitalSigns ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                             </button>
@@ -284,15 +283,15 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                                 <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-3 border-t border-emerald-100 pt-3">
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeVitalSigns" checked={options.includeVitalSigns} onCheckedChange={(checked) => handleOptionChange('includeVitalSigns', checked as boolean)} />
-                                        <Label htmlFor="includeVitalSigns" className="text-sm">Vital Signs (BP, HR, Temp)</Label>
+                                        <Label htmlFor="includeVitalSigns" className="text-sm">{t.diagnosisSummary.reportOptions.vitalSignsDesc}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeBMI" checked={options.includeBMI} onCheckedChange={(checked) => handleOptionChange('includeBMI', checked as boolean)} />
-                                        <Label htmlFor="includeBMI" className="text-sm">BMI & Body Measurements</Label>
+                                        <Label htmlFor="includeBMI" className="text-sm">{t.diagnosisSummary.reportOptions.bmiMeasurements}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeSmartConnectData" checked={options.includeSmartConnectData} onCheckedChange={(checked) => handleOptionChange('includeSmartConnectData', checked as boolean)} />
-                                        <Label htmlFor="includeSmartConnectData" className="text-sm">Smart Connect Device Data</Label>
+                                        <Label htmlFor="includeSmartConnectData" className="text-sm">{t.diagnosisSummary.reportOptions.smartConnectData}</Label>
                                     </div>
                                 </div>
                             )}
@@ -307,8 +306,8 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                             >
                                 <div className="flex items-center gap-2">
                                     <FileText className="w-4 h-4 text-blue-500" />
-                                    <span className="font-semibold text-slate-800">Medical History</span>
-                                    <span className="text-xs text-slate-500 bg-blue-50 px-2 py-0.5 rounded-full">Background</span>
+                                    <span className="font-semibold text-slate-800">{t.diagnosisSummary.reportOptions.medicalHistory}</span>
+                                    <span className="text-xs text-slate-500 bg-blue-50 px-2 py-0.5 rounded-full">{t.diagnosisSummary.reportOptions.background}</span>
                                 </div>
                                 {expandedSections.medicalHistory ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                             </button>
@@ -316,23 +315,23 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                                 <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-3 border-t border-emerald-100 pt-3">
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeMedicalHistory" checked={options.includeMedicalHistory} onCheckedChange={(checked) => handleOptionChange('includeMedicalHistory', checked as boolean)} />
-                                        <Label htmlFor="includeMedicalHistory" className="text-sm">Past Medical History</Label>
+                                        <Label htmlFor="includeMedicalHistory" className="text-sm">{t.diagnosisSummary.reportOptions.pastMedicalHistory}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeAllergies" checked={options.includeAllergies} onCheckedChange={(checked) => handleOptionChange('includeAllergies', checked as boolean)} />
-                                        <Label htmlFor="includeAllergies" className="text-sm">Known Allergies</Label>
+                                        <Label htmlFor="includeAllergies" className="text-sm">{t.diagnosisSummary.reportOptions.knownAllergies}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeCurrentMedications" checked={options.includeCurrentMedications} onCheckedChange={(checked) => handleOptionChange('includeCurrentMedications', checked as boolean)} />
-                                        <Label htmlFor="includeCurrentMedications" className="text-sm">Current Medications</Label>
+                                        <Label htmlFor="includeCurrentMedications" className="text-sm">{t.diagnosisSummary.reportOptions.currentMedications}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includePastDiagnoses" checked={options.includePastDiagnoses} onCheckedChange={(checked) => handleOptionChange('includePastDiagnoses', checked as boolean)} />
-                                        <Label htmlFor="includePastDiagnoses" className="text-sm">Past TCM Diagnoses</Label>
+                                        <Label htmlFor="includePastDiagnoses" className="text-sm">{t.diagnosisSummary.reportOptions.pastTcmDiagnoses}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeFamilyHistory" checked={options.includeFamilyHistory} onCheckedChange={(checked) => handleOptionChange('includeFamilyHistory', checked as boolean)} />
-                                        <Label htmlFor="includeFamilyHistory" className="text-sm">Family Medical History</Label>
+                                        <Label htmlFor="includeFamilyHistory" className="text-sm">{t.diagnosisSummary.reportOptions.familyHistory}</Label>
                                     </div>
                                 </div>
                             )}
@@ -347,8 +346,8 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                             >
                                 <div className="flex items-center gap-2">
                                     <Check className="w-4 h-4 text-emerald-600" />
-                                    <span className="font-semibold text-slate-800">TCM Recommendations</span>
-                                    <span className="text-xs text-slate-500 bg-emerald-100 px-2 py-0.5 rounded-full">Treatment</span>
+                                    <span className="font-semibold text-slate-800">{t.diagnosisSummary.reportOptions.tcmRecommendations}</span>
+                                    <span className="text-xs text-slate-500 bg-emerald-100 px-2 py-0.5 rounded-full">{t.diagnosisSummary.reportOptions.treatment}</span>
                                 </div>
                                 {expandedSections.recommendations ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                             </button>
@@ -356,35 +355,35 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                                 <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-3 border-t border-emerald-100 pt-3">
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="suggestMedicine" checked={options.suggestMedicine} onCheckedChange={(checked) => handleOptionChange('suggestMedicine', checked as boolean)} />
-                                        <Label htmlFor="suggestMedicine" className="text-sm">Herbal Medicine Suggestions</Label>
+                                        <Label htmlFor="suggestMedicine" className="text-sm">{t.diagnosisSummary.reportOptions.herbalMedicine}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="suggestDoctor" checked={options.suggestDoctor} onCheckedChange={(checked) => handleOptionChange('suggestDoctor', checked as boolean)} />
-                                        <Label htmlFor="suggestDoctor" className="text-sm">Nearby TCM Doctor</Label>
+                                        <Label htmlFor="suggestDoctor" className="text-sm">{t.diagnosisSummary.reportOptions.nearbyDoctor}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeDietary" checked={options.includeDietary} onCheckedChange={(checked) => handleOptionChange('includeDietary', checked as boolean)} />
-                                        <Label htmlFor="includeDietary" className="text-sm">Dietary Advice (食疗)</Label>
+                                        <Label htmlFor="includeDietary" className="text-sm">{t.diagnosisSummary.reportOptions.dietary}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeLifestyle" checked={options.includeLifestyle} onCheckedChange={(checked) => handleOptionChange('includeLifestyle', checked as boolean)} />
-                                        <Label htmlFor="includeLifestyle" className="text-sm">Lifestyle Tips (养生)</Label>
+                                        <Label htmlFor="includeLifestyle" className="text-sm">{t.diagnosisSummary.reportOptions.lifestyle}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeAcupuncture" checked={options.includeAcupuncture} onCheckedChange={(checked) => handleOptionChange('includeAcupuncture', checked as boolean)} />
-                                        <Label htmlFor="includeAcupuncture" className="text-sm">Acupuncture Points (穴位)</Label>
+                                        <Label htmlFor="includeAcupuncture" className="text-sm">{t.diagnosisSummary.reportOptions.acupuncture}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeExercise" checked={options.includeExercise} onCheckedChange={(checked) => handleOptionChange('includeExercise', checked as boolean)} />
-                                        <Label htmlFor="includeExercise" className="text-sm">Exercise Recommendations</Label>
+                                        <Label htmlFor="includeExercise" className="text-sm">{t.diagnosisSummary.reportOptions.exercise}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeSleepAdvice" checked={options.includeSleepAdvice} onCheckedChange={(checked) => handleOptionChange('includeSleepAdvice', checked as boolean)} />
-                                        <Label htmlFor="includeSleepAdvice" className="text-sm">Sleep & Rest Guidance</Label>
+                                        <Label htmlFor="includeSleepAdvice" className="text-sm">{t.diagnosisSummary.reportOptions.sleepAdvice}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeEmotionalWellness" checked={options.includeEmotionalWellness} onCheckedChange={(checked) => handleOptionChange('includeEmotionalWellness', checked as boolean)} />
-                                        <Label htmlFor="includeEmotionalWellness" className="text-sm">Emotional Wellness (情志)</Label>
+                                        <Label htmlFor="includeEmotionalWellness" className="text-sm">{t.diagnosisSummary.reportOptions.emotionalWellness}</Label>
                                     </div>
                                 </div>
                             )}
@@ -399,8 +398,8 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                             >
                                 <div className="flex items-center gap-2">
                                     <FileText className="w-4 h-4 text-purple-500" />
-                                    <span className="font-semibold text-slate-800">Report Format & Extras</span>
-                                    <span className="text-xs text-slate-500 bg-purple-50 px-2 py-0.5 rounded-full">Formatting</span>
+                                    <span className="font-semibold text-slate-800">{t.diagnosisSummary.reportOptions.reportExtras}</span>
+                                    <span className="text-xs text-slate-500 bg-purple-50 px-2 py-0.5 rounded-full">{t.diagnosisSummary.reportOptions.formatting}</span>
                                 </div>
                                 {expandedSections.reportExtras ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                             </button>
@@ -408,23 +407,23 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                                 <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-3 border-t border-emerald-100 pt-3">
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includePrecautions" checked={options.includePrecautions} onCheckedChange={(checked) => handleOptionChange('includePrecautions', checked as boolean)} />
-                                        <Label htmlFor="includePrecautions" className="text-sm">Precautions & Warnings</Label>
+                                        <Label htmlFor="includePrecautions" className="text-sm">{t.diagnosisSummary.reportOptions.precautions}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeFollowUp" checked={options.includeFollowUp} onCheckedChange={(checked) => handleOptionChange('includeFollowUp', checked as boolean)} />
-                                        <Label htmlFor="includeFollowUp" className="text-sm">Follow-up Guidance</Label>
+                                        <Label htmlFor="includeFollowUp" className="text-sm">{t.diagnosisSummary.reportOptions.followUp}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeTimestamp" checked={options.includeTimestamp} onCheckedChange={(checked) => handleOptionChange('includeTimestamp', checked as boolean)} />
-                                        <Label htmlFor="includeTimestamp" className="text-sm">Report Timestamp</Label>
+                                        <Label htmlFor="includeTimestamp" className="text-sm">{t.diagnosisSummary.reportOptions.timestamp}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeQRCode" checked={options.includeQRCode} onCheckedChange={(checked) => handleOptionChange('includeQRCode', checked as boolean)} />
-                                        <Label htmlFor="includeQRCode" className="text-sm text-slate-500">QR Code for Digital Access</Label>
+                                        <Label htmlFor="includeQRCode" className="text-sm text-slate-500">{t.diagnosisSummary.reportOptions.qrCode}</Label>
                                     </div>
                                     <div className="flex items-center space-x-2">
                                         <Checkbox id="includeDoctorSignature" checked={options.includeDoctorSignature} onCheckedChange={(checked) => handleOptionChange('includeDoctorSignature', checked as boolean)} />
-                                        <Label htmlFor="includeDoctorSignature" className="text-sm text-slate-500">Doctor Signature Field</Label>
+                                        <Label htmlFor="includeDoctorSignature" className="text-sm text-slate-500">{t.diagnosisSummary.reportOptions.doctorSignature}</Label>
                                     </div>
                                 </div>
                             )}
@@ -440,14 +439,14 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                     className="h-12 px-6 border-stone-300 text-stone-600 hover:bg-stone-100"
                 >
                     <ChevronLeft className="w-5 h-5 mr-2" />
-                    Back
+                    {t.diagnosisSummary.buttons.back}
                 </Button>
                 <Button
                     onClick={handleConfirm}
                     className="flex-1 h-12 text-lg font-semibold transition-all bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg"
                 >
                     <span className="flex items-center gap-2">
-                        Confirm & Generate Report
+                        {t.diagnosisSummary.buttons.confirmGenerate}
                         <ChevronRight className="w-5 h-5" />
                     </span>
                 </Button>

@@ -7,39 +7,7 @@ import { AudioAnalysisLoader } from './AudioAnalysisLoader'
 import { AudioAnalysisResult } from './AudioAnalysisResult'
 import { useLanguage } from '@/contexts/LanguageContext'
 
-// TCM Educational content about Wen (Listening) diagnosis
-const wenEducationalContent = {
-    title: "Understanding Wen (聞診) - Listening & Smelling Diagnosis",
-    introduction: "Wen diagnosis is one of the Four Pillars of TCM diagnosis. It involves the practitioner listening to sounds produced by the patient and, traditionally, noting any unusual body odors. This method provides valuable insights into the patient's internal health conditions.",
-    sections: [
-        {
-            icon: "🔊",
-            title: "Voice Quality Analysis",
-            content: "A strong, clear voice typically indicates sufficient Qi and healthy Lung function. A weak or low voice may suggest Qi deficiency, while a hoarse voice could indicate Heat affecting the Lungs or Yin deficiency."
-        },
-        {
-            icon: "💨",
-            title: "Breathing Patterns",
-            content: "The rhythm, depth, and sound of breathing reveal much about respiratory health. Rapid, shallow breathing may indicate Heat or anxiety, while slow, deep breathing suggests Cold patterns or Qi stagnation."
-        },
-        {
-            icon: "🗣️",
-            title: "Speech Patterns",
-            content: "How a person speaks—whether fast or slow, loud or soft, clear or mumbled—reflects their mental state and Qi flow. Excessive talking may indicate Heart Fire, while reluctance to speak suggests Heart Qi deficiency."
-        },
-        {
-            icon: "🫁",
-            title: "Cough Sounds",
-            content: "Different cough sounds indicate different conditions. A dry cough suggests Lung Yin deficiency or Heat, while a productive cough with white phlegm indicates Cold-Damp, and yellow phlegm points to Heat-Phlegm."
-        }
-    ],
-    tips: [
-        "Speak naturally and clearly",
-        "Say 'Ahhh' for 5-10 seconds",
-        "Describe any breathing difficulties",
-        "Mention if you have a cough"
-    ]
-}
+// TCM Educational content - translations are accessed directly in render
 
 interface AudioAnalysisData {
     overall_observation: string
@@ -418,17 +386,17 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                             </svg>
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-gray-800">Wen 聞診</h2>
-                            <p className="text-sm text-gray-500">Listening Diagnosis</p>
+                            <h2 className="text-xl font-bold text-gray-800">{t.audio.title}</h2>
+                            <p className="text-sm text-gray-500">{t.audio.listeningDiagnosis}</p>
                         </div>
                     </div>
                     <ShowPromptButton promptType="audio" />
                 </div>
 
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
-                    <p className="text-gray-700 font-medium mb-2">Instructions:</p>
+                    <p className="text-gray-700 font-medium mb-2">{t.audio.instructionsShort}</p>
                     <p className="text-gray-600 text-sm leading-relaxed">
-                        Please say <span className="font-semibold text-green-600">"Ahhh"</span> for 5-10 seconds, then describe how you feel, including any breathing difficulties or cough patterns.
+                        {t.audio.sayAhhh}
                     </p>
                 </div>
 
@@ -481,7 +449,7 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                                     <line x1="12" x2="12" y1="19" y2="22" />
                                 </svg>
                             </div>
-                            <span className="text-sm font-medium">Ready to record your voice</span>
+                            <span className="text-sm font-medium">{t.audio.readyToRecord}</span>
                         </div>
                     )}
                 </div>
@@ -588,7 +556,7 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                         <rect x="6" y="6" width="12" height="12" rx="2" />
                                     </svg>
-                                    Stop & Analyze
+                                    {t.audio.stopAndContinue}
                                 </span>
                             ) : (
                                 <span className="flex items-center gap-2">
@@ -596,7 +564,7 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                                         <circle cx="12" cy="12" r="10" />
                                         <circle cx="12" cy="12" r="4" fill="currentColor" />
                                     </svg>
-                                    Start Recording
+                                    {t.audio.startRecording}
                                 </span>
                             )}
                         </Button>
@@ -619,7 +587,7 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                                 <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                 </svg>
-                                Or upload an audio file
+                                {t.camera.or} {t.camera.uploadPhoto.toLowerCase().replace('photo', 'audio')}
                             </Button>
                         </div>
                     )}
@@ -629,10 +597,10 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                 <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
                     <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg">💡</span>
-                        <span className="font-semibold text-amber-800 text-sm">Tips for Better Recording</span>
+                        <span className="font-semibold text-amber-800 text-sm">{t.audio.tipsForBetterRecording}</span>
                     </div>
                     <ul className="text-sm text-amber-700 space-y-1">
-                        {wenEducationalContent.tips.map((tip, index) => (
+                        {t.audio.tips.map((tip: string, index: number) => (
                             <li key={index} className="flex items-center gap-2">
                                 <svg className="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -649,7 +617,7 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                         className="w-full opacity-60 hover:opacity-100"
                         onClick={() => onComplete({ audio: 'data:audio/webm;base64,UklGRi4AAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=' })}
                     >
-                        Debug: Skip
+                        {t.audio.debugSkip}
                     </Button>
                 )}
             </Card>
@@ -661,19 +629,19 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                         <span className="text-xl">📖</span>
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-gray-800">Learn About Wen Diagnosis</h3>
-                        <p className="text-sm text-gray-500">Traditional Chinese Medicine</p>
+                        <h3 className="text-lg font-bold text-gray-800">{t.audio.learnAboutWen}</h3>
+                        <p className="text-sm text-gray-500">{t.audio.traditionalChineseMedicine}</p>
                     </div>
                 </div>
 
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
                     <p className="text-gray-700 text-sm leading-relaxed">
-                        {wenEducationalContent.introduction}
+                        {t.audio.educationalIntro}
                     </p>
                 </div>
 
                 <div className="space-y-3 max-h-[340px] overflow-y-auto pr-2 scrollbar-thin">
-                    {wenEducationalContent.sections.map((section, index) => (
+                    {t.audio.sections.map((section: { icon: string; title: string; content: string }, index: number) => (
                         <div
                             key={index}
                             className={`rounded-xl border transition-all duration-300 cursor-pointer ${expandedSection === index
@@ -687,7 +655,7 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                                 <div className="flex-1">
                                     <h4 className="font-semibold text-gray-800">{section.title}</h4>
                                     {expandedSection !== index && (
-                                        <p className="text-xs text-gray-500 mt-0.5">Click to learn more</p>
+                                        <p className="text-xs text-gray-500 mt-0.5">{t.audio.clickToLearnMore}</p>
                                     )}
                                 </div>
                                 <svg
@@ -715,10 +683,10 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100">
                     <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg">✨</span>
-                        <span className="font-semibold text-purple-800 text-sm">Did You Know?</span>
+                        <span className="font-semibold text-purple-800 text-sm">{t.audio.didYouKnow}</span>
                     </div>
                     <p className="text-sm text-purple-700 leading-relaxed">
-                        Wen diagnosis has been practiced for over 2,000 years. Ancient TCM practitioners developed remarkable skills in diagnosing conditions simply by listening to a patient's voice, breathing, and even the sounds of their stomach!
+                        {t.audio.didYouKnowContent}
                     </p>
                 </div>
             </Card>

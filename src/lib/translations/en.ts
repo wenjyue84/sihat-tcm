@@ -138,6 +138,29 @@ export const en = {
         detailedSymptomsPlaceholder: 'Please describe your main complaints, feelings, and any other relevant details...',
         chooseTcmDoctor: 'Choose Your TCM Doctor',
         startDiagnosis: 'Start Diagnosis',
+        // Wizard step translations
+        wizardSteps: {
+            step1Title: 'Who are you?',
+            step1Subtitle: "Let's start with your identity",
+            step2Title: 'How old are you?',
+            step2Subtitle: 'Select your age',
+            step3Title: 'Body measurements',
+            step3Subtitle: 'Help us calculate your health metrics',
+            step4Title: "What's bothering you?",
+            step4Subtitle: 'Describe your symptoms',
+            step5Title: 'Choose your doctor',
+            step5Subtitle: 'Select your TCM practitioner level',
+            stepProgress: 'Step {current} of {total}',
+        },
+        ageRanges: {
+            under18: 'Under 18',
+            '18-25': '18-25',
+            '26-35': '26-35',
+            '36-45': '36-45',
+            '46-55': '46-55',
+            '56-65': '56-65',
+            over65: 'Over 65',
+        },
     },
 
     // Doctor levels
@@ -401,6 +424,34 @@ export const en = {
         },
     },
 
+    // Smart Connect Step
+    smartConnect: {
+        smartConnect: 'Smart Connect',
+        smartHealthMonitor: 'Smart Health Monitor',
+        manageDevices: 'Manage Devices',
+        description: 'Connect your smart devices to sync health metrics instantly.',
+        connect: 'Connect',
+        pulseRate: 'Pulse Rate',
+        bloodPressure: 'Blood Pressure',
+        bloodOxygen: 'Blood Oxygen',
+        temperature: 'Temperature',
+        hrv: 'HRV',
+        stressLevel: 'Stress Level',
+        healthAppData: 'Health App Data',
+        optional: 'Optional',
+        importFromHealthApp: 'Import from Health App (Samsung/Apple/Google)',
+        importedFrom: 'Imported from',
+        update: 'Update',
+        steps: 'steps',
+        sleep: 'sleep',
+        metricsConnected: 'Metrics Connected',
+        tapToConnect: 'Tap any metric to connect a smart device or import health app data',
+        allConnected: 'All metrics connected!',
+        continueConnecting: 'Continue connecting more devices or proceed',
+        continueWithData: 'Continue with Data',
+        skipForNow: 'Skip for Now',
+    },
+
     // Image Analysis
     imageAnalysis: {
         analyzing: 'Analyzing image...',
@@ -474,8 +525,77 @@ export const en = {
 
     // Analysis loading screen
     analysisLoading: {
-        title: 'Analyzing Your Health Profile',
-        subtitle: 'Our AI is processing your information using traditional Chinese medicine principles.',
+        title: 'Analyzing Your Constitution',
+        subtitle: 'Our AI practitioner is synthesizing your symptoms, observations, and pulse data...',
+        didYouKnow: 'Did you know?',
+        analysisProgress: 'ANALYSIS PROGRESS',
+        step: 'Step',
+        takingLonger: '(taking longer than usual)',
+        takingLongerWarning: 'Taking longer than expected.',
+        aiAnalysisMayTakeMoment: ' AI analysis may take a moment. Please wait...',
+        responseStreaming: ' Response is streaming, please wait...',
+        timeoutWarning: 'Timeout likely. Check: 1) API key valid? 2) Network connection? 3) Console errors?',
+        yearsOld: 'years old',
+        // Patient info cards
+        patientInfo: {
+            patient: 'Patient',
+            age: 'Age',
+            weightBmi: 'Weight & BMI',
+            mainConcerns: 'Main Concerns',
+            anonymous: 'Anonymous',
+            notAvailable: 'N/A',
+            generalConsultation: 'General consultation',
+        },
+        // Analysis steps
+        debugSteps: {
+            dataCollected: 'Data Collected',
+            gatheringInfo: 'Gathering your information',
+            preparingAnalysis: 'Preparing Analysis',
+            organizingData: 'Organizing your data',
+            connecting: 'Connecting',
+            establishingConnection: 'Establishing connection...',
+            processing: 'Processing',
+            preparingConsultation: 'Preparing consultation',
+            aiAnalysis: 'AI Analysis',
+            generatingInsights: 'Generating insights...',
+            receivingResults: 'Receiving Results',
+            retrievingAnalysis: 'Retrieving analysis...',
+            validating: 'Validating',
+            checkingResults: 'Checking results',
+            renderingReport: 'Rendering Report',
+            creatingReport: 'Creating your report',
+        },
+        // TCM Facts
+        tcmFacts: {
+            observation: {
+                title: '望 (Wàng) - Observation',
+                description: 'TCM practitioners examine your facial complexion, tongue coating, and body posture to understand your internal health condition.',
+            },
+            listening: {
+                title: '聞 (Wén) - Listening & Smelling',
+                description: 'The practitioner listens to your voice, breathing patterns, and cough sounds to detect imbalances in your Qi and organ systems.',
+            },
+            inquiry: {
+                title: '問 (Wèn) - Inquiry',
+                description: 'Through detailed questioning about your symptoms, lifestyle, and medical history, TCM builds a comprehensive picture of your health.',
+            },
+            palpation: {
+                title: '切 (Qiè) - Palpation',
+                description: 'Pulse diagnosis reveals the state of your organs and Qi flow. A skilled practitioner can detect up to 28 different pulse qualities.',
+            },
+            yinYang: {
+                title: 'Yin-Yang Balance',
+                description: 'TCM seeks to restore balance between opposing forces. Symptoms often indicate excess or deficiency in either Yin or Yang energy.',
+            },
+            fiveElements: {
+                title: 'Five Elements Theory',
+                description: 'Wood, Fire, Earth, Metal, and Water represent different organs and emotions. Their harmony is essential for wellbeing.',
+            },
+            qiBlood: {
+                title: 'Qi & Blood Flow',
+                description: 'Qi is your life force energy. When Qi flows smoothly through your meridians, health follows. Blockages lead to pain and illness.',
+            },
+        },
         steps: [
             'Collecting patient data...',
             'Analyzing symptoms...',
@@ -595,6 +715,78 @@ export const en = {
         logout: 'Are you sure you want to log out?',
         discard: 'Are you sure you want to discard changes?',
         leave: 'Are you sure you want to leave? Unsaved changes will be lost.',
+    },
+
+    // Diagnosis Summary
+    diagnosisSummary: {
+        title: 'Diagnostic Summary',
+        subtitle: 'Please review and edit the collected information before generating the final report.',
+        sections: {
+            basicInfo: 'Basic Information',
+            wenInquiry: 'Inquiry (Wen)',
+            wangTongue: 'Tongue Diagnosis (Wang)',
+            wangFace: 'Face Diagnosis (Wang)',
+            wangPart: 'Body Part Diagnosis (Wang)',
+            wenAudio: 'Audio Analysis (Wen)',
+            qie: 'Pulse Diagnosis (Qie)',
+            smartConnect: 'Smart Connect Health Metrics',
+        },
+        defaultMessages: {
+            noObservation: 'No observation recorded.',
+            inquiryCompleted: 'Patient inquiry completed.',
+            audioCompleted: 'Audio analysis completed.',
+            noDeviceData: 'No device data connected.',
+        },
+        reportOptions: {
+            title: 'Report Options',
+            subtitle: 'Customize what information to include in your diagnosis report',
+            // Patient Information
+            patientInfo: 'Patient Information',
+            demographics: 'Demographics',
+            patientName: 'Patient Name',
+            age: 'Age',
+            gender: 'Gender',
+            contactInfo: 'Contact Information',
+            address: 'Address',
+            emergencyContact: 'Emergency Contact',
+            // Vital Signs
+            vitalSigns: 'Vital Signs & Measurements',
+            healthData: 'Health Data',
+            vitalSignsDesc: 'Vital Signs (BP, HR, Temp)',
+            bmiMeasurements: 'BMI & Body Measurements',
+            smartConnectData: 'Smart Connect Device Data',
+            // Medical History
+            medicalHistory: 'Medical History',
+            background: 'Background',
+            pastMedicalHistory: 'Past Medical History',
+            knownAllergies: 'Known Allergies',
+            currentMedications: 'Current Medications',
+            pastTcmDiagnoses: 'Past TCM Diagnoses',
+            familyHistory: 'Family Medical History',
+            // TCM Recommendations
+            tcmRecommendations: 'TCM Recommendations',
+            treatment: 'Treatment',
+            herbalMedicine: 'Herbal Medicine Suggestions',
+            nearbyDoctor: 'Nearby TCM Doctor',
+            dietary: 'Dietary Advice (食疗)',
+            lifestyle: 'Lifestyle Tips (养生)',
+            acupuncture: 'Acupuncture Points (穴位)',
+            exercise: 'Exercise Recommendations',
+            sleepAdvice: 'Sleep & Rest Guidance',
+            emotionalWellness: 'Emotional Wellness (情志)',
+            // Report Extras
+            reportExtras: 'Report Format & Extras',
+            formatting: 'Formatting',
+            precautions: 'Precautions & Warnings',
+            followUp: 'Follow-up Guidance',
+            timestamp: 'Report Timestamp',
+            qrCode: 'QR Code for Digital Access',
+            doctorSignature: 'Doctor Signature Field',
+        },
+        buttons: {
+            back: 'Back',
+            confirmGenerate: 'Confirm & Generate Report',
+        },
     },
 };
 

@@ -29,7 +29,7 @@ const healthMetrics = [
     {
         id: 'pulse',
         key: 'pulseRate',
-        label: 'Pulse Rate',
+        labelKey: 'pulseRate',
         icon: Heart,
         color: 'from-rose-500 to-pink-600',
         bgColor: 'bg-rose-500/10',
@@ -40,7 +40,7 @@ const healthMetrics = [
     {
         id: 'bp',
         key: 'bloodPressure',
-        label: 'Blood Pressure',
+        labelKey: 'bloodPressure',
         icon: Activity,
         color: 'from-blue-500 to-indigo-600',
         bgColor: 'bg-blue-500/10',
@@ -51,7 +51,7 @@ const healthMetrics = [
     {
         id: 'oxygen',
         key: 'bloodOxygen',
-        label: 'Blood Oxygen',
+        labelKey: 'bloodOxygen',
         icon: Droplets,
         color: 'from-cyan-500 to-teal-600',
         bgColor: 'bg-cyan-500/10',
@@ -62,7 +62,7 @@ const healthMetrics = [
     {
         id: 'temp',
         key: 'bodyTemp',
-        label: 'Temperature',
+        labelKey: 'temperature',
         icon: Thermometer,
         color: 'from-amber-500 to-orange-600',
         bgColor: 'bg-amber-500/10',
@@ -73,7 +73,7 @@ const healthMetrics = [
     {
         id: 'hrv',
         key: 'hrv',
-        label: 'HRV',
+        labelKey: 'hrv',
         icon: Activity,
         color: 'from-purple-500 to-violet-600',
         bgColor: 'bg-purple-500/10',
@@ -84,7 +84,7 @@ const healthMetrics = [
     {
         id: 'stress',
         key: 'stressLevel',
-        label: 'Stress Level',
+        labelKey: 'stressLevel',
         icon: Brain,
         color: 'from-orange-500 to-red-600',
         bgColor: 'bg-orange-500/10',
@@ -141,9 +141,9 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                             <div>
                                 <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
                                     <Zap className="w-3 h-3" />
-                                    Smart Connect
+                                    {t.smartConnect.smartConnect}
                                 </span>
-                                <h2 className="text-2xl font-bold text-white">Smart Health Monitor</h2>
+                                <h2 className="text-2xl font-bold text-white">{t.smartConnect.smartHealthMonitor}</h2>
                             </div>
                         </div>
                         <Button
@@ -152,11 +152,11 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                             className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
                         >
                             <Settings className="w-4 h-4 mr-2" />
-                            Manage Devices
+                            {t.smartConnect.manageDevices}
                         </Button>
                     </div>
                     <p className="text-slate-300 text-sm">
-                        Connect your smart devices to sync health metrics instantly.
+                        {t.smartConnect.description}
                     </p>
                 </div>
             </div>
@@ -210,7 +210,7 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
 
                                     {/* Label */}
                                     <p className={`text-sm font-medium mb-1 ${isConnected ? metric.textColor : 'text-slate-300'}`}>
-                                        {metric.label}
+                                        {t.smartConnect[metric.labelKey as keyof typeof t.smartConnect]}
                                     </p>
 
                                     {/* Value or Connect button */}
@@ -221,7 +221,7 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                                         </div>
                                     ) : (
                                         <span className="text-xs text-emerald-400 font-medium">
-                                            Connect
+                                            {t.smartConnect.connect}
                                         </span>
                                     )}
                                 </button>
@@ -234,8 +234,8 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                 <div className="mt-6 p-4 bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl border border-slate-700/50">
                     <div className="flex items-center gap-2 mb-3">
                         <Smartphone className="w-5 h-5 text-emerald-400" />
-                        <span className="text-sm font-semibold text-white">Health App Data</span>
-                        <span className="text-xs text-slate-500">(Optional)</span>
+                        <span className="text-sm font-semibold text-white">{t.smartConnect.healthAppData}</span>
+                        <span className="text-xs text-slate-500">({t.smartConnect.optional})</span>
                     </div>
 
                     {!data.healthData ? (
@@ -246,7 +246,7 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                             className="w-full h-14 border-dashed border-2 border-slate-600 text-slate-400 hover:border-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 flex items-center justify-center gap-2 bg-transparent"
                         >
                             <Activity className="w-5 h-5" />
-                            Import from Health App (Samsung/Apple/Google)
+                            {t.smartConnect.importFromHealthApp}
                         </Button>
                     ) : (
                         <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4">
@@ -255,7 +255,7 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                                     <div className="p-1.5 bg-emerald-500/20 rounded-full">
                                         <Check className="w-4 h-4 text-emerald-400" />
                                     </div>
-                                    <span className="font-semibold text-emerald-300">Imported from {data.healthData.provider}</span>
+                                    <span className="font-semibold text-emerald-300">{t.smartConnect.importedFrom} {data.healthData.provider}</span>
                                 </div>
                                 <Button
                                     type="button"
@@ -264,17 +264,17 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                                     onClick={() => setShowHealthWizard(true)}
                                     className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20"
                                 >
-                                    Update
+                                    {t.smartConnect.update}
                                 </Button>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 <div className="flex items-center gap-2 text-sm text-slate-300">
                                     <Footprints className="w-4 h-4 text-slate-500" />
-                                    <span>{data.healthData.steps.toLocaleString()} steps</span>
+                                    <span>{data.healthData.steps.toLocaleString()} {t.smartConnect.steps}</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-slate-300">
                                     <Moon className="w-4 h-4 text-slate-500" />
-                                    <span>{data.healthData.sleepHours}h sleep</span>
+                                    <span>{data.healthData.sleepHours}h {t.smartConnect.sleep}</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-slate-300">
                                     <Heart className="w-4 h-4 text-slate-500" />
@@ -292,7 +292,7 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                 {/* Progress indicator */}
                 <div className="mt-6 p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-slate-400">Metrics Connected</span>
+                        <span className="text-sm text-slate-400">{t.smartConnect.metricsConnected}</span>
                         <span className="text-sm font-semibold text-emerald-400">{iotMetricCount} / {healthMetrics.length}</span>
                     </div>
                     <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
@@ -305,10 +305,10 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                     </div>
                     <p className="text-xs text-slate-500 mt-2">
                         {iotMetricCount === 0 && !data.healthData
-                            ? 'Tap any metric to connect a smart device or import health app data'
+                            ? t.smartConnect.tapToConnect
                             : iotMetricCount === healthMetrics.length
-                                ? 'All metrics connected!'
-                                : 'Continue connecting more devices or proceed'
+                                ? t.smartConnect.allConnected
+                                : t.smartConnect.continueConnecting
                         }
                     </p>
                 </div>
@@ -322,14 +322,14 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                     className="h-12 px-6 border-slate-600 text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white"
                 >
                     <ChevronLeft className="w-5 h-5 mr-2" />
-                    Back
+                    {t.common.back}
                 </Button>
                 <Button
                     onClick={handleSubmit}
                     className="flex-1 h-12 text-lg font-semibold transition-all bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/25"
                 >
                     <span className="flex items-center gap-2">
-                        {hasAnyData ? 'Continue with Data' : 'Skip for Now'}
+                        {hasAnyData ? t.smartConnect.continueWithData : t.smartConnect.skipForNow}
                         <ChevronRight className="w-5 h-5" />
                     </span>
                 </Button>

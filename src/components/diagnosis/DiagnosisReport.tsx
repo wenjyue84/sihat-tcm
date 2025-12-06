@@ -1,10 +1,13 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Activity, Utensils, AlertCircle, HeartPulse, Leaf, Info, Download, Check, User, Stethoscope, Pill, MapPin, Clock, Brain, Moon, Dumbbell, AlertTriangle, Calendar, QrCode, PenTool } from 'lucide-react'
+import { Activity, Utensils, AlertCircle, HeartPulse, Leaf, Info, Download, Check, User, Stethoscope, Pill, MapPin, Clock, Brain, Moon, Dumbbell, AlertTriangle, Calendar, QrCode, PenTool, MessageCircle, Image as ImageIcon } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { ShowPromptButton } from './ShowPromptButton'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { ReportChatWindow } from './ReportChatWindow'
+import { InfographicsGenerator } from './InfographicsGenerator'
 
 type Language = 'en' | 'zh' | 'ms'
 
@@ -175,6 +178,10 @@ export function DiagnosisReport({ data, patientInfo, reportOptions, smartConnect
     const doctorInfo = getDoctorInfo()
     const { language } = useLanguage()
     const opts = reportOptions || {}
+
+    // State for chat window and infographics
+    const [isChatOpen, setIsChatOpen] = useState(false)
+    const [isInfographicsOpen, setIsInfographicsOpen] = useState(false)
 
     // Calculate BMI if we have height and weight
     const calculateBMI = (height?: number, weight?: number) => {
@@ -887,12 +894,42 @@ export function DiagnosisReport({ data, patientInfo, reportOptions, smartConnect
                     Download PDF
                 </button>
                 <button
+                    onClick={() => setIsChatOpen(true)}
+                    className="px-4 py-2.5 bg-white border-2 border-teal-600 text-teal-600 rounded-full hover:bg-teal-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
+                >
+                    <MessageCircle className="h-4 w-4" />
+                    Ask About Report
+                </button>
+                <button
+                    onClick={() => setIsInfographicsOpen(true)}
+                    className="px-4 py-2.5 bg-white border-2 border-violet-600 text-violet-600 rounded-full hover:bg-violet-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
+                >
+                    <ImageIcon className="h-4 w-4" />
+                    Infographics
+                </button>
+                <button
                     onClick={onRestart}
                     className="px-6 py-2.5 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition-colors shadow-lg hover:shadow-xl text-sm font-medium min-h-[44px]"
                 >
                     Start New Consultation
                 </button>
             </motion.div>
+
+            {/* Report Chat Window */}
+            <ReportChatWindow
+                reportData={data}
+                patientInfo={patientInfo}
+                isOpen={isChatOpen}
+                onClose={() => setIsChatOpen(false)}
+            />
+
+            {/* Infographics Generator */}
+            <InfographicsGenerator
+                reportData={data}
+                patientInfo={patientInfo}
+                isOpen={isInfographicsOpen}
+                onClose={() => setIsInfographicsOpen(false)}
+            />
         </motion.div>
     )
 }

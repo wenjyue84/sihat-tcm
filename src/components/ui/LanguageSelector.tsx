@@ -123,14 +123,14 @@ export function LanguageSelector({
         <div className={`relative ${className}`} ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 backdrop-blur-sm border border-stone-200 shadow-sm hover:shadow-md transition-all text-stone-700"
+                className="flex items-center justify-center gap-2 p-2 sm:px-4 sm:py-2 rounded-xl bg-white/80 backdrop-blur-sm border border-stone-200 shadow-sm hover:shadow-md transition-all text-stone-700"
             >
                 <Globe className="w-4 h-4 text-emerald-600" />
-                <span className="text-sm font-medium">
+                <span className="hidden sm:flex items-center gap-1 text-sm font-medium">
                     {languages.find(l => l.code === language)?.flag} {languageNames[language].native}
                 </span>
                 <svg
-                    className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    className={`hidden sm:block w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

@@ -2,7 +2,7 @@
 
 import DiagnosisWizard from '@/components/diagnosis/DiagnosisWizard'
 import { useEffect, useState } from 'react'
-import { FlaskConical, User, Check } from 'lucide-react'
+import { FlaskConical, User, Check, LogIn } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -117,15 +117,16 @@ export default function Home() {
           {!loading && (
             user ? (
               <Link href={`/${profile?.role || 'patient'}`}>
-                <button className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-full text-sm font-medium transition-all shadow-lg hover:shadow-xl hover:scale-105">
+                <button className="flex items-center justify-center gap-2 p-2 sm:px-4 sm:py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-full text-sm font-medium transition-all shadow-lg hover:shadow-xl hover:scale-105">
                   <User className="w-4 h-4" />
-                  {t.nav.dashboard}
+                  <span className="hidden sm:inline">{t.nav.dashboard}</span>
                 </button>
               </Link>
             ) : (
               <Link href="/login">
-                <button className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium transition-all border border-white/20">
-                  {t.nav.login}
+                <button className="flex items-center justify-center gap-2 p-2 sm:px-4 sm:py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium transition-all border border-white/20">
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t.nav.login}</span>
                 </button>
               </Link>
             )

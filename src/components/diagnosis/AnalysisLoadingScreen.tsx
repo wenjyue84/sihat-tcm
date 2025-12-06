@@ -10,6 +10,7 @@ import {
     Database, Send, Cpu, FileJson, Layout
 } from 'lucide-react'
 import { BasicInfoData } from './BasicInfoForm'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface AnalysisLoadingScreenProps {
     basicInfo: BasicInfoData | null
@@ -18,62 +19,63 @@ interface AnalysisLoadingScreenProps {
     errorMessage?: string
 }
 
-// TCM educational facts to display while loading
-const TCM_FACTS = [
-    {
-        icon: Eye,
-        title: "望 (Wàng) - Observation",
-        description: "TCM practitioners examine your facial complexion, tongue coating, and body posture to understand your internal health condition."
-    },
-    {
-        icon: Ear,
-        title: "聞 (Wén) - Listening & Smelling",
-        description: "The practitioner listens to your voice, breathing patterns, and cough sounds to detect imbalances in your Qi and organ systems."
-    },
-    {
-        icon: Brain,
-        title: "問 (Wèn) - Inquiry",
-        description: "Through detailed questioning about your symptoms, lifestyle, and medical history, TCM builds a comprehensive picture of your health."
-    },
-    {
-        icon: Hand,
-        title: "切 (Qiè) - Palpation",
-        description: "Pulse diagnosis reveals the state of your organs and Qi flow. A skilled practitioner can detect up to 28 different pulse qualities."
-    },
-    {
-        icon: Heart,
-        title: "Yin-Yang Balance",
-        description: "TCM seeks to restore balance between opposing forces. Symptoms often indicate excess or deficiency in either Yin or Yang energy."
-    },
-    {
-        icon: Sparkles,
-        title: "Five Elements Theory",
-        description: "Wood, Fire, Earth, Metal, and Water represent different organs and emotions. Their harmony is essential for wellbeing."
-    },
-    {
-        icon: Activity,
-        title: "Qi & Blood Flow",
-        description: "Qi is your life force energy. When Qi flows smoothly through your meridians, health follows. Blockages lead to pain and illness."
-    },
-]
-
-// Analysis steps to show progress
-const DEBUG_STEPS = [
-    { id: 1, label: "Data Collected", icon: Database, description: "Gathering your information" },
-    { id: 2, label: "Preparing Analysis", icon: FileJson, description: "Organizing your data" },
-    { id: 3, label: "Connecting", icon: Send, description: "Establishing connection..." },
-    { id: 4, label: "Processing", icon: Cpu, description: "Preparing consultation" },
-    { id: 5, label: "AI Analysis", icon: Sparkles, description: "Generating insights..." },
-    { id: 6, label: "Receiving Results", icon: Loader2, description: "Retrieving analysis..." },
-    { id: 7, label: "Validating", icon: FileJson, description: "Checking results" },
-    { id: 8, label: "Rendering Report", icon: Layout, description: "Creating your report" },
-]
-
 export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', streamProgress = 0, errorMessage }: AnalysisLoadingScreenProps) {
+    const { t } = useLanguage()
     const [elapsedSeconds, setElapsedSeconds] = useState(0)
     const [currentFactIndex, setCurrentFactIndex] = useState(0)
     const [currentInfoIndex, setCurrentInfoIndex] = useState(0)
     const [currentDebugStep, setCurrentDebugStep] = useState(1)
+
+    // TCM educational facts to display while loading
+    const TCM_FACTS = [
+        {
+            icon: Eye,
+            title: t.analysisLoading.tcmFacts.observation.title,
+            description: t.analysisLoading.tcmFacts.observation.description
+        },
+        {
+            icon: Ear,
+            title: t.analysisLoading.tcmFacts.listening.title,
+            description: t.analysisLoading.tcmFacts.listening.description
+        },
+        {
+            icon: Brain,
+            title: t.analysisLoading.tcmFacts.inquiry.title,
+            description: t.analysisLoading.tcmFacts.inquiry.description
+        },
+        {
+            icon: Hand,
+            title: t.analysisLoading.tcmFacts.palpation.title,
+            description: t.analysisLoading.tcmFacts.palpation.description
+        },
+        {
+            icon: Heart,
+            title: t.analysisLoading.tcmFacts.yinYang.title,
+            description: t.analysisLoading.tcmFacts.yinYang.description
+        },
+        {
+            icon: Sparkles,
+            title: t.analysisLoading.tcmFacts.fiveElements.title,
+            description: t.analysisLoading.tcmFacts.fiveElements.description
+        },
+        {
+            icon: Activity,
+            title: t.analysisLoading.tcmFacts.qiBlood.title,
+            description: t.analysisLoading.tcmFacts.qiBlood.description
+        },
+    ]
+
+    // Analysis steps to show progress
+    const DEBUG_STEPS = [
+        { id: 1, label: t.analysisLoading.debugSteps.dataCollected, icon: Database, description: t.analysisLoading.debugSteps.gatheringInfo },
+        { id: 2, label: t.analysisLoading.debugSteps.preparingAnalysis, icon: FileJson, description: t.analysisLoading.debugSteps.organizingData },
+        { id: 3, label: t.analysisLoading.debugSteps.connecting, icon: Send, description: t.analysisLoading.debugSteps.establishingConnection },
+        { id: 4, label: t.analysisLoading.debugSteps.processing, icon: Cpu, description: t.analysisLoading.debugSteps.preparingConsultation },
+        { id: 5, label: t.analysisLoading.debugSteps.aiAnalysis, icon: Sparkles, description: t.analysisLoading.debugSteps.generatingInsights },
+        { id: 6, label: t.analysisLoading.debugSteps.receivingResults, icon: Loader2, description: t.analysisLoading.debugSteps.retrievingAnalysis },
+        { id: 7, label: t.analysisLoading.debugSteps.validating, icon: FileJson, description: t.analysisLoading.debugSteps.checkingResults },
+        { id: 8, label: t.analysisLoading.debugSteps.renderingReport, icon: Layout, description: t.analysisLoading.debugSteps.creatingReport },
+    ]
 
     // Timer effect
     useEffect(() => {
@@ -99,7 +101,7 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
             setCurrentFactIndex(prev => (prev + 1) % TCM_FACTS.length)
         }, 5000)
         return () => clearInterval(factTimer)
-    }, [])
+    }, [TCM_FACTS.length])
 
     // Rotate patient info every 3 seconds
     useEffect(() => {
@@ -130,29 +132,29 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
     const patientInfoCards = [
         {
             icon: User,
-            label: "Patient",
-            value: basicInfo?.name || "Anonymous",
+            label: t.analysisLoading.patientInfo.patient,
+            value: basicInfo?.name || t.analysisLoading.patientInfo.anonymous,
             color: "text-blue-600",
             bgColor: "bg-blue-50",
         },
         {
             icon: Clock,
-            label: "Age",
-            value: basicInfo?.age ? `${basicInfo.age} years old` : "N/A",
+            label: t.analysisLoading.patientInfo.age,
+            value: basicInfo?.age ? `${basicInfo.age} ${t.analysisLoading.yearsOld}` : t.analysisLoading.patientInfo.notAvailable,
             color: "text-purple-600",
             bgColor: "bg-purple-50",
         },
         {
             icon: Scale,
-            label: "Weight & BMI",
-            value: basicInfo?.weight ? `${basicInfo.weight} kg${bmi ? ` (BMI: ${bmi})` : ''}` : "N/A",
+            label: t.analysisLoading.patientInfo.weightBmi,
+            value: basicInfo?.weight ? `${basicInfo.weight} kg${bmi ? ` (BMI: ${bmi})` : ''}` : t.analysisLoading.patientInfo.notAvailable,
             color: "text-orange-600",
             bgColor: "bg-orange-50",
         },
         {
             icon: Activity,
-            label: "Main Concerns",
-            value: basicInfo?.symptoms || "General consultation",
+            label: t.analysisLoading.patientInfo.mainConcerns,
+            value: basicInfo?.symptoms || t.analysisLoading.patientInfo.generalConsultation,
             color: "text-emerald-600",
             bgColor: "bg-emerald-50",
         },
@@ -193,10 +195,10 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
 
                     <div className="space-y-2">
                         <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent">
-                            Analyzing Your Constitution
+                            {t.analysisLoading.title}
                         </h2>
                         <p className="text-stone-500">
-                            Our AI practitioner is synthesizing your symptoms, observations, and pulse data...
+                            {t.analysisLoading.subtitle}
                         </p>
                     </div>
 
@@ -205,7 +207,7 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
                         <Clock className="w-4 h-4 animate-pulse" />
                         <span className="font-mono font-medium">{formatTime(elapsedSeconds)}</span>
                         {elapsedSeconds > 60 && (
-                            <span className="text-amber-600 text-xs ml-2">(taking longer than usual)</span>
+                            <span className="text-amber-600 text-xs ml-2">{t.analysisLoading.takingLonger}</span>
                         )}
                     </div>
                 </div>
@@ -260,7 +262,7 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
                     <div className="absolute -top-3 left-4 px-2 py-1 bg-emerald-100 rounded-full">
                         <p className="text-xs font-medium text-emerald-700 flex items-center gap-1">
                             <Sparkles className="w-3 h-3" />
-                            Did you know?
+                            {t.analysisLoading.didYouKnow}
                         </p>
                     </div>
 
@@ -308,9 +310,9 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
                     <div className="flex items-center justify-between">
                         <p className="text-xs font-bold text-stone-600 uppercase tracking-wider flex items-center gap-2">
                             <Cpu className="w-4 h-4" />
-                            Analysis Progress
+                            {t.analysisLoading.analysisProgress}
                         </p>
-                        <span className="text-xs text-stone-400">Step {currentDebugStep}/8</span>
+                        <span className="text-xs text-stone-400">{t.analysisLoading.step} {currentDebugStep}/8</span>
                     </div>
 
                     <div className="grid grid-cols-4 gap-2">
@@ -354,10 +356,10 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
                         <div className="flex items-center gap-2 p-2 bg-amber-50 rounded-lg border border-amber-200 text-amber-700 text-xs">
                             <AlertCircle className="w-4 h-4 shrink-0" />
                             <span>
-                                Taking longer than expected.
+                                {t.analysisLoading.takingLongerWarning}
                                 {currentDebugStep <= 5
-                                    ? " AI analysis may take a moment. Please wait..."
-                                    : " Response is streaming, please wait..."}
+                                    ? t.analysisLoading.aiAnalysisMayTakeMoment
+                                    : t.analysisLoading.responseStreaming}
                             </span>
                         </div>
                     )}
@@ -366,7 +368,7 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
                         <div className="flex items-center gap-2 p-2 bg-red-50 rounded-lg border border-red-200 text-red-700 text-xs">
                             <AlertCircle className="w-4 h-4 shrink-0" />
                             <span>
-                                Timeout likely. Check: 1) API key valid? 2) Network connection? 3) Console errors?
+                                {t.analysisLoading.timeoutWarning}
                             </span>
                         </div>
                     )}
