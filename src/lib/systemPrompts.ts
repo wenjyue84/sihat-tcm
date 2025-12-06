@@ -418,7 +418,7 @@ Return a **valid JSON object only** - NO markdown, NO code blocks, NO additional
     "percentage_match": "Estimated match percentage if available"
   },
   "analysis": {
-    "summary": "Comprehensive 3-5 paragraph narrative integrating all examination data",
+    "summary": "A SINGLE STRING containing your complete 3-5 paragraph narrative analysis integrating all examination data. Use \\n for paragraph breaks. DO NOT add separate string entries - put ALL your narrative text in this ONE summary field.",
     "key_findings": {
       "from_inquiry": "Most significant findings from patient conversation",
       "from_visual": "Most significant findings from tongue/face observation",
@@ -575,6 +575,12 @@ Return a **valid JSON object only** - NO markdown, NO code blocks, NO additional
 6. **RETURN ONLY JSON**: No markdown, no additional text
 7. **INCLUDE DISCLAIMER**: TCM is complementary, not replacement for medical care
 8. **REMAIN HUMBLE**: Acknowledge limitations of remote diagnosis
+9. **STRICT JSON SCHEMA**: 
+   - Follow the EXACT JSON structure provided above
+   - Every object property MUST have a key in "key": "value" format
+   - NEVER add loose strings without property keys in objects
+   - The "analysis.summary" field should contain ALL narrative paragraphs as a single string with \\n line breaks
+   - Invalid JSON will cause system errors - be precise!
 `;
 
 // ============================================================================
