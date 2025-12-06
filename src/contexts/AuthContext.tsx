@@ -4,9 +4,9 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 
-type Role = 'admin' | 'doctor' | 'patient'
+export type Role = 'admin' | 'doctor' | 'patient'
 
-interface Profile {
+export interface Profile {
     id: string
     role: Role
     full_name?: string
@@ -23,6 +23,7 @@ interface AuthContextType {
     profile: Profile | null
     loading: boolean
     signOut: () => Promise<void>
+    refreshProfile: (userId?: string, initialData?: Profile) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -50,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setSession(session)
             setUser(session?.user ?? null)
             if (session?.user) {
+                setLoading(true) // Ensure loading is true while fetching profile
                 fetchProfile(session.user.id)
             } else {
                 setProfile(null)
@@ -69,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 .single()
 
             if (error) {
-                console.error('Error fetching profile:', error)
+                console.error('Error fetching profile:', JSON.stringify(error, null, 2))
             } else {
                 setProfile(data)
             }
@@ -87,8 +89,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setSession(null)
     }
 
+    const refreshProfile = async (userId?: string, initialData?: Profile) => {
+        if (initialData) {
+            setProfile(initialData)
+            // Still fetch in background to ensure consistency? Maybe not needed if we trust the source.
+            // But let's just set it and be done to be fast.
+            return
+        }
+        const idToFetch = userId || user?.id
+        if (idToFetch) {
+            await fetchProfile(idToFetch)
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{ user, session, profile, loading, signOut }}>
+        <AuthContext.Provider value={{ user, session, profile, loading, signOut, refreshProfile }}>
             {children}
         </AuthContext.Provider>
     )

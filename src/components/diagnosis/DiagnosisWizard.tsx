@@ -17,6 +17,9 @@ import { ProgressStepper } from './ProgressStepper'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft } from 'lucide-react'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
+import { ObservationResult } from './ObservationResult'
+import { ImageAnalysisLoader } from './ImageAnalysisLoader'
+import { Loader2 } from 'lucide-react'
 
 export type DiagnosisStep = 'basic_info' | 'wen_inquiry' | 'wang_tongue' | 'wang_face' | 'wang_part' | 'wen_audio' | 'qie' | 'processing' | 'report'
 
@@ -42,6 +45,10 @@ export default function DiagnosisWizard() {
         wen_chat: [],
         qie: null
     })
+    const [analysisResult, setAnalysisResult] = useState<any>(null)
+    const [isAnalyzing, setIsAnalyzing] = useState(false)
+    const [currentAnalysisType, setCurrentAnalysisType] = useState<'tongue' | 'face' | 'part'>('tongue')
+    const [pendingAnalysis, setPendingAnalysis] = useState<{ type: 'tongue' | 'face' | 'part', image: string } | null>(null)
     const { user, profile } = useAuth()
 
     useEffect(() => {
@@ -91,6 +98,74 @@ export default function DiagnosisWizard() {
             case 'qie': setStep('wen_audio'); break;
             default: break;
         }
+    }
+
+    const analyzeImage = async (image: string, type: 'tongue' | 'face' | 'part') => {
+        setIsAnalyzing(true)
+        setAnalysisResult(null)
+        setCurrentAnalysisType(type)
+        setPendingAnalysis({ type, image })
+        try {
+            const response = await fetch('/api/analyze-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image, type })
+            })
+            const result = await response.json()
+            console.log('[DiagnosisWizard] Analysis result:', result)
+
+            // Store the observation in the data for final report
+            const dataKey = type === 'tongue' ? 'wang_tongue' : type === 'face' ? 'wang_face' : 'wang_part'
+            setData((prev: any) => ({
+                ...prev,
+                [dataKey]: {
+                    ...prev[dataKey],
+                    observation: result.observation,
+                    potential_issues: result.potential_issues || []
+                }
+            }))
+
+            // Ensure we always have an observation
+            if (!result.observation && result.error) {
+                setAnalysisResult({
+                    observation: `Analysis will be reviewed later. You may proceed.`,
+                    potential_issues: []
+                })
+            } else if (!result.observation) {
+                setAnalysisResult({
+                    observation: "Analysis pending. You may proceed or retake the photo.",
+                    potential_issues: []
+                })
+            } else {
+                setAnalysisResult(result)
+            }
+        } catch (error) {
+            console.error('Analysis failed:', error)
+            setAnalysisResult({
+                observation: "Analysis will be available in the final report. You may proceed.",
+                potential_issues: []
+            })
+        } finally {
+            setIsAnalyzing(false)
+            setPendingAnalysis(null)
+        }
+    }
+
+    const handleSkipAnalysis = (currentStep: 'wang_tongue' | 'wang_face' | 'wang_part') => {
+        setIsAnalyzing(false)
+        setAnalysisResult(null)
+        setPendingAnalysis(null)
+        // Mark as skipped but keep the image
+        const dataKey = currentStep === 'wang_tongue' ? 'wang_tongue' : currentStep === 'wang_face' ? 'wang_face' : 'wang_part'
+        setData((prev: any) => ({
+            ...prev,
+            [dataKey]: {
+                ...prev[dataKey],
+                observation: 'Analysis skipped - will be processed with final report',
+                skipped: true
+            }
+        }))
+        nextStep(currentStep)
     }
 
     const submitConsultation = async () => {
@@ -213,39 +288,129 @@ export default function DiagnosisWizard() {
                     )}
                     {step === 'wang_tongue' && (
                         <motion.div key="wang_tongue" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
-                            <CameraCapture
-                                title="Wang (Tongue Inspection)"
-                                instruction="Please stick out your tongue and take a clear photo."
-                                onComplete={(result) => {
-                                    setData((prev: any) => ({ ...prev, wang_tongue: result }));
-                                    setTimeout(() => nextStep('wang_tongue'), 0)
-                                }}
-                            />
+                            {isAnalyzing ? (
+                                <ImageAnalysisLoader
+                                    type="tongue"
+                                    onSkip={() => handleSkipAnalysis('wang_tongue')}
+                                />
+                            ) : analysisResult ? (
+                                <ObservationResult
+                                    image={data.wang_tongue.image}
+                                    observation={analysisResult.observation}
+                                    potentialIssues={analysisResult.potential_issues}
+                                    type="tongue"
+                                    status={analysisResult.status}
+                                    message={analysisResult.message}
+                                    confidence={analysisResult.confidence}
+                                    imageDescription={analysisResult.image_description}
+                                    onRetake={() => {
+                                        setAnalysisResult(null)
+                                        setData((prev: any) => ({ ...prev, wang_tongue: null }))
+                                    }}
+                                    onContinue={() => {
+                                        setAnalysisResult(null)
+                                        setTimeout(() => nextStep('wang_tongue'), 0)
+                                    }}
+                                />
+                            ) : (
+                                <CameraCapture
+                                    title="Wang (Tongue Inspection)"
+                                    instruction="Please stick out your tongue and take a clear photo."
+                                    onComplete={(result) => {
+                                        setData((prev: any) => ({ ...prev, wang_tongue: result }));
+                                        if (result.image) {
+                                            analyzeImage(result.image, 'tongue')
+                                        } else {
+                                            setTimeout(() => nextStep('wang_tongue'), 0)
+                                        }
+                                    }}
+                                />
+                            )}
                         </motion.div>
                     )}
                     {step === 'wang_face' && (
                         <motion.div key="wang_face" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
-                            <CameraCapture
-                                title="Wang (Face Inspection)"
-                                instruction="Please take a clear photo of your face."
-                                onComplete={(result) => {
-                                    setData((prev: any) => ({ ...prev, wang_face: result }));
-                                    setTimeout(() => nextStep('wang_face'), 0)
-                                }}
-                            />
+                            {isAnalyzing ? (
+                                <ImageAnalysisLoader
+                                    type="face"
+                                    onSkip={() => handleSkipAnalysis('wang_face')}
+                                />
+                            ) : analysisResult ? (
+                                <ObservationResult
+                                    image={data.wang_face.image}
+                                    observation={analysisResult.observation}
+                                    potentialIssues={analysisResult.potential_issues}
+                                    type="face"
+                                    status={analysisResult.status}
+                                    message={analysisResult.message}
+                                    confidence={analysisResult.confidence}
+                                    imageDescription={analysisResult.image_description}
+                                    onRetake={() => {
+                                        setAnalysisResult(null)
+                                        setData((prev: any) => ({ ...prev, wang_face: null }))
+                                    }}
+                                    onContinue={() => {
+                                        setAnalysisResult(null)
+                                        setTimeout(() => nextStep('wang_face'), 0)
+                                    }}
+                                />
+                            ) : (
+                                <CameraCapture
+                                    title="Wang (Face Inspection)"
+                                    instruction="Please take a clear photo of your face."
+                                    onComplete={(result) => {
+                                        setData((prev: any) => ({ ...prev, wang_face: result }));
+                                        if (result.image) {
+                                            analyzeImage(result.image, 'face')
+                                        } else {
+                                            setTimeout(() => nextStep('wang_face'), 0)
+                                        }
+                                    }}
+                                />
+                            )}
                         </motion.div>
                     )}
                     {step === 'wang_part' && (
                         <motion.div key="wang_part" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
-                            <CameraCapture
-                                title="Wang (Specific Area)"
-                                instruction="If you have a specific area of concern (e.g., skin rash), take a photo. Otherwise, you can skip."
-                                required={false}
-                                onComplete={(result) => {
-                                    setData((prev: any) => ({ ...prev, wang_part: result }));
-                                    setTimeout(() => nextStep('wang_part'), 0)
-                                }}
-                            />
+                            {isAnalyzing ? (
+                                <ImageAnalysisLoader
+                                    type="part"
+                                    onSkip={() => handleSkipAnalysis('wang_part')}
+                                />
+                            ) : analysisResult ? (
+                                <ObservationResult
+                                    image={data.wang_part.image}
+                                    observation={analysisResult.observation}
+                                    potentialIssues={analysisResult.potential_issues}
+                                    type="part"
+                                    status={analysisResult.status}
+                                    message={analysisResult.message}
+                                    confidence={analysisResult.confidence}
+                                    imageDescription={analysisResult.image_description}
+                                    onRetake={() => {
+                                        setAnalysisResult(null)
+                                        setData((prev: any) => ({ ...prev, wang_part: null }))
+                                    }}
+                                    onContinue={() => {
+                                        setAnalysisResult(null)
+                                        setTimeout(() => nextStep('wang_part'), 0)
+                                    }}
+                                />
+                            ) : (
+                                <CameraCapture
+                                    title="Wang (Specific Area)"
+                                    instruction="If you have a specific area of concern (e.g., skin rash), take a photo. Otherwise, you can skip."
+                                    required={false}
+                                    onComplete={(result) => {
+                                        setData((prev: any) => ({ ...prev, wang_part: result }));
+                                        if (result.image) {
+                                            analyzeImage(result.image, 'part')
+                                        } else {
+                                            setTimeout(() => nextStep('wang_part'), 0)
+                                        }
+                                    }}
+                                />
+                            )}
                         </motion.div>
                     )}
                     {step === 'wen_audio' && (

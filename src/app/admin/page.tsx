@@ -4,47 +4,144 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { LogOut, Info, MessageSquare, Eye, FileText, Check, Loader2 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
+import {
+    INTERACTIVE_CHAT_PROMPT,
+    IMAGE_ANALYSIS_PROMPT,
+    FINAL_ANALYSIS_PROMPT
+} from '@/lib/systemPrompts'
+
+// Doctor Level → LLM Model mapping (same as DoctorContext)
+const DOCTOR_MODEL_MAPPING = {
+    Master: { model: 'gemini-3-pro-preview', label: 'Gemini 3 Pro Preview' },
+    Expert: { model: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+    Physician: { model: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+} as const
+
+// Prompt types with their default values
+const PROMPT_TYPES = {
+    chat: {
+        role: 'doctor_chat',
+        title: '问诊 Interactive Chat Prompt',
+        description: 'Used during Step 2 patient inquiry. Guides how the AI conducts the diagnostic conversation.',
+        icon: MessageSquare,
+        color: 'blue',
+        defaultPrompt: INTERACTIVE_CHAT_PROMPT,
+    },
+    image: {
+        role: 'doctor_image',
+        title: '望诊 Image Analysis Prompt',
+        description: 'Used for tongue, face, and body visual inspection. Guides how AI analyzes diagnostic images.',
+        icon: Eye,
+        color: 'emerald',
+        defaultPrompt: IMAGE_ANALYSIS_PROMPT,
+    },
+    final: {
+        role: 'doctor_final',
+        title: '综合诊断 Final Analysis Prompt',
+        description: 'Used for the final diagnosis synthesis. Guides how AI generates the comprehensive diagnosis report.',
+        icon: FileText,
+        color: 'amber',
+        defaultPrompt: FINAL_ANALYSIS_PROMPT,
+    },
+} as const
+
+type PromptType = keyof typeof PROMPT_TYPES
 
 export default function AdminDashboard() {
-    const [prompt, setPrompt] = useState('')
+    const [prompts, setPrompts] = useState<Record<PromptType, string>>({
+        chat: '',
+        image: '',
+        final: '',
+    })
+    const [doctorLevel, setDoctorLevel] = useState<keyof typeof DOCTOR_MODEL_MAPPING>('Physician')
     const [loading, setLoading] = useState(true)
-    const [saving, setSaving] = useState(false)
-    const { profile, loading: authLoading } = useAuth()
+    const [saving, setSaving] = useState<PromptType | 'config' | null>(null)
+    const [saved, setSaved] = useState<PromptType | 'config' | null>(null)
+    const { profile, loading: authLoading, signOut } = useAuth()
     const router = useRouter()
 
     useEffect(() => {
-        if (!authLoading && profile?.role !== 'admin') {
-            router.push('/')
-        }
-    }, [profile, authLoading, router])
-
-    useEffect(() => {
-        fetchSystemPrompt()
+        fetchAllPrompts()
     }, [])
 
-    const fetchSystemPrompt = async () => {
+    const fetchAllPrompts = async () => {
         try {
+            // Fetch all three prompts
             const { data, error } = await supabase
                 .from('system_prompts')
-                .select('prompt_text')
-                .eq('role', 'doctor')
-                .single()
+                .select('role, prompt_text, config')
+                .in('role', ['doctor_chat', 'doctor_image', 'doctor_final', 'doctor'])
 
             if (data) {
-                setPrompt(data.prompt_text)
+                const newPrompts = { ...prompts }
+                data.forEach((item) => {
+                    if (item.role === 'doctor_chat') {
+                        newPrompts.chat = item.prompt_text || ''
+                    } else if (item.role === 'doctor_image') {
+                        newPrompts.image = item.prompt_text || ''
+                    } else if (item.role === 'doctor_final') {
+                        newPrompts.final = item.prompt_text || ''
+                    } else if (item.role === 'doctor' && item.config) {
+                        // Legacy config for doctor level
+                        setDoctorLevel(item.config.default_level || 'Physician')
+                    }
+                })
+                setPrompts(newPrompts)
             }
         } catch (error) {
-            console.error('Error fetching prompt:', error)
+            console.error('Error fetching prompts:', error)
         } finally {
             setLoading(false)
         }
     }
 
-    const handleSave = async () => {
-        setSaving(true)
+    const handleSavePrompt = async (type: PromptType) => {
+        setSaving(type)
+        const promptConfig = PROMPT_TYPES[type]
+
+        try {
+            // Check if exists first
+            const { data: existing } = await supabase
+                .from('system_prompts')
+                .select('id')
+                .eq('role', promptConfig.role)
+                .single()
+
+            if (existing) {
+                await supabase
+                    .from('system_prompts')
+                    .update({
+                        prompt_text: prompts[type],
+                        updated_at: new Date()
+                    })
+                    .eq('role', promptConfig.role)
+            } else {
+                await supabase
+                    .from('system_prompts')
+                    .insert([{
+                        role: promptConfig.role,
+                        prompt_text: prompts[type],
+                    }])
+            }
+
+            setSaved(type)
+            setTimeout(() => setSaved(null), 2000)
+        } catch (error) {
+            console.error('Error saving prompt:', error)
+            alert('Failed to save prompt.')
+        } finally {
+            setSaving(null)
+        }
+    }
+
+    const handleSaveConfig = async () => {
+        setSaving('config')
         try {
             // Check if exists first
             const { data: existing } = await supabase
@@ -53,50 +150,225 @@ export default function AdminDashboard() {
                 .eq('role', 'doctor')
                 .single()
 
+            const config = {
+                default_level: doctorLevel,
+                model: DOCTOR_MODEL_MAPPING[doctorLevel].model
+            }
+
             if (existing) {
                 await supabase
                     .from('system_prompts')
-                    .update({ prompt_text: prompt, updated_at: new Date() })
+                    .update({
+                        config,
+                        updated_at: new Date()
+                    })
                     .eq('role', 'doctor')
             } else {
                 await supabase
                     .from('system_prompts')
-                    .insert([{ role: 'doctor', prompt_text: prompt }])
+                    .insert([{
+                        role: 'doctor',
+                        prompt_text: '',
+                        config
+                    }])
             }
-            alert('System prompt updated successfully!')
+
+            setSaved('config')
+            setTimeout(() => setSaved(null), 2000)
         } catch (error) {
-            console.error('Error saving prompt:', error)
-            alert('Failed to save prompt.')
+            console.error('Error saving config:', error)
+            alert('Failed to save configuration.')
         } finally {
-            setSaving(false)
+            setSaving(null)
         }
+    }
+
+    const handleResetToDefault = (type: PromptType) => {
+        if (confirm('Reset this prompt to the default? This will overwrite your custom prompt.')) {
+            setPrompts(prev => ({
+                ...prev,
+                [type]: PROMPT_TYPES[type].defaultPrompt
+            }))
+        }
+    }
+
+    const handleLogout = async () => {
+        await signOut()
+        router.push('/')
     }
 
     if (authLoading || loading) return <div className="p-8">Loading...</div>
 
-    return (
-        <div className="container mx-auto p-8">
-            <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+    if (!profile || profile.role !== 'admin') {
+        return (
+            <div className="container mx-auto p-8 text-center">
+                <h1 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h1>
+                <p className="mb-4">You are logged in as: <strong>{profile?.role || 'Unknown'}</strong></p>
+                <p className="mb-4">This page is for Admins only.</p>
+                <Button onClick={() => router.push('/')}>Go Home</Button>
+            </div>
+        )
+    }
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Doctor AI System Prompt</CardTitle>
-                    <CardDescription>
-                        Configure the system prompt that guides the AI Doctor's behavior and diagnosis style.
-                    </CardDescription>
+    const colorClasses = {
+        blue: {
+            bg: 'bg-blue-50',
+            border: 'border-blue-200',
+            icon: 'text-blue-600',
+            button: 'bg-blue-600 hover:bg-blue-700',
+        },
+        emerald: {
+            bg: 'bg-emerald-50',
+            border: 'border-emerald-200',
+            icon: 'text-emerald-600',
+            button: 'bg-emerald-600 hover:bg-emerald-700',
+        },
+        amber: {
+            bg: 'bg-amber-50',
+            border: 'border-amber-200',
+            icon: 'text-amber-600',
+            button: 'bg-amber-600 hover:bg-amber-700',
+        },
+    }
+
+    return (
+        <div className="container mx-auto p-8 max-w-5xl">
+            <div className="flex justify-between items-center mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+                    <p className="text-muted-foreground mt-1">Configure AI Doctor System Prompts</p>
+                </div>
+                <Button
+                    variant="outline"
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                </Button>
+            </div>
+
+            {/* Default Doctor Level Configuration */}
+            <Card className="mb-6">
+                <CardHeader className="pb-4">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                        <Info className="w-5 h-5" />
+                        Default Configuration
+                    </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <Textarea
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="Enter system prompt here..."
-                        className="min-h-[300px] font-mono"
-                    />
-                    <Button onClick={handleSave} disabled={saving}>
-                        {saving ? 'Saving...' : 'Save Configuration'}
-                    </Button>
+                <CardContent>
+                    <div className="flex flex-wrap items-end gap-4">
+                        <div className="space-y-2 flex-1 min-w-[200px]">
+                            <Label>Default Doctor Level</Label>
+                            <Select value={doctorLevel} onValueChange={(v) => setDoctorLevel(v as keyof typeof DOCTOR_MODEL_MAPPING)}>
+                                <SelectTrigger className="w-full max-w-md">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Physician">💊 医师 Physician (gemini-2.5-flash)</SelectItem>
+                                    <SelectItem value="Expert">🩺 专家 Expert (gemini-2.5-pro)</SelectItem>
+                                    <SelectItem value="Master">👨‍⚕️ 名医 Master (gemini-3-pro-preview)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <Button
+                            onClick={handleSaveConfig}
+                            disabled={saving === 'config'}
+                            className="h-10"
+                        >
+                            {saving === 'config' ? (
+                                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
+                            ) : saved === 'config' ? (
+                                <><Check className="w-4 h-4 mr-2" /> Saved!</>
+                            ) : (
+                                'Save Config'
+                            )}
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Three System Prompts */}
+            <div className="space-y-6">
+                {(Object.entries(PROMPT_TYPES) as [PromptType, typeof PROMPT_TYPES[PromptType]][]).map(([type, config]) => {
+                    const colors = colorClasses[config.color as keyof typeof colorClasses]
+                    const Icon = config.icon
+
+                    return (
+                        <Card key={type} className={`${colors.border} border-2`}>
+                            <CardHeader className={`${colors.bg} rounded-t-lg`}>
+                                <CardTitle className="flex items-center gap-3">
+                                    <Icon className={`w-6 h-6 ${colors.icon}`} />
+                                    {config.title}
+                                </CardTitle>
+                                <CardDescription className="text-gray-600">
+                                    {config.description}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="pt-4 space-y-4">
+                                <Textarea
+                                    value={prompts[type]}
+                                    onChange={(e) => setPrompts(prev => ({ ...prev, [type]: e.target.value }))}
+                                    placeholder={`Enter ${config.title} here... (Leave empty to use default)`}
+                                    className="min-h-[250px] font-mono text-sm"
+                                />
+                                <div className="flex items-center justify-between gap-3">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => handleResetToDefault(type)}
+                                        className="text-gray-600"
+                                    >
+                                        Reset to Default
+                                    </Button>
+                                    <Button
+                                        onClick={() => handleSavePrompt(type)}
+                                        disabled={saving === type}
+                                        className={colors.button}
+                                    >
+                                        {saving === type ? (
+                                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
+                                        ) : saved === type ? (
+                                            <><Check className="w-4 h-4 mr-2" /> Saved!</>
+                                        ) : (
+                                            'Save Prompt'
+                                        )}
+                                    </Button>
+                                </div>
+                                {!prompts[type] && (
+                                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                        <Info className="w-4 h-4" />
+                                        Currently using default prompt. Edit above to customize.
+                                    </p>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )
+                })}
+            </div>
+
+            {/* Model Mapping Reference Card */}
+            <Card className="mt-6">
+                <CardHeader>
+                    <CardTitle className="text-lg">Doctor Level → AI Model Mapping Reference</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid gap-2 text-sm">
+                        <div className="flex items-center justify-between p-2 bg-amber-50 rounded border border-amber-200">
+                            <span>👨‍⚕️ 名医 Master</span>
+                            <code className="bg-amber-100 px-2 py-0.5 rounded">gemini-3-pro-preview</code>
+                        </div>
+                        <div className="flex items-center justify-between p-2 bg-emerald-50 rounded border border-emerald-200">
+                            <span>🩺 专家 Expert</span>
+                            <code className="bg-emerald-100 px-2 py-0.5 rounded">gemini-2.5-pro</code>
+                        </div>
+                        <div className="flex items-center justify-between p-2 bg-blue-50 rounded border border-blue-200">
+                            <span>💊 医师 Physician</span>
+                            <code className="bg-blue-100 px-2 py-0.5 rounded">gemini-2.5-flash</code>
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
         </div>
     )
 }
+

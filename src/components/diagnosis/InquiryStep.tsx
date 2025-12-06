@@ -139,21 +139,13 @@ CRITICAL INSTRUCTIONS:
         if (!hasRequestedInitialQuestion && messages.length === 0) {
             setHasRequestedInitialQuestion(true)
 
-            // Generate a more specific prompt based on symptoms
-            let prompt = 'Please start the consultation.'
+            // Simple initial prompt - let the AI decide the first question based on symptoms
+            // The system prompt already has all the context it needs
+            let prompt = 'Please start by asking your first diagnostic question based on my symptoms.'
 
             if (basicInfo && basicInfo.symptoms) {
-                const symptoms = basicInfo.symptoms.toLowerCase()
-
-                if (symptoms.includes('pain') || symptoms.includes('ache')) {
-                    prompt = `The patient mentioned experiencing "${basicInfo.symptoms}". Please ask about the nature of this pain (sharp, dull, throbbing, or burning).`
-                } else if (symptoms.includes('fatigue') || symptoms.includes('tired')) {
-                    prompt = `The patient mentioned feeling "${basicInfo.symptoms}". Please ask when they notice this fatigue most (morning, afternoon, or evening).`
-                } else if (symptoms.includes('headache')) {
-                    prompt = `The patient mentioned "${basicInfo.symptoms}". Please ask about the characteristics of the headache.`
-                } else {
-                    prompt = `The patient mentioned experiencing "${basicInfo.symptoms}". Please ask a relevant follow-up question to understand their condition better.`
-                }
+                // Just reference the symptoms without prescribing what to ask
+                prompt = `Based on my symptoms: "${basicInfo.symptoms}", please ask your first diagnostic question.`
             }
 
             // Send the prompt to trigger the AI doctor's first question

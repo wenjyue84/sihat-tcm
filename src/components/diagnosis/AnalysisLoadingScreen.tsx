@@ -57,16 +57,16 @@ const TCM_FACTS = [
     },
 ]
 
-// Debug steps to show API flow
+// Analysis steps to show progress
 const DEBUG_STEPS = [
-    { id: 1, label: "Data Collected", icon: Database, description: "Patient info gathered from form" },
-    { id: 2, label: "Request Prepared", icon: FileJson, description: "Building API payload" },
-    { id: 3, label: "Sending to API", icon: Send, description: "POST /api/consult" },
-    { id: 4, label: "API Processing", icon: Cpu, description: "Server building prompt" },
-    { id: 5, label: "Calling Gemini", icon: Sparkles, description: "Waiting for AI..." },
-    { id: 6, label: "Streaming Response", icon: Loader2, description: "Receiving chunks..." },
-    { id: 7, label: "Parsing JSON", icon: FileJson, description: "Validating response" },
-    { id: 8, label: "Rendering Report", icon: Layout, description: "Building UI" },
+    { id: 1, label: "Data Collected", icon: Database, description: "Gathering your information" },
+    { id: 2, label: "Preparing Analysis", icon: FileJson, description: "Organizing your data" },
+    { id: 3, label: "Connecting", icon: Send, description: "Establishing connection..." },
+    { id: 4, label: "Processing", icon: Cpu, description: "Preparing consultation" },
+    { id: 5, label: "AI Analysis", icon: Sparkles, description: "Generating insights..." },
+    { id: 6, label: "Receiving Results", icon: Loader2, description: "Retrieving analysis..." },
+    { id: 7, label: "Validating", icon: FileJson, description: "Checking results" },
+    { id: 8, label: "Rendering Report", icon: Layout, description: "Creating your report" },
 ]
 
 export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', streamProgress = 0, errorMessage }: AnalysisLoadingScreenProps) {
@@ -308,7 +308,7 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
                     <div className="flex items-center justify-between">
                         <p className="text-xs font-bold text-stone-600 uppercase tracking-wider flex items-center gap-2">
                             <Cpu className="w-4 h-4" />
-                            Debug: API Process
+                            Analysis Progress
                         </p>
                         <span className="text-xs text-stone-400">Step {currentDebugStep}/8</span>
                     </div>
@@ -322,8 +322,8 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
                                 <div
                                     key={step.id}
                                     className={`p-2 rounded-lg text-center transition-all ${status === 'complete' ? 'bg-emerald-100 border border-emerald-200' :
-                                            status === 'active' ? 'bg-amber-100 border border-amber-300 animate-pulse' :
-                                                'bg-white border border-stone-200'
+                                        status === 'active' ? 'bg-amber-100 border border-amber-300 animate-pulse' :
+                                            'bg-white border border-stone-200'
                                         }`}
                                 >
                                     <div className="flex justify-center mb-1">
@@ -336,8 +336,8 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
                                         )}
                                     </div>
                                     <p className={`text-xs font-medium ${status === 'complete' ? 'text-emerald-700' :
-                                            status === 'active' ? 'text-amber-700' :
-                                                'text-stone-400'
+                                        status === 'active' ? 'text-amber-700' :
+                                            'text-stone-400'
                                         }`}>
                                         {step.label}
                                     </p>
@@ -356,7 +356,7 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
                             <span>
                                 Taking longer than expected.
                                 {currentDebugStep <= 5
-                                    ? " Gemini AI may be slow to respond. Check console for errors."
+                                    ? " AI analysis may take a moment. Please wait..."
                                     : " Response is streaming, please wait..."}
                             </span>
                         </div>

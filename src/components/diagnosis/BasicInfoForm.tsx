@@ -40,6 +40,28 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
 
     const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
 
+    // Load patient profile data from localStorage (set from patient dashboard)
+    useEffect(() => {
+        const savedProfileData = localStorage.getItem('patientProfileData')
+        if (savedProfileData) {
+            try {
+                const profileData = JSON.parse(savedProfileData)
+                setFormData(prev => ({
+                    ...prev,
+                    name: profileData.name || prev.name,
+                    age: profileData.age || prev.age,
+                    gender: profileData.gender || prev.gender,
+                    weight: profileData.weight || prev.weight,
+                    height: profileData.height || prev.height,
+                }))
+                // Clear the stored data after loading
+                localStorage.removeItem('patientProfileData')
+            } catch (e) {
+                console.error('Error loading profile data:', e)
+            }
+        }
+    }, [])
+
     // Listen for test data fill event (only works in development on localhost)
     useEffect(() => {
         const handleFillTestData = () => {
@@ -91,53 +113,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-8">
-                {/* Doctor Level Selection */}
-                <div className="space-y-4">
-                    <Label className="text-stone-600 font-medium flex items-center gap-2 text-lg">
-                        <Stethoscope className="w-5 h-5 text-emerald-600" />
-                        Choose Your TCM Doctor
-                    </Label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {(Object.keys(DOCTOR_LEVELS) as DoctorLevel[]).map((level) => {
-                            const info = DOCTOR_LEVELS[level]
-                            const isSelected = doctorLevel === level
 
-                            return (
-                                <div
-                                    key={level}
-                                    onClick={() => setDoctorLevel(level)}
-                                    className={`
-                                        relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200
-                                        ${isSelected
-                                            ? `${info.borderColor} ${info.bgColor} shadow-md scale-[1.02]`
-                                            : 'border-stone-100 bg-white hover:border-stone-200 hover:bg-stone-50'
-                                        }
-                                    `}
-                                >
-                                    <div className="flex items-start justify-between mb-2">
-                                        <span className="text-2xl">{info.icon}</span>
-                                        {isSelected && (
-                                            <div className={`h-5 w-5 rounded-full bg-gradient-to-r ${info.color} flex items-center justify-center`}>
-                                                <Check className="w-3 h-3 text-white" />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <h3 className={`font-bold ${isSelected ? info.textColor : 'text-stone-700'}`}>
-                                        {info.name}
-                                    </h3>
-                                    <p className="text-xs text-stone-500 mt-1">
-                                        {info.description}
-                                    </p>
-                                    {isSelected && (
-                                        <div className={`absolute inset-0 rounded-xl ring-2 ring-offset-2 ring-transparent ${info.borderColor.replace('border', 'ring')}`} />
-                                    )}
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
-
-                <div className="h-px bg-stone-100" />
 
                 <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2 col-span-2 md:col-span-1">
@@ -324,6 +300,52 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                         placeholder="Please describe your main complaints, feelings, and any other relevant details..."
                         className="min-h-[100px] border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50 resize-none"
                     />
+                </div>
+
+                {/* Doctor Level Selection */}
+                <div className="space-y-4">
+                    <Label className="text-stone-600 font-medium flex items-center gap-2 text-lg">
+                        <Stethoscope className="w-5 h-5 text-emerald-600" />
+                        Choose Your TCM Doctor
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {(Object.keys(DOCTOR_LEVELS) as DoctorLevel[]).map((level) => {
+                            const info = DOCTOR_LEVELS[level]
+                            const isSelected = doctorLevel === level
+
+                            return (
+                                <div
+                                    key={level}
+                                    onClick={() => setDoctorLevel(level)}
+                                    className={`
+                                        relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200
+                                        ${isSelected
+                                            ? `${info.borderColor} ${info.bgColor} shadow-md scale-[1.02]`
+                                            : 'border-stone-100 bg-white hover:border-stone-200 hover:bg-stone-50'
+                                        }
+                                    `}
+                                >
+                                    <div className="flex items-start justify-between mb-2">
+                                        <span className="text-2xl">{info.icon}</span>
+                                        {isSelected && (
+                                            <div className={`h-5 w-5 rounded-full bg-gradient-to-r ${info.color} flex items-center justify-center`}>
+                                                <Check className="w-3 h-3 text-white" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <h3 className={`font-bold ${isSelected ? info.textColor : 'text-stone-700'}`}>
+                                        {info.name}
+                                    </h3>
+                                    <p className="text-xs text-stone-500 mt-1">
+                                        {info.description}
+                                    </p>
+                                    {isSelected && (
+                                        <div className={`absolute inset-0 rounded-xl ring-2 ring-offset-2 ring-transparent ${info.borderColor.replace('border', 'ring')}`} />
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
 
                 <Button
