@@ -158,16 +158,6 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
         },
     ]
 
-    if (basicInfo?.healthData) {
-        patientInfoCards.push({
-            icon: Activity,
-            label: "Health Data",
-            value: `${basicInfo.healthData.steps} steps, ${basicInfo.healthData.sleepHours}h sleep`,
-            color: "text-teal-600",
-            bgColor: "bg-teal-50",
-        })
-    }
-
     const currentFact = TCM_FACTS[currentFactIndex]
     const CurrentFactIcon = currentFact.icon
 

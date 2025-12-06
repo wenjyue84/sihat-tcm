@@ -46,8 +46,15 @@ export function InquiryStep({
     const scrollAreaRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
+    // Initial prompts in different languages
+    const initialPrompts: Record<string, string> = {
+        en: `I am ready for the consultation. Please review my information and start.`,
+        zh: `我已经准备好进行问诊。请查看我的信息并开始。`,
+        ms: `Saya bersedia untuk konsultasi. Sila semak maklumat saya dan mulakan.`,
+    }
+
     // Construct the initial system message based on basic info
-    let systemMessage = basicInfo
+    const systemMessage = basicInfo
         ? `${INTERACTIVE_CHAT_PROMPT}
 
 === PATIENT DATA ===
@@ -61,35 +68,22 @@ Duration: ${basicInfo.symptomDuration}
 `
         : INTERACTIVE_CHAT_PROMPT
 
-    if (basicInfo?.healthData) {
-        systemMessage += `
-=== IMPORTED HEALTH DATA (from ${basicInfo.healthData.provider}) ===
-Steps: ${basicInfo.healthData.steps}
-Sleep: ${basicInfo.healthData.sleepHours} hours
-Avg Heart Rate: ${basicInfo.healthData.heartRate} bpm
-Calories: ${basicInfo.healthData.calories} kcal
-Last Updated: ${basicInfo.healthData.lastUpdated}
-`
-    }
-
     // Send message to API with manual streaming
     const sendMessage = useCallback(async (userMessage: string, isInitialPrompt = false) => {
         setIsLoading(true)
 
-        // Add user message to state (skip if it's the initial prompt)
+        // Add user message to state
         const userMsg: Message = {
             id: Date.now().toString(),
             role: 'user',
             content: userMessage
         }
 
-        const currentMessages = isInitialPrompt
-            ? [{ role: 'system', content: systemMessage }]
-            : [...messages, userMsg]
+        setMessages(prev => [...prev, userMsg])
 
-        if (!isInitialPrompt) {
-            setMessages(prev => [...prev, userMsg])
-        }
+        const currentMessages = isInitialPrompt
+            ? [{ role: 'system', content: systemMessage }, userMsg]
+            : [...messages, userMsg]
 
         try {
             console.log('[InquiryStep] Sending message to /api/chat with language:', language)
@@ -155,16 +149,14 @@ Last Updated: ${basicInfo.healthData.lastUpdated}
     }, [messages, systemMessage, basicInfo, doctorInfo.model, language])
 
     // Trigger the first question from AI doctor when component mounts
+    // NOTE: sendMessage is intentionally NOT in the dependency array to prevent duplicate API calls.
+    // The hasRequestedInitialQuestion flag ensures this only runs once.
     useEffect(() => {
         if (!hasRequestedInitialQuestion && messages.length === 0) {
             setHasRequestedInitialQuestion(true)
 
             // Initial prompt in the selected language
-            const initialPrompts: Record<string, string> = {
-                en: `I am ready for the consultation. Please review my information and start.`,
-                zh: `我已经准备好进行问诊。请查看我的信息并开始。`,
-                ms: `Saya bersedia untuk konsultasi. Sila semak maklumat saya dan mulakan.`,
-            }
+            // Uses the component-level initialPrompts constant
 
             const prompt = basicInfo && basicInfo.symptoms
                 ? initialPrompts[language] || initialPrompts.en
@@ -172,7 +164,8 @@ Last Updated: ${basicInfo.healthData.lastUpdated}
 
             sendMessage(prompt, true)
         }
-    }, [hasRequestedInitialQuestion, messages.length, basicInfo, sendMessage, language])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [hasRequestedInitialQuestion, messages.length, basicInfo, language])
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
@@ -267,7 +260,11 @@ Last Updated: ${basicInfo.healthData.lastUpdated}
     const displayMessages = messages.filter(m =>
         m.role !== 'system' &&
         !m.content.startsWith('The patient mentioned') &&
-        m.content !== 'Please start the consultation.'
+        m.content !== 'Please start the consultation.' &&
+        !Object.values(initialPrompts).includes(m.content) &&
+        m.content !== '请开始询问诊断问题。' &&
+        m.content !== 'Sila mulakan soalan diagnosis.' &&
+        m.content !== 'Please start by asking your first diagnostic question.'
     )
 
     return (

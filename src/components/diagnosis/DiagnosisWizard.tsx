@@ -21,6 +21,7 @@ import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { ObservationResult } from './ObservationResult'
 import { ImageAnalysisLoader } from './ImageAnalysisLoader'
 import { DiagnosisSummary } from './DiagnosisSummary'
+import { SmartConnectStep, SmartConnectData } from './SmartConnectStep'
 import { Loader2 } from 'lucide-react'
 
 /**
@@ -130,7 +131,7 @@ function repairJSON(jsonString: string): string {
 }
 
 
-export type DiagnosisStep = 'basic_info' | 'wen_inquiry' | 'wang_tongue' | 'wang_face' | 'wang_part' | 'wen_audio' | 'qie' | 'summary' | 'processing' | 'report'
+export type DiagnosisStep = 'basic_info' | 'wen_inquiry' | 'wang_tongue' | 'wang_face' | 'wang_part' | 'wen_audio' | 'qie' | 'smart_connect' | 'summary' | 'processing' | 'report'
 
 export default function DiagnosisWizard() {
     const { getModel } = useDoctorLevel()
@@ -145,6 +146,7 @@ export default function DiagnosisWizard() {
         { id: 'wang_face', label: t.steps.face },
         { id: 'wen_audio', label: t.steps.audio },
         { id: 'qie', label: t.steps.pulse },
+        { id: 'smart_connect', label: t.steps.smartConnect },
     ]
     const [data, setData] = useState<any>({
         basic_info: null,
@@ -154,7 +156,8 @@ export default function DiagnosisWizard() {
         wang_part: null,
         wen_audio: null,
         wen_chat: [],
-        qie: null
+        qie: null,
+        smart_connect: null
     })
     const [analysisResult, setAnalysisResult] = useState<any>(null)
     const [isAnalyzing, setIsAnalyzing] = useState(false)
@@ -208,7 +211,8 @@ export default function DiagnosisWizard() {
             case 'wang_face': setStep('wang_part'); break;
             case 'wang_part': setStep('wen_audio'); break;
             case 'wen_audio': setStep('qie'); break;
-            case 'qie': setStep('summary'); break;
+            case 'qie': setStep('smart_connect'); break;
+            case 'smart_connect': setStep('summary'); break;
             case 'summary':
                 setStep('processing');
                 submitConsultation();
@@ -225,7 +229,8 @@ export default function DiagnosisWizard() {
             case 'wang_part': setStep('wang_face'); break;
             case 'wen_audio': setStep('wang_part'); break;
             case 'qie': setStep('wen_audio'); break;
-            case 'summary': setStep('qie'); break;
+            case 'smart_connect': setStep('qie'); break;
+            case 'summary': setStep('smart_connect'); break;
             default: break;
         }
     }
@@ -392,7 +397,7 @@ export default function DiagnosisWizard() {
     // Map current step to stepper ID (handling sub-steps)
     const getCurrentStepperId = () => {
         if (step === 'wang_part') return 'wang_face' // Group part with face for stepper
-        if (step === 'processing' || step === 'report') return 'qie' // Show last step as active or completed
+        if (step === 'processing' || step === 'report') return 'smart_connect' // Show last step as active or completed
         return step
     }
 
@@ -403,16 +408,7 @@ export default function DiagnosisWizard() {
             )}
 
             <div className="relative min-h-[400px] md:min-h-[600px]">
-                {step !== 'basic_info' && step !== 'processing' && step !== 'report' && (
-                    <Button
-                        variant="ghost"
-                        onClick={() => prevStep(step)}
-                        className="hidden md:flex absolute -top-10 md:-top-12 left-0 text-stone-500 hover:text-stone-800 hover:bg-stone-100 h-10 px-3"
-                    >
-                        <ChevronLeft className="w-4 h-4 mr-1" />
-                        {t.common.back}
-                    </Button>
-                )}
+
 
                 <AnimatePresence mode="wait">
                     {step === 'basic_info' && (
@@ -597,6 +593,18 @@ export default function DiagnosisWizard() {
                             />
                         </motion.div>
                     )}
+                    {step === 'smart_connect' && (
+                        <motion.div key="smart_connect" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+                            <SmartConnectStep
+                                initialData={data.smart_connect || {}}
+                                onComplete={(result) => {
+                                    setData((prev: any) => ({ ...prev, smart_connect: result }));
+                                    nextStep('smart_connect');
+                                }}
+                                onBack={() => prevStep('smart_connect')}
+                            />
+                        </motion.div>
+                    )}
                     {step === 'summary' && (
                         <motion.div key="summary" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
                             <DiagnosisSummary
@@ -660,40 +668,38 @@ export default function DiagnosisWizard() {
                                                     console.log('[DiagnosisWizard] JSON repair successful!');
                                                 }
 
-                                                // Helper function to convert any value to a displayable string
-                                                const formatValue = (val: any): string => {
-                                                    if (val === null || val === undefined) return '';
-                                                    if (typeof val === 'string') return val;
-                                                    if (Array.isArray(val)) return val.map(v => formatValue(v)).join(', ');
-                                                    if (typeof val === 'object') {
-                                                        // Convert object to readable format
-                                                        return Object.entries(val)
-                                                            .map(([key, value]) => {
-                                                                const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                                                                const formattedValue = formatValue(value);
-                                                                return `${formattedKey}: ${formattedValue}`;
-                                                            })
-                                                            .join('\n');
-                                                    }
-                                                    return String(val);
-                                                };
-
-                                                // Normalize data structure to prevent undefined errors
+                                                // Normalize data structure - now keeping the full structure
                                                 const normalizedData = {
-                                                    diagnosis: formatValue(resultData.diagnosis) || 'Diagnosis pending',
-                                                    constitution: formatValue(resultData.constitution) || 'Not determined',
-                                                    analysis: formatValue(resultData.analysis) || '',
+                                                    diagnosis: resultData.diagnosis || 'Diagnosis pending',
+                                                    constitution: resultData.constitution || 'Not determined',
+                                                    analysis: resultData.analysis || '',
                                                     recommendations: {
-                                                        food: resultData.recommendations?.food || [],
-                                                        avoid: resultData.recommendations?.avoid || [],
-                                                        lifestyle: resultData.recommendations?.lifestyle || []
-                                                    }
+                                                        food: resultData.recommendations?.food || resultData.recommendations?.food_therapy?.beneficial || [],
+                                                        avoid: resultData.recommendations?.avoid || resultData.recommendations?.food_therapy?.avoid || [],
+                                                        lifestyle: resultData.recommendations?.lifestyle || [],
+                                                        food_therapy: resultData.recommendations?.food_therapy,
+                                                        acupoints: resultData.recommendations?.acupoints || [],
+                                                        exercise: resultData.recommendations?.exercise || [],
+                                                        sleep_guidance: resultData.recommendations?.sleep_guidance,
+                                                        emotional_care: resultData.recommendations?.emotional_care,
+                                                        herbal_formulas: resultData.recommendations?.herbal_formulas || [],
+                                                        doctor_consultation: resultData.recommendations?.doctor_consultation,
+                                                        general: resultData.recommendations?.general || []
+                                                    },
+                                                    patient_summary: resultData.patient_summary,
+                                                    precautions: resultData.precautions,
+                                                    follow_up: resultData.follow_up,
+                                                    disclaimer: resultData.disclaimer,
+                                                    timestamp: resultData.timestamp
                                                 };
 
                                                 return (
                                                     <DiagnosisReport
                                                         data={normalizedData}
                                                         saved={isSaved}
+                                                        patientInfo={data.basic_info}
+                                                        reportOptions={data.report_options}
+                                                        smartConnectData={data.smart_connect}
                                                         onRestart={() => {
                                                             setData({
                                                                 basic_info: null,
@@ -703,7 +709,8 @@ export default function DiagnosisWizard() {
                                                                 wang_part: null,
                                                                 wen_audio: null,
                                                                 wen_chat: [],
-                                                                qie: null
+                                                                qie: null,
+                                                                smart_connect: null
                                                             });
                                                             setStep('basic_info');
                                                             setIsSaved(false);

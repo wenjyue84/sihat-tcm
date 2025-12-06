@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Activity, Utensils, AlertCircle, HeartPulse, Leaf, Info, Download, Check } from 'lucide-react'
+import { Activity, Utensils, AlertCircle, HeartPulse, Leaf, Info, Download, Check, User, Stethoscope, Pill, MapPin, Clock, Brain, Moon, Dumbbell, AlertTriangle, Calendar, QrCode, PenTool } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { ShowPromptButton } from './ShowPromptButton'
@@ -8,16 +8,97 @@ import { useLanguage } from '@/contexts/LanguageContext'
 
 type Language = 'en' | 'zh' | 'ms'
 
+// Extended interface to handle all possible report data
 interface DiagnosisReportProps {
     data: {
-        diagnosis: string;
-        constitution: string;
-        analysis: string;
+        diagnosis: string | { primary_pattern?: string; secondary_patterns?: string[]; affected_organs?: string[]; pathomechanism?: string };
+        constitution: string | { type?: string; description?: string };
+        analysis: string | { summary?: string; key_findings?: { from_inquiry?: string; from_visual?: string; from_pulse?: string; from_other?: string }; pattern_rationale?: string };
         recommendations: {
-            food: string[];
-            avoid: string[];
-            lifestyle: string[];
+            food?: string[];
+            avoid?: string[];
+            lifestyle?: string[];
+            food_therapy?: {
+                beneficial?: string[];
+                recipes?: string[];
+                avoid?: string[];
+            };
+            acupoints?: string[];
+            exercise?: string[];
+            sleep_guidance?: string;
+            emotional_care?: string;
+            herbal_formulas?: Array<{
+                name: string;
+                ingredients?: string[];
+                dosage?: string;
+                purpose?: string;
+            }>;
+            doctor_consultation?: string;
+            general?: string[];
         };
+        patient_summary?: {
+            name?: string;
+            age?: number;
+            gender?: string;
+            vital_signs?: {
+                bmi?: number;
+                blood_pressure?: string;
+                heart_rate?: number;
+                temperature?: number;
+            };
+        };
+        precautions?: {
+            warning_signs?: string[];
+            contraindications?: string[];
+            special_notes?: string;
+        };
+        follow_up?: {
+            timeline?: string;
+            expected_improvement?: string;
+            next_steps?: string;
+        };
+        disclaimer?: string;
+        timestamp?: string;
+    };
+    // Patient data passed directly (displayed immediately without AI)
+    patientInfo?: {
+        name?: string;
+        age?: number;
+        gender?: string;
+        height?: number;
+        weight?: number;
+        symptoms?: string;
+    };
+    // Report options to control display
+    reportOptions?: {
+        includePatientName?: boolean;
+        includePatientAge?: boolean;
+        includePatientGender?: boolean;
+        includeVitalSigns?: boolean;
+        includeBMI?: boolean;
+        includeSmartConnectData?: boolean;
+        suggestMedicine?: boolean;
+        suggestDoctor?: boolean;
+        includeDietary?: boolean;
+        includeLifestyle?: boolean;
+        includeAcupuncture?: boolean;
+        includeExercise?: boolean;
+        includeSleepAdvice?: boolean;
+        includeEmotionalWellness?: boolean;
+        includePrecautions?: boolean;
+        includeFollowUp?: boolean;
+        includeTimestamp?: boolean;
+        includeQRCode?: boolean;
+        includeDoctorSignature?: boolean;
+    };
+    // Smart connect data (displayed immediately)
+    smartConnectData?: {
+        pulseRate?: number;
+        bloodPressure?: string;
+        bloodOxygen?: number;
+        bodyTemp?: number;
+        hrv?: number;
+        stressLevel?: string;
     };
     onRestart: () => void;
     saved?: boolean;
@@ -72,10 +153,35 @@ const translations = {
     }
 }
 
-export function DiagnosisReport({ data, onRestart, saved }: DiagnosisReportProps) {
+// Helper function to safely extract string from various formats
+function extractString(val: any, fallback: string = ''): string {
+    if (!val) return fallback;
+    if (typeof val === 'string') return val;
+    if (typeof val === 'object') {
+        // Try common field names
+        if (val.primary_pattern) return val.primary_pattern;
+        if (val.type) return val.type;
+        if (val.summary) return val.summary;
+        // Convert object to readable format
+        return Object.entries(val)
+            .map(([key, value]) => `${key.replace(/_/g, ' ')}: ${typeof value === 'string' ? value : JSON.stringify(value)}`)
+            .join('\n');
+    }
+    return String(val);
+}
+
+export function DiagnosisReport({ data, patientInfo, reportOptions, smartConnectData, onRestart, saved }: DiagnosisReportProps) {
     const { getDoctorInfo } = useDoctorLevel()
     const doctorInfo = getDoctorInfo()
     const { language } = useLanguage()
+    const opts = reportOptions || {}
+
+    // Calculate BMI if we have height and weight
+    const calculateBMI = (height?: number, weight?: number) => {
+        if (!height || !weight) return null;
+        const heightM = height / 100;
+        return (weight / (heightM * heightM)).toFixed(1);
+    }
 
     const container = {
         hidden: { opacity: 0 },
@@ -91,6 +197,30 @@ export function DiagnosisReport({ data, onRestart, saved }: DiagnosisReportProps
         hidden: { opacity: 0, y: 20 },
         show: { opacity: 1, y: 0 }
     }
+
+    // Extract values from potentially complex data structures
+    const diagnosisText = extractString(data.diagnosis, 'Diagnosis pending');
+    const constitutionText = extractString(data.constitution, 'Not determined');
+    const analysisText = extractString(data.analysis, '');
+
+    // Get recommendations in various formats
+    const getFoodRecommendations = () => {
+        if (data.recommendations?.food_therapy?.beneficial) {
+            return data.recommendations.food_therapy.beneficial;
+        }
+        return data.recommendations?.food || [];
+    };
+
+    const getFoodsToAvoid = () => {
+        if (data.recommendations?.food_therapy?.avoid) {
+            return data.recommendations.food_therapy.avoid;
+        }
+        return data.recommendations?.avoid || [];
+    };
+
+    const getRecipes = () => {
+        return data.recommendations?.food_therapy?.recipes || [];
+    };
 
     const downloadPDF = (language: Language = 'en') => {
         const t = translations[language]
@@ -141,51 +271,77 @@ export function DiagnosisReport({ data, onRestart, saved }: DiagnosisReportProps
         doc.line(margin, yPos, pageWidth - margin, yPos)
         yPos += 15
 
+        // Patient Info if available
+        if (patientInfo) {
+            doc.setTextColor(41, 37, 36)
+            addWrappedText('PATIENT INFORMATION', 14, true)
+            doc.setTextColor(68, 64, 60)
+            if (opts.includePatientName !== false && patientInfo.name) addWrappedText(`Name: ${patientInfo.name}`, 11)
+            if (opts.includePatientAge !== false && patientInfo.age) addWrappedText(`Age: ${patientInfo.age} years`, 11)
+            if (opts.includePatientGender !== false && patientInfo.gender) addWrappedText(`Gender: ${patientInfo.gender}`, 11)
+            if (opts.includeBMI !== false && patientInfo.height && patientInfo.weight) {
+                addWrappedText(`Height: ${patientInfo.height} cm | Weight: ${patientInfo.weight} kg`, 11)
+                addWrappedText(`BMI: ${calculateBMI(patientInfo.height, patientInfo.weight)}`, 11)
+            }
+            yPos += 10
+        }
+
         // Main Diagnosis
         doc.setTextColor(6, 95, 70)
         addWrappedText(t.mainDiagnosis, 14, true)
         doc.setTextColor(20, 83, 45) // Emerald-900
-        addWrappedText(data.diagnosis, 16, true)
+        addWrappedText(diagnosisText, 16, true)
 
         doc.setTextColor(21, 128, 61) // Emerald-700
-        addWrappedText(`${t.constitution}: ${data.constitution}`, 12)
+        addWrappedText(`${t.constitution}: ${constitutionText}`, 12)
         yPos += 10
 
         // Detailed Analysis
         doc.setTextColor(41, 37, 36) // Stone-800
         addWrappedText(t.detailedAnalysis, 14, true)
         doc.setTextColor(68, 64, 60) // Stone-700
-        addWrappedText(data.analysis, 11)
+        addWrappedText(analysisText, 11)
         yPos += 10
 
         // Dietary Recommendations
-        doc.setTextColor(41, 37, 36)
-        addWrappedText(t.dietaryRecommendations, 14, true)
+        const foodRecs = getFoodRecommendations()
+        const avoidRecs = getFoodsToAvoid()
+        if (foodRecs.length > 0 || avoidRecs.length > 0) {
+            doc.setTextColor(41, 37, 36)
+            addWrappedText(t.dietaryRecommendations, 14, true)
 
-        doc.setTextColor(21, 128, 61)
-        addWrappedText(t.recommendedFoods, 12, true)
-            ; (data.recommendations?.food || []).forEach((food) => {
-                doc.setTextColor(68, 64, 60)
-                addWrappedText(`• ${food}`, 11)
-            })
-        yPos += 5
+            if (foodRecs.length > 0) {
+                doc.setTextColor(21, 128, 61)
+                addWrappedText(t.recommendedFoods, 12, true)
+                foodRecs.forEach((food: string) => {
+                    doc.setTextColor(68, 64, 60)
+                    addWrappedText(`• ${food}`, 11)
+                })
+                yPos += 5
+            }
 
-        doc.setTextColor(185, 28, 28) // Red-700
-        addWrappedText(t.foodsToAvoid, 12, true)
-            ; (data.recommendations?.avoid || []).forEach((food) => {
-                doc.setTextColor(68, 64, 60)
-                addWrappedText(`• ${food}`, 11)
-            })
-        yPos += 10
+            if (avoidRecs.length > 0) {
+                doc.setTextColor(185, 28, 28) // Red-700
+                addWrappedText(t.foodsToAvoid, 12, true)
+                avoidRecs.forEach((food: string) => {
+                    doc.setTextColor(68, 64, 60)
+                    addWrappedText(`• ${food}`, 11)
+                })
+            }
+            yPos += 10
+        }
 
         // Lifestyle Recommendations
-        doc.setTextColor(41, 37, 36)
-        addWrappedText(t.lifestyleRecommendations, 14, true)
-            ; (data.recommendations?.lifestyle || []).forEach((tip) => {
+        const lifestyleRecs = data.recommendations?.lifestyle || []
+        if (lifestyleRecs.length > 0) {
+            doc.setTextColor(41, 37, 36)
+            addWrappedText(t.lifestyleRecommendations, 14, true)
+            lifestyleRecs.forEach((tip: string) => {
                 doc.setTextColor(68, 64, 60)
                 addWrappedText(`• ${tip}`, 11)
             })
-        yPos += 15
+            yPos += 15
+        }
 
         // Footer
         doc.setTextColor(120, 113, 108) // Stone-500
@@ -204,7 +360,7 @@ export function DiagnosisReport({ data, onRestart, saved }: DiagnosisReportProps
             variants={container}
             initial="hidden"
             animate="show"
-            className="space-y-4 md:space-y-6 max-w-3xl mx-auto px-2 md:px-0"
+            className="space-y-4 md:space-y-6 max-w-4xl mx-auto px-2 md:px-0"
         >
             {/* Header Section */}
             <motion.div variants={item} className="text-center space-y-1 md:space-y-2">
@@ -219,33 +375,157 @@ export function DiagnosisReport({ data, onRestart, saved }: DiagnosisReportProps
                         </span>
                     )}
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-emerald-900">Diagnosis Report</h2>
-                <p className="text-stone-600 text-sm md:text-base">Based on your Wang, Wen, Wen, and Qie analysis</p>
+                <h2 className="text-2xl md:text-3xl font-bold text-emerald-900">Comprehensive TCM Report</h2>
+                <p className="text-stone-600 text-sm md:text-base">Based on Four Pillars Diagnosis (四诊合参)</p>
 
-                {doctorInfo.id === 'master' && (
-                    <div className="max-w-md mx-auto mt-2 bg-amber-50 border border-amber-200 rounded-lg p-2 text-xs text-amber-800">
-                        <p><strong>Master Level Analysis:</strong> This report includes deep TCM theoretical analysis and comprehensive constitution evaluation.</p>
-                    </div>
+                {opts.includeTimestamp && data.timestamp && (
+                    <p className="text-xs text-stone-500 flex items-center justify-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        Generated: {new Date(data.timestamp).toLocaleString()}
+                    </p>
                 )}
             </motion.div>
 
+            {/* Patient Information Card - Displayed immediately without AI */}
+            {patientInfo && (opts.includePatientName || opts.includePatientAge || opts.includePatientGender || opts.includeBMI) && (
+                <motion.div variants={item}>
+                    <Card className="border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50">
+                        <CardHeader className="pb-2 px-4 md:px-6">
+                            <CardTitle className="flex items-center gap-2 text-blue-800 text-base md:text-lg">
+                                <User className="h-5 w-5" />
+                                Patient Information
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="px-4 md:px-6">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {opts.includePatientName !== false && patientInfo.name && (
+                                    <div>
+                                        <p className="text-xs text-blue-600 font-medium">Name</p>
+                                        <p className="text-blue-900 font-semibold">{patientInfo.name}</p>
+                                    </div>
+                                )}
+                                {opts.includePatientAge !== false && patientInfo.age && (
+                                    <div>
+                                        <p className="text-xs text-blue-600 font-medium">Age</p>
+                                        <p className="text-blue-900 font-semibold">{patientInfo.age} years</p>
+                                    </div>
+                                )}
+                                {opts.includePatientGender !== false && patientInfo.gender && (
+                                    <div>
+                                        <p className="text-xs text-blue-600 font-medium">Gender</p>
+                                        <p className="text-blue-900 font-semibold">{patientInfo.gender}</p>
+                                    </div>
+                                )}
+                                {opts.includeBMI !== false && patientInfo.height && patientInfo.weight && (
+                                    <>
+                                        <div>
+                                            <p className="text-xs text-blue-600 font-medium">Height / Weight</p>
+                                            <p className="text-blue-900 font-semibold">{patientInfo.height}cm / {patientInfo.weight}kg</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-blue-600 font-medium">BMI</p>
+                                            <p className="text-blue-900 font-semibold">{calculateBMI(patientInfo.height, patientInfo.weight)}</p>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            {patientInfo.symptoms && (
+                                <div className="mt-3 pt-3 border-t border-blue-100">
+                                    <p className="text-xs text-blue-600 font-medium">Chief Complaint</p>
+                                    <p className="text-blue-800">{patientInfo.symptoms}</p>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )}
+
+            {/* Smart Connect Health Data - Displayed immediately without AI */}
+            {smartConnectData && opts.includeSmartConnectData && Object.keys(smartConnectData).length > 0 && (
+                <motion.div variants={item}>
+                    <Card className="border-purple-100 bg-gradient-to-br from-purple-50 to-pink-50">
+                        <CardHeader className="pb-2 px-4 md:px-6">
+                            <CardTitle className="flex items-center gap-2 text-purple-800 text-base md:text-lg">
+                                <Activity className="h-5 w-5" />
+                                Smart Health Metrics
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="px-4 md:px-6">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                {smartConnectData.pulseRate && (
+                                    <div className="bg-white/60 rounded-lg p-3">
+                                        <p className="text-xs text-purple-600 font-medium">Pulse Rate</p>
+                                        <p className="text-xl font-bold text-purple-900">{smartConnectData.pulseRate} <span className="text-sm font-normal">BPM</span></p>
+                                    </div>
+                                )}
+                                {smartConnectData.bloodPressure && (
+                                    <div className="bg-white/60 rounded-lg p-3">
+                                        <p className="text-xs text-purple-600 font-medium">Blood Pressure</p>
+                                        <p className="text-xl font-bold text-purple-900">{smartConnectData.bloodPressure} <span className="text-sm font-normal">mmHg</span></p>
+                                    </div>
+                                )}
+                                {smartConnectData.bloodOxygen && (
+                                    <div className="bg-white/60 rounded-lg p-3">
+                                        <p className="text-xs text-purple-600 font-medium">Blood Oxygen</p>
+                                        <p className="text-xl font-bold text-purple-900">{smartConnectData.bloodOxygen}<span className="text-sm font-normal">%</span></p>
+                                    </div>
+                                )}
+                                {smartConnectData.bodyTemp && (
+                                    <div className="bg-white/60 rounded-lg p-3">
+                                        <p className="text-xs text-purple-600 font-medium">Body Temperature</p>
+                                        <p className="text-xl font-bold text-purple-900">{smartConnectData.bodyTemp}<span className="text-sm font-normal">°C</span></p>
+                                    </div>
+                                )}
+                                {smartConnectData.hrv && (
+                                    <div className="bg-white/60 rounded-lg p-3">
+                                        <p className="text-xs text-purple-600 font-medium">HRV</p>
+                                        <p className="text-xl font-bold text-purple-900">{smartConnectData.hrv} <span className="text-sm font-normal">ms</span></p>
+                                    </div>
+                                )}
+                                {smartConnectData.stressLevel && (
+                                    <div className="bg-white/60 rounded-lg p-3">
+                                        <p className="text-xs text-purple-600 font-medium">Stress Level</p>
+                                        <p className="text-xl font-bold text-purple-900">{smartConnectData.stressLevel}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )}
+
             {/* Main Diagnosis Card */}
             <motion.div variants={item}>
-                <Card className="border-emerald-100 bg-emerald-50/50">
+                <Card className="border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50">
                     <CardHeader className="pb-2 px-4 md:px-6">
                         <CardTitle className="flex items-center gap-2 text-emerald-800 text-base md:text-lg">
-                            <Activity className="h-5 w-5" />
-                            Main Diagnosis
+                            <Stethoscope className="h-5 w-5" />
+                            TCM Diagnosis (辨证)
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="px-4 md:px-6">
-                        <div className="text-xl md:text-2xl font-semibold text-emerald-900 mb-1">
-                            {data.diagnosis}
+                        <div className="text-xl md:text-2xl font-semibold text-emerald-900 mb-2">
+                            {diagnosisText}
                         </div>
-                        <div className="flex items-center gap-2 text-emerald-700 font-medium text-sm md:text-base">
+                        {typeof data.diagnosis === 'object' && data.diagnosis.secondary_patterns && data.diagnosis.secondary_patterns.length > 0 && (
+                            <div className="mb-2">
+                                <p className="text-sm text-emerald-700 font-medium">Secondary Patterns:</p>
+                                <p className="text-emerald-800">{data.diagnosis.secondary_patterns.join(', ')}</p>
+                            </div>
+                        )}
+                        {typeof data.diagnosis === 'object' && data.diagnosis.affected_organs && data.diagnosis.affected_organs.length > 0 && (
+                            <div className="mb-2">
+                                <p className="text-sm text-emerald-700 font-medium">Affected Organs:</p>
+                                <p className="text-emerald-800">{data.diagnosis.affected_organs.join(', ')}</p>
+                            </div>
+                        )}
+                        <div className="flex items-center gap-2 text-emerald-700 font-medium text-sm md:text-base mt-3 pt-3 border-t border-emerald-100">
                             <HeartPulse className="h-4 w-4" />
-                            Constitution: {data.constitution}
+                            Constitution: {constitutionText}
                         </div>
+                        {typeof data.constitution === 'object' && data.constitution.description && (
+                            <p className="text-sm text-emerald-600 mt-1">{data.constitution.description}</p>
+                        )}
                     </CardContent>
                 </Card>
             </motion.div>
@@ -261,79 +541,350 @@ export function DiagnosisReport({ data, onRestart, saved }: DiagnosisReportProps
                     </CardHeader>
                     <CardContent>
                         <p className="text-stone-700 leading-relaxed whitespace-pre-wrap">
-                            {data.analysis}
+                            {analysisText}
                         </p>
+                        {typeof data.analysis === 'object' && data.analysis.key_findings && (
+                            <div className="mt-4 pt-4 border-t border-stone-100 space-y-2">
+                                <p className="font-medium text-stone-800">Key Findings:</p>
+                                {data.analysis.key_findings.from_inquiry && (
+                                    <p className="text-sm text-stone-600"><span className="font-medium">From Inquiry:</span> {data.analysis.key_findings.from_inquiry}</p>
+                                )}
+                                {data.analysis.key_findings.from_visual && (
+                                    <p className="text-sm text-stone-600"><span className="font-medium">From Visual:</span> {data.analysis.key_findings.from_visual}</p>
+                                )}
+                                {data.analysis.key_findings.from_pulse && (
+                                    <p className="text-sm text-stone-600"><span className="font-medium">From Pulse:</span> {data.analysis.key_findings.from_pulse}</p>
+                                )}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </motion.div>
 
-            {/* Recommendations Grid - Stack on mobile */}
+            {/* Recommendations Grid */}
             <div className="grid md:grid-cols-2 gap-4 md:gap-6">
                 {/* Food Recommendations */}
-                <motion.div variants={item} className="space-y-6">
-                    <Card className="h-full">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-stone-800">
-                                <Utensils className="h-5 w-5 text-orange-500" />
-                                Dietary Advice
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div>
-                                <h4 className="font-medium text-emerald-700 mb-2 flex items-center gap-2">
-                                    <Leaf className="h-4 w-4" /> Recommended
-                                </h4>
-                                <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
-                                    {(data.recommendations?.food || []).map((food, idx) => (
-                                        <li key={idx}>{food}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 className="font-medium text-red-700 mb-2 flex items-center gap-2">
-                                    <AlertCircle className="h-4 w-4" /> Avoid
-                                </h4>
-                                <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
-                                    {(data.recommendations?.avoid || []).map((food, idx) => (
-                                        <li key={idx}>{food}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                {opts.includeDietary !== false && (getFoodRecommendations().length > 0 || getFoodsToAvoid().length > 0 || getRecipes().length > 0) && (
+                    <motion.div variants={item} className="space-y-6">
+                        <Card className="h-full">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="flex items-center gap-2 text-stone-800">
+                                    <Utensils className="h-5 w-5 text-orange-500" />
+                                    Dietary Therapy (食疗)
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {getFoodRecommendations().length > 0 && (
+                                    <div>
+                                        <h4 className="font-medium text-emerald-700 mb-2 flex items-center gap-2">
+                                            <Leaf className="h-4 w-4" /> Beneficial Foods
+                                        </h4>
+                                        <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
+                                            {getFoodRecommendations().map((food: string, idx: number) => (
+                                                <li key={idx}>{food}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {getRecipes().length > 0 && (
+                                    <div>
+                                        <h4 className="font-medium text-amber-700 mb-2 flex items-center gap-2">
+                                            <Utensils className="h-4 w-4" /> Therapeutic Recipes
+                                        </h4>
+                                        <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
+                                            {getRecipes().map((recipe: string, idx: number) => (
+                                                <li key={idx}>{recipe}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {getFoodsToAvoid().length > 0 && (
+                                    <div>
+                                        <h4 className="font-medium text-red-700 mb-2 flex items-center gap-2">
+                                            <AlertCircle className="h-4 w-4" /> Foods to Avoid
+                                        </h4>
+                                        <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
+                                            {getFoodsToAvoid().map((food: string, idx: number) => (
+                                                <li key={idx}>{food}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
 
                 {/* Lifestyle Advice */}
+                {opts.includeLifestyle !== false && data.recommendations?.lifestyle && data.recommendations.lifestyle.length > 0 && (
+                    <motion.div variants={item}>
+                        <Card className="h-full">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="flex items-center gap-2 text-stone-800">
+                                    <Leaf className="h-5 w-5 text-green-600" />
+                                    Lifestyle (养生)
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <ul className="space-y-3">
+                                    {data.recommendations.lifestyle.map((tip: string, idx: number) => (
+                                        <li key={idx} className="flex gap-3 text-stone-600 text-sm">
+                                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                                            <span>{tip}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
+
+                {/* Acupuncture Points */}
+                {opts.includeAcupuncture !== false && data.recommendations?.acupoints && data.recommendations.acupoints.length > 0 && (
+                    <motion.div variants={item}>
+                        <Card className="h-full">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="flex items-center gap-2 text-stone-800">
+                                    <MapPin className="h-5 w-5 text-indigo-500" />
+                                    Acupressure Points (穴位)
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <ul className="space-y-3">
+                                    {data.recommendations.acupoints.map((point: string, idx: number) => (
+                                        <li key={idx} className="flex gap-3 text-stone-600 text-sm">
+                                            <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 mt-2 shrink-0" />
+                                            <span>{point}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
+
+                {/* Exercise Recommendations */}
+                {opts.includeExercise !== false && data.recommendations?.exercise && data.recommendations.exercise.length > 0 && (
+                    <motion.div variants={item}>
+                        <Card className="h-full">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="flex items-center gap-2 text-stone-800">
+                                    <Dumbbell className="h-5 w-5 text-blue-500" />
+                                    Exercise (运动)
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <ul className="space-y-3">
+                                    {data.recommendations.exercise.map((ex: string, idx: number) => (
+                                        <li key={idx} className="flex gap-3 text-stone-600 text-sm">
+                                            <div className="h-1.5 w-1.5 rounded-full bg-blue-400 mt-2 shrink-0" />
+                                            <span>{ex}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
+            </div>
+
+            {/* Sleep & Emotional Wellness Row */}
+            {((opts.includeSleepAdvice && data.recommendations?.sleep_guidance) || (opts.includeEmotionalWellness && data.recommendations?.emotional_care)) && (
+                <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+                    {opts.includeSleepAdvice && data.recommendations?.sleep_guidance && (
+                        <motion.div variants={item}>
+                            <Card className="h-full border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-indigo-800">
+                                        <Moon className="h-5 w-5" />
+                                        Sleep & Rest
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-indigo-700 text-sm">{data.recommendations.sleep_guidance}</p>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    )}
+                    {opts.includeEmotionalWellness && data.recommendations?.emotional_care && (
+                        <motion.div variants={item}>
+                            <Card className="h-full border-rose-100 bg-gradient-to-br from-rose-50 to-pink-50">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-rose-800">
+                                        <Brain className="h-5 w-5" />
+                                        Emotional Wellness (情志)
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-rose-700 text-sm">{data.recommendations.emotional_care}</p>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    )}
+                </div>
+            )}
+
+            {/* Herbal Medicine Suggestions */}
+            {opts.suggestMedicine && data.recommendations?.herbal_formulas && data.recommendations.herbal_formulas.length > 0 && (
                 <motion.div variants={item}>
-                    <Card className="h-full">
+                    <Card className="border-amber-100 bg-gradient-to-br from-amber-50 to-yellow-50">
                         <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-stone-800">
-                                <Leaf className="h-5 w-5 text-green-600" />
-                                Lifestyle
+                            <CardTitle className="flex items-center gap-2 text-amber-800">
+                                <Pill className="h-5 w-5" />
+                                Herbal Medicine Formulas (中药方剂)
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <ul className="space-y-3">
-                                {(data.recommendations?.lifestyle || []).map((tip, idx) => (
-                                    <li key={idx} className="flex gap-3 text-stone-600 text-sm">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
-                                        <span>{tip}</span>
-                                    </li>
+                            <div className="space-y-4">
+                                {data.recommendations.herbal_formulas.map((formula, idx) => (
+                                    <div key={idx} className="bg-white/60 rounded-lg p-4">
+                                        <h4 className="font-semibold text-amber-900">{formula.name}</h4>
+                                        {formula.ingredients && formula.ingredients.length > 0 && (
+                                            <p className="text-sm text-amber-700 mt-1">
+                                                <span className="font-medium">Ingredients:</span> {formula.ingredients.join(', ')}
+                                            </p>
+                                        )}
+                                        {formula.dosage && (
+                                            <p className="text-sm text-amber-700">
+                                                <span className="font-medium">Dosage:</span> {formula.dosage}
+                                            </p>
+                                        )}
+                                        {formula.purpose && (
+                                            <p className="text-sm text-amber-700">
+                                                <span className="font-medium">Purpose:</span> {formula.purpose}
+                                            </p>
+                                        )}
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
+                            <p className="text-xs text-amber-600 mt-3 italic">
+                                ⚠️ Please consult a licensed TCM practitioner before taking any herbal medicine.
+                            </p>
                         </CardContent>
                     </Card>
                 </motion.div>
-            </div>
+            )}
 
-            {/* Action Buttons - Better mobile layout */}
+            {/* Doctor Consultation */}
+            {opts.suggestDoctor && data.recommendations?.doctor_consultation && (
+                <motion.div variants={item}>
+                    <Card className="border-teal-100 bg-gradient-to-br from-teal-50 to-cyan-50">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="flex items-center gap-2 text-teal-800">
+                                <Stethoscope className="h-5 w-5" />
+                                Professional Consultation
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-teal-700">{data.recommendations.doctor_consultation}</p>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )}
+
+            {/* Precautions */}
+            {opts.includePrecautions && data.precautions && (
+                <motion.div variants={item}>
+                    <Card className="border-red-100 bg-gradient-to-br from-red-50 to-orange-50">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="flex items-center gap-2 text-red-800">
+                                <AlertTriangle className="h-5 w-5" />
+                                Precautions & Warnings
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            {data.precautions.warning_signs && data.precautions.warning_signs.length > 0 && (
+                                <div>
+                                    <h4 className="font-medium text-red-700 text-sm mb-1">Warning Signs (Seek Medical Attention):</h4>
+                                    <ul className="list-disc list-inside text-stone-600 text-sm space-y-1">
+                                        {data.precautions.warning_signs.map((sign, idx) => (
+                                            <li key={idx}>{sign}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            {data.precautions.contraindications && data.precautions.contraindications.length > 0 && (
+                                <div>
+                                    <h4 className="font-medium text-red-700 text-sm mb-1">Contraindications:</h4>
+                                    <ul className="list-disc list-inside text-stone-600 text-sm space-y-1">
+                                        {data.precautions.contraindications.map((item, idx) => (
+                                            <li key={idx}>{item}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            {data.precautions.special_notes && (
+                                <p className="text-sm text-stone-600 italic">{data.precautions.special_notes}</p>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )}
+
+            {/* Follow-up Guidance */}
+            {opts.includeFollowUp && data.follow_up && (
+                <motion.div variants={item}>
+                    <Card className="border-sky-100 bg-gradient-to-br from-sky-50 to-blue-50">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="flex items-center gap-2 text-sky-800">
+                                <Calendar className="h-5 w-5" />
+                                Follow-up Guidance
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            {data.follow_up.timeline && (
+                                <p className="text-sky-700 text-sm"><span className="font-medium">Timeline:</span> {data.follow_up.timeline}</p>
+                            )}
+                            {data.follow_up.expected_improvement && (
+                                <p className="text-sky-700 text-sm"><span className="font-medium">Expected Improvement:</span> {data.follow_up.expected_improvement}</p>
+                            )}
+                            {data.follow_up.next_steps && (
+                                <p className="text-sky-700 text-sm"><span className="font-medium">Next Steps:</span> {data.follow_up.next_steps}</p>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )}
+
+            {/* Disclaimer */}
+            <motion.div variants={item}>
+                <div className="bg-stone-100 rounded-xl p-4 text-center">
+                    <p className="text-stone-600 text-xs md:text-sm">
+                        {data.disclaimer || "This report is generated by Sihat TCM AI Assistant for informational purposes only. It is not a substitute for professional medical advice. Please consult a licensed TCM practitioner or healthcare provider for diagnosis and treatment."}
+                    </p>
+                </div>
+            </motion.div>
+
+            {/* QR Code and Doctor Signature placeholders */}
+            {(opts.includeQRCode || opts.includeDoctorSignature) && (
+                <motion.div variants={item} className="flex flex-wrap justify-center gap-6">
+                    {opts.includeQRCode && (
+                        <div className="text-center">
+                            <div className="w-24 h-24 bg-stone-200 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                <QrCode className="w-12 h-12 text-stone-400" />
+                            </div>
+                            <p className="text-xs text-stone-500">Scan for digital access</p>
+                        </div>
+                    )}
+                    {opts.includeDoctorSignature && (
+                        <div className="text-center">
+                            <div className="w-40 h-16 border-b-2 border-stone-300 flex items-end justify-center mb-2">
+                                <PenTool className="w-6 h-6 text-stone-300 mb-1" />
+                            </div>
+                            <p className="text-xs text-stone-500">Practitioner Signature</p>
+                        </div>
+                    )}
+                </motion.div>
+            )}
+
+            {/* Action Buttons */}
             <motion.div variants={item} className="flex flex-wrap justify-center gap-3 pt-4 md:pt-6">
                 <button
                     onClick={() => downloadPDF(language as Language)}
                     className="px-4 py-2.5 bg-white border-2 border-emerald-600 text-emerald-600 rounded-full hover:bg-emerald-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
                 >
                     <Download className="h-4 w-4" />
-                    PDF
+                    Download PDF
                 </button>
                 <button
                     onClick={onRestart}

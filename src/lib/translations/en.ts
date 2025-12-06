@@ -168,6 +168,7 @@ export const en = {
         audio: 'Audio',
         pulse: 'Pulse',
         bodyPart: 'Body Part',
+        smartConnect: 'Smart Connect',
     },
 
     // Inquiry Step

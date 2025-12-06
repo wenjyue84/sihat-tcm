@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, CheckCircle2, Wifi, Activity, Heart, Thermometer, Droplets, Watch, Smartphone, Bluetooth, RefreshCw } from 'lucide-react'
+import { Loader2, CheckCircle2, Wifi, Activity, Heart, Thermometer, Droplets, Watch, Smartphone, Bluetooth, RefreshCw, Info, X } from 'lucide-react'
 
 export type IoTDeviceType = 'pulse' | 'bp' | 'oxygen' | 'temp' | 'hrv' | 'stress'
 
@@ -22,7 +22,9 @@ const deviceConfig = {
         color: 'text-rose-500',
         unit: 'BPM',
         range: [65, 95],
-        label: 'Pulse Rate'
+        label: 'Pulse Rate',
+        description: 'Heart rate is the speed of the heartbeat measured by the number of contractions (beats) of the heart per minute (bpm).',
+        normalRangeText: '60 - 100 BPM'
     },
     bp: {
         name: 'Digital Blood Pressure Cuff',
@@ -30,7 +32,9 @@ const deviceConfig = {
         color: 'text-blue-500',
         unit: 'mmHg',
         range: [110, 130], // Systolic range, will calc diastolic
-        label: 'Blood Pressure'
+        label: 'Blood Pressure',
+        description: 'Blood pressure is the pressure of circulating blood against the walls of blood vessels.',
+        normalRangeText: '90/60 - 120/80 mmHg'
     },
     oxygen: {
         name: 'Pulse Oximeter',
@@ -38,7 +42,9 @@ const deviceConfig = {
         color: 'text-cyan-500',
         unit: '%',
         range: [96, 99],
-        label: 'Blood Oxygen'
+        label: 'Blood Oxygen',
+        description: 'Blood oxygen level is a measure of how much oxygen your red blood cells are carrying.',
+        normalRangeText: '95% - 100%'
     },
     temp: {
         name: 'Smart Thermometer',
@@ -46,7 +52,9 @@ const deviceConfig = {
         color: 'text-amber-500',
         unit: '°C',
         range: [36.3, 37.1],
-        label: 'Body Temperature'
+        label: 'Body Temperature',
+        description: "Body temperature is a measure of your body's ability to generate and get rid of heat.",
+        normalRangeText: '36.1°C - 37.2°C'
     },
     hrv: {
         name: 'HRV Tracker',
@@ -54,7 +62,9 @@ const deviceConfig = {
         color: 'text-purple-500',
         unit: 'ms',
         range: [30, 80],
-        label: 'Heart Rate Variability'
+        label: 'Heart Rate Variability',
+        description: 'Heart rate variability is the physiological phenomenon of variation in the time interval between heartbeats.',
+        normalRangeText: '20 - 70 ms'
     },
     stress: {
         name: 'Stress Monitor',
@@ -62,7 +72,9 @@ const deviceConfig = {
         color: 'text-orange-500',
         unit: 'Score',
         range: [15, 45],
-        label: 'Stress Level'
+        label: 'Stress Level',
+        description: 'Stress level is estimated based on your heart rate variability and other physiological data.',
+        normalRangeText: '10 - 40'
     }
 }
 
@@ -71,6 +83,7 @@ export function IoTConnectionWizard({ isOpen, onClose, deviceType, onDataReceive
     const [progress, setProgress] = useState(0)
     const [currentValue, setCurrentValue] = useState<string | number>('--')
     const [finalValue, setFinalValue] = useState<any>(null)
+    const [showExplanation, setShowExplanation] = useState(false)
 
     const config = deviceConfig[deviceType]
     const Icon = config.icon
@@ -149,15 +162,50 @@ export function IoTConnectionWizard({ isOpen, onClose, deviceType, onDataReceive
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-emerald-400">
                         <Watch className="w-5 h-5" />
-                        IoT Device Connection
+                        Device Connection
                     </DialogTitle>
                     <DialogDescription className="text-slate-400">
                         Connecting to {config.name}...
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="py-6 flex flex-col items-center justify-center min-h-[300px]">
+                <div className="py-6 flex flex-col items-center justify-center min-h-[300px] relative">
                     <AnimatePresence mode="wait">
+                        {showExplanation ? (
+                            <motion.div
+                                key="explanation"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="absolute inset-0 bg-slate-900/95 z-20 flex flex-col p-4 rounded-lg"
+                            >
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2">
+                                        <Info className="w-5 h-5" />
+                                        About {config.label}
+                                    </h3>
+                                    <Button variant="ghost" size="sm" onClick={() => setShowExplanation(false)} className="h-8 w-8 p-0 text-slate-400 hover:text-white">
+                                        <X className="w-5 h-5" />
+                                    </Button>
+                                </div>
+                                <div className="flex-1 overflow-y-auto space-y-4">
+                                    <div className="rounded-lg overflow-hidden border border-slate-700">
+                                        <img src="/health-metrics-explanation.png" alt="Explanation" className="w-full h-32 object-cover" />
+                                    </div>
+                                    <p className="text-sm text-slate-300 leading-relaxed">
+                                        {config.description}
+                                    </p>
+                                    <div className="bg-slate-800 p-3 rounded-lg border border-slate-700">
+                                        <span className="text-xs text-slate-500 uppercase font-bold tracking-wider block mb-1">Normal Range</span>
+                                        <span className="text-lg font-mono text-emerald-400">{config.normalRangeText}</span>
+                                    </div>
+                                </div>
+                                <Button onClick={() => setShowExplanation(false)} className="mt-4 w-full bg-slate-800 hover:bg-slate-700 text-white">
+                                    Got it
+                                </Button>
+                            </motion.div>
+                        ) : null}
+
                         {step === 'scanning' && (
                             <motion.div
                                 key="scanning"
@@ -250,7 +298,15 @@ export function IoTConnectionWizard({ isOpen, onClose, deviceType, onDataReceive
                                 </div>
 
                                 <div className="flex gap-3 w-full mt-4">
-                                    <Button variant="outline" onClick={() => setStep('reading')} className="flex-1 border-slate-700 hover:bg-slate-800 hover:text-white">
+                                    <Button
+                                        variant="ghost"
+                                        onClick={() => setShowExplanation(true)}
+                                        className="flex-1 border border-slate-600 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                                    >
+                                        <Info className="w-4 h-4 mr-2" />
+                                        Explain
+                                    </Button>
+                                    <Button variant="outline" onClick={() => setStep('reading')} className="flex-1 bg-slate-700 border-slate-600 text-white hover:bg-slate-600">
                                         <RefreshCw className="w-4 h-4 mr-2" />
                                         Retry
                                     </Button>

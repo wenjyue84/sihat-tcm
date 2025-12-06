@@ -3,9 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useState, useRef } from 'react'
-import { Heart, Watch, Activity, Droplets, ThermometerSun, CheckCircle2, ChevronRight, Info, AlertCircle, Stethoscope, Wifi } from 'lucide-react'
+import { Heart, Activity, CheckCircle2, ChevronRight, Info, AlertCircle, Stethoscope } from 'lucide-react'
 import { ShowPromptButton } from './ShowPromptButton'
-import { IoTConnectionWizard, IoTDeviceType } from './IoTConnectionWizard'
 
 // TCM Pulse Quality Types (脉象类型)
 const tcmPulseQualities = [
@@ -31,9 +30,7 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
     const [currentStep, setCurrentStep] = useState(0)
     const [inputMode, setInputMode] = useState<'tap' | 'manual'>('manual') // Default to manual
     const [selectedPulseQualities, setSelectedPulseQualities] = useState<string[]>([])
-    const [wizardOpen, setWizardOpen] = useState(false)
-    const [selectedDevice, setSelectedDevice] = useState<IoTDeviceType>('pulse')
-    const [syncedData, setSyncedData] = useState<Record<string, any>>({})
+
 
     const steps = [
         {
@@ -334,84 +331,7 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
                 )}
             </div>
 
-            {/* Smart IoT Device Section */}
-            <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-900 p-6 text-white shadow-xl">
-                <div className="absolute top-0 right-0 w-64 h-64 opacity-10 pointer-events-none">
-                    <img
-                        src="/future-iot-device.png"
-                        alt="Future IoT Device"
-                        className="w-full h-full object-cover"
-                    />
-                </div>
 
-                <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <div className="flex items-center gap-2 mb-2">
-                                <Wifi className="w-5 h-5 text-emerald-400 animate-pulse" />
-                                <span className="text-sm font-semibold text-emerald-400 uppercase tracking-wide">Smart Connect</span>
-                            </div>
-                            <h3 className="text-xl font-bold">IoT Health Monitor</h3>
-                            <p className="text-sm text-slate-300">
-                                Connect your smart devices to sync health metrics instantly.
-                            </p>
-                        </div>
-                        <div className="hidden md:block">
-                            <Button variant="outline" className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300">
-                                <Watch className="w-4 h-4 mr-2" />
-                                Manage Devices
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                        {[
-                            { id: 'pulse', label: 'Pulse Rate', icon: Heart, color: 'text-rose-400', bg: 'bg-rose-500/10 border-rose-500/20' },
-                            { id: 'bp', label: 'Blood Pressure', icon: Activity, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-                            { id: 'oxygen', label: 'Blood Oxygen', icon: Droplets, color: 'text-cyan-400', bg: 'bg-cyan-500/10 border-cyan-500/20' },
-                            { id: 'temp', label: 'Temperature', icon: ThermometerSun, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
-                            { id: 'hrv', label: 'HRV', icon: Activity, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
-                            { id: 'stress', label: 'Stress Level', icon: Activity, color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' },
-                        ].map((device) => (
-                            <button
-                                key={device.id}
-                                onClick={() => {
-                                    setSelectedDevice(device.id as any)
-                                    setWizardOpen(true)
-                                }}
-                                className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all hover:scale-105 active:scale-95 ${device.bg} ${syncedData[device.id] ? 'ring-2 ring-emerald-500 ring-offset-2 ring-offset-slate-900' : ''
-                                    }`}
-                            >
-                                <div className={`p-2 rounded-full bg-white/5 ${device.color}`}>
-                                    <device.icon className="w-5 h-5" />
-                                </div>
-                                <span className="text-xs font-medium text-slate-200">{device.label}</span>
-                                {syncedData[device.id] ? (
-                                    <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                                        {syncedData[device.id]}
-                                    </span>
-                                ) : (
-                                    <span className="text-[10px] text-slate-500">Connect</span>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            <IoTConnectionWizard
-                isOpen={wizardOpen}
-                onClose={() => setWizardOpen(false)}
-                deviceType={selectedDevice}
-                onDataReceived={(data) => {
-                    setSyncedData(prev => ({ ...prev, [selectedDevice]: data }))
-                    if (selectedDevice === 'pulse') {
-                        // If it's pulse, also update the main BPM state
-                        setBpm(Number(data))
-                        setInputMode('tap') // Switch to tap/display mode to show the result
-                    }
-                }}
-            />
 
             {/* Complete Button */}
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 md:static md:bg-transparent md:border-none md:shadow-none md:p-0 flex gap-3">

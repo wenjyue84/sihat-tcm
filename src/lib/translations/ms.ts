@@ -113,7 +113,7 @@ export const ms: TranslationKeys = {
         seniorPhysician: { name: 'Doktor Kanan', nameZh: '主任医师', description: 'Perundingan lanjutan dengan analisis mendalam' },
         masterPhysician: { name: 'Pakar Utama', nameZh: '国医大师', description: 'Perundingan pakar dengan wawasan menyeluruh' },
     },
-    steps: { basics: 'Asas', inquiry: 'Pertanyaan', tongue: 'Lidah', face: 'Muka', audio: 'Audio', pulse: 'Nadi', bodyPart: 'Bahagian Badan' },
+    steps: { basics: 'Asas', inquiry: 'Pertanyaan', tongue: 'Lidah', face: 'Muka', audio: 'Audio', pulse: 'Nadi', bodyPart: 'Bahagian Badan', smartConnect: 'Sambungan Pintar' },
     inquiry: {
         title: 'Pertanyaan TCM (问诊)',
         subtitle: 'Doktor AI kami akan bertanya soalan berdasarkan simptom anda.',

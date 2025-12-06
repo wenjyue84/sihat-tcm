@@ -7,11 +7,10 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useState, useEffect, useRef } from 'react'
-import { User, Calendar as CalendarIcon, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles, Stethoscope, Minus, Plus, Smartphone, Heart, Moon, Footprints } from 'lucide-react'
+import { User, Calendar as CalendarIcon, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles, Stethoscope, Minus, Plus } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useDoctorLevel, DOCTOR_LEVELS, DoctorLevel } from '@/contexts/DoctorContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { HealthDataImportWizard, ImportedHealthData } from './HealthDataImportWizard'
 
 // Mobile-friendly numeric input with slider and increment/decrement buttons
 interface MobileNumericInputProps {
@@ -196,7 +195,6 @@ export interface BasicInfoData {
     height: string
     symptoms: string
     symptomDuration: string
-    healthData?: ImportedHealthData
 }
 
 export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: BasicInfoData) => void, initialData?: BasicInfoData }) {
@@ -212,7 +210,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
         symptomDuration: ''
     })
 
-    const [showHealthWizard, setShowHealthWizard] = useState(false)
+
 
     // Symptom keys for translation
     const symptomKeys: Array<keyof typeof t.basicInfo.symptoms> = [
@@ -255,8 +253,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                 weight: initialData.weight ?? prev.weight ?? '',
                 height: initialData.height ?? prev.height ?? '',
                 symptoms: initialData.symptoms ?? prev.symptoms ?? '',
-                symptomDuration: initialData.symptomDuration ?? prev.symptomDuration ?? '',
-                healthData: initialData.healthData ?? prev.healthData
+                symptomDuration: initialData.symptomDuration ?? prev.symptomDuration ?? ''
             }))
         }
     }, [initialData])
@@ -296,11 +293,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
         setFormData({ ...formData, symptoms: translatedSymptoms.join(', ') })
     }
 
-    const handleHealthDataImport = (data: ImportedHealthData) => {
-        setFormData(prev => ({ ...prev, healthData: data }))
-        // Optionally auto-fill weight if available and not set?
-        // But for now just store it.
-    }
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -485,63 +478,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                     </div>
                 </div>
 
-                {/* Health Data Import Section */}
-                <div className="space-y-3">
-                    <Label className="text-stone-600 font-medium flex items-center gap-2">
-                        <Smartphone className="w-4 h-4 text-emerald-600" />
-                        Health Data (Optional)
-                    </Label>
 
-                    {!formData.healthData ? (
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setShowHealthWizard(true)}
-                            className="w-full h-14 border-dashed border-2 border-stone-300 text-stone-500 hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 flex items-center justify-center gap-2"
-                        >
-                            <Activity className="w-5 h-5" />
-                            Import from Health App (Samsung/Apple/Google)
-                        </Button>
-                    ) : (
-                        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                    <div className="p-1.5 bg-emerald-100 rounded-full">
-                                        <Check className="w-4 h-4 text-emerald-600" />
-                                    </div>
-                                    <span className="font-semibold text-emerald-900">Imported from {formData.healthData.provider}</span>
-                                </div>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => setShowHealthWizard(true)}
-                                    className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100"
-                                >
-                                    Update
-                                </Button>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                <div className="flex items-center gap-2 text-sm text-stone-600">
-                                    <Footprints className="w-4 h-4 text-stone-400" />
-                                    <span>{formData.healthData.steps.toLocaleString()} steps</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-stone-600">
-                                    <Moon className="w-4 h-4 text-stone-400" />
-                                    <span>{formData.healthData.sleepHours}h sleep</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-stone-600">
-                                    <Heart className="w-4 h-4 text-stone-400" />
-                                    <span>{formData.healthData.heartRate} bpm</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm text-stone-600">
-                                    <Activity className="w-4 h-4 text-stone-400" />
-                                    <span>{formData.healthData.calories} kcal</span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
 
                 <div className="space-y-3">
                     <Label className="text-stone-600 font-medium flex items-center gap-2">
@@ -653,11 +590,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                 </div>
             </form>
 
-            <HealthDataImportWizard
-                isOpen={showHealthWizard}
-                onClose={() => setShowHealthWizard(false)}
-                onDataImported={handleHealthDataImport}
-            />
+
         </Card>
     )
 }

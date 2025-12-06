@@ -113,7 +113,7 @@ export const zh: TranslationKeys = {
         seniorPhysician: { name: '主任医师', nameZh: '主任医师', description: '深度问诊，提供更详细的分析' },
         masterPhysician: { name: '国医大师', nameZh: '国医大师', description: '专家问诊，提供全面深入的诊断' },
     },
-    steps: { basics: '基本信息', inquiry: '问诊', tongue: '舌诊', face: '面诊', audio: '闻诊', pulse: '切诊', bodyPart: '局部检查' },
+    steps: { basics: '基本信息', inquiry: '问诊', tongue: '舌诊', face: '面诊', audio: '闻诊', pulse: '切诊', bodyPart: '局部检查', smartConnect: '智能连接' },
     inquiry: {
         title: '中医问诊',
         subtitle: '我们的人工智能医师将根据您的症状向您提问。',
