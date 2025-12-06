@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import { User, Calendar, Scale, Ruler, FileText, Check, Sparkles, ClipboardList, History, LogOut, Eye, Loader2 } from 'lucide-react'
+import { User, Calendar, Scale, Ruler, FileText, Check, Sparkles, ClipboardList, History, LogOut, Eye, Loader2, Download, Upload } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Type for inquiries from Supabase
@@ -26,10 +26,18 @@ interface Inquiry {
     created_at: string
 }
 
+interface Report {
+    name: string
+    date: string
+    size: string
+    type: string
+}
+
 export default function PatientDashboard() {
     const { user, profile, loading: authLoading, signOut } = useAuth()
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [loggingOut, setLoggingOut] = useState(false)
     const [saved, setSaved] = useState(false)
     const [inquiries, setInquiries] = useState<Inquiry[]>([])
     const [loadingInquiries, setLoadingInquiries] = useState(true)
@@ -41,28 +49,143 @@ export default function PatientDashboard() {
         weight: '',
         medical_history: ''
     })
+    const [reports, setReports] = useState<Report[]>([
+        { name: "Blood Test Result.pdf", date: "2023-11-15", size: "1.2 MB", type: "application/pdf" },
+        { name: "X-Ray Report - Chest.pdf", date: "2023-10-20", size: "2.5 MB", type: "application/pdf" },
+        { name: "Annual Health Checkup.pdf", date: "2023-08-12", size: "3.1 MB", type: "application/pdf" },
+        { name: "MRI Scan Report.pdf", date: "2023-06-05", size: "5.8 MB", type: "application/pdf" },
+        { name: "Prescription History.pdf", date: "2023-05-20", size: "0.5 MB", type: "application/pdf" }
+    ])
+    const [isLoaded, setIsLoaded] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
+    // Load reports from localStorage
+    useEffect(() => {
+        const saved = localStorage.getItem('patientReports')
+        if (saved) {
+            setReports(JSON.parse(saved))
+        }
+        setIsLoaded(true)
+    }, [])
+
+    // Save reports to localStorage
+    useEffect(() => {
+        if (isLoaded) {
+            localStorage.setItem('patientReports', JSON.stringify(reports))
+        }
+    }, [reports, isLoaded])
+
+    const handleUploadClick = () => {
+        fileInputRef.current?.click()
+    }
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file) return
+
+        // Create a new report object
+        const newReport: Report = {
+            name: file.name,
+            date: new Date().toISOString().split('T')[0],
+            size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+            type: file.type
+        }
+
+        setReports([newReport, ...reports])
+
+        // Reset input
+        e.target.value = ''
+    }
 
     // REMOVED: Auto-redirect to home.
     // Instead, we will show an access denied message if the role doesn't match.
 
     // Fetch profile data
     useEffect(() => {
+        const getRandomProfile = () => {
+            const firstNames = ["James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth"];
+            const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez"];
+            const randomName = `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
+
+            return {
+                full_name: randomName,
+                age: Math.floor(Math.random() * (60 - 20) + 20).toString(),
+                gender: Math.random() > 0.5 ? 'male' : 'female',
+                height: (Math.floor(Math.random() * (190 - 150) + 150)).toString(),
+                weight: (Math.floor(Math.random() * (100 - 50) + 50)).toString(),
+                medical_history: "No significant medical history. Occasional seasonal allergies."
+            };
+        };
+
+        const random = getRandomProfile();
+
         if (profile) {
             setFormData({
-                full_name: profile.full_name || '',
-                age: profile.age?.toString() || '',
-                gender: profile.gender || '',
-                height: profile.height?.toString() || '',
-                weight: profile.weight?.toString() || '',
-                medical_history: profile.medical_history || ''
+                full_name: profile.full_name || random.full_name,
+                age: profile.age?.toString() || random.age,
+                gender: profile.gender || random.gender,
+                height: profile.height?.toString() || random.height,
+                weight: profile.weight?.toString() || random.weight,
+                medical_history: profile.medical_history || random.medical_history
             })
+        } else {
+            setFormData(random);
         }
     }, [profile])
 
     // Fetch diagnosis history from Supabase
     useEffect(() => {
         async function fetchInquiries() {
+            // Generate 10 mock inquiries
+            const generateMockInquiries = (): Inquiry[] => {
+                const mockInquiries: Inquiry[] = [];
+                const symptomsList = [
+                    "Headache, dizziness, and fatigue",
+                    "Stomach pain and bloating after eating",
+                    "Insomnia and anxiety at night",
+                    "Chronic cough with phlegm",
+                    "Lower back pain and knee weakness",
+                    "Dry eyes and blurred vision",
+                    "Palpitations and shortness of breath",
+                    "Skin rash and itching",
+                    "Constipation and dry stool",
+                    "Cold hands and feet"
+                ];
+                const diagnosesList = [
+                    "Liver Fire Uprising",
+                    "Spleen Qi Deficiency",
+                    "Heart Yin Deficiency",
+                    "Lung Qi Deficiency",
+                    "Kidney Yang Deficiency",
+                    "Liver Blood Deficiency",
+                    "Heart Qi Deficiency",
+                    "Wind-Heat attacking the Lungs",
+                    "Large Intestine Dryness",
+                    "Spleen Yang Deficiency"
+                ];
+
+                for (let i = 0; i < 10; i++) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (i * 3 + 1)); // Spread out over days
+
+                    mockInquiries.push({
+                        id: `mock-${i}`,
+                        symptoms: symptomsList[i],
+                        diagnosis_report: {
+                            mainComplaint: symptomsList[i],
+                            tcmDiagnosis: diagnosesList[i],
+                            syndromePattern: diagnosesList[i]
+                        },
+                        created_at: date.toISOString()
+                    });
+                }
+                return mockInquiries;
+            };
+
+            const mockData = generateMockInquiries();
+
             if (!user?.id) {
+                setInquiries(mockData);
                 setLoadingInquiries(false)
                 return
             }
@@ -76,11 +199,15 @@ export default function PatientDashboard() {
 
                 if (error) {
                     console.error('Error fetching inquiries:', error)
+                    setInquiries(mockData)
                 } else {
-                    setInquiries(data || [])
+                    const combined = [...(data || []), ...mockData]
+                    combined.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                    setInquiries(combined)
                 }
             } catch (error) {
                 console.error('Error fetching inquiries:', error)
+                setInquiries(mockData)
             } finally {
                 setLoadingInquiries(false)
             }
@@ -119,24 +246,57 @@ export default function PatientDashboard() {
         }
     }
 
-    const handleStartDiagnosis = () => {
-        // Store profile data in localStorage to pre-fill the BasicInfoForm
-        const profileData = {
-            name: formData.full_name,
-            age: formData.age,
-            gender: formData.gender.toLowerCase(),
-            weight: formData.weight,
-            height: formData.height,
-            symptoms: '',
-            symptomDuration: ''
+    const handleStartDiagnosis = async () => {
+        setLoading(true)
+        try {
+            // Auto-save profile to Supabase first
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    full_name: formData.full_name,
+                    age: parseInt(formData.age) || null,
+                    gender: formData.gender,
+                    height: parseFloat(formData.height) || null,
+                    weight: parseFloat(formData.weight) || null,
+                    medical_history: formData.medical_history
+                })
+                .eq('id', user?.id)
+
+            if (error) {
+                console.error('Error auto-saving profile:', error)
+                // Continue anyway, as we rely on localStorage for the immediate diagnosis
+            }
+
+            // Store profile data in localStorage to pre-fill the BasicInfoForm
+            const profileData = {
+                name: formData.full_name,
+                age: formData.age,
+                gender: formData.gender.toLowerCase(),
+                weight: formData.weight,
+                height: formData.height,
+                symptoms: '',
+                symptomDuration: ''
+            }
+            localStorage.setItem('patientProfileData', JSON.stringify(profileData))
+            router.push('/')
+        } catch (error) {
+            console.error('Error in start diagnosis:', error)
+            // Fallback: just redirect
+            router.push('/')
+        } finally {
+            setLoading(false)
         }
-        localStorage.setItem('patientProfileData', JSON.stringify(profileData))
-        router.push('/')
     }
 
     const handleLogout = async () => {
-        await signOut()
-        router.push('/')
+        try {
+            setLoggingOut(true)
+            await signOut()
+            router.push('/')
+        } catch (error) {
+            console.error('Error logging out:', error)
+            setLoggingOut(false)
+        }
     }
 
     if (authLoading) return <div className="p-8">Loading...</div>
@@ -154,21 +314,26 @@ export default function PatientDashboard() {
 
     return (
         <div className="container mx-auto p-8">
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <h1 className="text-3xl font-bold">Patient Dashboard</h1>
                 <Button
                     variant="outline"
                     onClick={handleLogout}
-                    className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                    disabled={loggingOut}
+                    className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 w-full md:w-auto justify-center"
                 >
-                    <LogOut className="w-4 h-4" />
-                    Logout
+                    {loggingOut ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                        <LogOut className="w-4 h-4" />
+                    )}
+                    {loggingOut ? 'Logging out...' : 'Logout'}
                 </Button>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-2">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {/* My Profile Card */}
-                <Card className="overflow-hidden border-none shadow-2xl bg-white/90 backdrop-blur-sm ring-1 ring-stone-900/5">
+                <Card className="overflow-hidden border-none shadow-2xl bg-white/90 backdrop-blur-sm ring-1 ring-stone-900/5 md:col-span-1 lg:col-span-1">
                     <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
@@ -316,7 +481,7 @@ export default function PatientDashboard() {
                 </Card>
 
                 {/* My Inquiries Card */}
-                <Card className="overflow-hidden border-none shadow-2xl bg-white/90 backdrop-blur-sm ring-1 ring-stone-900/5">
+                <Card className="overflow-hidden border-none shadow-2xl bg-white/90 backdrop-blur-sm ring-1 ring-stone-900/5 md:col-span-1 lg:col-span-1">
                     <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
@@ -415,6 +580,67 @@ export default function PatientDashboard() {
                             <Sparkles className="w-5 h-5 mr-2" />
                             Start New Diagnosis
                         </Button>
+                    </div>
+                </Card>
+
+                {/* Medical Reports Card */}
+                <Card className="overflow-hidden border-none shadow-2xl bg-white/90 backdrop-blur-sm ring-1 ring-stone-900/5 md:col-span-2 lg:col-span-1">
+                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
+                                <FileText className="w-6 h-6 text-white" />
+                            </div>
+                            <h2 className="text-2xl font-bold">Medical Reports</h2>
+                        </div>
+                        <p className="text-blue-50 opacity-90">Manage your uploaded medical documents.</p>
+                    </div>
+
+                    <div className="p-6 space-y-4">
+                        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                            {reports.map((file, index) => (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, x: 10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    className="flex items-center justify-between p-3 bg-stone-50 rounded-lg border border-stone-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all group"
+                                >
+                                    <div className="flex items-center gap-3 overflow-hidden">
+                                        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg shrink-0">
+                                            <FileText className="w-5 h-5" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className="font-medium text-stone-800 truncate">{file.name}</p>
+                                            <div className="flex items-center gap-2 text-xs text-stone-500">
+                                                <span>{file.date}</span>
+                                                <span>•</span>
+                                                <span>{file.size}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Button variant="ghost" size="icon" className="text-stone-400 hover:text-blue-600 hover:bg-blue-100/50 shrink-0">
+                                        <Download className="w-4 h-4" />
+                                    </Button>
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        <div className="pt-2">
+                            <Button
+                                onClick={handleUploadClick}
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 rounded-xl shadow-lg shadow-blue-200/50 transition-all"
+                            >
+                                <Upload className="w-4 h-4 mr-2" />
+                                Upload New Report
+                            </Button>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
+                                accept=".pdf,.md,.csv,.doc,.docx,application/pdf,text/markdown,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                onChange={handleFileChange}
+                            />
+                        </div>
                     </div>
                 </Card>
             </div>

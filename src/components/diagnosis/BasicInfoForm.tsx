@@ -7,10 +7,11 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useState, useEffect, useRef } from 'react'
-import { User, Calendar as CalendarIcon, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles, Stethoscope, Minus, Plus } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { User, Calendar as CalendarIcon, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles, Stethoscope, Minus, Plus, Smartphone, Heart, Moon, Footprints } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useDoctorLevel, DOCTOR_LEVELS, DoctorLevel } from '@/contexts/DoctorContext'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { HealthDataImportWizard, ImportedHealthData } from './HealthDataImportWizard'
 
 // Mobile-friendly numeric input with slider and increment/decrement buttons
 interface MobileNumericInputProps {
@@ -108,7 +109,7 @@ function MobileNumericInput({
                         onChange={(e) => onChange(e.target.value)}
                         onFocus={() => setShowSlider(true)}
                         placeholder={placeholder}
-                        className="pl-10 pr-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50 rounded-none text-center text-lg font-medium [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="pl-10 pr-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50 rounded-none text-center text-lg font-semibold text-stone-900 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         required={required}
                     />
                     {unit && (
@@ -195,6 +196,7 @@ export interface BasicInfoData {
     height: string
     symptoms: string
     symptomDuration: string
+    healthData?: ImportedHealthData
 }
 
 export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: BasicInfoData) => void, initialData?: BasicInfoData }) {
@@ -210,6 +212,8 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
         symptomDuration: ''
     })
 
+    const [showHealthWizard, setShowHealthWizard] = useState(false)
+
     // Symptom keys for translation
     const symptomKeys: Array<keyof typeof t.basicInfo.symptoms> = [
         'fever', 'cough', 'headache', 'fatigue',
@@ -217,6 +221,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
     ]
 
     const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
+    const [errors, setErrors] = useState<string[]>([])
 
     // Load patient profile data from localStorage
     useEffect(() => {
@@ -251,6 +256,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                 height: initialData.height ?? prev.height ?? '',
                 symptoms: initialData.symptoms ?? prev.symptoms ?? '',
                 symptomDuration: initialData.symptomDuration ?? prev.symptomDuration ?? '',
+                healthData: initialData.healthData ?? prev.healthData
             }))
         }
     }, [initialData])
@@ -290,11 +296,52 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
         setFormData({ ...formData, symptoms: translatedSymptoms.join(', ') })
     }
 
+    const handleHealthDataImport = (data: ImportedHealthData) => {
+        setFormData(prev => ({ ...prev, healthData: data }))
+        // Optionally auto-fill weight if available and not set?
+        // But for now just store it.
+    }
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        if (formData.name && formData.age && formData.gender && formData.weight && formData.height) {
-            onComplete(formData)
+
+        const missingFields: string[] = []
+        if (!formData.name) missingFields.push('name')
+        if (!formData.gender) missingFields.push('gender')
+        if (!formData.age) missingFields.push('age')
+        if (!formData.weight) missingFields.push('weight')
+        if (!formData.height) missingFields.push('height')
+        if (!formData.symptomDuration) missingFields.push('symptomDuration')
+
+        if (missingFields.length > 0) {
+            const fieldNames: Record<string, string> = {
+                name: t.basicInfo.fullName,
+                gender: t.basicInfo.gender,
+                age: t.basicInfo.age,
+                weight: t.basicInfo.weight,
+                height: t.basicInfo.height,
+                symptomDuration: t.basicInfo.duration
+            }
+
+            setErrors(missingFields.map(field => `${fieldNames[field]} ${t.errors?.requiredField || 'is required'}`))
+
+            // Scroll to the first missing field
+            const firstFieldId = missingFields[0]
+            // Check for wrapper first (for Selects), then direct ID (for Inputs)
+            const element = document.getElementById(`${firstFieldId}-wrapper`) || document.getElementById(firstFieldId)
+
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                // Try to focus if it's an input
+                if (element.tagName === 'INPUT') {
+                    element.focus()
+                }
+            }
+            return
         }
+
+        setErrors([])
+        onComplete(formData)
     }
 
     // Get translated doctor level info
@@ -319,9 +366,9 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                 <p className="text-emerald-50 opacity-90">{t.basicInfo.subtitle}</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-8 pb-24 md:pb-6">
-                <div className="grid gap-6 md:grid-cols-2">
-                    <div className="space-y-2 col-span-2 md:col-span-1">
+            <form onSubmit={handleSubmit} className="p-6 space-y-8 pb-24 md:pb-6" noValidate>
+                <div className="grid gap-6 lg:grid-cols-2">
+                    <div className="space-y-2 col-span-2 lg:col-span-1">
                         <Label htmlFor="name" className="text-stone-600 font-medium">{t.basicInfo.fullName}</Label>
                         <div className="relative">
                             <User className="absolute left-3 top-3.5 h-4 w-4 text-emerald-600/70" />
@@ -330,13 +377,13 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 placeholder={t.basicInfo.fullNamePlaceholder}
-                                className="pl-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
+                                className="pl-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50 text-stone-900"
                                 required
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-2 col-span-2 md:col-span-1">
+                    <div className="space-y-2 col-span-2 lg:col-span-1" id="gender-wrapper">
                         <Label htmlFor="gender" className="text-stone-600 font-medium">{t.basicInfo.gender}</Label>
                         <div className="relative">
                             <div className="absolute left-3 top-3 h-4 w-4 text-emerald-600/70 z-10 pointer-events-none">
@@ -346,7 +393,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                                 value={formData.gender}
                                 onValueChange={(val) => setFormData({ ...formData, gender: val })}
                             >
-                                <SelectTrigger id="gender" className="pl-10 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50">
+                                <SelectTrigger id="gender" className="pl-10 h-12 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50 text-stone-900">
                                     <SelectValue placeholder={t.basicInfo.selectGender} />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -408,7 +455,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                         />
                     </div>
 
-                    <div className="space-y-2 relative z-10">
+                    <div className="space-y-2 relative z-10" id="symptomDuration-wrapper">
                         <Label htmlFor="symptomDuration" className="text-stone-600 font-medium">{t.basicInfo.duration}</Label>
                         <div className="relative">
                             <div className="absolute left-3 top-3 h-4 w-4 text-emerald-600/70 z-10 pointer-events-none">
@@ -418,7 +465,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                                 value={formData.symptomDuration}
                                 onValueChange={(val) => setFormData({ ...formData, symptomDuration: val })}
                             >
-                                <SelectTrigger id="symptomDuration" className="pl-10 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50">
+                                <SelectTrigger id="symptomDuration" className="pl-10 h-12 border-stone-200 focus:ring-emerald-500/50 focus:border-emerald-500 bg-stone-50/50 text-stone-900">
                                     <SelectValue placeholder={t.basicInfo.durationPlaceholder} />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -436,6 +483,64 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                             </Select>
                         </div>
                     </div>
+                </div>
+
+                {/* Health Data Import Section */}
+                <div className="space-y-3">
+                    <Label className="text-stone-600 font-medium flex items-center gap-2">
+                        <Smartphone className="w-4 h-4 text-emerald-600" />
+                        Health Data (Optional)
+                    </Label>
+
+                    {!formData.healthData ? (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowHealthWizard(true)}
+                            className="w-full h-14 border-dashed border-2 border-stone-300 text-stone-500 hover:border-emerald-500 hover:text-emerald-600 hover:bg-emerald-50 flex items-center justify-center gap-2"
+                        >
+                            <Activity className="w-5 h-5" />
+                            Import from Health App (Samsung/Apple/Google)
+                        </Button>
+                    ) : (
+                        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-1.5 bg-emerald-100 rounded-full">
+                                        <Check className="w-4 h-4 text-emerald-600" />
+                                    </div>
+                                    <span className="font-semibold text-emerald-900">Imported from {formData.healthData.provider}</span>
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setShowHealthWizard(true)}
+                                    className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100"
+                                >
+                                    Update
+                                </Button>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div className="flex items-center gap-2 text-sm text-stone-600">
+                                    <Footprints className="w-4 h-4 text-stone-400" />
+                                    <span>{formData.healthData.steps.toLocaleString()} steps</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-stone-600">
+                                    <Moon className="w-4 h-4 text-stone-400" />
+                                    <span>{formData.healthData.sleepHours}h sleep</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-stone-600">
+                                    <Heart className="w-4 h-4 text-stone-400" />
+                                    <span>{formData.healthData.heartRate} bpm</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm text-stone-600">
+                                    <Activity className="w-4 h-4 text-stone-400" />
+                                    <span>{formData.healthData.calories} kcal</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="space-y-3">
@@ -486,7 +591,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                         <Stethoscope className="w-5 h-5 text-emerald-600" />
                         {t.basicInfo.chooseTcmDoctor}
                     </Label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="flex overflow-x-auto pb-4 gap-4 md:grid md:grid-cols-3 md:overflow-visible md:pb-0 snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 scrollbar-hide">
                         {(Object.keys(DOCTOR_LEVELS) as DoctorLevel[]).map((level) => {
                             const info = DOCTOR_LEVELS[level]
                             const translatedInfo = getDoctorLevelInfo(level)
@@ -497,7 +602,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                                     key={level}
                                     onClick={() => setDoctorLevel(level)}
                                     className={`
-                                        relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200
+                                        relative cursor-pointer rounded-xl p-4 border-2 transition-all duration-200 min-w-[260px] md:min-w-0 flex-shrink-0 snap-center
                                         ${isSelected
                                             ? `${info.borderColor} ${info.bgColor} shadow-md scale-[1.02]`
                                             : 'border-stone-100 bg-white hover:border-stone-200 hover:bg-stone-50'
@@ -527,7 +632,17 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                     </div>
                 </div>
 
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 md:static md:bg-transparent md:border-none md:shadow-none md:p-0">
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30 md:static md:bg-transparent md:border-none md:shadow-none md:p-0">
+                    {errors.length > 0 && (
+                        <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-600 animate-in fade-in slide-in-from-bottom-2">
+                            <p className="font-medium mb-1">{t.errors?.validationError || 'Please check the following fields:'}</p>
+                            <ul className="list-disc list-inside">
+                                {errors.map((error, index) => (
+                                    <li key={index}>{error}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                     <Button
                         type="submit"
                         className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-200/50 h-12 text-lg font-medium rounded-xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
@@ -537,6 +652,12 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                     </Button>
                 </div>
             </form>
+
+            <HealthDataImportWizard
+                isOpen={showHealthWizard}
+                onClose={() => setShowHealthWizard(false)}
+                onDataImported={handleHealthDataImport}
+            />
         </Card>
     )
 }

@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useRef, useState, useEffect } from 'react'
-import { Camera, Upload, RotateCcw, Check, SkipForward } from 'lucide-react'
+import { Camera, Upload, RotateCcw, Check, SkipForward, SwitchCamera } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { ShowPromptButton } from './ShowPromptButton'
 
@@ -27,6 +27,7 @@ export function CameraCapture({
     const [stream, setStream] = useState<MediaStream | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [capturedImage, setCapturedImage] = useState<string | null>(null)
+    const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user')
 
     // Use provided title/instruction or fall back to defaults from translations
     const displayTitle = title || t.camera.takePhoto
@@ -37,15 +38,15 @@ export function CameraCapture({
             startCamera()
         }
         return () => stopCamera()
-    }, [capturedImage])
+    }, [capturedImage, facingMode])
 
     const startCamera = async () => {
         try {
             setError(null)
-            // Use environment camera (rear) by default for better photo quality
+            // Use selected facing mode
             const mediaStream = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    facingMode: { ideal: 'environment' },
+                    facingMode: { ideal: facingMode },
                     width: { ideal: 1280 },
                     height: { ideal: 720 }
                 }
@@ -110,6 +111,10 @@ export function CameraCapture({
         onComplete({ image: null })
     }
 
+    const toggleCamera = () => {
+        setFacingMode(prev => prev === 'user' ? 'environment' : 'user')
+    }
+
     return (
         <Card className="p-4 md:p-6 space-y-4 pb-48 md:pb-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
@@ -128,6 +133,15 @@ export function CameraCapture({
                     !error ? (
                         <>
                             <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover" />
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                size="icon"
+                                className="absolute top-2 right-2 z-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-none h-10 w-10"
+                                onClick={toggleCamera}
+                            >
+                                <SwitchCamera className="w-5 h-5" />
+                            </Button>
                             <canvas ref={canvasRef} className="hidden" />
                             {!stream && (
                                 <div className="absolute inset-0 flex items-center justify-center text-gray-500">

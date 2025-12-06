@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
+import Image from 'next/image'
 
 export default function Home() {
   const [isDev, setIsDev] = useState(false)
@@ -56,13 +57,28 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-stone-50 to-emerald-50/30 text-stone-800 font-sans selection:bg-emerald-100">
-      <header className="relative overflow-hidden bg-emerald-900 text-white py-8 md:py-16 px-4 md:px-6 text-center">
+      <header className="relative bg-emerald-900 text-white h-20 px-4 md:px-6 flex items-center justify-between">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
 
-
+        {/* Left side: Logo and Title */}
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="bg-white/10 p-1.5 rounded-lg backdrop-blur-sm border border-white/10">
+            <Image
+              src="/logo.png"
+              alt="Sihat TCM Logo"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-contain"
+            />
+          </div>
+          <div className="flex flex-col">
+            <h1 className="text-xl font-bold leading-none tracking-tight text-white">Sihat TCM</h1>
+            <p className="text-xs text-emerald-200 font-medium tracking-wide">AI-Powered Traditional Chinese Medicine</p>
+          </div>
+        </div>
 
         {/* Top right buttons */}
-        <div className="absolute top-4 right-4 z-20 flex gap-2">
+        <div className="relative z-50 flex gap-2">
           <LanguageSelector />
           {/* 
             ========================================================================
@@ -115,7 +131,16 @@ export default function Home() {
             )
           )}
         </div>
+      </header>
 
+      <section className="container mx-auto py-6 md:py-12 px-4 relative z-20">
+        <div className="bg-white rounded-2xl shadow-xl border border-stone-100 overflow-hidden">
+          <DiagnosisWizard />
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden bg-emerald-900 text-white py-12 px-4 md:px-6 text-center mt-8">
+        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         <div className="relative z-10 max-w-3xl mx-auto space-y-4">
           <div className="inline-block px-3 py-1 rounded-full bg-emerald-800 text-emerald-100 text-xs md:text-sm font-medium mb-2">
             {t.common.appTagline}
@@ -126,12 +151,6 @@ export default function Home() {
           <p className="text-base md:text-xl text-emerald-100 max-w-2xl mx-auto leading-relaxed">
             {t.common.appDescription}
           </p>
-        </div>
-      </header>
-
-      <section className="container mx-auto py-6 md:py-12 px-4 -mt-6 md:-mt-8 relative z-20">
-        <div className="bg-white rounded-2xl shadow-xl border border-stone-100 overflow-hidden">
-          <DiagnosisWizard />
         </div>
       </section>
 

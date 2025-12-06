@@ -60,7 +60,12 @@ export async function POST(req: Request) {
 ═══════════════════════════════════════════════════════════════════════════════
                            患者资料 PATIENT PROFILE
 ═══════════════════════════════════════════════════════════════════════════════
+`;
 
+    if (data.verified_summaries?.basic_info) {
+      diagnosisInfo += `${data.verified_summaries.basic_info}\n`;
+    } else {
+      diagnosisInfo += `
 Name: ${basic_info?.name || 'Unknown'}
 Age: ${basic_info?.age || 'Unknown'}
 Gender: ${basic_info?.gender || 'Unknown'}
@@ -69,21 +74,28 @@ Height: ${basic_info?.height || 'Unknown'} cm
 ${basic_info?.height && basic_info?.weight ? `BMI: ${(basic_info.weight / ((basic_info.height / 100) ** 2)).toFixed(1)}` : ''}
 Reported Symptoms: ${basic_info?.symptoms || 'None'}
 Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
+`;
+    }
 
+    diagnosisInfo += `
 ═══════════════════════════════════════════════════════════════════════════════
                            问诊数据 INQUIRY DATA
 ═══════════════════════════════════════════════════════════════════════════════
 `;
 
-    if (data.wen_inquiry?.inquiryText) {
-      diagnosisInfo += `Detailed Notes: ${data.wen_inquiry.inquiryText}\n`;
-    }
-
-    if (data.wen_chat?.chat && Array.isArray(data.wen_chat.chat)) {
-      const chatHistory = data.wen_chat.chat.map((m: any) => `${m.role}: ${m.content}`).join('\n');
-      diagnosisInfo += `\nChat History (问诊记录):\n${chatHistory}\n`;
+    if (data.verified_summaries?.wen_inquiry) {
+      diagnosisInfo += `${data.verified_summaries.wen_inquiry}\n`;
     } else {
-      diagnosisInfo += `Chat History: No chat recorded\n`;
+      if (data.wen_inquiry?.inquiryText) {
+        diagnosisInfo += `Detailed Notes: ${data.wen_inquiry.inquiryText}\n`;
+      }
+
+      if (data.wen_chat?.chat && Array.isArray(data.wen_chat.chat)) {
+        const chatHistory = data.wen_chat.chat.map((m: any) => `${m.role}: ${m.content}`).join('\n');
+        diagnosisInfo += `\nChat History (问诊记录):\n${chatHistory}\n`;
+      } else {
+        diagnosisInfo += `Chat History: No chat recorded\n`;
+      }
     }
 
     diagnosisInfo += `
@@ -91,7 +103,11 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
                            切诊数据 PULSE DATA (切診)
 ═══════════════════════════════════════════════════════════════════════════════
 `;
-    diagnosisInfo += data.qie ? `Pulse BPM: ${data.qie.bpm}` : 'Pulse not measured';
+    if (data.verified_summaries?.qie) {
+      diagnosisInfo += `${data.verified_summaries.qie}\n`;
+    } else {
+      diagnosisInfo += data.qie ? `Pulse BPM: ${data.qie.bpm}` : 'Pulse not measured';
+    }
 
     diagnosisInfo += `
 
@@ -100,8 +116,10 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
 ═══════════════════════════════════════════════════════════════════════════════
 `;
 
-    // Include tongue observation if available
-    if (data.wang_tongue?.observation) {
+    // Tongue
+    if (data.verified_summaries?.wang_tongue) {
+      diagnosisInfo += `\n舌诊 Tongue Observation:\n${data.verified_summaries.wang_tongue}\n`;
+    } else if (data.wang_tongue?.observation) {
       diagnosisInfo += `\n舌诊 Tongue Observation:\n${data.wang_tongue.observation}\n`;
       if (data.wang_tongue.potential_issues?.length) {
         diagnosisInfo += `Tongue Indications: ${data.wang_tongue.potential_issues.join(', ')}\n`;
@@ -110,8 +128,10 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
       diagnosisInfo += 'Tongue: No observation recorded\n';
     }
 
-    // Include face observation if available
-    if (data.wang_face?.observation) {
+    // Face
+    if (data.verified_summaries?.wang_face) {
+      diagnosisInfo += `\n面诊 Face Observation:\n${data.verified_summaries.wang_face}\n`;
+    } else if (data.wang_face?.observation) {
       diagnosisInfo += `\n面诊 Face Observation:\n${data.wang_face.observation}\n`;
       if (data.wang_face.potential_issues?.length) {
         diagnosisInfo += `Face Indications: ${data.wang_face.potential_issues.join(', ')}\n`;
@@ -120,8 +140,10 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
       diagnosisInfo += 'Face: No observation recorded\n';
     }
 
-    // Include body part observation if available
-    if (data.wang_part?.observation) {
+    // Body Part
+    if (data.verified_summaries?.wang_part) {
+      diagnosisInfo += `\n体部诊 Body Part Observation:\n${data.verified_summaries.wang_part}\n`;
+    } else if (data.wang_part?.observation) {
       diagnosisInfo += `\n体部诊 Body Part Observation:\n${data.wang_part.observation}\n`;
       if (data.wang_part.potential_issues?.length) {
         diagnosisInfo += `Body Part Indications: ${data.wang_part.potential_issues.join(', ')}\n`;
@@ -134,45 +156,49 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
                            闻诊数据 LISTENING/SMELLING DATA (聞診)
 ═══════════════════════════════════════════════════════════════════════════════
 `;
-    // Include audio/voice observation if available
-    if (data.wen_audio?.audio) {
-      diagnosisInfo += `Voice Recording: ✓ Provided\n`;
-
-      // Handle structured analysis from AudioRecorder
-      if (data.wen_audio.analysis) {
-        const analysis = data.wen_audio.analysis;
-        diagnosisInfo += `\n--- AUDIO ANALYSIS RESULTS ---\n`;
-        diagnosisInfo += `Overall Observation: ${analysis.overall_observation || 'N/A'}\n`;
-
-        if (analysis.voice_quality_analysis) {
-          diagnosisInfo += `Voice Quality: ${analysis.voice_quality_analysis.observation} (Severity: ${analysis.voice_quality_analysis.severity})\n`;
-        }
-
-        if (analysis.breathing_patterns) {
-          diagnosisInfo += `Breathing: ${analysis.breathing_patterns.observation} (Severity: ${analysis.breathing_patterns.severity})\n`;
-        }
-
-        if (analysis.speech_patterns) {
-          diagnosisInfo += `Speech: ${analysis.speech_patterns.observation} (Severity: ${analysis.speech_patterns.severity})\n`;
-        }
-
-        if (analysis.cough_sounds) {
-          diagnosisInfo += `Cough: ${analysis.cough_sounds.observation} (Severity: ${analysis.cough_sounds.severity})\n`;
-        }
-
-        if (analysis.pattern_suggestions && analysis.pattern_suggestions.length > 0) {
-          diagnosisInfo += `Audio-suggested Patterns: ${analysis.pattern_suggestions.join(', ')}\n`;
-        }
-      } else if (data.wen_audio.observation) {
-        // Fallback for legacy format
-        diagnosisInfo += `Voice Analysis: ${data.wen_audio.observation}\n`;
-      }
-
-      if (data.wen_audio.transcription) {
-        diagnosisInfo += `Voice Transcription: ${data.wen_audio.transcription}\n`;
-      }
+    if (data.verified_summaries?.wen_audio) {
+      diagnosisInfo += `${data.verified_summaries.wen_audio}\n`;
     } else {
-      diagnosisInfo += `Voice Recording: Not provided\n`;
+      // Include audio/voice observation if available
+      if (data.wen_audio?.audio) {
+        diagnosisInfo += `Voice Recording: ✓ Provided\n`;
+
+        // Handle structured analysis from AudioRecorder
+        if (data.wen_audio.analysis) {
+          const analysis = data.wen_audio.analysis;
+          diagnosisInfo += `\n--- AUDIO ANALYSIS RESULTS ---\n`;
+          diagnosisInfo += `Overall Observation: ${analysis.overall_observation || 'N/A'}\n`;
+
+          if (analysis.voice_quality_analysis) {
+            diagnosisInfo += `Voice Quality: ${analysis.voice_quality_analysis.observation} (Severity: ${analysis.voice_quality_analysis.severity})\n`;
+          }
+
+          if (analysis.breathing_patterns) {
+            diagnosisInfo += `Breathing: ${analysis.breathing_patterns.observation} (Severity: ${analysis.breathing_patterns.severity})\n`;
+          }
+
+          if (analysis.speech_patterns) {
+            diagnosisInfo += `Speech: ${analysis.speech_patterns.observation} (Severity: ${analysis.speech_patterns.severity})\n`;
+          }
+
+          if (analysis.cough_sounds) {
+            diagnosisInfo += `Cough: ${analysis.cough_sounds.observation} (Severity: ${analysis.cough_sounds.severity})\n`;
+          }
+
+          if (analysis.pattern_suggestions && analysis.pattern_suggestions.length > 0) {
+            diagnosisInfo += `Audio-suggested Patterns: ${analysis.pattern_suggestions.join(', ')}\n`;
+          }
+        } else if (data.wen_audio.observation) {
+          // Fallback for legacy format
+          diagnosisInfo += `Voice Analysis: ${data.wen_audio.observation}\n`;
+        }
+
+        if (data.wen_audio.transcription) {
+          diagnosisInfo += `Voice Transcription: ${data.wen_audio.transcription}\n`;
+        }
+      } else {
+        diagnosisInfo += `Voice Recording: Not provided\n`;
+      }
     }
 
     // Note image availability
@@ -186,6 +212,20 @@ Data Availability Status:\n`;
     diagnosisInfo += data.wang_part?.image ? '✓ Body area image provided\n' : '✗ No body area image\n';
     diagnosisInfo += data.wen_audio?.audio ? '✓ Voice recording provided\n' : '✗ No voice recording\n';
     diagnosisInfo += data.qie?.bpm ? '✓ Pulse measurement taken\n' : '✗ No pulse measurement\n';
+
+    // Add Report Options
+    if (data.report_options) {
+      diagnosisInfo += `
+═══════════════════════════════════════════════════════════════════════════════
+                           REPORT REQUIREMENTS
+═══════════════════════════════════════════════════════════════════════════════
+The user has requested the following to be included in the report:
+`;
+      if (data.report_options.suggestMedicine) diagnosisInfo += `- Suggest herbal medicine formulas\n`;
+      if (data.report_options.suggestDoctor) diagnosisInfo += `- Suggest consulting a nearby TCM doctor\n`;
+      if (data.report_options.includeDietary) diagnosisInfo += `- Include dietary advice\n`;
+      if (data.report_options.includeLifestyle) diagnosisInfo += `- Include lifestyle recommendations\n`;
+    }
 
     // Add language-specific final instruction
     const finalInstructions: Record<string, string> = {

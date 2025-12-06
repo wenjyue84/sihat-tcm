@@ -145,6 +145,7 @@ const MOCK_INQUIRIES: Inquiry[] = [
 export default function DoctorDashboard() {
     const [inquiries, setInquiries] = useState<Inquiry[]>([])
     const [loading, setLoading] = useState(true)
+    const [loggingOut, setLoggingOut] = useState(false)
     const [useMockData, setUseMockData] = useState(false)
     const { profile, loading: authLoading, signOut } = useAuth()
     const router = useRouter()
@@ -203,7 +204,10 @@ export default function DoctorDashboard() {
     const filteredInquiries = useMemo(() => {
         return inquiries.filter(inquiry => {
             const profile = Array.isArray(inquiry.profiles) ? inquiry.profiles[0] : inquiry.profiles
-            const patientName = profile?.full_name?.toLowerCase() || ''
+            // Prefer patient_profile from diagnosis_report if available (for doctor entered patients)
+            const reportProfile = inquiry.diagnosis_report?.patient_profile
+            const patientName = (reportProfile?.name || profile?.full_name || '').toLowerCase()
+
             const symptoms = inquiry.symptoms?.toLowerCase() || ''
             const diagnosisText = JSON.stringify(inquiry.diagnosis_report || {}).toLowerCase()
             const searchLower = searchQuery.toLowerCase()
@@ -240,8 +244,14 @@ export default function DoctorDashboard() {
     }, [inquiries, searchQuery, dateFrom, dateTo, symptomFilter])
 
     const handleLogout = async () => {
-        await signOut()
-        router.push('/')
+        try {
+            setLoggingOut(true)
+            await signOut()
+            router.push('/')
+        } catch (error) {
+            console.error('Error logging out:', error)
+            setLoggingOut(false)
+        }
     }
 
     const clearFilters = () => {
@@ -260,7 +270,8 @@ export default function DoctorDashboard() {
         const recentCount = inquiries.filter(i => new Date(i.created_at) >= last7Days).length
         const uniquePatients = new Set(inquiries.map(i => {
             const p = Array.isArray(i.profiles) ? i.profiles[0] : i.profiles
-            return p?.full_name
+            const reportProfile = i.diagnosis_report?.patient_profile
+            return reportProfile?.name || p?.full_name
         })).size
 
         return {
@@ -304,8 +315,8 @@ export default function DoctorDashboard() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
             <div className="container mx-auto p-6 max-w-6xl">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <div>
+                <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <div className="text-center md:text-left">
                         <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                             Doctor Dashboard
                         </h1>
@@ -314,10 +325,15 @@ export default function DoctorDashboard() {
                     <Button
                         variant="outline"
                         onClick={handleLogout}
-                        className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                        disabled={loggingOut}
+                        className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 w-full md:w-auto justify-center"
                     >
-                        <LogOut className="w-4 h-4" />
-                        Logout
+                        {loggingOut ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                        ) : (
+                            <LogOut className="w-4 h-4" />
+                        )}
+                        {loggingOut ? 'Logging out...' : 'Logout'}
                     </Button>
                 </div>
 
@@ -473,8 +489,14 @@ export default function DoctorDashboard() {
                 {/* Patient Records List */}
                 <div className="grid gap-4">
                     {filteredInquiries.map((inquiry) => {
-                        const patientProfile = Array.isArray(inquiry.profiles) ? inquiry.profiles[0] : inquiry.profiles
+                        const dbProfile = Array.isArray(inquiry.profiles) ? inquiry.profiles[0] : inquiry.profiles
                         const diagnosis = inquiry.diagnosis_report
+                        // Prefer patient_profile from diagnosis_report if available
+                        const patientProfile = diagnosis?.patient_profile ? {
+                            full_name: diagnosis.patient_profile.name,
+                            age: diagnosis.patient_profile.age,
+                            gender: diagnosis.patient_profile.gender
+                        } : dbProfile
 
                         return (
                             <Card key={inquiry.id} className="bg-white/90 backdrop-blur hover:shadow-lg transition-shadow">

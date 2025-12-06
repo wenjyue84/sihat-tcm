@@ -71,6 +71,7 @@ export default function AdminDashboard() {
     })
     const [doctorLevel, setDoctorLevel] = useState<keyof typeof DOCTOR_MODEL_MAPPING>('Physician')
     const [loading, setLoading] = useState(true)
+    const [loggingOut, setLoggingOut] = useState(false)
     const [saving, setSaving] = useState<PromptType | 'config' | null>(null)
     const [saved, setSaved] = useState<PromptType | 'config' | null>(null)
     const [expandedPrompts, setExpandedPrompts] = useState<Record<PromptType, boolean>>({
@@ -218,8 +219,14 @@ export default function AdminDashboard() {
     }
 
     const handleLogout = async () => {
-        await signOut()
-        router.push('/')
+        try {
+            setLoggingOut(true)
+            await signOut()
+            router.push('/')
+        } catch (error) {
+            console.error('Error logging out:', error)
+            setLoggingOut(false)
+        }
     }
 
     if (authLoading || loading) return <div className="p-8">Loading...</div>
@@ -264,18 +271,23 @@ export default function AdminDashboard() {
 
     return (
         <div className="container mx-auto p-8 max-w-5xl">
-            <div className="flex justify-between items-center mb-8">
-                <div>
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                <div className="text-center md:text-left">
                     <h1 className="text-3xl font-bold">Admin Dashboard</h1>
                     <p className="text-muted-foreground mt-1">Configure AI Doctor System Prompts</p>
                 </div>
                 <Button
                     variant="outline"
                     onClick={handleLogout}
-                    className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                    disabled={loggingOut}
+                    className="flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 w-full md:w-auto justify-center"
                 >
-                    <LogOut className="w-4 h-4" />
-                    Logout
+                    {loggingOut ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                        <LogOut className="w-4 h-4" />
+                    )}
+                    {loggingOut ? 'Logging out...' : 'Logout'}
                 </Button>
             </div>
 

@@ -31,7 +31,7 @@ The patient has already provided their basic information including name, age, ge
 # OBJECTIVE (目标)
 Your primary goal is to gather comprehensive diagnostic information through a structured yet natural conversation. You must:
 
-1. **Ask ONE focused question per response** - Never combine multiple questions
+1. **Ask ONE focused question per response** - Never combine multiple questions. This is critical to avoid overloading the patient.
 2. **Follow the Ten Questions methodology (十问歌)** systematically:
    - 一问寒热 (Cold/Heat sensations)
    - 二问汗 (Perspiration patterns)
@@ -86,7 +86,12 @@ Adapt your:
 
 # RESPONSE FORMAT (回复格式)
 
-## Structure for Each Response:
+## Structure for FIRST Response (Start of Conversation):
+1. **Patient Summary**: Briefly summarize the patient's basic information (Name, Age, Gender, Chief Complaint) to confirm understanding.
+2. **Upload Instruction**: Explicitly tell the patient: "You can upload medical reports by clicking 'Upload Reports' if you have any." (Translate this if speaking Chinese/Malay).
+3. **First Question**: Ask your FIRST single, focused question.
+
+## Structure for SUBSEQUENT Responses:
 1. **Brief acknowledgment** of their previous answer (1-2 sentences maximum)
 2. **Transition phrase** connecting to the next topic (optional)
 3. **ONE clear, focused question**
@@ -101,13 +106,15 @@ Adapt your:
 - **NEVER mix languages** within a response
 - Maintain the same language throughout ALL your messages
 
-### One Question Rule:
+### One Question Rule (STRICT):
 - Your response must contain **EXACTLY ONE question mark** (? or ？)
+- **NEVER** ask multiple questions in one turn.
 - NEVER use phrases like:
   - "and also tell me..."
   - "could you also describe..."
   - "what about... and how about..."
 - Each question must be **single, focused, and easy to answer**
+- **Purpose**: Do not overload the patient with information.
 
 ### After Each Answer:
 - Acknowledge briefly (1-2 sentences max)
@@ -115,7 +122,9 @@ Adapt your:
 - Do NOT summarize what they've told you
 
 ## CORRECT EXAMPLES:
-✅ "I see, the headache has been bothering you for a week. Could you tell me exactly where in your head you feel the pain most strongly?"
+✅ "Hello [Name]. I see you are [Age] years old and experiencing [Complaint]. You can upload medical reports by clicking 'Upload Reports' if you have any. To start, could you describe the nature of your pain?" (First Response)
+
+✅ "I see, the headache has been bothering you for a week. Could you tell me exactly where in your head you feel the pain most strongly?" (Subsequent Response)
 
 ✅ "明白了，头痛已经持续一周了。请问疼痛主要在头部的哪个位置？"
 
@@ -838,8 +847,8 @@ Return a **valid JSON object only** - NO markdown, NO code blocks, NO additional
  * Get the appropriate image analysis prompt based on image type
  */
 export function getImageAnalysisPrompt(imageType: 'tongue' | 'face' | 'other'): { system: string; user: string } {
-   const userPrompts = {
-      tongue: `Analyze this TONGUE image according to TCM tongue diagnosis (舌诊). 
+  const userPrompts = {
+    tongue: `Analyze this TONGUE image according to TCM tongue diagnosis (舌诊). 
 
 Provide detailed observations on:
 1. Tongue body color (舌色): pale, light red, red, deep red, purple, bluish
@@ -851,7 +860,7 @@ Provide detailed observations on:
 
 Provide your complete analysis in the exact JSON format specified in the system prompt.`,
 
-      face: `Analyze this FACE image according to TCM face diagnosis (面诊).
+    face: `Analyze this FACE image according to TCM face diagnosis (面诊).
 
 Provide detailed observations on:
 1. Overall complexion (面色): color, luster, brightness
@@ -863,7 +872,7 @@ Provide detailed observations on:
 
 Provide your complete analysis in the exact JSON format specified in the system prompt.`,
 
-      other: `Analyze this BODY AREA image for TCM diagnostic purposes.
+    other: `Analyze this BODY AREA image for TCM diagnostic purposes.
 
 Provide detailed observations on:
 1. Skin condition: color, texture, moisture
@@ -874,34 +883,34 @@ Provide detailed observations on:
 6. Any other clinically relevant features
 
 Provide your complete analysis in the exact JSON format specified in the system prompt.`
-   };
+  };
 
-   return {
-      system: IMAGE_ANALYSIS_PROMPT,
-      user: userPrompts[imageType]
-   };
+  return {
+    system: IMAGE_ANALYSIS_PROMPT,
+    user: userPrompts[imageType]
+  };
 }
 
 /**
  * Build interactive chat prompt with patient context
  */
 export function buildChatPromptWithContext(basicInfo?: {
-   name?: string;
-   age?: string | number;
-   gender?: string;
-   height?: string | number;
-   weight?: string | number;
-   symptoms?: string;
-   symptomDuration?: string;
+  name?: string;
+  age?: string | number;
+  gender?: string;
+  height?: string | number;
+  weight?: string | number;
+  symptoms?: string;
+  symptomDuration?: string;
 }): string {
-   let prompt = INTERACTIVE_CHAT_PROMPT;
+  let prompt = INTERACTIVE_CHAT_PROMPT;
 
-   if (basicInfo) {
-      const height = basicInfo.height ? Number(basicInfo.height) : null;
-      const weight = basicInfo.weight ? Number(basicInfo.weight) : null;
-      const bmi = height && weight && height > 0 ? (weight / ((height / 100) ** 2)).toFixed(1) : null;
+  if (basicInfo) {
+    const height = basicInfo.height ? Number(basicInfo.height) : null;
+    const weight = basicInfo.weight ? Number(basicInfo.weight) : null;
+    const bmi = height && weight && height > 0 ? (weight / ((height / 100) ** 2)).toFixed(1) : null;
 
-      prompt += `
+    prompt += `
 
 ═══════════════════════════════════════════════════════════════════════════════
                     CURRENT PATIENT INFORMATION
@@ -929,64 +938,64 @@ Duration (病程): ${basicInfo.symptomDuration || 'Not provided'}
 4. Do NOT repeat their basic information back to them
 5. Do NOT introduce yourself or greet - the conversation has already started
 `;
-   }
+  }
 
-   return prompt;
+  return prompt;
 }
 
 /**
  * Get a summary of each prompt for display purposes
  */
 export function getPromptSummaries() {
-   return {
-      chat: {
-         title: '问诊 Interactive Chat Prompt',
-         description: 'Guides patient inquiry using Ten Questions (十问歌) methodology',
-         keyPoints: [
-            'One question at a time - absolutely mandatory',
-            'Automatic language matching (Chinese/English/Malay)',
-            'Ten Questions (十问歌) framework for systematic inquiry',
-            'Safety protocols for emergency symptoms',
-            'Clear conversation ending guidance'
-         ],
-         usedIn: '/api/chat - Step 2 Patient Inquiry'
-      },
-      image: {
-         title: '望诊 Image Analysis Prompt',
-         description: 'Analyzes tongue, face, and body images for diagnostic indicators',
-         keyPoints: [
-            'Comprehensive tongue diagnosis (舌诊) with all parameters',
-            'Face diagnosis (面诊) with five-organ zone mapping',
-            'Body area analysis for skin and visible conditions',
-            'Structured JSON output with pattern suggestions',
-            'Both Chinese and English terminology'
-         ],
-         usedIn: '/api/analyze-image - Visual Inspection'
-      },
-      listening: {
-         title: '闻诊 Listening Analysis Prompt',
-         description: 'Analyzes voice, breathing, and other sounds for diagnostic indicators',
-         keyPoints: [
-            'Voice quality analysis (声诊) - strength, pitch, clarity',
-            'Breathing pattern assessment (呼吸诊) - rhythm, depth, abnormalities',
-            'Cough sound diagnosis (咳嗽诊) - type, quality, timing',
-            'Speech pattern evaluation - emotional state, fluency',
-            'Structured JSON output with pattern suggestions'
-         ],
-         usedIn: '/api/analyze-audio - Listening Diagnosis'
-      },
-      final: {
-         title: '综合诊断 Final Analysis Prompt',
-         description: 'Synthesizes all Four Examinations data for comprehensive TCM diagnosis',
-         keyPoints: [
-            'Four Examinations combined analysis (四诊合参)',
-            'Eight Principles differentiation (八纲辨证)',
-            'Organ pattern differentiation (脏腑辨证)',
-            'Nine Constitution types assessment (九种体质)',
-            'Personalized food therapy and lifestyle recommendations',
-            'Acupoint self-care guidance'
-         ],
-         usedIn: '/api/consult - Final Diagnosis'
-      }
-   };
+  return {
+    chat: {
+      title: '问诊 Interactive Chat Prompt',
+      description: 'Guides patient inquiry using Ten Questions (十问歌) methodology',
+      keyPoints: [
+        'One question at a time - absolutely mandatory',
+        'Automatic language matching (Chinese/English/Malay)',
+        'Ten Questions (十问歌) framework for systematic inquiry',
+        'Safety protocols for emergency symptoms',
+        'Clear conversation ending guidance'
+      ],
+      usedIn: '/api/chat - Step 2 Patient Inquiry'
+    },
+    image: {
+      title: '望诊 Image Analysis Prompt',
+      description: 'Analyzes tongue, face, and body images for diagnostic indicators',
+      keyPoints: [
+        'Comprehensive tongue diagnosis (舌诊) with all parameters',
+        'Face diagnosis (面诊) with five-organ zone mapping',
+        'Body area analysis for skin and visible conditions',
+        'Structured JSON output with pattern suggestions',
+        'Both Chinese and English terminology'
+      ],
+      usedIn: '/api/analyze-image - Visual Inspection'
+    },
+    listening: {
+      title: '闻诊 Listening Analysis Prompt',
+      description: 'Analyzes voice, breathing, and other sounds for diagnostic indicators',
+      keyPoints: [
+        'Voice quality analysis (声诊) - strength, pitch, clarity',
+        'Breathing pattern assessment (呼吸诊) - rhythm, depth, abnormalities',
+        'Cough sound diagnosis (咳嗽诊) - type, quality, timing',
+        'Speech pattern evaluation - emotional state, fluency',
+        'Structured JSON output with pattern suggestions'
+      ],
+      usedIn: '/api/analyze-audio - Listening Diagnosis'
+    },
+    final: {
+      title: '综合诊断 Final Analysis Prompt',
+      description: 'Synthesizes all Four Examinations data for comprehensive TCM diagnosis',
+      keyPoints: [
+        'Four Examinations combined analysis (四诊合参)',
+        'Eight Principles differentiation (八纲辨证)',
+        'Organ pattern differentiation (脏腑辨证)',
+        'Nine Constitution types assessment (九种体质)',
+        'Personalized food therapy and lifestyle recommendations',
+        'Acupoint self-care guidance'
+      ],
+      usedIn: '/api/consult - Final Diagnosis'
+    }
+  };
 }

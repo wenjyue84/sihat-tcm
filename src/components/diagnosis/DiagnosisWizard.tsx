@@ -20,6 +20,7 @@ import { ChevronLeft } from 'lucide-react'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { ObservationResult } from './ObservationResult'
 import { ImageAnalysisLoader } from './ImageAnalysisLoader'
+import { DiagnosisSummary } from './DiagnosisSummary'
 import { Loader2 } from 'lucide-react'
 
 /**
@@ -129,7 +130,7 @@ function repairJSON(jsonString: string): string {
 }
 
 
-export type DiagnosisStep = 'basic_info' | 'wen_inquiry' | 'wang_tongue' | 'wang_face' | 'wang_part' | 'wen_audio' | 'qie' | 'processing' | 'report'
+export type DiagnosisStep = 'basic_info' | 'wen_inquiry' | 'wang_tongue' | 'wang_face' | 'wang_part' | 'wen_audio' | 'qie' | 'summary' | 'processing' | 'report'
 
 export default function DiagnosisWizard() {
     const { getModel } = useDoctorLevel()
@@ -160,9 +161,26 @@ export default function DiagnosisWizard() {
     const [currentAnalysisType, setCurrentAnalysisType] = useState<'tongue' | 'face' | 'part'>('tongue')
     const [pendingAnalysis, setPendingAnalysis] = useState<{ type: 'tongue' | 'face' | 'part', image: string } | null>(null)
     const { user, profile } = useAuth()
+    const [isSaved, setIsSaved] = useState(false)
 
     useEffect(() => {
-        if (profile && !data.basic_info) {
+        // Check localStorage first for data passed from dashboard
+        const localData = localStorage.getItem('patientProfileData')
+        if (localData && !data.basic_info) {
+            try {
+                const parsed = JSON.parse(localData)
+                setData((prev: any) => ({
+                    ...prev,
+                    basic_info: parsed
+                }))
+                // We don't remove it here because BasicInfoForm might also need to read it 
+                // if it mounts before this effect runs or if it needs to merge.
+                // But since we pass it as initialData, BasicInfoForm should be fine.
+                // Let's leave it for BasicInfoForm to clean up or keep it as backup.
+            } catch (e) {
+                console.error('Error parsing local profile data', e)
+            }
+        } else if (profile && !data.basic_info) {
             setData((prev: any) => ({
                 ...prev,
                 basic_info: {
@@ -190,7 +208,8 @@ export default function DiagnosisWizard() {
             case 'wang_face': setStep('wang_part'); break;
             case 'wang_part': setStep('wen_audio'); break;
             case 'wen_audio': setStep('qie'); break;
-            case 'qie':
+            case 'qie': setStep('summary'); break;
+            case 'summary':
                 setStep('processing');
                 submitConsultation();
                 break;
@@ -206,6 +225,7 @@ export default function DiagnosisWizard() {
             case 'wang_part': setStep('wang_face'); break;
             case 'wen_audio': setStep('wang_part'); break;
             case 'qie': setStep('wen_audio'); break;
+            case 'summary': setStep('qie'); break;
             default: break;
         }
     }
@@ -334,14 +354,29 @@ export default function DiagnosisWizard() {
                     const repairedJson = repairJSON(cleanJson);
                     resultData = JSON.parse(repairedJson);
                 }
+                // Inject patient profile into the report data for persistence
+                // This ensures we capture the actual patient details entered in the form
+                // rather than just the logged-in user's profile
+                const reportWithProfile = {
+                    ...resultData,
+                    patient_profile: {
+                        name: data.basic_info?.name || 'Anonymous',
+                        age: data.basic_info?.age,
+                        gender: data.basic_info?.gender,
+                        height: data.basic_info?.height,
+                        weight: data.basic_info?.weight
+                    }
+                };
+
                 if (user) {
                     await supabase.from('inquiries').insert({
                         user_id: user.id,
                         symptoms: data.basic_info?.symptoms || 'Not provided',
-                        diagnosis_report: resultData,
+                        diagnosis_report: reportWithProfile,
                         created_at: new Date().toISOString()
                     });
                     console.log('[DiagnosisWizard] Saved to Supabase');
+                    setIsSaved(true);
                 }
             } catch (e) {
                 console.error('[DiagnosisWizard] Failed to auto-save:', e);
@@ -372,7 +407,7 @@ export default function DiagnosisWizard() {
                     <Button
                         variant="ghost"
                         onClick={() => prevStep(step)}
-                        className="absolute -top-10 md:-top-12 left-0 text-stone-500 hover:text-stone-800 hover:bg-stone-100 h-10 px-3"
+                        className="hidden md:flex absolute -top-10 md:-top-12 left-0 text-stone-500 hover:text-stone-800 hover:bg-stone-100 h-10 px-3"
                     >
                         <ChevronLeft className="w-4 h-4 mr-1" />
                         {t.common.back}
@@ -431,6 +466,7 @@ export default function DiagnosisWizard() {
                                         setAnalysisResult(null)
                                         setTimeout(() => nextStep('wang_tongue'), 0)
                                     }}
+                                    onBack={() => prevStep('wang_tongue')}
                                 />
                             ) : (
                                 <CameraCapture
@@ -444,6 +480,7 @@ export default function DiagnosisWizard() {
                                             setTimeout(() => nextStep('wang_tongue'), 0)
                                         }
                                     }}
+                                    onBack={() => prevStep('wang_tongue')}
                                 />
                             )}
                         </motion.div>
@@ -473,6 +510,7 @@ export default function DiagnosisWizard() {
                                         setAnalysisResult(null)
                                         setTimeout(() => nextStep('wang_face'), 0)
                                     }}
+                                    onBack={() => prevStep('wang_face')}
                                 />
                             ) : (
                                 <CameraCapture
@@ -486,6 +524,7 @@ export default function DiagnosisWizard() {
                                             setTimeout(() => nextStep('wang_face'), 0)
                                         }
                                     }}
+                                    onBack={() => prevStep('wang_face')}
                                 />
                             )}
                         </motion.div>
@@ -515,6 +554,7 @@ export default function DiagnosisWizard() {
                                         setAnalysisResult(null)
                                         setTimeout(() => nextStep('wang_part'), 0)
                                     }}
+                                    onBack={() => prevStep('wang_part')}
                                 />
                             ) : (
                                 <CameraCapture
@@ -529,6 +569,7 @@ export default function DiagnosisWizard() {
                                             setTimeout(() => nextStep('wang_part'), 0)
                                         }
                                     }}
+                                    onBack={() => prevStep('wang_part')}
                                 />
                             )}
                         </motion.div>
@@ -540,16 +581,36 @@ export default function DiagnosisWizard() {
                                     setData((prev: any) => ({ ...prev, wen_audio: result }));
                                     setTimeout(() => nextStep('wen_audio'), 0)
                                 }}
+                                onBack={() => prevStep('wen_audio')}
                             />
                         </motion.div>
                     )}
 
                     {step === 'qie' && (
                         <motion.div key="qie" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
-                            <PulseCheck onComplete={(result) => {
-                                setData((prev: any) => ({ ...prev, qie: result }));
-                                nextStep('qie');
-                            }} />
+                            <PulseCheck
+                                onComplete={(result) => {
+                                    setData((prev: any) => ({ ...prev, qie: result }));
+                                    nextStep('qie');
+                                }}
+                                onBack={() => prevStep('qie')}
+                            />
+                        </motion.div>
+                    )}
+                    {step === 'summary' && (
+                        <motion.div key="summary" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+                            <DiagnosisSummary
+                                data={data}
+                                onConfirm={(summaries, options) => {
+                                    setData((prev: any) => ({
+                                        ...prev,
+                                        verified_summaries: summaries,
+                                        report_options: options
+                                    }));
+                                    nextStep('summary');
+                                }}
+                                onBack={() => prevStep('summary')}
+                            />
                         </motion.div>
                     )}
                     {step === 'processing' && (
@@ -632,6 +693,7 @@ export default function DiagnosisWizard() {
                                                 return (
                                                     <DiagnosisReport
                                                         data={normalizedData}
+                                                        saved={isSaved}
                                                         onRestart={() => {
                                                             setData({
                                                                 basic_info: null,
@@ -644,6 +706,7 @@ export default function DiagnosisWizard() {
                                                                 qie: null
                                                             });
                                                             setStep('basic_info');
+                                                            setIsSaved(false);
                                                         }}
                                                     />
                                                 );

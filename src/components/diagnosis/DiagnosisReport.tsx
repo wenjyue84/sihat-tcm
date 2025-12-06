@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Activity, Utensils, AlertCircle, HeartPulse, Leaf, Info, Download } from 'lucide-react'
+import { Activity, Utensils, AlertCircle, HeartPulse, Leaf, Info, Download, Check } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { ShowPromptButton } from './ShowPromptButton'
@@ -20,6 +20,7 @@ interface DiagnosisReportProps {
         };
     };
     onRestart: () => void;
+    saved?: boolean;
 }
 
 // Language translations for PDF content
@@ -71,7 +72,7 @@ const translations = {
     }
 }
 
-export function DiagnosisReport({ data, onRestart }: DiagnosisReportProps) {
+export function DiagnosisReport({ data, onRestart, saved }: DiagnosisReportProps) {
     const { getDoctorInfo } = useDoctorLevel()
     const doctorInfo = getDoctorInfo()
     const { language } = useLanguage()
@@ -212,6 +213,11 @@ export function DiagnosisReport({ data, onRestart }: DiagnosisReportProps) {
                         {doctorInfo.icon} Analyzed by {doctorInfo.name}
                     </span>
                     <ShowPromptButton promptType="final" />
+                    {saved && (
+                        <span className="px-3 py-1 rounded-full text-sm font-medium border bg-green-100 border-green-200 text-green-800 flex items-center gap-1">
+                            <Check className="w-3 h-3" /> Saved to Records
+                        </span>
+                    )}
                 </div>
                 <h2 className="text-2xl md:text-3xl font-bold text-emerald-900">Diagnosis Report</h2>
                 <p className="text-stone-600 text-sm md:text-base">Based on your Wang, Wen, Wen, and Qie analysis</p>

@@ -9,6 +9,7 @@ import { Loader2, Send, Upload, X } from 'lucide-react'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { ShowPromptButton } from './ShowPromptButton'
+import { INTERACTIVE_CHAT_PROMPT } from '@/lib/systemPrompts'
 import { ThinkingAnimation } from './ThinkingAnimation'
 
 interface FileData {
@@ -46,23 +47,30 @@ export function InquiryStep({
     const inputRef = useRef<HTMLInputElement>(null)
 
     // Construct the initial system message based on basic info
-    const systemMessage = basicInfo
-        ? `You are an experienced Traditional Chinese Medicine practitioner (老中医). The patient is a ${basicInfo.age}-year-old ${basicInfo.gender} named ${basicInfo.name}.
-    
+    let systemMessage = basicInfo
+        ? `${INTERACTIVE_CHAT_PROMPT}
+
+=== PATIENT DATA ===
+Name: ${basicInfo.name}
+Age: ${basicInfo.age}
+Gender: ${basicInfo.gender}
 Weight: ${basicInfo.weight} kg
 Height: ${basicInfo.height} cm
-Main complaints/symptoms: "${basicInfo.symptoms}"
-Symptom duration: ${basicInfo.symptomDuration}
+Chief Complaint: "${basicInfo.symptoms}"
+Duration: ${basicInfo.symptomDuration}
+`
+        : INTERACTIVE_CHAT_PROMPT
 
-CRITICAL INSTRUCTIONS:
-1. Ask ONLY ONE focused follow-up question at a time based on the information provided
-2. Do NOT greet or introduce yourself - the conversation has already started
-3. Base your questions on their symptoms: "${basicInfo.symptoms}"
-4. Follow the principles of the "Ten Questions" (Shi Wen) of TCM
-5. Continue asking focused questions until you have enough information for diagnosis (typically 8-15 questions)
-6. Be professional, empathetic, and thorough in your inquiry
-7. When you have sufficient information, acknowledge it and say you're ready to proceed with diagnosis`
-        : `You are an experienced Traditional Chinese Medicine practitioner (老中医). Please ask the patient relevant questions to understand their condition better. Ask only one question at a time.`
+    if (basicInfo?.healthData) {
+        systemMessage += `
+=== IMPORTED HEALTH DATA (from ${basicInfo.healthData.provider}) ===
+Steps: ${basicInfo.healthData.steps}
+Sleep: ${basicInfo.healthData.sleepHours} hours
+Avg Heart Rate: ${basicInfo.healthData.heartRate} bpm
+Calories: ${basicInfo.healthData.calories} kcal
+Last Updated: ${basicInfo.healthData.lastUpdated}
+`
+    }
 
     // Send message to API with manual streaming
     const sendMessage = useCallback(async (userMessage: string, isInitialPrompt = false) => {
@@ -153,9 +161,9 @@ CRITICAL INSTRUCTIONS:
 
             // Initial prompt in the selected language
             const initialPrompts: Record<string, string> = {
-                en: `Based on my symptoms: "${basicInfo?.symptoms || 'general assessment'}", please ask your first diagnostic question.`,
-                zh: `根据我的症状："${basicInfo?.symptoms || '综合评估'}"，请开始询问您的第一个诊断问题。`,
-                ms: `Berdasarkan gejala saya: "${basicInfo?.symptoms || 'penilaian umum'}", sila tanya soalan diagnosis pertama anda.`,
+                en: `I am ready for the consultation. Please review my information and start.`,
+                zh: `我已经准备好进行问诊。请查看我的信息并开始。`,
+                ms: `Saya bersedia untuk konsultasi. Sila semak maklumat saya dan mulakan.`,
             }
 
             const prompt = basicInfo && basicInfo.symptoms
@@ -263,7 +271,7 @@ CRITICAL INSTRUCTIONS:
     )
 
     return (
-        <Card className="p-4 md:p-6 h-[calc(100vh-180px)] min-h-[500px] max-h-[800px] flex flex-col gap-3 md:gap-4">
+        <Card className="p-4 md:p-6 h-[calc(100vh-220px)] md:h-[calc(100vh-180px)] min-h-[500px] max-h-[800px] flex flex-col gap-3 md:gap-4 mb-20 md:mb-0">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b pb-3 md:pb-4">
                 <div>
                     <div className="flex items-center gap-2">
@@ -276,7 +284,7 @@ CRITICAL INSTRUCTIONS:
                 </div>
                 <div className="flex gap-2">
                     <ShowPromptButton promptType="chat" />
-                    <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="h-10 text-sm">
+                    <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="h-11 text-sm">
                         <Upload className="w-4 h-4 mr-2" />
                         {language === 'zh' ? '上传报告' : language === 'ms' ? 'Muat Naik Laporan' : 'Upload Reports'}
                     </Button>
@@ -364,7 +372,7 @@ CRITICAL INSTRUCTIONS:
                 <div className="space-y-4 p-2">
                     {displayMessages.filter(m => m.content || m.role === 'user').map((m) => (
                         <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[80%] p-3 rounded-lg whitespace-pre-wrap ${m.role === 'user'
+                            <div className={`max-w-[85%] md:max-w-[80%] p-3 rounded-lg whitespace-pre-wrap text-sm md:text-base ${m.role === 'user'
                                 ? 'bg-emerald-600 text-white rounded-br-none'
                                 : 'bg-stone-100 text-stone-800 rounded-bl-none'
                                 }`}>
@@ -431,7 +439,7 @@ CRITICAL INSTRUCTIONS:
                 )}
                 <Button
                     onClick={handleComplete}
-                    className="flex-1 h-10 md:h-12 bg-emerald-800 hover:bg-emerald-900 text-base"
+                    className="flex-1 h-12 bg-emerald-800 hover:bg-emerald-900 text-base"
                     disabled={displayMessages.length < 2}
                 >
                     {t.inquiry.finishChat}

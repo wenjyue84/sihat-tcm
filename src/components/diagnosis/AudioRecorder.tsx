@@ -54,7 +54,7 @@ interface AudioAnalysisData {
     status: string
 }
 
-export function AudioRecorder({ onComplete }: { onComplete: (data: any) => void }) {
+export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) => void, onBack?: () => void }) {
     const { t } = useLanguage()
     const [isRecording, setIsRecording] = useState(false)
     const [audioUrl, setAudioUrl] = useState<string | null>(null)
@@ -75,6 +75,7 @@ export function AudioRecorder({ onComplete }: { onComplete: (data: any) => void 
     const analyserRef = useRef<AnalyserNode | null>(null)
     const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null)
     const streamRef = useRef<MediaStream | null>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
         return () => {
@@ -90,13 +91,35 @@ export function AudioRecorder({ onComplete }: { onComplete: (data: any) => void 
         }
     }, [])
 
+    const getSupportedMimeType = () => {
+        const types = [
+            'audio/webm',
+            'audio/mp4',
+            'audio/ogg',
+            'audio/wav',
+            'audio/aac'
+        ]
+        for (const type of types) {
+            if (MediaRecorder.isTypeSupported(type)) {
+                return type
+            }
+        }
+        return '' // Let browser pick default
+    }
+
     const startRecording = async () => {
         setMicError(null)
         setShowTroubleshoot(false)
         setHasAudioSignal(false)
 
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            })
             streamRef.current = stream
 
             // Setup Audio Context for visualization
@@ -113,7 +136,10 @@ export function AudioRecorder({ onComplete }: { onComplete: (data: any) => void 
             sourceRef.current = source
 
             // Setup MediaRecorder
-            const mediaRecorder = new MediaRecorder(stream)
+            const mimeType = getSupportedMimeType()
+            const options = mimeType ? { mimeType } : undefined
+            const mediaRecorder = new MediaRecorder(stream, options)
+
             mediaRecorderRef.current = mediaRecorder
             chunksRef.current = []
 
@@ -124,7 +150,7 @@ export function AudioRecorder({ onComplete }: { onComplete: (data: any) => void 
             }
 
             mediaRecorder.onstop = async () => {
-                const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
+                const blob = new Blob(chunksRef.current, { type: mimeType || 'audio/webm' })
                 const url = URL.createObjectURL(blob)
                 setAudioUrl(url)
 
@@ -174,6 +200,36 @@ export function AudioRecorder({ onComplete }: { onComplete: (data: any) => void 
             mediaRecorderRef.current.stop()
             setIsRecording(false)
         }
+    }
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+
+        // Check if file is audio
+        if (!file.type.startsWith('audio/')) {
+            setMicError('Please upload a valid audio file.')
+            return
+        }
+
+        setMicError(null)
+
+        // Create object URL for playback
+        const url = URL.createObjectURL(file)
+        setAudioUrl(url)
+
+        // Convert to base64 for analysis
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        reader.onloadend = () => {
+            const base64data = reader.result as string
+            setAudioData(base64data)
+            analyzeAudio(base64data)
+        }
+    }
+
+    const triggerFileUpload = () => {
+        fileInputRef.current?.click()
     }
 
     const analyzeAudio = async (base64Audio: string) => {
@@ -351,7 +407,7 @@ export function AudioRecorder({ onComplete }: { onComplete: (data: any) => void 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Recording Section */}
-            <Card className="p-6 space-y-5 bg-gradient-to-br from-white to-green-50/50 border-green-100">
+            <Card className="p-6 space-y-5 bg-gradient-to-br from-white to-green-50/50 border-green-100 pb-24 md:pb-6">
                 <div className="flex justify-between items-start">
                     <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg">
@@ -483,44 +539,91 @@ export function AudioRecorder({ onComplete }: { onComplete: (data: any) => void 
                                 <span><strong>Try a different browser:</strong> If issues persist, try Chrome, Firefox, or Edge</span>
                             </div>
                         </div>
-                        <Button
-                            onClick={startRecording}
-                            variant="outline"
-                            className="w-full mt-2 border-blue-300 text-blue-700 hover:bg-blue-100"
-                        >
-                            <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            Try Again
-                        </Button>
+                        <div className="flex gap-2 mt-2">
+                            <Button
+                                onClick={startRecording}
+                                variant="outline"
+                                className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-100"
+                            >
+                                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                Try Again
+                            </Button>
+                            <Button
+                                onClick={triggerFileUpload}
+                                variant="outline"
+                                className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-100"
+                            >
+                                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                                Upload File
+                            </Button>
+                        </div>
                     </div>
                 )}
 
-                <Button
-                    onClick={isRecording ? stopRecording : startRecording}
-                    variant={isRecording ? "destructive" : "default"}
-                    className={`w-full h-12 text-base font-semibold transition-all shadow-md ${isRecording
-                        ? 'bg-red-500 hover:bg-red-600'
-                        : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'
-                        }`}
-                >
-                    {isRecording ? (
-                        <span className="flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                <rect x="6" y="6" width="12" height="12" rx="2" />
-                            </svg>
-                            Stop & Analyze
-                        </span>
-                    ) : (
-                        <span className="flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="12" cy="12" r="10" />
-                                <circle cx="12" cy="12" r="4" fill="currentColor" />
-                            </svg>
-                            Start Recording
-                        </span>
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 md:static md:bg-transparent md:border-none md:shadow-none md:p-0 flex flex-col gap-3">
+                    <div className="flex gap-3">
+                        {onBack && (
+                            <Button
+                                variant="outline"
+                                onClick={onBack}
+                                className="h-12 w-12 p-0 flex-shrink-0 border-stone-300 text-stone-600 hover:bg-stone-100 md:hidden"
+                            >
+                                <span className="text-xl">←</span>
+                            </Button>
+                        )}
+                        <Button
+                            onClick={isRecording ? stopRecording : startRecording}
+                            variant={isRecording ? "destructive" : "default"}
+                            className={`flex-1 h-12 text-base font-semibold transition-all shadow-md ${isRecording
+                                ? 'bg-red-500 hover:bg-red-600'
+                                : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600'
+                                }`}
+                        >
+                            {isRecording ? (
+                                <span className="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                        <rect x="6" y="6" width="12" height="12" rx="2" />
+                                    </svg>
+                                    Stop & Analyze
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <circle cx="12" cy="12" r="4" fill="currentColor" />
+                                    </svg>
+                                    Start Recording
+                                </span>
+                            )}
+                        </Button>
+                    </div>
+
+                    {!isRecording && (
+                        <div className="flex justify-center">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileUpload}
+                                accept="audio/*"
+                                className="hidden"
+                            />
+                            <Button
+                                variant="ghost"
+                                onClick={triggerFileUpload}
+                                className="text-sm text-gray-500 hover:text-green-600 hover:bg-green-50"
+                            >
+                                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                                Or upload an audio file
+                            </Button>
+                        </div>
                     )}
-                </Button>
+                </div>
 
                 {/* Recording Tips */}
                 <div className="bg-amber-50 rounded-xl p-4 border border-amber-100">
