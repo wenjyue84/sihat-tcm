@@ -23,7 +23,7 @@ KEPERLUAN BAHASA: Anda MESTI menjawab sepenuhnya dalam Bahasa Malaysia. Tanya so
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { messages, basicInfo, model = 'gemini-2.5-flash', language = 'en' } = body;
+        const { messages, basicInfo, model = 'gemini-1.5-flash', language = 'en' } = body;
 
         console.log("[API /api/chat] Request received:", {
             messageCount: messages?.length,

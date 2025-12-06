@@ -6,12 +6,9 @@ import { Card } from '@/components/ui/card'
 import { Upload, Loader2, Image as ImageIcon } from 'lucide-react'
 
 const GEMINI_MODELS = [
-    { id: 'gemini-2.0-pro-exp-02-05', name: 'Gemini 3 Preview (2.0-pro-exp-02-05)' },
-    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
-    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
-    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
-    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
-    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' },
+    { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview (Master)' },
+    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro (Expert)' },
+    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Physician)' },
 ]
 
 export default function TestImagePage() {

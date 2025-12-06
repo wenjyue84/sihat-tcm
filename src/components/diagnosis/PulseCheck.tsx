@@ -3,7 +3,24 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useState } from 'react'
-import { Heart, Watch, Activity, Droplets, ThermometerSun, CheckCircle2, ChevronRight, Info } from 'lucide-react'
+import { Heart, Watch, Activity, Droplets, ThermometerSun, CheckCircle2, ChevronRight, Info, AlertCircle, Stethoscope } from 'lucide-react'
+import { ShowPromptButton } from './ShowPromptButton'
+
+// TCM Pulse Quality Types (脉象类型)
+const tcmPulseQualities = [
+    { id: 'hua', nameZh: '滑脉', nameEn: 'Slippery (Hua)', description: '脉来流利圆滑', descriptionEn: 'Smooth and flowing' },
+    { id: 'se', nameZh: '涩脉', nameEn: 'Rough (Se)', description: '脉来艰涩不畅', descriptionEn: 'Unsmooth and hesitant' },
+    { id: 'xian', nameZh: '弦脉', nameEn: 'Wiry (Xian)', description: '脉来端直如弦', descriptionEn: 'Taut like a bowstring' },
+    { id: 'jin', nameZh: '紧脉', nameEn: 'Tight (Jin)', description: '脉来紧张有力', descriptionEn: 'Tight and forceful' },
+    { id: 'xi', nameZh: '细脉', nameEn: 'Thin (Xi)', description: '脉来细如丝线', descriptionEn: 'Fine like a thread' },
+    { id: 'hong', nameZh: '洪脉', nameEn: 'Surging (Hong)', description: '脉来洪大有力', descriptionEn: 'Large and forceful' },
+    { id: 'ruo', nameZh: '弱脉', nameEn: 'Weak (Ruo)', description: '脉来软弱无力', descriptionEn: 'Soft and weak' },
+    { id: 'chen', nameZh: '沉脉', nameEn: 'Deep (Chen)', description: '脉位深沉', descriptionEn: 'Deep, felt only with pressure' },
+    { id: 'fu', nameZh: '浮脉', nameEn: 'Floating (Fu)', description: '脉位表浅', descriptionEn: 'Superficial, felt with light touch' },
+    { id: 'chi', nameZh: '迟脉', nameEn: 'Slow (Chi)', description: '脉来迟缓', descriptionEn: 'Slow rate' },
+    { id: 'shuo', nameZh: '数脉', nameEn: 'Rapid (Shuo)', description: '脉来急促', descriptionEn: 'Fast rate' },
+    { id: 'normal', nameZh: '平脉', nameEn: 'Normal (Ping)', description: '脉来平和有力', descriptionEn: 'Normal and balanced' },
+]
 
 export function PulseCheck({ onComplete }: { onComplete: (data: any) => void }) {
     const [taps, setTaps] = useState<number[]>([])
@@ -12,6 +29,7 @@ export function PulseCheck({ onComplete }: { onComplete: (data: any) => void }) 
     const [showGuide, setShowGuide] = useState(true) // Show guide by default
     const [currentStep, setCurrentStep] = useState(0)
     const [inputMode, setInputMode] = useState<'tap' | 'manual'>('manual') // Default to manual
+    const [selectedPulseQualities, setSelectedPulseQualities] = useState<string[]>([])
 
     const steps = [
         {
@@ -59,9 +77,25 @@ export function PulseCheck({ onComplete }: { onComplete: (data: any) => void }) 
         }
     }
 
+    const togglePulseQuality = (id: string) => {
+        setSelectedPulseQualities(prev =>
+            prev.includes(id)
+                ? prev.filter(q => q !== id)
+                : [...prev, id]
+        )
+    }
+
     const finish = () => {
         const finalBpm = inputMode === 'manual' ? parseInt(manualBpm) || 70 : bpm || 70
-        onComplete({ bpm: finalBpm })
+        const selectedQualities = selectedPulseQualities.map(id => {
+            const quality = tcmPulseQualities.find(q => q.id === id)
+            return quality ? { id, nameZh: quality.nameZh, nameEn: quality.nameEn } : null
+        }).filter(Boolean)
+
+        onComplete({
+            bpm: finalBpm,
+            pulseQualities: selectedQualities
+        })
     }
 
     const isComplete = inputMode === 'manual' ? manualBpm !== '' : bpm !== null
@@ -79,14 +113,17 @@ export function PulseCheck({ onComplete }: { onComplete: (data: any) => void }) 
                         <p className="text-sm text-slate-500">Pulse Diagnosis</p>
                     </div>
                 </div>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowGuide(!showGuide)}
-                    className="text-emerald-600 hover:text-emerald-700"
-                >
-                    {showGuide ? 'Hide Guide' : 'Show Guide'}
-                </Button>
+                <div className="flex items-center gap-2">
+                    <ShowPromptButton promptType="final" />
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowGuide(!showGuide)}
+                        className="text-emerald-600 hover:text-emerald-700"
+                    >
+                        {showGuide ? 'Hide Guide' : 'Show Guide'}
+                    </Button>
+                </div>
             </div>
 
             {/* Step-by-Step Guide */}
@@ -107,15 +144,15 @@ export function PulseCheck({ onComplete }: { onComplete: (data: any) => void }) 
                             <div
                                 key={index}
                                 className={`p-4 rounded-xl border transition-all cursor-pointer ${currentStep === index
-                                        ? 'border-emerald-400 bg-emerald-50 shadow-md'
-                                        : 'border-slate-200 bg-white hover:border-emerald-200'
+                                    ? 'border-emerald-400 bg-emerald-50 shadow-md'
+                                    : 'border-slate-200 bg-white hover:border-emerald-200'
                                     }`}
                                 onClick={() => setCurrentStep(index)}
                             >
                                 <div className="flex items-center gap-2 mb-2">
                                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold ${currentStep === index
-                                            ? 'bg-emerald-500 text-white'
-                                            : 'bg-slate-200 text-slate-600'
+                                        ? 'bg-emerald-500 text-white'
+                                        : 'bg-slate-200 text-slate-600'
                                         }`}>
                                         {index + 1}
                                     </div>
@@ -191,8 +228,8 @@ export function PulseCheck({ onComplete }: { onComplete: (data: any) => void }) 
                             <Button
                                 variant="outline"
                                 className={`rounded-full w-28 h-28 active:scale-90 transition-all duration-150 border-2 ${taps.length > 0
-                                        ? 'border-rose-400 bg-rose-50 hover:bg-rose-100'
-                                        : 'border-emerald-400 hover:bg-emerald-50'
+                                    ? 'border-rose-400 bg-rose-50 hover:bg-rose-100'
+                                    : 'border-emerald-400 hover:bg-emerald-50'
                                     }`}
                                 onClick={handleTap}
                             >
@@ -213,6 +250,68 @@ export function PulseCheck({ onComplete }: { onComplete: (data: any) => void }) 
                                 </Button>
                             )}
                         </div>
+                    </div>
+                )}
+            </div>
+
+            {/* TCM Pulse Quality Section - 中医脉象 */}
+            <div className="rounded-xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-5">
+                {/* Professional TCM Practitioner Notice */}
+                <div className="flex items-start gap-3 mb-4 p-3 bg-amber-100/70 rounded-lg border border-amber-300">
+                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                        <p className="text-sm font-semibold text-amber-800">
+                            ⚕️ 专业中医师诊断 | TCM Practitioner Required
+                        </p>
+                        <p className="text-xs text-amber-700 mt-1">
+                            以下脉象判断需由专业中医师通过切诊确认和输入。普通用户可跳过此部分。
+                        </p>
+                        <p className="text-xs text-amber-600 mt-0.5">
+                            The pulse qualities below require assessment by a qualified TCM practitioner. General users may skip this section.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Section Header */}
+                <div className="flex items-center gap-2 mb-4">
+                    <Stethoscope className="w-5 h-5 text-amber-600" />
+                    <h3 className="font-semibold text-amber-800">中医脉象 | TCM Pulse Qualities</h3>
+                    <span className="text-xs text-amber-600 bg-amber-200 px-2 py-0.5 rounded-full">可选 Optional</span>
+                </div>
+
+                {/* Pulse Quality Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {tcmPulseQualities.map((quality) => (
+                        <button
+                            key={quality.id}
+                            onClick={() => togglePulseQuality(quality.id)}
+                            className={`p-3 rounded-lg border-2 transition-all text-left ${selectedPulseQualities.includes(quality.id)
+                                ? 'border-amber-500 bg-amber-100 shadow-md'
+                                : 'border-amber-200 bg-white hover:border-amber-300 hover:bg-amber-50'
+                                }`}
+                        >
+                            <div className="flex items-center justify-between mb-1">
+                                <span className="font-bold text-amber-800">{quality.nameZh}</span>
+                                {selectedPulseQualities.includes(quality.id) && (
+                                    <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                                )}
+                            </div>
+                            <p className="text-xs text-amber-700">{quality.nameEn}</p>
+                            <p className="text-xs text-amber-600 mt-1 opacity-75">{quality.description}</p>
+                        </button>
+                    ))}
+                </div>
+
+                {/* Selected Qualities Display */}
+                {selectedPulseQualities.length > 0 && (
+                    <div className="mt-4 p-3 bg-white rounded-lg border border-amber-200">
+                        <p className="text-sm text-amber-800">
+                            <span className="font-semibold">已选脉象 Selected: </span>
+                            {selectedPulseQualities.map(id => {
+                                const quality = tcmPulseQualities.find(q => q.id === id)
+                                return quality?.nameZh
+                            }).join('、')}
+                        </p>
                     </div>
                 )}
             </div>
@@ -261,8 +360,8 @@ export function PulseCheck({ onComplete }: { onComplete: (data: any) => void }) 
                 onClick={finish}
                 disabled={!isComplete}
                 className={`w-full h-12 text-lg font-semibold transition-all ${isComplete
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg'
-                        : 'bg-slate-300'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg'
+                    : 'bg-slate-300'
                     }`}
             >
                 <span className="flex items-center gap-2">

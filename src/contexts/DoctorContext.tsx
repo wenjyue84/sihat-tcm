@@ -35,7 +35,7 @@ export const DOCTOR_LEVELS = {
         name: 'Physician',
         nameZh: '医师',
         description: 'Standard practitioner',
-        model: 'gemini-2.5-flash',
+        model: 'gemini-2.0-flash',
         icon: '💊',
         color: 'from-blue-500 to-indigo-600',
         bgColor: 'bg-blue-50',

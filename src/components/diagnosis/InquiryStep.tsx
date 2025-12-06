@@ -8,6 +8,8 @@ import { BasicInfoData } from './BasicInfoForm'
 import { Loader2, Send, Upload, X } from 'lucide-react'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { ShowPromptButton } from './ShowPromptButton'
+import { ThinkingAnimation } from './ThinkingAnimation'
 
 interface FileData {
     name: string
@@ -270,10 +272,13 @@ CRITICAL INSTRUCTIONS:
                     </div>
                     <p className="text-stone-600 text-xs md:text-sm">{t.inquiry.chatDescription}</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="h-10 text-sm">
-                    <Upload className="w-4 h-4 mr-2" />
-                    {language === 'zh' ? '上传报告' : language === 'ms' ? 'Muat Naik Laporan' : 'Upload Reports'}
-                </Button>
+                <div className="flex gap-2">
+                    <ShowPromptButton promptType="chat" />
+                    <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="h-10 text-sm">
+                        <Upload className="w-4 h-4 mr-2" />
+                        {language === 'zh' ? '上传报告' : language === 'ms' ? 'Muat Naik Laporan' : 'Upload Reports'}
+                    </Button>
+                </div>
             </div>
 
             {doctorInfo.id === 'master' && (
@@ -355,21 +360,27 @@ CRITICAL INSTRUCTIONS:
                 }}
             >
                 <div className="space-y-4 p-2">
-                    {displayMessages.map((m) => (
+                    {displayMessages.filter(m => m.content || m.role === 'user').map((m) => (
                         <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[80%] p-3 rounded-lg whitespace-pre-wrap ${m.role === 'user'
                                 ? 'bg-emerald-600 text-white rounded-br-none'
                                 : 'bg-stone-100 text-stone-800 rounded-bl-none'
                                 }`}>
-                                {m.content || (isLoading ? '...' : '')}
+                                {m.content}
                             </div>
                         </div>
                     ))}
                     {isLoading && displayMessages.length === 0 && (
                         <div className="flex justify-start">
-                            <div className="bg-stone-100 text-stone-500 p-3 rounded-lg rounded-bl-none flex items-center gap-2">
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                <span className="italic text-sm">{t.inquiry.doctorThinking}</span>
+                            <div className="max-w-[85%]">
+                                <ThinkingAnimation basicInfo={basicInfo} variant="compact" />
+                            </div>
+                        </div>
+                    )}
+                    {isLoading && displayMessages.length > 0 && !displayMessages[displayMessages.length - 1]?.content && (
+                        <div className="flex justify-start">
+                            <div className="max-w-[85%]">
+                                <ThinkingAnimation basicInfo={basicInfo} variant="compact" />
                             </div>
                         </div>
                     )}

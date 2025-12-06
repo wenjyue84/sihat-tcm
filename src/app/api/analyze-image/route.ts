@@ -7,20 +7,16 @@ export const maxDuration = 120;
 
 // Models ordered from most advanced to least advanced
 const MODEL_FALLBACK_ORDER = [
+    'gemini-3-pro-preview',
     'gemini-2.5-pro',
-    'gemini-2.5-flash',
     'gemini-2.0-flash',
-    'gemini-1.5-pro',
-    'gemini-1.5-flash',
 ];
 
 // Friendly names for status updates (without mentioning Gemini)
 const MODEL_STATUS: Record<string, string> = {
-    'gemini-2.5-pro': 'Using advanced deep analysis...',
-    'gemini-2.5-flash': 'Using fast deep analysis...',
-    'gemini-2.0-flash': 'Using quick analysis...',
-    'gemini-1.5-pro': 'Using comprehensive analysis...',
-    'gemini-1.5-flash': 'Using rapid analysis...',
+    'gemini-3-pro-preview': 'Using master-level comprehensive analysis...',
+    'gemini-2.5-pro': 'Using expert-level analysis...',
+    'gemini-2.0-flash': 'Using rapid analysis...',
 };
 
 function isValidObservation(text: string): boolean {

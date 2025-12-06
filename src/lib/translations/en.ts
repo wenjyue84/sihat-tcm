@@ -36,6 +36,7 @@ export const en = {
         copyright: '© {year} Sihat TCM. All rights reserved.',
         developedBy: 'Developed by Prisma Technology Solution Sdn Bhd',
         companyProfile: 'Company Profile',
+        filled: 'Filled!',
     },
 
     // Language selector
@@ -191,15 +192,24 @@ export const en = {
     // Camera Capture
     camera: {
         takePhoto: 'Take Photo',
+        capturePhoto: 'Capture Photo',
         retake: 'Retake',
         usePhoto: 'Use Photo',
+        confirm: 'Confirm',
         switchCamera: 'Switch Camera',
         uploadPhoto: 'Upload Photo',
         dragDropPhoto: 'Drag & drop an image here',
         orClickToUpload: 'or click to upload',
+        or: 'Or',
+        skip: 'Skip',
         cameraAccessDenied: 'Camera access denied',
         cameraNotFound: 'No camera found',
         preparingCamera: 'Preparing camera...',
+        initializingCamera: 'Initializing Camera...',
+        cameraError: 'Could not access camera. Please ensure you have granted permission or use "Upload Photo" instead.',
+        checkPermissions: 'Check browser permissions for camera',
+        useUploadInstead: 'Or use "Upload Photo" below',
+        retryCamera: 'Retry Camera',
     },
 
     // Tongue diagnosis
@@ -251,39 +261,142 @@ export const en = {
     // Audio recording
     audio: {
         title: 'Voice Analysis (闻诊)',
+        listeningDiagnosis: 'Listening Diagnosis',
         subtitle: 'Record your voice reading the text below for analysis.',
         instructions: 'Please read the following passage clearly:',
+        instructionsShort: 'Instructions:',
+        sayAhhh: 'Please say "Ahhh" for 5-10 seconds, then describe how you feel, including any breathing difficulties or cough patterns.',
         startRecording: 'Start Recording',
         stopRecording: 'Stop Recording',
+        stopAndContinue: 'Stop & Continue',
         recordAgain: 'Record Again',
         playRecording: 'Play Recording',
         pausePlayback: 'Pause',
         recording: 'Recording...',
         recorded: 'Recorded',
         noRecording: 'No recording yet',
+        readyToRecord: 'Ready to record your voice',
         readingPassage: 'The morning sun rises over the mountains, bringing warmth and light to the valley below. Birds sing their songs as the gentle breeze carries the fragrance of spring flowers.',
         readingPassageZh: '晨曦初升，阳光洒满山间，温暖的光芒照亮了山下的村庄。鸟儿欢唱，微风轻拂，春花的芬芳弥漫在空气中。',
+        // Educational content
+        educationalTitle: 'Understanding Wen (聞診) - Listening & Smelling Diagnosis',
+        educationalIntro: 'Wen diagnosis is one of the Four Pillars of TCM diagnosis. It involves the practitioner listening to sounds produced by the patient and, traditionally, noting any unusual body odors. This method provides valuable insights into the patient\'s internal health conditions.',
+        learnAboutWen: 'Learn About Wen Diagnosis',
+        traditionalChineseMedicine: 'Traditional Chinese Medicine',
+        clickToLearnMore: 'Click to learn more',
+        sections: [
+            {
+                icon: '🔊',
+                title: 'Voice Quality Analysis',
+                content: 'A strong, clear voice typically indicates sufficient Qi and healthy Lung function. A weak or low voice may suggest Qi deficiency, while a hoarse voice could indicate Heat affecting the Lungs or Yin deficiency.'
+            },
+            {
+                icon: '💨',
+                title: 'Breathing Patterns',
+                content: 'The rhythm, depth, and sound of breathing reveal much about respiratory health. Rapid, shallow breathing may indicate Heat or anxiety, while slow, deep breathing suggests Cold patterns or Qi stagnation.'
+            },
+            {
+                icon: '🗣️',
+                title: 'Speech Patterns',
+                content: 'How a person speaks—whether fast or slow, loud or soft, clear or mumbled—reflects their mental state and Qi flow. Excessive talking may indicate Heart Fire, while reluctance to speak suggests Heart Qi deficiency.'
+            },
+            {
+                icon: '🫁',
+                title: 'Cough Sounds',
+                content: 'Different cough sounds indicate different conditions. A dry cough suggests Lung Yin deficiency or Heat, while a productive cough with white phlegm indicates Cold-Damp, and yellow phlegm points to Heat-Phlegm.'
+            }
+        ],
+        tips: [
+            'Speak naturally and clearly',
+            'Say "Ahhh" for 5-10 seconds',
+            'Describe any breathing difficulties',
+            'Mention if you have a cough'
+        ],
+        tipsForBetterRecording: 'Tips for Better Recording',
+        didYouKnow: 'Did You Know?',
+        didYouKnowContent: 'Wen diagnosis has been practiced for over 2,000 years. Ancient TCM practitioners developed remarkable skills in diagnosing conditions simply by listening to a patient\'s voice, breathing, and even the sounds of their stomach!',
+        debugSkip: 'Debug: Skip',
     },
 
     // Pulse check
     pulse: {
         title: 'Pulse Measurement (切诊)',
         subtitle: 'Measure your pulse to complete your diagnosis.',
+        pulseDiagnosis: 'Pulse Diagnosis',
         instructions: 'Place your finger on your wrist and count your pulse for 30 seconds.',
         bpm: 'BPM',
         bpmLabel: 'Beats Per Minute',
         inputBpm: 'Enter your pulse rate',
+        enterBpm: 'Enter BPM',
         measuring: 'Measuring...',
         measured: 'Pulse measured',
         noMeasurement: 'No pulse measurement',
         manualEntry: 'Manual Entry',
+        enterBpmManually: 'Enter BPM Manually',
+        tapToMeasure: 'Tap to Measure',
         useDevice: 'Use Device',
         startMeasurement: 'Start Measurement',
         normalRange: 'Normal range: 60-100 BPM',
+        lowBpm: 'Low (Bradycardia)',
+        normalBpm: 'Normal Range',
+        highBpm: 'High (Tachycardia)',
         pulseCategories: {
             slow: 'Slow (Bradycardia)',
             normal: 'Normal',
             fast: 'Fast (Tachycardia)',
+        },
+        showGuide: 'Show Guide',
+        hideGuide: 'Hide Guide',
+        taps: 'Taps',
+        reset: 'Reset',
+        completePulseCheck: 'Complete Pulse Check',
+        afterCounting: 'After counting your pulse for 60 seconds, enter your heart rate below:',
+        tapInRhythm: 'Tap the button in rhythm with your pulse for 10-15 seconds:',
+        // Guide steps
+        guideSteps: [
+            {
+                title: 'Find Your Pulse Point',
+                description: 'Turn your palm facing up. Place your index and middle fingers on your wrist, just below the base of your thumb.',
+                tip: "Don't use your thumb - it has its own pulse!"
+            },
+            {
+                title: 'Feel the Beat',
+                description: 'Press gently until you feel the rhythmic pulsing of your radial artery. This is your pulse.',
+                tip: "If you can't feel it, try moving your fingers slightly or pressing a bit harder."
+            },
+            {
+                title: 'Count for 60 Seconds',
+                description: 'Count how many beats you feel in 60 seconds. This number is your heart rate in BPM (beats per minute).',
+                tip: 'Alternatively, count for 15 seconds and multiply by 4 for a quick estimate.'
+            }
+        ],
+        // IoT feature
+        comingSoon: 'Coming Soon',
+        smartMonitor: 'Smart TCM Health Monitor',
+        iotDescription: 'In the future, our IoT wristband device will automatically detect and transmit your health data:',
+        pulseRate: 'Pulse Rate',
+        bloodPressure: 'Blood Pressure',
+        bloodOxygen: 'Blood Oxygen',
+        bodyTemperature: 'Body Temperature',
+        // TCM Pulse Qualities (脉象)
+        tcmPulseQualities: 'TCM Pulse Qualities',
+        tcmPractitionerRequired: 'TCM Practitioner Required',
+        tcmPractitionerNotice: 'The pulse qualities below require assessment by a qualified TCM practitioner. General users may skip this section.',
+        optional: 'Optional',
+        selected: 'Selected',
+        pulseTypes: {
+            hua: { name: 'Slippery (Hua)', zh: '滑脉', desc: 'Smooth and flowing' },
+            se: { name: 'Rough (Se)', zh: '涩脉', desc: 'Unsmooth and hesitant' },
+            xian: { name: 'Wiry (Xian)', zh: '弦脉', desc: 'Taut like a bowstring' },
+            jin: { name: 'Tight (Jin)', zh: '紧脉', desc: 'Tight and forceful' },
+            xi: { name: 'Thin (Xi)', zh: '细脉', desc: 'Fine like a thread' },
+            hong: { name: 'Surging (Hong)', zh: '洪脉', desc: 'Large and forceful' },
+            ruo: { name: 'Weak (Ruo)', zh: '弱脉', desc: 'Soft and weak' },
+            chen: { name: 'Deep (Chen)', zh: '沉脉', desc: 'Deep, felt only with pressure' },
+            fu: { name: 'Floating (Fu)', zh: '浮脉', desc: 'Superficial, felt with light touch' },
+            chi: { name: 'Slow (Chi)', zh: '迟脉', desc: 'Slow rate' },
+            shuo: { name: 'Rapid (Shuo)', zh: '数脉', desc: 'Fast rate' },
+            normal: { name: 'Normal (Ping)', zh: '平脉', desc: 'Normal and balanced' },
         },
     },
 

@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useRef, useState, useEffect } from 'react'
 import { Camera, Upload, RotateCcw, Check, SkipForward } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { ShowPromptButton } from './ShowPromptButton'
 
 interface CameraCaptureProps {
     onComplete: (data: any) => void;
@@ -13,16 +15,21 @@ interface CameraCaptureProps {
 
 export function CameraCapture({
     onComplete,
-    title = "Wang (Inspection)",
-    instruction = "Please take a photo.",
+    title,
+    instruction,
     required = false
 }: CameraCaptureProps) {
+    const { t } = useLanguage()
     const videoRef = useRef<HTMLVideoElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [stream, setStream] = useState<MediaStream | null>(null)
     const [error, setError] = useState<string | null>(null)
     const [capturedImage, setCapturedImage] = useState<string | null>(null)
+
+    // Use provided title/instruction or fall back to defaults from translations
+    const displayTitle = title || t.camera.takePhoto
+    const displayInstruction = instruction || t.camera.preparingCamera
 
     useEffect(() => {
         if (!capturedImage) {
@@ -48,7 +55,7 @@ export function CameraCapture({
             }
         } catch (err) {
             console.error("Error accessing camera:", err)
-            setError("Could not access camera. Please ensure you have granted permission or use 'Upload Photo' instead.")
+            setError(t.camera.cameraError)
         }
     }
 
@@ -104,9 +111,12 @@ export function CameraCapture({
 
     return (
         <Card className="p-4 md:p-6 space-y-4">
-            <div className="text-center md:text-left">
-                <h2 className="text-xl font-semibold text-emerald-800">{title}</h2>
-                <p className="text-stone-600 text-sm mt-1">{instruction}</p>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                <div className="text-center md:text-left">
+                    <h2 className="text-xl font-semibold text-emerald-800">{displayTitle}</h2>
+                    <p className="text-stone-600 text-sm mt-1">{displayInstruction}</p>
+                </div>
+                <ShowPromptButton promptType="image" />
             </div>
 
             {/* Camera preview - taller on mobile for better framing */}
@@ -122,7 +132,7 @@ export function CameraCapture({
                                 <div className="absolute inset-0 flex items-center justify-center text-gray-500">
                                     <div className="text-center">
                                         <Camera className="w-8 h-8 mx-auto mb-2 animate-pulse" />
-                                        <span>Initializing Camera...</span>
+                                        <span>{t.camera.initializingCamera}</span>
                                     </div>
                                 </div>
                             )}
@@ -131,10 +141,10 @@ export function CameraCapture({
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 space-y-4">
                             <div className="text-red-500 font-medium text-sm">{error}</div>
                             <div className="text-xs text-gray-600 space-y-1">
-                                <p>1. Check browser permissions for camera</p>
-                                <p>2. Or use "Upload Photo" below</p>
+                                <p>1. {t.camera.checkPermissions}</p>
+                                <p>2. {t.camera.useUploadInstead}</p>
                             </div>
-                            <Button onClick={startCamera} variant="outline" size="sm">Retry Camera</Button>
+                            <Button onClick={startCamera} variant="outline" size="sm">{t.camera.retryCamera}</Button>
                         </div>
                     )
                 )}
@@ -149,14 +159,14 @@ export function CameraCapture({
                             className="flex-1 h-12 text-base"
                         >
                             <RotateCcw className="w-4 h-4 mr-2" />
-                            Retake
+                            {t.camera.retake}
                         </Button>
                         <Button
                             onClick={handleConfirm}
                             className="flex-1 h-12 text-base bg-emerald-600 hover:bg-emerald-700"
                         >
                             <Check className="w-4 h-4 mr-2" />
-                            Confirm
+                            {t.camera.confirm}
                         </Button>
                     </div>
                 ) : (
@@ -167,7 +177,7 @@ export function CameraCapture({
                             className="w-full h-14 text-base bg-emerald-600 hover:bg-emerald-700"
                         >
                             <Camera className="w-5 h-5 mr-2" />
-                            Capture Photo
+                            {t.camera.capturePhoto}
                         </Button>
 
                         <div className="relative">
@@ -175,7 +185,7 @@ export function CameraCapture({
                                 <span className="w-full border-t" />
                             </div>
                             <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-white px-2 text-gray-500">Or</span>
+                                <span className="bg-white px-2 text-gray-500">{t.camera.or}</span>
                             </div>
                         </div>
 
@@ -195,7 +205,7 @@ export function CameraCapture({
                                 onClick={() => fileInputRef.current?.click()}
                             >
                                 <Upload className="w-4 h-4 mr-2" />
-                                Upload Photo
+                                {t.camera.uploadPhoto}
                             </Button>
 
                             {/* Show skip if NOT required, OR if in dev mode */}
@@ -206,7 +216,7 @@ export function CameraCapture({
                                     onClick={handleSkip}
                                 >
                                     <SkipForward className="w-4 h-4 mr-1" />
-                                    Skip
+                                    {t.camera.skip}
                                 </Button>
                             )}
                         </div>

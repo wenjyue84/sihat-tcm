@@ -7,12 +7,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { LogOut, Info, MessageSquare, Eye, FileText, Check, Loader2 } from 'lucide-react'
+import { LogOut, Info, MessageSquare, Eye, FileText, Check, Loader2, ChevronDown, ChevronUp, Mic } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import {
     INTERACTIVE_CHAT_PROMPT,
     IMAGE_ANALYSIS_PROMPT,
+    LISTENING_ANALYSIS_PROMPT,
     FINAL_ANALYSIS_PROMPT
 } from '@/lib/systemPrompts'
 
@@ -20,7 +21,7 @@ import {
 const DOCTOR_MODEL_MAPPING = {
     Master: { model: 'gemini-3-pro-preview', label: 'Gemini 3 Pro Preview' },
     Expert: { model: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
-    Physician: { model: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+    Physician: { model: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
 } as const
 
 // Prompt types with their default values
@@ -41,6 +42,14 @@ const PROMPT_TYPES = {
         color: 'emerald',
         defaultPrompt: IMAGE_ANALYSIS_PROMPT,
     },
+    listening: {
+        role: 'doctor_listening',
+        title: '闻诊 Listening Analysis Prompt',
+        description: 'Used for voice and sound analysis. Guides how AI analyzes audio recordings for diagnostic insights.',
+        icon: Mic,
+        color: 'purple',
+        defaultPrompt: LISTENING_ANALYSIS_PROMPT,
+    },
     final: {
         role: 'doctor_final',
         title: '综合诊断 Final Analysis Prompt',
@@ -57,14 +66,28 @@ export default function AdminDashboard() {
     const [prompts, setPrompts] = useState<Record<PromptType, string>>({
         chat: '',
         image: '',
+        listening: '',
         final: '',
     })
     const [doctorLevel, setDoctorLevel] = useState<keyof typeof DOCTOR_MODEL_MAPPING>('Physician')
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState<PromptType | 'config' | null>(null)
     const [saved, setSaved] = useState<PromptType | 'config' | null>(null)
+    const [expandedPrompts, setExpandedPrompts] = useState<Record<PromptType, boolean>>({
+        chat: false,
+        image: false,
+        listening: false,
+        final: false,
+    })
     const { profile, loading: authLoading, signOut } = useAuth()
     const router = useRouter()
+
+    const togglePrompt = (type: PromptType) => {
+        setExpandedPrompts(prev => ({
+            ...prev,
+            [type]: !prev[type]
+        }))
+    }
 
     useEffect(() => {
         fetchAllPrompts()
@@ -76,7 +99,7 @@ export default function AdminDashboard() {
             const { data, error } = await supabase
                 .from('system_prompts')
                 .select('role, prompt_text, config')
-                .in('role', ['doctor_chat', 'doctor_image', 'doctor_final', 'doctor'])
+                .in('role', ['doctor_chat', 'doctor_image', 'doctor_listening', 'doctor_final', 'doctor'])
 
             if (data) {
                 const newPrompts = { ...prompts }
@@ -85,6 +108,8 @@ export default function AdminDashboard() {
                         newPrompts.chat = item.prompt_text || ''
                     } else if (item.role === 'doctor_image') {
                         newPrompts.image = item.prompt_text || ''
+                    } else if (item.role === 'doctor_listening') {
+                        newPrompts.listening = item.prompt_text || ''
                     } else if (item.role === 'doctor_final') {
                         newPrompts.final = item.prompt_text || ''
                     } else if (item.role === 'doctor' && item.config) {
@@ -223,6 +248,12 @@ export default function AdminDashboard() {
             icon: 'text-emerald-600',
             button: 'bg-emerald-600 hover:bg-emerald-700',
         },
+        purple: {
+            bg: 'bg-purple-50',
+            border: 'border-purple-200',
+            icon: 'text-purple-600',
+            button: 'bg-purple-600 hover:bg-purple-700',
+        },
         amber: {
             bg: 'bg-amber-50',
             border: 'border-amber-200',
@@ -265,7 +296,7 @@ export default function AdminDashboard() {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Physician">💊 医师 Physician (gemini-2.5-flash)</SelectItem>
+                                    <SelectItem value="Physician">💊 医师 Physician (gemini-2.0-flash)</SelectItem>
                                     <SelectItem value="Expert">🩺 专家 Expert (gemini-2.5-pro)</SelectItem>
                                     <SelectItem value="Master">👨‍⚕️ 名医 Master (gemini-3-pro-preview)</SelectItem>
                                 </SelectContent>
@@ -294,53 +325,80 @@ export default function AdminDashboard() {
                     const colors = colorClasses[config.color as keyof typeof colorClasses]
                     const Icon = config.icon
 
+                    const isExpanded = expandedPrompts[type]
+
                     return (
-                        <Card key={type} className={`${colors.border} border-2`}>
-                            <CardHeader className={`${colors.bg} rounded-t-lg`}>
-                                <CardTitle className="flex items-center gap-3">
-                                    <Icon className={`w-6 h-6 ${colors.icon}`} />
-                                    {config.title}
-                                </CardTitle>
+                        <Card key={type} className={`${colors.border} border-2 overflow-hidden`}>
+                            <CardHeader
+                                className={`${colors.bg} ${isExpanded ? 'rounded-t-lg' : 'rounded-lg'} cursor-pointer transition-all duration-200 hover:opacity-90`}
+                                onClick={() => togglePrompt(type)}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="flex items-center gap-3">
+                                        <Icon className={`w-6 h-6 ${colors.icon}`} />
+                                        {config.title}
+                                    </CardTitle>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className={`${colors.icon} hover:bg-white/50`}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            togglePrompt(type)
+                                        }}
+                                    >
+                                        {isExpanded ? (
+                                            <ChevronUp className="w-5 h-5" />
+                                        ) : (
+                                            <ChevronDown className="w-5 h-5" />
+                                        )}
+                                    </Button>
+                                </div>
                                 <CardDescription className="text-gray-600">
                                     {config.description}
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent className="pt-4 space-y-4">
-                                <Textarea
-                                    value={prompts[type]}
-                                    onChange={(e) => setPrompts(prev => ({ ...prev, [type]: e.target.value }))}
-                                    placeholder={`Enter ${config.title} here... (Leave empty to use default)`}
-                                    className="min-h-[250px] font-mono text-sm"
-                                />
-                                <div className="flex items-center justify-between gap-3">
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => handleResetToDefault(type)}
-                                        className="text-gray-600"
-                                    >
-                                        Reset to Default
-                                    </Button>
-                                    <Button
-                                        onClick={() => handleSavePrompt(type)}
-                                        disabled={saving === type}
-                                        className={colors.button}
-                                    >
-                                        {saving === type ? (
-                                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
-                                        ) : saved === type ? (
-                                            <><Check className="w-4 h-4 mr-2" /> Saved!</>
-                                        ) : (
-                                            'Save Prompt'
-                                        )}
-                                    </Button>
-                                </div>
-                                {!prompts[type] && (
-                                    <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                        <Info className="w-4 h-4" />
-                                        Currently using default prompt. Edit above to customize.
-                                    </p>
-                                )}
-                            </CardContent>
+                            <div
+                                className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+                                    }`}
+                            >
+                                <CardContent className="pt-4 space-y-4">
+                                    <Textarea
+                                        value={prompts[type]}
+                                        onChange={(e) => setPrompts(prev => ({ ...prev, [type]: e.target.value }))}
+                                        placeholder={`Enter ${config.title} here... (Leave empty to use default)`}
+                                        className="min-h-[250px] font-mono text-sm"
+                                    />
+                                    <div className="flex items-center justify-between gap-3">
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => handleResetToDefault(type)}
+                                            className="text-gray-600"
+                                        >
+                                            Reset to Default
+                                        </Button>
+                                        <Button
+                                            onClick={() => handleSavePrompt(type)}
+                                            disabled={saving === type}
+                                            className={colors.button}
+                                        >
+                                            {saving === type ? (
+                                                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
+                                            ) : saved === type ? (
+                                                <><Check className="w-4 h-4 mr-2" /> Saved!</>
+                                            ) : (
+                                                'Save Prompt'
+                                            )}
+                                        </Button>
+                                    </div>
+                                    {!prompts[type] && (
+                                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                            <Info className="w-4 h-4" />
+                                            Currently using default prompt. Edit above to customize.
+                                        </p>
+                                    )}
+                                </CardContent>
+                            </div>
                         </Card>
                     )
                 })}
@@ -363,7 +421,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="flex items-center justify-between p-2 bg-blue-50 rounded border border-blue-200">
                             <span>💊 医师 Physician</span>
-                            <code className="bg-blue-100 px-2 py-0.5 rounded">gemini-2.5-flash</code>
+                            <code className="bg-blue-100 px-2 py-0.5 rounded">gemini-2.0-flash</code>
                         </div>
                     </div>
                 </CardContent>

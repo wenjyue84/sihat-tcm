@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { data, prompt, model = 'gemini-2.5-flash', language = 'en' } = body;
+    const { data, prompt, model = 'gemini-1.5-flash', language = 'en' } = body;
 
     console.log('[consult] Received prompt:', prompt?.substring(0, 50));
     console.log('[consult] Patient name:', data?.basic_info?.name);
@@ -137,13 +137,40 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
     // Include audio/voice observation if available
     if (data.wen_audio?.audio) {
       diagnosisInfo += `Voice Recording: ✓ Provided\n`;
+
+      // Handle structured analysis from AudioRecorder
+      if (data.wen_audio.analysis) {
+        const analysis = data.wen_audio.analysis;
+        diagnosisInfo += `\n--- AUDIO ANALYSIS RESULTS ---\n`;
+        diagnosisInfo += `Overall Observation: ${analysis.overall_observation || 'N/A'}\n`;
+
+        if (analysis.voice_quality_analysis) {
+          diagnosisInfo += `Voice Quality: ${analysis.voice_quality_analysis.observation} (Severity: ${analysis.voice_quality_analysis.severity})\n`;
+        }
+
+        if (analysis.breathing_patterns) {
+          diagnosisInfo += `Breathing: ${analysis.breathing_patterns.observation} (Severity: ${analysis.breathing_patterns.severity})\n`;
+        }
+
+        if (analysis.speech_patterns) {
+          diagnosisInfo += `Speech: ${analysis.speech_patterns.observation} (Severity: ${analysis.speech_patterns.severity})\n`;
+        }
+
+        if (analysis.cough_sounds) {
+          diagnosisInfo += `Cough: ${analysis.cough_sounds.observation} (Severity: ${analysis.cough_sounds.severity})\n`;
+        }
+
+        if (analysis.pattern_suggestions && analysis.pattern_suggestions.length > 0) {
+          diagnosisInfo += `Audio-suggested Patterns: ${analysis.pattern_suggestions.join(', ')}\n`;
+        }
+      } else if (data.wen_audio.observation) {
+        // Fallback for legacy format
+        diagnosisInfo += `Voice Analysis: ${data.wen_audio.observation}\n`;
+      }
+
       if (data.wen_audio.transcription) {
         diagnosisInfo += `Voice Transcription: ${data.wen_audio.transcription}\n`;
       }
-      if (data.wen_audio.observation) {
-        diagnosisInfo += `Voice Analysis: ${data.wen_audio.observation}\n`;
-      }
-      diagnosisInfo += `Note: Voice quality, breathing patterns, and cough sounds should be considered if audio was provided.\n`;
     } else {
       diagnosisInfo += `Voice Recording: Not provided\n`;
     }
@@ -189,7 +216,7 @@ Data Availability Status:\n`;
     const result = streamText({
       model: google(model),
       system: systemPrompt,
-      prompt: diagnosisInfo,
+      messages: [{ role: 'user', content: diagnosisInfo }],
     });
 
     const duration = Date.now() - startTime;

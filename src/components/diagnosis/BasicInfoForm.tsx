@@ -6,11 +6,186 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useState, useEffect } from 'react'
-import { User, Calendar, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles, Stethoscope } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { User, Calendar as CalendarIcon, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles, Stethoscope, Minus, Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useDoctorLevel, DOCTOR_LEVELS, DoctorLevel } from '@/contexts/DoctorContext'
 import { useLanguage } from '@/contexts/LanguageContext'
+
+// Mobile-friendly numeric input with slider and increment/decrement buttons
+interface MobileNumericInputProps {
+    id: string
+    value: string
+    onChange: (value: string) => void
+    placeholder: string
+    icon: React.ReactNode
+    min: number
+    max: number
+    step?: number
+    unit?: string
+    quickValues?: number[]
+    required?: boolean
+}
+
+function MobileNumericInput({
+    id,
+    value,
+    onChange,
+    placeholder,
+    icon,
+    min,
+    max,
+    step = 1,
+    unit,
+    quickValues,
+    required = false
+}: MobileNumericInputProps) {
+    const [showSlider, setShowSlider] = useState(false)
+    const sliderRef = useRef<HTMLDivElement>(null)
+    const numValue = parseFloat(value) || 0
+
+    // Close slider when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (sliderRef.current && !sliderRef.current.contains(e.target as Node)) {
+                setShowSlider(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
+
+    const handleIncrement = () => {
+        const newValue = Math.min(max, numValue + step)
+        onChange(step < 1 ? newValue.toFixed(1) : String(Math.round(newValue)))
+    }
+
+    const handleDecrement = () => {
+        const newValue = Math.max(min, numValue - step)
+        onChange(step < 1 ? newValue.toFixed(1) : String(Math.round(newValue)))
+    }
+
+    const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = parseFloat(e.target.value)
+        onChange(step < 1 ? newValue.toFixed(1) : String(Math.round(newValue)))
+    }
+
+    const handleQuickSelect = (val: number) => {
+        onChange(step < 1 ? val.toFixed(1) : String(val))
+        setShowSlider(false)
+    }
+
+    const percentage = ((numValue - min) / (max - min)) * 100
+
+    return (
+        <div className="relative" ref={sliderRef}>
+            {/* Main input container */}
+            <div className="flex items-stretch gap-1">
+                {/* Decrement button */}
+                <button
+                    type="button"
+                    onClick={handleDecrement}
+                    disabled={numValue <= min}
+                    className="flex items-center justify-center w-11 h-12 rounded-l-lg border border-r-0 border-stone-200 bg-stone-50 hover:bg-emerald-50 hover:border-emerald-200 active:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all touch-manipulation"
+                    aria-label="Decrease"
+                >
+                    <Minus className="w-4 h-4 text-stone-600" />
+                </button>
+
+                {/* Input field */}
+                <div className="relative flex-1">
+                    <div className="absolute left-3 top-3.5 h-4 w-4 text-emerald-600/70 pointer-events-none">
+                        {icon}
+                    </div>
+                    <Input
+                        id={id}
+                        type="number"
+                        inputMode="decimal"
+                        min={min}
+                        max={max}
+                        step={step}
+                        value={value ?? ''}
+                        onChange={(e) => onChange(e.target.value)}
+                        onFocus={() => setShowSlider(true)}
+                        placeholder={placeholder}
+                        className="pl-10 pr-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50 rounded-none text-center text-lg font-medium [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        required={required}
+                    />
+                    {unit && (
+                        <span className="absolute right-3 top-3.5 text-stone-400 text-sm pointer-events-none">
+                            {unit}
+                        </span>
+                    )}
+                </div>
+
+                {/* Increment button */}
+                <button
+                    type="button"
+                    onClick={handleIncrement}
+                    disabled={numValue >= max}
+                    className="flex items-center justify-center w-11 h-12 rounded-r-lg border border-l-0 border-stone-200 bg-stone-50 hover:bg-emerald-50 hover:border-emerald-200 active:bg-emerald-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all touch-manipulation"
+                    aria-label="Increase"
+                >
+                    <Plus className="w-4 h-4 text-stone-600" />
+                </button>
+            </div>
+
+            {/* Expandable slider and quick selection panel */}
+            {showSlider && (
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute left-0 right-0 mt-2 p-4 bg-white border border-stone-200 rounded-xl shadow-lg z-20"
+                >
+                    {/* Slider */}
+                    <div className="mb-4">
+                        <div className="relative h-2 bg-stone-100 rounded-full overflow-hidden">
+                            <div
+                                className="absolute h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all"
+                                style={{ width: `${percentage}%` }}
+                            />
+                        </div>
+                        <input
+                            type="range"
+                            min={min}
+                            max={max}
+                            step={step}
+                            value={numValue || min}
+                            onChange={handleSliderChange}
+                            className="absolute top-0 left-0 right-0 w-full h-2 opacity-0 cursor-pointer"
+                            style={{ marginTop: '0px' }}
+                        />
+                        <div className="flex justify-between mt-1">
+                            <span className="text-xs text-stone-400">{min}{unit}</span>
+                            <span className="text-sm font-semibold text-emerald-600">{value || '—'}{unit && value ? unit : ''}</span>
+                            <span className="text-xs text-stone-400">{max}{unit}</span>
+                        </div>
+                    </div>
+
+                    {/* Quick selection buttons */}
+                    {quickValues && quickValues.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                            {quickValues.map((qv) => (
+                                <button
+                                    key={qv}
+                                    type="button"
+                                    onClick={() => handleQuickSelect(qv)}
+                                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all touch-manipulation min-h-[40px] ${numValue === qv
+                                        ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-300'
+                                        : 'bg-stone-50 text-stone-600 border border-stone-200 hover:bg-emerald-50 hover:border-emerald-200'
+                                        }`}
+                                >
+                                    {qv}{unit}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </motion.div>
+            )}
+        </div>
+    )
+}
 
 export interface BasicInfoData {
     name: string
@@ -26,7 +201,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
     const { doctorLevel, setDoctorLevel } = useDoctorLevel()
     const { t, language } = useLanguage()
     const [formData, setFormData] = useState<BasicInfoData>(initialData || {
-        name: '',
+        name: 'Anonymous',
         age: '',
         gender: '',
         weight: '',
@@ -51,11 +226,11 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                 const profileData = JSON.parse(savedProfileData)
                 setFormData(prev => ({
                     ...prev,
-                    name: profileData.name || prev.name,
-                    age: profileData.age || prev.age,
-                    gender: profileData.gender || prev.gender,
-                    weight: profileData.weight || prev.weight,
-                    height: profileData.height || prev.height,
+                    name: profileData.name ?? prev.name ?? '',
+                    age: profileData.age ?? prev.age ?? '',
+                    gender: profileData.gender ?? prev.gender ?? '',
+                    weight: profileData.weight ?? prev.weight ?? '',
+                    height: profileData.height ?? prev.height ?? '',
                 }))
                 localStorage.removeItem('patientProfileData')
             } catch (e) {
@@ -63,6 +238,22 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
             }
         }
     }, [])
+
+    // Sync with initialData changes (e.g. when profile loads)
+    useEffect(() => {
+        if (initialData) {
+            setFormData(prev => ({
+                ...prev,
+                name: initialData.name ?? prev.name ?? '',
+                age: initialData.age ?? prev.age ?? '',
+                gender: initialData.gender ?? prev.gender ?? '',
+                weight: initialData.weight ?? prev.weight ?? '',
+                height: initialData.height ?? prev.height ?? '',
+                symptoms: initialData.symptoms ?? prev.symptoms ?? '',
+                symptomDuration: initialData.symptomDuration ?? prev.symptomDuration ?? '',
+            }))
+        }
+    }, [initialData])
 
     // Listen for test data fill event
     useEffect(() => {
@@ -169,64 +360,55 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
 
                     <div className="space-y-2">
                         <Label htmlFor="age" className="text-stone-600 font-medium">{t.basicInfo.age}</Label>
-                        <div className="relative">
-                            <Calendar className="absolute left-3 top-3.5 h-4 w-4 text-emerald-600/70" />
-                            <Input
-                                id="age"
-                                type="number"
-                                inputMode="numeric"
-                                min="0"
-                                max="120"
-                                value={formData.age}
-                                onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                                placeholder={t.basicInfo.agePlaceholder}
-                                className="pl-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
-                                required
-                            />
-                        </div>
+                        <MobileNumericInput
+                            id="age"
+                            value={formData.age}
+                            onChange={(val) => setFormData({ ...formData, age: val })}
+                            placeholder={t.basicInfo.agePlaceholder}
+                            icon={<CalendarIcon className="h-4 w-4" />}
+                            min={1}
+                            max={120}
+                            step={1}
+                            quickValues={[18, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70]}
+                            required
+                        />
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="weight" className="text-stone-600 font-medium">{t.basicInfo.weight}</Label>
-                        <div className="relative">
-                            <Scale className="absolute left-3 top-3.5 h-4 w-4 text-emerald-600/70" />
-                            <Input
-                                id="weight"
-                                type="number"
-                                inputMode="decimal"
-                                min="1"
-                                max="500"
-                                step="0.1"
-                                value={formData.weight}
-                                onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                                placeholder={t.basicInfo.weightPlaceholder}
-                                className="pl-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
-                                required
-                            />
-                        </div>
+                        <MobileNumericInput
+                            id="weight"
+                            value={formData.weight}
+                            onChange={(val) => setFormData({ ...formData, weight: val })}
+                            placeholder={t.basicInfo.weightPlaceholder}
+                            icon={<Scale className="h-4 w-4" />}
+                            min={20}
+                            max={200}
+                            step={1}
+                            unit="kg"
+                            quickValues={[45, 50, 55, 60, 65, 70, 75, 80, 85, 90]}
+                            required
+                        />
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="height" className="text-stone-600 font-medium">{t.basicInfo.height}</Label>
-                        <div className="relative">
-                            <Ruler className="absolute left-3 top-3.5 h-4 w-4 text-emerald-600/70" />
-                            <Input
-                                id="height"
-                                type="number"
-                                inputMode="decimal"
-                                min="1"
-                                max="300"
-                                step="0.1"
-                                value={formData.height}
-                                onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                                placeholder={t.basicInfo.heightPlaceholder}
-                                className="pl-10 h-12 border-stone-200 focus-visible:ring-emerald-500/50 focus-visible:border-emerald-500 bg-stone-50/50"
-                                required
-                            />
-                        </div>
+                        <MobileNumericInput
+                            id="height"
+                            value={formData.height}
+                            onChange={(val) => setFormData({ ...formData, height: val })}
+                            placeholder={t.basicInfo.heightPlaceholder}
+                            icon={<Ruler className="h-4 w-4" />}
+                            min={100}
+                            max={220}
+                            step={1}
+                            unit="cm"
+                            quickValues={[150, 155, 160, 165, 170, 175, 180, 185, 190]}
+                            required
+                        />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 relative z-10">
                         <Label htmlFor="symptomDuration" className="text-stone-600 font-medium">{t.basicInfo.duration}</Label>
                         <div className="relative">
                             <div className="absolute left-3 top-3 h-4 w-4 text-emerald-600/70 z-10 pointer-events-none">

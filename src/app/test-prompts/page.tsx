@@ -67,7 +67,7 @@ export default function TestPromptsPage() {
                         symptoms: chatMessage,
                         symptomDuration: '1 week'
                     },
-                    model: 'gemini-2.5-flash'
+                    model: 'gemini-1.5-flash'
                 })
             });
 
@@ -201,7 +201,7 @@ export default function TestPromptsPage() {
                 body: JSON.stringify({
                     data: mockData,
                     prompt: 'Please provide a comprehensive TCM diagnosis',
-                    model: 'gemini-2.5-flash'
+                    model: 'gemini-1.5-flash'
                 })
             });
 

@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     const startTime = Date.now();
 
     try {
-        const { prompt, model = 'gemini-2.0-flash' } = await req.json();
+        const { prompt, model = 'gemini-1.5-flash' } = await req.json();
         console.log(`[test-gemini] Testing model: ${model}`);
         console.log('[test-gemini] Prompt:', prompt?.substring(0, 100) + '...');
 
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
         console.log(`[test-gemini] Calling ${model}...`);
         const { text } = await generateText({
             model: google(model),
-            prompt: prompt,
+            messages: [{ role: 'user', content: prompt }],
         });
 
         const duration = Date.now() - startTime;

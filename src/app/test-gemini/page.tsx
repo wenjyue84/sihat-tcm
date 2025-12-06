@@ -3,12 +3,9 @@
 import { useState } from 'react';
 
 const AVAILABLE_MODELS = [
-    { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview (Latest)' },
-    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
-    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
-    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
-    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
-    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' },
+    { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview (Master)' },
+    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro (Expert)' },
+    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash (Physician)' },
 ];
 
 type Step = {
@@ -20,7 +17,7 @@ type Step = {
 
 export default function TestGeminiPage() {
     const [prompt, setPrompt] = useState('Tell me a joke about TCM.');
-    const [selectedModel, setSelectedModel] = useState('gemini-2.5-pro');
+    const [selectedModel, setSelectedModel] = useState('gemini-2.0-flash');
     const [response, setResponse] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');

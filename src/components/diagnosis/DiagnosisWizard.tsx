@@ -22,6 +22,113 @@ import { ObservationResult } from './ObservationResult'
 import { ImageAnalysisLoader } from './ImageAnalysisLoader'
 import { Loader2 } from 'lucide-react'
 
+/**
+ * Repairs common JSON formatting issues from AI responses
+ * Specifically handles the case where AI adds extra string paragraphs without keys in objects
+ */
+function repairJSON(jsonString: string): string {
+    // First, try to find where the analysis object has malformed entries
+    // The pattern is: "summary": "...", "Some text without key", "More text"...
+    // We need to find these and either remove them or incorporate them into summary
+
+    try {
+        // Try to find the analysis section and fix it
+        const analysisMatch = jsonString.match(/"analysis"\s*:\s*\{[\s\S]*?"summary"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+        if (analysisMatch) {
+            // Find all the orphan strings after summary (strings without a key before them)
+            // Pattern: end of a string value, comma, then another string that's not followed by :
+            let fixed = jsonString;
+
+            // This regex finds strings that appear to be value-only (no key) in the analysis object
+            // Look for pattern: ", "text without colon after the next quote"
+            const orphanPattern = /("analysis"\s*:\s*\{[\s\S]*?"summary"\s*:\s*"(?:[^"\\]|\\.)*")\s*,\s*"(?:[^"\\]|\\.)*"(?=\s*,\s*"(?:[^"\\]|\\.)*"(?:\s*,\s*"(?:[^"\\]|\\.)*")*\s*,\s*"key_findings")/g;
+
+            // Simpler approach: find the analysis object and look for any string values not preceded by key:
+            // We'll do this by finding entries that match `,"string"` pattern where the string doesn't have : after it
+
+            // Find the analysis block
+            const analysisStart = fixed.indexOf('"analysis"');
+            if (analysisStart !== -1) {
+                // Find where key_findings starts
+                const keyFindingsPos = fixed.indexOf('"key_findings"', analysisStart);
+                if (keyFindingsPos !== -1) {
+                    // Get the substring between summary and key_findings
+                    const summaryEnd = fixed.indexOf('"summary"', analysisStart);
+                    if (summaryEnd !== -1) {
+                        // Find the end of the summary value
+                        let pos = summaryEnd + '"summary"'.length;
+                        // Skip whitespace and colon
+                        while (pos < keyFindingsPos && /[\s:]/.test(fixed[pos])) pos++;
+                        // Now we should be at the opening quote of summary value
+                        if (fixed[pos] === '"') {
+                            // Find the closing quote (accounting for escapes)
+                            let inEscape = false;
+                            pos++;
+                            while (pos < keyFindingsPos) {
+                                if (inEscape) {
+                                    inEscape = false;
+                                } else if (fixed[pos] === '\\') {
+                                    inEscape = true;
+                                } else if (fixed[pos] === '"') {
+                                    break;
+                                }
+                                pos++;
+                            }
+                            // pos is now at the closing quote of summary
+                            const summaryEndPos = pos + 1;
+
+                            // Extract what's between summary end and key_findings
+                            const betweenContent = fixed.substring(summaryEndPos, keyFindingsPos);
+
+                            // Check if there are orphan strings (strings not part of key: value)
+                            // Look for pattern: , "something" where the something doesn't have : after quotes
+                            const orphanStringPattern = /,\s*"((?:[^"\\]|\\.)*)"\s*(?=[,}]|$)/g;
+                            const orphanStrings: string[] = [];
+                            let match;
+                            let cleanedBetween = betweenContent;
+
+                            while ((match = orphanStringPattern.exec(betweenContent)) !== null) {
+                                // Check if this is truly an orphan (no : after it in a reasonable distance)
+                                const afterMatch = betweenContent.substring(match.index + match[0].length, match.index + match[0].length + 5);
+                                if (!afterMatch.includes(':')) {
+                                    orphanStrings.push(match[1]);
+                                }
+                            }
+
+                            if (orphanStrings.length > 0) {
+                                // We found orphan strings - remove them from between section
+                                for (const orphan of orphanStrings) {
+                                    const escapedOrphan = orphan.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                                    cleanedBetween = cleanedBetween.replace(new RegExp(',\\s*"' + escapedOrphan + '"\\s*', 'g'), '');
+                                }
+
+                                // Reconstruct the JSON with cleaned between section
+                                // Make sure we have proper comma before key_findings
+                                cleanedBetween = cleanedBetween.replace(/,\s*,/g, ',').trim();
+                                if (!cleanedBetween.endsWith(',')) {
+                                    cleanedBetween = cleanedBetween + ',';
+                                }
+                                if (cleanedBetween === ',') {
+                                    cleanedBetween = ',\n    ';
+                                }
+
+                                fixed = fixed.substring(0, summaryEndPos) + cleanedBetween + fixed.substring(keyFindingsPos);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return fixed;
+        }
+    } catch (e) {
+        console.error('[repairJSON] Error during repair attempt:', e);
+    }
+
+    return jsonString;
+}
+
+
 export type DiagnosisStep = 'basic_info' | 'wen_inquiry' | 'wang_tongue' | 'wang_face' | 'wang_part' | 'wen_audio' | 'qie' | 'processing' | 'report'
 
 export default function DiagnosisWizard() {
@@ -218,8 +325,15 @@ export default function DiagnosisWizard() {
 
             // Auto-save to Supabase if valid JSON
             try {
-                const cleanJson = fullText.replace(/```json\n?|\n?```/g, '').trim();
-                const resultData = JSON.parse(cleanJson);
+                let cleanJson = fullText.replace(/```json\n?|\n?```/g, '').trim();
+                let resultData;
+                try {
+                    resultData = JSON.parse(cleanJson);
+                } catch (parseError) {
+                    // Try to repair the JSON before saving
+                    const repairedJson = repairJSON(cleanJson);
+                    resultData = JSON.parse(repairedJson);
+                }
                 if (user) {
                     await supabase.from('inquiries').insert({
                         user_id: user.id,
@@ -318,8 +432,8 @@ export default function DiagnosisWizard() {
                                 />
                             ) : (
                                 <CameraCapture
-                                    title="Wang (Tongue Inspection)"
-                                    instruction="Please stick out your tongue and take a clear photo."
+                                    title={t.tongue.title}
+                                    instruction={t.tongue.instructions}
                                     onComplete={(result) => {
                                         setData((prev: any) => ({ ...prev, wang_tongue: result }));
                                         if (result.image) {
@@ -360,8 +474,8 @@ export default function DiagnosisWizard() {
                                 />
                             ) : (
                                 <CameraCapture
-                                    title="Wang (Face Inspection)"
-                                    instruction="Please take a clear photo of your face."
+                                    title={t.face.title}
+                                    instruction={t.face.instructions}
                                     onComplete={(result) => {
                                         setData((prev: any) => ({ ...prev, wang_face: result }));
                                         if (result.image) {
@@ -402,8 +516,8 @@ export default function DiagnosisWizard() {
                                 />
                             ) : (
                                 <CameraCapture
-                                    title="Wang (Specific Area)"
-                                    instruction="If you have a specific area of concern (e.g., skin rash), take a photo. Otherwise, you can skip."
+                                    title={t.bodyPart.title}
+                                    instruction={t.bodyPart.instructions}
                                     required={false}
                                     onComplete={(result) => {
                                         setData((prev: any) => ({ ...prev, wang_part: result }));
@@ -470,12 +584,52 @@ export default function DiagnosisWizard() {
                                     <div className="text-left w-full">
                                         {(() => {
                                             try {
-                                                const cleanJson = completion.replace(/```json\n?|\n?```/g, '').trim();
-                                                // At this point we know completion has content (checked above)
-                                                const resultData = JSON.parse(cleanJson);
+                                                let cleanJson = completion.replace(/```json\n?|\n?```/g, '').trim();
+                                                // First attempt: try parsing directly
+                                                let resultData;
+                                                try {
+                                                    resultData = JSON.parse(cleanJson);
+                                                } catch (parseError) {
+                                                    // Second attempt: try to repair the JSON
+                                                    console.log('[DiagnosisWizard] Initial parse failed, attempting JSON repair...');
+                                                    const repairedJson = repairJSON(cleanJson);
+                                                    resultData = JSON.parse(repairedJson);
+                                                    console.log('[DiagnosisWizard] JSON repair successful!');
+                                                }
+
+                                                // Helper function to convert any value to a displayable string
+                                                const formatValue = (val: any): string => {
+                                                    if (val === null || val === undefined) return '';
+                                                    if (typeof val === 'string') return val;
+                                                    if (Array.isArray(val)) return val.map(v => formatValue(v)).join(', ');
+                                                    if (typeof val === 'object') {
+                                                        // Convert object to readable format
+                                                        return Object.entries(val)
+                                                            .map(([key, value]) => {
+                                                                const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                                                const formattedValue = formatValue(value);
+                                                                return `${formattedKey}: ${formattedValue}`;
+                                                            })
+                                                            .join('\n');
+                                                    }
+                                                    return String(val);
+                                                };
+
+                                                // Normalize data structure to prevent undefined errors
+                                                const normalizedData = {
+                                                    diagnosis: formatValue(resultData.diagnosis) || 'Diagnosis pending',
+                                                    constitution: formatValue(resultData.constitution) || 'Not determined',
+                                                    analysis: formatValue(resultData.analysis) || '',
+                                                    recommendations: {
+                                                        food: resultData.recommendations?.food || [],
+                                                        avoid: resultData.recommendations?.avoid || [],
+                                                        lifestyle: resultData.recommendations?.lifestyle || []
+                                                    }
+                                                };
+
                                                 return (
                                                     <DiagnosisReport
-                                                        data={resultData}
+                                                        data={normalizedData}
                                                         onRestart={() => {
                                                             setData({
                                                                 basic_info: null,

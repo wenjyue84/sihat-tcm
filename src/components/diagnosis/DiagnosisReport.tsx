@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Activity, Utensils, AlertCircle, HeartPulse, Leaf, Info, Download, Languages } from 'lucide-react'
+import { Activity, Utensils, AlertCircle, HeartPulse, Leaf, Info, Download } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
+import { ShowPromptButton } from './ShowPromptButton'
+import { useLanguage } from '@/contexts/LanguageContext'
 
-type Language = 'en' | 'zh' | 'bm'
+type Language = 'en' | 'zh' | 'ms'
 
 interface DiagnosisReportProps {
     data: {
@@ -52,7 +54,7 @@ const translations = {
         footer2: '如需专业医疗建议，请咨询持证中医师。',
         fileName: '中医诊断报告'
     },
-    bm: {
+    ms: {
         title: 'Laporan Diagnosis TCM',
         subtitle: 'Analisis Perubatan Tradisional Cina',
         generated: 'Dijana pada',
@@ -72,6 +74,7 @@ const translations = {
 export function DiagnosisReport({ data, onRestart }: DiagnosisReportProps) {
     const { getDoctorInfo } = useDoctorLevel()
     const doctorInfo = getDoctorInfo()
+    const { language } = useLanguage()
 
     const container = {
         hidden: { opacity: 0 },
@@ -122,7 +125,7 @@ export function DiagnosisReport({ data, onRestart }: DiagnosisReportProps) {
         yPos += 5
 
         // Date
-        const dateLocale = language === 'zh' ? 'zh-CN' : language === 'bm' ? 'ms-MY' : 'en-US'
+        const dateLocale = language === 'zh' ? 'zh-CN' : language === 'ms' ? 'ms-MY' : 'en-US'
         const date = new Date().toLocaleDateString(dateLocale, {
             year: 'numeric',
             month: 'long',
@@ -160,27 +163,27 @@ export function DiagnosisReport({ data, onRestart }: DiagnosisReportProps) {
 
         doc.setTextColor(21, 128, 61)
         addWrappedText(t.recommendedFoods, 12, true)
-        data.recommendations.food.forEach((food) => {
-            doc.setTextColor(68, 64, 60)
-            addWrappedText(`• ${food}`, 11)
-        })
+            ; (data.recommendations?.food || []).forEach((food) => {
+                doc.setTextColor(68, 64, 60)
+                addWrappedText(`• ${food}`, 11)
+            })
         yPos += 5
 
         doc.setTextColor(185, 28, 28) // Red-700
         addWrappedText(t.foodsToAvoid, 12, true)
-        data.recommendations.avoid.forEach((food) => {
-            doc.setTextColor(68, 64, 60)
-            addWrappedText(`• ${food}`, 11)
-        })
+            ; (data.recommendations?.avoid || []).forEach((food) => {
+                doc.setTextColor(68, 64, 60)
+                addWrappedText(`• ${food}`, 11)
+            })
         yPos += 10
 
         // Lifestyle Recommendations
         doc.setTextColor(41, 37, 36)
         addWrappedText(t.lifestyleRecommendations, 14, true)
-        data.recommendations.lifestyle.forEach((tip) => {
-            doc.setTextColor(68, 64, 60)
-            addWrappedText(`• ${tip}`, 11)
-        })
+            ; (data.recommendations?.lifestyle || []).forEach((tip) => {
+                doc.setTextColor(68, 64, 60)
+                addWrappedText(`• ${tip}`, 11)
+            })
         yPos += 15
 
         // Footer
@@ -204,10 +207,11 @@ export function DiagnosisReport({ data, onRestart }: DiagnosisReportProps) {
         >
             {/* Header Section */}
             <motion.div variants={item} className="text-center space-y-1 md:space-y-2">
-                <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium border ${doctorInfo.bgColor} ${doctorInfo.borderColor} ${doctorInfo.textColor}`}>
                         {doctorInfo.icon} Analyzed by {doctorInfo.name}
                     </span>
+                    <ShowPromptButton promptType="final" />
                 </div>
                 <h2 className="text-2xl md:text-3xl font-bold text-emerald-900">Diagnosis Report</h2>
                 <p className="text-stone-600 text-sm md:text-base">Based on your Wang, Wen, Wen, and Qie analysis</p>
@@ -274,7 +278,7 @@ export function DiagnosisReport({ data, onRestart }: DiagnosisReportProps) {
                                     <Leaf className="h-4 w-4" /> Recommended
                                 </h4>
                                 <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
-                                    {data.recommendations.food.map((food, idx) => (
+                                    {(data.recommendations?.food || []).map((food, idx) => (
                                         <li key={idx}>{food}</li>
                                     ))}
                                 </ul>
@@ -284,7 +288,7 @@ export function DiagnosisReport({ data, onRestart }: DiagnosisReportProps) {
                                     <AlertCircle className="h-4 w-4" /> Avoid
                                 </h4>
                                 <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
-                                    {data.recommendations.avoid.map((food, idx) => (
+                                    {(data.recommendations?.avoid || []).map((food, idx) => (
                                         <li key={idx}>{food}</li>
                                     ))}
                                 </ul>
@@ -304,7 +308,7 @@ export function DiagnosisReport({ data, onRestart }: DiagnosisReportProps) {
                         </CardHeader>
                         <CardContent>
                             <ul className="space-y-3">
-                                {data.recommendations.lifestyle.map((tip, idx) => (
+                                {(data.recommendations?.lifestyle || []).map((tip, idx) => (
                                     <li key={idx} className="flex gap-3 text-stone-600 text-sm">
                                         <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
                                         <span>{tip}</span>
@@ -317,34 +321,17 @@ export function DiagnosisReport({ data, onRestart }: DiagnosisReportProps) {
             </div>
 
             {/* Action Buttons - Better mobile layout */}
-            <motion.div variants={item} className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 pt-4 md:pt-6">
-                {/* Language Download Buttons */}
-                <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-                    <button
-                        onClick={() => downloadPDF('en')}
-                        className="px-4 py-2.5 bg-white border-2 border-emerald-600 text-emerald-600 rounded-full hover:bg-emerald-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
-                    >
-                        <Download className="h-4 w-4" />
-                        PDF (EN)
-                    </button>
-                    <button
-                        onClick={() => downloadPDF('zh')}
-                        className="px-4 py-2.5 bg-white border-2 border-amber-600 text-amber-600 rounded-full hover:bg-amber-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
-                    >
-                        <Download className="h-4 w-4" />
-                        PDF (中文)
-                    </button>
-                    <button
-                        onClick={() => downloadPDF('bm')}
-                        className="px-4 py-2.5 bg-white border-2 border-blue-600 text-blue-600 rounded-full hover:bg-blue-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
-                    >
-                        <Download className="h-4 w-4" />
-                        PDF (BM)
-                    </button>
-                </div>
+            <motion.div variants={item} className="flex flex-wrap justify-center gap-3 pt-4 md:pt-6">
+                <button
+                    onClick={() => downloadPDF(language as Language)}
+                    className="px-4 py-2.5 bg-white border-2 border-emerald-600 text-emerald-600 rounded-full hover:bg-emerald-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
+                >
+                    <Download className="h-4 w-4" />
+                    PDF
+                </button>
                 <button
                     onClick={onRestart}
-                    className="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition-colors shadow-lg hover:shadow-xl text-sm font-medium min-h-[44px]"
+                    className="px-6 py-2.5 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition-colors shadow-lg hover:shadow-xl text-sm font-medium min-h-[44px]"
                 >
                     Start New Consultation
                 </button>
