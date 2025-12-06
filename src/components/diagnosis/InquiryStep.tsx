@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { BasicInfoData } from './BasicInfoForm'
 import { Loader2, Send, Upload, X } from 'lucide-react'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface FileData {
     name: string
@@ -28,6 +29,7 @@ export function InquiryStep({
     basicInfo?: BasicInfoData
 }) {
     const { getDoctorInfo } = useDoctorLevel()
+    const { t, language } = useLanguage()
     const doctorInfo = getDoctorInfo()
     const [files, setFiles] = useState<FileData[]>([])
     const [messages, setMessages] = useState<Message[]>([])
@@ -78,14 +80,15 @@ CRITICAL INSTRUCTIONS:
         }
 
         try {
-            console.log('[InquiryStep] Sending message to /api/chat')
+            console.log('[InquiryStep] Sending message to /api/chat with language:', language)
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     messages: currentMessages.map(m => ({ role: m.role, content: m.content })),
                     basicInfo,
-                    model: doctorInfo.model
+                    model: doctorInfo.model,
+                    language: language // Pass the selected language
                 })
             })
 
@@ -123,35 +126,41 @@ CRITICAL INSTRUCTIONS:
             console.log('[InquiryStep] Final response length:', fullText.length)
         } catch (err: any) {
             console.error('[InquiryStep] Error:', err)
-            // Add error message
+            // Add error message in the selected language
+            const errorMessages: Record<string, string> = {
+                en: 'Sorry, I encountered an error. Please try again.',
+                zh: '抱歉，发生了错误。请重试。',
+                ms: 'Maaf, terdapat ralat. Sila cuba lagi.',
+            }
             setMessages(prev => [...prev, {
                 id: Date.now().toString(),
                 role: 'assistant',
-                content: 'Sorry, I encountered an error. Please try again.'
+                content: errorMessages[language] || errorMessages.en
             }])
         } finally {
             setIsLoading(false)
         }
-    }, [messages, systemMessage, basicInfo, doctorInfo.model])
+    }, [messages, systemMessage, basicInfo, doctorInfo.model, language])
 
     // Trigger the first question from AI doctor when component mounts
     useEffect(() => {
         if (!hasRequestedInitialQuestion && messages.length === 0) {
             setHasRequestedInitialQuestion(true)
 
-            // Simple initial prompt - let the AI decide the first question based on symptoms
-            // The system prompt already has all the context it needs
-            let prompt = 'Please start by asking your first diagnostic question based on my symptoms.'
-
-            if (basicInfo && basicInfo.symptoms) {
-                // Just reference the symptoms without prescribing what to ask
-                prompt = `Based on my symptoms: "${basicInfo.symptoms}", please ask your first diagnostic question.`
+            // Initial prompt in the selected language
+            const initialPrompts: Record<string, string> = {
+                en: `Based on my symptoms: "${basicInfo?.symptoms || 'general assessment'}", please ask your first diagnostic question.`,
+                zh: `根据我的症状："${basicInfo?.symptoms || '综合评估'}"，请开始询问您的第一个诊断问题。`,
+                ms: `Berdasarkan gejala saya: "${basicInfo?.symptoms || 'penilaian umum'}", sila tanya soalan diagnosis pertama anda.`,
             }
 
-            // Send the prompt to trigger the AI doctor's first question
+            const prompt = basicInfo && basicInfo.symptoms
+                ? initialPrompts[language] || initialPrompts.en
+                : (language === 'zh' ? '请开始询问诊断问题。' : language === 'ms' ? 'Sila mulakan soalan diagnosis.' : 'Please start by asking your first diagnostic question.')
+
             sendMessage(prompt, true)
         }
-    }, [hasRequestedInitialQuestion, messages.length, basicInfo, sendMessage])
+    }, [hasRequestedInitialQuestion, messages.length, basicInfo, sendMessage, language])
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
@@ -160,10 +169,9 @@ CRITICAL INSTRUCTIONS:
         }
     }, [messages])
 
-    // Keep focus on input field - refocus when loading finishes or messages change
+    // Keep focus on input field
     useEffect(() => {
         if (!isLoading) {
-            // Small delay to ensure DOM is updated before focusing
             const timer = setTimeout(() => {
                 inputRef.current?.focus()
             }, 100)
@@ -177,7 +185,6 @@ CRITICAL INSTRUCTIONS:
         const userInput = localInput
         setLocalInput('')
         await sendMessage(userInput)
-        // Auto-focus the input field after sending message
         inputRef.current?.focus()
     }
 
@@ -188,7 +195,7 @@ CRITICAL INSTRUCTIONS:
         for (let i = 0; i < e.target.files.length; i++) {
             const file = e.target.files[i]
             if (file.size > 5 * 1024 * 1024) {
-                alert(`File ${file.name} is too large (max 5MB)`)
+                alert(t.errors.fileTooBig.replace('{size}', '5'))
                 continue
             }
 
@@ -225,17 +232,16 @@ CRITICAL INSTRUCTIONS:
     }
 
     const getBMICategory = (bmi: number) => {
-        if (bmi < 18.5) return { category: 'Underweight', description: 'Below healthy range', color: 'bg-blue-50 border-blue-300 text-blue-800' }
-        if (bmi < 25) return { category: 'Normal', description: 'Healthy weight', color: 'bg-green-50 border-green-300 text-green-800' }
-        if (bmi < 30) return { category: 'Overweight', description: 'Above healthy range', color: 'bg-yellow-50 border-yellow-300 text-yellow-800' }
-        return { category: 'Obese', description: 'Significantly above range', color: 'bg-red-50 border-red-300 text-red-800' }
+        if (bmi < 18.5) return { category: language === 'zh' ? '偏瘦' : language === 'ms' ? 'Kurang berat' : 'Underweight', color: 'bg-blue-50 border-blue-300 text-blue-800' }
+        if (bmi < 25) return { category: language === 'zh' ? '正常' : language === 'ms' ? 'Normal' : 'Normal', color: 'bg-green-50 border-green-300 text-green-800' }
+        if (bmi < 30) return { category: language === 'zh' ? '超重' : language === 'ms' ? 'Berlebihan berat' : 'Overweight', color: 'bg-yellow-50 border-yellow-300 text-yellow-800' }
+        return { category: language === 'zh' ? '肥胖' : language === 'ms' ? 'Obes' : 'Obese', color: 'bg-red-50 border-red-300 text-red-800' }
     }
 
     const handleComplete = () => {
-        // Compile the chat history into a text format for the "inquiryText" field
         const chatSummary = messages
             .filter((m) => m.role !== 'system')
-            .map((m) => `${m.role === 'user' ? 'Patient' : 'Doctor'}: ${m.content}`)
+            .map((m) => `${m.role === 'user' ? (language === 'zh' ? '患者' : language === 'ms' ? 'Pesakit' : 'Patient') : (language === 'zh' ? '医师' : language === 'ms' ? 'Doktor' : 'Doctor')}: ${m.content}`)
             .join('\n');
 
         onComplete({
@@ -245,7 +251,7 @@ CRITICAL INSTRUCTIONS:
         })
     }
 
-    // Filter messages for display (hide system messages and initial prompts)
+    // Filter messages for display
     const displayMessages = messages.filter(m =>
         m.role !== 'system' &&
         !m.content.startsWith('The patient mentioned') &&
@@ -257,16 +263,16 @@ CRITICAL INSTRUCTIONS:
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b pb-3 md:pb-4">
                 <div>
                     <div className="flex items-center gap-2">
-                        <h2 className="text-lg md:text-xl font-semibold text-emerald-800">Wen (Inquiry) - Consultation</h2>
+                        <h2 className="text-lg md:text-xl font-semibold text-emerald-800">{t.inquiry.title}</h2>
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${doctorInfo.bgColor} ${doctorInfo.borderColor} ${doctorInfo.textColor}`}>
-                            {doctorInfo.icon} {doctorInfo.name}
+                            {doctorInfo.icon} {language === 'zh' ? doctorInfo.nameZh : doctorInfo.name}
                         </span>
                     </div>
-                    <p className="text-stone-600 text-xs md:text-sm">Chat with the AI assistant to describe your condition.</p>
+                    <p className="text-stone-600 text-xs md:text-sm">{t.inquiry.chatDescription}</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="h-10 text-sm">
                     <Upload className="w-4 h-4 mr-2" />
-                    Upload Reports
+                    {language === 'zh' ? '上传报告' : language === 'ms' ? 'Muat Naik Laporan' : 'Upload Reports'}
                 </Button>
             </div>
 
@@ -274,40 +280,44 @@ CRITICAL INSTRUCTIONS:
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-3 text-sm text-amber-800">
                     <span className="text-xl">⏳</span>
                     <div>
-                        <p className="font-medium">Master Level Analysis</p>
+                        <p className="font-medium">{language === 'zh' ? '大师级别分析' : language === 'ms' ? 'Analisis Tahap Pakar' : 'Master Level Analysis'}</p>
                         <p className="text-amber-700/80 text-xs mt-0.5">
-                            The Master physician performs deep reasoning and analysis. Responses may take slightly longer to generate as it considers multiple TCM theories.
+                            {language === 'zh'
+                                ? '大师级医师会进行深度推理和分析。回复可能需要较长时间，因为需要考虑多种中医理论。'
+                                : language === 'ms'
+                                    ? 'Pakar melakukan penaakulan dan analisis mendalam. Respons mungkin mengambil sedikit masa.'
+                                    : 'The Master physician performs deep reasoning and analysis. Responses may take slightly longer to generate.'}
                         </p>
                     </div>
                 </div>
             )}
 
-            {/* Basic Information Summary with BMI - Collapsible hint on mobile */}
+            {/* Basic Information Summary with BMI */}
             {basicInfo && basicInfo.weight && basicInfo.height && (
                 <details className="bg-gradient-to-r from-emerald-50 to-teal-50 p-3 md:p-4 rounded-lg border border-emerald-200 group">
                     <summary className="font-semibold text-emerald-800 text-sm cursor-pointer flex items-center justify-between">
-                        Patient Information
-                        <span className="text-xs text-emerald-600 group-open:hidden">Tap to expand</span>
+                        {t.report.patientInfo}
+                        <span className="text-xs text-emerald-600 group-open:hidden">{language === 'zh' ? '点击展开' : language === 'ms' ? 'Ketik untuk kembang' : 'Tap to expand'}</span>
                     </summary>
                     <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 text-sm">
                         <div>
-                            <span className="text-stone-500 text-xs">Name:</span>
+                            <span className="text-stone-500 text-xs">{t.report.name}:</span>
                             <p className="font-medium text-stone-800 text-sm">{basicInfo.name}</p>
                         </div>
                         <div>
-                            <span className="text-stone-500 text-xs">Age:</span>
-                            <p className="font-medium text-stone-800 text-sm">{basicInfo.age} years</p>
+                            <span className="text-stone-500 text-xs">{t.report.age}:</span>
+                            <p className="font-medium text-stone-800 text-sm">{basicInfo.age} {language === 'zh' ? '岁' : language === 'ms' ? 'tahun' : 'years'}</p>
                         </div>
                         <div>
-                            <span className="text-stone-500 text-xs">Gender:</span>
+                            <span className="text-stone-500 text-xs">{t.report.gender}:</span>
                             <p className="font-medium text-stone-800 text-sm capitalize">{basicInfo.gender}</p>
                         </div>
                         <div>
-                            <span className="text-stone-500 text-xs">Weight:</span>
+                            <span className="text-stone-500 text-xs">{t.report.weight}:</span>
                             <p className="font-medium text-stone-800 text-sm">{basicInfo.weight} kg</p>
                         </div>
                         <div>
-                            <span className="text-stone-500 text-xs">Height:</span>
+                            <span className="text-stone-500 text-xs">{t.report.height}:</span>
                             <p className="font-medium text-stone-800 text-sm">{basicInfo.height} cm</p>
                         </div>
                         <div className="col-span-2 md:col-span-3">
@@ -319,7 +329,7 @@ CRITICAL INSTRUCTIONS:
                                     const bmiInfo = getBMICategory(bmi)
                                     return (
                                         <div>
-                                            <span className="text-stone-500 text-xs">BMI Status:</span>
+                                            <span className="text-stone-500 text-xs">{t.report.bmi}:</span>
                                             <div className={`inline-flex items-center gap-2 mt-1 px-2 py-0.5 rounded-full border text-xs ${bmiInfo.color}`}>
                                                 <span className="font-bold">{bmi.toFixed(1)}</span>
                                                 <span>•</span>
@@ -335,7 +345,7 @@ CRITICAL INSTRUCTIONS:
                 </details>
             )}
 
-            {/* Chat Messages Area with Scrollbar */}
+            {/* Chat Messages Area */}
             <div
                 ref={scrollAreaRef}
                 className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-emerald-300 scrollbar-track-stone-100"
@@ -359,7 +369,7 @@ CRITICAL INSTRUCTIONS:
                         <div className="flex justify-start">
                             <div className="bg-stone-100 text-stone-500 p-3 rounded-lg rounded-bl-none flex items-center gap-2">
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                <span className="italic text-sm">Doctor is typing...</span>
+                                <span className="italic text-sm">{t.inquiry.doctorThinking}</span>
                             </div>
                         </div>
                     )}
@@ -385,7 +395,7 @@ CRITICAL INSTRUCTIONS:
                         ref={inputRef}
                         value={localInput}
                         onChange={(e) => setLocalInput(e.target.value)}
-                        placeholder="Type your response..."
+                        placeholder={t.inquiry.inputPlaceholder}
                         className="flex-1 h-12 text-base"
                         autoFocus
                         disabled={isLoading}
@@ -401,7 +411,7 @@ CRITICAL INSTRUCTIONS:
                 className="w-full h-12 bg-emerald-800 hover:bg-emerald-900 text-base"
                 disabled={displayMessages.length < 2}
             >
-                Finish Inquiry & Continue
+                {t.inquiry.finishChat}
             </Button>
 
             <input

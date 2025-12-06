@@ -6,20 +6,34 @@ import { INTERACTIVE_CHAT_PROMPT } from '@/lib/systemPrompts';
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
 
+// Language instruction templates for chat responses
+const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
+    en: `
+LANGUAGE REQUIREMENT: You MUST respond entirely in English. Ask questions and provide all responses in clear, simple English.
+`,
+    zh: `
+语言要求：你必须完全使用中文回复。所有问诊对话必须使用简体中文。
+请使用简单易懂的中文，确保老年患者能够理解。不要使用英文或马来文。
+`,
+    ms: `
+KEPERLUAN BAHASA: Anda MESTI menjawab sepenuhnya dalam Bahasa Malaysia. Tanya soalan dan berikan semua respons dalam Bahasa Malaysia yang jelas dan mudah.
+`,
+};
+
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { messages, basicInfo, model = 'gemini-2.5-flash' } = body;
+        const { messages, basicInfo, model = 'gemini-2.5-flash', language = 'en' } = body;
 
         console.log("[API /api/chat] Request received:", {
             messageCount: messages?.length,
             hasBasicInfo: !!basicInfo,
             firstMsgRole: messages?.[0]?.role,
-            model: model
+            model: model,
+            language: language
         });
 
         // Fetch custom system prompt from admin database (uses 'doctor_chat' role)
-        // Falls back to INTERACTIVE_CHAT_PROMPT from systemPrompts.ts if not found
         let customPrompt = '';
         try {
             const { data } = await supabase
@@ -33,8 +47,11 @@ export async function POST(req: Request) {
         }
 
         // Use the database prompt if available, otherwise use the library default
-        // This matches what admin's "Reset to Default" button loads
         let systemPrompt = customPrompt || INTERACTIVE_CHAT_PROMPT;
+
+        // Add language instructions to the system prompt
+        const languageInstruction = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.en;
+        systemPrompt = languageInstruction + '\n\n' + systemPrompt;
 
         // Add patient information context
         if (basicInfo) {
@@ -60,17 +77,22 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
 **INSTRUCTION:** Use this information as context. Build upon their chief complaint with your first question. Do NOT repeat this information back to the patient.`;
         }
 
-        // Filter out system messages from the messages array (we'll use our own system prompt)
+        // Filter out system messages from the messages array
         const filteredMessages = messages?.filter((m: any) => m.role !== 'system') || [];
 
         console.log("[API /api/chat] Filtered messages count:", filteredMessages.length);
         console.log("[API /api/chat] First filtered message:", filteredMessages[0]);
 
-        // If no messages, create a default initial message
+        // Create language-appropriate initial message if no messages
         if (filteredMessages.length === 0) {
+            const initialMessages: Record<string, string> = {
+                en: 'Please start the consultation by asking me relevant questions about my symptoms.',
+                zh: '请开始问诊，询问我有关症状的相关问题。',
+                ms: 'Sila mulakan perundingan dengan bertanya soalan berkaitan gejala saya.',
+            };
             filteredMessages.push({
                 role: 'user',
-                content: 'Please start the consultation by asking me relevant questions about my symptoms.'
+                content: initialMessages[language] || initialMessages.en
             });
         }
 

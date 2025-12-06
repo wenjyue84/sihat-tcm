@@ -5,17 +5,32 @@ import { supabase } from '@/lib/supabase';
 
 export const maxDuration = 60;
 
+// Language instruction templates for consistent AI responses
+const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
+  en: `
+IMPORTANT: You MUST respond entirely in English. All text, including section headers, diagnosis terms, food names, and recommendations must be in English. Do not use any Chinese characters or Malay words unless specifically quoting TCM terminology (which should be followed by English translation).
+`,
+  zh: `
+重要提示：你必须完全使用中文回复。所有文字，包括标题、诊断术语、食物名称和建议都必须使用中文。不要使用英文或马来文，除非是引用专业医学术语（需附上中文翻译）。
+请确保所有内容对不懂英文的老年华人用户友好。使用简体中文。
+`,
+  ms: `
+PENTING: Anda MESTI menjawab sepenuhnya dalam Bahasa Malaysia. Semua teks, termasuk tajuk seksyen, terma diagnosis, nama makanan, dan cadangan mesti dalam Bahasa Malaysia. Jangan gunakan huruf Cina atau perkataan Inggeris kecuali untuk memetik istilah TCM (yang harus diikuti dengan terjemahan Bahasa Malaysia).
+`,
+};
+
 export async function POST(req: Request) {
   const startTime = Date.now();
   console.log('[consult] Request started');
 
   try {
     const body = await req.json();
-    const { data, prompt, model = 'gemini-2.5-flash' } = body;
+    const { data, prompt, model = 'gemini-2.5-flash', language = 'en' } = body;
 
     console.log('[consult] Received prompt:', prompt?.substring(0, 50));
     console.log('[consult] Patient name:', data?.basic_info?.name);
     console.log('[consult] Using model:', model);
+    console.log('[consult] Language:', language);
 
     // Fetch custom final analysis prompt from admin (if exists)
     let customPrompt = '';
@@ -31,11 +46,16 @@ export async function POST(req: Request) {
     }
 
     // Use custom prompt if set, otherwise use default from library
-    const systemPrompt = customPrompt || FINAL_ANALYSIS_PROMPT;
+    let systemPrompt = customPrompt || FINAL_ANALYSIS_PROMPT;
+
+    // Add language instructions to the system prompt
+    const languageInstruction = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.en;
+    systemPrompt = languageInstruction + '\n\n' + systemPrompt;
 
     // Build a comprehensive text summary of all the data
     const { basic_info } = data;
 
+    // Build diagnosis info with bilingual headers for AI context
     let diagnosisInfo = `
 ═══════════════════════════════════════════════════════════════════════════════
                            患者资料 PATIENT PROFILE
@@ -100,7 +120,7 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
       diagnosisInfo += 'Face: No observation recorded\n';
     }
 
-    // Include body part observation if available (skin rashes, specific areas of concern)
+    // Include body part observation if available
     if (data.wang_part?.observation) {
       diagnosisInfo += `\n体部诊 Body Part Observation:\n${data.wang_part.observation}\n`;
       if (data.wang_part.potential_issues?.length) {
@@ -117,14 +137,12 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
     // Include audio/voice observation if available
     if (data.wen_audio?.audio) {
       diagnosisInfo += `Voice Recording: ✓ Provided\n`;
-      // If there's any transcription or analysis results, include them
       if (data.wen_audio.transcription) {
         diagnosisInfo += `Voice Transcription: ${data.wen_audio.transcription}\n`;
       }
       if (data.wen_audio.observation) {
         diagnosisInfo += `Voice Analysis: ${data.wen_audio.observation}\n`;
       }
-      // Note: The actual audio file would need separate processing for full analysis
       diagnosisInfo += `Note: Voice quality, breathing patterns, and cough sounds should be considered if audio was provided.\n`;
     } else {
       diagnosisInfo += `Voice Recording: Not provided\n`;
@@ -142,13 +160,29 @@ Data Availability Status:\n`;
     diagnosisInfo += data.wen_audio?.audio ? '✓ Voice recording provided\n' : '✗ No voice recording\n';
     diagnosisInfo += data.qie?.bpm ? '✓ Pulse measurement taken\n' : '✗ No pulse measurement\n';
 
-    diagnosisInfo += `
-
+    // Add language-specific final instruction
+    const finalInstructions: Record<string, string> = {
+      en: `
 ═══════════════════════════════════════════════════════════════════════════════
-                     请根据以上资料进行综合诊断
          Please provide a comprehensive diagnosis based on the above data
+                    ALL RESPONSE TEXT MUST BE IN ENGLISH
 ═══════════════════════════════════════════════════════════════════════════════
-`;
+`,
+      zh: `
+═══════════════════════════════════════════════════════════════════════════════
+                      请根据以上资料进行综合诊断
+                    所有回复内容必须使用中文
+═══════════════════════════════════════════════════════════════════════════════
+`,
+      ms: `
+═══════════════════════════════════════════════════════════════════════════════
+         Sila berikan diagnosis komprehensif berdasarkan data di atas
+              SEMUA TEKS RESPONS MESTI DALAM BAHASA MALAYSIA
+═══════════════════════════════════════════════════════════════════════════════
+`,
+    };
+
+    diagnosisInfo += finalInstructions[language] || finalInstructions.en;
 
     console.log('[consult] Calling Gemini streamText...');
 
@@ -183,4 +217,3 @@ Data Availability Status:\n`;
     });
   }
 }
-

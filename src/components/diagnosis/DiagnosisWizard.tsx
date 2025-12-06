@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { CameraCapture } from './CameraCapture'
 import { AudioRecorder } from './AudioRecorder'
 
@@ -23,18 +24,20 @@ import { Loader2 } from 'lucide-react'
 
 export type DiagnosisStep = 'basic_info' | 'wen_inquiry' | 'wang_tongue' | 'wang_face' | 'wang_part' | 'wen_audio' | 'qie' | 'processing' | 'report'
 
-const STEPS = [
-    { id: 'basic_info', label: 'Basics' },
-    { id: 'wen_inquiry', label: 'Inquiry' },
-    { id: 'wang_tongue', label: 'Tongue' },
-    { id: 'wang_face', label: 'Face' },
-    { id: 'wen_audio', label: 'Audio' },
-    { id: 'qie', label: 'Pulse' },
-]
-
 export default function DiagnosisWizard() {
     const { getModel } = useDoctorLevel()
+    const { t, language } = useLanguage()
     const [step, setStep] = useState<DiagnosisStep>('basic_info')
+
+    // Steps with translated labels
+    const STEPS = [
+        { id: 'basic_info', label: t.steps.basics },
+        { id: 'wen_inquiry', label: t.steps.inquiry },
+        { id: 'wang_tongue', label: t.steps.tongue },
+        { id: 'wang_face', label: t.steps.face },
+        { id: 'wen_audio', label: t.steps.audio },
+        { id: 'qie', label: t.steps.pulse },
+    ]
     const [data, setData] = useState<any>({
         basic_info: null,
         wen_inquiry: null,
@@ -181,7 +184,8 @@ export default function DiagnosisWizard() {
                 body: JSON.stringify({
                     prompt: 'Analyze this patient data and provide TCM diagnosis',
                     data: data,
-                    model: getModel()
+                    model: getModel(),
+                    language: language // Pass language for multilingual AI response
                 })
             })
 
@@ -257,7 +261,7 @@ export default function DiagnosisWizard() {
                         className="absolute -top-10 md:-top-12 left-0 text-stone-500 hover:text-stone-800 hover:bg-stone-100 h-10 px-3"
                     >
                         <ChevronLeft className="w-4 h-4 mr-1" />
-                        Back
+                        {t.common.back}
                     </Button>
                 )}
 

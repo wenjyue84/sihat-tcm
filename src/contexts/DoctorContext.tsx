@@ -8,7 +8,8 @@ export type DoctorLevel = 'master' | 'expert' | 'physician'
 export const DOCTOR_LEVELS = {
     master: {
         id: 'master',
-        name: '名医 Master',
+        name: 'Master',
+        nameZh: '名医大师',
         description: 'Most experienced, renowned physician',
         model: 'gemini-3-pro-preview',
         icon: '👨‍⚕️',
@@ -19,7 +20,8 @@ export const DOCTOR_LEVELS = {
     },
     expert: {
         id: 'expert',
-        name: '专家 Expert',
+        name: 'Expert',
+        nameZh: '专家医师',
         description: 'Experienced specialist physician',
         model: 'gemini-2.5-pro',
         icon: '🩺',
@@ -30,7 +32,8 @@ export const DOCTOR_LEVELS = {
     },
     physician: {
         id: 'physician',
-        name: '医师 Physician',
+        name: 'Physician',
+        nameZh: '医师',
         description: 'Standard practitioner',
         model: 'gemini-2.5-flash',
         icon: '💊',
