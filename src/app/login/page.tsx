@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
+import { useDeveloper } from '@/contexts/DeveloperContext'
 
 // Simple, elegant icons
 const PatientIcon = () => (
@@ -33,6 +34,7 @@ export default function LoginPage() {
     const router = useRouter()
     const { user, profile, refreshProfile } = useAuth()
     const { t } = useLanguage()
+    const { isDeveloperMode, toggleDeveloperMode } = useDeveloper()
 
     if (user && profile) {
         router.push(`/${profile.role}`)
@@ -266,9 +268,15 @@ export default function LoginPage() {
                 </div>
 
                 {/* Footer */}
-                <p className="text-center text-xs text-gray-400 mt-6">
-                    {t.login.devMode}
-                </p>
+                <button
+                    onClick={() => {
+                        toggleDeveloperMode()
+                        // Optional: Add a toast or visual feedback here
+                    }}
+                    className={`text-center text-xs mt-6 w-full transition-colors duration-300 ${isDeveloperMode ? 'text-emerald-600 font-medium' : 'text-gray-400 hover:text-gray-600'}`}
+                >
+                    {isDeveloperMode ? 'Developer Mode Active' : t.login.devMode}
+                </button>
             </div>
         </div>
     )

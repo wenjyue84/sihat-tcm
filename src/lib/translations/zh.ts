@@ -144,9 +144,9 @@ export const zh: TranslationKeys = {
         },
     },
     doctorLevels: {
-        physician: { name: '医师', nameZh: '医师', description: '标准问诊，适用于常见病症' },
-        seniorPhysician: { name: '主任医师', nameZh: '主任医师', description: '深度问诊，提供更详细的分析' },
-        masterPhysician: { name: '国医大师', nameZh: '国医大师', description: '专家问诊，提供全面深入的诊断' },
+        physician: { name: '医师', nameZh: '医师', description: '标准问诊，适用于常见病症。处理速度快，消耗积分最少。' },
+        seniorPhysician: { name: '主任医师', nameZh: '主任医师', description: '深度问诊，适合复杂病症。提供更详细的分析，需要更多处理时间。' },
+        masterPhysician: { name: '国医大师', nameZh: '国医大师', description: '专家级问诊，适合奇难杂症、久治不愈的疑难病例。消耗更多积分，需要更长处理时间。' },
     },
     steps: { basics: '基本信息', inquiry: '问诊', tongue: '舌诊', face: '面诊', audio: '闻诊', pulse: '切诊', bodyPart: '局部检查', smartConnect: '智能连接' },
     inquiry: {
@@ -174,6 +174,7 @@ export const zh: TranslationKeys = {
         confirm: '确认',
         switchCamera: '切换相机',
         uploadPhoto: '上传照片',
+        uploadAudio: '上传声音档',
         dragDropPhoto: '拖放图片到此处',
         orClickToUpload: '或点击上传',
         or: '或',
@@ -242,7 +243,7 @@ export const zh: TranslationKeys = {
         tipsForBetterRecording: '录音小贴士',
         didYouKnow: '您知道吗？',
         didYouKnowContent: '闻诊已有2000多年的历史。古代中医师通过倾听患者的声音、呼吸甚至胃部的声音来诊断疾病，发展出了卓越的诊断技能！',
-        debugSkip: '调试：跳过',
+        debugSkip: '跳过',
     },
     pulse: {
         title: '切诊（脉诊）',
@@ -310,6 +311,22 @@ export const zh: TranslationKeys = {
             hua_se: "不能同时选择“滑脉”和“涩脉”。这是相反的脉象。",
             fu_chen: "不能同时选择“浮脉”和“沉脉”。这是相反的脉象。",
             chi_shuo: "不能同时选择“迟脉”和“数脉”。这是相反的脉象。",
+            hong_ruo: "不能同时选择“洪脉”和“弱脉”。洪脉脉来洪大有力，弱脉脉来软弱无力，两者相反不可并存。",
+        },
+        abnormalBpmTips: {
+            title: '测量提示',
+            highBpmTitle: '您的心率偏高',
+            lowBpmTitle: '您的心率偏低',
+            subtitle: '为确保测量准确，请先确认以下事项：',
+            tips: [
+                { icon: '🏃', title: '避免刚运动完', description: '剧烈运动后请休息5-10分钟再测量' },
+                { icon: '😌', title: '保持放松', description: '紧张、焦虑会导致心率升高，请深呼吸放松' },
+                { icon: '🪑', title: '舒适坐姿', description: '请坐在舒适的位置，保持平静呼吸' },
+                { icon: '☕', title: '避免刺激物', description: '咖啡、茶等刺激性饮品会影响心率' },
+            ],
+            remeasure: '重新测量',
+            continueAnyway: '确认继续',
+            confirmMessage: '如果您已排除以上因素，可以继续；否则建议重新测量。',
         },
     },
     smartConnect: {
@@ -337,6 +354,7 @@ export const zh: TranslationKeys = {
         continueConnecting: '继续连接更多设备或继续下一步',
         continueWithData: '使用数据继续',
         skipForNow: '暂时跳过',
+        useAllData: '使用所有可用数据',
     },
     imageAnalysis: {
         analyzing: '正在分析图像...', processingWithAI: '人工智能处理中...', tryingDifferentModel: '正在尝试其他分析方法...',

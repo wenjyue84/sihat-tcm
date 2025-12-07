@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, Send, X, Minimize2, Maximize2, Sparkles, User, Bot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useDoctorLevel } from '@/contexts/DoctorContext'
 
-interface Message {
+export interface Message {
     id: string;
     role: 'user' | 'assistant';
     content: string;
@@ -16,6 +17,12 @@ interface ReportChatWindowProps {
     patientInfo?: any;
     isOpen: boolean;
     onClose: () => void;
+    initialMessage?: string;
+    onMessageSent?: () => void;
+    isExpanded?: boolean;
+    onToggleExpand?: () => void;
+    messages?: Message[];
+    onMessagesChange?: (messages: Message[]) => void;
 }
 
 const translations = {
@@ -60,16 +67,29 @@ const translations = {
     }
 }
 
-export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose }: ReportChatWindowProps) {
+export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, initialMessage, onMessageSent, isExpanded = false, onToggleExpand, messages: controlledMessages, onMessagesChange }: ReportChatWindowProps) {
     const { language } = useLanguage()
+    const { doctorLevel } = useDoctorLevel()
     const t = translations[language as keyof typeof translations] || translations.en
 
-    const [messages, setMessages] = useState<Message[]>([])
+    const [internalMessages, setInternalMessages] = useState<Message[]>([])
+
+    const messages = controlledMessages || internalMessages
+
+    const setMessages = (action: React.SetStateAction<Message[]>) => {
+        if (onMessagesChange) {
+            const newMessages = typeof action === 'function' ? action(messages) : action
+            onMessagesChange(newMessages)
+        } else {
+            setInternalMessages(action)
+        }
+    }
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [isMinimized, setIsMinimized] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
+    const hasSentInitialMessage = useRef(false)
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
@@ -81,7 +101,22 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose }: R
         if (isOpen && !isMinimized) {
             setTimeout(() => inputRef.current?.focus(), 300)
         }
-    }, [isOpen, isMinimized])
+    }, [isOpen, isMinimized, isExpanded])
+
+    // Handle initial message
+    useEffect(() => {
+        if (isOpen && initialMessage && !hasSentInitialMessage.current && !isLoading) {
+            hasSentInitialMessage.current = true
+            sendMessage(initialMessage)
+            if (onMessageSent) {
+                onMessageSent()
+            }
+        }
+        // Reset the ref when chat is closed so it can trigger again if reopened with a new message
+        if (!isOpen) {
+            hasSentInitialMessage.current = false
+        }
+    }, [isOpen, initialMessage, onMessageSent])
 
     const sendMessage = async (content: string) => {
         if (!content.trim() || isLoading) return
@@ -104,7 +139,8 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose }: R
                     messages: [...messages, userMessage],
                     reportData,
                     patientInfo,
-                    language
+                    language,
+                    doctorLevel: doctorLevel // Pass the current doctor level
                 })
             })
 
@@ -153,6 +189,145 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose }: R
 
     if (!isOpen) return null
 
+    if (isExpanded) {
+        return (
+            <div className="flex flex-col w-full h-full bg-white border-l border-stone-200 shadow-xl">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                            <MessageCircle className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                            <h3 className="text-white font-semibold text-sm">{t.title}</h3>
+                            <p className="text-emerald-100 text-xs">{t.subtitle}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={onToggleExpand}
+                            className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                            title="Exit Full Screen"
+                        >
+                            <Minimize2 className="w-4 h-4" />
+                        </button>
+                        <button
+                            onClick={onClose}
+                            className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Messages Area */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-stone-50 to-white">
+                    {messages.length === 0 ? (
+                        <div className="space-y-4">
+                            <div className="text-center py-6">
+                                <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Sparkles className="w-8 h-8 text-emerald-600" />
+                                </div>
+                                <p className="text-stone-600 text-sm">
+                                    Ask me anything about your TCM diagnosis report!
+                                </p>
+                            </div>
+
+                            {/* Suggestion Chips */}
+                            <div className="space-y-2">
+                                <p className="text-xs text-stone-500 uppercase tracking-wider font-medium">
+                                    Quick questions
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    {t.suggestions.map((suggestion, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => handleSuggestionClick(suggestion)}
+                                            className="text-xs px-3 py-2 bg-white border border-stone-200 rounded-full text-stone-600 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-all shadow-sm"
+                                        >
+                                            {suggestion}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        messages.map((msg) => (
+                            <motion.div
+                                key={msg.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+                            >
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user'
+                                    ? 'bg-emerald-100'
+                                    : 'bg-gradient-to-br from-teal-500 to-emerald-600'
+                                    }`}>
+                                    {msg.role === 'user'
+                                        ? <User className="w-4 h-4 text-emerald-700" />
+                                        : <Bot className="w-4 h-4 text-white" />
+                                    }
+                                </div>
+                                <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm ${msg.role === 'user'
+                                    ? 'bg-emerald-600 text-white rounded-tr-sm'
+                                    : 'bg-white border border-stone-200 text-stone-700 rounded-tl-sm shadow-sm'
+                                    }`}>
+                                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                                </div>
+                            </motion.div>
+                        ))
+                    )}
+
+                    {isLoading && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex gap-3"
+                        >
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">
+                                <Bot className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="bg-white border border-stone-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+                                <div className="flex items-center gap-2 text-stone-500 text-sm">
+                                    <div className="flex gap-1">
+                                        <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                        <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                        <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                    </div>
+                                    <span>{t.thinking}</span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input Area */}
+                <form onSubmit={handleSubmit} className="p-4 border-t border-stone-100 bg-white shrink-0">
+                    <div className="flex gap-2">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder={t.placeholder}
+                            disabled={isLoading}
+                            className="flex-1 px-4 py-2.5 bg-stone-100 border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all disabled:opacity-50"
+                        />
+                        <Button
+                            type="submit"
+                            disabled={!input.trim() || isLoading}
+                            className="w-10 h-10 rounded-full bg-emerald-600 hover:bg-emerald-700 p-0 flex items-center justify-center disabled:opacity-50"
+                        >
+                            <Send className="w-4 h-4" />
+                        </Button>
+                    </div>
+                </form>
+            </div>
+        )
+    }
+
     return (
         <AnimatePresence>
             <motion.div
@@ -181,10 +356,10 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose }: R
                     </div>
                     <div className="flex items-center gap-1">
                         <button
-                            onClick={() => setIsMinimized(!isMinimized)}
+                            onClick={onToggleExpand ? onToggleExpand : () => setIsMinimized(!isMinimized)}
                             className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                         >
-                            {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
+                            {onToggleExpand ? <Maximize2 className="w-4 h-4" /> : (isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />)}
                         </button>
                         <button
                             onClick={onClose}
@@ -238,17 +413,17 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose }: R
                                         className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
                                     >
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user'
-                                                ? 'bg-emerald-100'
-                                                : 'bg-gradient-to-br from-teal-500 to-emerald-600'
+                                            ? 'bg-emerald-100'
+                                            : 'bg-gradient-to-br from-teal-500 to-emerald-600'
                                             }`}>
                                             {msg.role === 'user'
                                                 ? <User className="w-4 h-4 text-emerald-700" />
                                                 : <Bot className="w-4 h-4 text-white" />
                                             }
                                         </div>
-                                        <div className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm ${msg.role === 'user'
-                                                ? 'bg-emerald-600 text-white rounded-tr-sm'
-                                                : 'bg-white border border-stone-200 text-stone-700 rounded-tl-sm shadow-sm'
+                                        <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm ${msg.role === 'user'
+                                            ? 'bg-emerald-600 text-white rounded-tr-sm'
+                                            : 'bg-white border border-stone-200 text-stone-700 rounded-tl-sm shadow-sm'
                                             }`}>
                                             <p className="whitespace-pre-wrap">{msg.content}</p>
                                         </div>

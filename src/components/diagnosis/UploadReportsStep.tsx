@@ -3,9 +3,15 @@
 import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Upload, X, FileText, ArrowRight, SkipForward } from 'lucide-react'
+import { Upload, X, FileText, ArrowRight, SkipForward, Eye } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { TextReviewModal } from './TextReviewModal'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 
 export interface FileData {
     name: string
@@ -26,6 +32,7 @@ export function UploadReportsStep({ onComplete, onSkip, initialFiles = [], onBac
     const [files, setFiles] = useState<FileData[]>(initialFiles)
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
     const [currentReviewFile, setCurrentReviewFile] = useState<File | null>(null)
+    const [viewingFile, setViewingFile] = useState<FileData | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -101,6 +108,21 @@ export function UploadReportsStep({ onComplete, onSkip, initialFiles = [], onBac
             en: 'Uploaded Files:',
             zh: '已上传文件：',
             ms: 'Fail Dimuat Naik:'
+        },
+        viewExtractedText: {
+            en: 'Extracted Text',
+            zh: '提取的文本',
+            ms: 'Teks Diekstrak'
+        },
+        clickToView: {
+            en: 'Click to view extracted text',
+            zh: '点击查看提取的文本',
+            ms: 'Klik untuk melihat teks'
+        },
+        noTextExtracted: {
+            en: 'No text was extracted from this file.',
+            zh: '未从此文件中提取到文本。',
+            ms: 'Tiada teks diekstrak daripada fail ini.'
         }
     }
 
@@ -129,16 +151,23 @@ export function UploadReportsStep({ onComplete, onSkip, initialFiles = [], onBac
                     <div className="space-y-2">
                         {files.map((file, index) => (
                             <div key={index} className="flex items-center justify-between bg-white border border-stone-200 p-3 rounded-lg shadow-sm">
-                                <div className="flex items-center gap-3 overflow-hidden">
+                                <div
+                                    className="flex items-center gap-3 overflow-hidden flex-1 cursor-pointer hover:bg-stone-50 rounded-lg transition-colors p-1 -ml-1"
+                                    onClick={() => setViewingFile(file)}
+                                    title={content.clickToView[lang]}
+                                >
                                     <div className="w-8 h-8 bg-stone-100 rounded flex items-center justify-center flex-shrink-0">
                                         <FileText className="w-4 h-4 text-stone-500" />
                                     </div>
-                                    <div className="min-w-0">
-                                        <p className="text-sm font-medium text-stone-800 truncate">{file.name}</p>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-sm font-medium text-emerald-700 truncate hover:underline">{file.name}</p>
+                                            <Eye className="w-3 h-3 text-stone-400" />
+                                        </div>
                                         <p className="text-xs text-stone-500 truncate">{file.extractedText?.substring(0, 50)}...</p>
                                     </div>
                                 </div>
-                                <Button variant="ghost" size="sm" onClick={() => removeFile(index)} className="text-stone-400 hover:text-red-500">
+                                <Button variant="ghost" size="sm" onClick={() => removeFile(index)} className="text-stone-400 hover:text-red-500 flex-shrink-0">
                                     <X className="w-4 h-4" />
                                 </Button>
                             </div>
@@ -181,6 +210,26 @@ export function UploadReportsStep({ onComplete, onSkip, initialFiles = [], onBac
                 onConfirm={handleReviewConfirm}
                 file={currentReviewFile}
             />
+
+            {/* View Extracted Text Dialog */}
+            <Dialog open={!!viewingFile} onOpenChange={(open) => !open && setViewingFile(null)}>
+                <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-emerald-800">
+                            <FileText className="w-5 h-5" />
+                            {viewingFile?.name}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="text-sm text-stone-600 mb-2">
+                        {content.viewExtractedText[lang]}
+                    </div>
+                    <div className="bg-stone-50 border border-stone-200 rounded-lg p-4 max-h-[50vh] overflow-y-auto">
+                        <pre className="whitespace-pre-wrap text-sm text-stone-700 font-mono">
+                            {viewingFile?.extractedText || content.noTextExtracted[lang]}
+                        </pre>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </Card>
     )
 }

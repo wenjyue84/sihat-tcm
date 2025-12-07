@@ -1,12 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { createPortal } from 'react-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Activity, Utensils, AlertCircle, HeartPulse, Leaf, Info, Download, Check, User, Stethoscope, Pill, MapPin, Clock, Brain, Moon, Dumbbell, AlertTriangle, Calendar, QrCode, PenTool, MessageCircle, Image as ImageIcon } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { ShowPromptButton } from './ShowPromptButton'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { ReportChatWindow } from './ReportChatWindow'
+import { ReportChatWindow, ReportChatButton, type Message } from './ReportChatWindow'
 import { InfographicsGenerator } from './InfographicsGenerator'
 
 type Language = 'en' | 'zh' | 'ms'
@@ -71,12 +72,18 @@ interface DiagnosisReportProps {
         height?: number;
         weight?: number;
         symptoms?: string;
+        address?: string;
+        contact?: string;
+        emergencyContact?: string;
     };
     // Report options to control display
     reportOptions?: {
         includePatientName?: boolean;
         includePatientAge?: boolean;
         includePatientGender?: boolean;
+        includePatientContact?: boolean;
+        includePatientAddress?: boolean;
+        includeEmergencyContact?: boolean;
         includeVitalSigns?: boolean;
         includeBMI?: boolean;
         includeSmartConnectData?: boolean;
@@ -182,6 +189,14 @@ export function DiagnosisReport({ data, patientInfo, reportOptions, smartConnect
     // State for chat window and infographics
     const [isChatOpen, setIsChatOpen] = useState(false)
     const [isInfographicsOpen, setIsInfographicsOpen] = useState(false)
+    const [activeQuestion, setActiveQuestion] = useState<string | null>(null)
+    const [isChatExpanded, setIsChatExpanded] = useState(false)
+    const [mounted, setMounted] = useState(false)
+    const [chatMessages, setChatMessages] = useState<Message[]>([])
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     // Calculate BMI if we have height and weight
     const calculateBMI = (height?: number, weight?: number) => {
@@ -228,6 +243,11 @@ export function DiagnosisReport({ data, patientInfo, reportOptions, smartConnect
     const getRecipes = () => {
         return data.recommendations?.food_therapy?.recipes || [];
     };
+
+    const handleSectionClick = (question: string) => {
+        setActiveQuestion(question)
+        setIsChatOpen(true)
+    }
 
     const downloadPDF = (language: Language = 'en') => {
         const t = translations[language]
@@ -286,6 +306,9 @@ export function DiagnosisReport({ data, patientInfo, reportOptions, smartConnect
             if (opts.includePatientName !== false && patientInfo.name) addWrappedText(`Name: ${patientInfo.name}`, 11)
             if (opts.includePatientAge !== false && patientInfo.age) addWrappedText(`Age: ${patientInfo.age} years`, 11)
             if (opts.includePatientGender !== false && patientInfo.gender) addWrappedText(`Gender: ${patientInfo.gender}`, 11)
+            if (opts.includePatientContact && patientInfo.contact) addWrappedText(`Contact: ${patientInfo.contact}`, 11)
+            if (opts.includePatientAddress && patientInfo.address) addWrappedText(`Address: ${patientInfo.address}`, 11)
+            if (opts.includeEmergencyContact && patientInfo.emergencyContact) addWrappedText(`Emergency Contact: ${patientInfo.emergencyContact}`, 11)
             if (opts.includeBMI !== false && patientInfo.height && patientInfo.weight) {
                 addWrappedText(`Height: ${patientInfo.height} cm | Weight: ${patientInfo.weight} kg`, 11)
                 addWrappedText(`BMI: ${calculateBMI(patientInfo.height, patientInfo.weight)}`, 11)
@@ -362,574 +385,667 @@ export function DiagnosisReport({ data, patientInfo, reportOptions, smartConnect
         doc.save(fileName)
     }
 
-    return (
-        <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="space-y-4 md:space-y-6 max-w-4xl mx-auto px-2 md:px-0"
-        >
-            {/* Header Section */}
-            <motion.div variants={item} className="text-center space-y-1 md:space-y-2">
-                <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${doctorInfo.bgColor} ${doctorInfo.borderColor} ${doctorInfo.textColor}`}>
-                        {doctorInfo.icon} Analyzed by {doctorInfo.name}
-                    </span>
-                    <ShowPromptButton promptType="final" />
-                    {saved && (
-                        <span className="px-3 py-1 rounded-full text-sm font-medium border bg-green-100 border-green-200 text-green-800 flex items-center gap-1">
-                            <Check className="w-3 h-3" /> Saved to Records
+    const content = (
+        <div className={`transition-all duration-300 ${isChatExpanded ? 'fixed inset-0 z-50 bg-stone-50 flex overflow-hidden' : ''}`}>
+            {/* Left Panel - Report Content */}
+            <motion.div
+                variants={container}
+                initial="hidden"
+                animate="show"
+                className={`space-y-4 md:space-y-6 max-w-4xl mx-auto px-2 md:px-0 ${isChatExpanded ? 'w-1/2 h-full overflow-y-auto p-6 border-r border-stone-200' : ''}`}
+            >
+                {/* Header Section */}
+                <motion.div variants={item} className="text-center space-y-1 md:space-y-2">
+                    <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium border ${doctorInfo.bgColor} ${doctorInfo.borderColor} ${doctorInfo.textColor}`}>
+                            {doctorInfo.icon} Analyzed by {doctorInfo.name}
                         </span>
-                    )}
-                </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-emerald-900">Comprehensive TCM Report</h2>
-                <p className="text-stone-600 text-sm md:text-base">Based on Four Pillars Diagnosis (四诊合参)</p>
-
-                {opts.includeTimestamp && data.timestamp && (
-                    <p className="text-xs text-stone-500 flex items-center justify-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        Generated: {new Date(data.timestamp).toLocaleString()}
-                    </p>
-                )}
-            </motion.div>
-
-            {/* Patient Information Card - Displayed immediately without AI */}
-            {patientInfo && (opts.includePatientName || opts.includePatientAge || opts.includePatientGender || opts.includeBMI) && (
-                <motion.div variants={item}>
-                    <Card className="border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50">
-                        <CardHeader className="pb-2 px-4 md:px-6">
-                            <CardTitle className="flex items-center gap-2 text-blue-800 text-base md:text-lg">
-                                <User className="h-5 w-5" />
-                                Patient Information
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="px-4 md:px-6">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {opts.includePatientName !== false && patientInfo.name && (
-                                    <div>
-                                        <p className="text-xs text-blue-600 font-medium">Name</p>
-                                        <p className="text-blue-900 font-semibold">{patientInfo.name}</p>
-                                    </div>
-                                )}
-                                {opts.includePatientAge !== false && patientInfo.age && (
-                                    <div>
-                                        <p className="text-xs text-blue-600 font-medium">Age</p>
-                                        <p className="text-blue-900 font-semibold">{patientInfo.age} years</p>
-                                    </div>
-                                )}
-                                {opts.includePatientGender !== false && patientInfo.gender && (
-                                    <div>
-                                        <p className="text-xs text-blue-600 font-medium">Gender</p>
-                                        <p className="text-blue-900 font-semibold">{patientInfo.gender}</p>
-                                    </div>
-                                )}
-                                {opts.includeBMI !== false && patientInfo.height && patientInfo.weight && (
-                                    <>
-                                        <div>
-                                            <p className="text-xs text-blue-600 font-medium">Height / Weight</p>
-                                            <p className="text-blue-900 font-semibold">{patientInfo.height}cm / {patientInfo.weight}kg</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-blue-600 font-medium">BMI</p>
-                                            <p className="text-blue-900 font-semibold">{calculateBMI(patientInfo.height, patientInfo.weight)}</p>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                            {patientInfo.symptoms && (
-                                <div className="mt-3 pt-3 border-t border-blue-100">
-                                    <p className="text-xs text-blue-600 font-medium">Chief Complaint</p>
-                                    <p className="text-blue-800">{patientInfo.symptoms}</p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            )}
-
-            {/* Smart Connect Health Data - Displayed immediately without AI */}
-            {smartConnectData && opts.includeSmartConnectData && Object.keys(smartConnectData).length > 0 && (
-                <motion.div variants={item}>
-                    <Card className="border-purple-100 bg-gradient-to-br from-purple-50 to-pink-50">
-                        <CardHeader className="pb-2 px-4 md:px-6">
-                            <CardTitle className="flex items-center gap-2 text-purple-800 text-base md:text-lg">
-                                <Activity className="h-5 w-5" />
-                                Smart Health Metrics
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="px-4 md:px-6">
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                {smartConnectData.pulseRate && (
-                                    <div className="bg-white/60 rounded-lg p-3">
-                                        <p className="text-xs text-purple-600 font-medium">Pulse Rate</p>
-                                        <p className="text-xl font-bold text-purple-900">{smartConnectData.pulseRate} <span className="text-sm font-normal">BPM</span></p>
-                                    </div>
-                                )}
-                                {smartConnectData.bloodPressure && (
-                                    <div className="bg-white/60 rounded-lg p-3">
-                                        <p className="text-xs text-purple-600 font-medium">Blood Pressure</p>
-                                        <p className="text-xl font-bold text-purple-900">{smartConnectData.bloodPressure} <span className="text-sm font-normal">mmHg</span></p>
-                                    </div>
-                                )}
-                                {smartConnectData.bloodOxygen && (
-                                    <div className="bg-white/60 rounded-lg p-3">
-                                        <p className="text-xs text-purple-600 font-medium">Blood Oxygen</p>
-                                        <p className="text-xl font-bold text-purple-900">{smartConnectData.bloodOxygen}<span className="text-sm font-normal">%</span></p>
-                                    </div>
-                                )}
-                                {smartConnectData.bodyTemp && (
-                                    <div className="bg-white/60 rounded-lg p-3">
-                                        <p className="text-xs text-purple-600 font-medium">Body Temperature</p>
-                                        <p className="text-xl font-bold text-purple-900">{smartConnectData.bodyTemp}<span className="text-sm font-normal">°C</span></p>
-                                    </div>
-                                )}
-                                {smartConnectData.hrv && (
-                                    <div className="bg-white/60 rounded-lg p-3">
-                                        <p className="text-xs text-purple-600 font-medium">HRV</p>
-                                        <p className="text-xl font-bold text-purple-900">{smartConnectData.hrv} <span className="text-sm font-normal">ms</span></p>
-                                    </div>
-                                )}
-                                {smartConnectData.stressLevel && (
-                                    <div className="bg-white/60 rounded-lg p-3">
-                                        <p className="text-xs text-purple-600 font-medium">Stress Level</p>
-                                        <p className="text-xl font-bold text-purple-900">{smartConnectData.stressLevel}</p>
-                                    </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            )}
-
-            {/* Main Diagnosis Card */}
-            <motion.div variants={item}>
-                <Card className="border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50">
-                    <CardHeader className="pb-2 px-4 md:px-6">
-                        <CardTitle className="flex items-center gap-2 text-emerald-800 text-base md:text-lg">
-                            <Stethoscope className="h-5 w-5" />
-                            TCM Diagnosis (辨证)
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="px-4 md:px-6">
-                        <div className="text-xl md:text-2xl font-semibold text-emerald-900 mb-2">
-                            {diagnosisText}
-                        </div>
-                        {typeof data.diagnosis === 'object' && data.diagnosis.secondary_patterns && data.diagnosis.secondary_patterns.length > 0 && (
-                            <div className="mb-2">
-                                <p className="text-sm text-emerald-700 font-medium">Secondary Patterns:</p>
-                                <p className="text-emerald-800">{data.diagnosis.secondary_patterns.join(', ')}</p>
-                            </div>
+                        <ShowPromptButton promptType="final" />
+                        {saved && (
+                            <span className="px-3 py-1 rounded-full text-sm font-medium border bg-green-100 border-green-200 text-green-800 flex items-center gap-1">
+                                <Check className="w-3 h-3" /> Saved to Records
+                            </span>
                         )}
-                        {typeof data.diagnosis === 'object' && data.diagnosis.affected_organs && data.diagnosis.affected_organs.length > 0 && (
-                            <div className="mb-2">
-                                <p className="text-sm text-emerald-700 font-medium">Affected Organs:</p>
-                                <p className="text-emerald-800">{data.diagnosis.affected_organs.join(', ')}</p>
-                            </div>
-                        )}
-                        <div className="flex items-center gap-2 text-emerald-700 font-medium text-sm md:text-base mt-3 pt-3 border-t border-emerald-100">
-                            <HeartPulse className="h-4 w-4" />
-                            Constitution: {constitutionText}
-                        </div>
-                        {typeof data.constitution === 'object' && data.constitution.description && (
-                            <p className="text-sm text-emerald-600 mt-1">{data.constitution.description}</p>
-                        )}
-                    </CardContent>
-                </Card>
-            </motion.div>
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-emerald-900">Comprehensive TCM Report</h2>
+                    <p className="text-stone-600 text-sm md:text-base">Based on Four Pillars Diagnosis (四诊合参)</p>
 
-            {/* Detailed Analysis */}
-            <motion.div variants={item}>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="flex items-center gap-2 text-stone-800">
-                            <Info className="h-5 w-5 text-stone-600" />
-                            Detailed Analysis
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-stone-700 leading-relaxed whitespace-pre-wrap">
-                            {analysisText}
+                    {opts.includeTimestamp && data.timestamp && (
+                        <p className="text-xs text-stone-500 flex items-center justify-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            Generated: {new Date(data.timestamp).toLocaleString()}
                         </p>
-                        {typeof data.analysis === 'object' && data.analysis.key_findings && (
-                            <div className="mt-4 pt-4 border-t border-stone-100 space-y-2">
-                                <p className="font-medium text-stone-800">Key Findings:</p>
-                                {data.analysis.key_findings.from_inquiry && (
-                                    <p className="text-sm text-stone-600"><span className="font-medium">From Inquiry:</span> {data.analysis.key_findings.from_inquiry}</p>
+                    )}
+                </motion.div>
+
+                {/* Patient Information Card - Displayed immediately without AI */}
+                {patientInfo && (opts.includePatientName || opts.includePatientAge || opts.includePatientGender || opts.includeBMI) && (
+                    <motion.div variants={item}>
+                        <Card className="border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50">
+                            <CardHeader className="pb-2 px-4 md:px-6">
+                                <CardTitle className="flex items-center gap-2 text-blue-800 text-base md:text-lg">
+                                    <User className="h-5 w-5" />
+                                    Patient Information
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="px-4 md:px-6">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {opts.includePatientName !== false && patientInfo.name && (
+                                        <div>
+                                            <p className="text-xs text-blue-600 font-medium">Name</p>
+                                            <p className="text-blue-900 font-semibold">{patientInfo.name}</p>
+                                        </div>
+                                    )}
+                                    {opts.includePatientAge !== false && patientInfo.age && (
+                                        <div>
+                                            <p className="text-xs text-blue-600 font-medium">Age</p>
+                                            <p className="text-blue-900 font-semibold">{patientInfo.age} years</p>
+                                        </div>
+                                    )}
+                                    {opts.includePatientGender !== false && patientInfo.gender && (
+                                        <div>
+                                            <p className="text-xs text-blue-600 font-medium">Gender</p>
+                                            <p className="text-blue-900 font-semibold">{patientInfo.gender}</p>
+                                        </div>
+                                    )}
+                                    {opts.includeBMI !== false && patientInfo.height && patientInfo.weight && (
+                                        <>
+                                            <div>
+                                                <p className="text-xs text-blue-600 font-medium">Height / Weight</p>
+                                                <p className="text-blue-900 font-semibold">{patientInfo.height}cm / {patientInfo.weight}kg</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-blue-600 font-medium">BMI</p>
+                                                <p className="text-blue-900 font-semibold">{calculateBMI(patientInfo.height, patientInfo.weight)}</p>
+                                            </div>
+                                        </>
+                                    )}
+                                    {opts.includePatientContact && patientInfo.contact && (
+                                        <div className="col-span-2 md:col-span-1">
+                                            <p className="text-xs text-blue-600 font-medium">Contact</p>
+                                            <p className="text-blue-900 font-semibold">{patientInfo.contact}</p>
+                                        </div>
+                                    )}
+                                    {opts.includePatientAddress && patientInfo.address && (
+                                        <div className="col-span-2">
+                                            <p className="text-xs text-blue-600 font-medium">Address</p>
+                                            <p className="text-blue-900 font-semibold">{patientInfo.address}</p>
+                                        </div>
+                                    )}
+                                    {opts.includeEmergencyContact && patientInfo.emergencyContact && (
+                                        <div className="col-span-2 md:col-span-1">
+                                            <p className="text-xs text-blue-600 font-medium">Emergency Contact</p>
+                                            <p className="text-blue-900 font-semibold">{patientInfo.emergencyContact}</p>
+                                        </div>
+                                    )}
+                                </div>
+                                {patientInfo.symptoms && (
+                                    <div className="mt-3 pt-3 border-t border-blue-100">
+                                        <p className="text-xs text-blue-600 font-medium">Chief Complaint</p>
+                                        <p className="text-blue-800">{patientInfo.symptoms}</p>
+                                    </div>
                                 )}
-                                {data.analysis.key_findings.from_visual && (
-                                    <p className="text-sm text-stone-600"><span className="font-medium">From Visual:</span> {data.analysis.key_findings.from_visual}</p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
+
+                {/* Smart Connect Health Data - Displayed immediately without AI */}
+                {smartConnectData && opts.includeSmartConnectData && Object.keys(smartConnectData).length > 0 && (
+                    <motion.div variants={item}>
+                        <Card className="border-purple-100 bg-gradient-to-br from-purple-50 to-pink-50">
+                            <CardHeader className="pb-2 px-4 md:px-6">
+                                <CardTitle className="flex items-center gap-2 text-purple-800 text-base md:text-lg">
+                                    <Activity className="h-5 w-5" />
+                                    Smart Health Metrics
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="px-4 md:px-6">
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {smartConnectData.pulseRate && (
+                                        <div className="bg-white/60 rounded-lg p-3">
+                                            <p className="text-xs text-purple-600 font-medium">Pulse Rate</p>
+                                            <p className="text-xl font-bold text-purple-900">{smartConnectData.pulseRate} <span className="text-sm font-normal">BPM</span></p>
+                                        </div>
+                                    )}
+                                    {smartConnectData.bloodPressure && (
+                                        <div className="bg-white/60 rounded-lg p-3">
+                                            <p className="text-xs text-purple-600 font-medium">Blood Pressure</p>
+                                            <p className="text-xl font-bold text-purple-900">{smartConnectData.bloodPressure} <span className="text-sm font-normal">mmHg</span></p>
+                                        </div>
+                                    )}
+                                    {smartConnectData.bloodOxygen && (
+                                        <div className="bg-white/60 rounded-lg p-3">
+                                            <p className="text-xs text-purple-600 font-medium">Blood Oxygen</p>
+                                            <p className="text-xl font-bold text-purple-900">{smartConnectData.bloodOxygen}<span className="text-sm font-normal">%</span></p>
+                                        </div>
+                                    )}
+                                    {smartConnectData.bodyTemp && (
+                                        <div className="bg-white/60 rounded-lg p-3">
+                                            <p className="text-xs text-purple-600 font-medium">Body Temperature</p>
+                                            <p className="text-xl font-bold text-purple-900">{smartConnectData.bodyTemp}<span className="text-sm font-normal">°C</span></p>
+                                        </div>
+                                    )}
+                                    {smartConnectData.hrv && (
+                                        <div className="bg-white/60 rounded-lg p-3">
+                                            <p className="text-xs text-purple-600 font-medium">HRV</p>
+                                            <p className="text-xl font-bold text-purple-900">{smartConnectData.hrv} <span className="text-sm font-normal">ms</span></p>
+                                        </div>
+                                    )}
+                                    {smartConnectData.stressLevel && (
+                                        <div className="bg-white/60 rounded-lg p-3">
+                                            <p className="text-xs text-purple-600 font-medium">Stress Level</p>
+                                            <p className="text-xl font-bold text-purple-900">{smartConnectData.stressLevel}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
+
+                {/* Main Diagnosis Card */}
+                <motion.div variants={item}>
+                    <Card className="border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50">
+                        <CardHeader className="pb-2 px-4 md:px-6">
+                            <CardTitle className="flex items-center gap-2 text-emerald-800 text-base md:text-lg">
+                                <Stethoscope className="h-5 w-5" />
+                                TCM Diagnosis (辨证)
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="px-4 md:px-6">
+                            <div className="text-xl md:text-2xl font-semibold text-emerald-900 mb-2">
+                                {diagnosisText}
+                            </div>
+                            {typeof data.diagnosis === 'object' && data.diagnosis.secondary_patterns && data.diagnosis.secondary_patterns.length > 0 && (
+                                <div className="mb-2">
+                                    <p className="text-sm text-emerald-700 font-medium">Secondary Patterns:</p>
+                                    <p className="text-emerald-800">{data.diagnosis.secondary_patterns.join(', ')}</p>
+                                </div>
+                            )}
+                            {typeof data.diagnosis === 'object' && data.diagnosis.affected_organs && data.diagnosis.affected_organs.length > 0 && (
+                                <div className="mb-2">
+                                    <p className="text-sm text-emerald-700 font-medium">Affected Organs:</p>
+                                    <p className="text-emerald-800">{data.diagnosis.affected_organs.join(', ')}</p>
+                                </div>
+                            )}
+                            <div className="flex items-center gap-2 text-emerald-700 font-medium text-sm md:text-base mt-3 pt-3 border-t border-emerald-100">
+                                <HeartPulse className="h-4 w-4" />
+                                Constitution: {constitutionText}
+                            </div>
+                            {typeof data.constitution === 'object' && data.constitution.description && (
+                                <p className="text-sm text-emerald-600 mt-1">{data.constitution.description}</p>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* Detailed Analysis */}
+                <motion.div variants={item}>
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="flex items-center gap-2 text-stone-800">
+                                <Info className="h-5 w-5 text-stone-600" />
+                                Detailed Analysis
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-stone-700 leading-relaxed whitespace-pre-wrap">
+                                {analysisText}
+                            </p>
+                            {typeof data.analysis === 'object' && data.analysis.key_findings && (
+                                <div className="mt-4 pt-4 border-t border-stone-100 space-y-2">
+                                    <p className="font-medium text-stone-800">Key Findings:</p>
+                                    {data.analysis.key_findings.from_inquiry && (
+                                        <p className="text-sm text-stone-600"><span className="font-medium">From Inquiry:</span> {data.analysis.key_findings.from_inquiry}</p>
+                                    )}
+                                    {data.analysis.key_findings.from_visual && (
+                                        <p className="text-sm text-stone-600"><span className="font-medium">From Visual:</span> {data.analysis.key_findings.from_visual}</p>
+                                    )}
+                                    {data.analysis.key_findings.from_pulse && (
+                                        <p className="text-sm text-stone-600"><span className="font-medium">From Pulse:</span> {data.analysis.key_findings.from_pulse}</p>
+                                    )}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* Recommendations Grid */}
+                <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+                    {/* Food Recommendations */}
+                    {opts.includeDietary !== false && (getFoodRecommendations().length > 0 || getFoodsToAvoid().length > 0 || getRecipes().length > 0) && (
+                        <motion.div variants={item} className="space-y-6">
+                            <Card className="h-full">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-stone-800">
+                                        <button
+                                            onClick={() => handleSectionClick("Please elaborate on the Dietary Therapy recommendations. Why are these foods beneficial for me?")}
+                                            className="flex items-center gap-2 hover:text-emerald-600 transition-colors text-left"
+                                        >
+                                            <Utensils className="h-5 w-5 text-orange-500" />
+                                            <span className="underline decoration-dotted underline-offset-4 decoration-stone-400 hover:decoration-emerald-500">
+                                                Dietary Therapy (食疗)
+                                            </span>
+                                        </button>
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    {getFoodRecommendations().length > 0 && (
+                                        <div>
+                                            <h4 className="font-medium text-emerald-700 mb-2 flex items-center gap-2">
+                                                <Leaf className="h-4 w-4" /> Beneficial Foods
+                                            </h4>
+                                            <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
+                                                {getFoodRecommendations().map((food: string, idx: number) => (
+                                                    <li key={idx}>{food}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                    {getRecipes().length > 0 && (
+                                        <div>
+                                            <h4 className="font-medium text-amber-700 mb-2 flex items-center gap-2">
+                                                <Utensils className="h-4 w-4" /> Therapeutic Recipes
+                                            </h4>
+                                            <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
+                                                {getRecipes().map((recipe: string, idx: number) => (
+                                                    <li key={idx}>{recipe}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                    {getFoodsToAvoid().length > 0 && (
+                                        <div>
+                                            <h4 className="font-medium text-red-700 mb-2 flex items-center gap-2">
+                                                <AlertCircle className="h-4 w-4" /> Foods to Avoid
+                                            </h4>
+                                            <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
+                                                {getFoodsToAvoid().map((food: string, idx: number) => (
+                                                    <li key={idx}>{food}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    )}
+
+                    {/* Lifestyle Advice */}
+                    {opts.includeLifestyle !== false && data.recommendations?.lifestyle && data.recommendations.lifestyle.length > 0 && (
+                        <motion.div variants={item}>
+                            <Card className="h-full">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-stone-800">
+                                        <button
+                                            onClick={() => handleSectionClick("Please explain the Lifestyle recommendations in more detail. How will these changes help my condition?")}
+                                            className="flex items-center gap-2 hover:text-emerald-600 transition-colors text-left"
+                                        >
+                                            <Leaf className="h-5 w-5 text-green-600" />
+                                            <span className="underline decoration-dotted underline-offset-4 decoration-stone-400 hover:decoration-emerald-500">
+                                                Lifestyle (养生)
+                                            </span>
+                                        </button>
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <ul className="space-y-3">
+                                        {data.recommendations.lifestyle.map((tip: string, idx: number) => (
+                                            <li key={idx} className="flex gap-3 text-stone-600 text-sm">
+                                                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                                                <span>{tip}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    )}
+
+                    {/* Acupuncture Points */}
+                    {opts.includeAcupuncture !== false && data.recommendations?.acupoints && data.recommendations.acupoints.length > 0 && (
+                        <motion.div variants={item}>
+                            <Card className="h-full">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-stone-800">
+                                        <button
+                                            onClick={() => handleSectionClick("Can you explain these Acupressure Points? Where exactly are they located and how should I massage them?")}
+                                            className="flex items-center gap-2 hover:text-emerald-600 transition-colors text-left"
+                                        >
+                                            <MapPin className="h-5 w-5 text-indigo-500" />
+                                            <span className="underline decoration-dotted underline-offset-4 decoration-stone-400 hover:decoration-emerald-500">
+                                                Acupressure Points (穴位)
+                                            </span>
+                                        </button>
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <ul className="space-y-3">
+                                        {data.recommendations.acupoints.map((point: string, idx: number) => (
+                                            <li key={idx} className="flex gap-3 text-stone-600 text-sm">
+                                                <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 mt-2 shrink-0" />
+                                                <span>{point}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    )}
+
+                    {/* Exercise Recommendations */}
+                    {opts.includeExercise !== false && data.recommendations?.exercise && data.recommendations.exercise.length > 0 && (
+                        <motion.div variants={item}>
+                            <Card className="h-full">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-stone-800">
+                                        <button
+                                            onClick={() => handleSectionClick("What kind of Exercise is best for me? Please explain the recommended exercises.")}
+                                            className="flex items-center gap-2 hover:text-emerald-600 transition-colors text-left"
+                                        >
+                                            <Dumbbell className="h-5 w-5 text-blue-500" />
+                                            <span className="underline decoration-dotted underline-offset-4 decoration-stone-400 hover:decoration-emerald-500">
+                                                Exercise (运动)
+                                            </span>
+                                        </button>
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <ul className="space-y-3">
+                                        {data.recommendations.exercise.map((ex: string, idx: number) => (
+                                            <li key={idx} className="flex gap-3 text-stone-600 text-sm">
+                                                <div className="h-1.5 w-1.5 rounded-full bg-blue-400 mt-2 shrink-0" />
+                                                <span>{ex}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    )}
+                </div>
+
+                {/* Sleep & Emotional Wellness Row */}
+                {((opts.includeSleepAdvice && data.recommendations?.sleep_guidance) || (opts.includeEmotionalWellness && data.recommendations?.emotional_care)) && (
+                    <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+                        {opts.includeSleepAdvice && data.recommendations?.sleep_guidance && (
+                            <motion.div variants={item}>
+                                <Card className="h-full border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50">
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="flex items-center gap-2 text-indigo-800">
+                                            <Moon className="h-5 w-5" />
+                                            Sleep & Rest
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-indigo-700 text-sm">{data.recommendations.sleep_guidance}</p>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        )}
+                        {opts.includeEmotionalWellness && data.recommendations?.emotional_care && (
+                            <motion.div variants={item}>
+                                <Card className="h-full border-rose-100 bg-gradient-to-br from-rose-50 to-pink-50">
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="flex items-center gap-2 text-rose-800">
+                                            <Brain className="h-5 w-5" />
+                                            Emotional Wellness (情志)
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-rose-700 text-sm">{data.recommendations.emotional_care}</p>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        )}
+                    </div>
+                )}
+
+                {/* Herbal Medicine Suggestions */}
+                {opts.suggestMedicine && data.recommendations?.herbal_formulas && data.recommendations.herbal_formulas.length > 0 && (
+                    <motion.div variants={item}>
+                        <Card className="border-amber-100 bg-gradient-to-br from-amber-50 to-yellow-50">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="flex items-center gap-2 text-amber-800">
+                                    <button
+                                        onClick={() => handleSectionClick("Please tell me more about these Herbal Medicine Formulas. What are they for and how do they work?")}
+                                        className="flex items-center gap-2 hover:text-amber-600 transition-colors text-left"
+                                    >
+                                        <Pill className="h-5 w-5" />
+                                        <span className="underline decoration-dotted underline-offset-4 decoration-amber-400 hover:decoration-amber-600">
+                                            Herbal Medicine Formulas (中药方剂)
+                                        </span>
+                                    </button>
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                    {data.recommendations.herbal_formulas.map((formula, idx) => (
+                                        <div key={idx} className="bg-white/60 rounded-lg p-4">
+                                            <h4 className="font-semibold text-amber-900">{formula.name}</h4>
+                                            {formula.ingredients && formula.ingredients.length > 0 && (
+                                                <p className="text-sm text-amber-700 mt-1">
+                                                    <span className="font-medium">Ingredients:</span> {formula.ingredients.join(', ')}
+                                                </p>
+                                            )}
+                                            {formula.dosage && (
+                                                <p className="text-sm text-amber-700">
+                                                    <span className="font-medium">Dosage:</span> {formula.dosage}
+                                                </p>
+                                            )}
+                                            {formula.purpose && (
+                                                <p className="text-sm text-amber-700">
+                                                    <span className="font-medium">Purpose:</span> {formula.purpose}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-amber-600 mt-3 italic">
+                                    ⚠️ Please consult a licensed TCM practitioner before taking any herbal medicine.
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
+
+                {/* Doctor Consultation */}
+                {opts.suggestDoctor && data.recommendations?.doctor_consultation && (
+                    <motion.div variants={item}>
+                        <Card className="border-teal-100 bg-gradient-to-br from-teal-50 to-cyan-50">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="flex items-center gap-2 text-teal-800">
+                                    <Stethoscope className="h-5 w-5" />
+                                    Professional Consultation
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-teal-700">{data.recommendations.doctor_consultation}</p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
+
+                {/* Precautions */}
+                {opts.includePrecautions && data.precautions && (
+                    <motion.div variants={item}>
+                        <Card className="border-red-100 bg-gradient-to-br from-red-50 to-orange-50">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="flex items-center gap-2 text-red-800">
+                                    <AlertTriangle className="h-5 w-5" />
+                                    Precautions & Warnings
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {data.precautions.warning_signs && data.precautions.warning_signs.length > 0 && (
+                                    <div>
+                                        <h4 className="font-medium text-red-700 text-sm mb-1">Warning Signs (Seek Medical Attention):</h4>
+                                        <ul className="list-disc list-inside text-stone-600 text-sm space-y-1">
+                                            {data.precautions.warning_signs.map((sign, idx) => (
+                                                <li key={idx}>{sign}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
                                 )}
-                                {data.analysis.key_findings.from_pulse && (
-                                    <p className="text-sm text-stone-600"><span className="font-medium">From Pulse:</span> {data.analysis.key_findings.from_pulse}</p>
+                                {data.precautions.contraindications && data.precautions.contraindications.length > 0 && (
+                                    <div>
+                                        <h4 className="font-medium text-red-700 text-sm mb-1">Contraindications:</h4>
+                                        <ul className="list-disc list-inside text-stone-600 text-sm space-y-1">
+                                            {data.precautions.contraindications.map((item, idx) => (
+                                                <li key={idx}>{item}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
                                 )}
+                                {data.precautions.special_notes && (
+                                    <p className="text-sm text-stone-600 italic">{data.precautions.special_notes}</p>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
+
+                {/* Follow-up Guidance */}
+                {opts.includeFollowUp && data.follow_up && (
+                    <motion.div variants={item}>
+                        <Card className="border-sky-100 bg-gradient-to-br from-sky-50 to-blue-50">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="flex items-center gap-2 text-sky-800">
+                                    <Calendar className="h-5 w-5" />
+                                    Follow-up Guidance
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-2">
+                                {data.follow_up.timeline && (
+                                    <p className="text-sky-700 text-sm"><span className="font-medium">Timeline:</span> {data.follow_up.timeline}</p>
+                                )}
+                                {data.follow_up.expected_improvement && (
+                                    <p className="text-sky-700 text-sm"><span className="font-medium">Expected Improvement:</span> {data.follow_up.expected_improvement}</p>
+                                )}
+                                {data.follow_up.next_steps && (
+                                    <p className="text-sky-700 text-sm"><span className="font-medium">Next Steps:</span> {data.follow_up.next_steps}</p>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                )}
+
+                {/* Disclaimer */}
+                <motion.div variants={item}>
+                    <div className="bg-stone-100 rounded-xl p-4 text-center">
+                        <p className="text-stone-600 text-xs md:text-sm">
+                            {data.disclaimer || "This report is generated by Sihat TCM AI Assistant for informational purposes only. It is not a substitute for professional medical advice. Please consult a licensed TCM practitioner or healthcare provider for diagnosis and treatment."}
+                        </p>
+                    </div>
+                </motion.div>
+
+                {/* QR Code and Doctor Signature placeholders */}
+                {(opts.includeQRCode || opts.includeDoctorSignature) && (
+                    <motion.div variants={item} className="flex flex-wrap justify-center gap-6">
+                        {opts.includeQRCode && (
+                            <div className="text-center">
+                                <div className="w-24 h-24 bg-stone-200 rounded-lg flex items-center justify-center mx-auto mb-2">
+                                    <QrCode className="w-12 h-12 text-stone-400" />
+                                </div>
+                                <p className="text-xs text-stone-500">Scan for digital access</p>
                             </div>
                         )}
-                    </CardContent>
-                </Card>
+                        {opts.includeDoctorSignature && (
+                            <div className="text-center">
+                                <div className="w-40 h-16 border-b-2 border-stone-300 flex items-end justify-center mb-2">
+                                    <PenTool className="w-6 h-6 text-stone-300 mb-1" />
+                                </div>
+                                <p className="text-xs text-stone-500">Practitioner Signature</p>
+                            </div>
+                        )}
+                    </motion.div>
+                )}
+
+                {/* Action Buttons */}
+                <motion.div variants={item} className="flex flex-wrap justify-center gap-3 pt-4 md:pt-6">
+                    <button
+                        onClick={() => downloadPDF(language as Language)}
+                        className="px-4 py-2.5 bg-white border-2 border-emerald-600 text-emerald-600 rounded-full hover:bg-emerald-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
+                    >
+                        <Download className="h-4 w-4" />
+                        Download PDF
+                    </button>
+                    <button
+                        onClick={() => setIsChatOpen(true)}
+                        className="px-4 py-2.5 bg-white border-2 border-teal-600 text-teal-600 rounded-full hover:bg-teal-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
+                    >
+                        <MessageCircle className="h-4 w-4" />
+                        Ask About Report
+                    </button>
+                    <button
+                        onClick={() => setIsInfographicsOpen(true)}
+                        className="px-4 py-2.5 bg-white border-2 border-violet-600 text-violet-600 rounded-full hover:bg-violet-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
+                    >
+                        <ImageIcon className="h-4 w-4" />
+                        Infographics
+                    </button>
+                    <button
+                        onClick={onRestart}
+                        className="px-6 py-2.5 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition-colors shadow-lg hover:shadow-xl text-sm font-medium min-h-[44px]"
+                    >
+                        Start New Consultation
+                    </button>
+                </motion.div>
+
             </motion.div>
 
-            {/* Recommendations Grid */}
-            <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-                {/* Food Recommendations */}
-                {opts.includeDietary !== false && (getFoodRecommendations().length > 0 || getFoodsToAvoid().length > 0 || getRecipes().length > 0) && (
-                    <motion.div variants={item} className="space-y-6">
-                        <Card className="h-full">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="flex items-center gap-2 text-stone-800">
-                                    <Utensils className="h-5 w-5 text-orange-500" />
-                                    Dietary Therapy (食疗)
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                {getFoodRecommendations().length > 0 && (
-                                    <div>
-                                        <h4 className="font-medium text-emerald-700 mb-2 flex items-center gap-2">
-                                            <Leaf className="h-4 w-4" /> Beneficial Foods
-                                        </h4>
-                                        <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
-                                            {getFoodRecommendations().map((food: string, idx: number) => (
-                                                <li key={idx}>{food}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                                {getRecipes().length > 0 && (
-                                    <div>
-                                        <h4 className="font-medium text-amber-700 mb-2 flex items-center gap-2">
-                                            <Utensils className="h-4 w-4" /> Therapeutic Recipes
-                                        </h4>
-                                        <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
-                                            {getRecipes().map((recipe: string, idx: number) => (
-                                                <li key={idx}>{recipe}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                                {getFoodsToAvoid().length > 0 && (
-                                    <div>
-                                        <h4 className="font-medium text-red-700 mb-2 flex items-center gap-2">
-                                            <AlertCircle className="h-4 w-4" /> Foods to Avoid
-                                        </h4>
-                                        <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
-                                            {getFoodsToAvoid().map((food: string, idx: number) => (
-                                                <li key={idx}>{food}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                )}
-
-                {/* Lifestyle Advice */}
-                {opts.includeLifestyle !== false && data.recommendations?.lifestyle && data.recommendations.lifestyle.length > 0 && (
-                    <motion.div variants={item}>
-                        <Card className="h-full">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="flex items-center gap-2 text-stone-800">
-                                    <Leaf className="h-5 w-5 text-green-600" />
-                                    Lifestyle (养生)
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-3">
-                                    {data.recommendations.lifestyle.map((tip: string, idx: number) => (
-                                        <li key={idx} className="flex gap-3 text-stone-600 text-sm">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
-                                            <span>{tip}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                )}
-
-                {/* Acupuncture Points */}
-                {opts.includeAcupuncture !== false && data.recommendations?.acupoints && data.recommendations.acupoints.length > 0 && (
-                    <motion.div variants={item}>
-                        <Card className="h-full">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="flex items-center gap-2 text-stone-800">
-                                    <MapPin className="h-5 w-5 text-indigo-500" />
-                                    Acupressure Points (穴位)
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-3">
-                                    {data.recommendations.acupoints.map((point: string, idx: number) => (
-                                        <li key={idx} className="flex gap-3 text-stone-600 text-sm">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 mt-2 shrink-0" />
-                                            <span>{point}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                )}
-
-                {/* Exercise Recommendations */}
-                {opts.includeExercise !== false && data.recommendations?.exercise && data.recommendations.exercise.length > 0 && (
-                    <motion.div variants={item}>
-                        <Card className="h-full">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="flex items-center gap-2 text-stone-800">
-                                    <Dumbbell className="h-5 w-5 text-blue-500" />
-                                    Exercise (运动)
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-3">
-                                    {data.recommendations.exercise.map((ex: string, idx: number) => (
-                                        <li key={idx} className="flex gap-3 text-stone-600 text-sm">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-blue-400 mt-2 shrink-0" />
-                                            <span>{ex}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                )}
-            </div>
-
-            {/* Sleep & Emotional Wellness Row */}
-            {((opts.includeSleepAdvice && data.recommendations?.sleep_guidance) || (opts.includeEmotionalWellness && data.recommendations?.emotional_care)) && (
-                <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-                    {opts.includeSleepAdvice && data.recommendations?.sleep_guidance && (
-                        <motion.div variants={item}>
-                            <Card className="h-full border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50">
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="flex items-center gap-2 text-indigo-800">
-                                        <Moon className="h-5 w-5" />
-                                        Sleep & Rest
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-indigo-700 text-sm">{data.recommendations.sleep_guidance}</p>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    )}
-                    {opts.includeEmotionalWellness && data.recommendations?.emotional_care && (
-                        <motion.div variants={item}>
-                            <Card className="h-full border-rose-100 bg-gradient-to-br from-rose-50 to-pink-50">
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="flex items-center gap-2 text-rose-800">
-                                        <Brain className="h-5 w-5" />
-                                        Emotional Wellness (情志)
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-rose-700 text-sm">{data.recommendations.emotional_care}</p>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    )}
+            {/* Right Panel - Chat Interface (Only visible when expanded) */}
+            {isChatExpanded && (
+                <div className="w-1/2 h-full bg-white">
+                    <ReportChatWindow
+                        reportData={data}
+                        patientInfo={patientInfo}
+                        isOpen={true}
+                        onClose={() => setIsChatExpanded(false)}
+                        initialMessage={activeQuestion || undefined}
+                        onMessageSent={() => setActiveQuestion(null)}
+                        isExpanded={true}
+                        onToggleExpand={() => setIsChatExpanded(false)}
+                        messages={chatMessages}
+                        onMessagesChange={setChatMessages}
+                    />
                 </div>
             )}
 
-            {/* Herbal Medicine Suggestions */}
-            {opts.suggestMedicine && data.recommendations?.herbal_formulas && data.recommendations.herbal_formulas.length > 0 && (
-                <motion.div variants={item}>
-                    <Card className="border-amber-100 bg-gradient-to-br from-amber-50 to-yellow-50">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-amber-800">
-                                <Pill className="h-5 w-5" />
-                                Herbal Medicine Formulas (中药方剂)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                {data.recommendations.herbal_formulas.map((formula, idx) => (
-                                    <div key={idx} className="bg-white/60 rounded-lg p-4">
-                                        <h4 className="font-semibold text-amber-900">{formula.name}</h4>
-                                        {formula.ingredients && formula.ingredients.length > 0 && (
-                                            <p className="text-sm text-amber-700 mt-1">
-                                                <span className="font-medium">Ingredients:</span> {formula.ingredients.join(', ')}
-                                            </p>
-                                        )}
-                                        {formula.dosage && (
-                                            <p className="text-sm text-amber-700">
-                                                <span className="font-medium">Dosage:</span> {formula.dosage}
-                                            </p>
-                                        )}
-                                        {formula.purpose && (
-                                            <p className="text-sm text-amber-700">
-                                                <span className="font-medium">Purpose:</span> {formula.purpose}
-                                            </p>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                            <p className="text-xs text-amber-600 mt-3 italic">
-                                ⚠️ Please consult a licensed TCM practitioner before taking any herbal medicine.
-                            </p>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+            {/* Floating Chat Button & Window (Standard Mode) */}
+            {!isChatExpanded && (
+                <>
+                    <ReportChatButton onClick={() => setIsChatOpen(true)} />
+                    <ReportChatWindow
+                        reportData={data}
+                        patientInfo={patientInfo}
+                        isOpen={isChatOpen}
+                        onClose={() => setIsChatOpen(false)}
+                        initialMessage={activeQuestion || undefined}
+                        onMessageSent={() => setActiveQuestion(null)}
+                        isExpanded={false}
+                        onToggleExpand={() => {
+                            setIsChatOpen(false);
+                            setIsChatExpanded(true);
+                        }}
+                        messages={chatMessages}
+                        onMessagesChange={setChatMessages}
+                    />
+                </>
             )}
 
-            {/* Doctor Consultation */}
-            {opts.suggestDoctor && data.recommendations?.doctor_consultation && (
-                <motion.div variants={item}>
-                    <Card className="border-teal-100 bg-gradient-to-br from-teal-50 to-cyan-50">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-teal-800">
-                                <Stethoscope className="h-5 w-5" />
-                                Professional Consultation
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-teal-700">{data.recommendations.doctor_consultation}</p>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            )}
-
-            {/* Precautions */}
-            {opts.includePrecautions && data.precautions && (
-                <motion.div variants={item}>
-                    <Card className="border-red-100 bg-gradient-to-br from-red-50 to-orange-50">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-red-800">
-                                <AlertTriangle className="h-5 w-5" />
-                                Precautions & Warnings
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            {data.precautions.warning_signs && data.precautions.warning_signs.length > 0 && (
-                                <div>
-                                    <h4 className="font-medium text-red-700 text-sm mb-1">Warning Signs (Seek Medical Attention):</h4>
-                                    <ul className="list-disc list-inside text-stone-600 text-sm space-y-1">
-                                        {data.precautions.warning_signs.map((sign, idx) => (
-                                            <li key={idx}>{sign}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                            {data.precautions.contraindications && data.precautions.contraindications.length > 0 && (
-                                <div>
-                                    <h4 className="font-medium text-red-700 text-sm mb-1">Contraindications:</h4>
-                                    <ul className="list-disc list-inside text-stone-600 text-sm space-y-1">
-                                        {data.precautions.contraindications.map((item, idx) => (
-                                            <li key={idx}>{item}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                            {data.precautions.special_notes && (
-                                <p className="text-sm text-stone-600 italic">{data.precautions.special_notes}</p>
-                            )}
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            )}
-
-            {/* Follow-up Guidance */}
-            {opts.includeFollowUp && data.follow_up && (
-                <motion.div variants={item}>
-                    <Card className="border-sky-100 bg-gradient-to-br from-sky-50 to-blue-50">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-sky-800">
-                                <Calendar className="h-5 w-5" />
-                                Follow-up Guidance
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                            {data.follow_up.timeline && (
-                                <p className="text-sky-700 text-sm"><span className="font-medium">Timeline:</span> {data.follow_up.timeline}</p>
-                            )}
-                            {data.follow_up.expected_improvement && (
-                                <p className="text-sky-700 text-sm"><span className="font-medium">Expected Improvement:</span> {data.follow_up.expected_improvement}</p>
-                            )}
-                            {data.follow_up.next_steps && (
-                                <p className="text-sky-700 text-sm"><span className="font-medium">Next Steps:</span> {data.follow_up.next_steps}</p>
-                            )}
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            )}
-
-            {/* Disclaimer */}
-            <motion.div variants={item}>
-                <div className="bg-stone-100 rounded-xl p-4 text-center">
-                    <p className="text-stone-600 text-xs md:text-sm">
-                        {data.disclaimer || "This report is generated by Sihat TCM AI Assistant for informational purposes only. It is not a substitute for professional medical advice. Please consult a licensed TCM practitioner or healthcare provider for diagnosis and treatment."}
-                    </p>
-                </div>
-            </motion.div>
-
-            {/* QR Code and Doctor Signature placeholders */}
-            {(opts.includeQRCode || opts.includeDoctorSignature) && (
-                <motion.div variants={item} className="flex flex-wrap justify-center gap-6">
-                    {opts.includeQRCode && (
-                        <div className="text-center">
-                            <div className="w-24 h-24 bg-stone-200 rounded-lg flex items-center justify-center mx-auto mb-2">
-                                <QrCode className="w-12 h-12 text-stone-400" />
-                            </div>
-                            <p className="text-xs text-stone-500">Scan for digital access</p>
-                        </div>
-                    )}
-                    {opts.includeDoctorSignature && (
-                        <div className="text-center">
-                            <div className="w-40 h-16 border-b-2 border-stone-300 flex items-end justify-center mb-2">
-                                <PenTool className="w-6 h-6 text-stone-300 mb-1" />
-                            </div>
-                            <p className="text-xs text-stone-500">Practitioner Signature</p>
-                        </div>
-                    )}
-                </motion.div>
-            )}
-
-            {/* Action Buttons */}
-            <motion.div variants={item} className="flex flex-wrap justify-center gap-3 pt-4 md:pt-6">
-                <button
-                    onClick={() => downloadPDF(language as Language)}
-                    className="px-4 py-2.5 bg-white border-2 border-emerald-600 text-emerald-600 rounded-full hover:bg-emerald-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
-                >
-                    <Download className="h-4 w-4" />
-                    Download PDF
-                </button>
-                <button
-                    onClick={() => setIsChatOpen(true)}
-                    className="px-4 py-2.5 bg-white border-2 border-teal-600 text-teal-600 rounded-full hover:bg-teal-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
-                >
-                    <MessageCircle className="h-4 w-4" />
-                    Ask About Report
-                </button>
-                <button
-                    onClick={() => setIsInfographicsOpen(true)}
-                    className="px-4 py-2.5 bg-white border-2 border-violet-600 text-violet-600 rounded-full hover:bg-violet-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
-                >
-                    <ImageIcon className="h-4 w-4" />
-                    Infographics
-                </button>
-                <button
-                    onClick={onRestart}
-                    className="px-6 py-2.5 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition-colors shadow-lg hover:shadow-xl text-sm font-medium min-h-[44px]"
-                >
-                    Start New Consultation
-                </button>
-            </motion.div>
-
-            {/* Report Chat Window */}
-            <ReportChatWindow
-                reportData={data}
-                patientInfo={patientInfo}
-                isOpen={isChatOpen}
-                onClose={() => setIsChatOpen(false)}
-            />
-
-            {/* Infographics Generator */}
             <InfographicsGenerator
-                reportData={data}
-                patientInfo={patientInfo}
                 isOpen={isInfographicsOpen}
                 onClose={() => setIsInfographicsOpen(false)}
+                reportData={data}
             />
-        </motion.div>
+        </div>
     )
+
+    if (isChatExpanded && mounted) {
+        return createPortal(content, document.body)
+    }
+
+    return content
 }

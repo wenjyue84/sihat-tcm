@@ -11,9 +11,11 @@ const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
     ms: `Anda MESTI menjawab sepenuhnya dalam Bahasa Malaysia. Jelas, mesra, dan bersifat mendidik.`,
 };
 
+import { DOCTOR_LEVELS } from '@/lib/doctorLevels';
+
 export async function POST(req: Request) {
     try {
-        const { messages, reportData, patientInfo, language = 'en' } = await req.json();
+        const { messages, reportData, patientInfo, language = 'en', doctorLevel = 'physician' } = await req.json();
 
         // Build context from the report data
         const reportContext = buildReportContext(reportData, patientInfo);
@@ -56,8 +58,11 @@ Remember: You're here to help them understand their existing report, not to cond
             content: m.content
         }));
 
+        // Get the model based on doctor level
+        const selectedModel = DOCTOR_LEVELS[doctorLevel as keyof typeof DOCTOR_LEVELS]?.model || 'gemini-1.5-flash';
+
         const result = streamText({
-            model: google('gemini-1.5-flash'),
+            model: google(selectedModel),
             system: systemPrompt,
             messages: formattedMessages,
         });
@@ -121,7 +126,11 @@ function buildReportContext(reportData: any, patientInfo: any): string {
         const analysis = typeof reportData.analysis === 'string'
             ? reportData.analysis
             : reportData.analysis.summary || JSON.stringify(reportData.analysis);
-        context += `\nDETAILED ANALYSIS: ${analysis}\n`;
+        context += `\nFINAL ANALYSIS (综合诊断): ${analysis}\n`;
+
+        if (typeof reportData.analysis === 'object' && reportData.analysis.pattern_rationale) {
+            context += `Rationale: ${reportData.analysis.pattern_rationale}\n`;
+        }
     }
 
     // Recommendations

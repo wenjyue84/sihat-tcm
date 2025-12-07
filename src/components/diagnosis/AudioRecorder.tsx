@@ -505,15 +505,18 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                             )}
                         </>
                     ) : (
-                        <div className="text-gray-400 flex flex-col items-center gap-3">
-                            <div className="w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center border-2 border-dashed border-green-200 transition-all hover:border-green-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400">
+                        <div
+                            className="text-gray-400 flex flex-col items-center gap-3 cursor-pointer group"
+                            onClick={startRecording}
+                        >
+                            <div className="w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center border-2 border-dashed border-green-200 transition-all group-hover:border-green-400 group-hover:shadow-lg group-hover:scale-105">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400 group-hover:text-green-500 transition-colors">
                                     <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                                     <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                                     <line x1="12" x2="12" y1="19" y2="22" />
                                 </svg>
                             </div>
-                            <span className="text-sm font-medium">{t.audio.readyToRecord}</span>
+                            <span className="text-sm font-medium group-hover:text-green-600 transition-colors">{t.audio.readyToRecord}</span>
                         </div>
                     )}
                 </div>
@@ -635,7 +638,7 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                     </div>
 
                     {!isRecording && (
-                        <div className="flex justify-center">
+                        <div className="flex justify-center gap-4">
                             <input
                                 type="file"
                                 ref={fileInputRef}
@@ -651,7 +654,14 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                                 <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                 </svg>
-                                {t.camera.or} {t.camera.uploadPhoto.toLowerCase().replace('photo', 'audio')}
+                                {t.camera.or} {t.camera.uploadAudio}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                onClick={() => onComplete({ audio: 'data:audio/webm;base64,UklGRi4AAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=' })}
+                                className="text-sm text-gray-500 hover:text-green-600 hover:bg-green-50"
+                            >
+                                {t.audio.debugSkip}
                             </Button>
                         </div>
                     )}
@@ -674,16 +684,6 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                         ))}
                     </ul>
                 </div>
-
-                {process.env.NODE_ENV === 'development' && (
-                    <Button
-                        variant="outline"
-                        className="w-full opacity-60 hover:opacity-100"
-                        onClick={() => onComplete({ audio: 'data:audio/webm;base64,UklGRi4AAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=' })}
-                    >
-                        {t.audio.debugSkip}
-                    </Button>
-                )}
             </Card>
 
             {/* Educational Content Section */}

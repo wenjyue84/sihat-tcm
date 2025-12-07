@@ -184,17 +184,17 @@ export const en = {
         physician: {
             name: 'Physician',
             nameZh: '医师',
-            description: 'Standard consultation for common ailments',
+            description: 'Standard consultation for common ailments. Fastest processing, uses the least credits.',
         },
         seniorPhysician: {
             name: 'Senior Physician',
             nameZh: '主任医师',
-            description: 'Advanced consultation with deeper analysis',
+            description: 'Advanced consultation for complex conditions. Provides detailed analysis, requires more processing time.',
         },
         masterPhysician: {
             name: 'Master Physician',
             nameZh: '国医大师',
-            description: 'Expert consultation with comprehensive insights',
+            description: 'Expert-level consultation for rare, difficult, or chronic cases that are hard to treat. Uses more credits and requires longer processing time.',
         },
     },
 
@@ -238,6 +238,7 @@ export const en = {
         confirm: 'Confirm',
         switchCamera: 'Switch Camera',
         uploadPhoto: 'Upload Photo',
+        uploadAudio: 'Upload Audio',
         dragDropPhoto: 'Drag & drop an image here',
         orClickToUpload: 'or click to upload',
         or: 'Or',
@@ -355,7 +356,7 @@ export const en = {
         tipsForBetterRecording: 'Tips for Better Recording',
         didYouKnow: 'Did You Know?',
         didYouKnowContent: 'Wen diagnosis has been practiced for over 2,000 years. Ancient TCM practitioners developed remarkable skills in diagnosing conditions simply by listening to a patient\'s voice, breathing, and even the sounds of their stomach!',
-        debugSkip: 'Debug: Skip',
+        debugSkip: 'Skip',
     },
 
     // Pulse check
@@ -443,6 +444,22 @@ export const en = {
             hua_se: "Cannot select 'Slippery' and 'Rough' together. These are opposing qualities.",
             fu_chen: "Cannot select 'Floating' and 'Deep' together. These are opposing qualities.",
             chi_shuo: "Cannot select 'Slow' and 'Rapid' together. These are opposing qualities.",
+            hong_ruo: "Cannot select 'Surging' and 'Weak' together. Surging pulse is large and forceful, while Weak pulse is soft and powerless - they cannot coexist.",
+        },
+        abnormalBpmTips: {
+            title: 'Measurement Tips',
+            highBpmTitle: 'Your heart rate is high',
+            lowBpmTitle: 'Your heart rate is low',
+            subtitle: 'To ensure accurate measurement, please confirm the following:',
+            tips: [
+                { icon: '🏃', title: 'Avoid post-exercise', description: 'Rest for 5-10 minutes after intense exercise before measuring' },
+                { icon: '😌', title: 'Stay relaxed', description: 'Nervousness or anxiety can raise heart rate. Take deep breaths' },
+                { icon: '🪑', title: 'Comfortable position', description: 'Sit comfortably and breathe calmly' },
+                { icon: '☕', title: 'Avoid stimulants', description: 'Coffee, tea and other stimulants can affect heart rate' },
+            ],
+            remeasure: 'Remeasure',
+            continueAnyway: 'Confirm & Continue',
+            confirmMessage: 'If you have ruled out the above factors, you may continue; otherwise, consider remeasuring.',
         },
     },
 
@@ -472,6 +489,7 @@ export const en = {
         continueConnecting: 'Continue connecting more devices or proceed',
         continueWithData: 'Continue with Data',
         skipForNow: 'Skip for Now',
+        useAllData: 'Use All Available Data',
     },
 
     // Image Analysis

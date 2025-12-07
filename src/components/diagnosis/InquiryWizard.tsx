@@ -1,34 +1,53 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { UploadReportsStep, FileData } from './UploadReportsStep'
 import { UploadMedicineStep } from './UploadMedicineStep'
 import { InquiryChatStep } from './InquiryChatStep'
 import { InquirySummaryStep } from './InquirySummaryStep'
+import { ChooseDoctorStep } from './ChooseDoctorStep'
 import { BasicInfoData } from './BasicInfoForm'
 
-type InquiryStepType = 'upload_reports' | 'upload_medicine' | 'chat' | 'summary'
+type InquiryStepType = 'choose_doctor' | 'upload_reports' | 'upload_medicine' | 'chat' | 'summary'
 
 interface InquiryWizardProps {
     basicInfo?: BasicInfoData
-    onComplete: (result: { inquiryText: string, chatHistory: any[], files: FileData[] }) => void
+    initialData?: {
+        reportFiles?: FileData[]
+        medicineFiles?: FileData[]
+        chatHistory?: any[]
+        summary?: string
+    }
+    onComplete: (result: { inquiryText: string, chatHistory: any[], files: FileData[], reportFiles?: FileData[], medicineFiles?: FileData[] }) => void
     onBack?: () => void
 }
 
-export function InquiryWizard({ basicInfo, onComplete, onBack }: InquiryWizardProps) {
-    const [step, setStep] = useState<InquiryStepType>('upload_reports')
+export function InquiryWizard({ basicInfo, initialData, onComplete, onBack }: InquiryWizardProps) {
+    const [step, setStep] = useState<InquiryStepType>('choose_doctor')
     const [data, setData] = useState<{
         reportFiles: FileData[]
         medicineFiles: FileData[]
         chatHistory: any[]
         summary: string
     }>({
-        reportFiles: [],
-        medicineFiles: [],
-        chatHistory: [],
-        summary: ''
+        reportFiles: initialData?.reportFiles || [],
+        medicineFiles: initialData?.medicineFiles || [],
+        chatHistory: initialData?.chatHistory || [],
+        summary: initialData?.summary || ''
     })
+
+    // Update state if initialData changes (e.g. when loading a test profile)
+    useEffect(() => {
+        if (initialData) {
+            setData({
+                reportFiles: initialData.reportFiles || [],
+                medicineFiles: initialData.medicineFiles || [],
+                chatHistory: initialData.chatHistory || [],
+                summary: initialData.summary || ''
+            })
+        }
+    }, [initialData])
 
     const nextStep = (next: InquiryStepType) => {
         setStep(next)
@@ -65,20 +84,30 @@ export function InquiryWizard({ basicInfo, onComplete, onBack }: InquiryWizardPr
         onComplete({
             inquiryText: summary, // This will be used as the main text
             chatHistory: data.chatHistory,
-            files: [...data.reportFiles, ...data.medicineFiles]
+            reportFiles: data.reportFiles,
+            medicineFiles: data.medicineFiles,
+            files: [...data.reportFiles, ...data.medicineFiles] // Keep this for backward compatibility if needed
         })
     }
 
     return (
         <div className="w-full">
             <AnimatePresence mode="wait">
+                {step === 'choose_doctor' && (
+                    <motion.div key="choose_doctor" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+                        <ChooseDoctorStep
+                            onComplete={() => nextStep('upload_reports')}
+                            onBack={onBack}
+                        />
+                    </motion.div>
+                )}
                 {step === 'upload_reports' && (
                     <motion.div key="upload_reports" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
                         <UploadReportsStep
                             initialFiles={data.reportFiles}
                             onComplete={handleReportsComplete}
                             onSkip={() => nextStep('upload_medicine')}
-                            onBack={onBack}
+                            onBack={() => prevStep('choose_doctor')}
                         />
                     </motion.div>
                 )}
@@ -97,6 +126,8 @@ export function InquiryWizard({ basicInfo, onComplete, onBack }: InquiryWizardPr
                         <InquiryChatStep
                             basicInfo={basicInfo}
                             uploadedFiles={[...data.reportFiles, ...data.medicineFiles]}
+                            reportFiles={data.reportFiles}
+                            medicineFiles={data.medicineFiles}
                             onComplete={handleChatComplete}
                             onBack={() => prevStep('upload_medicine')}
                         />

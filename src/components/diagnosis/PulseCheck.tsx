@@ -82,7 +82,8 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
             // If selecting, check for conflicts
             const conflicts: Record<string, string[]> = {
                 'xi': ['hong'], // Thin vs Surging
-                'hong': ['xi'], // Surging vs Thin
+                'hong': ['xi', 'ruo'], // Surging vs Thin, Surging vs Weak
+                'ruo': ['hong'], // Weak vs Surging
                 'hua': ['se'],  // Slippery vs Rough
                 'se': ['hua'],  // Rough vs Slippery
                 'fu': ['chen'], // Floating vs Deep
@@ -104,6 +105,8 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
                     warningMsg = t.pulse.conflicts?.fu_chen || "Cannot select 'Floating' and 'Deep' together."
                 } else if ((id === 'chi' && conflictingId === 'shuo') || (id === 'shuo' && conflictingId === 'chi')) {
                     warningMsg = t.pulse.conflicts?.chi_shuo || "Cannot select 'Slow' and 'Rapid' together."
+                } else if ((id === 'hong' && conflictingId === 'ruo') || (id === 'ruo' && conflictingId === 'hong')) {
+                    warningMsg = t.pulse.conflicts?.hong_ruo || "Cannot select 'Surging' and 'Weak' together."
                 }
 
                 setConflictWarning(warningMsg)
@@ -268,14 +271,61 @@ export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => 
                                         <span className="text-xl font-semibold text-slate-500">{t.pulse.bpm}</span>
                                     </div>
                                     {manualBpm && (
-                                        <div className="mt-3 flex items-center justify-center gap-2 text-emerald-600">
-                                            <CheckCircle2 className="w-5 h-5" />
-                                            <span className="font-medium">
-                                                {parseInt(manualBpm) < 60 ? t.pulse.lowBpm :
-                                                    parseInt(manualBpm) > 100 ? t.pulse.highBpm :
-                                                        t.pulse.normalBpm}
-                                            </span>
-                                        </div>
+                                        <>
+                                            <div className={`mt-3 flex items-center justify-center gap-2 ${parseInt(manualBpm) < 60 || parseInt(manualBpm) > 100 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                                <CheckCircle2 className="w-5 h-5" />
+                                                <span className="font-medium">
+                                                    {parseInt(manualBpm) < 60 ? t.pulse.lowBpm :
+                                                        parseInt(manualBpm) > 100 ? t.pulse.highBpm :
+                                                            t.pulse.normalBpm}
+                                                </span>
+                                            </div>
+                                            {/* Abnormal BPM Tips Panel */}
+                                            {(parseInt(manualBpm) < 60 || parseInt(manualBpm) > 100) && (
+                                                <div className="mt-4 p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 animate-in slide-in-from-top-2 duration-300">
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        <AlertCircle className="w-5 h-5 text-amber-600" />
+                                                        <h4 className="font-semibold text-amber-800">
+                                                            {parseInt(manualBpm) > 100
+                                                                ? (t.pulse.abnormalBpmTips?.highBpmTitle || 'Your heart rate is high')
+                                                                : (t.pulse.abnormalBpmTips?.lowBpmTitle || 'Your heart rate is low')}
+                                                        </h4>
+                                                    </div>
+                                                    <p className="text-sm text-amber-700 mb-3">
+                                                        {t.pulse.abnormalBpmTips?.subtitle || 'To ensure accurate measurement, please confirm the following:'}
+                                                    </p>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        {(t.pulse.abnormalBpmTips?.tips || [
+                                                            { icon: '🏃', title: 'Avoid post-exercise', description: 'Rest 5-10 minutes after exercise' },
+                                                            { icon: '😌', title: 'Stay relaxed', description: 'Take deep breaths to calm down' },
+                                                            { icon: '🪑', title: 'Comfortable position', description: 'Sit comfortably' },
+                                                            { icon: '☕', title: 'Avoid stimulants', description: 'Coffee or tea affects heart rate' },
+                                                        ]).map((tip, index) => (
+                                                            <div key={index} className="flex items-start gap-2 p-2 bg-white/70 rounded-lg border border-amber-100">
+                                                                <span className="text-xl flex-shrink-0">{tip.icon}</span>
+                                                                <div>
+                                                                    <p className="text-xs font-medium text-amber-800">{tip.title}</p>
+                                                                    <p className="text-xs text-amber-600">{tip.description}</p>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    <p className="mt-3 text-xs text-amber-600 italic">
+                                                        {t.pulse.abnormalBpmTips?.confirmMessage || 'If you have ruled out the above factors, you may continue.'}
+                                                    </p>
+                                                    <div className="mt-3 flex gap-2">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => setManualBpm('')}
+                                                            className="flex-1 border-amber-300 text-amber-700 hover:bg-amber-100"
+                                                        >
+                                                            {t.pulse.abnormalBpmTips?.remeasure || 'Remeasure'}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </div>

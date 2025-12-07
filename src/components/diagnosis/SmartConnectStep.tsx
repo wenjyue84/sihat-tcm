@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
-import { ChevronRight, ChevronLeft, Wifi, Heart, Activity, Droplets, Thermometer, Brain, Zap, Check, Settings, Smartphone, Footprints, Moon } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Wifi, Heart, Activity, Droplets, Thermometer, Brain, Zap, Check, Settings, Smartphone, Footprints, Moon, Database } from 'lucide-react'
 import { IoTConnectionWizard, IoTDeviceType } from './IoTConnectionWizard'
 import { HealthDataImportWizard, ImportedHealthData } from './HealthDataImportWizard'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -114,6 +114,27 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
         setShowHealthWizard(false)
     }
 
+    // Generate mock data for all health metrics
+    const generateMockData = () => {
+        const mockData: SmartConnectData = {
+            pulseRate: Math.floor(Math.random() * (95 - 65) + 65), // 65-95 BPM
+            bloodPressure: `${Math.floor(Math.random() * (130 - 110) + 110)}/${Math.floor(Math.random() * (85 - 70) + 70)}`, // Systolic/Diastolic
+            bloodOxygen: Math.floor(Math.random() * (99 - 96) + 96), // 96-99%
+            bodyTemp: (Math.random() * (37.1 - 36.3) + 36.3).toFixed(1), // 36.3-37.1°C
+            hrv: Math.floor(Math.random() * (80 - 30) + 30), // 30-80 ms
+            stressLevel: Math.floor(Math.random() * (45 - 15) + 15), // 15-45 Score
+            healthData: {
+                provider: 'Demo Data',
+                steps: Math.floor(Math.random() * (15000 - 5000) + 5000),
+                sleepHours: Number((Math.random() * (9 - 6) + 6).toFixed(1)),
+                heartRate: Math.floor(Math.random() * (85 - 60) + 60),
+                calories: Math.floor(Math.random() * (2500 - 1500) + 1500),
+                lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            },
+        }
+        setData(mockData)
+    }
+
     const handleSubmit = () => {
         onComplete(data)
     }
@@ -146,14 +167,25 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                                 <h2 className="text-2xl font-bold text-white">{t.smartConnect.smartHealthMonitor}</h2>
                             </div>
                         </div>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
-                        >
-                            <Settings className="w-4 h-4 mr-2" />
-                            {t.smartConnect.manageDevices}
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={generateMockData}
+                                className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:text-cyan-300"
+                            >
+                                <Database className="w-4 h-4 mr-2" />
+                                {t.smartConnect.useAllData || 'Use All Available Data'}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300"
+                            >
+                                <Settings className="w-4 h-4 mr-2" />
+                                {t.smartConnect.manageDevices}
+                            </Button>
+                        </div>
                     </div>
                     <p className="text-slate-300 text-sm">
                         {t.smartConnect.description}

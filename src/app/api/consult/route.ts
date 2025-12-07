@@ -8,14 +8,21 @@ export const maxDuration = 60;
 // Language instruction templates for consistent AI responses
 const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
   en: `
-IMPORTANT: You MUST respond entirely in English. All text, including section headers, diagnosis terms, food names, and recommendations must be in English. Do not use any Chinese characters or Malay words unless specifically quoting TCM terminology (which should be followed by English translation).
+IMPORTANT: You MUST respond entirely in English. All text, including section headers, diagnosis terms, food names, and recommendations must be in English. 
+- DO NOT use any Chinese characters.
+- DO NOT use Pinyin.
+- DO NOT provide bilingual terms (e.g., do NOT write "Qi Deficiency (气虚)", just write "Qi Deficiency").
+- Translate all TCM terms into standard English medical/TCM terminology.
 `,
   zh: `
-重要提示：你必须完全使用中文回复。所有文字，包括标题、诊断术语、食物名称和建议都必须使用中文。不要使用英文或马来文，除非是引用专业医学术语（需附上中文翻译）。
+重要提示：你必须完全使用中文回复。所有文字，包括标题、诊断术语、食物名称和建议都必须使用中文。
+- 不要使用英文。
+- 不要使用拼音。
+- 不要提供双语术语（例如，不要写 "Spleen Qi Deficiency (脾气虚)"，只写 "脾气虚"）。
 请确保所有内容对不懂英文的老年华人用户友好。使用简体中文。
 `,
   ms: `
-PENTING: Anda MESTI menjawab sepenuhnya dalam Bahasa Malaysia. Semua teks, termasuk tajuk seksyen, terma diagnosis, nama makanan, dan cadangan mesti dalam Bahasa Malaysia. Jangan gunakan huruf Cina atau perkataan Inggeris kecuali untuk memetik istilah TCM (yang harus diikuti dengan terjemahan Bahasa Malaysia).
+PENTING: Anda MESTI menjawab sepenuhnya dalam Bahasa Malaysia. Semua teks, termasuk tajuk seksyen, terma diagnosis, nama makanan, dan cadangan mesti dalam Bahasa Malaysia. Jangan gunakan huruf Cina atau perkataan Inggeris.
 `,
 };
 
@@ -376,6 +383,7 @@ Include a comprehensive TCM diagnosis with:
 - Detailed analysis with key findings
 - Dietary recommendations (foods to eat and avoid)
 - Lifestyle suggestions
+- Herbal medicine formulas (中药方剂)
 - Acupuncture points for self-care
 - Precautions and follow-up guidance
 `;

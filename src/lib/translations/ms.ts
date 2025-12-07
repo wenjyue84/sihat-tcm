@@ -144,9 +144,9 @@ export const ms: TranslationKeys = {
         },
     },
     doctorLevels: {
-        physician: { name: 'Doktor', nameZh: '医师', description: 'Perundingan standard untuk penyakit biasa' },
-        seniorPhysician: { name: 'Doktor Kanan', nameZh: '主任医师', description: 'Perundingan lanjutan dengan analisis mendalam' },
-        masterPhysician: { name: 'Pakar Utama', nameZh: '国医大师', description: 'Perundingan pakar dengan wawasan menyeluruh' },
+        physician: { name: 'Doktor', nameZh: '医师', description: 'Perundingan standard untuk penyakit biasa. Pemprosesan paling pantas, guna kredit paling sedikit.' },
+        seniorPhysician: { name: 'Doktor Kanan', nameZh: '主任医师', description: 'Perundingan lanjutan untuk keadaan kompleks. Menyediakan analisis terperinci, memerlukan masa pemprosesan lebih.' },
+        masterPhysician: { name: 'Pakar Utama', nameZh: '国医大师', description: 'Perundingan pakar untuk kes jarang, sukar, atau kronik yang susah dirawat. Guna lebih banyak kredit dan memerlukan masa pemprosesan lebih lama.' },
     },
     steps: { basics: 'Asas', inquiry: 'Pertanyaan', tongue: 'Lidah', face: 'Muka', audio: 'Audio', pulse: 'Nadi', bodyPart: 'Bahagian Badan', smartConnect: 'Sambungan Pintar' },
     inquiry: {
@@ -174,6 +174,7 @@ export const ms: TranslationKeys = {
         confirm: 'Sahkan',
         switchCamera: 'Tukar Kamera',
         uploadPhoto: 'Muat Naik Gambar',
+        uploadAudio: 'Muat Naik Audio',
         dragDropPhoto: 'Seret & lepas gambar di sini',
         orClickToUpload: 'atau klik untuk muat naik',
         or: 'Atau',
@@ -242,7 +243,7 @@ export const ms: TranslationKeys = {
         tipsForBetterRecording: 'Petua untuk Rakaman Lebih Baik',
         didYouKnow: 'Tahukah Anda?',
         didYouKnowContent: 'Diagnosis Wen telah diamalkan selama lebih 2,000 tahun. Pengamal TCM purba mengembangkan kemahiran luar biasa dalam mendiagnosis keadaan hanya dengan mendengar suara pesakit, pernafasan, dan juga bunyi perut mereka!',
-        debugSkip: 'Nyahpepijat: Langkau',
+        debugSkip: 'Langkau',
     },
     pulse: {
         title: 'Pengukuran Nadi (切诊)',
@@ -310,6 +311,22 @@ export const ms: TranslationKeys = {
             hua_se: "Tidak boleh memilih 'Licin' dan 'Kasar' bersama-sama. Ini adalah kualiti yang bertentangan.",
             fu_chen: "Tidak boleh memilih 'Terapung' dan 'Dalam' bersama-sama. Ini adalah kualiti yang bertentangan.",
             chi_shuo: "Tidak boleh memilih 'Perlahan' dan 'Laju' bersama-sama. Ini adalah kualiti yang bertentangan.",
+            hong_ruo: "Tidak boleh memilih 'Melimpah' dan 'Lemah' bersama-sama. Nadi Melimpah besar dan kuat, manakala nadi Lemah lembut dan lemah - ia tidak boleh wujud bersama.",
+        },
+        abnormalBpmTips: {
+            title: 'Petua Pengukuran',
+            highBpmTitle: 'Kadar denyutan jantung anda tinggi',
+            lowBpmTitle: 'Kadar denyutan jantung anda rendah',
+            subtitle: 'Untuk memastikan pengukuran tepat, sila sahkan perkara berikut:',
+            tips: [
+                { icon: '🏃', title: 'Elakkan selepas bersenam', description: 'Rehat 5-10 minit selepas senaman berat sebelum mengukur' },
+                { icon: '😌', title: 'Kekal tenang', description: 'Kegelisahan boleh meningkatkan kadar denyutan. Tarik nafas dalam' },
+                { icon: '🪑', title: 'Posisi selesa', description: 'Duduk dengan selesa dan bernafas dengan tenang' },
+                { icon: '☕', title: 'Elakkan perangsang', description: 'Kopi, teh dan perangsang lain boleh mempengaruhi kadar denyutan' },
+            ],
+            remeasure: 'Ukur Semula',
+            continueAnyway: 'Sahkan & Teruskan',
+            confirmMessage: 'Jika anda telah menolak faktor di atas, anda boleh meneruskan; jika tidak, pertimbangkan untuk mengukur semula.',
         },
     },
     smartConnect: {
@@ -337,6 +354,7 @@ export const ms: TranslationKeys = {
         continueConnecting: 'Teruskan menyambungkan lebih banyak peranti atau teruskan',
         continueWithData: 'Teruskan dengan Data',
         skipForNow: 'Langkau Buat Masa Ini',
+        useAllData: 'Gunakan Semua Data Tersedia',
     },
     imageAnalysis: {
         analyzing: 'Menganalisis imej...', processingWithAI: 'Memproses dengan AI...', tryingDifferentModel: 'Mencuba kaedah analisis lain...',

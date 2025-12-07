@@ -30,76 +30,70 @@ export function TextReviewModal({ isOpen, onClose, onConfirm, file, mode = 'gene
             setText('')
             setWarning(null)
 
-            // Simulate processing time
+            // Start timer
             const startTime = Date.now()
             const interval = setInterval(() => {
                 const elapsed = Math.floor((Date.now() - startTime) / 1000)
                 setTimer(elapsed)
             }, 1000)
 
-            // Simulate extraction completion after 3 seconds
-            const timeout = setTimeout(() => {
-                clearInterval(interval)
-                setIsProcessing(false)
+            // Actually extract text from the file using AI
+            const extractText = async () => {
+                try {
+                    // Convert file to base64
+                    const base64 = await new Promise<string>((resolve, reject) => {
+                        const reader = new FileReader()
+                        reader.readAsDataURL(file)
+                        reader.onload = () => resolve(reader.result as string)
+                        reader.onerror = error => reject(error)
+                    })
 
-                let mockText = ''
+                    // Call extraction API
+                    const response = await fetch('/api/extract-text', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            file: base64,
+                            fileName: file.name,
+                            fileType: file.type,
+                            mode: mode,
+                            language: language
+                        })
+                    })
 
-                if (mode === 'medicine') {
-                    // Simulate detection of medical report vs medicine label
-                    const isReport = file.name.toLowerCase().includes('report') || file.name.toLowerCase().includes('lab')
+                    const data = await response.json()
 
-                    if (isReport) {
-                        setWarning(language === 'zh'
-                            ? '检测到您上传了医疗报告。系统仅提取了其中的药物信息。'
-                            : language === 'ms'
-                                ? 'Laporan perubatan dikesan. Hanya maklumat ubat telah diekstrak.'
-                                : 'Medical report detected. Only medicine information has been extracted.')
-
-                        mockText = `=== EXTRACTED MEDICINE ===
-File: ${file.name}
-
-[Medicines Found]
-1. Atorvastatin 20mg
-2. Metformin 500mg
-
-[Note]
-Other clinical data from this report has been ignored as per your request to upload medicine only.`
-                    } else {
-                        mockText = `=== EXTRACTED MEDICINE ===
-File: ${file.name}
-
-[Medicines Identified]
-1. Panadol (Paracetamol)
-2. Vitamin C Supplement`
+                    if (data.error) {
+                        throw new Error(data.error)
                     }
-                } else {
-                    // General mode (existing logic)
-                    mockText = `=== EXTRACTED DATA ===
-File: ${file.name}
-Date: ${new Date().toLocaleDateString()}
 
-[Medical Report Summary]
-Patient Name: [Patient Name]
-Report Type: ${file.type.includes('pdf') ? 'PDF Document' : 'Image Scan'}
+                    // Set warning if applicable
+                    if (data.warning) {
+                        setWarning(data.warning)
+                    }
 
-Clinical Findings:
-- The patient shows signs of fatigue and irregular pulse.
-- Blood pressure is slightly elevated (135/85).
-- Tongue examination reveals a pale coating.
+                    // Set the extracted text
+                    setText(data.text || '')
 
-TCM Implications:
-- Possible Qi deficiency.
-- Dampness accumulation suspected.
-
-[End of Extract]`
+                } catch (error: any) {
+                    console.error('Extraction error:', error)
+                    // Show error message in the text area
+                    const errorMessages = {
+                        en: `Error extracting text: ${error.message}\n\nPlease try again or enter the information manually.`,
+                        zh: `提取文本时出错：${error.message}\n\n请重试或手动输入信息。`,
+                        ms: `Ralat mengekstrak teks: ${error.message}\n\nSila cuba lagi atau masukkan maklumat secara manual.`
+                    }
+                    setText(errorMessages[language as 'en' | 'zh' | 'ms'] || errorMessages.en)
+                } finally {
+                    clearInterval(interval)
+                    setIsProcessing(false)
                 }
+            }
 
-                setText(mockText)
-            }, 3000)
+            extractText()
 
             return () => {
                 clearInterval(interval)
-                clearTimeout(timeout)
             }
         }
     }, [isOpen, file, mode, language])

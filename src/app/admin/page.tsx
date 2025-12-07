@@ -16,8 +16,10 @@ import {
     FACE_ANALYSIS_PROMPT,
     BODY_ANALYSIS_PROMPT,
     LISTENING_ANALYSIS_PROMPT,
+    INQUIRY_SUMMARY_PROMPT,
     FINAL_ANALYSIS_PROMPT
 } from '@/lib/systemPrompts'
+import { ClipboardList } from 'lucide-react'
 
 // Doctor Level → LLM Model mapping (same as DoctorContext)
 const DOCTOR_MODEL_MAPPING = {
@@ -68,6 +70,14 @@ const PROMPT_TYPES = {
         color: 'purple',
         defaultPrompt: LISTENING_ANALYSIS_PROMPT,
     },
+    inquiry_summary: {
+        role: 'doctor_inquiry_summary',
+        title: '问诊总结 Inquiry Summary Prompt',
+        description: 'Used to summarize the patient inquiry into a structured clinical summary. This is the step that\'s failing in your screenshot.',
+        icon: ClipboardList,
+        color: 'teal',
+        defaultPrompt: INQUIRY_SUMMARY_PROMPT,
+    },
     final: {
         role: 'doctor_final',
         title: '综合诊断 Final Analysis Prompt',
@@ -87,6 +97,7 @@ export default function AdminDashboard() {
         face: '',
         body: '',
         listening: '',
+        inquiry_summary: '',
         final: '',
     })
     const [doctorLevel, setDoctorLevel] = useState<keyof typeof DOCTOR_MODEL_MAPPING>('Physician')
@@ -100,6 +111,7 @@ export default function AdminDashboard() {
         face: false,
         body: false,
         listening: false,
+        inquiry_summary: false,
         final: false,
     })
     const { profile, loading: authLoading, signOut } = useAuth()
@@ -122,7 +134,7 @@ export default function AdminDashboard() {
             const { data, error } = await supabase
                 .from('system_prompts')
                 .select('role, prompt_text, config')
-                .in('role', ['doctor_chat', 'doctor_tongue', 'doctor_face', 'doctor_body', 'doctor_listening', 'doctor_final', 'doctor'])
+                .in('role', ['doctor_chat', 'doctor_tongue', 'doctor_face', 'doctor_body', 'doctor_listening', 'doctor_inquiry_summary', 'doctor_final', 'doctor'])
 
             if (data) {
                 const newPrompts = { ...prompts }
@@ -137,6 +149,8 @@ export default function AdminDashboard() {
                         newPrompts.body = item.prompt_text || ''
                     } else if (item.role === 'doctor_listening') {
                         newPrompts.listening = item.prompt_text || ''
+                    } else if (item.role === 'doctor_inquiry_summary') {
+                        newPrompts.inquiry_summary = item.prompt_text || ''
                     } else if (item.role === 'doctor_final') {
                         newPrompts.final = item.prompt_text || ''
                     } else if (item.role === 'doctor' && item.config) {
@@ -298,6 +312,12 @@ export default function AdminDashboard() {
             border: 'border-purple-200',
             icon: 'text-purple-600',
             button: 'bg-purple-600 hover:bg-purple-700',
+        },
+        teal: {
+            bg: 'bg-teal-50',
+            border: 'border-teal-200',
+            icon: 'text-teal-600',
+            button: 'bg-teal-600 hover:bg-teal-700',
         },
         amber: {
             bg: 'bg-amber-50',

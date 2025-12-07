@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, Check, ArrowLeft, RefreshCw } from 'lucide-react'
+import { Loader2, Check, ArrowLeft, RefreshCw, AlertCircle, Clock, Wifi, FileText, Sparkles, CheckCircle2 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { FileData } from './UploadReportsStep'
 
 interface InquirySummaryStepProps {
@@ -19,16 +20,62 @@ interface InquirySummaryStepProps {
     }
 }
 
+interface ErrorState {
+    title: string
+    message: string
+    guide: string
+    step: string
+    duration: number
+}
+
+type ProgressStep = 'connecting' | 'analyzing' | 'generating' | 'complete' | 'error'
+
+const PROGRESS_STEPS = {
+    connecting: { en: 'Connecting to AI service...', zh: '连接AI服务...', ms: 'Menyambung ke perkhidmatan AI...' },
+    analyzing: { en: 'Analyzing inquiry data...', zh: '分析问诊数据...', ms: 'Menganalisis data pertanyaan...' },
+    generating: { en: 'Generating summary...', zh: '生成总结...', ms: 'Menjana ringkasan...' },
+    complete: { en: 'Processing complete', zh: '处理完成', ms: 'Pemprosesan selesai' },
+    error: { en: 'Error occurred', zh: '发生错误', ms: 'Ralat berlaku' }
+}
+
 export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryStepProps) {
-    const { t, language } = useLanguage()
+    const { language } = useLanguage()
+    const { getDoctorInfo } = useDoctorLevel()
+    const doctorInfo = getDoctorInfo()
     const [summary, setSummary] = useState('')
     const [isLoading, setIsLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const [error, setError] = useState<ErrorState | null>(null)
+    const [elapsedTime, setElapsedTime] = useState(0)
+    const [progressStep, setProgressStep] = useState<ProgressStep>('connecting')
+    const timerRef = useRef<NodeJS.Timeout | null>(null)
+    const startTimeRef = useRef<number>(0)
+
+    const startTimer = () => {
+        startTimeRef.current = Date.now()
+        setElapsedTime(0)
+        timerRef.current = setInterval(() => {
+            setElapsedTime(Math.floor((Date.now() - startTimeRef.current) / 1000))
+        }, 100)
+    }
+
+    const stopTimer = () => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current)
+            timerRef.current = null
+        }
+    }
 
     const generateSummary = async () => {
         setIsLoading(true)
         setError(null)
+        setProgressStep('connecting')
+        startTimer()
+
         try {
+            // Simulate step progression for better UX
+            setTimeout(() => setProgressStep('analyzing'), 500)
+            setTimeout(() => setProgressStep('generating'), 1500)
+
             const response = await fetch('/api/summarize-inquiry', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -37,17 +84,71 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
                     reportFiles: data.reportFiles,
                     medicineFiles: data.medicineFiles,
                     basicInfo: data.basicInfo,
-                    language
+                    language,
+                    // Model is determined by doctor level from DoctorContext
+                    // gemini-1.5-flash is deprecated - now uses gemini-3-pro-preview/gemini-2.5-pro/gemini-2.0-flash
+                    model: doctorInfo.model
                 })
             })
 
-            if (!response.ok) throw new Error('Failed to generate summary')
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error(JSON.stringify(errorData))
+            }
 
             const result = await response.json()
+            stopTimer()
+            setProgressStep('complete')
             setSummary(result.summary)
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error generating summary:', err)
-            setError('Failed to generate summary. Please try again.')
+            stopTimer()
+            setProgressStep('error')
+
+            let errorData = { code: 'UNKNOWN', error: 'Unknown error', step: 'unknown', duration: elapsedTime * 1000 }
+            try {
+                errorData = JSON.parse(err.message)
+            } catch {
+                // If not JSON, use default
+            }
+
+            const failedStep = errorData.step || 'generation'
+            const failedDuration = errorData.duration || (elapsedTime * 1000)
+
+            if (errorData.code === 'NO_HISTORY') {
+                setError({
+                    title: language === 'zh' ? '无法生成总结' : 'Unable to Generate Summary',
+                    message: language === 'zh' ? '未找到问诊记录。' : 'No consultation history found.',
+                    guide: language === 'zh'
+                        ? '请返回聊天界面，确保您已经与医生进行了对话。'
+                        : 'Please go back to the chat and ensure you have had a conversation with the doctor.',
+                    step: 'validation',
+                    duration: failedDuration
+                })
+            } else {
+                // Map step to user-friendly message
+                const stepMessages: Record<string, { en: string; zh: string }> = {
+                    connection: { en: 'connecting to AI service', zh: '连接AI服务' },
+                    timeout: { en: 'waiting for response', zh: '等待响应' },
+                    rate_limit: { en: 'AI service is busy', zh: 'AI服务繁忙' },
+                    generation: { en: 'generating summary', zh: '生成总结' },
+                    unknown: { en: 'processing', zh: '处理' }
+                }
+
+                const stepMessage = stepMessages[failedStep] || stepMessages.unknown
+
+                setError({
+                    title: language === 'zh' ? '生成总结失败' : 'Failed to Generate Summary',
+                    message: language === 'zh'
+                        ? `在"${stepMessage.zh}"步骤失败 (${(failedDuration / 1000).toFixed(1)}秒后)`
+                        : `Failed at "${stepMessage.en}" step (after ${(failedDuration / 1000).toFixed(1)}s)`,
+                    guide: language === 'zh'
+                        ? '请点击下方的"重试"按钮。如果问题持续存在，您可以手动填写总结。'
+                        : 'Please click the "Retry" button below. If the problem persists, you can manually fill in the summary.',
+                    step: failedStep,
+                    duration: failedDuration
+                })
+            }
         } finally {
             setIsLoading(false)
         }
@@ -55,6 +156,7 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
 
     useEffect(() => {
         generateSummary()
+        return () => stopTimer()
     }, [])
 
     const lang = language as 'en' | 'zh' | 'ms'
@@ -70,11 +172,6 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
             zh: '请审核下方的问诊总结。您可以编辑它以补充遗漏的细节或更正任何错误，然后再继续下一步。',
             ms: 'Sila semak ringkasan siasatan anda di bawah. Anda boleh mengeditnya untuk menambah butiran yang hilang atau membetulkan sebarang kesilapan sebelum kami meneruskan ke langkah seterusnya.'
         },
-        loading: {
-            en: 'Generating summary from your consultation...',
-            zh: '正在根据您的问诊生成总结...',
-            ms: 'Sedang menjana ringkasan daripada konsultasi anda...'
-        },
         confirmBtn: {
             en: 'Confirm & Continue',
             zh: '确认并继续',
@@ -89,47 +186,166 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
             en: 'Back to Chat',
             zh: '返回聊天',
             ms: 'Kembali ke Sembang'
+        },
+        guideTitle: {
+            en: 'What to do next:',
+            zh: '接下来的步骤：',
+            ms: 'Apa yang perlu dilakukan seterusnya:'
+        },
+        timer: {
+            en: 'Elapsed time',
+            zh: '已用时间',
+            ms: 'Masa berlalu'
         }
     }
 
+    const renderProgressIndicator = () => {
+        const steps: { key: ProgressStep; icon: typeof Wifi }[] = [
+            { key: 'connecting', icon: Wifi },
+            { key: 'analyzing', icon: FileText },
+            { key: 'generating', icon: Sparkles },
+        ]
+
+        const currentIndex = steps.findIndex(s => s.key === progressStep)
+
+        // Short labels for mobile
+        const MOBILE_STEPS = {
+            connecting: { en: 'Connect', zh: '连接', ms: 'Sambung' },
+            analyzing: { en: 'Analyze', zh: '分析', ms: 'Analisis' },
+            generating: { en: 'Generate', zh: '生成', ms: 'Hasilkan' },
+            complete: { en: 'Done', zh: '完成', ms: 'Selesai' },
+            error: { en: 'Error', zh: '错误', ms: 'Ralat' }
+        }
+
+        return (
+            <div className="w-full max-w-xs sm:max-w-md mx-auto mb-4 sm:mb-6">
+                {/* Timer display */}
+                <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4 text-emerald-700">
+                    <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="font-mono text-base sm:text-lg">{elapsedTime}s</span>
+                </div>
+
+                {/* Progress steps */}
+                <div className="flex items-center justify-between relative">
+                    {/* Progress line */}
+                    <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-stone-200 -translate-y-1/2 -z-10" />
+                    <div
+                        className="absolute left-0 top-1/2 h-0.5 bg-emerald-500 -translate-y-1/2 -z-10 transition-all duration-500"
+                        style={{ width: `${Math.max(0, currentIndex) * 50}%` }}
+                    />
+
+                    {steps.map((step, index) => {
+                        const Icon = step.icon
+                        const isActive = progressStep === step.key
+                        const isComplete = currentIndex > index || progressStep === 'complete'
+
+                        return (
+                            <div key={step.key} className="flex flex-col items-center gap-0.5 sm:gap-1">
+                                <div className={`
+                                    w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300
+                                    ${isComplete ? 'bg-emerald-500 border-emerald-500 text-white' :
+                                        isActive ? 'bg-emerald-50 border-emerald-500 text-emerald-600' :
+                                            'bg-white border-stone-200 text-stone-400'}
+                                `}>
+                                    {isComplete ? <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" /> :
+                                        isActive ? <Icon className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" /> :
+                                            <Icon className="w-4 h-4 sm:w-5 sm:h-5" />}
+                                </div>
+                                {/* Show short labels on mobile, full labels on desktop */}
+                                <span className={`text-[10px] sm:text-xs font-medium text-center leading-tight ${isActive ? 'text-emerald-600' : 'text-stone-500'}`}>
+                                    <span className="hidden sm:inline">{PROGRESS_STEPS[step.key][lang]}</span>
+                                    <span className="sm:hidden">{MOBILE_STEPS[step.key][lang]}</span>
+                                </span>
+                            </div>
+                        )
+                    })}
+                </div>
+
+                {/* Current step description - only show on larger screens */}
+                <p className="hidden sm:block text-center text-sm text-stone-600 mt-4 animate-pulse">
+                    {PROGRESS_STEPS[progressStep][lang]}
+                </p>
+            </div>
+        )
+    }
+
     return (
-        <Card className="p-6 min-h-[500px] flex flex-col">
-            <div className="mb-6">
-                <h2 className="text-xl font-semibold text-emerald-800 mb-2">{content.title[lang]}</h2>
-                <p className="text-stone-600">{content.description[lang]}</p>
+        <Card className="p-4 sm:p-6 min-h-[400px] sm:min-h-[500px] flex flex-col">
+            <div className="mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl font-semibold text-emerald-800 mb-1 sm:mb-2">{content.title[lang]}</h2>
+                <p className="text-sm sm:text-base text-stone-600">{content.description[lang]}</p>
             </div>
 
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-h-0">
                 {isLoading ? (
-                    <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-                        <Loader2 className="w-12 h-12 text-emerald-600 animate-spin" />
-                        <p className="text-stone-500 animate-pulse">{content.loading[lang]}</p>
+                    <div className="flex-1 flex flex-col items-center justify-center space-y-4 px-2">
+                        {renderProgressIndicator()}
                     </div>
                 ) : error ? (
-                    <div className="flex-1 flex flex-col items-center justify-center space-y-4 text-red-500">
-                        <p>{error}</p>
-                        <Button onClick={generateSummary} variant="outline">
-                            <RefreshCw className="w-4 h-4 mr-2" />
-                            {content.retryBtn[lang]}
-                        </Button>
+                    <div className="flex-1 flex flex-col p-3 sm:p-6 bg-stone-50 rounded-lg border border-stone-200 overflow-auto">
+                        <div className="flex flex-col items-center text-center space-y-2 sm:space-y-3 max-w-md mx-auto mb-4 sm:mb-6">
+                            <div className="p-2 sm:p-3 bg-orange-100 rounded-full">
+                                <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
+                            </div>
+                            <h3 className="text-base sm:text-lg font-medium text-stone-800">{error.title}</h3>
+                            <p className="text-sm sm:text-base text-stone-600">{error.message}</p>
+
+                            {/* Technical details for debugging */}
+                            <div className="text-xs text-stone-400 bg-stone-100 px-2 sm:px-3 py-1 rounded-full">
+                                {lang === 'zh' ? '步骤' : 'Step'}: {error.step} | {(error.duration / 1000).toFixed(1)}s
+                            </div>
+
+                            <div className="w-full bg-white p-3 sm:p-4 rounded border border-stone-100 mt-3 sm:mt-4 text-left">
+                                <p className="text-xs sm:text-sm font-medium text-stone-700 mb-1">{content.guideTitle[lang]}</p>
+                                <p className="text-xs sm:text-sm text-stone-600">{error.guide}</p>
+                            </div>
+
+                            <Button onClick={generateSummary} variant="outline" className="mt-3 sm:mt-4">
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                                {content.retryBtn[lang]}
+                            </Button>
+                        </div>
+
+                        {/* Manual entry section */}
+                        <div className="flex-1 flex flex-col border-t border-stone-200 pt-3 sm:pt-4">
+                            <p className="text-xs sm:text-sm text-stone-600 mb-2">
+                                {lang === 'zh' ? '或者，您可以手动输入问诊总结后继续：' :
+                                    lang === 'ms' ? 'Atau, anda boleh memasukkan ringkasan secara manual dan meneruskan:' :
+                                        'Alternatively, you can manually enter a summary and continue:'}
+                            </p>
+                            <Textarea
+                                value={summary}
+                                onChange={(e) => setSummary(e.target.value)}
+                                placeholder={lang === 'zh' ? '在此输入您的问诊总结...' :
+                                    lang === 'ms' ? 'Masukkan ringkasan siasatan anda di sini...' :
+                                        'Enter your inquiry summary here...'}
+                                className="flex-1 min-h-[120px] sm:min-h-[150px] text-sm sm:text-base p-3 sm:p-4 leading-relaxed bg-white border-stone-200 focus:border-emerald-500 focus:ring-emerald-500"
+                            />
+                        </div>
                     </div>
                 ) : (
-                    <Textarea
-                        value={summary}
-                        onChange={(e) => setSummary(e.target.value)}
-                        className="flex-1 min-h-[300px] text-base p-4 leading-relaxed bg-stone-50 border-stone-200 focus:border-emerald-500 focus:ring-emerald-500"
-                    />
+                    <div className="flex-1 flex flex-col min-h-0 overflow-hidden rounded-lg border border-stone-200 bg-stone-50">
+                        <Textarea
+                            value={summary}
+                            onChange={(e) => setSummary(e.target.value)}
+                            className="flex-1 min-h-[200px] sm:min-h-[300px] text-sm sm:text-base p-3 sm:p-4 leading-relaxed bg-stone-50 border-0 focus:border-emerald-500 focus:ring-emerald-500 resize-none font-mono"
+                            style={{
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word'
+                            }}
+                        />
+                    </div>
                 )}
             </div>
 
-            <div className="flex justify-between mt-6 pt-4 border-t border-stone-100">
-                <Button variant="outline" onClick={onBack} className="text-stone-600">
+            <div className="flex flex-col-reverse sm:flex-row justify-between gap-3 sm:gap-4 mt-4 sm:mt-6 pt-4 border-t border-stone-100">
+                <Button variant="outline" onClick={onBack} className="text-stone-600 w-full sm:w-auto">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     {content.backBtn[lang]}
                 </Button>
                 <Button
                     onClick={() => onComplete(summary)}
-                    className="bg-emerald-800 hover:bg-emerald-900"
+                    className="bg-emerald-800 hover:bg-emerald-900 w-full sm:w-auto"
                     disabled={isLoading || !summary.trim()}
                 >
                     <Check className="w-4 h-4 mr-2" />

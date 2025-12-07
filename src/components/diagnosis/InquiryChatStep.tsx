@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { BasicInfoData } from './BasicInfoForm'
-import { Loader2, Send, ArrowLeft } from 'lucide-react'
+import { Loader2, Send, ArrowLeft, Pill, FileText, ChevronDown, ChevronUp } from 'lucide-react'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { ShowPromptButton } from './ShowPromptButton'
@@ -23,12 +23,16 @@ export function InquiryChatStep({
     onComplete,
     basicInfo,
     onBack,
-    uploadedFiles = []
+    uploadedFiles = [],
+    reportFiles = [],
+    medicineFiles = []
 }: {
     onComplete: (chatHistory: any[]) => void,
     basicInfo?: BasicInfoData,
     onBack?: () => void,
-    uploadedFiles?: FileData[]
+    uploadedFiles?: FileData[],
+    reportFiles?: FileData[],
+    medicineFiles?: FileData[]
 }) {
     const { getDoctorInfo } = useDoctorLevel()
     const { t, language } = useLanguage()
@@ -266,9 +270,14 @@ Duration: ${basicInfo.symptomDuration}
             {/* Basic Information Summary with BMI */}
             {basicInfo && basicInfo.weight && basicInfo.height && (
                 <details className="bg-gradient-to-r from-emerald-50 to-teal-50 p-3 md:p-4 rounded-lg border border-emerald-200 group">
-                    <summary className="font-semibold text-emerald-800 text-sm cursor-pointer flex items-center justify-between">
+                    <summary className="font-semibold text-emerald-800 text-sm cursor-pointer flex items-center justify-between list-none [&::-webkit-details-marker]:hidden">
                         {t.report.patientInfo}
-                        <span className="text-xs text-emerald-600 group-open:hidden">{language === 'zh' ? '点击展开' : language === 'ms' ? 'Ketik untuk kembang' : 'Tap to expand'}</span>
+                        <div className="flex items-center gap-1 text-xs text-emerald-600">
+                            <span className="group-open:hidden">{language === 'zh' ? '点击展开' : language === 'ms' ? 'Ketik untuk kembang' : 'Tap to expand'}</span>
+                            <span className="hidden group-open:inline">{language === 'zh' ? '点击收起' : language === 'ms' ? 'Ketik untuk tutup' : 'Tap to collapse'}</span>
+                            <ChevronDown className="w-4 h-4 group-open:hidden" />
+                            <ChevronUp className="w-4 h-4 hidden group-open:block" />
+                        </div>
                     </summary>
                     <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 text-sm">
                         <div>
@@ -313,6 +322,53 @@ Duration: ${basicInfo.symptomDuration}
                             })()}
                         </div>
                     </div>
+
+                    {/* Medicine List Section */}
+                    {medicineFiles.length > 0 && (
+                        <div className="mt-4 pt-3 border-t border-emerald-200/50">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Pill className="w-4 h-4 text-amber-600" />
+                                <span className="font-medium text-stone-700 text-sm">
+                                    {language === 'zh' ? '当前用药' : language === 'ms' ? 'Ubat Semasa' : 'Current Medications'}
+                                </span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {medicineFiles.map((file, index) => (
+                                    <div key={index} className="bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full text-xs text-amber-800">
+                                        {file.extractedText ? (
+                                            <span>{file.extractedText.split('\n').filter(line => line.trim()).slice(0, 3).join(', ')}{file.extractedText.split('\n').filter(line => line.trim()).length > 3 ? '...' : ''}</span>
+                                        ) : (
+                                            <span>{file.name}</span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Medical Reports Summary Section */}
+                    {reportFiles.length > 0 && (
+                        <div className="mt-4 pt-3 border-t border-emerald-200/50">
+                            <div className="flex items-center gap-2 mb-2">
+                                <FileText className="w-4 h-4 text-blue-600" />
+                                <span className="font-medium text-stone-700 text-sm">
+                                    {language === 'zh' ? '医疗报告摘要' : language === 'ms' ? 'Ringkasan Laporan Perubatan' : 'Medical Report Summary'}
+                                </span>
+                            </div>
+                            <div className="space-y-2">
+                                {reportFiles.map((file, index) => (
+                                    <div key={index} className="bg-blue-50 border border-blue-200 px-3 py-2 rounded-lg text-xs text-blue-800">
+                                        <div className="font-medium mb-1">{file.name}</div>
+                                        {file.extractedText && (
+                                            <p className="text-blue-700/80 line-clamp-2">
+                                                {file.extractedText.substring(0, 150)}{file.extractedText.length > 150 ? '...' : ''}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </details>
             )}
 

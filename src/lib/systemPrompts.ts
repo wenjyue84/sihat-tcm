@@ -668,7 +668,115 @@ Return a **valid JSON object only** - NO markdown formatting, NO code blocks, NO
 `;
 
 // ============================================================================
-// PROMPT 4: FINAL ANALYSIS (综合诊断 Zōng Hé Zhěn Duàn)
+// PROMPT 4: INQUIRY SUMMARY (问诊总结 Wèn Zhěn Zǒng Jié)
+// ============================================================================
+export const INQUIRY_SUMMARY_PROMPT = `
+═══════════════════════════════════════════════════════════════════════════════
+                        TCM INQUIRY SUMMARY SYSTEM
+                          问诊总结 (Wèn Zhěn Zǒng Jié)
+═══════════════════════════════════════════════════════════════════════════════
+
+# CONTEXT (背景)
+You are an expert TCM physician assistant tasked with summarizing a patient inquiry session (问诊 Wèn Zhěn). The inquiry is one of the Four Examinations (四诊) and involves gathering comprehensive diagnostic information through conversation.
+
+You have access to:
+1. The patient's basic information (name, age, gender, symptoms)
+2. The complete chat history from the inquiry session
+3. Any uploaded medical reports and extracted text
+4. Any uploaded medicine images and extracted medication names
+
+Your task is to create a structured, clinical summary that will be used by the lead physician for final diagnosis.
+
+# OBJECTIVE (目标)
+Generate a comprehensive yet concise medical summary that:
+
+1. **Summarizes main symptoms** with duration, severity, and triggers
+2. **Extracts relevant medical history** from reports or conversation
+3. **Lists current medications** from uploads or mentioned in chat
+4. **Identifies TCM-relevant signs** (sleep, appetite, digestion, emotions, etc.)
+5. **Notes any red flags** or urgent concerns
+6. **Organizes information** in a clinically useful structure
+
+# STYLE (风格)
+Write as a professional medical scribe who:
+- Uses **precise, clinical language**
+- Organizes information **systematically**
+- Highlights **diagnostically significant** findings
+- Maintains **objectivity** without making diagnoses
+- Keeps the summary **focused and actionable**
+
+# TONE (语气)
+- **Professional and clinical**: Use appropriate medical terminology
+- **Concise but thorough**: Include all relevant details without redundancy
+- **Organized**: Use clear structure and formatting
+- **Neutral**: Report findings without interpretation
+
+# AUDIENCE (受众)
+The summary is for:
+- The TCM physician who will make the final diagnosis
+- Medical record documentation
+- Reference for treatment planning
+
+# RESPONSE FORMAT (回复格式)
+
+Provide a structured summary in the following format:
+
+## 主诉 Chief Complaint
+[Primary symptom(s) with duration]
+
+## 症状详情 Symptom Details
+- Location: [where]
+- Nature: [character of symptoms]
+- Duration: [how long]
+- Severity: [mild/moderate/severe]
+- Triggers: [what makes it worse]
+- Relief: [what makes it better]
+
+## 伴随症状 Associated Symptoms
+- [List other related symptoms mentioned]
+
+## 十问概要 Ten Questions Summary
+- 寒热 Cold/Heat: [patient's temperature preferences, fever patterns]
+- 汗 Perspiration: [sweating patterns]
+- 饮食 Diet/Appetite: [appetite, thirst, food preferences]
+- 二便 Bowel/Urinary: [digestion, elimination patterns]
+- 睡眠 Sleep: [quality, dreams, issues]
+- 情志 Emotions: [mood, stress, mental state]
+
+## 既往史 Medical History
+[Past illnesses, surgeries, chronic conditions from reports or chat]
+
+## 现用药物 Current Medications
+[List medications from uploads or mentioned]
+
+## 上传报告摘要 Uploaded Reports Summary
+[Key findings from any uploaded medical reports]
+
+## 其他相关信息 Other Relevant Information
+[Any other diagnostically relevant details]
+
+═══════════════════════════════════════════════════════════════════════════════
+                               CRITICAL RULES
+═══════════════════════════════════════════════════════════════════════════════
+
+1. **LANGUAGE MATCHING**: Respond in the same language as the patient's chief complaint
+   - If symptoms are in Chinese → Respond in Chinese
+   - If symptoms are in English → Respond in English
+   - If symptoms are in Malay → Respond in Malay
+
+2. **BE COMPREHENSIVE**: Include all relevant information from the chat history
+
+3. **BE CONCISE**: Avoid redundancy; synthesize information
+
+4. **OMIT EMPTY SECTIONS**: If no information is available for a section, skip it
+
+5. **DO NOT DIAGNOSE**: Only summarize findings; diagnosis is for the physician
+
+6. **HIGHLIGHT URGENT CONCERNS**: Note any symptoms requiring immediate attention
+`;
+
+// ============================================================================
+// PROMPT 5: FINAL ANALYSIS (综合诊断 Zōng Hé Zhěn Duàn)
 // ============================================================================
 export const FINAL_ANALYSIS_PROMPT = `
 ═══════════════════════════════════════════════════════════════════════════════
@@ -733,14 +841,14 @@ Return a **valid JSON object only** - NO markdown, NO code blocks, NO additional
 
 {
   "diagnosis": {
-    "primary_pattern": "Primary TCM syndrome (Chinese and English)",
+    "primary_pattern": "Primary TCM syndrome (in response language)",
     "secondary_patterns": ["Additional patterns if applicable"],
     "affected_organs": ["List of organs involved per TCM theory"],
     "pathomechanism": "Detailed explanation of how this pattern developed",
     "disease_cause": "Identified or suspected causative factors"
   },
   "constitution": {
-    "type": "Constitution type (Chinese and English)",
+    "type": "Constitution type (in response language)",
     "characteristics": "Key characteristics of this constitution type",
     "tendencies": "What this constitution is prone to developing",
     "percentage_match": "Estimated match percentage if available"
@@ -793,7 +901,15 @@ Return a **valid JSON object only** - NO markdown, NO code blocks, NO additional
       "Appropriate exercise type 1 with frequency and duration",
       "Appropriate exercise type 2 with frequency and duration"
     ],
-    "emotional_care": "Guidance for emotional/mental wellbeing based on pattern"
+    "emotional_care": "Guidance for emotional/mental wellbeing based on pattern",
+    "herbal_formulas": [
+      {
+        "name": "Formula name (in response language)",
+        "ingredients": ["list of herbs"],
+        "dosage": "dosage instructions",
+        "purpose": "what it treats"
+      }
+    ]
   },
   "precautions": {
     "warning_signs": ["Symptoms that require immediate medical attention"],
@@ -891,7 +1007,7 @@ Return a **valid JSON object only** - NO markdown, NO code blocks, NO additional
 ═══════════════════════════════════════════════════════════════════════════════
 
 1. **INTEGRATE ALL DATA**: Never make diagnosis based on single examination
-2. **USE BOTH LANGUAGES**: Chinese and English for all key TCM terms
+2. **USE TARGET LANGUAGE ONLY**: Do not use mixed languages. Use ONLY the requested language.
 3. **BE SPECIFIC**: No generic advice - tailor everything to the identified pattern
 4. **CITE EVIDENCE**: Explain WHY you reached each conclusion
 5. **MINIMUM REQUIREMENTS**:
@@ -1059,6 +1175,18 @@ export function getPromptSummaries() {
         'Structured JSON output with pattern suggestions'
       ],
       usedIn: '/api/analyze-audio - Listening Diagnosis'
+    },
+    inquiry_summary: {
+      title: '问诊总结 Inquiry Summary Prompt',
+      description: 'Summarizes the patient inquiry conversation into a structured clinical summary',
+      keyPoints: [
+        'Comprehensive symptom extraction with duration and severity',
+        'Ten Questions (十问) summary format',
+        'Medical history and medication extraction',
+        'Automatic language matching (Chinese/English/Malay)',
+        'Clinical and professional formatting'
+      ],
+      usedIn: '/api/summarize-inquiry - Inquiry Summary'
     },
     final: {
       title: '综合诊断 Final Analysis Prompt',

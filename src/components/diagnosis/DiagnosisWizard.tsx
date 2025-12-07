@@ -18,6 +18,7 @@ import { ProgressStepper } from './ProgressStepper'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft } from 'lucide-react'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
+import { useDeveloper } from '@/contexts/DeveloperContext'
 import { ObservationResult } from './ObservationResult'
 import { ImageAnalysisLoader } from './ImageAnalysisLoader'
 import { DiagnosisSummary } from './DiagnosisSummary'
@@ -133,10 +134,222 @@ function repairJSON(jsonString: string): string {
 
 export type DiagnosisStep = 'basic_info' | 'wen_inquiry' | 'wang_tongue' | 'wang_face' | 'wang_part' | 'wen_audio' | 'qie' | 'smart_connect' | 'summary' | 'processing' | 'report'
 
+const MOCK_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+const MOCK_AUDIO = "data:audio/webm;base64,UklGRi4AAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
+
+const MOCK_PROFILES = [
+    {
+        id: 'profile1',
+        name: 'Elderly Woman (Kidney Disease)',
+        description: '72yo female, chronic kidney disease, lower back pain, edema.',
+        data: {
+            basic_info: {
+                name: "Zhang Wei",
+                age: "72",
+                gender: "female",
+                height: "160",
+                weight: "55",
+                symptoms: "Lower back pain, fatigue, swelling in ankles, frequent urination at night."
+            },
+            wen_inquiry: {
+                summary: "Patient reports chronic lower back pain and fatigue. Experiences edema in lower extremities and nocturia. Tongue diagnosis suggests Kidney Yang deficiency.",
+                chatHistory: [
+                    { role: 'assistant', content: 'Hello, I see you are experiencing lower back pain. Can you tell me more about it?' },
+                    { role: 'user', content: 'It hurts mostly at night and feels cold.' },
+                    { role: 'assistant', content: 'Do you have any other symptoms like frequent urination?' },
+                    { role: 'user', content: 'Yes, I wake up 3-4 times a night.' }
+                ],
+                reportFiles: [
+                    { name: "Blood_Test_2023.pdf", type: "application/pdf", data: "", extractedText: "Kidney function test shows slightly elevated creatinine." }
+                ],
+                medicineFiles: [
+                    { name: "Blood_Pressure_Meds.jpg", type: "image/jpeg", data: MOCK_IMAGE, extractedText: "Amlodipine 5mg" }
+                ],
+                files: [] // Will be populated by merging reportFiles and medicineFiles if needed, but InquiryWizard handles separation
+            },
+            wang_tongue: {
+                observation: "Pale, swollen tongue with tooth marks. White, slippery coating.",
+                potential_issues: ["Kidney Yang Deficiency", "Dampness accumulation"],
+                image: MOCK_IMAGE
+            },
+            wang_face: {
+                observation: "Pale complexion, dark circles under eyes, puffiness.",
+                potential_issues: ["Kidney Deficiency"],
+                image: MOCK_IMAGE
+            },
+            wang_part: {
+                observation: "Swelling in ankles (Edema).",
+                potential_issues: ["Water retention"],
+                image: MOCK_IMAGE
+            },
+            wen_audio: {
+                audio: MOCK_AUDIO,
+                analysis: {
+                    overall_observation: "Low, weak voice.",
+                    voice_quality_analysis: { observation: "Weak", severity: "warning", tcm_indicators: ["Qi Deficiency"] },
+                    confidence: "high",
+                    status: "success"
+                }
+            },
+            qie: {
+                bpm: 62,
+                pulseQualities: [
+                    { id: 'chen', nameZh: '沉脉', nameEn: 'Deep (Chen)' },
+                    { id: 'ruo', nameZh: '弱脉', nameEn: 'Weak (Ruo)' },
+                    { id: 'chi', nameZh: '迟脉', nameEn: 'Slow (Chi)' }
+                ]
+            },
+            smart_connect: {
+                pulseRate: 62,
+                bloodPressure: "140/90",
+                bloodOxygen: 96,
+                bodyTemp: 36.2,
+                hrv: 35,
+                stressLevel: "High"
+            }
+        }
+    },
+    {
+        id: 'profile2',
+        name: 'Woman 30+ (Stomach Issues)',
+        description: '34yo female, persistent stomachache, bloating, stress.',
+        data: {
+            basic_info: {
+                name: "Li Na",
+                age: "34",
+                gender: "female",
+                height: "165",
+                weight: "58",
+                symptoms: "Stomach pain, bloating, acid reflux, worse when stressed."
+            },
+            wen_inquiry: {
+                summary: "Patient complains of epigastric pain and distension, aggravated by emotional stress. Reports acid regurgitation.",
+                chatHistory: [
+                    { role: 'assistant', content: 'When does the stomach pain usually occur?' },
+                    { role: 'user', content: 'Usually after eating or when I am stressed at work.' }
+                ],
+                reportFiles: [],
+                medicineFiles: [
+                    { name: "Gastric_Relief.jpg", type: "image/jpeg", data: MOCK_IMAGE, extractedText: "Omeprazole 20mg" }
+                ],
+                files: []
+            },
+            wang_tongue: {
+                observation: "Red sides, thin white or yellow coating.",
+                potential_issues: ["Liver Qi Stagnation", "Stomach Heat"],
+                image: MOCK_IMAGE
+            },
+            wang_face: {
+                observation: "Sallow complexion.",
+                potential_issues: ["Spleen Deficiency"],
+                image: MOCK_IMAGE
+            },
+            wang_part: {
+                observation: "Abdominal tenderness.",
+                potential_issues: ["Qi Stagnation"],
+                image: MOCK_IMAGE
+            },
+            wen_audio: {
+                audio: MOCK_AUDIO,
+                analysis: {
+                    overall_observation: "Normal voice, frequent sighing.",
+                    voice_quality_analysis: { observation: "Sighing", severity: "normal", tcm_indicators: ["Liver Qi Stagnation"] },
+                    confidence: "high",
+                    status: "success"
+                }
+            },
+            qie: {
+                bpm: 78,
+                pulseQualities: [
+                    { id: 'xian', nameZh: '弦脉', nameEn: 'Wiry (Xian)' }
+                ]
+            },
+            smart_connect: {
+                pulseRate: 78,
+                bloodPressure: "110/70",
+                bloodOxygen: 98,
+                bodyTemp: 36.6,
+                hrv: 65,
+                stressLevel: "Moderate"
+            }
+        }
+    },
+    {
+        id: 'profile3',
+        name: 'Elderly Man (Stroke/Hypertension)',
+        description: '68yo male, recent stroke, high blood pressure, dizziness.',
+        data: {
+            basic_info: {
+                name: "Wang Qiang",
+                age: "68",
+                gender: "male",
+                height: "172",
+                weight: "75",
+                symptoms: "Dizziness, numbness in right arm, difficulty speaking clearly, history of hypertension."
+            },
+            wen_inquiry: {
+                summary: "Patient recovering from recent stroke. Reports dizziness and hemiparesthesia. History of hypertension.",
+                chatHistory: [
+                    { role: 'assistant', content: 'How long have you had high blood pressure?' },
+                    { role: 'user', content: 'For about 10 years.' }
+                ],
+                reportFiles: [
+                    { name: "Hospital_Discharge.pdf", type: "application/pdf", data: "", extractedText: "Ischemic stroke, hypertension stage 2." }
+                ],
+                medicineFiles: [
+                    { name: "Aspirin.jpg", type: "image/jpeg", data: MOCK_IMAGE, extractedText: "Aspirin 100mg" }
+                ],
+                files: []
+            },
+            wang_tongue: {
+                observation: "Deviated, purple spots, greasy coating.",
+                potential_issues: ["Blood Stasis", "Wind-Phlegm"],
+                image: MOCK_IMAGE
+            },
+            wang_face: {
+                observation: "Red face, facial asymmetry.",
+                potential_issues: ["Liver Yang Rising", "Wind Stroke"],
+                image: MOCK_IMAGE
+            },
+            wang_part: {
+                observation: "Numbness in limbs.",
+                potential_issues: ["Meridian blockage"],
+                image: MOCK_IMAGE
+            },
+            wen_audio: {
+                audio: MOCK_AUDIO,
+                analysis: {
+                    overall_observation: "Slurred speech.",
+                    voice_quality_analysis: { observation: "Slurred", severity: "high", tcm_indicators: ["Wind-Phlegm blocking orifices"] },
+                    confidence: "high",
+                    status: "success"
+                }
+            },
+            qie: {
+                bpm: 85,
+                pulseQualities: [
+                    { id: 'xian', nameZh: '弦脉', nameEn: 'Wiry (Xian)' },
+                    { id: 'hua', nameZh: '滑脉', nameEn: 'Slippery (Hua)' }
+                ]
+            },
+            smart_connect: {
+                pulseRate: 85,
+                bloodPressure: "150/95",
+                bloodOxygen: 95,
+                bodyTemp: 36.8,
+                hrv: 40,
+                stressLevel: "High"
+            }
+        }
+    }
+]
+
 export default function DiagnosisWizard() {
     const { getModel } = useDoctorLevel()
     const { t, language } = useLanguage()
+    const { isDeveloperMode } = useDeveloper()
     const [step, setStep] = useState<DiagnosisStep>('basic_info')
+    const [showTestProfiles, setShowTestProfiles] = useState(false)
 
     // Steps with translated labels
     const STEPS = [
@@ -407,6 +620,182 @@ export default function DiagnosisWizard() {
                 <ProgressStepper currentStep={getCurrentStepperId()} steps={STEPS} />
             )}
 
+            {/* Developer Mode Controls */}
+            {isDeveloperMode && (
+                <>
+                    <div className="fixed bottom-4 right-4 z-50 p-4 bg-slate-800 text-white rounded-xl shadow-2xl border border-slate-700 max-w-xs opacity-90 hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-400">Developer Mode</h3>
+                            <span className="text-[10px] bg-slate-700 px-2 py-0.5 rounded text-slate-300">Active</span>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div>
+                                <label className="text-[10px] text-slate-400 block mb-1">Jump to Step</label>
+                                <select
+                                    value={step}
+                                    onChange={(e) => setStep(e.target.value as DiagnosisStep)}
+                                    className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                                >
+                                    <option value="basic_info">Basic Info</option>
+                                    <option value="wen_inquiry">Inquiry</option>
+                                    <option value="wang_tongue">Tongue Analysis</option>
+                                    <option value="wang_face">Face Analysis</option>
+                                    <option value="wang_part">Body Part</option>
+                                    <option value="wen_audio">Audio</option>
+                                    <option value="qie">Pulse</option>
+                                    <option value="smart_connect">Smart Connect</option>
+                                    <option value="summary">Summary</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="report">Report</option>
+                                </select>
+                            </div>
+
+                            <button
+                                onClick={() => setShowTestProfiles(true)}
+                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-1.5 rounded transition-colors font-medium"
+                            >
+                                Test Scenarios (Fill Data)
+                            </button>
+
+                            <button
+                                onClick={() => {
+                                    // Use the first mock profile for data
+                                    const mockData = MOCK_PROFILES[0].data;
+                                    setData((prev: any) => ({
+                                        ...prev,
+                                        ...mockData,
+                                        report_options: {
+                                            includePatientName: true,
+                                            includePatientAge: true,
+                                            includePatientGender: true,
+                                            includePatientContact: true,
+                                            includePatientAddress: true,
+                                            includeEmergencyContact: true,
+                                            includeVitalSigns: true,
+                                            includeBMI: true,
+                                            includeSmartConnectData: true,
+                                            suggestMedicine: true,
+                                            suggestDoctor: true,
+                                            includeDietary: true,
+                                            includeLifestyle: true,
+                                            includeAcupuncture: true,
+                                            includeExercise: true,
+                                            includeSleepAdvice: true,
+                                            includeEmotionalWellness: true,
+                                            includePrecautions: true,
+                                            includeFollowUp: true,
+                                            includeTimestamp: true,
+                                            includeQRCode: true,
+                                            includeDoctorSignature: true
+                                        },
+                                        verified_summaries: {
+                                            inquiry: mockData.wen_inquiry.summary,
+                                            tongue: mockData.wang_tongue.observation,
+                                            face: mockData.wang_face.observation,
+                                            pulse: "Pulse analysis completed"
+                                        }
+                                    }));
+
+                                    const mockReport = {
+                                        diagnosis: {
+                                            primary_pattern: "Kidney Yang Deficiency",
+                                            secondary_patterns: ["Dampness Accumulation"],
+                                            affected_organs: ["Kidney", "Spleen"],
+                                            pathomechanism: "Kidney Yang deficiency failing to transform water, leading to dampness and edema."
+                                        },
+                                        constitution: {
+                                            type: "Yang Deficiency",
+                                            description: "Tendency to be cold, fatigue, and water retention."
+                                        },
+                                        analysis: {
+                                            summary: "Patient presents with classic signs of Kidney Yang Deficiency.",
+                                            key_findings: {
+                                                from_inquiry: "Lower back pain, nocturia",
+                                                from_visual: "Pale swollen tongue",
+                                                from_pulse: "Deep, weak"
+                                            }
+                                        },
+                                        recommendations: {
+                                            food: ["Walnuts", "Lamb", "Ginger", "Cinnamon"],
+                                            avoid: ["Raw foods", "Cold drinks", "Salads"],
+                                            lifestyle: ["Keep warm", "Moxa therapy", "Gentle exercise"],
+                                            acupoints: ["KI3 (Taixi)", "BL23 (Shenshu)", "CV4 (Guanyuan)"],
+                                            herbal_formulas: [
+                                                { "name": "Jin Gui Shen Qi Wan", "purpose": "Warm Kidney Yang" }
+                                            ],
+                                            exercise: ["Tai Chi", "Qigong"],
+                                            sleep_guidance: "Sleep early, keep feet warm.",
+                                            emotional_care: "Avoid fear and anxiety."
+                                        },
+                                        patient_summary: {
+                                            name: mockData.basic_info.name,
+                                            age: mockData.basic_info.age,
+                                            gender: mockData.basic_info.gender
+                                        },
+                                        timestamp: new Date().toISOString()
+                                    };
+                                    setCompletion(JSON.stringify(mockReport));
+                                    setStep('processing');
+                                }}
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1.5 rounded transition-colors font-medium mt-2"
+                            >
+                                Fill & View Mock Report
+                            </button>
+
+                            <div className="pt-2 border-t border-slate-700">
+                                <p className="text-[10px] text-slate-500">Current Step: {step}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Test Profiles Modal */}
+                    {showTestProfiles && (
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
+                                <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                    <h3 className="font-bold text-slate-800">Select Test Profile</h3>
+                                    <button
+                                        onClick={() => setShowTestProfiles(false)}
+                                        className="text-slate-400 hover:text-slate-600"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
+                                    {MOCK_PROFILES.map((profile) => (
+                                        <button
+                                            key={profile.id}
+                                            onClick={() => {
+                                                setData((prev: any) => ({
+                                                    ...prev,
+                                                    ...profile.data
+                                                }))
+                                                setShowTestProfiles(false)
+                                                // Optional: Alert user
+                                                // alert(`Loaded profile: ${profile.name}`)
+                                            }}
+                                            className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 transition-all group"
+                                        >
+                                            <div className="flex justify-between items-start mb-1">
+                                                <h4 className="font-bold text-slate-800 group-hover:text-emerald-700">{profile.name}</h4>
+                                                <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full group-hover:bg-emerald-100 group-hover:text-emerald-600">
+                                                    Full Data
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-slate-500">{profile.description}</p>
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="p-4 bg-slate-50 border-t border-slate-100 text-xs text-slate-500 text-center">
+                                    Selecting a profile will overwrite current diagnosis data.
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
+            )}
+
             <div className="relative min-h-[400px] md:min-h-[600px]">
 
 
@@ -425,6 +814,7 @@ export default function DiagnosisWizard() {
                         <motion.div key="wen_inquiry" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
                             <InquiryWizard
                                 basicInfo={data.basic_info}
+                                initialData={data.wen_inquiry}
                                 onComplete={(result) => {
                                     setData((prev: any) => ({
                                         ...prev,
@@ -444,16 +834,16 @@ export default function DiagnosisWizard() {
                                     type="tongue"
                                     onSkip={() => handleSkipAnalysis('wang_tongue')}
                                 />
-                            ) : analysisResult ? (
+                            ) : (analysisResult || data.wang_tongue) ? (
                                 <ObservationResult
-                                    image={data.wang_tongue.image}
-                                    observation={analysisResult.observation}
-                                    potentialIssues={analysisResult.potential_issues}
+                                    image={data.wang_tongue?.image}
+                                    observation={analysisResult?.observation || data.wang_tongue?.observation}
+                                    potentialIssues={analysisResult?.potential_issues || data.wang_tongue?.potential_issues}
                                     type="tongue"
-                                    status={analysisResult.status}
-                                    message={analysisResult.message}
-                                    confidence={analysisResult.confidence}
-                                    imageDescription={analysisResult.image_description}
+                                    status={analysisResult?.status || 'success'}
+                                    message={analysisResult?.message}
+                                    confidence={analysisResult?.confidence}
+                                    imageDescription={analysisResult?.image_description}
                                     onRetake={() => {
                                         setAnalysisResult(null)
                                         setData((prev: any) => ({ ...prev, wang_tongue: null }))
@@ -488,16 +878,16 @@ export default function DiagnosisWizard() {
                                     type="face"
                                     onSkip={() => handleSkipAnalysis('wang_face')}
                                 />
-                            ) : analysisResult ? (
+                            ) : (analysisResult || data.wang_face) ? (
                                 <ObservationResult
-                                    image={data.wang_face.image}
-                                    observation={analysisResult.observation}
-                                    potentialIssues={analysisResult.potential_issues}
+                                    image={data.wang_face?.image}
+                                    observation={analysisResult?.observation || data.wang_face?.observation}
+                                    potentialIssues={analysisResult?.potential_issues || data.wang_face?.potential_issues}
                                     type="face"
-                                    status={analysisResult.status}
-                                    message={analysisResult.message}
-                                    confidence={analysisResult.confidence}
-                                    imageDescription={analysisResult.image_description}
+                                    status={analysisResult?.status || 'success'}
+                                    message={analysisResult?.message}
+                                    confidence={analysisResult?.confidence}
+                                    imageDescription={analysisResult?.image_description}
                                     onRetake={() => {
                                         setAnalysisResult(null)
                                         setData((prev: any) => ({ ...prev, wang_face: null }))
@@ -532,16 +922,16 @@ export default function DiagnosisWizard() {
                                     type="part"
                                     onSkip={() => handleSkipAnalysis('wang_part')}
                                 />
-                            ) : analysisResult ? (
+                            ) : (analysisResult || data.wang_part) ? (
                                 <ObservationResult
-                                    image={data.wang_part.image}
-                                    observation={analysisResult.observation}
-                                    potentialIssues={analysisResult.potential_issues}
+                                    image={data.wang_part?.image}
+                                    observation={analysisResult?.observation || data.wang_part?.observation}
+                                    potentialIssues={analysisResult?.potential_issues || data.wang_part?.potential_issues}
                                     type="part"
-                                    status={analysisResult.status}
-                                    message={analysisResult.message}
-                                    confidence={analysisResult.confidence}
-                                    imageDescription={analysisResult.image_description}
+                                    status={analysisResult?.status || 'success'}
+                                    message={analysisResult?.message}
+                                    confidence={analysisResult?.confidence}
+                                    imageDescription={analysisResult?.image_description}
                                     onRetake={() => {
                                         setAnalysisResult(null)
                                         setData((prev: any) => ({ ...prev, wang_part: null }))
@@ -609,11 +999,15 @@ export default function DiagnosisWizard() {
                         <motion.div key="summary" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
                             <DiagnosisSummary
                                 data={data}
-                                onConfirm={(summaries, options) => {
+                                onConfirm={(summaries, options, additionalInfo) => {
                                     setData((prev: any) => ({
                                         ...prev,
                                         verified_summaries: summaries,
-                                        report_options: options
+                                        report_options: options,
+                                        basic_info: {
+                                            ...prev.basic_info,
+                                            ...additionalInfo
+                                        }
                                     }));
                                     nextStep('summary');
                                 }}
