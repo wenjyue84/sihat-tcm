@@ -963,34 +963,46 @@ export function DiagnosisReport({ data, patientInfo, reportOptions, smartConnect
                 )}
 
                 {/* Action Buttons */}
-                <motion.div variants={item} className="flex flex-wrap justify-center gap-3 pt-4 md:pt-6">
-                    <button
-                        onClick={() => downloadPDF(language as Language)}
-                        className="px-4 py-2.5 bg-white border-2 border-emerald-600 text-emerald-600 rounded-full hover:bg-emerald-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
-                    >
-                        <Download className="h-4 w-4" />
-                        Download PDF
-                    </button>
+                <motion.div variants={item} className="flex flex-col items-center gap-4 pt-6 md:pt-8">
+                    {/* Primary CTA */}
                     <button
                         onClick={() => setIsChatOpen(true)}
-                        className="px-4 py-2.5 bg-white border-2 border-teal-600 text-teal-600 rounded-full hover:bg-teal-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
+                        className="relative group px-8 py-4 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-500 bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-white rounded-full shadow-xl shadow-emerald-200 hover:shadow-2xl hover:shadow-emerald-300 flex items-center justify-center gap-3 text-lg font-bold min-w-[280px] transform hover:-translate-y-1 ring-4 ring-emerald-100"
                     >
-                        <MessageCircle className="h-4 w-4" />
-                        Ask About Report
+                        <div className="absolute inset-0 rounded-full bg-white/20 group-hover:bg-transparent transition-colors" />
+                        <MessageCircle className="h-6 w-6 animate-pulse" />
+                        <span>Ask About Report</span>
+                        <span className="absolute -top-2 -right-2 flex h-4 w-4">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-4 w-4 bg-amber-500"></span>
+                        </span>
                     </button>
-                    <button
-                        onClick={() => setIsInfographicsOpen(true)}
-                        className="px-4 py-2.5 bg-white border-2 border-violet-600 text-violet-600 rounded-full hover:bg-violet-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 text-sm font-medium min-h-[44px]"
-                    >
-                        <ImageIcon className="h-4 w-4" />
-                        Infographics
-                    </button>
-                    <button
-                        onClick={onRestart}
-                        className="px-6 py-2.5 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 transition-colors shadow-lg hover:shadow-xl text-sm font-medium min-h-[44px]"
-                    >
-                        Start New Consultation
-                    </button>
+
+                    {/* Secondary Actions */}
+                    <div className="flex flex-wrap justify-center gap-3">
+                        <button
+                            onClick={() => downloadPDF(language as Language)}
+                            className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow flex items-center gap-2 text-sm font-medium"
+                        >
+                            <Download className="h-4 w-4" />
+                            Download PDF
+                        </button>
+
+                        <button
+                            onClick={() => setIsInfographicsOpen(true)}
+                            className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow flex items-center gap-2 text-sm font-medium"
+                        >
+                            <ImageIcon className="h-4 w-4" />
+                            Infographics
+                        </button>
+
+                        <button
+                            onClick={onRestart}
+                            className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow flex items-center gap-2 text-sm font-medium"
+                        >
+                            Start New Consultation
+                        </button>
+                    </div>
                 </motion.div>
 
             </motion.div>
@@ -1039,6 +1051,7 @@ export function DiagnosisReport({ data, patientInfo, reportOptions, smartConnect
                 isOpen={isInfographicsOpen}
                 onClose={() => setIsInfographicsOpen(false)}
                 reportData={data}
+                patientInfo={patientInfo}
             />
         </div>
     )

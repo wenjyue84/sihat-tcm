@@ -6,7 +6,7 @@ export const DOCTOR_LEVELS = {
         name: 'Master',
         nameZh: '名医大师',
         description: 'Most experienced, renowned physician',
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-2.5-pro', // Most advanced model for Master level
         icon: '👨‍⚕️',
         color: 'from-amber-500 to-orange-600',
         bgColor: 'bg-amber-50',
@@ -18,7 +18,7 @@ export const DOCTOR_LEVELS = {
         name: 'Expert',
         nameZh: '专家医师',
         description: 'Experienced specialist physician',
-        model: 'gemini-2.5-pro',
+        model: 'gemini-2.5-flash', // Fast and capable model for Expert level
         icon: '🩺',
         color: 'from-emerald-500 to-teal-600',
         bgColor: 'bg-emerald-50',
@@ -30,7 +30,7 @@ export const DOCTOR_LEVELS = {
         name: 'Physician',
         nameZh: '医师',
         description: 'Standard practitioner',
-        model: 'gemini-2.0-flash',
+        model: 'gemini-2.0-flash', // Reliable and fast model for Physician level
         icon: '💊',
         color: 'from-blue-500 to-indigo-600',
         bgColor: 'bg-blue-50',
@@ -38,3 +38,4 @@ export const DOCTOR_LEVELS = {
         textColor: 'text-blue-800',
     },
 } as const
+

@@ -833,7 +833,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                 </AnimatePresence>
 
                 {/* Navigation Buttons */}
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-30 md:static md:bg-transparent md:border-none md:shadow-none md:p-0 md:mt-8">
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 md:static md:bg-transparent md:border-none md:shadow-none md:p-0 md:mt-8">
                     <div className="flex gap-3">
                         {/* Back Button */}
                         {currentStep > 1 && (

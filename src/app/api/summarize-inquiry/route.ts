@@ -15,7 +15,7 @@ export async function POST(req: Request) {
         // - Expert (专家): gemini-2.5-pro  
         // - Physician (医师): gemini-2.0-flash
         // NOTE: gemini-1.5-flash is deprecated and no longer used
-        const { chatHistory, reportFiles, medicineFiles, basicInfo, language = 'en', model = 'gemini-2.0-flash' } = await req.json();
+        const { chatHistory, reportFiles, medicineFiles, basicInfo, language = 'en', model = 'gemini-1.5-pro' } = await req.json();
         console.log('[summarize-inquiry] Language:', language);
         console.log('[summarize-inquiry] Using model:', model);
         console.log('[summarize-inquiry] Chat history length:', chatHistory?.length || 0);

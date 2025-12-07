@@ -5,7 +5,7 @@ export const maxDuration = 60;
 
 export async function POST(req: Request) {
     try {
-        const { prompt, model = 'gemini-1.5-flash' } = await req.json();
+        const { prompt, model = 'gemini-1.5-pro' } = await req.json();
         console.log(`[test-gemini] Testing model (stream): ${model}`);
 
         const result = streamText({

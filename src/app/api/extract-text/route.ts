@@ -33,7 +33,7 @@ IMPORTANT RULES:
 RESPOND IN STRICT JSON FORMAT:
 {
   "is_medicine_image": boolean,
-  "text": "The formatted text to display",
+  "text": "The formatted text to display (as a single string, use \\n for newlines)",
   "warning": "Optional warning message if this looks like a medical report"
 }
 
@@ -71,7 +71,7 @@ Language for response: ${language === 'zh' ? 'Chinese (简体中文)' : language
 
 RESPOND IN STRICT JSON FORMAT:
 {
-  "text": "The formatted extracted text"
+  "text": "The formatted extracted text (as a single string, use \\n for newlines)"
 }`;
         }
 
@@ -126,13 +126,26 @@ RESPOND IN STRICT JSON FORMAT:
         try {
             const cleanText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
             result = JSON.parse(cleanText);
-        } catch (parseError) {
+        } catch (_parseError) {
             // If JSON parsing fails, return the raw text
             return Response.json({
                 text: responseText,
                 warning: null
             });
         }
+
+        // Helper to ensure text is string
+        // IMPORTANT: The AI sometimes returns a JSON object for the 'text' field 
+        // even when explicitly asked for a string. This helper prevents [object Object]
+        // from being displayed to the user by stringifying any objects.
+        const ensureString = (val: unknown) => {
+            if (typeof val === 'string') return val;
+            if (typeof val === 'object' && val !== null) {
+                // If it's an object, try to format it nicely
+                return JSON.stringify(val, null, 2);
+            }
+            return String(val || '');
+        };
 
         // Handle medicine mode responses
         if (mode === 'medicine') {
@@ -183,7 +196,7 @@ Atau gunakan medan input manual untuk menaip nama ubat anda.`
 
             // Valid medicine image
             return Response.json({
-                text: result.text || '',
+                text: ensureString(result.text),
                 warning: result.warning || null,
                 is_valid: true
             });
@@ -191,14 +204,15 @@ Atau gunakan medan input manual untuk menaip nama ubat anda.`
 
         // General mode
         return Response.json({
-            text: result.text || responseText,
+            text: ensureString(result.text || responseText),
             warning: null
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Extract text error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to extract text';
         return Response.json({
-            error: error.message || 'Failed to extract text',
+            error: errorMessage,
         }, { status: 500 });
     }
 }

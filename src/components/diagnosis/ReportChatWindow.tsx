@@ -69,19 +69,53 @@ const translations = {
 
 export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, initialMessage, onMessageSent, isExpanded = false, onToggleExpand, messages: controlledMessages, onMessagesChange }: ReportChatWindowProps) {
     const { language } = useLanguage()
-    const { doctorLevel } = useDoctorLevel()
+    const { getModel, getDoctorInfo } = useDoctorLevel()
+    const doctorInfo = getDoctorInfo()
     const t = translations[language as keyof typeof translations] || translations.en
+
+    // ============================================================================
+    // CONTROLLED/UNCONTROLLED STATE PATTERN FOR MESSAGES
+    // ============================================================================
+    // This component supports both controlled and uncontrolled modes:
+    // - Controlled: Parent passes `messages` and `onMessagesChange` props
+    // - Uncontrolled: Component manages its own `internalMessages` state
+    //
+    // IMPORTANT: When using controlled mode with functional updates like
+    // `setMessages(prev => [...prev, newMessage])`, we must use a ref to track
+    // the latest messages value. This prevents the "stale closure" problem where
+    // multiple rapid state updates (e.g., adding user message then assistant message)
+    // would use an outdated `messages` value from the closure.
+    // ============================================================================
 
     const [internalMessages, setInternalMessages] = useState<Message[]>([])
 
+    // Determine which messages to use (controlled or internal)
     const messages = controlledMessages || internalMessages
 
+    // CRITICAL: Use a ref to always have the latest messages value
+    // This fixes the stale closure issue when using functional state updates
+    // DO NOT REMOVE THIS REF - it ensures sequential state updates work correctly
+    const messagesRef = useRef(messages)
+    useEffect(() => {
+        messagesRef.current = messages
+    }, [messages])
+
+    // Custom setMessages that handles both controlled and uncontrolled modes
     const setMessages = (action: React.SetStateAction<Message[]>) => {
+        // IMPORTANT: Use messagesRef.current instead of `messages` to avoid stale closure
+        const currentMessages = messagesRef.current
+        const newMessages = typeof action === 'function' ? action(currentMessages) : action
+
+        // Update ref immediately so subsequent calls in the same render cycle 
+        // see the latest value (e.g., when adding user message then assistant message)
+        messagesRef.current = newMessages
+
         if (onMessagesChange) {
-            const newMessages = typeof action === 'function' ? action(messages) : action
+            // Controlled mode: notify parent of state change
             onMessagesChange(newMessages)
         } else {
-            setInternalMessages(action)
+            // Uncontrolled mode: update internal state
+            setInternalMessages(newMessages)
         }
     }
     const [input, setInput] = useState('')
@@ -127,25 +161,35 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, ini
             content: content.trim()
         }
 
+        // User message added
         setMessages(prev => [...prev, userMessage])
         setInput('')
         setIsLoading(true)
 
         try {
+            const requestBody = {
+                messages: [...messages, userMessage],
+                reportData,
+                patientInfo,
+                language,
+                model: doctorInfo?.model || 'gemini-2.0-flash' // Fallback if doctorInfo.model is undefined
+            }
+
             const response = await fetch('/api/report-chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    messages: [...messages, userMessage],
-                    reportData,
-                    patientInfo,
-                    language,
-                    doctorLevel: doctorLevel // Pass the current doctor level
-                })
+                body: JSON.stringify(requestBody)
             })
 
-            if (!response.ok) throw new Error('Failed to get response')
+            // Response received
 
+            if (!response.ok) {
+                const errorText = await response.text()
+                console.error('[ReportChatWindow] Response not OK:', errorText)
+                throw new Error(`Failed to get response: ${response.status} - ${errorText}`)
+            }
+
+            // Starting stream
             const reader = response.body?.getReader()
             const decoder = new TextDecoder()
             let assistantContent = ''
@@ -166,12 +210,12 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, ini
                         : msg
                 ))
             }
-        } catch (error) {
-            console.error('Chat error:', error)
+        } catch (error: any) {
+            console.error('[ReportChatWindow] Chat error:', error.message)
             setMessages(prev => [...prev, {
                 id: (Date.now() + 1).toString(),
                 role: 'assistant',
-                content: 'Sorry, I encountered an error. Please try again.'
+                content: `Sorry, I encountered an error: ${error.message}. Please try again.`
             }])
         } finally {
             setIsLoading(false)

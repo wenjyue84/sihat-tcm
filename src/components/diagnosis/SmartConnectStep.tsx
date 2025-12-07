@@ -347,7 +347,7 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
             </div>
 
             {/* Navigation Buttons */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-900/95 backdrop-blur-sm border-t border-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.3)] z-30 md:static md:bg-transparent md:border-none md:shadow-none md:p-6 md:pt-0 flex gap-3">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-900/95 backdrop-blur-sm border-t border-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.3)] z-50 md:static md:bg-transparent md:border-none md:shadow-none md:p-6 md:pt-0 flex gap-3">
                 <Button
                     variant="outline"
                     onClick={onBack}

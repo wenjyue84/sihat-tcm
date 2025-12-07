@@ -62,6 +62,11 @@ function TestChatContent() {
                     ))}
                 </div>
                 <p>Current Level: <span className="font-bold capitalize">{doctorLevel}</span></p>
+                <p className="text-sm text-gray-500">Model: <span className="font-mono">{
+                    doctorLevel === 'master' ? 'gemini-2.5-pro' :
+                        doctorLevel === 'expert' ? 'gemini-2.5-flash' :
+                            'gemini-2.0-flash'
+                }</span></p>
             </div>
 
             <div className="space-y-4">

@@ -11,11 +11,19 @@ const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
     ms: `Anda MESTI menjawab sepenuhnya dalam Bahasa Malaysia. Jelas, mesra, dan bersifat mendidik.`,
 };
 
-import { DOCTOR_LEVELS } from '@/lib/doctorLevels';
+// Fallback model cascade - if primary model fails, try these in order
+const FALLBACK_MODELS = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash-exp',
+    'gemini-2.0-flash',
+];
 
 export async function POST(req: Request) {
     try {
-        const { messages, reportData, patientInfo, language = 'en', doctorLevel = 'physician' } = await req.json();
+        // Accept 'model' directly like /api/chat does (this is the working pattern)
+        const { messages, reportData, patientInfo, language = 'en', model = 'gemini-2.0-flash' } = await req.json();
+
+        console.log(`[API /api/report-chat] Received request with model: ${model}, language: ${language}`);
 
         // Build context from the report data
         const reportContext = buildReportContext(reportData, patientInfo);
@@ -58,18 +66,51 @@ Remember: You're here to help them understand their existing report, not to cond
             content: m.content
         }));
 
-        // Get the model based on doctor level
-        const selectedModel = DOCTOR_LEVELS[doctorLevel as keyof typeof DOCTOR_LEVELS]?.model || 'gemini-1.5-flash';
+        console.log(`[API /api/report-chat] Calling streamText with model: ${model}`);
 
-        const result = streamText({
-            model: google(selectedModel),
-            system: systemPrompt,
-            messages: formattedMessages,
-        });
+        // Try the requested model first
+        try {
+            const result = streamText({
+                model: google(model),
+                system: systemPrompt,
+                messages: formattedMessages,
+                onFinish: (completion) => {
+                    console.log(`[API /api/report-chat] Stream finished with ${model}. Text length: ${completion.text.length}`);
+                },
+            });
 
-        return result.toTextStreamResponse();
+            return result.toTextStreamResponse();
+        } catch (primaryError: any) {
+            console.error(`[API /api/report-chat] Primary model ${model} failed:`, primaryError.message);
+
+            // Try fallback models in order
+            for (const fallbackModel of FALLBACK_MODELS) {
+                // Skip if it's the same as the failed model
+                if (fallbackModel === model) continue;
+
+                try {
+                    console.log(`[API /api/report-chat] Attempting fallback model: ${fallbackModel}`);
+                    const fallbackResult = streamText({
+                        model: google(fallbackModel),
+                        system: systemPrompt,
+                        messages: formattedMessages,
+                        onFinish: (completion) => {
+                            console.log(`[API /api/report-chat] Fallback ${fallbackModel} finished. Text length: ${completion.text.length}`);
+                        },
+                    });
+
+                    return fallbackResult.toTextStreamResponse();
+                } catch (fallbackError: any) {
+                    console.error(`[API /api/report-chat] Fallback ${fallbackModel} also failed:`, fallbackError.message);
+                    // Continue to next fallback
+                }
+            }
+
+            // All models failed
+            throw new Error(`All models failed. Primary error: ${primaryError.message}`);
+        }
     } catch (error: any) {
-        console.error("[API /api/report-chat] Error:", error);
+        console.error("[API /api/report-chat] Fatal Error:", error);
         return new Response(JSON.stringify({
             error: error.message || 'Report chat API error'
         }), {

@@ -29,106 +29,36 @@ import { Loader2 } from 'lucide-react'
  * Repairs common JSON formatting issues from AI responses
  * Specifically handles the case where AI adds extra string paragraphs without keys in objects
  */
-function repairJSON(jsonString: string): string {
-    // First, try to find where the analysis object has malformed entries
-    // The pattern is: "summary": "...", "Some text without key", "More text"...
-    // We need to find these and either remove them or incorporate them into summary
+export function repairJSON(jsonString: string): string {
+    // Repairs common JSON formatting issues from AI responses
+    // Specifically handles the case where AI adds extra string paragraphs without keys in objects
+    // e.g. "summary": "...", "orphan text", "key": "..."
 
     try {
-        // Try to find the analysis section and fix it
-        const analysisMatch = jsonString.match(/"analysis"\s*:\s*\{[\s\S]*?"summary"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-        if (analysisMatch) {
-            // Find all the orphan strings after summary (strings without a key before them)
-            // Pattern: end of a string value, comma, then another string that's not followed by :
-            let fixed = jsonString;
+        let current = jsonString;
+        // Regex to find: "summary": "value", "orphan string" (where orphan string is not followed by :)
+        // Group 1: "summary": "value"
+        // Followed by comma, whitespace, "orphan string", whitespace, and NOT followed by colon
+        const regex = /("summary"\s*:\s*"(?:[^"\\]|\\.)*")\s*,\s*"(?:[^"\\]|\\.)*"\s*(?!:)/;
 
-            // This regex finds strings that appear to be value-only (no key) in the analysis object
-            // Look for pattern: ", "text without colon after the next quote"
-            const orphanPattern = /("analysis"\s*:\s*\{[\s\S]*?"summary"\s*:\s*"(?:[^"\\]|\\.)*")\s*,\s*"(?:[^"\\]|\\.)*"(?=\s*,\s*"(?:[^"\\]|\\.)*"(?:\s*,\s*"(?:[^"\\]|\\.)*")*\s*,\s*"key_findings")/g;
-
-            // Simpler approach: find the analysis object and look for any string values not preceded by key:
-            // We'll do this by finding entries that match `,"string"` pattern where the string doesn't have : after it
-
-            // Find the analysis block
-            const analysisStart = fixed.indexOf('"analysis"');
-            if (analysisStart !== -1) {
-                // Find where key_findings starts
-                const keyFindingsPos = fixed.indexOf('"key_findings"', analysisStart);
-                if (keyFindingsPos !== -1) {
-                    // Get the substring between summary and key_findings
-                    const summaryEnd = fixed.indexOf('"summary"', analysisStart);
-                    if (summaryEnd !== -1) {
-                        // Find the end of the summary value
-                        let pos = summaryEnd + '"summary"'.length;
-                        // Skip whitespace and colon
-                        while (pos < keyFindingsPos && /[\s:]/.test(fixed[pos])) pos++;
-                        // Now we should be at the opening quote of summary value
-                        if (fixed[pos] === '"') {
-                            // Find the closing quote (accounting for escapes)
-                            let inEscape = false;
-                            pos++;
-                            while (pos < keyFindingsPos) {
-                                if (inEscape) {
-                                    inEscape = false;
-                                } else if (fixed[pos] === '\\') {
-                                    inEscape = true;
-                                } else if (fixed[pos] === '"') {
-                                    break;
-                                }
-                                pos++;
-                            }
-                            // pos is now at the closing quote of summary
-                            const summaryEndPos = pos + 1;
-
-                            // Extract what's between summary end and key_findings
-                            const betweenContent = fixed.substring(summaryEndPos, keyFindingsPos);
-
-                            // Check if there are orphan strings (strings not part of key: value)
-                            // Look for pattern: , "something" where the something doesn't have : after quotes
-                            const orphanStringPattern = /,\s*"((?:[^"\\]|\\.)*)"\s*(?=[,}]|$)/g;
-                            const orphanStrings: string[] = [];
-                            let match;
-                            let cleanedBetween = betweenContent;
-
-                            while ((match = orphanStringPattern.exec(betweenContent)) !== null) {
-                                // Check if this is truly an orphan (no : after it in a reasonable distance)
-                                const afterMatch = betweenContent.substring(match.index + match[0].length, match.index + match[0].length + 5);
-                                if (!afterMatch.includes(':')) {
-                                    orphanStrings.push(match[1]);
-                                }
-                            }
-
-                            if (orphanStrings.length > 0) {
-                                // We found orphan strings - remove them from between section
-                                for (const orphan of orphanStrings) {
-                                    const escapedOrphan = orphan.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                                    cleanedBetween = cleanedBetween.replace(new RegExp(',\\s*"' + escapedOrphan + '"\\s*', 'g'), '');
-                                }
-
-                                // Reconstruct the JSON with cleaned between section
-                                // Make sure we have proper comma before key_findings
-                                cleanedBetween = cleanedBetween.replace(/,\s*,/g, ',').trim();
-                                if (!cleanedBetween.endsWith(',')) {
-                                    cleanedBetween = cleanedBetween + ',';
-                                }
-                                if (cleanedBetween === ',') {
-                                    cleanedBetween = ',\n    ';
-                                }
-
-                                fixed = fixed.substring(0, summaryEndPos) + cleanedBetween + fixed.substring(keyFindingsPos);
-                            }
-                        }
-                    }
-                }
+        // Loop to remove multiple orphans
+        let iterations = 0;
+        while (iterations < 20) { // Safety limit
+            const match = current.match(regex);
+            if (match) {
+                // Replace the match (summary + comma + orphan) with just the summary (Group 1)
+                // This effectively removes the comma and the orphan string
+                current = current.replace(regex, '$1');
+                iterations++;
+            } else {
+                break;
             }
-
-            return fixed;
         }
+        return current;
     } catch (e) {
         console.error('[repairJSON] Error during repair attempt:', e);
+        return jsonString;
     }
-
-    return jsonString;
 }
 
 
@@ -137,7 +67,7 @@ export type DiagnosisStep = 'basic_info' | 'wen_inquiry' | 'wang_tongue' | 'wang
 const MOCK_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 const MOCK_AUDIO = "data:audio/webm;base64,UklGRi4AAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
 
-const MOCK_PROFILES = [
+export const MOCK_PROFILES = [
     {
         id: 'profile1',
         name: 'Elderly Woman (Kidney Disease)',
@@ -149,7 +79,8 @@ const MOCK_PROFILES = [
                 gender: "female",
                 height: "160",
                 weight: "55",
-                symptoms: "Lower back pain, fatigue, swelling in ankles, frequent urination at night."
+                symptoms: "Lower back pain, fatigue, swelling in ankles, frequent urination at night.",
+                symptomDuration: "chronic"
             },
             wen_inquiry: {
                 summary: "Patient reports chronic lower back pain and fatigue. Experiences edema in lower extremities and nocturia. Tongue diagnosis suggests Kidney Yang deficiency.",
@@ -205,7 +136,15 @@ const MOCK_PROFILES = [
                 bloodOxygen: 96,
                 bodyTemp: 36.2,
                 hrv: 35,
-                stressLevel: "High"
+                stressLevel: "High",
+                healthData: {
+                    provider: 'Apple Health',
+                    steps: 5432,
+                    sleepHours: 6.5,
+                    heartRate: 62,
+                    calories: 1850,
+                    lastUpdated: "10:30 AM"
+                }
             }
         }
     },
@@ -220,7 +159,8 @@ const MOCK_PROFILES = [
                 gender: "female",
                 height: "165",
                 weight: "58",
-                symptoms: "Stomach pain, bloating, acid reflux, worse when stressed."
+                symptoms: "Stomach pain, bloating, acid reflux, worse when stressed.",
+                symptomDuration: "1-3-months"
             },
             wen_inquiry: {
                 summary: "Patient complains of epigastric pain and distension, aggravated by emotional stress. Reports acid regurgitation.",
@@ -270,7 +210,15 @@ const MOCK_PROFILES = [
                 bloodOxygen: 98,
                 bodyTemp: 36.6,
                 hrv: 65,
-                stressLevel: "Moderate"
+                stressLevel: "Moderate",
+                healthData: {
+                    provider: 'Samsung Health',
+                    steps: 8500,
+                    sleepHours: 7.2,
+                    heartRate: 78,
+                    calories: 2100,
+                    lastUpdated: "09:15 AM"
+                }
             }
         }
     },
@@ -285,7 +233,8 @@ const MOCK_PROFILES = [
                 gender: "male",
                 height: "172",
                 weight: "75",
-                symptoms: "Dizziness, numbness in right arm, difficulty speaking clearly, history of hypertension."
+                symptoms: "Dizziness, numbness in right arm, difficulty speaking clearly, history of hypertension.",
+                symptomDuration: "1-2-weeks"
             },
             wen_inquiry: {
                 summary: "Patient recovering from recent stroke. Reports dizziness and hemiparesthesia. History of hypertension.",
@@ -338,11 +287,145 @@ const MOCK_PROFILES = [
                 bloodOxygen: 95,
                 bodyTemp: 36.8,
                 hrv: 40,
-                stressLevel: "High"
+                stressLevel: "High",
+                healthData: {
+                    provider: 'Google Fit',
+                    steps: 3200,
+                    sleepHours: 5.5,
+                    heartRate: 85,
+                    calories: 1400,
+                    lastUpdated: "11:45 AM"
+                }
             }
         }
     }
 ]
+
+export const generateMockReport = (data: any) => {
+    const name = data.basic_info?.name || "";
+
+    if (name.includes("Li Na")) {
+        // Stomach profile
+        return {
+            diagnosis: {
+                primary_pattern: "Liver Qi Stagnation attacking Stomach",
+                secondary_patterns: ["Spleen Deficiency"],
+                affected_organs: ["Liver", "Stomach", "Spleen"],
+                pathomechanism: "Emotional stress causing Liver Qi stagnation, which invades the Stomach causing pain and acid reflux."
+            },
+            constitution: {
+                type: "Qi Stagnation",
+                description: "Prone to stress, mood swings, and digestive issues."
+            },
+            analysis: {
+                summary: "Patient suffers from stress-induced stomach pain.",
+                key_findings: {
+                    from_inquiry: "Stomach pain, bloating, stress",
+                    from_visual: "Red tongue sides",
+                    from_pulse: "Wiry"
+                }
+            },
+            recommendations: {
+                food: ["Peppermint tea", "Radish", "Orange peel"],
+                avoid: ["Spicy foods", "Alcohol", "Coffee"],
+                lifestyle: ["Stress management", "Regular meals"],
+                acupoints: ["LR3 (Taichong)", "ST36 (Zusanli)", "PC6 (Neiguan)"],
+                herbal_formulas: [
+                    { "name": "Chai Hu Shu Gan San", "purpose": "Soothe Liver Qi" }
+                ],
+                exercise: ["Yoga", "Meditation"],
+                sleep_guidance: "Relax before bed.",
+                emotional_care: "Express emotions freely."
+            },
+            patient_summary: {
+                name: data.basic_info.name,
+                age: data.basic_info.age,
+                gender: data.basic_info.gender
+            },
+            timestamp: new Date().toISOString()
+        };
+    } else if (name.includes("Wang Qiang")) {
+        // Stroke profile
+        return {
+            diagnosis: {
+                primary_pattern: "Wind-Phlegm blocking Orifices",
+                secondary_patterns: ["Liver Yang Rising", "Blood Stasis"],
+                affected_organs: ["Liver", "Kidney", "Heart"],
+                pathomechanism: "Liver Yang rising generating wind, combined with phlegm to block the meridians and orifices."
+            },
+            constitution: {
+                type: "Phlegm-Dampness",
+                description: "Tendency to heaviness, dizziness, and circulation issues."
+            },
+            analysis: {
+                summary: "Post-stroke recovery with lingering hemiparesthesia and hypertension.",
+                key_findings: {
+                    from_inquiry: "History of hypertension, stroke",
+                    from_visual: "Deviated tongue, purple spots",
+                    from_pulse: "Wiry, Slippery"
+                }
+            },
+            recommendations: {
+                food: ["Celery", "Hawthorn berry", "Black fungus"],
+                avoid: ["Greasy foods", "Salty foods", "Alcohol"],
+                lifestyle: ["Monitor blood pressure", "Fall prevention"],
+                acupoints: ["LI4 (Hegu)", "LI11 (Quchi)", "GB20 (Fengchi)"],
+                herbal_formulas: [
+                    { "name": "Ban Xia Bai Zhu Tian Ma Tang", "purpose": "Resolve Phlegm and Wind" }
+                ],
+                exercise: ["Rehabilitation exercises", "Walking"],
+                sleep_guidance: "Elevate head slightly.",
+                emotional_care: "Maintain calm mind."
+            },
+            patient_summary: {
+                name: data.basic_info.name,
+                age: data.basic_info.age,
+                gender: data.basic_info.gender
+            },
+            timestamp: new Date().toISOString()
+        };
+    }
+
+    // Default (Kidney profile)
+    return {
+        diagnosis: {
+            primary_pattern: "Kidney Yang Deficiency",
+            secondary_patterns: ["Dampness Accumulation"],
+            affected_organs: ["Kidney", "Spleen"],
+            pathomechanism: "Kidney Yang deficiency failing to transform water, leading to dampness and edema."
+        },
+        constitution: {
+            type: "Yang Deficiency",
+            description: "Tendency to be cold, fatigue, and water retention."
+        },
+        analysis: {
+            summary: "Patient presents with classic signs of Kidney Yang Deficiency.",
+            key_findings: {
+                from_inquiry: "Lower back pain, nocturia",
+                from_visual: "Pale swollen tongue",
+                from_pulse: "Deep, weak"
+            }
+        },
+        recommendations: {
+            food: ["Walnuts", "Lamb", "Ginger", "Cinnamon"],
+            avoid: ["Raw foods", "Cold drinks", "Salads"],
+            lifestyle: ["Keep warm", "Moxa therapy", "Gentle exercise"],
+            acupoints: ["KI3 (Taixi)", "BL23 (Shenshu)", "CV4 (Guanyuan)"],
+            herbal_formulas: [
+                { "name": "Jin Gui Shen Qi Wan", "purpose": "Warm Kidney Yang" }
+            ],
+            exercise: ["Tai Chi", "Qigong"],
+            sleep_guidance: "Sleep early, keep feet warm.",
+            emotional_care: "Avoid fear and anxiety."
+        },
+        patient_summary: {
+            name: data.basic_info?.name,
+            age: data.basic_info?.age,
+            gender: data.basic_info?.gender
+        },
+        timestamp: new Date().toISOString()
+    };
+}
 
 export default function DiagnosisWizard() {
     const { getModel } = useDoctorLevel()
@@ -697,50 +780,20 @@ export default function DiagnosisWizard() {
                                         }
                                     }));
 
-                                    const mockReport = {
-                                        diagnosis: {
-                                            primary_pattern: "Kidney Yang Deficiency",
-                                            secondary_patterns: ["Dampness Accumulation"],
-                                            affected_organs: ["Kidney", "Spleen"],
-                                            pathomechanism: "Kidney Yang deficiency failing to transform water, leading to dampness and edema."
-                                        },
-                                        constitution: {
-                                            type: "Yang Deficiency",
-                                            description: "Tendency to be cold, fatigue, and water retention."
-                                        },
-                                        analysis: {
-                                            summary: "Patient presents with classic signs of Kidney Yang Deficiency.",
-                                            key_findings: {
-                                                from_inquiry: "Lower back pain, nocturia",
-                                                from_visual: "Pale swollen tongue",
-                                                from_pulse: "Deep, weak"
-                                            }
-                                        },
-                                        recommendations: {
-                                            food: ["Walnuts", "Lamb", "Ginger", "Cinnamon"],
-                                            avoid: ["Raw foods", "Cold drinks", "Salads"],
-                                            lifestyle: ["Keep warm", "Moxa therapy", "Gentle exercise"],
-                                            acupoints: ["KI3 (Taixi)", "BL23 (Shenshu)", "CV4 (Guanyuan)"],
-                                            herbal_formulas: [
-                                                { "name": "Jin Gui Shen Qi Wan", "purpose": "Warm Kidney Yang" }
-                                            ],
-                                            exercise: ["Tai Chi", "Qigong"],
-                                            sleep_guidance: "Sleep early, keep feet warm.",
-                                            emotional_care: "Avoid fear and anxiety."
-                                        },
-                                        patient_summary: {
-                                            name: mockData.basic_info.name,
-                                            age: mockData.basic_info.age,
-                                            gender: mockData.basic_info.gender
-                                        },
-                                        timestamp: new Date().toISOString()
-                                    };
+                                    const mockReport = generateMockReport(mockData);
                                     setCompletion(JSON.stringify(mockReport));
                                     setStep('processing');
                                 }}
                                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1.5 rounded transition-colors font-medium mt-2"
                             >
                                 Fill & View Mock Report
+                            </button>
+
+                            <button
+                                onClick={() => window.open('/test-runner', '_blank')}
+                                className="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs py-1.5 rounded transition-colors font-medium mt-2"
+                            >
+                                Test modules with program
                             </button>
 
                             <div className="pt-2 border-t border-slate-700">
@@ -767,13 +820,49 @@ export default function DiagnosisWizard() {
                                         <button
                                             key={profile.id}
                                             onClick={() => {
-                                                setData((prev: any) => ({
-                                                    ...prev,
-                                                    ...profile.data
-                                                }))
-                                                setShowTestProfiles(false)
-                                                // Optional: Alert user
-                                                // alert(`Loaded profile: ${profile.name}`)
+                                                const newData = {
+                                                    ...data,
+                                                    ...profile.data,
+                                                    report_options: {
+                                                        includePatientName: true,
+                                                        includePatientAge: true,
+                                                        includePatientGender: true,
+                                                        includePatientContact: true,
+                                                        includePatientAddress: true,
+                                                        includeEmergencyContact: true,
+                                                        includeVitalSigns: true,
+                                                        includeBMI: true,
+                                                        includeSmartConnectData: true,
+                                                        suggestMedicine: true,
+                                                        suggestDoctor: true,
+                                                        includeDietary: true,
+                                                        includeLifestyle: true,
+                                                        includeAcupuncture: true,
+                                                        includeExercise: true,
+                                                        includeSleepAdvice: true,
+                                                        includeEmotionalWellness: true,
+                                                        includePrecautions: true,
+                                                        includeFollowUp: true,
+                                                        includeTimestamp: true,
+                                                        includeQRCode: true,
+                                                        includeDoctorSignature: true
+                                                    },
+                                                    verified_summaries: {
+                                                        inquiry: profile.data.wen_inquiry?.summary || "Inquiry completed",
+                                                        tongue: profile.data.wang_tongue?.observation || "Tongue analysis completed",
+                                                        face: profile.data.wang_face?.observation || "Face analysis completed",
+                                                        pulse: "Pulse analysis completed"
+                                                    }
+                                                };
+
+                                                setData(newData);
+                                                setShowTestProfiles(false);
+
+                                                // If we are on processing or report step, generate the mock report immediately
+                                                if (step === 'processing' || step === 'report') {
+                                                    const mockReport = generateMockReport(profile.data);
+                                                    setCompletion(JSON.stringify(mockReport));
+                                                }
                                             }}
                                             className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 transition-all group"
                                         >
@@ -963,6 +1052,7 @@ export default function DiagnosisWizard() {
                     {step === 'wen_audio' && (
                         <motion.div key="wen_audio" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
                             <AudioRecorder
+                                initialData={data.wen_audio}
                                 onComplete={(result) => {
                                     setData((prev: any) => ({ ...prev, wen_audio: result }));
                                     setTimeout(() => nextStep('wen_audio'), 0)
@@ -975,6 +1065,7 @@ export default function DiagnosisWizard() {
                     {step === 'qie' && (
                         <motion.div key="qie" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
                             <PulseCheck
+                                initialData={data.qie}
                                 onComplete={(result) => {
                                     setData((prev: any) => ({ ...prev, qie: result }));
                                     nextStep('qie');

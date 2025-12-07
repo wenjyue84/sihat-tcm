@@ -22,14 +22,14 @@ interface AudioAnalysisData {
     status: string
 }
 
-export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) => void, onBack?: () => void }) {
+export function AudioRecorder({ onComplete, onBack, initialData }: { onComplete: (data: any) => void, onBack?: () => void, initialData?: any }) {
     const { t } = useLanguage()
     const [isRecording, setIsRecording] = useState(false)
     const [audioUrl, setAudioUrl] = useState<string | null>(null)
-    const [audioData, setAudioData] = useState<string | null>(null)
+    const [audioData, setAudioData] = useState<string | null>(initialData?.audio || null)
     const [expandedSection, setExpandedSection] = useState<number | null>(null)
     const [isAnalyzing, setIsAnalyzing] = useState(false)
-    const [analysisResult, setAnalysisResult] = useState<AudioAnalysisData | null>(null)
+    const [analysisResult, setAnalysisResult] = useState<AudioAnalysisData | null>(initialData?.analysis || null)
     const [audioLevel, setAudioLevel] = useState(0)
     const [hasAudioSignal, setHasAudioSignal] = useState(false)
     const [micError, setMicError] = useState<string | null>(null)

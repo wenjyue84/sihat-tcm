@@ -23,7 +23,7 @@ KEPERLUAN BAHASA: Anda MESTI menjawab sepenuhnya dalam Bahasa Malaysia. Tanya so
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { messages, basicInfo, model = 'gemini-1.5-flash', language = 'en' } = body;
+        const { messages, basicInfo, model = 'gemini-1.5-pro', language = 'en' } = body;
 
         console.log("[API /api/chat] Request received:", {
             messageCount: messages?.length,
@@ -96,13 +96,32 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
             });
         }
 
-        const result = streamText({
-            model: google(model),
-            system: systemPrompt,
-            messages: filteredMessages,
-        });
+        console.log("[API /api/chat] Calling streamText with model:", model);
 
-        return result.toTextStreamResponse();
+        try {
+            const result = streamText({
+                model: google(model),
+                system: systemPrompt,
+                messages: filteredMessages,
+                onFinish: (completion) => {
+                    console.log("[API /api/chat] Stream finished. Text length:", completion.text.length);
+                },
+            });
+
+            console.log("[API /api/chat] streamText called, returning stream response");
+            return result.toTextStreamResponse();
+        } catch (primaryError: any) {
+            console.error(`[API /api/chat] Primary model ${model} failed:`, primaryError);
+
+            // Fallback to 1.5 Flash
+            console.log(`[API /api/chat] Falling back to gemini-1.5-flash`);
+            const fallbackResult = streamText({
+                model: google('gemini-1.5-flash'),
+                system: systemPrompt,
+                messages: filteredMessages,
+            });
+            return fallbackResult.toTextStreamResponse();
+        }
     } catch (error: any) {
         console.error("[API /api/chat] Error:", error);
         return new Response(JSON.stringify({

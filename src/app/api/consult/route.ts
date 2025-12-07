@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { data, prompt, model = 'gemini-1.5-flash', language = 'en' } = body;
+    const { data, prompt, model = 'gemini-1.5-pro', language = 'en' } = body;
 
     console.log('[consult] Received prompt:', prompt?.substring(0, 50));
     console.log('[consult] Patient name:', data?.basic_info?.name);

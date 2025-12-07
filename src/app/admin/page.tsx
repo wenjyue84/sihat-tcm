@@ -23,8 +23,8 @@ import { ClipboardList } from 'lucide-react'
 
 // Doctor Level → LLM Model mapping (same as DoctorContext)
 const DOCTOR_MODEL_MAPPING = {
-    Master: { model: 'gemini-3-pro-preview', label: 'Gemini 3 Pro Preview' },
-    Expert: { model: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+    Master: { model: 'gemini-3.0-preview', label: 'Gemini 3.0 Preview (Master)' },
+    Expert: { model: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro (Expert)' },
     Physician: { model: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
 } as const
 
@@ -483,7 +483,7 @@ export default function AdminDashboard() {
                     <div className="grid gap-2 text-sm">
                         <div className="flex items-center justify-between p-2 bg-amber-50 rounded border border-amber-200">
                             <span>👨‍⚕️ 名医 Master</span>
-                            <code className="bg-amber-100 px-2 py-0.5 rounded">gemini-3-pro-preview</code>
+                            <code className="bg-amber-100 px-2 py-0.5 rounded">gemini-3.0-preview</code>
                         </div>
                         <div className="flex items-center justify-between p-2 bg-emerald-50 rounded border border-emerald-200">
                             <span>🩺 专家 Expert</span>

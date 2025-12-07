@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Image as ImageIcon, X, Download, Loader2, Sparkles, Palette, ChevronLeft, ChevronRight, Check } from 'lucide-react'
+import { Image as ImageIcon, X, Download, Loader2, Sparkles, Palette, ChevronLeft, ChevronRight, Check, FileText, Utensils, Leaf, Activity, Dumbbell, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/contexts/LanguageContext'
 
@@ -53,7 +53,16 @@ const translations = {
         close: 'Close',
         success: 'Infographic Generated!',
         error: 'Generation failed. Please try again.',
-        tip: 'Tip: Infographics are great for sharing health insights with family!'
+        tip: 'Tip: Infographics are great for sharing health insights with family!',
+        selectContent: 'Select Content',
+        content: {
+            diagnosis: 'Diagnosis & Constitution',
+            dietary: 'Dietary Advice',
+            lifestyle: 'Lifestyle Tips',
+            acupoints: 'Acupressure Points',
+            exercise: 'Exercise',
+            metrics: 'Health Metrics'
+        }
     },
     zh: {
         title: '创建信息图',
@@ -66,7 +75,16 @@ const translations = {
         close: '关闭',
         success: '信息图已生成！',
         error: '生成失败，请重试。',
-        tip: '提示：信息图非常适合与家人分享健康知识！'
+        tip: '提示：信息图非常适合与家人分享健康知识！',
+        selectContent: '选择内容',
+        content: {
+            diagnosis: '诊断与体质',
+            dietary: '饮食建议',
+            lifestyle: '生活方式',
+            acupoints: '穴位按摩',
+            exercise: '运动建议',
+            metrics: '健康指标'
+        }
     },
     ms: {
         title: 'Cipta Infografik',
@@ -79,7 +97,16 @@ const translations = {
         close: 'Tutup',
         success: 'Infografik Dijana!',
         error: 'Penjanaan gagal. Sila cuba lagi.',
-        tip: 'Petua: Infografik bagus untuk berkongsi maklumat kesihatan dengan keluarga!'
+        tip: 'Petua: Infografik bagus untuk berkongsi maklumat kesihatan dengan keluarga!',
+        selectContent: 'Pilih Kandungan',
+        content: {
+            diagnosis: 'Diagnosis & Perlembagaan',
+            dietary: 'Nasihat Pemakanan',
+            lifestyle: 'Tips Gaya Hidup',
+            acupoints: 'Titik Akupresur',
+            exercise: 'Senaman',
+            metrics: 'Metrik Kesihatan'
+        }
     }
 }
 
@@ -88,6 +115,14 @@ export function InfographicsGenerator({ reportData, patientInfo, isOpen, onClose
     const t = translations[language as keyof typeof translations] || translations.en
 
     const [selectedStyle, setSelectedStyle] = useState<InfographicStyle>('modern')
+    const [selectedContent, setSelectedContent] = useState({
+        diagnosis: true,
+        dietary: true,
+        lifestyle: true,
+        acupoints: false,
+        exercise: false,
+        metrics: false
+    })
     const [isGenerating, setIsGenerating] = useState(false)
     const [generatedImage, setGeneratedImage] = useState<string | null>(null)
     const [error, setError] = useState<string | null>(null)
@@ -98,7 +133,7 @@ export function InfographicsGenerator({ reportData, patientInfo, isOpen, onClose
 
         try {
             // Build the prompt for infographic generation
-            const prompt = buildInfographicPrompt(reportData, patientInfo, selectedStyle)
+            const prompt = buildInfographicPrompt(reportData, patientInfo, selectedStyle, selectedContent)
 
             const response = await fetch('/api/generate-infographic', {
                 method: 'POST',
@@ -189,8 +224,8 @@ export function InfographicsGenerator({ reportData, patientInfo, isOpen, onClose
                                                 key={style.id}
                                                 onClick={() => setSelectedStyle(style.id)}
                                                 className={`relative p-4 rounded-xl border-2 transition-all text-left ${selectedStyle === style.id
-                                                        ? 'border-violet-500 bg-violet-50'
-                                                        : 'border-stone-200 hover:border-stone-300 bg-white'
+                                                    ? 'border-violet-500 bg-violet-50'
+                                                    : 'border-stone-200 hover:border-stone-300 bg-white'
                                                     }`}
                                             >
                                                 {selectedStyle === style.id && (
@@ -211,6 +246,75 @@ export function InfographicsGenerator({ reportData, patientInfo, isOpen, onClose
                                                 <p className="text-xs text-stone-500">{style.description}</p>
                                             </button>
                                         ))}
+                                    </div>
+                                </div>
+
+                                {/* Content Selection */}
+                                <div>
+                                    <h3 className="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                                        <FileText className="w-4 h-4" />
+                                        {t.selectContent}
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => setSelectedContent(prev => ({ ...prev, diagnosis: !prev.diagnosis }))}
+                                            className={`p-3 rounded-xl border transition-all text-left flex items-center gap-3 ${selectedContent.diagnosis ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-stone-200 hover:border-stone-300 text-stone-600'}`}
+                                        >
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center ${selectedContent.diagnosis ? 'bg-violet-500 border-violet-500' : 'border-stone-300 bg-white'}`}>
+                                                {selectedContent.diagnosis && <Check className="w-3 h-3 text-white" />}
+                                            </div>
+                                            <span className="text-sm font-medium">{t.content.diagnosis}</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => setSelectedContent(prev => ({ ...prev, dietary: !prev.dietary }))}
+                                            className={`p-3 rounded-xl border transition-all text-left flex items-center gap-3 ${selectedContent.dietary ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-stone-200 hover:border-stone-300 text-stone-600'}`}
+                                        >
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center ${selectedContent.dietary ? 'bg-violet-500 border-violet-500' : 'border-stone-300 bg-white'}`}>
+                                                {selectedContent.dietary && <Check className="w-3 h-3 text-white" />}
+                                            </div>
+                                            <span className="text-sm font-medium">{t.content.dietary}</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => setSelectedContent(prev => ({ ...prev, lifestyle: !prev.lifestyle }))}
+                                            className={`p-3 rounded-xl border transition-all text-left flex items-center gap-3 ${selectedContent.lifestyle ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-stone-200 hover:border-stone-300 text-stone-600'}`}
+                                        >
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center ${selectedContent.lifestyle ? 'bg-violet-500 border-violet-500' : 'border-stone-300 bg-white'}`}>
+                                                {selectedContent.lifestyle && <Check className="w-3 h-3 text-white" />}
+                                            </div>
+                                            <span className="text-sm font-medium">{t.content.lifestyle}</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => setSelectedContent(prev => ({ ...prev, acupoints: !prev.acupoints }))}
+                                            className={`p-3 rounded-xl border transition-all text-left flex items-center gap-3 ${selectedContent.acupoints ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-stone-200 hover:border-stone-300 text-stone-600'}`}
+                                        >
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center ${selectedContent.acupoints ? 'bg-violet-500 border-violet-500' : 'border-stone-300 bg-white'}`}>
+                                                {selectedContent.acupoints && <Check className="w-3 h-3 text-white" />}
+                                            </div>
+                                            <span className="text-sm font-medium">{t.content.acupoints}</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => setSelectedContent(prev => ({ ...prev, exercise: !prev.exercise }))}
+                                            className={`p-3 rounded-xl border transition-all text-left flex items-center gap-3 ${selectedContent.exercise ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-stone-200 hover:border-stone-300 text-stone-600'}`}
+                                        >
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center ${selectedContent.exercise ? 'bg-violet-500 border-violet-500' : 'border-stone-300 bg-white'}`}>
+                                                {selectedContent.exercise && <Check className="w-3 h-3 text-white" />}
+                                            </div>
+                                            <span className="text-sm font-medium">{t.content.exercise}</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => setSelectedContent(prev => ({ ...prev, metrics: !prev.metrics }))}
+                                            className={`p-3 rounded-xl border transition-all text-left flex items-center gap-3 ${selectedContent.metrics ? 'border-violet-500 bg-violet-50 text-violet-700' : 'border-stone-200 hover:border-stone-300 text-stone-600'}`}
+                                        >
+                                            <div className={`w-5 h-5 rounded border flex items-center justify-center ${selectedContent.metrics ? 'bg-violet-500 border-violet-500' : 'border-stone-300 bg-white'}`}>
+                                                {selectedContent.metrics && <Check className="w-3 h-3 text-white" />}
+                                            </div>
+                                            <span className="text-sm font-medium">{t.content.metrics}</span>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -302,21 +406,61 @@ export function InfographicsGenerator({ reportData, patientInfo, isOpen, onClose
     )
 }
 
-function buildInfographicPrompt(reportData: any, patientInfo: any, style: InfographicStyle): string {
-    // Extract key info for the infographic
-    const diagnosis = typeof reportData.diagnosis === 'string'
-        ? reportData.diagnosis
-        : reportData.diagnosis?.primary_pattern || 'TCM Diagnosis';
+function buildInfographicPrompt(
+    reportData: any,
+    patientInfo: any,
+    style: InfographicStyle,
+    content: {
+        diagnosis: boolean;
+        dietary: boolean;
+        lifestyle: boolean;
+        acupoints: boolean;
+        exercise: boolean;
+        metrics: boolean;
+    }
+): string {
+    // Extract key info for the infographic based on selection
+    let contentParts = [];
 
-    const constitution = typeof reportData.constitution === 'string'
-        ? reportData.constitution
-        : reportData.constitution?.type || '';
+    if (content.diagnosis) {
+        const diagnosis = typeof reportData.diagnosis === 'string'
+            ? reportData.diagnosis
+            : reportData.diagnosis?.primary_pattern || 'TCM Diagnosis';
 
-    const foods = reportData.recommendations?.food_therapy?.beneficial?.slice(0, 4)
-        || reportData.recommendations?.food?.slice(0, 4)
-        || [];
+        const constitution = typeof reportData.constitution === 'string'
+            ? reportData.constitution
+            : reportData.constitution?.type || '';
 
-    const lifestyle = reportData.recommendations?.lifestyle?.slice(0, 3) || [];
+        contentParts.push(`Diagnosis: ${diagnosis}`);
+        if (constitution) contentParts.push(`Constitution Type: ${constitution}`);
+    }
+
+    if (content.dietary) {
+        const foods = reportData.recommendations?.food_therapy?.beneficial?.slice(0, 4)
+            || reportData.recommendations?.food?.slice(0, 4)
+            || [];
+        if (foods.length > 0) contentParts.push(`Recommended Foods: ${foods.join(', ')}`);
+    }
+
+    if (content.lifestyle) {
+        const lifestyle = reportData.recommendations?.lifestyle?.slice(0, 3) || [];
+        if (lifestyle.length > 0) contentParts.push(`Lifestyle Tips: ${lifestyle.join('; ')}`);
+    }
+
+    if (content.acupoints) {
+        const acupoints = reportData.recommendations?.acupoints?.slice(0, 3) || [];
+        if (acupoints.length > 0) contentParts.push(`Acupressure Points: ${acupoints.join(', ')}`);
+    }
+
+    if (content.exercise) {
+        const exercise = reportData.recommendations?.exercise?.slice(0, 3) || [];
+        if (exercise.length > 0) contentParts.push(`Exercise: ${exercise.join('; ')}`);
+    }
+
+    if (content.metrics && patientInfo) {
+        if (patientInfo.bmi) contentParts.push(`BMI: ${patientInfo.bmi}`);
+        // Add other metrics if available in patientInfo or passed separately
+    }
 
     const styleDescriptions: Record<InfographicStyle, string> = {
         modern: 'modern, clean, minimalist with teal and blue gradients, professional healthcare design',
@@ -328,16 +472,13 @@ function buildInfographicPrompt(reportData: any, patientInfo: any, style: Infogr
     return `Create a beautiful health infographic for a TCM (Traditional Chinese Medicine) diagnosis with ${styleDescriptions[style]} style.
 
 Title: "Your TCM Health Summary"
-Diagnosis: ${diagnosis}
-${constitution ? `Constitution Type: ${constitution}` : ''}
-${foods.length > 0 ? `Recommended Foods: ${foods.join(', ')}` : ''}
-${lifestyle.length > 0 ? `Lifestyle Tips: ${lifestyle.join('; ')}` : ''}
+${contentParts.join('\n')}
 
 Design requirements:
 - Clear visual hierarchy
 - Professional medical infographic layout
 - Include icons for different sections
-- Show food recommendations with simple food illustrations
+- Show food recommendations with simple food illustrations (if included)
 - Include a health balance meter or chart
 - Add traditional Chinese medicine elements subtly
 - Make it easy to read and understand

@@ -34,7 +34,7 @@ export async function POST(req: Request) {
         `;
 
         const { text: responseText } = await generateText({
-            model: google('gemini-1.5-flash'),
+            model: google('gemini-1.5-pro'),
             messages: [{ role: 'user', content: prompt }],
         });
 

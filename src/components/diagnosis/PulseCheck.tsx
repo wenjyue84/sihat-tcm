@@ -23,15 +23,15 @@ const tcmPulseQualities = [
     { id: 'normal', nameZh: '平脉', nameEn: 'Normal (Ping)', description: '脉来平和有力', descriptionEn: 'Normal and balanced' },
 ]
 
-export function PulseCheck({ onComplete, onBack }: { onComplete: (data: any) => void, onBack?: () => void }) {
+export function PulseCheck({ onComplete, onBack, initialData }: { onComplete: (data: any) => void, onBack?: () => void, initialData?: any }) {
     const { t, language } = useLanguage()
     const [taps, setTaps] = useState<number[]>([])
-    const [bpm, setBpm] = useState<number | null>(null)
-    const [manualBpm, setManualBpm] = useState<string>('')
+    const [bpm, setBpm] = useState<number | null>(initialData?.bpm || null)
+    const [manualBpm, setManualBpm] = useState<string>(initialData?.bpm ? String(initialData.bpm) : '')
     const [showGuide, setShowGuide] = useState(false) // Hide guide by default
     const [guideStep, setGuideStep] = useState(0)
     const [inputMode, setInputMode] = useState<'tap' | 'manual'>('manual') // Default to manual
-    const [selectedPulseQualities, setSelectedPulseQualities] = useState<string[]>([])
+    const [selectedPulseQualities, setSelectedPulseQualities] = useState<string[]>(initialData?.pulseQualities?.map((q: any) => q.id) || [])
     const [conflictWarning, setConflictWarning] = useState<string | null>(null)
 
     // Wizard state
