@@ -13,6 +13,7 @@ import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { DOCTOR_LEVELS, DoctorLevel } from '@/lib/doctorLevels'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { BMIExplanationModal } from './BMIExplanationModal'
+import { useDiagnosisProgressOptional } from '@/contexts/DiagnosisProgressContext'
 
 // Total number of wizard steps
 const TOTAL_STEPS = 5
@@ -248,6 +249,7 @@ const stepVariants = {
 export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: BasicInfoData) => void, initialData?: BasicInfoData }) {
     const { doctorLevel, setDoctorLevel } = useDoctorLevel()
     const { t, language } = useLanguage()
+    const progressContext = useDiagnosisProgressOptional()
 
     // Wizard step state
     const [currentStep, setCurrentStep] = useState(1)
@@ -274,6 +276,44 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
     ]
 
     const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
+
+    /**
+     * ============================================================================
+     * GRANULAR PROGRESS TRACKING
+     * ============================================================================
+     * Tracks form field completion and updates the header progress indicator.
+     * The basic_info step contributes 14% to total progress.
+     * 
+     * Fields tracked (7 total fields = 2% each):
+     * 1. gender (required)
+     * 2. age (required)
+     * 3. height (required)
+     * 4. weight (required)
+     * 5. symptomDuration (required)
+     * 6. symptoms (optional but tracked)
+     * 7. doctorLevel (always set, counts as complete)
+     * ============================================================================
+     */
+    useEffect(() => {
+        if (!progressContext) return
+
+        // Count filled fields
+        const fields = [
+            formData.gender,           // Step 1
+            formData.age,              // Step 2
+            formData.height,           // Step 3
+            formData.weight,           // Step 3
+            formData.symptomDuration,  // Step 4
+            formData.symptoms,         // Step 4 (optional)
+            doctorLevel,               // Step 5 (always has value)
+        ]
+
+        const completedFields = fields.filter(field => field && String(field).trim() !== '').length
+        const totalFields = fields.length
+
+        // Update the context with granular progress
+        progressContext.updateFormProgress('basic_info', completedFields, totalFields)
+    }, [formData, doctorLevel, progressContext])
 
     // Age quick-select values
     // Age quick-select values

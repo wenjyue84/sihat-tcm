@@ -1,12 +1,14 @@
 'use client'
 
 import DiagnosisWizard from '@/components/diagnosis/DiagnosisWizard'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FlaskConical, User, Check, LogIn } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
+import { HeaderProgressIndicator } from '@/components/ui/HeaderProgressIndicator'
+import { DiagnosisProgressProvider } from '@/contexts/DiagnosisProgressContext'
 import Image from 'next/image'
 
 export default function Home() {
@@ -50,31 +52,37 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-stone-50 to-emerald-50/30 text-stone-800 font-sans selection:bg-emerald-100">
-      <header className="relative bg-emerald-900 text-white h-20 px-4 md:px-6 flex items-center justify-between">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+    <DiagnosisProgressProvider>
+      <main className="min-h-screen bg-gradient-to-b from-stone-50 to-emerald-50/30 text-stone-800 font-sans selection:bg-emerald-100">
+        <header className="relative bg-emerald-900 text-white h-20 px-4 md:px-6 flex items-center justify-between">
+          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
 
-        {/* Left side: Logo and Title */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="bg-white/10 p-1.5 rounded-lg backdrop-blur-sm border border-white/10">
-            <Image
-              src="/logo.png"
-              alt="Sihat TCM Logo"
-              width={40}
-              height={40}
-              className="w-10 h-10 object-contain"
-            />
+          {/* Left side: Logo and Title */}
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="bg-white/10 p-1.5 rounded-lg backdrop-blur-sm border border-white/10">
+              <Image
+                src="/logo.png"
+                alt="Sihat TCM Logo"
+                width={40}
+                height={40}
+                className="w-10 h-10 object-contain"
+              />
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-xl font-bold leading-none tracking-tight text-white">Sihat TCM</h1>
+              <p className="text-xs text-emerald-200 font-medium tracking-wide hidden sm:block">AI-Powered Traditional Chinese Medicine</p>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <h1 className="text-xl font-bold leading-none tracking-tight text-white">Sihat TCM</h1>
-            <p className="text-xs text-emerald-200 font-medium tracking-wide">AI-Powered Traditional Chinese Medicine</p>
-          </div>
-        </div>
 
-        {/* Top right buttons */}
-        <div className="relative z-50 flex gap-2">
-          <LanguageSelector />
-          {/* 
+          {/* Center: Progress Indicator */}
+          <div className="relative z-10 flex items-center">
+            <HeaderProgressIndicator size={44} />
+          </div>
+
+          {/* Top right buttons */}
+          <div className="relative z-50 flex gap-2">
+            <LanguageSelector />
+            {/* 
             ========================================================================
             TEST BUTTON WITH CLICK FEEDBACK
             ========================================================================
@@ -89,69 +97,70 @@ export default function Home() {
             DO NOT REMOVE the testClicked conditional styling or icon swap!
             ========================================================================
           */}
-          <button
-            onClick={handleTestClick}
-            className={`flex items-center gap-2 p-2 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl
+            <button
+              onClick={handleTestClick}
+              className={`flex items-center gap-2 p-2 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl
               ${testClicked
-                ? 'bg-emerald-500 text-white scale-95 ring-4 ring-emerald-300/50'
-                : 'bg-amber-500 hover:bg-amber-400 text-amber-950 hover:scale-105'
-              }`}
-          >
-            {/* Icon swap: Check with bounce when clicked, FlaskConical otherwise */}
-            {testClicked ? (
-              <Check className="w-4 h-4 animate-bounce" />
-            ) : (
-              <FlaskConical className="w-4 h-4" />
+                  ? 'bg-emerald-500 text-white scale-95 ring-4 ring-emerald-300/50'
+                  : 'bg-amber-500 hover:bg-amber-400 text-amber-950 hover:scale-105'
+                }`}
+            >
+              {/* Icon swap: Check with bounce when clicked, FlaskConical otherwise */}
+              {testClicked ? (
+                <Check className="w-4 h-4 animate-bounce" />
+              ) : (
+                <FlaskConical className="w-4 h-4" />
+              )}
+              {/* Text: "Filled!" when clicked, "Test" otherwise */}
+              <span className="hidden sm:inline">
+                {testClicked ? t.common.filled : t.nav.test}
+              </span>
+            </button>
+            {!loading && (
+              user ? (
+                <Link href={`/${profile?.role || 'patient'}`}>
+                  <button className="flex items-center justify-center gap-2 p-2 sm:px-4 sm:py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-full text-sm font-medium transition-all shadow-lg hover:shadow-xl hover:scale-105">
+                    <User className="w-4 h-4" />
+                    <span className="hidden sm:inline">{t.nav.dashboard}</span>
+                  </button>
+                </Link>
+              ) : (
+                <Link href="/login">
+                  <button className="flex items-center justify-center gap-2 p-2 sm:px-4 sm:py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium transition-all border border-white/20">
+                    <LogIn className="w-4 h-4" />
+                    <span className="hidden sm:inline">{t.nav.login}</span>
+                  </button>
+                </Link>
+              )
             )}
-            {/* Text: "Filled!" when clicked, "Test" otherwise */}
-            <span className="hidden sm:inline">
-              {testClicked ? t.common.filled : t.nav.test}
-            </span>
-          </button>
-          {!loading && (
-            user ? (
-              <Link href={`/${profile?.role || 'patient'}`}>
-                <button className="flex items-center justify-center gap-2 p-2 sm:px-4 sm:py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-full text-sm font-medium transition-all shadow-lg hover:shadow-xl hover:scale-105">
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t.nav.dashboard}</span>
-                </button>
-              </Link>
-            ) : (
-              <Link href="/login">
-                <button className="flex items-center justify-center gap-2 p-2 sm:px-4 sm:py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium transition-all border border-white/20">
-                  <LogIn className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t.nav.login}</span>
-                </button>
-              </Link>
-            )
-          )}
-        </div>
-      </header>
-
-      <section className="container mx-auto py-6 md:py-12 px-4 relative z-20">
-        <div className="bg-white rounded-2xl shadow-xl border border-stone-100 overflow-hidden">
-          <DiagnosisWizard />
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden bg-emerald-900 text-white py-12 px-4 md:px-6 text-center mt-8">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="relative z-10 max-w-3xl mx-auto space-y-4">
-          <div className="inline-block px-3 py-1 rounded-full bg-emerald-800 text-emerald-100 text-xs md:text-sm font-medium mb-2">
-            {t.common.appTagline}
           </div>
-          <h1 className="text-3xl md:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-200 to-teal-100">
-            {t.common.appName}
-          </h1>
-          <p className="text-base md:text-xl text-emerald-100 max-w-2xl mx-auto leading-relaxed">
-            {t.common.appDescription}
-          </p>
-        </div>
-      </section>
+        </header>
 
-      <footer className="text-center py-8 text-stone-500 text-sm">
-        <p>{t.common.copyright.replace('{year}', new Date().getFullYear().toString())}</p>
-      </footer>
-    </main>
+        <section className="container mx-auto py-6 md:py-12 px-4 relative z-20">
+          <div className="bg-white rounded-2xl shadow-xl border border-stone-100 overflow-hidden">
+            <DiagnosisWizard />
+          </div>
+        </section>
+
+        <section className="relative overflow-hidden bg-emerald-900 text-white py-12 px-4 md:px-6 text-center mt-8">
+          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+          <div className="relative z-10 max-w-3xl mx-auto space-y-4">
+            <div className="inline-block px-3 py-1 rounded-full bg-emerald-800 text-emerald-100 text-xs md:text-sm font-medium mb-2">
+              {t.common.appTagline}
+            </div>
+            <h1 className="text-3xl md:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-200 to-teal-100">
+              {t.common.appName}
+            </h1>
+            <p className="text-base md:text-xl text-emerald-100 max-w-2xl mx-auto leading-relaxed">
+              {t.common.appDescription}
+            </p>
+          </div>
+        </section>
+
+        <footer className="text-center py-8 text-stone-500 text-sm">
+          <p>{t.common.copyright.replace('{year}', new Date().getFullYear().toString())}</p>
+        </footer>
+      </main>
+    </DiagnosisProgressProvider>
   )
 }

@@ -6,73 +6,9 @@ interface ProgressStepperProps {
     steps: { id: string; label: string }[]
 }
 
-// Circular Progress Ring Component
-function CircularProgress({ percentage, size = 56 }: { percentage: number; size?: number }) {
-    const strokeWidth = 4
-    const radius = (size - strokeWidth) / 2
-    const circumference = 2 * Math.PI * radius
-    const offset = circumference - (percentage / 100) * circumference
-
-    return (
-        <div className="relative" style={{ width: size, height: size }}>
-            {/* Background circle */}
-            <svg className="transform -rotate-90" width={size} height={size}>
-                <circle
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={radius}
-                    stroke="currentColor"
-                    strokeWidth={strokeWidth}
-                    fill="transparent"
-                    className="text-stone-100"
-                />
-                {/* Progress circle */}
-                <motion.circle
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={radius}
-                    stroke="url(#progressGradient)"
-                    strokeWidth={strokeWidth}
-                    fill="transparent"
-                    strokeLinecap="round"
-                    initial={{ strokeDashoffset: circumference }}
-                    animate={{ strokeDashoffset: offset }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    style={{
-                        strokeDasharray: circumference,
-                    }}
-                />
-                {/* Gradient definition */}
-                <defs>
-                    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#10b981" />
-                        <stop offset="100%" stopColor="#14b8a6" />
-                    </linearGradient>
-                </defs>
-            </svg>
-            {/* Percentage text */}
-            <div className="absolute inset-0 flex items-center justify-center">
-                <motion.span
-                    className="text-sm font-bold text-emerald-600"
-                    key={percentage}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                >
-                    {percentage}%
-                </motion.span>
-            </div>
-        </div>
-    )
-}
-
 export function ProgressStepper({ currentStep, steps }: ProgressStepperProps) {
     const currentStepIndex = steps.findIndex(s => s.id === currentStep)
     const currentStepLabel = steps[currentStepIndex]?.label || ''
-
-    // Calculate percentage based on completed steps
-    // At step 0 (first step), progress is 0%. After completing all steps, it's 100%.
-    const progressPercentage = Math.round((currentStepIndex / steps.length) * 100)
 
     const getStepIcon = (id: string) => {
         switch (id) {
@@ -89,17 +25,13 @@ export function ProgressStepper({ currentStep, steps }: ProgressStepperProps) {
 
     return (
         <div className="w-full mb-6 md:mb-10 px-2">
-            {/* Mobile: Show current step indicator with percentage */}
-            <div className="md:hidden flex items-center justify-center gap-3 mb-4">
-                <div className="flex-shrink-0">
-                    <CircularProgress percentage={progressPercentage} size={44} />
-                </div>
-                <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-emerald-700">
-                        Step {currentStepIndex + 1} of {steps.length}
-                    </span>
-                    <span className="text-xs text-stone-500">{currentStepLabel}</span>
-                </div>
+            {/* Mobile: Show current step indicator (percentage is now in header) */}
+            <div className="md:hidden text-center mb-4">
+                <span className="text-sm font-semibold text-emerald-700">
+                    Step {currentStepIndex + 1} of {steps.length}
+                </span>
+                <span className="text-stone-400 mx-2">•</span>
+                <span className="text-xs text-stone-500">{currentStepLabel}</span>
             </div>
 
             <div className="flex items-center gap-4">
@@ -148,11 +80,6 @@ export function ProgressStepper({ currentStep, steps }: ProgressStepperProps) {
                             </div>
                         )
                     })}
-                </div>
-
-                {/* Desktop: Circular progress on the right */}
-                <div className="hidden md:flex flex-shrink-0">
-                    <CircularProgress percentage={progressPercentage} size={56} />
                 </div>
             </div>
         </div>
