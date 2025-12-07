@@ -10,7 +10,7 @@ import { AudioRecorder } from './AudioRecorder'
 
 import { BasicInfoForm } from './BasicInfoForm'
 import { PulseCheck } from './PulseCheck'
-import { InquiryStep } from './InquiryStep'
+import { InquiryWizard } from './InquiryWizard'
 import { Card } from '@/components/ui/card'
 import { DiagnosisReport } from './DiagnosisReport'
 import { AnalysisLoadingScreen } from './AnalysisLoadingScreen'
@@ -423,7 +423,7 @@ export default function DiagnosisWizard() {
                     )}
                     {step === 'wen_inquiry' && (
                         <motion.div key="wen_inquiry" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
-                            <InquiryStep
+                            <InquiryWizard
                                 basicInfo={data.basic_info}
                                 onComplete={(result) => {
                                     setData((prev: any) => ({

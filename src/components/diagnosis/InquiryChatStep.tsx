@@ -5,19 +5,13 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { BasicInfoData } from './BasicInfoForm'
-import { ChevronDown, ChevronUp, Loader2, Send, Upload, X } from 'lucide-react'
+import { Loader2, Send, ArrowLeft } from 'lucide-react'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { ShowPromptButton } from './ShowPromptButton'
 import { INTERACTIVE_CHAT_PROMPT } from '@/lib/systemPrompts'
 import { ThinkingAnimation } from './ThinkingAnimation'
-import { TextReviewModal } from './TextReviewModal'
-
-interface FileData {
-    name: string
-    type: string
-    data: string
-}
+import { FileData } from './UploadReportsStep'
 
 interface Message {
     id: string
@@ -25,25 +19,26 @@ interface Message {
     content: string
 }
 
-export function InquiryStep({
+export function InquiryChatStep({
     onComplete,
     basicInfo,
-    onBack
+    onBack,
+    uploadedFiles = []
 }: {
-    onComplete: (data: { inquiryText: string, chatHistory: any[], files: FileData[] }) => void,
+    onComplete: (chatHistory: any[]) => void,
     basicInfo?: BasicInfoData,
-    onBack?: () => void
+    onBack?: () => void,
+    uploadedFiles?: FileData[]
 }) {
     const { getDoctorInfo } = useDoctorLevel()
     const { t, language } = useLanguage()
     const doctorInfo = getDoctorInfo()
-    const [files, setFiles] = useState<FileData[]>([])
     const [messages, setMessages] = useState<Message[]>([])
     const [localInput, setLocalInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const hasRequestedInitialQuestion = useRef(false)
+    const hasInformedAboutFiles = useRef(false)
 
-    const fileInputRef = useRef<HTMLInputElement>(null)
     const scrollAreaRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLInputElement>(null)
 
@@ -70,24 +65,35 @@ Duration: ${basicInfo.symptomDuration}
         : INTERACTIVE_CHAT_PROMPT
 
     // Send message to API with manual streaming
-    const sendMessage = useCallback(async (userMessage: string, isInitialPrompt = false) => {
+    const sendMessage = useCallback(async (userMessage: string, isInitialPrompt = false, isSystemInjection = false) => {
         setIsLoading(true)
 
-        // Add user message to state
+        // Add user message to state (unless it's a hidden system injection)
         const userMsg: Message = {
             id: Date.now().toString(),
             role: 'user',
             content: userMessage
         }
 
-        setMessages(prev => [...prev, userMsg])
+        if (!isSystemInjection) {
+            setMessages(prev => [...prev, userMsg])
+        }
 
+        // Prepare messages for API
+        // If it's system injection, we send it as user role but don't show it in UI
+        // or we can append it to the history for the API context
         const currentMessages = isInitialPrompt
             ? [{ role: 'system', content: systemMessage }, userMsg]
             : [...messages, userMsg]
 
+        // If this is a system injection (like file info), we append it to the last message or as a new context
+        // For simplicity, we treat it as a user message for the API but filter it out in UI if needed, 
+        // but here we want the AI to respond to it if it's the initial prompt.
+        // If it's just context injection (files), we might want to just add it to history without triggering a visible response?
+        // Actually, for files, we want the AI to acknowledge them.
+
         try {
-            console.log('[InquiryStep] Sending message to /api/chat with language:', language)
+            console.log('[InquiryChatStep] Sending message to /api/chat with language:', language)
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -113,11 +119,11 @@ Duration: ${basicInfo.symptomDuration}
             setMessages(prev => [...prev, { id: assistantMsgId, role: 'assistant', content: '' }])
 
             if (reader) {
-                console.log('[InquiryStep] Starting to read stream...')
+                console.log('[InquiryChatStep] Starting to read stream...')
                 while (true) {
                     const { done, value } = await reader.read()
                     if (done) {
-                        console.log('[InquiryStep] Stream complete!')
+                        console.log('[InquiryChatStep] Stream complete!')
                         break
                     }
                     const chunk = decoder.decode(value, { stream: true })
@@ -130,9 +136,9 @@ Duration: ${basicInfo.symptomDuration}
                 }
             }
 
-            console.log('[InquiryStep] Final response length:', fullText.length)
+            console.log('[InquiryChatStep] Final response length:', fullText.length)
         } catch (err: any) {
-            console.error('[InquiryStep] Error:', err)
+            console.error('[InquiryChatStep] Error:', err)
             // Add error message in the selected language
             const errorMessages: Record<string, string> = {
                 en: 'Sorry, I encountered an error. Please try again.',
@@ -150,23 +156,28 @@ Duration: ${basicInfo.symptomDuration}
     }, [messages, systemMessage, basicInfo, doctorInfo.model, language])
 
     // Trigger the first question from AI doctor when component mounts
-    // NOTE: sendMessage is intentionally NOT in the dependency array to prevent duplicate API calls.
-    // The hasRequestedInitialQuestion flag ensures this only runs once.
     useEffect(() => {
         if (!hasRequestedInitialQuestion.current && messages.length === 0) {
             hasRequestedInitialQuestion.current = true
 
-            // Initial prompt in the selected language
-            // Uses the component-level initialPrompts constant
-
-            const prompt = basicInfo && basicInfo.symptoms
+            let prompt = basicInfo && basicInfo.symptoms
                 ? initialPrompts[language] || initialPrompts.en
                 : (language === 'zh' ? '请开始询问诊断问题。' : language === 'ms' ? 'Sila mulakan soalan diagnosis.' : 'Please start by asking your first diagnostic question.')
+
+            // Inject file info if available
+            if (uploadedFiles.length > 0 && !hasInformedAboutFiles.current) {
+                hasInformedAboutFiles.current = true
+                const fileSummary = uploadedFiles.map(f => `${f.name} (${f.type}): ${f.extractedText ? 'Text extracted' : 'Image only'}`).join(', ');
+                const fileContext = language === 'zh'
+                    ? `\n\n此外，我还上传了以下文件：${fileSummary}。请在诊断时参考这些信息。`
+                    : `\n\nAdditionally, I have uploaded the following files: ${fileSummary}. Please consider this information during diagnosis.`
+                prompt += fileContext
+            }
 
             sendMessage(prompt, true)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [messages.length, basicInfo, language])
+    }, [messages.length, basicInfo, language, uploadedFiles])
 
     // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
@@ -194,69 +205,6 @@ Duration: ${basicInfo.symptomDuration}
         inputRef.current?.focus()
     }
 
-    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
-    const [reviewFile, setReviewFile] = useState<File | null>(null)
-
-    // ... existing code ...
-
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files || e.target.files.length === 0) return
-
-        // We'll handle the first file for the review modal
-        // If multiple files support is needed with review, we'd need a queue system
-        const file = e.target.files[0]
-
-        if (file.size > 5 * 1024 * 1024) {
-            alert(t.errors.fileTooBig.replace('{size}', '5'))
-            return
-        }
-
-        setReviewFile(file)
-        setIsReviewModalOpen(true)
-
-        // Reset input so the same file can be selected again if needed
-        e.target.value = ''
-    }
-
-    const handleReviewConfirm = async (text: string, file: File) => {
-        try {
-            const base64 = await convertToBase64(file)
-
-            // Add file to visual list
-            setFiles(prev => [...prev, {
-                name: file.name,
-                type: file.type,
-                data: base64 as string
-            }])
-
-            // Send extracted text to AI
-            // We send it as a user message so the AI knows about it and it's in history
-            const messageContent = language === 'zh'
-                ? `我上传了一份医疗报告 (${file.name})。以下是内容：\n\n${text}`
-                : language === 'ms'
-                    ? `Saya telah memuat naik laporan perubatan (${file.name}). Berikut adalah kandungannya:\n\n${text}`
-                    : `I have uploaded a medical report (${file.name}). Here is the content:\n\n${text}`
-
-            await sendMessage(messageContent)
-
-        } catch (error) {
-            console.error("Error processing file:", error)
-        }
-    }
-
-    const convertToBase64 = (file: File) => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader()
-            reader.readAsDataURL(file)
-            reader.onload = () => resolve(reader.result)
-            reader.onerror = error => reject(error)
-        })
-    }
-
-    const removeFile = (index: number) => {
-        setFiles(prev => prev.filter((_, i) => i !== index))
-    }
-
     const calculateBMI = (weight: number, height: number) => {
         const heightInMeters = height / 100
         return weight / (heightInMeters * heightInMeters)
@@ -270,16 +218,7 @@ Duration: ${basicInfo.symptomDuration}
     }
 
     const handleComplete = () => {
-        const chatSummary = messages
-            .filter((m) => m.role !== 'system')
-            .map((m) => `${m.role === 'user' ? (language === 'zh' ? '患者' : language === 'ms' ? 'Pesakit' : 'Patient') : (language === 'zh' ? '医师' : language === 'ms' ? 'Doktor' : 'Doctor')}: ${m.content}`)
-            .join('\n');
-
-        onComplete({
-            inquiryText: chatSummary,
-            chatHistory: messages,
-            files
-        })
+        onComplete(messages)
     }
 
     // Filter messages for display
@@ -287,10 +226,8 @@ Duration: ${basicInfo.symptomDuration}
         m.role !== 'system' &&
         !m.content.startsWith('The patient mentioned') &&
         m.content !== 'Please start the consultation.' &&
-        !Object.values(initialPrompts).includes(m.content) &&
-        m.content !== '请开始询问诊断问题。' &&
-        m.content !== 'Sila mulakan soalan diagnosis.' &&
-        m.content !== 'Please start by asking your first diagnostic question.'
+        !Object.values(initialPrompts).some(p => m.content.includes(p)) &&
+        !m.content.includes('uploaded the following files') // Hide the file injection message if it looks technical
     )
 
     return (
@@ -307,10 +244,6 @@ Duration: ${basicInfo.symptomDuration}
                 </div>
                 <div className="flex gap-2">
                     <ShowPromptButton promptType="chat" />
-                    <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="h-11 text-sm">
-                        <Upload className="w-4 h-4 mr-2" />
-                        {language === 'zh' ? '上传报告' : language === 'ms' ? 'Muat Naik Laporan' : 'Upload Reports'}
-                    </Button>
                 </div>
             </div>
 
@@ -333,14 +266,9 @@ Duration: ${basicInfo.symptomDuration}
             {/* Basic Information Summary with BMI */}
             {basicInfo && basicInfo.weight && basicInfo.height && (
                 <details className="bg-gradient-to-r from-emerald-50 to-teal-50 p-3 md:p-4 rounded-lg border border-emerald-200 group">
-                    <summary className="font-semibold text-emerald-800 text-sm cursor-pointer flex items-center justify-between list-none [&::-webkit-details-marker]:hidden">
+                    <summary className="font-semibold text-emerald-800 text-sm cursor-pointer flex items-center justify-between">
                         {t.report.patientInfo}
-                        <div className="flex items-center gap-1 text-xs text-emerald-600">
-                            <span className="group-open:hidden">{language === 'zh' ? '点击展开' : language === 'ms' ? 'Ketik untuk kembang' : 'Tap to expand'}</span>
-                            <span className="hidden group-open:inline">{language === 'zh' ? '点击收起' : language === 'ms' ? 'Ketik untuk tutup' : 'Tap to collapse'}</span>
-                            <ChevronDown className="w-4 h-4 group-open:hidden" />
-                            <ChevronUp className="w-4 h-4 hidden group-open:block" />
-                        </div>
+                        <span className="text-xs text-emerald-600 group-open:hidden">{language === 'zh' ? '点击展开' : language === 'ms' ? 'Ketik untuk kembang' : 'Tap to expand'}</span>
                     </summary>
                     <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 text-sm">
                         <div>
@@ -425,19 +353,6 @@ Duration: ${basicInfo.symptomDuration}
                 </div>
             </div>
 
-            {files.length > 0 && (
-                <div className="flex gap-2 overflow-x-auto py-2 border-t border-stone-100">
-                    {files.map((file, index) => (
-                        <div key={index} className="flex items-center gap-2 bg-stone-50 px-3 py-1 rounded-full border border-stone-200 text-xs whitespace-nowrap">
-                            <span className="truncate max-w-[100px]">{file.name}</span>
-                            <button onClick={() => removeFile(index)} className="text-stone-400 hover:text-red-500">
-                                <X className="w-3 h-3" />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            )}
-
             <div className="flex gap-2 pt-2 border-t">
                 <form onSubmit={handleSubmit} className="flex-1 flex gap-2">
                     <Input
@@ -462,6 +377,7 @@ Duration: ${basicInfo.symptomDuration}
                         onClick={onBack}
                         className="flex-1 md:flex-none md:w-auto border-stone-300 text-stone-600 hover:bg-stone-100"
                     >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
                         {t.common.back}
                     </Button>
                 )}
@@ -470,24 +386,9 @@ Duration: ${basicInfo.symptomDuration}
                     className="flex-1 h-12 bg-emerald-800 hover:bg-emerald-900 text-base"
                     disabled={displayMessages.length < 2}
                 >
-                    {t.inquiry.finishChat}
+                    {language === 'zh' ? '生成总结' : language === 'ms' ? 'Jana Ringkasan' : 'Generate Summary'}
                 </Button>
             </div>
-
-            <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*,application/pdf"
-                onChange={handleFileChange}
-            />
-
-            <TextReviewModal
-                isOpen={isReviewModalOpen}
-                onClose={() => setIsReviewModalOpen(false)}
-                onConfirm={handleReviewConfirm}
-                file={reviewFile}
-            />
         </Card>
     )
 }

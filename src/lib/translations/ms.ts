@@ -102,6 +102,8 @@ export const ms: TranslationKeys = {
         symptoms: {
             fever: 'Demam', cough: 'Batuk', headache: 'Sakit Kepala', fatigue: 'Keletihan',
             stomachPain: 'Sakit Perut', soreThroat: 'Sakit Tekak', shortnessOfBreath: 'Sesak Nafas',
+            highBloodPressure: 'Tekanan Darah Tinggi', diabetes: 'Kencing Manis', cancer: 'Kanser',
+            heartDisease: 'Sakit Jantung', pneumonia: 'Pneumonia', stroke: 'Angin Ahmar',
         },
         detailedSymptoms: 'Simptom Terperinci / Kebimbangan',
         detailedSymptomsPlaceholder: 'Sila terangkan aduan utama, perasaan, dan butiran lain yang berkaitan...',
@@ -129,6 +131,16 @@ export const ms: TranslationKeys = {
             '46-55': '46-55',
             '56-65': '56-65',
             over65: 'Atas 65',
+        },
+        bmiExplanation: {
+            title: 'Memahami BMI Anda',
+            description: 'Indeks Jisim Badan (BMI) adalah indeks mudah berat-untuk-tinggi yang biasa digunakan untuk mengklasifikasikan kurang berat badan, berat badan berlebihan dan obesiti pada orang dewasa.',
+            yourBmi: 'BMI Anda',
+            underweight: 'Kurang Berat Badan',
+            normal: 'Berat Normal',
+            overweight: 'Berat Berlebihan',
+            obese: 'Obes',
+            howItIsCalculated: 'Bagaimana ia dikira',
         },
     },
     doctorLevels: {
@@ -292,6 +304,12 @@ export const ms: TranslationKeys = {
             chi: { name: 'Perlahan (Chi)', zh: '迟脉', desc: 'Kadar perlahan' },
             shuo: { name: 'Laju (Shuo)', zh: '数脉', desc: 'Kadar laju' },
             normal: { name: 'Normal (Ping)', zh: '平脉', desc: 'Normal dan seimbang' },
+        },
+        conflicts: {
+            xi_hong: "Tidak boleh memilih 'Nipis' dan 'Melimpah' bersama-sama. Ini adalah kualiti yang bertentangan.",
+            hua_se: "Tidak boleh memilih 'Licin' dan 'Kasar' bersama-sama. Ini adalah kualiti yang bertentangan.",
+            fu_chen: "Tidak boleh memilih 'Terapung' dan 'Dalam' bersama-sama. Ini adalah kualiti yang bertentangan.",
+            chi_shuo: "Tidak boleh memilih 'Perlahan' dan 'Laju' bersama-sama. Ini adalah kualiti yang bertentangan.",
         },
     },
     smartConnect: {

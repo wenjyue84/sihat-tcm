@@ -102,6 +102,8 @@ export const zh: TranslationKeys = {
         symptoms: {
             fever: '发烧', cough: '咳嗽', headache: '头痛', fatigue: '疲劳',
             stomachPain: '胃痛', soreThroat: '喉咙痛', shortnessOfBreath: '呼吸急促',
+            highBloodPressure: '高血压', diabetes: '糖尿病', cancer: '癌症',
+            heartDisease: '心脏病', pneumonia: '肺炎', stroke: '中风',
         },
         detailedSymptoms: '详细症状描述',
         detailedSymptomsPlaceholder: '请详细描述您的主要症状、感受以及其他相关情况...',
@@ -129,6 +131,16 @@ export const zh: TranslationKeys = {
             '46-55': '46-55岁',
             '56-65': '56-65岁',
             over65: '65岁以上',
+        },
+        bmiExplanation: {
+            title: '了解您的BMI指数',
+            description: '身体质量指数（BMI）是衡量人体胖瘦程度以及是否健康的一个常用指标。',
+            yourBmi: '您的BMI指数',
+            underweight: '体重过轻',
+            normal: '体重正常',
+            overweight: '超重',
+            obese: '肥胖',
+            howItIsCalculated: '计算公式',
         },
     },
     doctorLevels: {
@@ -292,6 +304,12 @@ export const zh: TranslationKeys = {
             chi: { name: '迟脉', zh: '迟脉', desc: '脉来迟缓' },
             shuo: { name: '数脉', zh: '数脉', desc: '脉来急促' },
             normal: { name: '平脉', zh: '平脉', desc: '脉来平和有力' },
+        },
+        conflicts: {
+            xi_hong: "不能同时选择“细脉”和“洪脉”。这是相反的脉象。",
+            hua_se: "不能同时选择“滑脉”和“涩脉”。这是相反的脉象。",
+            fu_chen: "不能同时选择“浮脉”和“沉脉”。这是相反的脉象。",
+            chi_shuo: "不能同时选择“迟脉”和“数脉”。这是相反的脉象。",
         },
     },
     smartConnect: {

@@ -44,6 +44,7 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
     const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null)
     const streamRef = useRef<MediaStream | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const hasAudioSignalRef = useRef(false)
 
     useEffect(() => {
         return () => {
@@ -79,6 +80,7 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
         setMicError(null)
         setShowTroubleshoot(false)
         setHasAudioSignal(false)
+        hasAudioSignalRef.current = false
 
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
@@ -93,6 +95,12 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
             // Setup Audio Context for visualization
             const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
             const audioContext = new AudioContextClass()
+
+            // Ensure context is running (needed for some browsers/Android)
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume()
+            }
+
             const analyser = audioContext.createAnalyser()
             const source = audioContext.createMediaStreamSource(stream)
 
@@ -121,6 +129,34 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                 const blob = new Blob(chunksRef.current, { type: mimeType || 'audio/webm' })
                 const url = URL.createObjectURL(blob)
                 setAudioUrl(url)
+
+                // Check if we actually detected any audio
+                if (!hasAudioSignalRef.current) {
+                    setAnalysisResult({
+                        overall_observation: 'No audio signal detected.',
+                        voice_quality_analysis: {
+                            observation: 'No voice detected',
+                            severity: 'warning',
+                            tcm_indicators: ['Silent recording'],
+                            clinical_significance: 'Please check your microphone settings'
+                        },
+                        breathing_patterns: null,
+                        speech_patterns: null,
+                        cough_sounds: null,
+                        confidence: 'low',
+                        notes: 'The recording appears to be silent. Please check your microphone and try again.',
+                        status: 'error'
+                    })
+
+                    // Cleanup visualization
+                    if (animationFrameRef.current) {
+                        cancelAnimationFrame(animationFrameRef.current)
+                    }
+
+                    // Stop all tracks
+                    stream.getTracks().forEach(track => track.stop())
+                    return
+                }
 
                 // Convert to Base64
                 const reader = new FileReader()
@@ -213,14 +249,34 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
 
             const result = await response.json()
             console.log('[AudioRecorder] Analysis result:', result)
+
+            if (result.status === 'silence') {
+                setAnalysisResult({
+                    overall_observation: 'No clear audio detected.',
+                    voice_quality_analysis: {
+                        observation: 'No voice detected',
+                        severity: 'warning',
+                        tcm_indicators: ['Silent recording'],
+                        clinical_significance: 'Please check your microphone settings'
+                    },
+                    breathing_patterns: null,
+                    speech_patterns: null,
+                    cough_sounds: null,
+                    confidence: 'low',
+                    notes: 'The recording appears to be silent. Please check your microphone and try again.',
+                    status: 'error'
+                })
+                return
+            }
+
             setAnalysisResult(result)
         } catch (error) {
             console.error('[AudioRecorder] Analysis failed:', error)
             // Create a fallback result
             setAnalysisResult({
-                overall_observation: 'Audio analysis is pending. Your recording has been saved and will be analyzed in the final report.',
+                overall_observation: 'Audio analysis is unavailable.',
                 voice_quality_analysis: {
-                    observation: 'Voice recording captured successfully',
+                    observation: 'Recording saved but analysis failed',
                     severity: 'normal',
                     tcm_indicators: ['Recording saved'],
                     clinical_significance: 'Will be analyzed with comprehensive diagnosis'
@@ -294,9 +350,10 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
             const avgLevel = sum / dataArray.length
             setAudioLevel(avgLevel)
 
-            // Detect if there's actual audio signal (threshold of 5)
-            if (avgLevel > 5) {
+            // Detect if there's actual audio signal (threshold of 10 to avoid background noise)
+            if (avgLevel > 10) {
                 setHasAudioSignal(true)
+                hasAudioSignalRef.current = true
             }
 
             // Create gradient background
@@ -424,15 +481,22 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                                         style={{ width: `${Math.min(100, audioLevel * 2)}%` }}
                                     />
                                 </div>
-                                <span className={`text-xs font-medium px-2 py-0.5 rounded ${hasAudioSignal ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                                    }`}>
+                                <span
+                                    onClick={() => !hasAudioSignal && setShowTroubleshoot(true)}
+                                    className={`text-xs font-medium px-2 py-0.5 rounded transition-colors ${hasAudioSignal
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-yellow-100 text-yellow-700 cursor-pointer hover:bg-yellow-200'
+                                        }`}>
                                     {hasAudioSignal ? '✓ Mic OK' : '⚠ No signal'}
                                 </span>
                             </div>
 
                             {/* Warning if no audio signal after 3 seconds */}
                             {!hasAudioSignal && (
-                                <div className="absolute top-3 left-3 bg-yellow-100 border border-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded-lg flex items-center gap-1">
+                                <div
+                                    onClick={() => setShowTroubleshoot(true)}
+                                    className="absolute top-3 left-3 bg-yellow-100 border border-yellow-300 text-yellow-800 text-xs px-2 py-1 rounded-lg flex items-center gap-1 cursor-pointer hover:bg-yellow-200 transition-colors shadow-sm z-10"
+                                >
                                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                                     </svg>
@@ -488,23 +552,23 @@ export function AudioRecorder({ onComplete, onBack }: { onComplete: (data: any) 
                         <div className="space-y-2 text-sm text-blue-700">
                             <div className="flex items-start gap-2">
                                 <span className="font-bold text-blue-500">1.</span>
-                                <span><strong>Check browser permission:</strong> Click the lock/info icon in your browser's address bar and ensure microphone is set to "Allow"</span>
+                                <span><strong>Check browser permission:</strong> Click the lock/info icon in your browser's address bar (top left) and ensure microphone is set to "Allow".</span>
                             </div>
                             <div className="flex items-start gap-2">
                                 <span className="font-bold text-blue-500">2.</span>
-                                <span><strong>Check system settings:</strong> Go to your device settings → Privacy → Microphone and ensure access is enabled for your browser</span>
+                                <span><strong>Android users:</strong> If using Chrome/Samsung Internet, go to Settings &gt; Site Settings &gt; Microphone and ensure it's allowed for this site.</span>
                             </div>
                             <div className="flex items-start gap-2">
                                 <span className="font-bold text-blue-500">3.</span>
-                                <span><strong>Check physical connection:</strong> If using an external mic, ensure it's properly plugged in</span>
+                                <span><strong>Check system settings:</strong> Go to your device Settings &gt; Privacy &gt; Microphone and ensure your browser has access.</span>
                             </div>
                             <div className="flex items-start gap-2">
                                 <span className="font-bold text-blue-500">4.</span>
-                                <span><strong>Close other apps:</strong> Apps like Zoom, Teams, or other recording software may be using your microphone</span>
+                                <span><strong>Close other apps:</strong> Apps like Zoom, Teams, or Phone calls may be locking the microphone.</span>
                             </div>
                             <div className="flex items-start gap-2">
                                 <span className="font-bold text-blue-500">5.</span>
-                                <span><strong>Try a different browser:</strong> If issues persist, try Chrome, Firefox, or Edge</span>
+                                <span><strong>Try a different browser:</strong> If using an in-app browser (like from Facebook/WeChat), open the link in Chrome or Safari instead.</span>
                             </div>
                         </div>
                         <div className="flex gap-2 mt-2">

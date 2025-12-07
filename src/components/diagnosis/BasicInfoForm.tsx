@@ -7,10 +7,11 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useState, useEffect, useRef } from 'react'
-import { User, Calendar as CalendarIcon, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles, Stethoscope, Minus, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
+import { User, Calendar as CalendarIcon, Scale, Ruler, Activity, Clock, FileText, Check, Sparkles, Stethoscope, Minus, Plus, ChevronLeft, ChevronRight, Info } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useDoctorLevel, DOCTOR_LEVELS, DoctorLevel } from '@/contexts/DoctorContext'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { BMIExplanationModal } from './BMIExplanationModal'
 
 // Total number of wizard steps
 const TOTAL_STEPS = 5
@@ -251,6 +252,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
     const [currentStep, setCurrentStep] = useState(1)
     const [direction, setDirection] = useState(0)
     const [stepError, setStepError] = useState<string | null>(null)
+    const [showBMIModal, setShowBMIModal] = useState(false)
 
     const [formData, setFormData] = useState<BasicInfoData>(initialData || {
         name: 'Anonymous',
@@ -265,20 +267,23 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
     // Symptom keys for translation
     const symptomKeys: Array<keyof typeof t.basicInfo.symptoms> = [
         'fever', 'cough', 'headache', 'fatigue',
-        'stomachPain', 'soreThroat', 'shortnessOfBreath'
+        'stomachPain', 'soreThroat', 'shortnessOfBreath',
+        'highBloodPressure', 'diabetes', 'cancer',
+        'heartDisease', 'pneumonia', 'stroke'
     ]
 
     const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
 
     // Age quick-select values
+    // Age quick-select values
     const ageRanges = [
-        { label: t.basicInfo.ageRanges?.under18 || 'Under 18', value: 15 },
-        { label: t.basicInfo.ageRanges?.['18-25'] || '18-25', value: 22 },
-        { label: t.basicInfo.ageRanges?.['26-35'] || '26-35', value: 30 },
-        { label: t.basicInfo.ageRanges?.['36-45'] || '36-45', value: 40 },
-        { label: t.basicInfo.ageRanges?.['46-55'] || '46-55', value: 50 },
-        { label: t.basicInfo.ageRanges?.['56-65'] || '56-65', value: 60 },
-        { label: t.basicInfo.ageRanges?.over65 || 'Over 65', value: 70 },
+        { label: t.basicInfo.ageRanges?.under18 || 'Under 18', value: 15, min: 0, max: 17 },
+        { label: t.basicInfo.ageRanges?.['18-25'] || '18-25', value: 22, min: 18, max: 25 },
+        { label: t.basicInfo.ageRanges?.['26-35'] || '26-35', value: 30, min: 26, max: 35 },
+        { label: t.basicInfo.ageRanges?.['36-45'] || '36-45', value: 40, min: 36, max: 45 },
+        { label: t.basicInfo.ageRanges?.['46-55'] || '46-55', value: 50, min: 46, max: 55 },
+        { label: t.basicInfo.ageRanges?.['56-65'] || '56-65', value: 60, min: 56, max: 65 },
+        { label: t.basicInfo.ageRanges?.over65 || 'Over 65', value: 70, min: 66, max: 120 },
     ]
 
     // Load patient profile data from localStorage
@@ -549,7 +554,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                                             onClick={() => setFormData({ ...formData, age: String(range.value) })}
                                             className={`
                                                 px-4 py-3 rounded-full text-sm font-medium transition-all duration-200 min-h-[44px]
-                                                ${parseInt(formData.age) >= range.value - 5 && parseInt(formData.age) <= range.value + 5
+                                                ${parseInt(formData.age) >= range.min && parseInt(formData.age) <= range.max
                                                     ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-300 shadow-sm'
                                                     : 'bg-white text-stone-600 border border-stone-200 hover:border-emerald-200 hover:bg-emerald-50'
                                                 }
@@ -625,16 +630,35 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
 
                             {/* BMI Preview */}
                             {formData.height && formData.weight && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 text-center"
-                                >
-                                    <span className="text-stone-500 text-sm">BMI: </span>
-                                    <span className="text-emerald-700 font-bold text-lg">
-                                        {(parseFloat(formData.weight) / Math.pow(parseFloat(formData.height) / 100, 2)).toFixed(1)}
-                                    </span>
-                                </motion.div>
+                                <>
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 text-center cursor-pointer hover:bg-emerald-100 transition-colors relative group"
+                                        onClick={() => setShowBMIModal(true)}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                    >
+                                        <span className="text-stone-500 text-sm">BMI: </span>
+                                        <span className="text-emerald-700 font-bold text-lg">
+                                            {(parseFloat(formData.weight) / Math.pow(parseFloat(formData.height) / 100, 2)).toFixed(1)}
+                                        </span>
+                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Info className="w-4 h-4 text-emerald-400" />
+                                        </div>
+                                        <div className="text-xs text-emerald-600/70 mt-1 font-medium">
+                                            {t.common.view || 'View'} details
+                                        </div>
+                                    </motion.div>
+
+                                    <BMIExplanationModal
+                                        isOpen={showBMIModal}
+                                        onClose={() => setShowBMIModal(false)}
+                                        bmi={parseFloat(formData.weight) / Math.pow(parseFloat(formData.height) / 100, 2)}
+                                        height={parseFloat(formData.height)}
+                                        weight={parseFloat(formData.weight)}
+                                    />
+                                </>
                             )}
                         </div>
                     )}

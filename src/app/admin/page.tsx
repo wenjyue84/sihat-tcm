@@ -12,7 +12,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import {
     INTERACTIVE_CHAT_PROMPT,
-    IMAGE_ANALYSIS_PROMPT,
+    TONGUE_ANALYSIS_PROMPT,
+    FACE_ANALYSIS_PROMPT,
+    BODY_ANALYSIS_PROMPT,
     LISTENING_ANALYSIS_PROMPT,
     FINAL_ANALYSIS_PROMPT
 } from '@/lib/systemPrompts'
@@ -34,13 +36,29 @@ const PROMPT_TYPES = {
         color: 'blue',
         defaultPrompt: INTERACTIVE_CHAT_PROMPT,
     },
-    image: {
-        role: 'doctor_image',
-        title: '望诊 Image Analysis Prompt',
-        description: 'Used for tongue, face, and body visual inspection. Guides how AI analyzes diagnostic images.',
+    tongue: {
+        role: 'doctor_tongue',
+        title: '舌诊 Tongue Analysis Prompt',
+        description: 'Used for tongue visual inspection. Guides how AI analyzes tongue images.',
+        icon: Eye,
+        color: 'red',
+        defaultPrompt: TONGUE_ANALYSIS_PROMPT,
+    },
+    face: {
+        role: 'doctor_face',
+        title: '面诊 Face Analysis Prompt',
+        description: 'Used for face visual inspection. Guides how AI analyzes face images.',
+        icon: Eye,
+        color: 'orange',
+        defaultPrompt: FACE_ANALYSIS_PROMPT,
+    },
+    body: {
+        role: 'doctor_body',
+        title: '体诊 Body Analysis Prompt',
+        description: 'Used for body visual inspection. Guides how AI analyzes body images.',
         icon: Eye,
         color: 'emerald',
-        defaultPrompt: IMAGE_ANALYSIS_PROMPT,
+        defaultPrompt: BODY_ANALYSIS_PROMPT,
     },
     listening: {
         role: 'doctor_listening',
@@ -65,7 +83,9 @@ type PromptType = keyof typeof PROMPT_TYPES
 export default function AdminDashboard() {
     const [prompts, setPrompts] = useState<Record<PromptType, string>>({
         chat: '',
-        image: '',
+        tongue: '',
+        face: '',
+        body: '',
         listening: '',
         final: '',
     })
@@ -76,7 +96,9 @@ export default function AdminDashboard() {
     const [saved, setSaved] = useState<PromptType | 'config' | null>(null)
     const [expandedPrompts, setExpandedPrompts] = useState<Record<PromptType, boolean>>({
         chat: false,
-        image: false,
+        tongue: false,
+        face: false,
+        body: false,
         listening: false,
         final: false,
     })
@@ -96,19 +118,23 @@ export default function AdminDashboard() {
 
     const fetchAllPrompts = async () => {
         try {
-            // Fetch all three prompts
+            // Fetch all prompts
             const { data, error } = await supabase
                 .from('system_prompts')
                 .select('role, prompt_text, config')
-                .in('role', ['doctor_chat', 'doctor_image', 'doctor_listening', 'doctor_final', 'doctor'])
+                .in('role', ['doctor_chat', 'doctor_tongue', 'doctor_face', 'doctor_body', 'doctor_listening', 'doctor_final', 'doctor'])
 
             if (data) {
                 const newPrompts = { ...prompts }
                 data.forEach((item) => {
                     if (item.role === 'doctor_chat') {
                         newPrompts.chat = item.prompt_text || ''
-                    } else if (item.role === 'doctor_image') {
-                        newPrompts.image = item.prompt_text || ''
+                    } else if (item.role === 'doctor_tongue') {
+                        newPrompts.tongue = item.prompt_text || ''
+                    } else if (item.role === 'doctor_face') {
+                        newPrompts.face = item.prompt_text || ''
+                    } else if (item.role === 'doctor_body') {
+                        newPrompts.body = item.prompt_text || ''
                     } else if (item.role === 'doctor_listening') {
                         newPrompts.listening = item.prompt_text || ''
                     } else if (item.role === 'doctor_final') {
@@ -248,6 +274,18 @@ export default function AdminDashboard() {
             border: 'border-blue-200',
             icon: 'text-blue-600',
             button: 'bg-blue-600 hover:bg-blue-700',
+        },
+        red: {
+            bg: 'bg-red-50',
+            border: 'border-red-200',
+            icon: 'text-red-600',
+            button: 'bg-red-600 hover:bg-red-700',
+        },
+        orange: {
+            bg: 'bg-orange-50',
+            border: 'border-orange-200',
+            icon: 'text-orange-600',
+            button: 'bg-orange-600 hover:bg-orange-700',
         },
         emerald: {
             bg: 'bg-emerald-50',

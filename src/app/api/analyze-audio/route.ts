@@ -58,6 +58,8 @@ Listen carefully for:
 3. Speech patterns - flow, pace, coherence, emotional undertones
 4. Cough sounds - if present, describe the quality and frequency
 
+CRITICAL: If the audio is silent, contains only background noise, or no clear human voice/breathing sounds are detectable, return a JSON with "status": "silence" and "overall_observation": "No clear voice or breathing sounds detected. Please record again.". Do NOT hallucinate findings or return "normal" results for silence.
+
 Provide your analysis in the specified JSON format with detailed observations for each category.`;
 
         // Try each model in order until we get a valid result
@@ -111,7 +113,7 @@ Provide your analysis in the specified JSON format with detailed observations fo
                         return new Response(JSON.stringify({
                             ...data,
                             modelUsed: i + 1,
-                            status: 'success'
+                            status: data.status || 'success'
                         }), {
                             headers: { 'Content-Type': 'application/json' }
                         });
@@ -152,28 +154,28 @@ Provide your analysis in the specified JSON format with detailed observations fo
         return new Response(JSON.stringify({
             overall_observation: 'Audio analysis will be processed with your final diagnosis report.',
             voice_quality_analysis: {
-                observation: 'Voice recording received and will be analyzed during final diagnosis',
-                severity: 'normal',
+                observation: 'Voice recording received',
+                severity: 'pending',
                 tcm_indicators: ['Audio recorded successfully'],
                 clinical_significance: 'Will be integrated with other diagnostic data'
             },
             breathing_patterns: {
-                observation: 'Breathing patterns will be assessed in comprehensive analysis',
-                severity: 'normal',
-                tcm_indicators: ['Recording captured'],
+                observation: 'Pending analysis',
+                severity: 'pending',
+                tcm_indicators: [],
                 clinical_significance: 'Pending comprehensive analysis'
             },
             speech_patterns: {
-                observation: 'Speech patterns noted and will be reviewed',
-                severity: 'normal',
-                tcm_indicators: ['Speech recorded'],
+                observation: 'Pending analysis',
+                severity: 'pending',
+                tcm_indicators: [],
                 clinical_significance: 'Will be evaluated alongside other findings'
             },
             cough_sounds: {
-                observation: 'No significant cough detected or will be reviewed in final analysis',
-                severity: 'none',
+                observation: 'Pending analysis',
+                severity: 'pending',
                 tcm_indicators: [],
-                clinical_significance: 'No immediate concerns noted'
+                clinical_significance: 'Pending'
             },
             pattern_suggestions: ['Analysis pending'],
             recommendations: ['Continue with remaining diagnostic steps'],

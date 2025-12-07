@@ -86,15 +86,23 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
     if (data.verified_summaries?.wen_inquiry) {
       diagnosisInfo += `${data.verified_summaries.wen_inquiry}\n`;
     } else {
-      if (data.wen_inquiry?.inquiryText) {
-        diagnosisInfo += `Detailed Notes: ${data.wen_inquiry.inquiryText}\n`;
-      }
-
-      if (data.wen_chat?.chat && Array.isArray(data.wen_chat.chat)) {
-        const chatHistory = data.wen_chat.chat.map((m: any) => `${m.role}: ${m.content}`).join('\n');
-        diagnosisInfo += `\nChat History (问诊记录):\n${chatHistory}\n`;
+      // If we have a structured summary from the InquiryWizard, use it and SKIP the full chat history
+      // to avoid context limit issues and redundancy.
+      if (data.wen_inquiry?.inquiryText && data.wen_inquiry.inquiryText.length > 50) {
+        diagnosisInfo += `Inquiry Summary: ${data.wen_inquiry.inquiryText}\n`;
+        diagnosisInfo += `(Full chat history omitted as summary is provided)\n`;
       } else {
-        diagnosisInfo += `Chat History: No chat recorded\n`;
+        // Fallback to chat history if no summary or summary is too short
+        if (data.wen_inquiry?.inquiryText) {
+          diagnosisInfo += `Notes: ${data.wen_inquiry.inquiryText}\n`;
+        }
+
+        if (data.wen_chat?.chat && Array.isArray(data.wen_chat.chat)) {
+          const chatHistory = data.wen_chat.chat.map((m: any) => `${m.role}: ${m.content}`).join('\n');
+          diagnosisInfo += `\nChat History (问诊记录):\n${chatHistory}\n`;
+        } else {
+          diagnosisInfo += `Chat History: No chat recorded\n`;
+        }
       }
     }
 

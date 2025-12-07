@@ -1,0 +1,186 @@
+'use client'
+
+import { useState, useRef } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Upload, X, FileText, ArrowRight, SkipForward } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { TextReviewModal } from './TextReviewModal'
+
+export interface FileData {
+    name: string
+    type: string
+    data: string
+    extractedText?: string
+}
+
+interface UploadReportsStepProps {
+    onComplete: (files: FileData[]) => void
+    onSkip: () => void
+    initialFiles?: FileData[]
+    onBack?: () => void
+}
+
+export function UploadReportsStep({ onComplete, onSkip, initialFiles = [], onBack }: UploadReportsStepProps) {
+    const { t, language } = useLanguage()
+    const [files, setFiles] = useState<FileData[]>(initialFiles)
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+    const [currentReviewFile, setCurrentReviewFile] = useState<File | null>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return
+        const file = e.target.files[0]
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert(t.errors?.fileTooBig?.replace('{size}', '5') || 'File too big (max 5MB)')
+            return
+        }
+
+        setCurrentReviewFile(file)
+        setIsReviewModalOpen(true)
+        e.target.value = '' // Reset input
+    }
+
+    const convertToBase64 = (file: File) => {
+        return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.readAsDataURL(file)
+            reader.onload = () => resolve(reader.result as string)
+            reader.onerror = error => reject(error)
+        })
+    }
+
+    const handleReviewConfirm = async (text: string, file: File) => {
+        try {
+            const base64 = await convertToBase64(file)
+            setFiles(prev => [...prev, {
+                name: file.name,
+                type: file.type,
+                data: base64,
+                extractedText: text
+            }])
+        } catch (error) {
+            console.error("Error processing file:", error)
+        }
+    }
+
+    const removeFile = (index: number) => {
+        setFiles(prev => prev.filter((_, i) => i !== index))
+    }
+
+    const lang = language as 'en' | 'zh' | 'ms'
+
+    const content = {
+        title: {
+            en: 'Upload Medical Reports',
+            zh: '上传医疗报告',
+            ms: 'Muat Naik Laporan Perubatan'
+        },
+        description: {
+            en: 'If you have any existing medical reports, blood tests, or diagnosis documents, please upload them here. We will extract the text for the AI doctor.',
+            zh: '如果您有任何现有的医疗报告、验血报告或诊断文件，请在此上传。我们将为AI医生提取文本。',
+            ms: 'Jika anda mempunyai sebarang laporan perubatan, ujian darah, atau dokumen diagnosis sedia ada, sila muat naik di sini. Kami akan mengekstrak teks untuk doktor AI.'
+        },
+        uploadBtn: {
+            en: 'Upload Document',
+            zh: '上传文档',
+            ms: 'Muat Naik Dokumen'
+        },
+        nextBtn: {
+            en: 'Next Step',
+            zh: '下一步',
+            ms: 'Langkah Seterusnya'
+        },
+        skipBtn: {
+            en: 'Skip',
+            zh: '跳过',
+            ms: 'Langkau'
+        },
+        uploadedFiles: {
+            en: 'Uploaded Files:',
+            zh: '已上传文件：',
+            ms: 'Fail Dimuat Naik:'
+        }
+    }
+
+    return (
+        <Card className="p-6 min-h-[500px] flex flex-col">
+            <div className="mb-6">
+                <h2 className="text-xl font-semibold text-emerald-800 mb-2">{content.title[lang]}</h2>
+                <p className="text-stone-600">{content.description[lang]}</p>
+            </div>
+
+            <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-stone-200 rounded-xl bg-stone-50 p-8 mb-6">
+                <div className="text-center">
+                    <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Upload className="w-8 h-8" />
+                    </div>
+                    <Button onClick={() => fileInputRef.current?.click()} className="bg-emerald-600 hover:bg-emerald-700">
+                        {content.uploadBtn[lang]}
+                    </Button>
+                    <p className="text-xs text-stone-400 mt-2">PDF, JPG, PNG (Max 5MB)</p>
+                </div>
+            </div>
+
+            {files.length > 0 && (
+                <div className="mb-6">
+                    <h3 className="text-sm font-medium text-stone-700 mb-3">{content.uploadedFiles[lang]}</h3>
+                    <div className="space-y-2">
+                        {files.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between bg-white border border-stone-200 p-3 rounded-lg shadow-sm">
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                    <div className="w-8 h-8 bg-stone-100 rounded flex items-center justify-center flex-shrink-0">
+                                        <FileText className="w-4 h-4 text-stone-500" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-medium text-stone-800 truncate">{file.name}</p>
+                                        <p className="text-xs text-stone-500 truncate">{file.extractedText?.substring(0, 50)}...</p>
+                                    </div>
+                                </div>
+                                <Button variant="ghost" size="sm" onClick={() => removeFile(index)} className="text-stone-400 hover:text-red-500">
+                                    <X className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            <div className="flex justify-between mt-auto pt-4 border-t border-stone-100">
+                <div className="flex gap-2">
+                    {onBack && (
+                        <Button variant="outline" onClick={onBack} className="text-stone-600">
+                            {language === 'zh' ? '返回' : language === 'ms' ? 'Kembali' : 'Back'}
+                        </Button>
+                    )}
+                    <Button variant="ghost" onClick={onSkip} className="text-stone-500 hover:text-stone-700">
+                        {content.skipBtn[lang]} <SkipForward className="w-4 h-4 ml-2" />
+                    </Button>
+                </div>
+                <Button
+                    onClick={() => onComplete(files)}
+                    className="bg-emerald-800 hover:bg-emerald-900"
+                    disabled={files.length === 0}
+                >
+                    {content.nextBtn[lang]} <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+            </div>
+
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*,application/pdf"
+                onChange={handleFileChange}
+            />
+
+            <TextReviewModal
+                isOpen={isReviewModalOpen}
+                onClose={() => setIsReviewModalOpen(false)}
+                onConfirm={handleReviewConfirm}
+                file={currentReviewFile}
+            />
+        </Card>
+    )
+}

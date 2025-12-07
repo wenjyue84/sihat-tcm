@@ -77,7 +77,7 @@ export function ShowPromptButton({ promptType }: ShowPromptButtonProps) {
         setIsLoading(true)
         try {
             // Dynamic import of systemPrompts
-            const { INTERACTIVE_CHAT_PROMPT, IMAGE_ANALYSIS_PROMPT, LISTENING_ANALYSIS_PROMPT, FINAL_ANALYSIS_PROMPT } = await import('@/lib/systemPrompts')
+            const { INTERACTIVE_CHAT_PROMPT, TONGUE_ANALYSIS_PROMPT, FACE_ANALYSIS_PROMPT, BODY_ANALYSIS_PROMPT, LISTENING_ANALYSIS_PROMPT, FINAL_ANALYSIS_PROMPT } = await import('@/lib/systemPrompts')
 
             let selectedPrompt = ''
             switch (promptType) {
@@ -85,7 +85,7 @@ export function ShowPromptButton({ promptType }: ShowPromptButtonProps) {
                     selectedPrompt = INTERACTIVE_CHAT_PROMPT
                     break
                 case 'image':
-                    selectedPrompt = IMAGE_ANALYSIS_PROMPT
+                    selectedPrompt = `--- TONGUE ANALYSIS PROMPT ---\n${TONGUE_ANALYSIS_PROMPT}\n\n--- FACE ANALYSIS PROMPT ---\n${FACE_ANALYSIS_PROMPT}\n\n--- BODY ANALYSIS PROMPT ---\n${BODY_ANALYSIS_PROMPT}`
                     break
                 case 'final':
                     selectedPrompt = FINAL_ANALYSIS_PROMPT

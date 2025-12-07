@@ -1,6 +1,6 @@
 import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
-import { getImageAnalysisPrompt, IMAGE_ANALYSIS_PROMPT } from '@/lib/systemPrompts';
+import { getImageAnalysisPrompt } from '@/lib/systemPrompts';
 import { supabase } from '@/lib/supabase';
 
 export const maxDuration = 120;
@@ -67,10 +67,10 @@ export async function POST(req: Request) {
 
         // Get the appropriate prompt based on image type
         const imageType = type === 'tongue' ? 'tongue' : type === 'face' ? 'face' : 'other';
-        const { user: userPrompt } = getImageAnalysisPrompt(imageType);
+        const { system: defaultSystemPrompt, user: userPrompt } = getImageAnalysisPrompt(imageType);
 
         // Use custom prompt if set, otherwise use default from library
-        const systemPrompt = customPrompt || IMAGE_ANALYSIS_PROMPT;
+        const systemPrompt = customPrompt || defaultSystemPrompt;
 
 
 

@@ -10,7 +10,7 @@ import { LanguageSelector } from '@/components/ui/LanguageSelector'
 import Image from 'next/image'
 
 export default function Home() {
-  const [isDev, setIsDev] = useState(false)
+
   /**
    * ============================================================================
    * TEST BUTTON CLICK FEEDBACK FEATURE
@@ -32,13 +32,7 @@ export default function Home() {
   const { user, profile, loading } = useAuth()
   const { t } = useLanguage()
 
-  useEffect(() => {
-    // Check if running on localhost (development)
-    setIsDev(
-      window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1'
-    )
-  }, [])
+
 
   /**
    * Handle Test button click with visual feedback
@@ -95,25 +89,25 @@ export default function Home() {
             DO NOT REMOVE the testClicked conditional styling or icon swap!
             ========================================================================
           */}
-          {isDev && (
-            <button
-              onClick={handleTestClick}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl
-                ${testClicked
-                  ? 'bg-emerald-500 text-white scale-95 ring-4 ring-emerald-300/50'
-                  : 'bg-amber-500 hover:bg-amber-400 text-amber-950 hover:scale-105'
-                }`}
-            >
-              {/* Icon swap: Check with bounce when clicked, FlaskConical otherwise */}
-              {testClicked ? (
-                <Check className="w-4 h-4 animate-bounce" />
-              ) : (
-                <FlaskConical className="w-4 h-4" />
-              )}
-              {/* Text: "Filled!" when clicked, "Test" otherwise */}
+          <button
+            onClick={handleTestClick}
+            className={`flex items-center gap-2 p-2 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl
+              ${testClicked
+                ? 'bg-emerald-500 text-white scale-95 ring-4 ring-emerald-300/50'
+                : 'bg-amber-500 hover:bg-amber-400 text-amber-950 hover:scale-105'
+              }`}
+          >
+            {/* Icon swap: Check with bounce when clicked, FlaskConical otherwise */}
+            {testClicked ? (
+              <Check className="w-4 h-4 animate-bounce" />
+            ) : (
+              <FlaskConical className="w-4 h-4" />
+            )}
+            {/* Text: "Filled!" when clicked, "Test" otherwise */}
+            <span className="hidden sm:inline">
               {testClicked ? t.common.filled : t.nav.test}
-            </button>
-          )}
+            </span>
+          </button>
           {!loading && (
             user ? (
               <Link href={`/${profile?.role || 'patient'}`}>
