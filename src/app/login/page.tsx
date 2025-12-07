@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
 import { useDeveloper } from '@/contexts/DeveloperContext'
+import { Home } from 'lucide-react'
 
 // Simple, elegant icons
 const PatientIcon = () => (
@@ -164,6 +166,15 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-stone-50 to-stone-100 flex items-center justify-center p-4">
+            {/* Home Button - Top Left */}
+            <Link
+                href="/"
+                className="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-2 bg-white/90 hover:bg-white rounded-lg border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow transition-all duration-200 text-gray-600 hover:text-gray-900"
+            >
+                <Home className="w-4 h-4" />
+                <span className="text-sm font-medium">{t.nav.home}</span>
+            </Link>
+
             {/* Language Selector - Top Right */}
             <div className="absolute top-4 right-4 z-20">
                 <LanguageSelector variant="dropdown" />

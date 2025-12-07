@@ -23,7 +23,11 @@ import { ObservationResult } from './ObservationResult'
 import { ImageAnalysisLoader } from './ImageAnalysisLoader'
 import { DiagnosisSummary } from './DiagnosisSummary'
 import { SmartConnectStep, SmartConnectData } from './SmartConnectStep'
+import { PhaseCompleteAnimation } from './PhaseCompleteAnimation'
 import { Loader2 } from 'lucide-react'
+
+// Type for celebration animation phases
+type CelebrationPhase = 'basics' | 'inquiry' | 'tongue' | 'face' | 'audio' | 'pulse' | 'smartConnect' | 'summary' | null
 
 /**
  * Repairs common JSON formatting issues from AI responses
@@ -462,6 +466,9 @@ export default function DiagnosisWizard() {
     const { user, profile } = useAuth()
     const [isSaved, setIsSaved] = useState(false)
 
+    // Celebration animation state - shows brief animation on phase completion
+    const [celebrationPhase, setCelebrationPhase] = useState<CelebrationPhase>(null)
+
     useEffect(() => {
         // Check localStorage first for data passed from dashboard
         const localData = localStorage.getItem('patientProfileData')
@@ -500,6 +507,28 @@ export default function DiagnosisWizard() {
     const [error, setError] = useState<Error | null>(null)
 
     const nextStep = (current: DiagnosisStep) => {
+        // Map step to celebration phase and trigger animation
+        const stepToCelebration: Record<DiagnosisStep, CelebrationPhase> = {
+            'basic_info': 'basics',
+            'wen_inquiry': 'inquiry',
+            'wang_tongue': 'tongue',
+            'wang_face': 'face',
+            'wang_part': 'face', // Part is grouped with face
+            'wen_audio': 'audio',
+            'qie': 'pulse',
+            'smart_connect': 'smartConnect',
+            'summary': 'summary',
+            'processing': null,
+            'report': null
+        }
+
+        // Trigger celebration animation (non-blocking)
+        const celebrationPhase = stepToCelebration[current]
+        if (celebrationPhase) {
+            setCelebrationPhase(celebrationPhase)
+        }
+
+        // Proceed with step transition immediately (animation runs in parallel)
         switch (current) {
             case 'basic_info': setStep('wen_inquiry'); break;
             case 'wen_inquiry': setStep('wang_tongue'); break;

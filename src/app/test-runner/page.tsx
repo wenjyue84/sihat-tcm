@@ -5,13 +5,23 @@ import { motion } from 'framer-motion'
 import { repairJSON, generateMockReport, MOCK_PROFILES } from '@/components/diagnosis/DiagnosisWizard'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, XCircle, Loader2, AlertTriangle, Terminal, Play, Copy, ChevronRight, ChevronDown } from 'lucide-react'
+import { CheckCircle, XCircle, Loader2, AlertTriangle, Terminal, Play, Copy, ChevronRight, ChevronDown, RefreshCw } from 'lucide-react'
 
 const MOCK_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 const MOCK_AUDIO = "data:audio/webm;base64,UklGRi4AAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=";
 
-type TestStatus = 'pending' | 'running' | 'passed' | 'failed'
-type TestCategory = 'Utilities' | 'Data Integrity' | 'AI Capabilities' | 'Chat & Interaction' | 'System Health' | 'Report Generation'
+type TestStatus = 'pending' | 'running' | 'passed' | 'failed' | 'skipped'
+type TestCategory =
+    | 'Step 1: Basic Info'
+    | 'Step 2: TCM Inquiry'
+    | 'Step 3: Tongue Analysis'
+    | 'Step 4: Face Analysis'
+    | 'Step 5: Voice Analysis'
+    | 'Step 6: Pulse Check'
+    | 'Step 7: Smart Connect'
+    | 'Step 8: Report Generation'
+    | 'Core Utilities'
+    | 'System Health'
 
 interface TestResult {
     id: string
@@ -23,117 +33,341 @@ interface TestResult {
     message?: string
     error?: any
     duration?: number
+    critical?: boolean // Mark critical tests
 }
 
 export default function TestRunnerPage() {
     const [tests, setTests] = useState<TestResult[]>([
-        // Utilities
+        // ============================================
+        // CORE UTILITIES (Foundation Tests)
+        // ============================================
         {
             id: 'json_repair',
             number: 1,
             name: 'JSON Repair Utility',
-            description: 'Tests the JSON repair function with malformed JSON strings.',
-            category: 'Utilities',
-            status: 'pending'
+            description: 'Tests the JSON repair function with malformed AI responses.',
+            category: 'Core Utilities',
+            status: 'pending',
+            critical: true
         },
-        // Data Integrity
         {
-            id: 'mock_profiles',
+            id: 'mock_profiles_integrity',
             number: 2,
-            name: 'Mock Profiles Integrity',
-            description: 'Verifies that mock profiles contain all necessary data fields.',
-            category: 'Data Integrity',
-            status: 'pending'
+            name: 'Mock Profiles Data Integrity',
+            description: 'Verifies all mock profiles contain required fields for testing.',
+            category: 'Core Utilities',
+            status: 'pending',
+            critical: true
         },
         {
-            id: 'test_button_data_coverage',
+            id: 'component_imports',
             number: 3,
-            name: 'Test Button Data Coverage',
-            description: 'Checks if the "Test" button mock data covers all required fields (medicine, audio, etc).',
-            category: 'Data Integrity',
-            status: 'pending'
+            name: 'Core Component Imports',
+            description: 'Verifies critical components can be imported without errors.',
+            category: 'Core Utilities',
+            status: 'pending',
+            critical: true
         },
-        // AI Capabilities
+
+        // ============================================
+        // STEP 1: BASIC INFO
+        // ============================================
         {
-            id: 'llm_text_extraction',
+            id: 'basic_info_validation',
             number: 4,
-            name: 'LLM Text Extraction (OCR)',
-            description: 'Verifies if the LLM can extract text from images (PDF/JPG).',
-            category: 'AI Capabilities',
-            status: 'pending'
+            name: 'Basic Info Field Validation',
+            description: 'Verifies required fields: name, age, gender, symptoms.',
+            category: 'Step 1: Basic Info',
+            status: 'pending',
+            critical: true
         },
         {
-            id: 'medicine_extraction',
+            id: 'bmi_calculation',
             number: 5,
-            name: 'Medicine Recognition',
-            description: 'Tests if the LLM can identify medicine from photos.',
-            category: 'AI Capabilities',
+            name: 'BMI Calculation Logic',
+            description: 'Tests BMI calculation with various height/weight inputs.',
+            category: 'Step 1: Basic Info',
             status: 'pending'
         },
         {
-            id: 'audio_analysis',
+            id: 'symptom_duration_options',
             number: 6,
-            name: 'Audio Analysis',
-            description: 'Verifies if the system can process and analyze audio files.',
-            category: 'AI Capabilities',
+            name: 'Symptom Duration Options',
+            description: 'Verifies all symptom duration options are available.',
+            category: 'Step 1: Basic Info',
             status: 'pending'
         },
+
+        // ============================================
+        // STEP 2: TCM INQUIRY (问诊)
+        // ============================================
         {
-            id: 'tongue_analysis',
+            id: 'chat_api_endpoint',
             number: 7,
-            name: 'Tongue Analysis (Vision)',
-            description: 'Verifies if the system can analyze a tongue image.',
-            category: 'AI Capabilities',
-            status: 'pending'
+            name: 'Chat API Endpoint Health',
+            description: 'Checks if /api/chat endpoint is reachable.',
+            category: 'Step 2: TCM Inquiry',
+            status: 'pending',
+            critical: true
         },
-        // Chat & Interaction
         {
-            id: 'tcm_inquiry_prompt',
+            id: 'chat_stream_response',
             number: 8,
-            name: 'TCM Inquiry Persona',
-            description: 'Verifies that the TCM inquiry chat acts according to the system prompt.',
-            category: 'Chat & Interaction',
-            status: 'pending'
+            name: 'Chat Streaming Response',
+            description: 'Verifies chat API returns streaming response correctly.',
+            category: 'Step 2: TCM Inquiry',
+            status: 'pending',
+            critical: true
         },
         {
-            id: 'chat_api_health',
+            id: 'tcm_inquiry_persona',
             number: 9,
-            name: 'Chat API Endpoint',
-            description: 'Checks if the chat API endpoint is reachable and accepts requests.',
-            category: 'Chat & Interaction',
+            name: 'TCM Doctor Persona',
+            description: 'Verifies AI responds as a TCM practitioner.',
+            category: 'Step 2: TCM Inquiry',
             status: 'pending'
         },
-        // Report Generation
         {
-            id: 'report_generation_api',
+            id: 'chat_language_support',
             number: 10,
-            name: 'Report Generation API',
-            description: 'Tests the backend report generation API with mock data.',
-            category: 'Report Generation',
+            name: 'Multi-language Chat Support',
+            description: 'Tests chat works with zh, en, and ms languages.',
+            category: 'Step 2: TCM Inquiry',
             status: 'pending'
         },
         {
-            id: 'report_generation',
+            id: 'file_upload_extraction',
             number: 11,
-            name: 'Report Generation Logic (Mock)',
-            description: 'Tests the mock report generation with various profile data.',
-            category: 'Report Generation',
+            name: 'Report File Text Extraction',
+            description: 'Tests /api/extract-text for uploaded reports.',
+            category: 'Step 2: TCM Inquiry',
             status: 'pending'
         },
-        // System Health
         {
-            id: 'api_health',
+            id: 'medicine_photo_extraction',
             number: 12,
-            name: 'General API Health Check',
-            description: 'Checks if the backend API endpoints are reachable.',
+            name: 'Medicine Photo Recognition',
+            description: 'Tests medicine identification from photos.',
+            category: 'Step 2: TCM Inquiry',
+            status: 'pending'
+        },
+        {
+            id: 'inquiry_summary_generation',
+            number: 13,
+            name: 'Inquiry Summary Generation',
+            description: 'Tests /api/summarize-inquiry endpoint.',
+            category: 'Step 2: TCM Inquiry',
+            status: 'pending',
+            critical: true
+        },
+
+        // ============================================
+        // STEP 3: TONGUE ANALYSIS (望诊-舌)
+        // ============================================
+        {
+            id: 'tongue_api_endpoint',
+            number: 14,
+            name: 'Tongue Analysis API',
+            description: 'Checks /api/analyze-image?type=tongue endpoint.',
+            category: 'Step 3: Tongue Analysis',
+            status: 'pending',
+            critical: true
+        },
+        {
+            id: 'tongue_image_validation',
+            number: 15,
+            name: 'Tongue Image Validation',
+            description: 'Verifies API rejects non-tongue images gracefully.',
+            category: 'Step 3: Tongue Analysis',
+            status: 'pending'
+        },
+        {
+            id: 'tongue_observation_format',
+            number: 16,
+            name: 'Tongue Observation Format',
+            description: 'Verifies response includes observation and potential_issues.',
+            category: 'Step 3: Tongue Analysis',
+            status: 'pending'
+        },
+
+        // ============================================
+        // STEP 4: FACE ANALYSIS (望诊-面)
+        // ============================================
+        {
+            id: 'face_api_endpoint',
+            number: 17,
+            name: 'Face Analysis API',
+            description: 'Checks /api/analyze-image?type=face endpoint.',
+            category: 'Step 4: Face Analysis',
+            status: 'pending',
+            critical: true
+        },
+        {
+            id: 'face_observation_format',
+            number: 18,
+            name: 'Face Observation Format',
+            description: 'Verifies response includes TCM complexion analysis.',
+            category: 'Step 4: Face Analysis',
+            status: 'pending'
+        },
+
+        // ============================================
+        // STEP 5: VOICE ANALYSIS (闻诊)
+        // ============================================
+        {
+            id: 'audio_api_endpoint',
+            number: 19,
+            name: 'Audio Analysis API',
+            description: 'Checks /api/analyze-audio endpoint.',
+            category: 'Step 5: Voice Analysis',
+            status: 'pending',
+            critical: true
+        },
+        {
+            id: 'audio_analysis_format',
+            number: 20,
+            name: 'Audio Analysis Response Format',
+            description: 'Verifies response includes voice quality and TCM indicators.',
+            category: 'Step 5: Voice Analysis',
+            status: 'pending'
+        },
+        {
+            id: 'audio_language_support',
+            number: 21,
+            name: 'Audio Multi-language Support',
+            description: 'Tests audio analysis with different language settings.',
+            category: 'Step 5: Voice Analysis',
+            status: 'pending'
+        },
+
+        // ============================================
+        // STEP 6: PULSE CHECK (切诊)
+        // ============================================
+        {
+            id: 'pulse_qualities_data',
+            number: 22,
+            name: 'Pulse Qualities Data',
+            description: 'Verifies all TCM pulse types are defined correctly.',
+            category: 'Step 6: Pulse Check',
+            status: 'pending'
+        },
+        {
+            id: 'bpm_calculation',
+            number: 23,
+            name: 'BPM Calculation Logic',
+            description: 'Tests heart rate calculation from tap intervals.',
+            category: 'Step 6: Pulse Check',
+            status: 'pending'
+        },
+        {
+            id: 'pulse_data_structure',
+            number: 24,
+            name: 'Pulse Data Structure',
+            description: 'Verifies pulse data contains bpm and pulseQualities.',
+            category: 'Step 6: Pulse Check',
+            status: 'pending'
+        },
+
+        // ============================================
+        // STEP 7: SMART CONNECT (IoT)
+        // ============================================
+        {
+            id: 'smart_connect_data_structure',
+            number: 25,
+            name: 'Smart Connect Data Structure',
+            description: 'Verifies IoT data fields: pulseRate, bloodPressure, etc.',
+            category: 'Step 7: Smart Connect',
+            status: 'pending'
+        },
+        {
+            id: 'health_data_provider_integration',
+            number: 26,
+            name: 'Health Data Provider Fields',
+            description: 'Checks steps, sleepHours, heartRate, calories fields.',
+            category: 'Step 7: Smart Connect',
+            status: 'pending'
+        },
+
+        // ============================================
+        // STEP 8: REPORT GENERATION
+        // ============================================
+        {
+            id: 'consult_api_endpoint',
+            number: 27,
+            name: 'Consult API Endpoint Health',
+            description: 'Checks if /api/consult endpoint is reachable.',
+            category: 'Step 8: Report Generation',
+            status: 'pending',
+            critical: true
+        },
+        {
+            id: 'consult_stream_response',
+            number: 28,
+            name: 'Report Generation Streaming',
+            description: 'Verifies /api/consult returns streaming JSON report.',
+            category: 'Step 8: Report Generation',
+            status: 'pending',
+            critical: true
+        },
+        {
+            id: 'report_structure_validation',
+            number: 29,
+            name: 'Report Structure Validation',
+            description: 'Verifies report has diagnosis, recommendations, etc.',
+            category: 'Step 8: Report Generation',
+            status: 'pending',
+            critical: true
+        },
+        {
+            id: 'mock_report_generation',
+            number: 30,
+            name: 'Mock Report Generation',
+            description: 'Tests generateMockReport with all profile types.',
+            category: 'Step 8: Report Generation',
+            status: 'pending'
+        },
+        {
+            id: 'report_chat_api',
+            number: 31,
+            name: 'Report Chat API',
+            description: 'Tests /api/report-chat for follow-up questions.',
+            category: 'Step 8: Report Generation',
+            status: 'pending'
+        },
+        {
+            id: 'infographic_generation',
+            number: 32,
+            name: 'Infographic Generation API',
+            description: 'Tests /api/generate-infographic endpoint.',
+            category: 'Step 8: Report Generation',
+            status: 'pending'
+        },
+
+        // ============================================
+        // SYSTEM HEALTH
+        // ============================================
+        {
+            id: 'api_general_health',
+            number: 33,
+            name: 'General API Health',
+            description: 'Checks if the Next.js server is responding.',
+            category: 'System Health',
+            status: 'pending',
+            critical: true
+        },
+        {
+            id: 'supabase_connection',
+            number: 34,
+            name: 'Database Connection (Supabase)',
+            description: 'Verifies Supabase connection is working.',
             category: 'System Health',
             status: 'pending'
         },
         {
-            id: 'diagnosis_wizard_import',
-            number: 13,
-            name: 'Component Imports',
-            description: 'Verifies that critical components can be imported without errors.',
+            id: 'model_fallback_chain',
+            number: 35,
+            name: 'AI Model Fallback Chain',
+            description: 'Verifies model fallback works when primary fails.',
             category: 'System Health',
             status: 'pending'
         }
@@ -143,12 +377,16 @@ export default function TestRunnerPage() {
     const [progress, setProgress] = useState(0)
     const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null)
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
-        'Utilities': true,
-        'Data Integrity': true,
-        'AI Capabilities': true,
-        'Chat & Interaction': true,
-        'System Health': true,
-        'Report Generation': true
+        'Core Utilities': true,
+        'Step 1: Basic Info': true,
+        'Step 2: TCM Inquiry': true,
+        'Step 3: Tongue Analysis': true,
+        'Step 4: Face Analysis': true,
+        'Step 5: Voice Analysis': true,
+        'Step 6: Pulse Check': true,
+        'Step 7: Smart Connect': true,
+        'Step 8: Report Generation': true,
+        'System Health': true
     })
 
     useEffect(() => {
@@ -330,11 +568,36 @@ export default function TestRunnerPage() {
                             language: 'en'
                         })
                     });
-                    if (!response.ok) throw new Error(`API returned ${response.status}`);
+                    if (!response.ok) {
+                        // Try to get error details from response body
+                        const errorText = await response.text().catch(() => 'Unknown error');
+                        throw new Error(`API returned ${response.status}: ${errorText.slice(0, 200)}`);
+                    }
                     const reader = response.body?.getReader();
                     if (!reader) throw new Error('No response body');
-                    const { value, done } = await reader.read();
-                    if (done && !value) throw new Error('Empty response stream');
+
+                    // Read stream with timeout - LLM streams may take time to start
+                    let receivedData = false;
+                    const startTime = Date.now();
+                    const timeout = 15000; // 15 second timeout for first chunk
+
+                    while (!receivedData && (Date.now() - startTime) < timeout) {
+                        const { value, done } = await reader.read();
+                        if (value && value.length > 0) {
+                            receivedData = true;
+                        } else if (done) {
+                            throw new Error('Empty response stream - stream closed without data');
+                        }
+                        // Small delay before retry if no data yet
+                        if (!receivedData && !done) {
+                            await new Promise(r => setTimeout(r, 100));
+                        }
+                    }
+
+                    if (!receivedData) {
+                        throw new Error('Timeout waiting for stream data (15s)');
+                    }
+
                     reader.cancel();
                 } catch (e: any) {
                     throw new Error(`TCM Inquiry failed: ${e.message}`);
@@ -371,11 +634,35 @@ export default function TestRunnerPage() {
                             language: 'en'
                         })
                     });
-                    if (!response.ok) throw new Error(`API returned ${response.status}`);
+                    if (!response.ok) {
+                        const errorText = await response.text().catch(() => 'Unknown error');
+                        throw new Error(`API returned ${response.status}: ${errorText.slice(0, 200)}`);
+                    }
                     const reader = response.body?.getReader();
                     if (!reader) throw new Error('No response body');
-                    const { value, done } = await reader.read();
-                    if (done && !value) throw new Error('Empty response stream');
+
+                    // Read stream with timeout - LLM streams may take time to start
+                    let receivedData = false;
+                    const startTime = Date.now();
+                    const timeout = 15000; // 15 second timeout for first chunk
+
+                    while (!receivedData && (Date.now() - startTime) < timeout) {
+                        const { value, done } = await reader.read();
+                        if (value && value.length > 0) {
+                            receivedData = true;
+                        } else if (done) {
+                            throw new Error('Empty response stream - stream closed without data');
+                        }
+                        // Small delay before retry if no data yet
+                        if (!receivedData && !done) {
+                            await new Promise(r => setTimeout(r, 100));
+                        }
+                    }
+
+                    if (!receivedData) {
+                        throw new Error('Timeout waiting for stream data (15s)');
+                    }
+
                     reader.cancel();
                 } catch (e: any) {
                     throw new Error(`Report Generation API failed: ${e.message}`);
@@ -433,7 +720,18 @@ Please help me troubleshoot this issue. Analyze the code related to '${test.id}'
         return acc
     }, {} as Record<TestCategory, TestResult[]>)
 
-    const categories: TestCategory[] = ['Utilities', 'Data Integrity', 'AI Capabilities', 'Chat & Interaction', 'Report Generation', 'System Health']
+    const categories: TestCategory[] = [
+        'Core Utilities',
+        'Step 1: Basic Info',
+        'Step 2: TCM Inquiry',
+        'Step 3: Tongue Analysis',
+        'Step 4: Face Analysis',
+        'Step 5: Voice Analysis',
+        'Step 6: Pulse Check',
+        'Step 7: Smart Connect',
+        'Step 8: Report Generation',
+        'System Health'
+    ]
 
     return (
         <div className="min-h-screen bg-slate-950 text-slate-200 p-8 font-sans">
@@ -509,8 +807,8 @@ Please help me troubleshoot this issue. Analyze the code related to '${test.id}'
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex items-center gap-4">
                                                         <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${test.status === 'passed' ? 'bg-emerald-900 text-emerald-400' :
-                                                                test.status === 'failed' ? 'bg-red-900 text-red-400' :
-                                                                    'bg-slate-800 text-slate-500'
+                                                            test.status === 'failed' ? 'bg-red-900 text-red-400' :
+                                                                'bg-slate-800 text-slate-500'
                                                             }`}>
                                                             {test.number}
                                                         </div>
