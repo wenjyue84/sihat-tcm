@@ -90,39 +90,7 @@ const phaseConfigs: Record<DiagnosisPhase, {
     }
 }
 
-// Translations for phase completion messages
-const phaseMessages: Record<string, Record<DiagnosisPhase, { title: string; subtitle: string }>> = {
-    en: {
-        basics: { title: 'Profile Complete!', subtitle: 'Great start! Moving to inquiry...' },
-        inquiry: { title: 'Inquiry Complete!', subtitle: 'Excellent answers! Time for visual diagnosis...' },
-        tongue: { title: 'Tongue Analysis Done!', subtitle: 'Perfect! Now let\'s check your face...' },
-        face: { title: 'Face Analysis Done!', subtitle: 'Looking good! Voice analysis is next...' },
-        audio: { title: 'Voice Recorded!', subtitle: 'Clear audio! Pulse check ahead...' },
-        pulse: { title: 'Pulse Measured!', subtitle: 'Almost there! Connect smart devices...' },
-        smartConnect: { title: 'Data Connected!', subtitle: 'Final review coming up...' },
-        summary: { title: 'All Set!', subtitle: 'Generating your personalized report...' }
-    },
-    zh: {
-        basics: { title: '资料填写完成！', subtitle: '开始问诊...' },
-        inquiry: { title: '问诊完成！', subtitle: '回答很详细！开始望诊...' },
-        tongue: { title: '舌诊完成！', subtitle: '很好！接下来面诊...' },
-        face: { title: '面诊完成！', subtitle: '不错！准备声音分析...' },
-        audio: { title: '声音录制完成！', subtitle: '清晰！开始脉诊...' },
-        pulse: { title: '脉诊完成！', subtitle: '快完成了！连接智能设备...' },
-        smartConnect: { title: '数据已连接！', subtitle: '准备最终审核...' },
-        summary: { title: '准备就绪！', subtitle: '正在生成您的个性化报告...' }
-    },
-    ms: {
-        basics: { title: 'Profil Lengkap!', subtitle: 'Permulaan yang baik! Ke soal jawab...' },
-        inquiry: { title: 'Soal Jawab Selesai!', subtitle: 'Jawapan bagus! Masa untuk diagnosis visual...' },
-        tongue: { title: 'Analisis Lidah Selesai!', subtitle: 'Sempurna! Sekarang muka pula...' },
-        face: { title: 'Analisis Muka Selesai!', subtitle: 'Bagus! Analisis suara seterusnya...' },
-        audio: { title: 'Suara Dirakam!', subtitle: 'Jelas! Semakan nadi seterusnya...' },
-        pulse: { title: 'Nadi Diukur!', subtitle: 'Hampir siap! Sambung peranti pintar...' },
-        smartConnect: { title: 'Data Disambung!', subtitle: 'Semakan akhir akan datang...' },
-        summary: { title: 'Sedia!', subtitle: 'Menjana laporan peribadi anda...' }
-    }
-}
+// Translations for phase completion messages are now in the global translation files
 
 // Floating particle component for celebration effect
 const FloatingParticle = ({ delay, x }: { delay: number; x: number }) => (
@@ -148,12 +116,12 @@ export function PhaseCompleteAnimation({
     onComplete,
     duration = 1500
 }: PhaseCompleteAnimationProps) {
-    const { language } = useLanguage()
+    const { t } = useLanguage()
     const [showParticles, setShowParticles] = useState(false)
 
     const config = phaseConfigs[phase]
-    const messages = phaseMessages[language] || phaseMessages.en
-    const message = messages[phase]
+    // Fallback to empty if translation loading, though t should always be ready
+    const message = t.celebration?.[phase] || { title: '', subtitle: '' }
     const IconComponent = config.icon
 
     useEffect(() => {

@@ -294,8 +294,10 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
      * 7. doctorLevel (always set, counts as complete)
      * ============================================================================
      */
+    const updateFormProgress = progressContext?.updateFormProgress
+
     useEffect(() => {
-        if (!progressContext) return
+        if (!updateFormProgress) return
 
         // Count filled fields
         const fields = [
@@ -312,8 +314,8 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
         const totalFields = fields.length
 
         // Update the context with granular progress
-        progressContext.updateFormProgress('basic_info', completedFields, totalFields)
-    }, [formData, doctorLevel, progressContext])
+        updateFormProgress('basic_info', completedFields, totalFields)
+    }, [formData, doctorLevel, updateFormProgress])
 
     // Age quick-select values
     // Age quick-select values

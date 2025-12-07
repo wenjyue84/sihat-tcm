@@ -25,6 +25,7 @@ import { DiagnosisSummary } from './DiagnosisSummary'
 import { SmartConnectStep, SmartConnectData } from './SmartConnectStep'
 import { PhaseCompleteAnimation } from './PhaseCompleteAnimation'
 import { Loader2 } from 'lucide-react'
+import { useDiagnosisProgressOptional } from '@/contexts/DiagnosisProgressContext'
 
 // Type for celebration animation phases
 type CelebrationPhase = 'basics' | 'inquiry' | 'tongue' | 'face' | 'audio' | 'pulse' | 'smartConnect' | 'summary' | null
@@ -435,6 +436,7 @@ export default function DiagnosisWizard() {
     const { getModel } = useDoctorLevel()
     const { t, language } = useLanguage()
     const { isDeveloperMode } = useDeveloper()
+    const progressContext = useDiagnosisProgressOptional()
     const [step, setStep] = useState<DiagnosisStep>('basic_info')
     const [showTestProfiles, setShowTestProfiles] = useState(false)
 
@@ -468,6 +470,42 @@ export default function DiagnosisWizard() {
 
     // Celebration animation state - shows brief animation on phase completion
     const [celebrationPhase, setCelebrationPhase] = useState<CelebrationPhase>(null)
+
+    /**
+     * ============================================================================
+     * STEP-BASED PROGRESS TRACKING
+     * ============================================================================
+     * Updates base progress when moving between major diagnosis steps.
+     * Each step has a base progress value that's set when entering that step.
+     * This ensures the header progress indicator shows meaningful progress.
+     * 
+     * Note: basic_info step is handled by BasicInfoForm with granular tracking
+     * ============================================================================
+     */
+    useEffect(() => {
+        if (!progressContext) return
+
+        // Skip basic_info - it has granular tracking in BasicInfoForm
+        if (step === 'basic_info') return
+
+        // Base progress for each step
+        const stepProgress: Record<DiagnosisStep, number> = {
+            'basic_info': 0,      // Handled by BasicInfoForm (0-14%)
+            'wen_inquiry': 15,    // 15-28%
+            'wang_tongue': 29,    // 29-42%
+            'wang_face': 43,      // 43-56%
+            'wang_part': 50,      // (sub-step of face)
+            'wen_audio': 57,      // 57-70%
+            'qie': 71,            // 71-84%
+            'smart_connect': 85,  // 85-99%
+            'summary': 95,        // Review step
+            'processing': 98,     // Processing
+            'report': 100         // Complete!
+        }
+
+        const baseProgress = stepProgress[step] ?? 0
+        progressContext.setProgress(baseProgress)
+    }, [step, progressContext])
 
     useEffect(() => {
         // Check localStorage first for data passed from dashboard
@@ -506,7 +544,7 @@ export default function DiagnosisWizard() {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<Error | null>(null)
 
-    const nextStep = (current: DiagnosisStep) => {
+    const nextStep = (current: DiagnosisStep, skipCelebration: boolean = false) => {
         // Map step to celebration phase and trigger animation
         const stepToCelebration: Record<DiagnosisStep, CelebrationPhase> = {
             'basic_info': 'basics',
@@ -522,9 +560,9 @@ export default function DiagnosisWizard() {
             'report': null
         }
 
-        // Trigger celebration animation (non-blocking)
+        // Trigger celebration animation (non-blocking) only if not skipped
         const celebrationPhase = stepToCelebration[current]
-        if (celebrationPhase) {
+        if (celebrationPhase && !skipCelebration) {
             setCelebrationPhase(celebrationPhase)
         }
 
@@ -989,7 +1027,7 @@ export default function DiagnosisWizard() {
                                         if (result.image) {
                                             analyzeImage(result.image, 'tongue')
                                         } else {
-                                            setTimeout(() => nextStep('wang_tongue'), 0)
+                                            setTimeout(() => nextStep('wang_tongue', true), 0)
                                         }
                                     }}
                                     onBack={() => prevStep('wang_tongue')}
@@ -1033,7 +1071,7 @@ export default function DiagnosisWizard() {
                                         if (result.image) {
                                             analyzeImage(result.image, 'face')
                                         } else {
-                                            setTimeout(() => nextStep('wang_face'), 0)
+                                            setTimeout(() => nextStep('wang_face', true), 0)
                                         }
                                     }}
                                     onBack={() => prevStep('wang_face')}
@@ -1078,7 +1116,7 @@ export default function DiagnosisWizard() {
                                         if (result.image) {
                                             analyzeImage(result.image, 'part')
                                         } else {
-                                            setTimeout(() => nextStep('wang_part'), 0)
+                                            setTimeout(() => nextStep('wang_part', true), 0)
                                         }
                                     }}
                                     onBack={() => prevStep('wang_part')}
@@ -1092,7 +1130,7 @@ export default function DiagnosisWizard() {
                                 initialData={data.wen_audio}
                                 onComplete={(result) => {
                                     setData((prev: any) => ({ ...prev, wen_audio: result }));
-                                    setTimeout(() => nextStep('wen_audio'), 0)
+                                    setTimeout(() => nextStep('wen_audio', result.skipCelebration), 0)
                                 }}
                                 onBack={() => prevStep('wen_audio')}
                             />

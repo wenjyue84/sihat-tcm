@@ -592,7 +592,10 @@ export function AudioRecorder({ onComplete, onBack, initialData }: { onComplete:
                             </Button>
                             <Button
                                 variant="ghost"
-                                onClick={() => onComplete({ audio: 'data:audio/webm;base64,UklGRi4AAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=' })}
+                                onClick={() => onComplete({
+                                    audio: 'data:audio/webm;base64,UklGRi4AAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=',
+                                    skipCelebration: true
+                                })}
                                 className="text-sm text-gray-500 hover:text-green-600 hover:bg-green-50"
                             >
                                 {t.audio.debugSkip}

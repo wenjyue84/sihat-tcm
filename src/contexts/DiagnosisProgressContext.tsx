@@ -94,18 +94,18 @@ export function DiagnosisProgressProvider({ children }: { children: ReactNode })
         setFormProgress({})
     }, [])
 
+    const contextValue = React.useMemo(() => ({
+        progress,
+        setProgress,
+        incrementProgress,
+        currentStepIndex,
+        setCurrentStepIndex,
+        updateFormProgress,
+        resetProgress
+    }), [progress, setProgress, incrementProgress, currentStepIndex, setCurrentStepIndex, updateFormProgress, resetProgress])
+
     return (
-        <DiagnosisProgressContext.Provider
-            value={{
-                progress,
-                setProgress,
-                incrementProgress,
-                currentStepIndex,
-                setCurrentStepIndex,
-                updateFormProgress,
-                resetProgress
-            }}
-        >
+        <DiagnosisProgressContext.Provider value={contextValue}>
             {children}
         </DiagnosisProgressContext.Provider>
     )

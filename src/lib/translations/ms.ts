@@ -39,6 +39,16 @@ export const ms: TranslationKeys = {
         companyProfile: 'Profil Syarikat',
         filled: 'Diisi!',
     },
+    celebration: {
+        basics: { title: 'Profil Lengkap!', subtitle: 'Permulaan yang baik! Ke soal jawab...' },
+        inquiry: { title: 'Soal Jawab Selesai!', subtitle: 'Jawapan bagus! Masa untuk diagnosis visual...' },
+        tongue: { title: 'Analisis Lidah Selesai!', subtitle: 'Sempurna! Sekarang muka pula...' },
+        face: { title: 'Analisis Muka Selesai!', subtitle: 'Bagus! Analisis suara seterusnya...' },
+        audio: { title: 'Suara Dirakam!', subtitle: 'Jelas! Semakan nadi seterusnya...' },
+        pulse: { title: 'Nadi Diukur!', subtitle: 'Hampir siap! Sambung peranti pintar...' },
+        smartConnect: { title: 'Data Disambung!', subtitle: 'Semakan akhir akan datang...' },
+        summary: { title: 'Sedia!', subtitle: 'Menjana laporan peribadi anda...' }
+    },
     language: {
         title: 'Bahasa',
         english: 'English',

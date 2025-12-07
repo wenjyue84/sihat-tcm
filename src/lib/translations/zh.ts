@@ -39,6 +39,16 @@ export const zh: TranslationKeys = {
         companyProfile: '公司简介',
         filled: '已填入!',
     },
+    celebration: {
+        basics: { title: '资料填写完成！', subtitle: '开始问诊...' },
+        inquiry: { title: '问诊完成！', subtitle: '回答很详细！开始望诊...' },
+        tongue: { title: '舌诊完成！', subtitle: '很好！接下来面诊...' },
+        face: { title: '面诊完成！', subtitle: '不错！准备声音分析...' },
+        audio: { title: '声音录制完成！', subtitle: '清晰！开始脉诊...' },
+        pulse: { title: '脉诊完成！', subtitle: '快完成了！连接智能设备...' },
+        smartConnect: { title: '数据已连接！', subtitle: '准备最终审核...' },
+        summary: { title: '准备就绪！', subtitle: '正在生成您的个性化报告...' }
+    },
     language: {
         title: '语言',
         english: 'English',

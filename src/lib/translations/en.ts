@@ -38,6 +38,16 @@ export const en = {
         companyProfile: 'Company Profile',
         filled: 'Filled!',
     },
+    celebration: {
+        basics: { title: 'Profile Complete!', subtitle: 'Great start! Moving to inquiry...' },
+        inquiry: { title: 'Inquiry Complete!', subtitle: 'Excellent answers! Time for visual diagnosis...' },
+        tongue: { title: 'Tongue Analysis Done!', subtitle: 'Perfect! Now let\'s check your face...' },
+        face: { title: 'Face Analysis Done!', subtitle: 'Looking good! Voice analysis is next...' },
+        audio: { title: 'Voice Recorded!', subtitle: 'Clear audio! Pulse check ahead...' },
+        pulse: { title: 'Pulse Measured!', subtitle: 'Almost there! Connect smart devices...' },
+        smartConnect: { title: 'Data Connected!', subtitle: 'Final review coming up...' },
+        summary: { title: 'All Set!', subtitle: 'Generating your personalized report...' }
+    },
 
     // Language selector
     language: {
