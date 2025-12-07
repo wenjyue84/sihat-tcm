@@ -653,7 +653,7 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
     }
 
     return (
-        <Card className="p-4 md:p-6 space-y-6 pb-24 md:pb-6 max-w-3xl mx-auto bg-white/80 backdrop-blur-md shadow-xl border-emerald-100/50">
+        <Card className="p-4 md:p-6 space-y-6 pb-6 max-w-3xl mx-auto bg-white/80 backdrop-blur-md shadow-xl border-emerald-100/50 mb-20 md:mb-0">
             <div className="space-y-2 text-center md:text-left">
                 <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-800 to-teal-700 bg-clip-text text-transparent">{t.diagnosisSummary.title}</h2>
                 <p className="text-slate-600 text-sm md:text-base">{t.diagnosisSummary.subtitle}</p>
@@ -691,7 +691,7 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                 })}
             </div>
 
-            <ScrollArea className="h-[calc(100vh-300px)] md:h-[500px] pr-2 md:pr-4 -mr-2 md:-mr-4">
+            <ScrollArea className="h-[calc(100vh-380px)] md:h-[500px] pr-2 md:pr-4 -mr-2 md:-mr-4">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentStep}

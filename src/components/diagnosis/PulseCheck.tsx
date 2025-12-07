@@ -158,289 +158,291 @@ export function PulseCheck({ onComplete, onBack, initialData }: { onComplete: (d
     }
 
     return (
-        <Card className="p-6 space-y-6 pb-24 md:pb-6">
-            {/* Header */}
-            <div className="flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
-                        <Heart className="w-6 h-6 text-rose-500" />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-semibold">{t.pulse.title}</h2>
-                        <p className="text-sm text-slate-500">{t.pulse.pulseDiagnosis}</p>
-                    </div>
-                </div>
-                <div className="flex items-center gap-2">
-                    <ShowPromptButton promptType="final" />
-                    {wizardStep === 'bpm' && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowGuide(!showGuide)}
-                            className="text-emerald-600 hover:text-emerald-700"
-                        >
-                            {showGuide ? t.pulse.hideGuide : t.pulse.showGuide}
-                        </Button>
-                    )}
-                </div>
-            </div>
-
-            {/* BPM Step Content */}
-            {wizardStep === 'bpm' && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                    {/* Step-by-Step Guide */}
-                    {showGuide && (
-                        <div className="space-y-4">
-                            {/* Steps Image */}
-                            <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-gradient-to-br from-slate-50 to-teal-50">
-                                <img
-                                    src="/pulse-check-steps.png"
-                                    alt="How to Check Your Pulse"
-                                    className="w-full h-auto object-contain"
-                                />
-                            </div>
-
-                            {/* Step Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                {steps.map((step, index) => (
-                                    <div
-                                        key={index}
-                                        className={`p-4 rounded-xl border transition-all cursor-pointer ${guideStep === index
-                                            ? 'border-emerald-400 bg-emerald-50 shadow-md'
-                                            : 'border-slate-200 bg-white hover:border-emerald-200'
-                                            }`}
-                                        onClick={() => setGuideStep(index)}
-                                    >
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold ${guideStep === index
-                                                ? 'bg-emerald-500 text-white'
-                                                : 'bg-slate-200 text-slate-600'
-                                                }`}>
-                                                {index + 1}
-                                            </div>
-                                            <h3 className="font-medium text-sm">{step.title}</h3>
-                                        </div>
-                                        <p className="text-xs text-slate-600 mb-2">{step.description}</p>
-                                        <div className="flex items-start gap-1 text-xs text-amber-600 bg-amber-50 p-2 rounded-lg">
-                                            <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                            <span>{step.tip}</span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+        <>
+            <Card className="p-6 space-y-6 mb-20 md:mb-0">
+                {/* Header */}
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-br from-rose-100 to-pink-100 rounded-xl">
+                            <Heart className="w-6 h-6 text-rose-500" />
                         </div>
-                    )}
-
-                    {/* Input Mode Selection */}
-                    <div className="flex gap-3">
-                        <Button
-                            variant={inputMode === 'manual' ? 'default' : 'outline'}
-                            className={`flex-1 ${inputMode === 'manual' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}`}
-                            onClick={() => setInputMode('manual')}
-                        >
-                            {t.pulse.enterBpmManually}
-                        </Button>
-                        <Button
-                            variant={inputMode === 'tap' ? 'default' : 'outline'}
-                            className={`flex-1 ${inputMode === 'tap' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}`}
-                            onClick={() => { setInputMode('tap'); resetTaps(); }}
-                        >
-                            {t.pulse.tapToMeasure}
-                        </Button>
+                        <div>
+                            <h2 className="text-xl font-semibold">{t.pulse.title}</h2>
+                            <p className="text-sm text-slate-500">{t.pulse.pulseDiagnosis}</p>
+                        </div>
                     </div>
+                    <div className="flex items-center gap-2">
+                        <ShowPromptButton promptType="final" />
+                        {wizardStep === 'bpm' && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowGuide(!showGuide)}
+                                className="text-emerald-600 hover:text-emerald-700"
+                            >
+                                {showGuide ? t.pulse.hideGuide : t.pulse.showGuide}
+                            </Button>
+                        )}
+                    </div>
+                </div>
 
-                    {/* Input Area */}
-                    <div className="bg-gradient-to-br from-slate-50 to-emerald-50 rounded-xl p-6">
-                        {inputMode === 'manual' ? (
+                {/* BPM Step Content */}
+                {wizardStep === 'bpm' && (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                        {/* Step-by-Step Guide */}
+                        {showGuide && (
                             <div className="space-y-4">
-                                <div className="text-center">
-                                    <p className="text-slate-600 mb-4">
-                                        {t.pulse.afterCounting}
-                                    </p>
-                                    <div className="flex items-center justify-center gap-3">
-                                        <Input
-                                            ref={bpmInputRef}
-                                            type="text"
-                                            inputMode="numeric"
-                                            pattern="[0-9]*"
-                                            placeholder={t.pulse.enterBpm}
-                                            value={manualBpm}
-                                            onChange={handleManualInput}
-                                            className="w-32 text-center text-2xl font-bold h-16 border-2 border-emerald-200 focus:border-emerald-500"
-                                        />
-                                        <span className="text-xl font-semibold text-slate-500">{t.pulse.bpm}</span>
-                                    </div>
-                                    {manualBpm && (
-                                        <>
-                                            <div className={`mt-3 flex items-center justify-center gap-2 ${parseInt(manualBpm) < 60 || parseInt(manualBpm) > 100 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                                                <CheckCircle2 className="w-5 h-5" />
-                                                <span className="font-medium">
-                                                    {parseInt(manualBpm) < 60 ? t.pulse.lowBpm :
-                                                        parseInt(manualBpm) > 100 ? t.pulse.highBpm :
-                                                            t.pulse.normalBpm}
-                                                </span>
-                                            </div>
-                                            {/* Abnormal BPM Tips Panel */}
-                                            {(parseInt(manualBpm) < 60 || parseInt(manualBpm) > 100) && (
-                                                <div className="mt-4 p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 animate-in slide-in-from-top-2 duration-300">
-                                                    <div className="flex items-center gap-2 mb-3">
-                                                        <AlertCircle className="w-5 h-5 text-amber-600" />
-                                                        <h4 className="font-semibold text-amber-800">
-                                                            {parseInt(manualBpm) > 100
-                                                                ? (t.pulse.abnormalBpmTips?.highBpmTitle || 'Your heart rate is high')
-                                                                : (t.pulse.abnormalBpmTips?.lowBpmTitle || 'Your heart rate is low')}
-                                                        </h4>
-                                                    </div>
-                                                    <p className="text-sm text-amber-700 mb-3">
-                                                        {t.pulse.abnormalBpmTips?.subtitle || 'To ensure accurate measurement, please confirm the following:'}
-                                                    </p>
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        {(t.pulse.abnormalBpmTips?.tips || [
-                                                            { icon: '🏃', title: 'Avoid post-exercise', description: 'Rest 5-10 minutes after exercise' },
-                                                            { icon: '😌', title: 'Stay relaxed', description: 'Take deep breaths to calm down' },
-                                                            { icon: '🪑', title: 'Comfortable position', description: 'Sit comfortably' },
-                                                            { icon: '☕', title: 'Avoid stimulants', description: 'Coffee or tea affects heart rate' },
-                                                        ]).map((tip, index) => (
-                                                            <div key={index} className="flex items-start gap-2 p-2 bg-white/70 rounded-lg border border-amber-100">
-                                                                <span className="text-xl flex-shrink-0">{tip.icon}</span>
-                                                                <div>
-                                                                    <p className="text-xs font-medium text-amber-800">{tip.title}</p>
-                                                                    <p className="text-xs text-amber-600">{tip.description}</p>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                    <p className="mt-3 text-xs text-amber-600 italic">
-                                                        {t.pulse.abnormalBpmTips?.confirmMessage || 'If you have ruled out the above factors, you may continue.'}
-                                                    </p>
-                                                    <div className="mt-3 flex gap-2">
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => setManualBpm('')}
-                                                            className="flex-1 border-amber-300 text-amber-700 hover:bg-amber-100"
-                                                        >
-                                                            {t.pulse.abnormalBpmTips?.remeasure || 'Remeasure'}
-                                                        </Button>
-                                                    </div>
+                                {/* Steps Image */}
+                                <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-gradient-to-br from-slate-50 to-teal-50">
+                                    <img
+                                        src="/pulse-check-steps.png"
+                                        alt="How to Check Your Pulse"
+                                        className="w-full h-auto object-contain"
+                                    />
+                                </div>
+
+                                {/* Step Cards */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    {steps.map((step, index) => (
+                                        <div
+                                            key={index}
+                                            className={`p-4 rounded-xl border transition-all cursor-pointer ${guideStep === index
+                                                ? 'border-emerald-400 bg-emerald-50 shadow-md'
+                                                : 'border-slate-200 bg-white hover:border-emerald-200'
+                                                }`}
+                                            onClick={() => setGuideStep(index)}
+                                        >
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold ${guideStep === index
+                                                    ? 'bg-emerald-500 text-white'
+                                                    : 'bg-slate-200 text-slate-600'
+                                                    }`}>
+                                                    {index + 1}
                                                 </div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="text-center space-y-4">
-                                <p className="text-slate-600">
-                                    {t.pulse.tapInRhythm}
-                                </p>
-                                <div className="flex flex-col items-center gap-4">
-                                    <Button
-                                        variant="outline"
-                                        className={`rounded-full w-28 h-28 active:scale-90 transition-all duration-150 border-2 ${taps.length > 0
-                                            ? 'border-rose-400 bg-rose-50 hover:bg-rose-100'
-                                            : 'border-emerald-400 hover:bg-emerald-50'
-                                            }`}
-                                        onClick={handleTap}
-                                    >
-                                        <Heart className={`w-10 h-10 ${taps.length > 0 ? 'text-rose-500' : 'text-emerald-500'}`} />
-                                    </Button>
-                                    <div className="text-sm text-slate-500">
-                                        {t.pulse.taps}: {taps.length}
-                                    </div>
-                                    {bpm && (
-                                        <div className="text-3xl font-bold text-emerald-600 flex items-center gap-2">
-                                            <Activity className="w-8 h-8" />
-                                            {bpm} BPM
+                                                <h3 className="font-medium text-sm">{step.title}</h3>
+                                            </div>
+                                            <p className="text-xs text-slate-600 mb-2">{step.description}</p>
+                                            <div className="flex items-start gap-1 text-xs text-amber-600 bg-amber-50 p-2 rounded-lg">
+                                                <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                                <span>{step.tip}</span>
+                                            </div>
                                         </div>
-                                    )}
-                                    {taps.length > 0 && (
-                                        <Button variant="ghost" size="sm" onClick={resetTaps}>
-                                            {t.pulse.reset}
-                                        </Button>
-                                    )}
+                                    ))}
                                 </div>
                             </div>
                         )}
-                    </div>
-                </div>
-            )}
 
-            {/* TCM Pulse Quality Step Content */}
-            {wizardStep === 'qualities' && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="rounded-xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-5">
-                        {/* Professional TCM Practitioner Notice */}
-                        <div className="flex items-start gap-3 mb-4 p-3 bg-amber-100/70 rounded-lg border border-amber-300">
-                            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                            <div>
-                                <p className="text-sm font-semibold text-amber-800">
-                                    ⚕️ 专业中医师诊断 | TCM Practitioner Required
-                                </p>
-                                <p className="text-xs text-amber-700 mt-1">
-                                    以下脉象判断需由专业中医师通过切诊确认和输入。普通用户可跳过此部分。
-                                </p>
-                                <p className="text-xs text-amber-600 mt-0.5">
-                                    The pulse qualities below require assessment by a qualified TCM practitioner. General users may skip this section.
-                                </p>
-                            </div>
+                        {/* Input Mode Selection */}
+                        <div className="flex gap-3">
+                            <Button
+                                variant={inputMode === 'manual' ? 'default' : 'outline'}
+                                className={`flex-1 ${inputMode === 'manual' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}`}
+                                onClick={() => setInputMode('manual')}
+                            >
+                                {t.pulse.enterBpmManually}
+                            </Button>
+                            <Button
+                                variant={inputMode === 'tap' ? 'default' : 'outline'}
+                                className={`flex-1 ${inputMode === 'tap' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}`}
+                                onClick={() => { setInputMode('tap'); resetTaps(); }}
+                            >
+                                {t.pulse.tapToMeasure}
+                            </Button>
                         </div>
 
-                        {/* Section Header */}
-                        <div className="flex items-center gap-2 mb-4">
-                            <Stethoscope className="w-5 h-5 text-amber-600" />
-                            <h3 className="font-semibold text-amber-800">{t.pulse.tcmPulseQualities}</h3>
-                            <span className="text-xs text-amber-600 bg-amber-200 px-2 py-0.5 rounded-full">{t.pulse.optional}</span>
-                        </div>
-
-                        {/* Conflict Warning Alert */}
-                        {conflictWarning && (
-                            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 animate-in fade-in slide-in-from-top-2">
-                                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                                <p className="text-sm text-red-700 font-medium">{conflictWarning}</p>
-                            </div>
-                        )}
-
-                        {/* Pulse Quality Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                            {tcmPulseQualities.map((quality) => (
-                                <button
-                                    key={quality.id}
-                                    onClick={() => togglePulseQuality(quality.id)}
-                                    className={`p-3 rounded-lg border-2 transition-all text-left ${selectedPulseQualities.includes(quality.id)
-                                        ? 'border-amber-500 bg-amber-100 shadow-md'
-                                        : 'border-amber-200 bg-white hover:border-amber-300 hover:bg-amber-50'
-                                        }`}
-                                >
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className="font-bold text-amber-800">{quality.nameZh}</span>
-                                        {selectedPulseQualities.includes(quality.id) && (
-                                            <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                        {/* Input Area */}
+                        <div className="bg-gradient-to-br from-slate-50 to-emerald-50 rounded-xl p-6">
+                            {inputMode === 'manual' ? (
+                                <div className="space-y-4">
+                                    <div className="text-center">
+                                        <p className="text-slate-600 mb-4">
+                                            {t.pulse.afterCounting}
+                                        </p>
+                                        <div className="flex items-center justify-center gap-3">
+                                            <Input
+                                                ref={bpmInputRef}
+                                                type="text"
+                                                inputMode="numeric"
+                                                pattern="[0-9]*"
+                                                placeholder={t.pulse.enterBpm}
+                                                value={manualBpm}
+                                                onChange={handleManualInput}
+                                                className="w-32 text-center text-2xl font-bold h-16 border-2 border-emerald-200 focus:border-emerald-500"
+                                            />
+                                            <span className="text-xl font-semibold text-slate-500">{t.pulse.bpm}</span>
+                                        </div>
+                                        {manualBpm && (
+                                            <>
+                                                <div className={`mt-3 flex items-center justify-center gap-2 ${parseInt(manualBpm) < 60 || parseInt(manualBpm) > 100 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                                    <CheckCircle2 className="w-5 h-5" />
+                                                    <span className="font-medium">
+                                                        {parseInt(manualBpm) < 60 ? t.pulse.lowBpm :
+                                                            parseInt(manualBpm) > 100 ? t.pulse.highBpm :
+                                                                t.pulse.normalBpm}
+                                                    </span>
+                                                </div>
+                                                {/* Abnormal BPM Tips Panel */}
+                                                {(parseInt(manualBpm) < 60 || parseInt(manualBpm) > 100) && (
+                                                    <div className="mt-4 p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200 animate-in slide-in-from-top-2 duration-300">
+                                                        <div className="flex items-center gap-2 mb-3">
+                                                            <AlertCircle className="w-5 h-5 text-amber-600" />
+                                                            <h4 className="font-semibold text-amber-800">
+                                                                {parseInt(manualBpm) > 100
+                                                                    ? (t.pulse.abnormalBpmTips?.highBpmTitle || 'Your heart rate is high')
+                                                                    : (t.pulse.abnormalBpmTips?.lowBpmTitle || 'Your heart rate is low')}
+                                                            </h4>
+                                                        </div>
+                                                        <p className="text-sm text-amber-700 mb-3">
+                                                            {t.pulse.abnormalBpmTips?.subtitle || 'To ensure accurate measurement, please confirm the following:'}
+                                                        </p>
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            {(t.pulse.abnormalBpmTips?.tips || [
+                                                                { icon: '🏃', title: 'Avoid post-exercise', description: 'Rest 5-10 minutes after exercise' },
+                                                                { icon: '😌', title: 'Stay relaxed', description: 'Take deep breaths to calm down' },
+                                                                { icon: '🪑', title: 'Comfortable position', description: 'Sit comfortably' },
+                                                                { icon: '☕', title: 'Avoid stimulants', description: 'Coffee or tea affects heart rate' },
+                                                            ]).map((tip, index) => (
+                                                                <div key={index} className="flex items-start gap-2 p-2 bg-white/70 rounded-lg border border-amber-100">
+                                                                    <span className="text-xl flex-shrink-0">{tip.icon}</span>
+                                                                    <div>
+                                                                        <p className="text-xs font-medium text-amber-800">{tip.title}</p>
+                                                                        <p className="text-xs text-amber-600">{tip.description}</p>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        <p className="mt-3 text-xs text-amber-600 italic">
+                                                            {t.pulse.abnormalBpmTips?.confirmMessage || 'If you have ruled out the above factors, you may continue.'}
+                                                        </p>
+                                                        <div className="mt-3 flex gap-2">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => setManualBpm('')}
+                                                                className="flex-1 border-amber-300 text-amber-700 hover:bg-amber-100"
+                                                            >
+                                                                {t.pulse.abnormalBpmTips?.remeasure || 'Remeasure'}
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
                                     </div>
-                                    <p className="text-xs text-amber-700">{quality.nameEn}</p>
-                                    <p className="text-xs text-amber-600 mt-1 opacity-75">{quality.description}</p>
-                                </button>
-                            ))}
+                                </div>
+                            ) : (
+                                <div className="text-center space-y-4">
+                                    <p className="text-slate-600">
+                                        {t.pulse.tapInRhythm}
+                                    </p>
+                                    <div className="flex flex-col items-center gap-4">
+                                        <Button
+                                            variant="outline"
+                                            className={`rounded-full w-28 h-28 active:scale-90 transition-all duration-150 border-2 ${taps.length > 0
+                                                ? 'border-rose-400 bg-rose-50 hover:bg-rose-100'
+                                                : 'border-emerald-400 hover:bg-emerald-50'
+                                                }`}
+                                            onClick={handleTap}
+                                        >
+                                            <Heart className={`w-10 h-10 ${taps.length > 0 ? 'text-rose-500' : 'text-emerald-500'}`} />
+                                        </Button>
+                                        <div className="text-sm text-slate-500">
+                                            {t.pulse.taps}: {taps.length}
+                                        </div>
+                                        {bpm && (
+                                            <div className="text-3xl font-bold text-emerald-600 flex items-center gap-2">
+                                                <Activity className="w-8 h-8" />
+                                                {bpm} BPM
+                                            </div>
+                                        )}
+                                        {taps.length > 0 && (
+                                            <Button variant="ghost" size="sm" onClick={resetTaps}>
+                                                {t.pulse.reset}
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
-
-                        {/* Selected Qualities Display */}
-                        {selectedPulseQualities.length > 0 && (
-                            <div className="mt-4 p-3 bg-white rounded-lg border border-amber-200">
-                                <p className="text-sm text-amber-800">
-                                    <span className="font-semibold">已选脉象 Selected: </span>
-                                    {selectedPulseQualities.map(id => {
-                                        const quality = tcmPulseQualities.find(q => q.id === id)
-                                        return quality?.nameZh
-                                    }).join('、')}
-                                </p>
-                            </div>
-                        )}
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* Footer Buttons */}
+                {/* TCM Pulse Quality Step Content */}
+                {wizardStep === 'qualities' && (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                        <div className="rounded-xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-5">
+                            {/* Professional TCM Practitioner Notice */}
+                            <div className="flex items-start gap-3 mb-4 p-3 bg-amber-100/70 rounded-lg border border-amber-300">
+                                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-sm font-semibold text-amber-800">
+                                        ⚕️ 专业中医师诊断 | TCM Practitioner Required
+                                    </p>
+                                    <p className="text-xs text-amber-700 mt-1">
+                                        以下脉象判断需由专业中医师通过切诊确认和输入。普通用户可跳过此部分。
+                                    </p>
+                                    <p className="text-xs text-amber-600 mt-0.5">
+                                        The pulse qualities below require assessment by a qualified TCM practitioner. General users may skip this section.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Section Header */}
+                            <div className="flex items-center gap-2 mb-4">
+                                <Stethoscope className="w-5 h-5 text-amber-600" />
+                                <h3 className="font-semibold text-amber-800">{t.pulse.tcmPulseQualities}</h3>
+                                <span className="text-xs text-amber-600 bg-amber-200 px-2 py-0.5 rounded-full">{t.pulse.optional}</span>
+                            </div>
+
+                            {/* Conflict Warning Alert */}
+                            {conflictWarning && (
+                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 animate-in fade-in slide-in-from-top-2">
+                                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                    <p className="text-sm text-red-700 font-medium">{conflictWarning}</p>
+                                </div>
+                            )}
+
+                            {/* Pulse Quality Grid */}
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                                {tcmPulseQualities.map((quality) => (
+                                    <button
+                                        key={quality.id}
+                                        onClick={() => togglePulseQuality(quality.id)}
+                                        className={`p-3 rounded-lg border-2 transition-all text-left ${selectedPulseQualities.includes(quality.id)
+                                            ? 'border-amber-500 bg-amber-100 shadow-md'
+                                            : 'border-amber-200 bg-white hover:border-amber-300 hover:bg-amber-50'
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between mb-1">
+                                            <span className="font-bold text-amber-800">{quality.nameZh}</span>
+                                            {selectedPulseQualities.includes(quality.id) && (
+                                                <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-amber-700">{quality.nameEn}</p>
+                                        <p className="text-xs text-amber-600 mt-1 opacity-75">{quality.description}</p>
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Selected Qualities Display */}
+                            {selectedPulseQualities.length > 0 && (
+                                <div className="mt-4 p-3 bg-white rounded-lg border border-amber-200">
+                                    <p className="text-sm text-amber-800">
+                                        <span className="font-semibold">已选脉象 Selected: </span>
+                                        {selectedPulseQualities.map(id => {
+                                            const quality = tcmPulseQualities.find(q => q.id === id)
+                                            return quality?.nameZh
+                                        }).join('、')}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </Card>
+
+            {/* Footer Buttons - Outside Card for proper fixed positioning */}
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-stone-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 md:static md:bg-transparent md:border-none md:shadow-none md:p-0 flex gap-3">
                 <Button
                     variant="outline"
@@ -461,6 +463,7 @@ export function PulseCheck({ onComplete, onBack, initialData }: { onComplete: (d
                     </span>
                 </Button>
             </div>
-        </Card>
+        </>
     )
 }
+

@@ -160,14 +160,90 @@ export function InfographicsGenerator({ reportData, patientInfo, isOpen, onClose
         }
     }
 
-    const handleDownload = () => {
-        if (generatedImage) {
-            const link = document.createElement('a')
-            link.href = generatedImage
-            link.download = `tcm-infographic-${new Date().toISOString().split('T')[0]}.png`
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
+    const handleDownload = async () => {
+        if (!generatedImage) return;
+
+        const filename = `tcm-infographic-${new Date().toISOString().split('T')[0]}.png`;
+
+        try {
+            // Check if it's an SVG data URL - convert to PNG for better mobile compatibility
+            if (generatedImage.startsWith('data:image/svg+xml')) {
+                // Create an image from the SVG
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+
+                await new Promise<void>((resolve, reject) => {
+                    img.onload = () => resolve();
+                    img.onerror = () => reject(new Error('Failed to load image'));
+                    img.src = generatedImage;
+                });
+
+                // Create canvas and draw the image
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width || 800;
+                canvas.height = img.height || 1000;
+                const ctx = canvas.getContext('2d');
+
+                if (ctx) {
+                    // Fill white background
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+
+                    // Convert to PNG blob
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            // Create object URL for better mobile support
+                            const blobUrl = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = blobUrl;
+                            link.download = filename;
+                            link.style.display = 'none';
+                            document.body.appendChild(link);
+                            link.click();
+
+                            // Cleanup
+                            setTimeout(() => {
+                                document.body.removeChild(link);
+                                URL.revokeObjectURL(blobUrl);
+                            }, 100);
+                        }
+                    }, 'image/png', 0.95);
+                }
+            } else {
+                // For other image formats (PNG, JPEG), convert data URL to blob
+                const response = await fetch(generatedImage);
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = filename;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+
+                // Cleanup
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(blobUrl);
+                }, 100);
+            }
+        } catch (error) {
+            console.error('Download failed:', error);
+            // Fallback: open in new tab for user to save manually
+            const newWindow = window.open();
+            if (newWindow) {
+                newWindow.document.write(`
+                    <html>
+                        <head><title>TCM Infographic</title></head>
+                        <body style="margin:0;display:flex;justify-content:center;background:#f5f5f5;">
+                            <img src="${generatedImage}" alt="TCM Infographic" style="max-width:100%;height:auto;"/>
+                        </body>
+                    </html>
+                `);
+                newWindow.document.close();
+            }
         }
     }
 
@@ -179,7 +255,7 @@ export function InfographicsGenerator({ reportData, patientInfo, isOpen, onClose
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start md:items-center justify-center pt-0 md:pt-4 p-4 overflow-y-auto"
                 onClick={onClose}
             >
                 <motion.div

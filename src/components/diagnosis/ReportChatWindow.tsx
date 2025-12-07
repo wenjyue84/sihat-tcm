@@ -235,7 +235,7 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, ini
 
     if (isExpanded) {
         return (
-            <div className="flex flex-col w-full h-full bg-white border-l border-stone-200 shadow-xl">
+            <div className="flex flex-col w-full h-full bg-white border-l border-stone-200 md:shadow-xl">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">

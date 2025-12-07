@@ -305,55 +305,122 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
                     </div>
                 </div>
 
-                {/* DEBUG: API Process Steps */}
-                <div className="space-y-3 bg-stone-50 rounded-xl p-4 border border-stone-200">
-                    <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold text-stone-600 uppercase tracking-wider flex items-center gap-2">
-                            <Cpu className="w-4 h-4" />
-                            {t.analysisLoading.analysisProgress}
-                        </p>
-                        <span className="text-xs text-stone-400">{t.analysisLoading.step} {currentDebugStep}/8</span>
+                {/* ANALYSIS PROGRESS - Mobile Optimized */}
+                <div className="bg-gradient-to-br from-stone-50 to-slate-50 rounded-2xl p-5 border border-stone-200 shadow-sm">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-emerald-100 rounded-lg">
+                                <Cpu className="w-4 h-4 text-emerald-600" />
+                            </div>
+                            <p className="text-sm font-bold text-stone-700">
+                                {t.analysisLoading.analysisProgress}
+                            </p>
+                        </div>
+                        <div className="px-3 py-1 bg-emerald-100 rounded-full">
+                            <span className="text-xs font-semibold text-emerald-700">{currentDebugStep}/8</span>
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-2">
-                        {DEBUG_STEPS.map((step) => {
-                            const status = getStepStatus(step.id)
-                            const StepIcon = step.icon
+                    {/* Circular Progress Icons Timeline */}
+                    <div className="relative mb-5">
+                        {/* Connection line */}
+                        <div className="absolute top-5 left-4 right-4 h-0.5 bg-stone-200 z-0" />
+                        <div
+                            className="absolute top-5 left-4 h-0.5 bg-gradient-to-r from-emerald-400 to-emerald-500 z-0 transition-all duration-500"
+                            style={{ width: `calc(${Math.min((currentDebugStep - 1) / 7 * 100, 100)}% - 32px)` }}
+                        />
 
-                            return (
-                                <div
-                                    key={step.id}
-                                    className={`p-2 rounded-lg text-center transition-all ${status === 'complete' ? 'bg-emerald-100 border border-emerald-200' :
-                                        status === 'active' ? 'bg-amber-100 border border-amber-300 animate-pulse' :
-                                            'bg-white border border-stone-200'
-                                        }`}
-                                >
-                                    <div className="flex justify-center mb-1">
-                                        {status === 'complete' ? (
-                                            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                                        ) : status === 'active' ? (
-                                            <Loader2 className="w-5 h-5 text-amber-600 animate-spin" />
-                                        ) : (
-                                            <Circle className="w-5 h-5 text-stone-300" />
-                                        )}
-                                    </div>
-                                    <p className={`text-xs font-medium ${status === 'complete' ? 'text-emerald-700' :
-                                        status === 'active' ? 'text-amber-700' :
-                                            'text-stone-400'
-                                        }`}>
-                                        {step.label}
-                                    </p>
-                                    <p className="text-[10px] text-stone-400 mt-0.5 truncate">
-                                        {step.description}
-                                    </p>
-                                </div>
-                            )
-                        })}
+                        {/* Icons */}
+                        <div className="relative z-10 flex justify-between">
+                            {DEBUG_STEPS.map((step) => {
+                                const status = getStepStatus(step.id)
+                                const StepIcon = step.icon
+
+                                return (
+                                    <motion.div
+                                        key={step.id}
+                                        initial={{ scale: 0.8, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        transition={{ delay: step.id * 0.05 }}
+                                        className="flex flex-col items-center"
+                                    >
+                                        <div
+                                            className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${status === 'complete'
+                                                    ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-200'
+                                                    : status === 'active'
+                                                        ? 'bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-200'
+                                                        : 'bg-white border-2 border-stone-200'
+                                                }`}
+                                        >
+                                            {status === 'complete' ? (
+                                                <CheckCircle2 className="w-5 h-5 text-white" />
+                                            ) : status === 'active' ? (
+                                                <motion.div
+                                                    animate={{ rotate: 360 }}
+                                                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                                                >
+                                                    <StepIcon className="w-5 h-5 text-white" />
+                                                </motion.div>
+                                            ) : (
+                                                <StepIcon className="w-4 h-4 text-stone-400" />
+                                            )}
+
+                                            {/* Active pulse ring */}
+                                            {status === 'active' && (
+                                                <motion.div
+                                                    className="absolute inset-0 rounded-full border-2 border-amber-400"
+                                                    animate={{ scale: [1, 1.3, 1], opacity: [0.8, 0, 0.8] }}
+                                                    transition={{ duration: 1.5, repeat: Infinity }}
+                                                />
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Single Rotating Label - Shows current step info */}
+                    <div className="min-h-[60px] flex items-center justify-center">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={currentDebugStep}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.3 }}
+                                className="text-center"
+                            >
+                                <p className="text-base font-semibold text-stone-800 mb-1">
+                                    {DEBUG_STEPS[currentDebugStep - 1]?.label}
+                                </p>
+                                <p className="text-sm text-stone-500">
+                                    {DEBUG_STEPS[currentDebugStep - 1]?.description}
+                                </p>
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="mt-4">
+                        <div className="h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-500 rounded-full"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${(currentDebugStep / 8) * 100}%` }}
+                                transition={{ duration: 0.5, ease: "easeOut" }}
+                            />
+                        </div>
                     </div>
 
                     {/* Warning if taking too long */}
                     {elapsedSeconds > 30 && (
-                        <div className="flex items-center gap-2 p-2 bg-amber-50 rounded-lg border border-amber-200 text-amber-700 text-xs">
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-center gap-2 p-3 mt-4 bg-amber-50 rounded-xl border border-amber-200 text-amber-700 text-sm"
+                        >
                             <AlertCircle className="w-4 h-4 shrink-0" />
                             <span>
                                 {t.analysisLoading.takingLongerWarning}
@@ -361,16 +428,20 @@ export function AnalysisLoadingScreen({ basicInfo, apiStatus = 'sending', stream
                                     ? t.analysisLoading.aiAnalysisMayTakeMoment
                                     : t.analysisLoading.responseStreaming}
                             </span>
-                        </div>
+                        </motion.div>
                     )}
 
                     {elapsedSeconds > 120 && (
-                        <div className="flex items-center gap-2 p-2 bg-red-50 rounded-lg border border-red-200 text-red-700 text-xs">
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex items-center gap-2 p-3 mt-3 bg-red-50 rounded-xl border border-red-200 text-red-700 text-sm"
+                        >
                             <AlertCircle className="w-4 h-4 shrink-0" />
                             <span>
                                 {t.analysisLoading.timeoutWarning}
                             </span>
-                        </div>
+                        </motion.div>
                     )}
                 </div>
             </div>
