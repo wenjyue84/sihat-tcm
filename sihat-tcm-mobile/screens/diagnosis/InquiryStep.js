@@ -21,11 +21,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { COLORS } from '../../constants/themes';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { API_CONFIG, TCM_CONSULTATION_PROMPT } from '../../lib/apiConfig';
+import { API_CONFIG, TCM_CONSULTATION_PROMPT, getApiKeySync } from '../../lib/apiConfig';
 import { getSystemPrompt } from '../../lib/supabase';
 
-// Initialize Google AI
-const genAI = new GoogleGenerativeAI(API_CONFIG.GOOGLE_API_KEY);
+// Note: genAI will be created dynamically with the fetched API key
 
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -251,6 +250,11 @@ Do NOT repeat all the above information verbatim - use it as context for your qu
                 // Use selected model from previous step, or fallback
                 const selectedModel = data.doctor?.doctorLevel?.model || API_CONFIG.DEFAULT_MODEL;
                 console.log('Using AI Model:', selectedModel);
+
+                // Create genAI instance with dynamically fetched API key from admin dashboard
+                const apiKey = getApiKeySync();
+                console.log('[InquiryStep] Using API key from:', apiKey.startsWith('AIza') ? 'fetched/fallback' : 'unknown');
+                const genAI = new GoogleGenerativeAI(apiKey);
 
                 const model = genAI.getGenerativeModel({
                     model: selectedModel,

@@ -13,15 +13,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { COLORS } from '../constants/themes';
-import { API_CONFIG } from '../lib/apiConfig';
+import { getGenAI, API_CONFIG } from '../lib/googleAI';
 import { useTheme } from '../contexts/ThemeContext';
 import { getSystemPrompt as fetchPrompt } from '../lib/supabase';
 import { useLanguage } from '../contexts/LanguageContext';
-
-// Initialize Google AI
-const genAI = new GoogleGenerativeAI(API_CONFIG.GOOGLE_API_KEY);
 
 // Report Chat System Prompt
 const getSystemPrompt = (reportData) => `You are a Traditional Chinese Medicine (TCM) health assistant. The user has just received a TCM diagnosis report and may have questions about it.
@@ -84,7 +80,7 @@ export default function ReportChatModal({ visible, onClose, reportData, theme, i
             }
             finalPrompt += `\n\nIMPORTANT: Use ${language === 'zh' ? 'Chinese (Simplified)' : language === 'ms' ? 'Malay' : 'English'} for all responses.`;
 
-            const model = genAI.getGenerativeModel({ model: API_CONFIG.DEFAULT_MODEL });
+            const model = getGenAI().getGenerativeModel({ model: API_CONFIG.DEFAULT_MODEL });
             const chat = model.startChat({
                 history: [],
                 generationConfig: { temperature: 0.7, maxOutputTokens: 500 },

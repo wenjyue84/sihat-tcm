@@ -99,6 +99,7 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
         console.log("[API /api/chat] Calling streamText with model:", model);
 
         try {
+            const google = getGoogleProvider();
             const result = streamText({
                 model: google(model),
                 system: systemPrompt,
@@ -122,8 +123,9 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
 
             // Fallback to 1.5 Flash
             console.log(`[API /api/chat] Falling back to gemini-1.5-flash`);
+            const googleFallback = getGoogleProvider();
             const fallbackResult = streamText({
-                model: google('gemini-1.5-flash'),
+                model: googleFallback('gemini-1.5-flash'),
                 system: systemPrompt,
                 messages: filteredMessages,
                 onFinish: (completion) => {

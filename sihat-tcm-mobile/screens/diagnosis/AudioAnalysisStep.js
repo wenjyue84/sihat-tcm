@@ -14,20 +14,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Haptics from 'expo-haptics';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 import { COLORS } from '../../constants/themes';
-import { API_CONFIG } from '../../lib/apiConfig';
+import { getGenAI, API_CONFIG } from '../../lib/googleAI';
 import { LISTENING_ANALYSIS_PROMPT } from '../../constants/SystemPrompts';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(API_CONFIG.GOOGLE_API_KEY);
-
-export default function AudioAnalysisStep({ onNext, onUpdate, theme, isDark }) {
+export default function AudioAnalysisStep({ onNext, onUpdate, theme, isDark, initialData }) {
     const styles = useMemo(() => createStyles(theme, isDark), [theme, isDark]);
     const { t } = useLanguage();
 
@@ -39,8 +35,15 @@ export default function AudioAnalysisStep({ onNext, onUpdate, theme, isDark }) {
     const [audioUri, setAudioUri] = useState(null);
     const [duration, setDuration] = useState(0);
     const [metering, setMetering] = useState(-160);
-    const [analysisData, setAnalysisData] = useState(null);
+    const [analysisData, setAnalysisData] = useState(initialData?.audioAnalysis || null);
     const [errorMsg, setErrorMsg] = useState(null);
+
+    useEffect(() => {
+        if (initialData?.audioAnalysis) {
+            setAnalysisData(initialData.audioAnalysis);
+            setRecordingStatus('recorded');
+        }
+    }, [initialData]);
 
     // Animations
     const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -211,7 +214,7 @@ export default function AudioAnalysisStep({ onNext, onUpdate, theme, isDark }) {
             console.log('[AudioAnalysis] Audio base64 length:', base64Audio.length);
 
             // 2. Prepare Prompt
-            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const model = getGenAI().getGenerativeModel({ model: "gemini-2.0-flash" });
             const prompt = LISTENING_ANALYSIS_PROMPT;
 
             console.log('[AudioAnalysis] Sending to Gemini...');

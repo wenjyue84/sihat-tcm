@@ -16,15 +16,11 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { COLORS } from '../../constants/themes';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { API_CONFIG } from '../../lib/apiConfig';
+import { getGenAI, API_CONFIG } from '../../lib/googleAI';
 import { getSystemPrompt } from '../../lib/supabase';
-
-// Initialize Google AI
-const genAI = new GoogleGenerativeAI(API_CONFIG.GOOGLE_API_KEY);
 
 // TCM Face Analysis Prompt
 const FACE_ANALYSIS_PROMPT = `You are an expert Traditional Chinese Medicine (TCM) practitioner specializing in facial diagnosis (望诊/面诊).
@@ -157,7 +153,7 @@ export default function FaceAnalysisStep({ data, onUpdate, theme, isDark }) {
             // Fetch prompt from Admin Dashboard (Supabase)
             const basePrompt = await getSystemPrompt('doctor_face', FACE_ANALYSIS_PROMPT);
 
-            const model = genAI.getGenerativeModel({ model: API_CONFIG.DEFAULT_MODEL });
+            const model = getGenAI().getGenerativeModel({ model: API_CONFIG.DEFAULT_MODEL });
 
             const result = await model.generateContent([
                 basePrompt,

@@ -230,21 +230,7 @@ export default function BasicInfoStep({ data, onUpdate, theme, isDark }) {
                 <Text style={styles.title}>{t.basicInfo.title || 'Tell Us About Yourself'}</Text>
                 <TouchableOpacity onPress={() => onUpdate({
                     ...data,
-                    name: 'John Doe',
-                    age: '30',
-                    height: '175',
-                    weight: '70',
-                    gender: 'male',
-                    mainConcern: 'headache',
-                    symptoms: ['insomnia', 'fatigue'],
-                    symptomDetails: 'I have been feeling a persistent headache for the last few days.',
-                    duration: 'few_days',
-                    medicines: [{
-                        id: 'test-med-1',
-                        type: 'text',
-                        content: 'Vitamin C',
-                        name: 'Vitamin C'
-                    }]
+                    ...require('../../data/mockTestData').getMockFormData()
                 })}>
                     <Ionicons name="flask-outline" size={16} color={isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)"} />
                 </TouchableOpacity>

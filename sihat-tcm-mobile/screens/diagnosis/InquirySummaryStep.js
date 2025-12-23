@@ -13,11 +13,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { API_CONFIG } from '../../lib/apiConfig';
-
-// Initialize Google AI
-const genAI = new GoogleGenerativeAI(API_CONFIG.GOOGLE_API_KEY);
+import { getGenAI, API_CONFIG } from '../../lib/googleAI';
 
 // Progress steps
 const PROGRESS_STEPS = [
@@ -143,7 +139,7 @@ Main Concern: ${data.mainConcern || 'Not specified'}
             // Step 3: Generating
             setProgressStep(2);
 
-            const model = genAI.getGenerativeModel({
+            const model = getGenAI().getGenerativeModel({
                 model: data.doctor?.doctorLevel?.model || API_CONFIG.DEFAULT_MODEL,
                 systemInstruction: SUMMARY_PROMPT,
             });

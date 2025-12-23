@@ -20,12 +20,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { COLORS } from '../../constants/themes';
-import { API_CONFIG, MEDICAL_REPORT_PROMPT } from '../../lib/apiConfig';
+import { MEDICAL_REPORT_PROMPT } from '../../lib/apiConfig';
+import { getGenAI, API_CONFIG } from '../../lib/googleAI';
 import { getSystemPrompt } from '../../lib/supabase';
-
-const genAI = new GoogleGenerativeAI(API_CONFIG.GOOGLE_API_KEY);
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function UploadReportsStep({ data, onUpdate, theme, isDark }) {
@@ -119,7 +117,7 @@ export default function UploadReportsStep({ data, onUpdate, theme, isDark }) {
             // Fetch prompt from Admin Dashboard (Supabase)
             const basePrompt = await getSystemPrompt('medical_report', MEDICAL_REPORT_PROMPT);
 
-            const model = genAI.getGenerativeModel({ model: API_CONFIG.DEFAULT_MODEL });
+            const model = getGenAI().getGenerativeModel({ model: API_CONFIG.DEFAULT_MODEL });
 
             const result = await model.generateContent([
                 basePrompt,

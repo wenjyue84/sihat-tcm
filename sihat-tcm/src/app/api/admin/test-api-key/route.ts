@@ -1,14 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText } from 'ai';
+import { getGeminiApiKey } from '@/lib/settings';
 
 export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
     try {
-        const { apiKey } = await request.json();
+        const { apiKey, useSavedKey } = await request.json();
 
-        if (!apiKey) {
+        // Determine which key to test
+        let keyToTest: string;
+
+        if (useSavedKey) {
+            // Test the saved key from settings
+            keyToTest = getGeminiApiKey();
+            if (!keyToTest) {
+                return NextResponse.json(
+                    { error: 'No saved API key found' },
+                    { status: 400 }
+                );
+            }
+        } else if (apiKey) {
+            keyToTest = apiKey;
+        } else {
             return NextResponse.json(
                 { error: 'API key is required' },
                 { status: 400 }
@@ -16,7 +31,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create a provider with the test API key
-        const google = createGoogleGenerativeAI({ apiKey });
+        const google = createGoogleGenerativeAI({ apiKey: keyToTest });
 
         // Make a simple test call
         const result = await generateText({

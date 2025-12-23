@@ -1,104 +1,80 @@
 import React, { useEffect, useRef, useMemo } from 'react';
-import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
-import Svg, { Path, Defs, LinearGradient, Stop, Line } from 'react-native-svg';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
+import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop, Line, G } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+// Medically-accurate PQRST waveform path - Hospital-grade ECG
+// Path width: 100 units = 1 cardiac cycle, baseline at y=50
+const ECG_PATH = `
+M 0,50
+L 10,50
+C 13,50 15,47 18,43
+C 21,39 23,39 25,43
+C 27,47 29,50 32,50
+L 38,50
+L 40,53
+L 42,15
+L 44,80
+L 46,8
+L 48,50
+L 55,50
+C 60,50 63,44 68,38
+C 73,32 76,32 80,38
+C 84,44 87,50 92,50
+L 100,50
+`.trim().replace(/\n/g, ' ');
 
-// ECG waveform path - realistic PQRST wave pattern
-const ECG_PATH = "M 0,50 L 8,50 L 10,48 L 12,50 L 14,50 L 16,50 L 18,55 L 19,20 L 20,85 L 21,5 L 22,50 L 24,50 L 26,45 L 30,50 L 35,50";
-const PATH_WIDTH = 35; // Width of each ECG segment
+const PATH_WIDTH = 100;
 
-/**
- * EcgAnimation - Animated ECG/心电图 component
- * @param {number|null} bpm - Current heart rate in BPM
- * @param {boolean} isActive - Whether the animation is active
- * @param {number} height - Height of the component
- * @param {string} lineColor - Override line color
- * @param {object} style - Additional styles
- */
 export default function EcgAnimation({
     bpm = null,
     isActive = true,
-    height = 60,
+    height = 80,
     lineColor = null,
     style = {}
 }) {
     const translateX = useRef(new Animated.Value(0)).current;
-    const pulseScale = useRef(new Animated.Value(1)).current;
     const pulseOpacity = useRef(new Animated.Value(1)).current;
+    const pulseScale = useRef(new Animated.Value(1)).current;
 
-    // Calculate animation duration based on BPM - REALISTIC TIMING
-    // At 60 BPM: 1 beat per second, animation takes ~4 seconds
-    // At 120 BPM: 2 beats per second, animation takes ~2 seconds
-    const getAnimationDuration = (bpmValue) => {
-        if (!bpmValue || bpmValue <= 0) return 4000; // Default slow (ms)
+    // Duration for one complete cardiac cycle based on BPM
+    const cycleDuration = bpm && bpm > 0 ? (60 / bpm) * 1000 : 1000;
 
-        const beatDuration = 60 / bpmValue; // seconds per beat
-        return beatDuration * 4 * 1000; // Show about 4 heartbeats worth in ms
-    };
+    // Hospital ECG green (phosphor color) - Match Web exactly
+    const color = lineColor || '#00ff41';
 
-    // Dynamic color based on BPM range
-    const getLineColor = (bpmValue) => {
-        if (lineColor) return lineColor;
-        if (!bpmValue) return '#10b981'; // emerald-500 default
-        if (bpmValue < 60) return '#3b82f6'; // blue-500 for bradycardia
-        if (bpmValue > 100) return '#ef4444'; // red-500 for tachycardia
-        return '#10b981'; // emerald-500 for normal
-    };
+    // Status indicator color based on BPM
+    const statusColor = (!bpm) ? '#00ff41' : (bpm < 60 ? '#3b82f6' : (bpm > 100 ? '#ef4444' : '#00ff41'));
 
-    const color = getLineColor(bpm);
-    const animationDuration = getAnimationDuration(bpm);
-
-    // Pulse duration matches actual heart rate
-    const pulseDuration = bpm && bpm > 0 ? (60 / bpm) * 1000 : 1000; // ms per beat
-
-    // Number of paths for seamless scrolling
-    const pathCount = 16;
-    const totalWidth = PATH_WIDTH * pathCount;
+    // Generate waveforms - 6 waves to fill screen width
+    const waveCount = 6;
+    const pathOffsets = useMemo(() => {
+        return Array.from({ length: waveCount }, (_, i) => i * PATH_WIDTH);
+    }, []);
 
     useEffect(() => {
         if (isActive && bpm && bpm > 0) {
-            // Reset animation
-            translateX.setValue(totalWidth);
+            translateX.setValue(0);
 
-            // Create the scrolling animation
             const scrollAnim = Animated.loop(
                 Animated.timing(translateX, {
-                    toValue: -totalWidth,
-                    duration: animationDuration,
+                    toValue: -PATH_WIDTH,
+                    duration: cycleDuration,
                     easing: Easing.linear,
                     useNativeDriver: true,
                 })
             );
 
-            // Create the pulse animation (dot beats with heart rate)
+            // Pulse indicator animation
             const pulseAnim = Animated.loop(
                 Animated.sequence([
                     Animated.parallel([
-                        Animated.timing(pulseScale, {
-                            toValue: 1.8,
-                            duration: pulseDuration * 0.15,
-                            easing: Easing.out(Easing.ease),
-                            useNativeDriver: true,
-                        }),
-                        Animated.timing(pulseOpacity, {
-                            toValue: 0.6,
-                            duration: pulseDuration * 0.15,
-                            useNativeDriver: true,
-                        }),
+                        Animated.timing(pulseOpacity, { toValue: 0.3, duration: cycleDuration * 0.1, useNativeDriver: true }),
+                        Animated.timing(pulseScale, { toValue: 1.3, duration: cycleDuration * 0.1, useNativeDriver: true }),
                     ]),
                     Animated.parallel([
-                        Animated.timing(pulseScale, {
-                            toValue: 1,
-                            duration: pulseDuration * 0.85,
-                            easing: Easing.in(Easing.ease),
-                            useNativeDriver: true,
-                        }),
-                        Animated.timing(pulseOpacity, {
-                            toValue: 1,
-                            duration: pulseDuration * 0.85,
-                            useNativeDriver: true,
-                        }),
+                        Animated.timing(pulseOpacity, { toValue: 1, duration: cycleDuration * 0.9, useNativeDriver: true }),
+                        Animated.timing(pulseScale, { toValue: 1, duration: cycleDuration * 0.9, useNativeDriver: true }),
                     ]),
                 ])
             );
@@ -112,123 +88,177 @@ export default function EcgAnimation({
             };
         } else {
             translateX.setValue(0);
-            pulseScale.setValue(1);
-            pulseOpacity.setValue(1);
         }
-    }, [bpm, isActive, animationDuration, pulseDuration, totalWidth]);
+    }, [bpm, isActive, cycleDuration]);
 
-    // Generate path offsets for multiple waves
-    const pathOffsets = useMemo(() => {
-        return Array.from({ length: pathCount }, (_, i) => i * PATH_WIDTH);
-    }, []);
-
-    // Inactive state - flat line
     if (!isActive || !bpm || bpm <= 0) {
         return (
             <View style={[styles.container, { height }, style]}>
-                <Svg
-                    width="100%"
-                    height="100%"
-                    viewBox="0 0 200 100"
-                    preserveAspectRatio="none"
-                >
-                    <Line
-                        x1="0"
-                        y1="50"
-                        x2="200"
-                        y2="50"
-                        stroke="#d1d5db"
-                        strokeWidth="2"
-                        opacity={0.3}
-                    />
+                {/* Background Grid */}
+                <View style={styles.gridBackground}>
+                    <Svg height="100%" width="100%" style={styles.absolute}>
+                        <Defs>
+                            <SvgLinearGradient id="gridGradH" x1="0" y1="0" x2="1" y2="0">
+                                <Stop offset="0" stopColor="#0d2810" stopOpacity="0.8" />
+                                <Stop offset="1" stopColor="#0d2810" stopOpacity="0.8" />
+                            </SvgLinearGradient>
+                        </Defs>
+                        {/* Render Grid Lines manually for crispness */}
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <Line key={`h${i}`} x1="0" y1={i * 20 + "%"} x2="100%" y2={i * 20 + "%"} stroke="#0d2810" strokeWidth="1" />
+                        ))}
+                        {Array.from({ length: 10 }).map((_, i) => (
+                            <Line key={`v${i}`} x1={i * 10 + "%"} y1="0" x2={i * 10 + "%"} y2="100%" stroke="#0d2810" strokeWidth="1" />
+                        ))}
+                    </Svg>
+                </View>
+                <Svg width="100%" height="100%" viewBox="0 0 200 100" preserveAspectRatio="none">
+                    <Line x1="0" y1="50" x2="200" y2="50" stroke={color} strokeWidth="2" opacity={0.3} />
                 </Svg>
+                <LinearGradient
+                    colors={['rgba(0,0,0,0.8)', 'transparent', 'transparent', 'rgba(0,0,0,0.8)']}
+                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                    style={styles.absolute}
+                    pointerEvents="none"
+                />
             </View>
         );
     }
 
     return (
         <View style={[styles.container, { height }, style]}>
-            {/* Background grid effect */}
-            <View style={styles.gridContainer}>
-                {[0, 1, 2, 3, 4].map((i) => (
-                    <View
-                        key={`h-${i}`}
-                        style={[
-                            styles.gridLineHorizontal,
-                            { top: `${(i + 1) * 20}%`, backgroundColor: color + '15' }
-                        ]}
-                    />
-                ))}
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-                    <View
-                        key={`v-${i}`}
-                        style={[
-                            styles.gridLineVertical,
-                            { left: `${(i + 1) * 10}%`, backgroundColor: color + '15' }
-                        ]}
-                    />
-                ))}
+            {/* Hospital ECG Paper Grid Background - SVG for sharpness */}
+            <View style={styles.gridBackground}>
+                <Svg height="100%" width="100%" style={styles.absolute}>
+                    {/* Major Grid Lines (Dark Green) */}
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <Line key={`h${i}`} x1="0" y1={`${i * 25}%`} x2="100%" y2={`${i * 25}%`} stroke="#0d2810" strokeWidth="1.5" />
+                    ))}
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <Line key={`v${i}`} x1={`${i * 12.5}%`} y1="0" x2={`${i * 12.5}%`} y2="100%" stroke="#0d2810" strokeWidth="1.5" />
+                    ))}
+                    {/* Minor Grid Lines (More subtle) */}
+                    {Array.from({ length: 20 }).map((_, i) => (
+                        <Line key={`hm${i}`} x1="0" y1={`${i * 5}%`} x2="100%" y2={`${i * 5}%`} stroke="#091a09" strokeWidth="0.5" />
+                    ))}
+                </Svg>
             </View>
 
-            {/* Animated ECG Wave */}
+            {/* Animated ECG Waveform */}
             <Animated.View
                 style={[
                     styles.svgContainer,
-                    {
-                        transform: [{
-                            translateX: translateX.interpolate({
-                                inputRange: [-totalWidth, totalWidth],
-                                outputRange: [-totalWidth * 1.5, totalWidth * 1.5],
-                            })
-                        }]
-                    }
+                    { transform: [{ translateX: translateX }] }
                 ]}
             >
                 <Svg
-                    width={totalWidth * 3}
+                    width="100%"
                     height="100%"
-                    viewBox={`0 0 ${totalWidth * 1.5} 100`}
+                    viewBox="0 0 200 100"
                     preserveAspectRatio="none"
                 >
                     <Defs>
-                        <LinearGradient id="ecgGradientMobile" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <Stop offset="0%" stopColor={color} stopOpacity="0.2" />
-                            <Stop offset="20%" stopColor={color} stopOpacity="1" />
-                            <Stop offset="80%" stopColor={color} stopOpacity="1" />
-                            <Stop offset="100%" stopColor={color} stopOpacity="0.2" />
-                        </LinearGradient>
+                        {/* Gradient for fading edges */}
+                        <SvgLinearGradient id="ecgFadeMobile" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <Stop offset="0%" stopColor={color} stopOpacity="0" />
+                            <Stop offset="5%" stopColor={color} stopOpacity="1" />
+                            <Stop offset="95%" stopColor={color} stopOpacity="1" />
+                            <Stop offset="100%" stopColor={color} stopOpacity="0" />
+                        </SvgLinearGradient>
                     </Defs>
 
-                    {pathOffsets.map((offset, index) => (
-                        <Path
-                            key={index}
-                            d={ECG_PATH}
-                            fill="none"
-                            stroke={color}
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            transform={`translate(${offset}, 0)`}
-                        />
-                    ))}
+                    {/* GLOW SIMULATION: Layer multiple transparent paths */}
+
+                    {/* 1. Outer Bloom (Wide, very transparent) */}
+                    <G>
+                        {pathOffsets.map((offset, index) => (
+                            <Path
+                                key={`glow1-${index}`}
+                                d={ECG_PATH}
+                                fill="none"
+                                stroke={color}
+                                strokeWidth="8"
+                                strokeOpacity="0.15"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                transform={`translate(${offset}, 0)`}
+                            />
+                        ))}
+                    </G>
+
+                    {/* 2. Inner Bloom (Medium, semi-transparent) */}
+                    <G>
+                        {pathOffsets.map((offset, index) => (
+                            <Path
+                                key={`glow2-${index}`}
+                                d={ECG_PATH}
+                                fill="none"
+                                stroke={color}
+                                strokeWidth="4"
+                                strokeOpacity="0.3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                transform={`translate(${offset}, 0)`}
+                            />
+                        ))}
+                    </G>
+
+                    {/* 3. Core Line (Sharp, bright) */}
+                    <G>
+                        {pathOffsets.map((offset, index) => (
+                            <Path
+                                key={`core-${index}`}
+                                d={ECG_PATH}
+                                fill="none"
+                                stroke={`url(#ecgFadeMobile)`}
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                transform={`translate(${offset}, 0)`}
+                            />
+                        ))}
+                    </G>
                 </Svg>
             </Animated.View>
 
-            {/* Pulsing indicator dot - beats with actual heart rate */}
-            <Animated.View
-                style={[
-                    styles.pulseDot,
-                    {
-                        backgroundColor: color,
-                        transform: [{ scale: pulseScale }],
-                        opacity: pulseOpacity,
-                        shadowColor: color,
-                    }
-                ]}
+            {/* BPM Display - Hospital monitor style */}
+            <View style={styles.bpmDisplay}>
+                <Animated.View
+                    style={[
+                        styles.bpmIndicator,
+                        {
+                            backgroundColor: statusColor,
+                            opacity: pulseOpacity,
+                            transform: [{ scale: pulseScale }],
+                        }
+                    ]}
+                />
+                <Text style={[styles.bpmText, { color: statusColor }]}>
+                    {bpm}
+                </Text>
+            </View>
+
+            {/* Vignette overlay for monitor effect - Darker corners */}
+            <LinearGradient
+                colors={['rgba(0,0,0,0.8)', 'transparent', 'transparent', 'rgba(0,0,0,0.8)']}
+                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={styles.absolute}
+                pointerEvents="none"
+            />
+            {/* Top/Bottom vignette */}
+            <LinearGradient
+                colors={['rgba(0,0,0,0.3)', 'transparent', 'transparent', 'rgba(0,0,0,0.3)']}
+                start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}
+                style={styles.absolute}
+                pointerEvents="none"
             />
 
-            {/* Scan line effect */}
-            <View style={[styles.scanLine, { backgroundColor: color }]} />
+            {/* CRT scanlines pattern */}
+            <View style={styles.scanlines} pointerEvents="none">
+                {Array.from({ length: 20 }).map((_, i) => (
+                    <View key={i} style={styles.scanLineRow} />
+                ))}
+            </View>
         </View>
     );
 }
@@ -238,53 +268,56 @@ const styles = StyleSheet.create({
         position: 'relative',
         overflow: 'hidden',
         borderRadius: 8,
-        backgroundColor: 'transparent',
+        backgroundColor: '#0a0a0a',
+        borderWidth: 1,
+        borderColor: '#1a1a1a',
+    },
+    absolute: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+    },
+    gridBackground: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
     },
     svgContainer: {
         position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        top: 0, left: 0, bottom: 0,
+        width: '300%', // Wide container for waves
     },
-    gridContainer: {
+    bpmDisplay: {
         position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-    },
-    gridLineHorizontal: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        height: 1,
-    },
-    gridLineVertical: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        width: 1,
-    },
-    pulseDot: {
-        position: 'absolute',
+        top: 8,
         right: 12,
-        top: '50%',
-        marginTop: -6,
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.8,
-        shadowRadius: 10,
-        elevation: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        zIndex: 10,
     },
-    scanLine: {
+    bpmIndicator: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
+    bpmText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        fontFamily: 'monospace',
+    },
+    vignette: {
         position: 'absolute',
-        right: 28,
-        top: 0,
-        bottom: 0,
-        width: 2,
-        opacity: 0.3,
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'transparent',
     },
+    scanlines: {
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        justifyContent: 'space-between',
+        opacity: 0.1,
+    },
+    scanLineRow: {
+        height: 1,
+        backgroundColor: '#000',
+        width: '100%',
+    }
 });

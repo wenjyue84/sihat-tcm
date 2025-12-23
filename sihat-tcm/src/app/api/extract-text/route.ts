@@ -1,5 +1,5 @@
-import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
+import { getGoogleProvider } from '@/lib/googleProvider';
 
 export const maxDuration = 60;
 
@@ -108,6 +108,7 @@ RESPOND IN STRICT JSON FORMAT:
                 mimeType: mimeType as 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp'
             };
 
+        const google = getGoogleProvider();
         const { text: responseText } = await generateText({
             model: google('gemini-2.0-flash'),
             messages: [

@@ -61,21 +61,19 @@ export default function PulseStep({ data, onUpdate, theme, isDark }) {
     const [conflictWarning, setConflictWarning] = useState(null);
 
     const pulseAnim = useRef(new Animated.Value(1)).current;
+    // Multi-layer ripple animations (Apple Watch inspired)
+    const ripple1Scale = useRef(new Animated.Value(1)).current;
+    const ripple1Opacity = useRef(new Animated.Value(0.6)).current;
+    const ripple2Scale = useRef(new Animated.Value(1)).current;
+    const ripple2Opacity = useRef(new Animated.Value(0.4)).current;
+    const ripple3Scale = useRef(new Animated.Value(1)).current;
+    const ripple3Opacity = useRef(new Animated.Value(0.2)).current;
     const durationTimer = useRef(null);
 
-    // Heartbeat animation synced to BPM
+    // Heartbeat animation with multi-layer ripples synced to BPM
+    // Heartbeat animation removed as per request
     useEffect(() => {
-        if (bpm && parseInt(bpm) > 0) {
-            const interval = 60000 / parseInt(bpm);
-            const anim = Animated.loop(
-                Animated.sequence([
-                    Animated.timing(pulseAnim, { toValue: 1.15, duration: 100, useNativeDriver: true }),
-                    Animated.timing(pulseAnim, { toValue: 1, duration: Math.max(100, interval - 100), useNativeDriver: true }),
-                ])
-            );
-            anim.start();
-            return () => anim.stop();
-        }
+        // No animation
     }, [bpm]);
 
     const startMeasuring = () => {
@@ -156,11 +154,14 @@ export default function PulseStep({ data, onUpdate, theme, isDark }) {
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            {/* Header */}
+            {/* Header with Multi-Layer Ripple Effect */}
             <View style={styles.header}>
-                <Animated.View style={[styles.iconContainer, { transform: [{ scale: pulseAnim }], backgroundColor: isDark ? 'rgba(16,185,129,0.15)' : 'rgba(16,185,129,0.1)' }]}>
-                    <Ionicons name="heart" size={36} color={theme.accent.primary} />
-                </Animated.View>
+                <View style={styles.iconWrapper}>
+                    {/* Main Heart Icon - Static */}
+                    <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(16,185,129,0.15)' : 'rgba(16,185,129,0.1)' }]}>
+                        <Ionicons name="heart" size={36} color={theme.accent.primary} />
+                    </View>
+                </View>
                 <Text style={styles.title}>{t.pulse.title || 'Pulse Diagnosis'}</Text>
                 <Text style={styles.subtitle}>{t.pulse.subtitle || '切诊 - TCM pulse examination'}</Text>
             </View>
@@ -189,13 +190,13 @@ export default function PulseStep({ data, onUpdate, theme, isDark }) {
                     )}
                 </View>
 
-                {/* ECG Animation - 心电图 */}
+                {/* ECG Animation - Hospital Monitor Style 心电图 */}
                 {bpm && parseInt(bpm) > 0 && (
                     <View style={styles.ecgContainer}>
                         <EcgAnimation
                             bpm={parseInt(bpm)}
                             isActive={true}
-                            height={70}
+                            height={100}
                         />
                     </View>
                 )}
@@ -355,9 +356,28 @@ const createStyles = (theme, isDark) => StyleSheet.create({
     container: { flex: 1 },
     content: { padding: 20 },
     header: { alignItems: 'center', marginBottom: 28 },
+    iconWrapper: {
+        width: 120, height: 120,
+        justifyContent: 'center', alignItems: 'center',
+        marginBottom: 8,
+    },
+    rippleCircle: {
+        position: 'absolute',
+        borderRadius: 100,
+    },
+    ripple1: {
+        width: 80, height: 80,
+    },
+    ripple2: {
+        width: 80, height: 80,
+    },
+    ripple3: {
+        width: 80, height: 80,
+    },
     iconContainer: {
         width: 80, height: 80, borderRadius: 40,
-        justifyContent: 'center', alignItems: 'center', marginBottom: 16,
+        justifyContent: 'center', alignItems: 'center',
+        zIndex: 10,
     },
     title: { fontSize: 24, fontWeight: 'bold', color: theme.text.primary, marginBottom: 4 },
     subtitle: { fontSize: 14, color: theme.text.secondary },
@@ -384,9 +404,6 @@ const createStyles = (theme, isDark) => StyleSheet.create({
         marginTop: 16,
         borderRadius: 12,
         overflow: 'hidden',
-        backgroundColor: isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.05)',
-        borderWidth: 1,
-        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
     },
     measureButton: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,

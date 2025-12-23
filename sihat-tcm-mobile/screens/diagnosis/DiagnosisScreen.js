@@ -419,6 +419,7 @@ export default function DiagnosisScreen({ isLoggedIn = false, onExitToDashboard,
                 return <AudioAnalysisStep
                     onNext={goToNext}
                     onUpdate={(data) => setFormData(prev => ({ ...prev, ...data }))}
+                    initialData={formData}
                     theme={theme}
                     isDark={isDark}
                 />;

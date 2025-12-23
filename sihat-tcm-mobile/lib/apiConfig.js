@@ -1,9 +1,72 @@
 // API Configuration for Sihat TCM Mobile
-// In production, these should be loaded from environment variables
+// The API key can be fetched from the admin dashboard or use a local fallback
+
+// Server URL - update this to your deployed URL in production
+const WEB_SERVER_URL = __DEV__
+  ? 'http://192.168.0.5:3000' // Local dev server IP
+  : 'https://YOUR_PRODUCTION_URL.vercel.app'; // Update this for production
+
+// Local fallback API key (used if server is unreachable)
+const FALLBACK_API_KEY = 'AIzaSyDunuw1wCDTmnuQr9KTMeuKG7v8YypVmxg';
+
+// Cached API key (fetched from server)
+let cachedApiKey = null;
+let lastFetchTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // Cache for 5 minutes
+
+/**
+ * Fetch the API key from the web server's admin dashboard
+ * This ensures both web and mobile use the same API key
+ */
+export async function fetchApiKey() {
+  try {
+    // Check cache first
+    if (cachedApiKey && (Date.now() - lastFetchTime) < CACHE_DURATION) {
+      return cachedApiKey;
+    }
+
+    console.log('[apiConfig] Fetching API key from server...');
+    const response = await fetch(`${WEB_SERVER_URL}/api/config/gemini-key`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 5000, // 5 second timeout
+    });
+
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.apiKey) {
+      console.log('[apiConfig] API key fetched from:', data.source);
+      cachedApiKey = data.apiKey;
+      lastFetchTime = Date.now();
+      return data.apiKey;
+    } else {
+      throw new Error(data.error || 'No API key in response');
+    }
+  } catch (error) {
+    console.warn('[apiConfig] Failed to fetch API key from server:', error.message);
+    console.log('[apiConfig] Using fallback API key');
+    return FALLBACK_API_KEY;
+  }
+}
+
+/**
+ * Get the current API key (sync version for backward compatibility)
+ * Returns cached key or fallback
+ */
+export function getApiKeySync() {
+  return cachedApiKey || FALLBACK_API_KEY;
+}
 
 export const API_CONFIG = {
-  // Google Generative AI
-  GOOGLE_API_KEY: 'AIzaSyAXMPk2O7sv-ym6BdV5JhdC8PN12xo3UcM',
+  // Web server URL for API key fetching
+  WEB_SERVER_URL,
+
+  // Google Generative AI - use getApiKeySync() or fetchApiKey()
+  GOOGLE_API_KEY: FALLBACK_API_KEY, // Default fallback, will be updated dynamically
 
   // Supabase
   SUPABASE_URL: 'https://jvokcruuowmvpthubjqh.supabase.co',

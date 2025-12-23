@@ -35,6 +35,7 @@ import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { LanguageSelector, LanguageButton } from './components/LanguageSelector';
 import { performBiometricLogin, hasStoredCredentials, isBiometricEnabled } from './lib/biometricAuth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchApiKey } from './lib/apiConfig';
 
 
 // Enable LayoutAnimation on Android
@@ -276,6 +277,20 @@ function AppContent() {
     setTimeout(callback, 150);
   };
 
+  // Fetch API key from server on mount (for centralized API key management)
+  useEffect(() => {
+    const initApiKey = async () => {
+      try {
+        console.log('[App] Fetching API key from admin dashboard...');
+        await fetchApiKey();
+        console.log('[App] API key initialized successfully');
+      } catch (error) {
+        console.warn('[App] Failed to fetch API key, using fallback:', error.message);
+      }
+    };
+    initApiKey();
+  }, []);
+
   // Check if onboarding is completed on mount
   useEffect(() => {
     const checkOnboarding = async () => {
@@ -489,17 +504,20 @@ function AppContent() {
         Alert.alert(
           language === 'zh' ? '注册成功' : language === 'ms' ? 'Berjaya' : 'Success',
           language === 'zh'
-            ? '账户创建成功！请查看邮箱验证。'
+            ? '账户创建成功！欢迎使用诗哈中医。'
             : language === 'ms'
-              ? 'Akaun berjaya dibuat! Sila semak e-mel anda.'
-              : 'Account created! Please check your email to verify.',
+              ? 'Akaun berjaya dibuat! Selamat datang ke Sihat TCM.'
+              : 'Account created! Welcome to Sihat TCM.',
           [{
             text: 'OK',
             onPress: () => {
-              animateStepChange(() => {
-                setAuthStep('password');
-                setPassword('');
+              // Auto-login the user since email confirmation is disabled
+              setCurrentUser({
+                id: user.id,
+                email: user.email,
+                role: 'patient',
               });
+              setIsGuest(true);
             }
           }]
         );

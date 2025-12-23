@@ -1,6 +1,6 @@
-import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
+import { getGoogleProvider } from '@/lib/googleProvider';
 import path from 'path';
 import fs from 'fs';
 
@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
 
         console.log('[Ask AI Doctor] Generating response...');
 
+        const google = getGoogleProvider();
         const { text } = await generateText({
             model: google('gemini-2.0-flash'),
             prompt: filledPrompt,

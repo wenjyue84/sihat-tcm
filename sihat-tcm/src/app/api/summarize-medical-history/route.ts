@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { google } from '@ai-sdk/google'
 import { generateText } from 'ai'
+import { getGoogleProvider } from '@/lib/googleProvider'
 
 // Default prompt if not configured in admin
 const DEFAULT_PROMPT = `You are a medical assistant helping patients summarize their medical history for doctor consultations.
@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
         console.log('[Summarize Medical History] Reports count:', reports?.length || 0)
 
         // Generate summary using ai-sdk
+        const google = getGoogleProvider()
         const result = await generateText({
             model: google('gemini-2.0-flash'),
             prompt: finalPrompt,

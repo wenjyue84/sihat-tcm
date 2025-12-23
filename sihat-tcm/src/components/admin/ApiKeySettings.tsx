@@ -46,7 +46,10 @@ export function ApiKeySettings() {
     };
 
     const handleTestKey = async () => {
-        if (!apiKey.trim()) {
+        // If input is empty but we have a saved key, test the saved key
+        const keyToTest = apiKey.trim() || (status?.hasCustomKey ? 'USE_SAVED_KEY' : '');
+
+        if (!keyToTest) {
             setTestResult({ success: false, message: 'Please enter an API key to test' });
             return;
         }
@@ -58,7 +61,10 @@ export function ApiKeySettings() {
             const res = await fetch('/api/admin/test-api-key', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ apiKey: apiKey.trim() })
+                body: JSON.stringify({
+                    apiKey: keyToTest === 'USE_SAVED_KEY' ? undefined : keyToTest,
+                    useSavedKey: keyToTest === 'USE_SAVED_KEY'
+                })
             });
 
             const data = await res.json();
@@ -241,8 +247,8 @@ export function ApiKeySettings() {
                     {/* Test Result */}
                     {testResult && (
                         <div className={`flex items-center gap-2 p-3 rounded-lg ${testResult.success
-                                ? 'bg-green-50 text-green-700 border border-green-200'
-                                : 'bg-red-50 text-red-700 border border-red-200'
+                            ? 'bg-green-50 text-green-700 border border-green-200'
+                            : 'bg-red-50 text-red-700 border border-red-200'
                             }`}>
                             {testResult.success ? (
                                 <Check className="w-4 h-4" />
@@ -256,8 +262,8 @@ export function ApiKeySettings() {
                     {/* Save Result */}
                     {saveResult && (
                         <div className={`flex items-center gap-2 p-3 rounded-lg ${saveResult.success
-                                ? 'bg-green-50 text-green-700 border border-green-200'
-                                : 'bg-red-50 text-red-700 border border-red-200'
+                            ? 'bg-green-50 text-green-700 border border-green-200'
+                            : 'bg-red-50 text-red-700 border border-red-200'
                             }`}>
                             {saveResult.success ? (
                                 <Check className="w-4 h-4" />
@@ -273,10 +279,14 @@ export function ApiKeySettings() {
                         <Button
                             variant="outline"
                             onClick={handleTestKey}
-                            disabled={testing || !apiKey.trim()}
+                            disabled={testing || (!apiKey.trim() && !status?.hasCustomKey)}
                         >
                             {testing ? (
                                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Testing...</>
+                            ) : apiKey.trim() ? (
+                                'Test Key'
+                            ) : status?.hasCustomKey ? (
+                                'Test Saved Key'
                             ) : (
                                 'Test Key'
                             )}

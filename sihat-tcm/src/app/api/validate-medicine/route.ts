@@ -1,5 +1,5 @@
-import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
+import { getGoogleProvider } from '@/lib/googleProvider';
 
 export const maxDuration = 60;
 
@@ -33,6 +33,7 @@ export async function POST(req: Request) {
         5. Do not include markdown formatting like \`\`\`json. Just the raw JSON string.
         `;
 
+        const google = getGoogleProvider();
         const { text: responseText } = await generateText({
             model: google('gemini-1.5-pro'),
             messages: [{ role: 'user', content: prompt }],

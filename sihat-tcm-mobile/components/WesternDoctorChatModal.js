@@ -15,15 +15,11 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { COLORS } from '../constants/themes';
-import { API_CONFIG } from '../lib/apiConfig';
+import { getGenAI, API_CONFIG } from '../lib/googleAI';
 import { useTheme } from '../contexts/ThemeContext';
 import { getSystemPrompt as fetchPrompt } from '../lib/supabase';
 import { useLanguage } from '../contexts/LanguageContext';
-
-// Initialize Google AI
-const genAI = new GoogleGenerativeAI(API_CONFIG.GOOGLE_API_KEY);
 
 // Western Doctor System Prompt
 const getSystemPrompt = (reportData, language) => {
@@ -92,7 +88,7 @@ export default function WesternDoctorChatModal({ visible, onClose, reportData, t
             // Fetch prompt
             const finalPrompt = getSystemPrompt(reportData, language);
 
-            const model = genAI.getGenerativeModel({
+            const model = getGenAI().getGenerativeModel({
                 model: API_CONFIG.DEFAULT_MODEL,
                 systemInstruction: finalPrompt,
             });

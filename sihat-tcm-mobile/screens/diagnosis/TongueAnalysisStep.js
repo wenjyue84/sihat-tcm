@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
     View,
     Text,
@@ -16,15 +16,11 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { COLORS } from '../../constants/themes';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { API_CONFIG } from '../../lib/apiConfig';
+import { getGenAI, API_CONFIG } from '../../lib/googleAI';
 import { getSystemPrompt } from '../../lib/supabase';
-
-// Initialize Google AI
-const genAI = new GoogleGenerativeAI(API_CONFIG.GOOGLE_API_KEY);
 
 // TCM Tongue Analysis Prompt
 const TONGUE_ANALYSIS_PROMPT = `You are an expert Traditional Chinese Medicine (TCM) practitioner specializing in tongue diagnosis (舌诊).
@@ -63,6 +59,20 @@ export default function TongueAnalysisStep({ data, onUpdate, theme, isDark }) {
     const [analysisResult, setAnalysisResult] = useState(null);
     const [error, setError] = useState(null);
     const scanAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        if (data?.tongueImage) {
+            if (typeof data.tongueImage === 'number') {
+                const asset = Image.resolveAssetSource(data.tongueImage);
+                setImage({ uri: asset.uri });
+            } else {
+                setImage({ uri: data.tongueImage });
+            }
+        }
+        if (data?.tongueAnalysis) {
+            setAnalysisResult(data.tongueAnalysis);
+        }
+    }, [data]);
 
     const startScanningAnim = () => {
         scanAnim.setValue(0);
@@ -155,7 +165,7 @@ export default function TongueAnalysisStep({ data, onUpdate, theme, isDark }) {
             // Fetch prompt from Admin Dashboard (Supabase)
             const basePrompt = await getSystemPrompt('doctor_tongue', TONGUE_ANALYSIS_PROMPT);
 
-            const model = genAI.getGenerativeModel({ model: API_CONFIG.DEFAULT_MODEL });
+            const model = getGenAI().getGenerativeModel({ model: API_CONFIG.DEFAULT_MODEL });
 
             const result = await model.generateContent([
                 basePrompt,

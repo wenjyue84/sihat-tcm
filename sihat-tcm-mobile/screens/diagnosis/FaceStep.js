@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
     View,
     Text,
@@ -15,13 +15,9 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import { API_CONFIG } from '../../lib/apiConfig';
-
-// Initialize Google AI
-const genAI = new GoogleGenerativeAI(API_CONFIG.GOOGLE_API_KEY);
+import { getGenAI, API_CONFIG } from '../../lib/googleAI';
 
 // TCM Face Analysis Prompt
 const FACE_ANALYSIS_PROMPT = `You are an expert Traditional Chinese Medicine (TCM) practitioner specializing in facial diagnosis (望诊/面诊).
@@ -60,6 +56,20 @@ export default function FaceStep({ data, onUpdate, theme, isDark }) {
     const [analysisResult, setAnalysisResult] = useState(null);
     const [error, setError] = useState(null);
     const scanAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        if (data?.faceImage) {
+            if (typeof data.faceImage === 'number') {
+                const asset = Image.resolveAssetSource(data.faceImage);
+                setImage({ uri: asset.uri });
+            } else {
+                setImage({ uri: data.faceImage });
+            }
+        }
+        if (data?.faceAnalysis) {
+            setAnalysisResult(data.faceAnalysis);
+        }
+    }, [data]);
 
     const startScanningAnim = () => {
         scanAnim.setValue(0);
@@ -149,7 +159,7 @@ export default function FaceStep({ data, onUpdate, theme, isDark }) {
         startScanningAnim();
 
         try {
-            const model = genAI.getGenerativeModel({ model: API_CONFIG.DEFAULT_MODEL });
+            const model = getGenAI().getGenerativeModel({ model: API_CONFIG.DEFAULT_MODEL });
 
             const result = await model.generateContent([
                 FACE_ANALYSIS_PROMPT,

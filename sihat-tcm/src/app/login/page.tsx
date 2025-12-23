@@ -394,6 +394,13 @@ function LoginForm() {
                                 {loading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                                 {mode === 'login' ? t.login.signin : t.login.signup}
                             </button>
+
+                            {/* Error message - positioned right after submit button for visibility */}
+                            {error && (
+                                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg animate-in slide-in-from-top-2 duration-300">
+                                    <p className="text-sm text-red-600 text-center font-medium">{error}</p>
+                                </div>
+                            )}
                         </form>
 
                         {/* Divider */}
@@ -444,13 +451,6 @@ function LoginForm() {
                                 })}
                             </div>
                         </div>
-
-                        {/* Error message */}
-                        {error && (
-                            <div className="mt-6 p-3 bg-red-50 border border-red-100 rounded-lg">
-                                <p className="text-sm text-red-600 text-center">{error}</p>
-                            </div>
-                        )}
                     </div>
                 </div>
 

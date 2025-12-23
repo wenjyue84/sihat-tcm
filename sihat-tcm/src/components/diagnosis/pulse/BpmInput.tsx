@@ -111,13 +111,13 @@ function ManualBpmInput({
                     <span className="text-xl font-semibold text-slate-500">{t.pulse.bpm}</span>
                 </div>
 
-                {/* ECG Animation */}
+                {/* ECG Animation - Hospital Monitor Style */}
                 {manualBpm && bpmValue > 0 && (
-                    <div className="mt-4 rounded-xl overflow-hidden bg-gradient-to-r from-slate-900/5 via-slate-900/10 to-slate-900/5 border border-slate-200/50">
+                    <div className="mt-4">
                         <EcgAnimation
                             bpm={bpmValue}
                             isActive={true}
-                            height={80}
+                            height={100}
                             className="w-full"
                         />
                     </div>
@@ -189,12 +189,12 @@ function TapBpmInput({
                             <Activity className="w-8 h-8" />
                             {bpm} BPM
                         </div>
-                        {/* ECG Animation */}
-                        <div className="w-full mt-2 rounded-xl overflow-hidden bg-gradient-to-r from-slate-900/5 via-slate-900/10 to-slate-900/5 border border-slate-200/50">
+                        {/* ECG Animation - Hospital Monitor Style */}
+                        <div className="w-full mt-2">
                             <EcgAnimation
                                 bpm={bpm}
                                 isActive={true}
-                                height={80}
+                                height={100}
                                 className="w-full"
                             />
                         </div>

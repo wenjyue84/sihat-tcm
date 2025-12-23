@@ -1,5 +1,5 @@
-import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
+import { getGoogleProvider } from '@/lib/googleProvider';
 
 export const maxDuration = 60;
 
@@ -97,6 +97,7 @@ Format the response as a clear, paragraph-based summary suitable for medical rec
 
         let text;
         try {
+            const google = getGoogleProvider();
             const result = await generateText({
                 model: google('gemini-2.0-flash'),
                 system: systemPrompt,
@@ -108,8 +109,9 @@ Format the response as a clear, paragraph-based summary suitable for medical rec
 
             // Fallback
             try {
+                const googleFallback = getGoogleProvider();
                 const fallbackResult = await generateText({
-                    model: google('gemini-1.5-flash'),
+                    model: googleFallback('gemini-1.5-flash'),
                     system: systemPrompt,
                     prompt: userPrompt,
                 });

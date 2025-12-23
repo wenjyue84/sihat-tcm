@@ -7,11 +7,12 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { LogOut, Info, MessageSquare, Eye, FileText, Check, Loader2, ChevronDown, ChevronUp, Mic, Users, Settings, Shield, Key } from 'lucide-react'
+import { LogOut, Info, MessageSquare, Eye, FileText, Check, Loader2, ChevronDown, ChevronUp, Mic, Users, Settings, Shield, Key, UserCog } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PractitionerManager } from '@/components/admin/PractitionerManager'
 import { SecuritySettings } from '@/components/admin/SecuritySettings'
 import { ApiKeySettings } from '@/components/admin/ApiKeySettings'
+import { UserManager } from '@/components/admin/UserManager'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import {
@@ -354,7 +355,7 @@ export default function AdminDashboard() {
             </div>
 
             <Tabs defaultValue="prompts" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-4 max-w-2xl mx-auto mb-8">
+                <TabsList className="grid w-full grid-cols-5 max-w-3xl mx-auto mb-8">
                     <TabsTrigger value="prompts" className="flex items-center gap-2">
                         <Settings className="w-4 h-4" />
                         Prompts
@@ -366,6 +367,10 @@ export default function AdminDashboard() {
                     <TabsTrigger value="security" className="flex items-center gap-2">
                         <Shield className="w-4 h-4" />
                         Security
+                    </TabsTrigger>
+                    <TabsTrigger value="users" className="flex items-center gap-2">
+                        <UserCog className="w-4 h-4" />
+                        Users
                     </TabsTrigger>
                     <TabsTrigger value="practitioners" className="flex items-center gap-2">
                         <Users className="w-4 h-4" />
@@ -529,6 +534,10 @@ export default function AdminDashboard() {
 
                 <TabsContent value="security" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
                     <SecuritySettings />
+                </TabsContent>
+
+                <TabsContent value="users" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
+                    <UserManager />
                 </TabsContent>
 
                 <TabsContent value="practitioners" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
