@@ -450,6 +450,7 @@ export function AudioRecorder({ onComplete, onBack, initialData }: { onComplete:
             <AudioAnalysisResult
                 analysisData={analysisResult}
                 onRetake={handleRetake}
+                onUpload={triggerFileUpload}
                 onContinue={handleContinueWithResult}
             />
         )

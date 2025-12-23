@@ -175,9 +175,11 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
 
     // Handler for mobile bottom nav "Next" press
     const handleMobileNext = useCallback(() => {
-        // Show the review prompt instead of proceeding
-        setShowReviewPrompt(true)
-    }, [])
+        // Directly proceed to next step with the summary
+        if (summary.trim()) {
+            onCompleteRef.current(summary)
+        }
+    }, [summary])
 
     // Handler for back button
     const handleBack = useCallback(() => {

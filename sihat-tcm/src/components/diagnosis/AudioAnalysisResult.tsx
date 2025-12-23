@@ -3,7 +3,7 @@
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { Mic, Wind, MessageSquare, Volume2, ChevronDown, ChevronUp, RefreshCw, ArrowRight, CheckCircle, AlertCircle, Info } from 'lucide-react'
+import { Mic, Wind, MessageSquare, Volume2, ChevronDown, ChevronUp, RefreshCw, ArrowRight, CheckCircle, AlertCircle, Info, Upload } from 'lucide-react'
 import { useState } from 'react'
 
 interface AnalysisCategory {
@@ -29,6 +29,7 @@ interface AudioAnalysisData {
 interface AudioAnalysisResultProps {
     analysisData: AudioAnalysisData
     onRetake: () => void
+    onUpload: () => void
     onContinue: () => void
 }
 
@@ -166,7 +167,7 @@ function CategoryCard({ title, icon, iconBgColor, data, isExpanded, onToggle }: 
     )
 }
 
-export function AudioAnalysisResult({ analysisData, onRetake, onContinue }: AudioAnalysisResultProps) {
+export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContinue }: AudioAnalysisResultProps) {
     const { t } = useLanguage()
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
         voice: true, // Start with voice expanded
@@ -294,6 +295,14 @@ export function AudioAnalysisResult({ analysisData, onRetake, onContinue }: Audi
                 >
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Record Again
+                </Button>
+                <Button
+                    variant="outline"
+                    onClick={onUpload}
+                    className="flex-1 h-12 text-gray-600 border-gray-300 hover:bg-gray-50"
+                >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Audio
                 </Button>
                 <Button
                     onClick={onContinue}

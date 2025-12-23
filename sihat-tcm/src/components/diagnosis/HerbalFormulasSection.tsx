@@ -69,21 +69,7 @@ export function HerbalFormulasSection({
     }
 
     return (
-        <Card className="border-amber-100 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/20 dark:border-amber-800/50">
-            <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
-                    <button
-                        onClick={() => onSectionClick?.("Can you explain these Herbal Formulas in more detail? What are the key ingredients and their functions?")}
-                        className="flex items-center gap-2 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors text-left"
-                    >
-                        <Pill className="h-5 w-5" />
-                        <span className="underline decoration-dotted underline-offset-4 decoration-amber-400 hover:decoration-emerald-500">
-                            Herbal Formulas (中药方剂)
-                        </span>
-                    </button>
-                </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <div className="space-y-4">
                 {formulas.map((formula, idx) => (
                     <div
                         key={idx}
@@ -159,7 +145,6 @@ export function HerbalFormulasSection({
                         )}
                     </div>
                 ))}
-            </CardContent>
-        </Card>
+        </div>
     )
 }

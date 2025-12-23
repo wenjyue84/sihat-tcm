@@ -7,20 +7,21 @@
  * for testing and demonstration purposes.
  * 
  * Data includes:
- * - PDF medical report (base64 placeholder)
+ * - PDF medical report (extracted text)
  * - Medicine entries (manually entered format)
- * - Tongue diagnosis photo
- * - Face diagnosis photo
+ * - Tongue diagnosis photo (TCM 舌诊 style)
+ * - Face diagnosis photo (TCM 面诊 style)
  * - Body area examination photo
  * - Voice analysis audio
  * - Pulse measurement BPM
  */
 
-// Small placeholder image (1x1 green pixel that represents "captured" state)
-// In production, you'd use real sample images
-const MOCK_TONGUE_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mNk+M+wnYGBgZGBATEAABz8A/l4XLjBAAAAAElFTkSuQmCC";
-const MOCK_FACE_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mP8z8DwHwYYGBgYCDIDABdoA/l5FpnhAAAAAElFTkSuQmCC";
-const MOCK_BODY_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mNk+P+fgZGBgYGRgQAxAADeGAP5VzGDgQAAAABJRU5ErkJggg==";
+// Mock images - using public folder paths
+// These are realistic selfie-style photos that simulate patient-taken images for TCM diagnosis
+const MOCK_TONGUE_IMAGE = "/mock-tongue.png";
+const MOCK_FACE_IMAGE = "/mock-face.png";
+const MOCK_BODY_IMAGE = "/mock-body.png";
+
 
 // Minimal valid audio file (WebM format placeholder)
 const MOCK_AUDIO_BASE64 = "data:audio/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQRChYECGFOAZwH/////////FUmpZpkq17GDD0JATYCGQ2hyb21lV0GGQ2hyb21lFlSua7+uvdeBAXPFh4CBAR9DtnUBAAAA";

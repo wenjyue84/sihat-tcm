@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Utensils, Leaf, MapPin, Dumbbell, Moon, Brain, Stethoscope, AlertCircle, AlertTriangle, Calendar } from 'lucide-react'
+import { Utensils, Leaf, MapPin, Dumbbell, Moon, Brain, Stethoscope, AlertCircle, AlertTriangle, Calendar, Heart, Pill } from 'lucide-react'
 import { HerbalFormulasSection } from '../HerbalFormulasSection'
+import { CollapsibleSection } from '@/components/ui/CollapsibleSection'
 
 interface ReportRecommendationsProps {
     data: any
@@ -24,32 +25,23 @@ export function ReportRecommendations({
 }: ReportRecommendationsProps) {
     return (
         <>
-            {/* Recommendations Grid */}
-            <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-                {/* Food Recommendations */}
+            {/* Recommendations - Collapsible Sections */}
+            <div className="space-y-4 md:space-y-6">
+                {/* Food Recommendations - Collapsible */}
                 {opts.includeDietary !== false && (getFoodRecommendations().length > 0 || getFoodsToAvoid().length > 0 || getRecipes().length > 0) && (
-                    <motion.div variants={variants} className="space-y-6">
-                        <Card className="h-full">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="flex items-center gap-2 text-stone-800">
-                                    <button
-                                        onClick={() => handleSectionClick("Please elaborate on the Dietary Therapy recommendations. Why are these foods beneficial for me?")}
-                                        className="flex items-center gap-2 hover:text-emerald-600 transition-colors text-left"
-                                    >
-                                        <Utensils className="h-5 w-5 text-orange-500" />
-                                        <span className="underline decoration-dotted underline-offset-4 decoration-stone-400 hover:decoration-emerald-500">
-                                            Dietary Therapy (食疗)
-                                        </span>
-                                    </button>
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
+                    <motion.div variants={variants}>
+                        <CollapsibleSection
+                            title="Dietary Therapy (食疗)"
+                            icon={Utensils}
+                            accentColor="orange"
+                        >
+                            <div className="w-full md:w-[90%] md:max-w-[680px] md:mx-auto space-y-5">
                                 {getFoodRecommendations().length > 0 && (
                                     <div>
                                         <h4 className="font-medium text-emerald-700 mb-2 flex items-center gap-2">
                                             <Leaf className="h-4 w-4" /> Beneficial Foods
                                         </h4>
-                                        <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
+                                        <ul className="list-disc list-inside text-stone-700 space-y-2 text-base leading-relaxed">
                                             {getFoodRecommendations().map((food, idx) => (
                                                 <li key={idx}>{food}</li>
                                             ))}
@@ -61,7 +53,7 @@ export function ReportRecommendations({
                                         <h4 className="font-medium text-amber-700 mb-2 flex items-center gap-2">
                                             <Utensils className="h-4 w-4" /> Therapeutic Recipes
                                         </h4>
-                                        <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
+                                        <ul className="list-disc list-inside text-stone-700 space-y-2 text-base leading-relaxed">
                                             {getRecipes().map((recipe, idx) => (
                                                 <li key={idx}>{recipe}</li>
                                             ))}
@@ -73,191 +65,167 @@ export function ReportRecommendations({
                                         <h4 className="font-medium text-red-700 mb-2 flex items-center gap-2">
                                             <AlertCircle className="h-4 w-4" /> Foods to Avoid
                                         </h4>
-                                        <ul className="list-disc list-inside text-stone-600 space-y-1 text-sm">
+                                        <ul className="list-disc list-inside text-stone-700 space-y-2 text-base leading-relaxed">
                                             {getFoodsToAvoid().map((food, idx) => (
                                                 <li key={idx}>{food}</li>
                                             ))}
                                         </ul>
                                     </div>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </CollapsibleSection>
                     </motion.div>
                 )}
 
-                {/* Lifestyle Advice */}
+                {/* Lifestyle Advice - Collapsible */}
                 {opts.includeLifestyle !== false && data.recommendations?.lifestyle && data.recommendations.lifestyle.length > 0 && (
                     <motion.div variants={variants}>
-                        <Card className="h-full">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="flex items-center gap-2 text-stone-800">
-                                    <button
-                                        onClick={() => handleSectionClick("Please explain the Lifestyle recommendations in more detail. How will these changes help my condition?")}
-                                        className="flex items-center gap-2 hover:text-emerald-600 transition-colors text-left"
-                                    >
-                                        <Leaf className="h-5 w-5 text-green-600" />
-                                        <span className="underline decoration-dotted underline-offset-4 decoration-stone-400 hover:decoration-emerald-500">
-                                            Lifestyle (养生)
-                                        </span>
-                                    </button>
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
+                        <CollapsibleSection
+                            title="Lifestyle (养生)"
+                            icon={Leaf}
+                            accentColor="emerald"
+                        >
+                            <div className="w-full md:w-[90%] md:max-w-[680px] md:mx-auto">
                                 <ul className="space-y-3">
                                     {data.recommendations.lifestyle.map((tip: string, idx: number) => (
-                                        <li key={idx} className="flex gap-3 text-stone-600 text-sm">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                                        <li key={idx} className="flex gap-3 text-stone-700 text-base leading-relaxed">
+                                            <div className="h-2 w-2 rounded-full bg-emerald-400 mt-2 shrink-0" />
                                             <span>{tip}</span>
                                         </li>
                                     ))}
                                 </ul>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </CollapsibleSection>
                     </motion.div>
                 )}
 
-                {/* Acupuncture Points */}
+                {/* Acupuncture Points - Collapsible */}
                 {opts.includeAcupuncture !== false && data.recommendations?.acupoints && data.recommendations.acupoints.length > 0 && (
                     <motion.div variants={variants}>
-                        <Card className="h-full">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="flex items-center gap-2 text-stone-800">
-                                    <button
-                                        onClick={() => handleSectionClick("Can you explain these Acupressure Points? Where exactly are they located and how should I massage them?")}
-                                        className="flex items-center gap-2 hover:text-emerald-600 transition-colors text-left"
-                                    >
-                                        <MapPin className="h-5 w-5 text-indigo-500" />
-                                        <span className="underline decoration-dotted underline-offset-4 decoration-stone-400 hover:decoration-emerald-500">
-                                            Acupressure Points (穴位)
-                                        </span>
-                                    </button>
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
+                        <CollapsibleSection
+                            title="Acupressure Points (穴位)"
+                            icon={MapPin}
+                            accentColor="indigo"
+                        >
+                            <div className="w-full md:w-[90%] md:max-w-[680px] md:mx-auto">
                                 <ul className="space-y-3">
                                     {data.recommendations.acupoints.map((point: string, idx: number) => (
-                                        <li key={idx} className="flex gap-3 text-stone-600 text-sm">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 mt-2 shrink-0" />
+                                        <li key={idx} className="flex gap-3 text-stone-700 text-base leading-relaxed">
+                                            <div className="h-2 w-2 rounded-full bg-indigo-400 mt-2 shrink-0" />
                                             <span>{point}</span>
                                         </li>
                                     ))}
                                 </ul>
-                            </CardContent>
-                        </Card>
+                                <p className="mt-4 text-sm text-stone-600 italic">
+                                    💡 Massage each point for 1-2 minutes, 2-3 times daily
+                                </p>
+                            </div>
+                        </CollapsibleSection>
                     </motion.div>
                 )}
 
-                {/* Exercise Recommendations */}
+                {/* Exercise Recommendations - Collapsible */}
                 {opts.includeExercise !== false && data.recommendations?.exercise && data.recommendations.exercise.length > 0 && (
                     <motion.div variants={variants}>
-                        <Card className="h-full">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="flex items-center gap-2 text-stone-800">
-                                    <button
-                                        onClick={() => handleSectionClick("What kind of Exercise is best for me? Please explain the recommended exercises.")}
-                                        className="flex items-center gap-2 hover:text-emerald-600 transition-colors text-left"
-                                    >
-                                        <Dumbbell className="h-5 w-5 text-blue-500" />
-                                        <span className="underline decoration-dotted underline-offset-4 decoration-stone-400 hover:decoration-emerald-500">
-                                            Exercise (运动)
-                                        </span>
-                                    </button>
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
+                        <CollapsibleSection
+                            title="Exercise (运动)"
+                            icon={Dumbbell}
+                            accentColor="blue"
+                        >
+                            <div className="w-full md:w-[90%] md:max-w-[680px] md:mx-auto">
                                 <ul className="space-y-3">
                                     {data.recommendations.exercise.map((ex: string, idx: number) => (
-                                        <li key={idx} className="flex gap-3 text-stone-600 text-sm">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-blue-400 mt-2 shrink-0" />
+                                        <li key={idx} className="flex gap-3 text-stone-700 text-base leading-relaxed">
+                                            <div className="h-2 w-2 rounded-full bg-blue-400 mt-2 shrink-0" />
                                             <span>{ex}</span>
                                         </li>
                                     ))}
                                 </ul>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </CollapsibleSection>
                     </motion.div>
                 )}
             </div>
 
-            {/* Sleep & Emotional Wellness Row */}
+            {/* Sleep & Emotional Wellness - Collapsible */}
             {((opts.includeSleepAdvice && data.recommendations?.sleep_guidance) || (opts.includeEmotionalWellness && data.recommendations?.emotional_care)) && (
-                <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-                    {opts.includeSleepAdvice && data.recommendations?.sleep_guidance && (
-                        <motion.div variants={variants}>
-                            <Card className="h-full border-indigo-100 bg-gradient-to-br from-indigo-50 to-purple-50">
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="flex items-center gap-2 text-indigo-800">
-                                        <Moon className="h-5 w-5" />
-                                        Sleep & Rest
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-indigo-700 text-sm">{data.recommendations.sleep_guidance}</p>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    )}
-                    {opts.includeEmotionalWellness && data.recommendations?.emotional_care && (
-                        <motion.div variants={variants}>
-                            <Card className="h-full border-rose-100 bg-gradient-to-br from-rose-50 to-pink-50">
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="flex items-center gap-2 text-rose-800">
-                                        <Brain className="h-5 w-5" />
-                                        Emotional Wellness (情志)
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-rose-700 text-sm">{data.recommendations.emotional_care}</p>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    )}
-                </div>
+                <motion.div variants={variants}>
+                    <CollapsibleSection
+                        title="Rest & Wellness"
+                        icon={Moon}
+                        accentColor="purple"
+                    >
+                        <div className="space-y-4 w-full md:w-[90%] md:max-w-[680px] md:mx-auto">
+                            {opts.includeSleepAdvice && data.recommendations?.sleep_guidance && (
+                                <div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Moon className="h-4 w-4 text-indigo-600" />
+                                        <h4 className="font-medium text-indigo-800">Sleep Guidance</h4>
+                                    </div>
+                                    <p className="text-indigo-700 text-base leading-relaxed">{data.recommendations.sleep_guidance}</p>
+                                </div>
+                            )}
+                            {opts.includeEmotionalWellness && data.recommendations?.emotional_care && (
+                                <div>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Brain className="h-4 w-4 text-rose-600" />
+                                        <h4 className="font-medium text-rose-800">Emotional Wellness (情志)</h4>
+                                    </div>
+                                    <p className="text-rose-700 text-base leading-relaxed">{data.recommendations.emotional_care}</p>
+                                </div>
+                            )}
+                        </div>
+                    </CollapsibleSection>
+                </motion.div>
             )}
 
-            {/* Herbal Medicine Suggestions */}
+            {/* Herbal Medicine Suggestions - Collapsible */}
             {opts.suggestMedicine && data.recommendations?.herbal_formulas && data.recommendations.herbal_formulas.length > 0 && (
                 <motion.div variants={variants}>
-                    <HerbalFormulasSection
-                        formulas={data.recommendations.herbal_formulas}
-                        reportId={data.timestamp ? `report-${new Date(data.timestamp).getTime()}` : undefined}
-                        onSectionClick={handleSectionClick}
-                    />
+                    <CollapsibleSection
+                        title="Herbal Formulas (中药方剂)"
+                        icon={Pill}
+                        accentColor="amber"
+                    >
+                        <div className="w-full">
+                            <HerbalFormulasSection
+                                formulas={data.recommendations.herbal_formulas}
+                                reportId={data.timestamp ? `report-${new Date(data.timestamp).getTime()}` : undefined}
+                                onSectionClick={handleSectionClick}
+                            />
+                        </div>
+                    </CollapsibleSection>
                 </motion.div>
             )}
 
-            {/* Doctor Consultation */}
+            {/* Doctor Consultation - Collapsible */}
             {opts.suggestDoctor && data.recommendations?.doctor_consultation && (
                 <motion.div variants={variants}>
-                    <Card className="border-teal-100 bg-gradient-to-br from-teal-50 to-cyan-50">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-teal-800">
-                                <Stethoscope className="h-5 w-5" />
-                                Professional Consultation
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-teal-700">{data.recommendations.doctor_consultation}</p>
-                        </CardContent>
-                    </Card>
+                    <CollapsibleSection
+                        title="Professional Consultation"
+                        icon={Stethoscope}
+                        accentColor="teal"
+                    >
+                        <div className="w-full md:w-[90%] md:max-w-[680px] md:mx-auto">
+                            <p className="text-teal-700 text-base leading-relaxed">{data.recommendations.doctor_consultation}</p>
+                        </div>
+                    </CollapsibleSection>
                 </motion.div>
             )}
 
-            {/* Precautions */}
+            {/* Precautions - Collapsible */}
             {opts.includePrecautions && data.precautions && (
                 <motion.div variants={variants}>
-                    <Card className="border-red-100 bg-gradient-to-br from-red-50 to-orange-50">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-red-800">
-                                <AlertTriangle className="h-5 w-5" />
-                                Precautions & Warnings
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
+                    <CollapsibleSection
+                        title="Precautions & Warnings"
+                        icon={AlertTriangle}
+                        accentColor="rose"
+                    >
+                        <div className="w-full md:w-[90%] md:max-w-[680px] md:mx-auto space-y-4">
                             {data.precautions.warning_signs && data.precautions.warning_signs.length > 0 && (
                                 <div>
-                                    <h4 className="font-medium text-red-700 text-sm mb-1">Warning Signs (Seek Medical Attention):</h4>
-                                    <ul className="list-disc list-inside text-stone-600 text-sm space-y-1">
+                                    <h4 className="font-medium text-red-700 text-sm mb-2">Warning Signs (Seek Medical Attention):</h4>
+                                    <ul className="list-disc list-inside text-stone-700 text-base leading-relaxed space-y-2">
                                         {data.precautions.warning_signs.map((sign: string, idx: number) => (
                                             <li key={idx}>{sign}</li>
                                         ))}
@@ -266,8 +234,8 @@ export function ReportRecommendations({
                             )}
                             {data.precautions.contraindications && data.precautions.contraindications.length > 0 && (
                                 <div>
-                                    <h4 className="font-medium text-red-700 text-sm mb-1">Contraindications:</h4>
-                                    <ul className="list-disc list-inside text-stone-600 text-sm space-y-1">
+                                    <h4 className="font-medium text-red-700 text-sm mb-2">Contraindications:</h4>
+                                    <ul className="list-disc list-inside text-stone-700 text-base leading-relaxed space-y-2">
                                         {data.precautions.contraindications.map((item: string, idx: number) => (
                                             <li key={idx}>{item}</li>
                                         ))}
@@ -275,35 +243,33 @@ export function ReportRecommendations({
                                 </div>
                             )}
                             {data.precautions.special_notes && (
-                                <p className="text-sm text-stone-600 italic">{data.precautions.special_notes}</p>
+                                <p className="text-base text-stone-700 italic leading-relaxed">{data.precautions.special_notes}</p>
                             )}
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </CollapsibleSection>
                 </motion.div>
             )}
 
-            {/* Follow-up Guidance */}
+            {/* Follow-up Guidance - Collapsible */}
             {opts.includeFollowUp && data.follow_up && (
                 <motion.div variants={variants}>
-                    <Card className="border-sky-100 bg-gradient-to-br from-sky-50 to-blue-50">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="flex items-center gap-2 text-sky-800">
-                                <Calendar className="h-5 w-5" />
-                                Follow-up Guidance
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
+                    <CollapsibleSection
+                        title="Follow-up Guidance"
+                        icon={Calendar}
+                        accentColor="blue"
+                    >
+                        <div className="w-full md:w-[90%] md:max-w-[680px] md:mx-auto space-y-3">
                             {data.follow_up.timeline && (
-                                <p className="text-sky-700 text-sm"><span className="font-medium">Timeline:</span> {data.follow_up.timeline}</p>
+                                <p className="text-sky-700 text-base leading-relaxed"><span className="font-medium">Timeline:</span> {data.follow_up.timeline}</p>
                             )}
                             {data.follow_up.expected_improvement && (
-                                <p className="text-sky-700 text-sm"><span className="font-medium">Expected Improvement:</span> {data.follow_up.expected_improvement}</p>
+                                <p className="text-sky-700 text-base leading-relaxed"><span className="font-medium">Expected Improvement:</span> {data.follow_up.expected_improvement}</p>
                             )}
                             {data.follow_up.next_steps && (
-                                <p className="text-sky-700 text-sm"><span className="font-medium">Next Steps:</span> {data.follow_up.next_steps}</p>
+                                <p className="text-sky-700 text-base leading-relaxed"><span className="font-medium">Next Steps:</span> {data.follow_up.next_steps}</p>
                             )}
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </CollapsibleSection>
                 </motion.div>
             )}
         </>
