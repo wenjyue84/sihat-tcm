@@ -1,0 +1,37 @@
+2458750 refactor: decompose DiagnosisReport into atomic sub-components
+a1d1b05 refactor: Modularize DiagnosisReport into sub-components
+47f0dc8 refactor: Extract diagnosis wizard logic to useDiagnosisWizard hook and mockProfiles
+d2ed8c8 Enhance UI: Animate login logo and update diagnosis form labels
+bae104b feat: add medical history migration, admin dashboard, and diagnosis chat components
+28a3732 Update BasicInfoForm and DiagnosisWizard components
+eda5b8a feat: Add suggested quick reply options to TCM inquiry chat
+0d7246a Fix navigation button state in diagnosis wizard steps
+25f0c2e Update application with new features and fixes
+aa7aaeb Refactor diagnosis components, update translations, and fix minor UI issues
+7f04e39 feat: Mobile UI improvements and progress indicator enhancements
+f7fceb9 feat: UI/UX improvements for mobile experience
+7209f5b feat: UI/UX improvements for mobile experience
+4a844ab feat: enhance report chat, developer mode testing, and infographics options
+d5433ce Enhance diagnosis wizard, add developer controls, and improve chat functionality
+15c7502 Refactor PulseCheck to wizard and other improvements
+39343a3 feat: Implement multi-step wizard for BasicInfoForm and update translations
+0b0fd5b Add Smart Connect step with IoT health metrics, enhance diagnosis report with dynamic options, and improve UI
+b8a171a Fix Doctor Dashboard inquiries display and persistence, update diagnosis wizard flow
+8d6f34a Fix client-side crash due to missing Supabase env vars and add back button to InquiryStep
+418f8ad feat: Implement audio analysis, localization, and UI enhancements
+1146117 Update login page styling and refinements
+4dafe40 feat: Implement multi-language support with enhanced login page UI
+6d4b320 feat: comprehensive updates including image analysis, doctor levels, mobile improvements, and UI enhancements
+22a4b15 Mobile-friendly UI improvements
+a7832b5 feat: Fix AI chat in Inquiry step + add PDF download + scrollbar
+0d0e103 chore: Update dependencies and DiagnosisReport component
+dae72e8 feat: Add interactive AI doctor inquiry, enhanced diagnosis wizard, and new components
+71c390b fix: update chat API and cleanup test pages
+ab40fdb Implement Inquiry step and update diagnosis flow
+ae3c9ed feat: implement diagnosis report and fix audio data transmission
+264987d Implement AI questioning flow: Pass basic info to chat and trigger initial question
+e387e90 feat: add pulse check instructions and illustration
+1c08e1b Fix: bypass TS errors in AdaptiveChat
+c612564 Fix: use toTextStreamResponse for consult route
+42757f9 Fix: use toTextStreamResponse for AI stream
+870a545 Initial commit

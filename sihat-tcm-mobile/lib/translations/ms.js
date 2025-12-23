@@ -1,0 +1,649 @@
+/**
+ * Malay (Bahasa Malaysia) Translations for Sihat TCM Mobile
+ * 
+ * Terjemahan Bahasa Malaysia
+ */
+
+export const ms = {
+    // Kod bahasa - untuk penjanaan PDF
+    langCode: 'ms',
+
+    // String UI umum
+    common: {
+        appName: 'Sihat TCM',
+        appTagline: 'TCM Berkuasa AI',
+        loading: 'Memuatkan...',
+        error: 'Ralat',
+        success: 'Berjaya',
+        save: 'Simpan',
+        cancel: 'Batal',
+        submit: 'Hantar',
+        next: 'Seterusnya',
+        previous: 'Sebelumnya',
+        back: 'Kembali',
+        continue: 'Teruskan',
+        skip: 'Langkau',
+        close: 'Tutup',
+        confirm: 'Sahkan',
+        delete: 'Padam',
+        edit: 'Edit',
+        view: 'Lihat',
+        search: 'Cari',
+        filter: 'Tapis',
+        reset: 'Set Semula',
+        retry: 'Cuba Lagi',
+        yes: 'Ya',
+        no: 'Tidak',
+        or: 'atau',
+        and: 'dan',
+        all: 'Semua',
+        none: 'Tiada',
+        required: 'Diperlukan',
+        optional: 'Pilihan',
+        done: 'Selesai',
+        select: 'Pilih',
+        selected: 'Dipilih',
+        filled: 'Diisi!',
+        analyzing: 'Menganalisis...',
+    },
+
+    // Pemilih bahasa
+    language: {
+        title: 'Bahasa',
+        selectLanguage: 'Pilih Bahasa',
+        changeLanguage: 'Tukar Bahasa',
+        english: 'English',
+        chinese: '中文',
+        malay: 'Bahasa Malaysia',
+    },
+
+    // Navigasi
+    nav: {
+        home: 'Utama',
+        history: 'Sejarah',
+        profile: 'Profil',
+        settings: 'Tetapan',
+        logout: 'Log Keluar',
+    },
+
+    // Log masuk & Pengesahan
+    login: {
+        title: 'Sihat TCM',
+        chineseTitle: '思和中医',
+        subtitle: 'Pilih Peranan Anda',
+        welcome: 'Selamat Kembali',
+        email: 'E-mel',
+        password: 'Kata Laluan',
+        fullName: 'Nama Penuh',
+        signIn: 'Log Masuk',
+        signUp: 'Daftar',
+        orContinueWith: 'Atau teruskan dengan',
+        google: 'Google',
+        apple: 'Apple',
+        biometric: 'Face ID / Cap Jari',
+        forgotPassword: 'Lupa Kata Laluan?',
+        noAccount: 'Tiada akaun?',
+        hasAccount: 'Sudah ada akaun?',
+        quickAccess: 'Akses Pantas (Demo)',
+        roles: {
+            patient: 'Pesakit',
+            doctor: 'Doktor',
+            admin: 'Pentadbir',
+            developer: 'Pembangun',
+        },
+        roleDescriptions: {
+            patient: 'Mulakan perjalanan pemulihan',
+            doctor: 'Amalkan seni tradisional',
+            admin: 'Selia sistem',
+        },
+    },
+
+    // Borang maklumat asas
+    basicInfo: {
+        title: 'Profil Pesakit',
+        subtitle: 'Beritahu kami tentang diri anda',
+        fullName: 'Nama Penuh',
+        fullNamePlaceholder: 'Masukkan nama anda',
+        gender: 'Jantina',
+        selectGender: 'Pilih Jantina',
+        male: 'Lelaki',
+        female: 'Perempuan',
+        other: 'Lain-lain',
+        age: 'Umur',
+        agePlaceholder: 'Umur anda',
+        weight: 'Berat (kg)',
+        weightPlaceholder: 'kg',
+        height: 'Tinggi (cm)',
+        heightPlaceholder: 'cm',
+        bmi: 'BMI',
+        bmiCategories: {
+            underweight: 'Kurang Berat',
+            normal: 'Normal',
+            overweight: 'Lebih Berat',
+            obese: 'Obes',
+        },
+        bmiExplanation: {
+            title: 'BMI Anda',
+            description: 'Indeks Jisim Badan (BMI) adalah ukuran lemak badan berdasarkan tinggi dan berat badan.',
+            yourBmi: 'BMI Anda',
+            howItIsCalculated: 'Bagaimana ia dikira?',
+            underweight: 'Kurang Berat',
+            normal: 'Normal',
+            overweight: 'Lebih Berat',
+            obese: 'Obes',
+        },
+        mainConcern: 'Aduan Utama',
+        mainConcernPlaceholder: 'Terangkan masalah utama...',
+        otherSymptoms: 'Gejala Lain',
+        otherSymptomsPlaceholder: 'Gejala tambahan...',
+        duration: 'Tempoh',
+        durationPlaceholder: 'Berapa lama?',
+        durationOptions: {
+            lessThan1Day: 'Kurang 1 hari',
+            '1-3days': '1-3 hari',
+            '4-7days': '4-7 hari',
+            '1-2weeks': '1-2 minggu',
+            '2-4weeks': '2-4 minggu',
+            '1-3months': '1-3 bulan',
+            '3-6months': '3-6 bulan',
+            '6-12months': '6-12 bulan',
+            over1Year: 'Lebih 1 tahun',
+            chronic: 'Kronik',
+        },
+        commonSymptoms: 'Gejala Biasa',
+        symptoms: {
+            fever: 'Demam',
+            cough: 'Batuk',
+            headache: 'Sakit Kepala',
+            fatigue: 'Keletihan',
+            stomachPain: 'Sakit Perut',
+            soreThroat: 'Sakit Tekak',
+            shortnessOfBreath: 'Sesak Nafas',
+            highBloodPressure: 'Darah Tinggi',
+            diabetes: 'Kencing Manis',
+            insomnia: 'Insomnia',
+            anxiety: 'Kebimbangan',
+            backPain: 'Sakit Belakang',
+        },
+    },
+
+    // Langkah gejala
+    symptoms: {
+        title: 'Gejala',
+        subtitle: 'Pilih gejala anda',
+        searchPlaceholder: 'Cari gejala...',
+        selectedSymptoms: 'Gejala Dipilih',
+        noSymptomsSelected: 'Tiada gejala dipilih',
+        tapToRemove: 'Ketik untuk buang',
+    },
+
+    // Pilih doktor
+    chooseDoctor: {
+        title: 'Pilih Doktor Anda',
+        subtitle: 'Pilih tahap perundingan',
+        physician: {
+            name: 'Doktor',
+            nameZh: '医师',
+            description: 'Perundingan standard',
+        },
+        seniorPhysician: {
+            name: 'Doktor Kanan',
+            nameZh: '主任医师',
+            description: 'Analisis lanjutan',
+        },
+        masterPhysician: {
+            name: 'Pakar TCM',
+            nameZh: '国医大师',
+            description: 'Perundingan pakar',
+        },
+    },
+
+    // Langkah diagnosis
+    steps: {
+        welcome: 'Selamat Datang',
+        basicInfo: 'Info Asas',
+        symptoms: 'Gejala',
+        chooseDoctor: 'Doktor',
+        uploadReports: 'Laporan',
+        uploadMedicine: 'Ubat',
+        inquiry: 'Soal Siasat',
+        tongue: 'Lidah',
+        face: 'Muka',
+        audio: 'Suara',
+        pulse: 'Nadi',
+        smartConnect: 'Peranti',
+        analysis: 'Analisis',
+        results: 'Keputusan',
+    },
+
+    // Langkah selamat datang
+    welcome: {
+        title: 'Selamat Datang ke Sihat TCM',
+        subtitle: 'Perubatan Cina Tradisional Berkuasa AI',
+        description: 'Rasai kebijaksanaan perubatan kuno digabungkan dengan teknologi AI moden.',
+        startDiagnosis: 'Mula Diagnosis',
+        features: {
+            fourPillars: 'Diagnosis Empat Tiang',
+            aiAnalysis: 'Analisis Berkuasa AI',
+            personalized: 'Nasihat Peribadi',
+        },
+    },
+
+    // Muat naik laporan
+    uploadReports: {
+        title: 'Laporan Perubatan',
+        subtitle: 'Muat naik dokumen perubatan sedia ada',
+        uploadButton: 'Muat Naik Dokumen',
+        takePhoto: 'Ambil Gambar',
+        chooseFromLibrary: 'Pilih dari Galeri',
+        noFilesYet: 'Tiada fail dimuat naik',
+        analyzing: 'Menganalisis dokumen...',
+        analysisComplete: 'Analisis selesai',
+        removeFile: 'Buang',
+        supportedFormats: 'PDF, JPG, PNG disokong',
+        optional: 'Pilihan',
+    },
+
+    // Muat naik ubat
+    uploadMedicine: {
+        title: 'Ubat Semasa',
+        subtitle: 'Muat naik gambar ubat anda',
+        uploadButton: 'Tambah Gambar Ubat',
+        noMedicinesYet: 'Tiada ubat ditambah',
+        analyzing: 'Mengenal pasti ubat...',
+        identifiedAs: 'Dikenal pasti sebagai',
+        optional: 'Pilihan',
+    },
+
+    // Langkah soal siasat
+    inquiry: {
+        title: 'Soal Siasat TCM',
+        titleZh: '问诊',
+        subtitle: 'Sembang dengan Doktor AI',
+        chatTitle: 'Perundingan Kesihatan',
+        inputPlaceholder: 'Taip jawapan anda...',
+        send: 'Hantar',
+        doctorThinking: 'Doktor sedang berfikir...',
+        finishChat: 'Tamat Perundingan',
+        consultationComplete: 'Perundingan Selesai',
+        proceedToNext: 'Teruskan',
+        quickReplies: {
+            yes: 'Ya',
+            no: 'Tidak',
+            sometimes: 'Kadang-kadang',
+            notSure: 'Tidak pasti',
+        },
+    },
+
+    // Diagnosis lidah
+    tongue: {
+        title: 'Diagnosis Lidah',
+        titleZh: '舌诊',
+        subtitle: 'Tangkap gambar lidah untuk analisis',
+        instructions: 'Julurkan lidah dan ambil gambar jelas',
+        tips: [
+            'Gunakan cahaya semula jadi',
+            'Elakkan makan 30 min sebelum',
+            'Relakskan lidah secara semula jadi',
+        ],
+        takePhoto: 'Ambil Gambar',
+        retake: 'Ambil Semula',
+        analyzing: 'Menganalisis lidah...',
+        analysisComplete: 'Analisis selesai',
+        skip: 'Langkau',
+    },
+
+    // Diagnosis muka
+    face: {
+        title: 'Diagnosis Muka',
+        titleZh: '面诊',
+        subtitle: 'Tangkap gambar muka untuk analisis',
+        instructions: 'Ambil gambar muka dari hadapan',
+        tips: [
+            'Gunakan cahaya semula jadi',
+            'Buang solekan jika boleh',
+            'Ekspresi neutral',
+        ],
+        takePhoto: 'Ambil Gambar',
+        retake: 'Ambil Semula',
+        analyzing: 'Menganalisis muka...',
+        analysisComplete: 'Analisis selesai',
+        skip: 'Langkau',
+    },
+
+    // Diagnosis suara
+    audio: {
+        title: 'Analisis Suara',
+        titleZh: '闻诊',
+        subtitle: 'Rakam suara untuk analisis',
+        instructions: 'Sebut "Ahhh" selama 5-10 saat',
+        startRecording: 'Mula Rakaman',
+        stopRecording: 'Berhenti',
+        recording: 'Merakam...',
+        recordAgain: 'Rakam Semula',
+        analyzing: 'Menganalisis suara...',
+        analysisComplete: 'Analisis selesai',
+        tips: [
+            'Cari tempat senyap',
+            'Bercakap secara semula jadi',
+            'Pegang telefon dengan stabil',
+        ],
+        skip: 'Langkau',
+        permissionDenied: 'Akses mikrofon ditolak',
+        enableMicrophone: 'Sila aktifkan mikrofon dalam tetapan',
+    },
+
+    // Diagnosis nadi
+    pulse: {
+        title: 'Pemeriksaan Nadi',
+        titleZh: '切诊',
+        subtitle: 'Ukur kadar nadi',
+        bpm: 'BPM',
+        bpmLabel: 'Degupan Seminit',
+        enterBpm: 'Masukkan BPM',
+        manualEntry: 'Masukan Manual',
+        tapToMeasure: 'Ketik untuk Ukur',
+        guideTitle: 'Cara Mengukur',
+        guideSteps: [
+            { title: 'Cari Titik Nadi', desc: 'Letakkan jari pada pergelangan di bawah ibu jari' },
+            { title: 'Rasakan Degupan', desc: 'Tekan perlahan sehingga terasa nadi' },
+            { title: 'Kira Degupan', desc: 'Kira selama 60 saat' },
+        ],
+        normalRange: 'Normal: 60-100 BPM',
+        categories: {
+            low: 'Rendah',
+            normal: 'Normal',
+            high: 'Tinggi',
+        },
+        tcmQualities: 'Kualiti Nadi TCM',
+        tcmQualitiesDesc: 'Pilihan - Untuk pengamal TCM',
+        pulseTypes: {
+            hua: { name: 'Licin', zh: '滑脉' },
+            se: { name: 'Kasar', zh: '涩脉' },
+            xian: { name: 'Tegang', zh: '弦脉' },
+            jin: { name: 'Ketat', zh: '紧脉' },
+            xi: { name: 'Halus', zh: '细脉' },
+            hong: { name: 'Melimpah', zh: '洪脉' },
+            ruo: { name: 'Lemah', zh: '弱脉' },
+            chen: { name: 'Dalam', zh: '沉脉' },
+            fu: { name: 'Terapung', zh: '浮脉' },
+            chi: { name: 'Perlahan', zh: '迟脉' },
+            shuo: { name: 'Laju', zh: '数脉' },
+            normal: { name: 'Normal', zh: '平脉' },
+        },
+    },
+
+    // Sambungan pintar
+    smartConnect: {
+        title: 'Sambungan Pintar',
+        subtitle: 'Sambung peranti kesihatan',
+        description: 'Import data dari peranti pintar',
+        pulseRate: 'Kadar Nadi',
+        bloodPressure: 'Tekanan Darah',
+        bloodOxygen: 'Oksigen Darah',
+        temperature: 'Suhu',
+        connect: 'Sambung',
+        connected: 'Disambung',
+        importHealth: 'Import Data Kesihatan',
+        healthApps: 'Aplikasi Kesihatan',
+        samsung: 'Samsung Health',
+        apple: 'Apple Health',
+        google: 'Google Fit',
+        skip: 'Langkau',
+        metricsConnected: 'Metrik Disambung',
+        dataTypes: {
+            steps: 'Langkah',
+            sleep: 'Tidur',
+            heartRate: 'Kadar Jantung',
+            activity: 'Aktiviti',
+            stress: 'Tekanan',
+        },
+    },
+
+    // Pemuatan analisis
+    analysis: {
+        title: 'Menganalisis...',
+        subtitle: 'AI sedang mensintesis data kesihatan anda',
+        pleaseWait: 'Sila tunggu sebentar',
+        steps: [
+            'Mengumpul data...',
+            'Menganalisis gejala...',
+            'Memproses pemerhatian...',
+            'Menjana diagnosis...',
+            'Menyediakan cadangan...',
+        ],
+        didYouKnow: 'Tahukah Anda?',
+        facts: [
+            'TCM telah diamalkan lebih 2,000 tahun',
+            'Lidah mendedahkan kesihatan organ dalaman',
+            'Diagnosis nadi boleh mengesan 28 kualiti berbeza',
+            'Keseimbangan Yin dan Yang penting untuk kesihatan',
+        ],
+    },
+
+    // Keputusan / Laporan
+    report: {
+        title: 'Laporan Diagnosis',
+        generatedOn: 'Dijana pada',
+        patientInfo: 'Info Pesakit',
+        constitution: 'Perlembagaan',
+        diagnosis: 'Diagnosis',
+        recommendations: 'Cadangan',
+        dietaryAdvice: 'Nasihat Pemakanan',
+        foodsToEat: 'Makanan Disyorkan',
+        foodsToAvoid: 'Makanan Dielak',
+        lifestyle: 'Gaya Hidup',
+        herbalFormula: 'Formula Herba',
+        acupoints: 'Titik Akupunktur',
+        share: 'Kongsi',
+        saveToHistory: 'Simpan ke Sejarah',
+        newDiagnosis: 'Diagnosis Baru',
+        askQuestion: 'Tanya Soalan',
+        chatAboutReport: 'Sembang Tentang Laporan',
+        disclaimer: 'Laporan ini hanya untuk rujukan. Sila rujuk pengamal TCM berlesen untuk nasihat perubatan.',
+        sections: {
+            overview: 'Gambaran',
+            tcmAnalysis: 'Analisis TCM',
+            dietary: 'Pemakanan',
+            lifestyle: 'Gaya Hidup',
+            treatment: 'Rawatan',
+        },
+        pdf: {
+            download: 'PDF',
+            generating: 'Menjana PDF...',
+            success: 'PDF berjaya dijana',
+            error: 'Gagal menjana PDF',
+        },
+    },
+
+    // Sembang laporan
+    reportChat: {
+        title: 'Tanya Tentang Laporan Anda',
+        subtitle: 'Pembantu TCM berkuasa AI',
+        inputPlaceholder: 'Tanya tentang diagnosis anda...',
+        suggestions: [
+            'Apakah maksud diagnosis saya?',
+            'Mengapa elakkan makanan tertentu?',
+            'Bagaimana untuk memperbaiki?',
+            'Terangkan titik akupresur',
+        ],
+    },
+
+    // Papan pemuka
+    dashboard: {
+        greeting: {
+            morning: 'Selamat Pagi',
+            afternoon: 'Selamat Petang',
+            evening: 'Selamat Malam',
+        },
+        welcome: 'Selamat Datang',
+        startDiagnosis: 'Mula Diagnosis',
+        recentHistory: 'Sejarah Terkini',
+        viewAll: 'Lihat Semua',
+        noHistory: 'Tiada sejarah diagnosis',
+        noHistoryDesc: 'Mulakan diagnosis TCM pertama anda',
+        tabs: {
+            home: 'Utama',
+            history: 'Sejarah',
+            profile: 'Profil',
+        },
+    },
+
+    // Sejarah
+    history: {
+        title: 'Sejarah',
+        subtitle: 'Rekod diagnosis anda',
+        noRecords: 'Tiada rekod',
+        viewReport: 'Lihat Laporan',
+        deleteRecord: 'Padam',
+        confirmDelete: 'Padam rekod ini?',
+    },
+
+    // Lihat Laporan
+    viewReport: {
+        title: 'Lihat Laporan',
+        noReport: 'Tiada laporan untuk dipaparkan',
+        share: 'Kongsi',
+        sharing: 'Berkongsi...',
+        shareSuccess: 'Laporan berjaya dikongsi',
+        shareError: 'Gagal berkongsi laporan',
+        medicalReport: 'Laporan Perubatan',
+        generatedBy: 'Dijana oleh Sihat TCM',
+    },
+
+    // Profil
+    profile: {
+        title: 'Profil',
+        personalInfo: 'Maklumat Peribadi',
+        healthInfo: 'Maklumat Kesihatan',
+        preferences: 'Pilihan',
+        language: 'Bahasa',
+        theme: 'Tema',
+        notifications: 'Pemberitahuan',
+        about: 'Tentang',
+        version: 'Versi',
+        logout: 'Log Keluar',
+        confirmLogout: 'Pasti mahu log keluar?',
+        editProfile: 'Edit Profil',
+        saveChanges: 'Simpan Perubahan',
+    },
+
+    // Ralat
+    errors: {
+        generic: 'Sesuatu tidak kena',
+        network: 'Ralat rangkaian',
+        timeout: 'Permintaan tamat masa',
+        unauthorized: 'Sila log masuk semula',
+        notFound: 'Tidak dijumpai',
+        tryAgain: 'Cuba Lagi',
+        goBack: 'Kembali',
+        permissionDenied: 'Kebenaran ditolak',
+        cameraError: 'Ralat kamera',
+        microphoneError: 'Ralat mikrofon',
+        analysisError: 'Analisis gagal',
+    },
+
+    // Mesej berjaya
+    success: {
+        saved: 'Berjaya disimpan',
+        updated: 'Berjaya dikemas kini',
+        deleted: 'Berjaya dipadam',
+        copied: 'Disalin ke papan keratan',
+        shared: 'Berjaya dikongsi',
+    },
+
+    // Langkah ringkasan profil
+    profileSummary: {
+        title: 'Ringkasan Profil',
+        subtitle: 'Sila sahkan maklumat anda',
+        anonymous: 'Pesakit',
+        yearsOld: 'thn',
+        profileReady: 'Maklumat profil lengkap',
+        profileIncomplete: 'Sila lengkapkan profil anda',
+        missingFields: 'Beberapa maklumat tiada',
+        continueToSymptoms: 'Teruskan ke Gejala',
+        completeProfile: 'Lengkapkan Profil Saya',
+        editProfile: 'Edit Profil',
+        wantToEdit: 'Mahu kemas kini profil anda?',
+    },
+
+    // Dialog pengesahan
+    confirm: {
+        delete: 'Pasti mahu padam?',
+        logout: 'Log keluar?',
+        discard: 'Buang perubahan?',
+        exitDiagnosis: 'Keluar diagnosis? Kemajuan akan hilang.',
+    },
+
+    // Infografik
+    infographic: {
+        title: 'Cipta Infografik',
+        subtitle: 'Ubah laporan kepada kandungan visual',
+        selectStyle: 'Pilih Gaya',
+        selectContent: 'Pilih Kandungan',
+        generating: 'Menjana...',
+        generated: 'Infografik Siap!',
+        save: 'Simpan ke Foto',
+        share: 'Kongsi',
+        close: 'Tutup',
+        generate: 'Jana',
+        tip: '💡 Infografik bagus untuk berkongsi dengan keluarga!',
+        error: 'Gagal menjana. Sila cuba lagi.',
+        saved: 'Disimpan ke Foto!',
+        permissionDenied: 'Kebenaran diperlukan untuk menyimpan foto',
+        styles: {
+            modern: 'Moden',
+            modernDesc: 'Bersih, profesional',
+            traditional: 'Tradisional',
+            traditionalDesc: 'Estetik TCM klasik',
+            minimal: 'Minimal',
+            minimalDesc: 'Ringkas, elegan',
+            colorful: 'Berwarna',
+            colorfulDesc: 'Meriah, menarik',
+        },
+        content: {
+            diagnosis: 'Diagnosis & Perlembagaan',
+            dietary: 'Nasihat Pemakanan',
+            lifestyle: 'Tips Gaya Hidup',
+            acupoints: 'Titik Akupresur',
+            exercise: 'Senaman',
+            metrics: 'Metrik Kesihatan',
+        },
+    },
+
+    // Pengesahan Doktor
+    verification: {
+        buttonLabel: 'Sahkan',
+        modalTitle: 'Minta Pengesahan Doktor',
+        modalSubtitle: 'Minta pengamal TCM berlesen menyemak diagnosis AI anda',
+        selectDoctor: 'Pilih Pengamal',
+        noSelection: 'Langkau - Hantar kepada Mana-mana Doktor',
+        specialties: 'Kepakaran',
+        experience: 'Pengalaman',
+        confirmTitle: 'Sahkan Permintaan',
+        confirmMessage: 'Laporan diagnosis lengkap anda akan dihantar untuk semakan profesional. Anda akan dimaklumkan setelah disahkan.',
+        sendRequest: 'Hantar Permintaan',
+        cancel: 'Batal',
+        successTitle: 'Permintaan Dihantar!',
+        successMessage: 'Diagnosis anda telah dihantar untuk pengesahan. Anda akan menerima pemberitahuan selepas disemak.',
+        errorTitle: 'Ralat',
+        errorMessage: 'Tidak dapat menghantar permintaan pengesahan. Sila cuba lagi.',
+        noPractitioners: 'Tiada pengamal tersedia buat masa ini.',
+    },
+
+    // Sembang Doktor Barat
+    westernChat: {
+        title: 'Pendapat Pakar Perubatan Barat',
+        subtitle: 'Perspektif Berasaskan Bukti',
+        intro: 'Hello. Saya Dr. Smith. Saya telah menyemak laporan TCM anda. Dari perspektif perubatan Barat, saya boleh membantu menterjemahkan penemuan ini ke dalam istilah fisiologi dan mencadangkan penilaian standard. Bagaimanakah saya boleh membantu anda?',
+        placeholder: 'Tanya Dr. Smith...',
+        error: 'Maaf, saya menghadapi masalah untuk menyambung buat masa ini.',
+        questions: {
+            opinion: 'Apakah pandangan perubatan Barat?',
+            tests: 'Apakah ujian makmal yang perlu saya ambil?',
+            science: 'Adakah terdapat sokongan saintifik untuk ini?',
+            redFlags: 'Adakah terdapat sebarang tanda amaran?',
+        },
+    },
+};
+

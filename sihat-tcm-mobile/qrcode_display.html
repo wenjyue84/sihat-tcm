@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Sihat TCM - Local Connection</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0fdf4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border: 2px solid #22c55e;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: #166534;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+
+        img {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 10px;
+        }
+
+        .url {
+            font-family: 'Consolas', monospace;
+            background: #f0fdf4;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: #15803d;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 20px 0;
+            display: inline-block;
+        }
+
+        .status {
+            background: #22c55e;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .instruction {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #4b5563;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <span class="status">Local LAN Mode Active</span>
+        <h1>Scan to Connect</h1>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=exp://192.168.0.5:8081"
+            alt="Local QR Code" />
+        <br>
+        <div class="url">exp://192.168.0.5:8081</div>
+        <p class="instruction">
+            Ensure your phone is on the <strong>Same Wi-Fi</strong>.<br>
+            If connection fails, check your Firewall settings.
+        </p>
+    </div>
+</body>
+
+</html>
