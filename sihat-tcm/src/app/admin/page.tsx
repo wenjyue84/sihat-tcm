@@ -7,10 +7,11 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { LogOut, Info, MessageSquare, Eye, FileText, Check, Loader2, ChevronDown, ChevronUp, Mic, Users, Settings, Shield } from 'lucide-react'
+import { LogOut, Info, MessageSquare, Eye, FileText, Check, Loader2, ChevronDown, ChevronUp, Mic, Users, Settings, Shield, Key } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PractitionerManager } from '@/components/admin/PractitionerManager'
 import { SecuritySettings } from '@/components/admin/SecuritySettings'
+import { ApiKeySettings } from '@/components/admin/ApiKeySettings'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import {
@@ -353,10 +354,14 @@ export default function AdminDashboard() {
             </div>
 
             <Tabs defaultValue="prompts" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3 max-w-xl mx-auto mb-8">
+                <TabsList className="grid w-full grid-cols-4 max-w-2xl mx-auto mb-8">
                     <TabsTrigger value="prompts" className="flex items-center gap-2">
                         <Settings className="w-4 h-4" />
                         Prompts
+                    </TabsTrigger>
+                    <TabsTrigger value="apikeys" className="flex items-center gap-2">
+                        <Key className="w-4 h-4" />
+                        API Keys
                     </TabsTrigger>
                     <TabsTrigger value="security" className="flex items-center gap-2">
                         <Shield className="w-4 h-4" />
@@ -516,6 +521,10 @@ export default function AdminDashboard() {
                             </div>
                         </CardContent>
                     </Card>
+                </TabsContent>
+
+                <TabsContent value="apikeys" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
+                    <ApiKeySettings />
                 </TabsContent>
 
                 <TabsContent value="security" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-500">

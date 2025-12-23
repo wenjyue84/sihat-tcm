@@ -171,7 +171,14 @@ Duration: ${basicInfo.symptomDuration}
             })
 
             if (!response.ok) {
-                throw new Error(`API error: ${response.status}`)
+                // Try to parse error response for specific error codes
+                try {
+                    const errorData = await response.json()
+                    console.error('[InquiryChatStep] API Error:', errorData)
+                    throw new Error(JSON.stringify(errorData))
+                } catch {
+                    throw new Error(`API error: ${response.status}`)
+                }
             }
 
             // Read streaming response
@@ -204,16 +211,46 @@ Duration: ${basicInfo.symptomDuration}
             console.log('[InquiryChatStep] Final response length:', fullText.length)
         } catch (err: any) {
             console.error('[InquiryChatStep] Error:', err)
-            // Add error message in the selected language
-            const errorMessages: Record<string, string> = {
-                en: 'Sorry, I encountered an error. Please try again.',
-                zh: '抱歉，发生了错误。请重试。',
-                ms: 'Maaf, terdapat ralat. Sila cuba lagi.',
+
+            // Try to parse structured error
+            let errorMessage = ''
+            try {
+                const errorData = JSON.parse(err.message)
+                if (errorData.code === 'API_KEY_LEAKED') {
+                    errorMessage = language === 'zh'
+                        ? '⚠️ API密钥已泄露！请到Google AI Studio生成新密钥并更新.env.local文件。'
+                        : language === 'ms'
+                            ? '⚠️ Kunci API telah bocor! Sila jana kunci baharu dari Google AI Studio dan kemas kini fail .env.local.'
+                            : '⚠️ API key has been flagged as leaked! Please generate a new key from Google AI Studio and update your .env.local file.'
+                } else if (errorData.code === 'API_KEY_INVALID') {
+                    errorMessage = language === 'zh'
+                        ? '⚠️ API密钥无效。请检查.env.local文件中的GOOGLE_GENERATIVE_AI_API_KEY设置。'
+                        : language === 'ms'
+                            ? '⚠️ Kunci API tidak sah. Sila semak tetapan GOOGLE_GENERATIVE_AI_API_KEY dalam fail .env.local.'
+                            : '⚠️ Invalid API key. Please check your GOOGLE_GENERATIVE_AI_API_KEY in .env.local file.'
+                } else if (errorData.code === 'API_QUOTA_EXCEEDED') {
+                    errorMessage = language === 'zh'
+                        ? '⚠️ API配额已用完。请稍等片刻或检查Google AI Studio的账单设置。'
+                        : language === 'ms'
+                            ? '⚠️ Kuota API telah melebihi. Sila tunggu sebentar atau semak bil Google AI Studio anda.'
+                            : '⚠️ API quota exceeded. Please wait a moment or check your Google AI Studio billing.'
+                } else {
+                    errorMessage = errorData.error || (language === 'zh' ? '抱歉，发生了错误。请重试。' : language === 'ms' ? 'Maaf, terdapat ralat. Sila cuba lagi.' : 'Sorry, I encountered an error. Please try again.')
+                }
+            } catch {
+                // Fallback to generic error message
+                const errorMessages: Record<string, string> = {
+                    en: 'Sorry, I encountered an error. Please try again.',
+                    zh: '抱歉，发生了错误。请重试。',
+                    ms: 'Maaf, terdapat ralat. Sila cuba lagi.',
+                }
+                errorMessage = errorMessages[language] || errorMessages.en
             }
+
             setMessages(prev => [...prev, {
                 id: Date.now().toString(),
                 role: 'assistant',
-                content: errorMessages[language] || errorMessages.en
+                content: errorMessage
             }])
         } finally {
             setIsLoading(false)

@@ -139,28 +139,44 @@ Follow the structured format specified in your system prompt.
         const duration = Date.now() - startTime;
         console.error(`[summarize-inquiry] FAILED after ${duration}ms:`, error.message);
 
-        // Determine which step failed
+        // Determine which step failed and provide specific error messages
         let step = 'unknown';
         let errorMessage = error.message || 'An unknown error occurred';
+        let errorCode = 'GENERATION_FAILED';
 
-        if (errorMessage.includes('fetch') || errorMessage.includes('network')) {
+        // Check for API key specific errors
+        if (errorMessage.includes('leaked') || errorMessage.includes('API key was reported')) {
+            step = 'api_key';
+            errorCode = 'API_KEY_LEAKED';
+            errorMessage = 'API key has been flagged as leaked. Please generate a new API key from Google AI Studio and update your .env.local file.';
+        } else if (errorMessage.includes('invalid') || errorMessage.includes('API_KEY_INVALID')) {
+            step = 'api_key';
+            errorCode = 'API_KEY_INVALID';
+            errorMessage = 'Invalid API key. Please check your GOOGLE_GENERATIVE_AI_API_KEY in .env.local file.';
+        } else if (errorMessage.includes('quota') || errorMessage.includes('RATE_LIMIT') || errorMessage.includes('429')) {
+            step = 'rate_limit';
+            errorCode = 'API_QUOTA_EXCEEDED';
+            errorMessage = 'API quota exceeded. Please wait a moment or check your Google AI Studio billing.';
+        } else if (errorMessage.includes('fetch') || errorMessage.includes('network')) {
             step = 'connection';
             errorMessage = 'Failed to connect to AI service';
         } else if (errorMessage.includes('timeout')) {
             step = 'timeout';
             errorMessage = 'Request timed out while generating summary';
-        } else if (errorMessage.includes('rate') || errorMessage.includes('quota')) {
-            step = 'rate_limit';
-            errorMessage = 'AI service rate limit reached. Please try again later.';
+        } else if (errorMessage.includes('not found') || errorMessage.includes('does not exist')) {
+            step = 'model';
+            errorCode = 'MODEL_NOT_FOUND';
+            errorMessage = 'AI model not available. Please try again or contact support.';
         } else {
             step = 'generation';
         }
 
         return new Response(JSON.stringify({
             error: errorMessage,
-            code: 'GENERATION_FAILED',
+            code: errorCode,
             step: step,
-            duration: duration
+            duration: duration,
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
         }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }

@@ -250,6 +250,7 @@ function AppContent() {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(false); // For email check loading
+  const [isEmailFocused, setIsEmailFocused] = useState(false); // For showing quick access buttons
   const [showLanguageSelector, setShowLanguageSelector] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(null); // null = loading, true/false = checked
 
@@ -959,44 +960,48 @@ function AppContent() {
                     autoCapitalize="none"
                     returnKeyType="next"
                     onSubmitEditing={handleEmailContinue}
+                    onFocus={() => setIsEmailFocused(true)}
+                    onBlur={() => setIsEmailFocused(false)}
                   />
 
-                  {/* Quick Login - Demo accounts */}
-                  <View style={{ marginBottom: 16 }}>
-                    <Text style={{ color: COLORS.textSecondary, marginBottom: 8, fontSize: 12 }}>
-                      {t.login?.quickAccess || 'Quick Access (Demo)'}:
-                    </Text>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-                      {MOCKED_ACCOUNTS.map((account) => (
-                        <TouchableOpacity
-                          key={account.role}
-                          style={{
-                            backgroundColor: email === account.email ? 'rgba(251, 191, 36, 0.15)' : 'rgba(255,255,255,0.08)',
-                            paddingHorizontal: 14,
-                            paddingVertical: 8,
-                            borderRadius: 20,
-                            borderWidth: 1,
-                            borderColor: email === account.email ? COLORS.amberStart : 'transparent',
-                            flex: 1,
-                            alignItems: 'center'
-                          }}
-                          onPress={() => {
-                            setEmail(account.email);
-                            setPassword(account.pass);
-                            Haptics.selectionAsync();
-                          }}
-                        >
-                          <Text style={{
-                            color: email === account.email ? COLORS.amberStart : COLORS.textSecondary,
-                            fontSize: 11,
-                            fontWeight: '600'
-                          }}>
-                            {account.label}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
+                  {/* Quick Login - Demo accounts (only shown when email is focused) */}
+                  {isEmailFocused && (
+                    <View style={{ marginBottom: 16 }}>
+                      <Text style={{ color: COLORS.textSecondary, marginBottom: 8, fontSize: 12 }}>
+                        {t.login?.quickAccess || 'Quick Access (Demo)'}:
+                      </Text>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+                        {MOCKED_ACCOUNTS.map((account) => (
+                          <TouchableOpacity
+                            key={account.role}
+                            style={{
+                              backgroundColor: email === account.email ? 'rgba(251, 191, 36, 0.15)' : 'rgba(255,255,255,0.08)',
+                              paddingHorizontal: 14,
+                              paddingVertical: 8,
+                              borderRadius: 20,
+                              borderWidth: 1,
+                              borderColor: email === account.email ? COLORS.amberStart : 'transparent',
+                              flex: 1,
+                              alignItems: 'center'
+                            }}
+                            onPress={() => {
+                              setEmail(account.email);
+                              setPassword(account.pass);
+                              Haptics.selectionAsync();
+                            }}
+                          >
+                            <Text style={{
+                              color: email === account.email ? COLORS.amberStart : COLORS.textSecondary,
+                              fontSize: 11,
+                              fontWeight: '600'
+                            }}>
+                              {account.label}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
                     </View>
-                  </View>
+                  )}
 
                   {/* Continue Button */}
                   <TouchableOpacity

@@ -429,16 +429,37 @@ Include a comprehensive TCM diagnosis with:
     const duration = Date.now() - startTime;
     console.error(`[consult] FAILED after ${duration}ms:`, error.message);
 
+    // Detect specific API key errors
+    const errorMessage = error.message || error.toString() || '';
+    let userFriendlyError = 'An error occurred. Please try again.';
+    let errorCode = 'CONSULT_ERROR';
+
+    if (errorMessage.includes('leaked') || errorMessage.includes('API key was reported')) {
+      userFriendlyError = 'API key has been flagged as leaked. Please generate a new API key from Google AI Studio and update your .env.local file.';
+      errorCode = 'API_KEY_LEAKED';
+    } else if (errorMessage.includes('invalid') || errorMessage.includes('API_KEY_INVALID')) {
+      userFriendlyError = 'Invalid API key. Please check your GOOGLE_GENERATIVE_AI_API_KEY in .env.local file.';
+      errorCode = 'API_KEY_INVALID';
+    } else if (errorMessage.includes('quota') || errorMessage.includes('RATE_LIMIT') || errorMessage.includes('429')) {
+      userFriendlyError = 'API quota exceeded. Please wait a moment or check your Google AI Studio billing.';
+      errorCode = 'API_QUOTA_EXCEEDED';
+    } else if (errorMessage.includes('not found') || errorMessage.includes('does not exist')) {
+      userFriendlyError = 'AI model not available. Please try again or contact support.';
+      errorCode = 'MODEL_NOT_FOUND';
+    }
+
     // Return a valid JSON response even on error
     const errorResponse = {
       diagnosis: "Analysis Error",
       constitution: "Unable to determine",
-      analysis: `An error occurred: ${error.message}. Please try again.`,
+      analysis: userFriendlyError,
+      error_code: errorCode,
       recommendations: {
         food: ["Please retry the analysis"],
         avoid: ["N/A"],
         lifestyle: ["Please try again with the diagnosis"]
-      }
+      },
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
     };
     return new Response(JSON.stringify(errorResponse), {
       status: 200,

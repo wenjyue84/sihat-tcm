@@ -1,7 +1,7 @@
-import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import { supabase } from '@/lib/supabase';
 import { INTERACTIVE_CHAT_PROMPT } from '@/lib/systemPrompts';
+import { getGoogleProvider } from '@/lib/googleProvider';
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
@@ -141,8 +141,30 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
         }
     } catch (error: any) {
         console.error("[API /api/chat] Error:", error);
+
+        // Detect specific API key errors
+        const errorMessage = error.message || error.toString() || '';
+        let userFriendlyError = 'Chat API error';
+        let errorCode = 'CHAT_ERROR';
+
+        if (errorMessage.includes('leaked') || errorMessage.includes('API key was reported')) {
+            userFriendlyError = 'API key has been flagged as leaked. Please generate a new API key from Google AI Studio and update your .env.local file.';
+            errorCode = 'API_KEY_LEAKED';
+        } else if (errorMessage.includes('invalid') || errorMessage.includes('API_KEY_INVALID')) {
+            userFriendlyError = 'Invalid API key. Please check your GOOGLE_GENERATIVE_AI_API_KEY in .env.local file.';
+            errorCode = 'API_KEY_INVALID';
+        } else if (errorMessage.includes('quota') || errorMessage.includes('RATE_LIMIT') || errorMessage.includes('429')) {
+            userFriendlyError = 'API quota exceeded. Please wait a moment or check your Google AI Studio billing.';
+            errorCode = 'API_QUOTA_EXCEEDED';
+        } else if (errorMessage.includes('not found') || errorMessage.includes('does not exist')) {
+            userFriendlyError = 'AI model not available. Please try again or contact support.';
+            errorCode = 'MODEL_NOT_FOUND';
+        }
+
         return new Response(JSON.stringify({
-            error: error.message || 'Chat API error'
+            error: userFriendlyError,
+            code: errorCode,
+            details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
         }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }
