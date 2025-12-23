@@ -25,7 +25,6 @@ export function ReportPatientInfo({ patientInfo, smartConnectData, reportOptions
                         title="Patient Information"
                         icon={User}
                         accentColor="blue"
-                        defaultOpen={true}
                     >
                         <div className="w-full">
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
