@@ -121,14 +121,28 @@ export const zh: TranslationKeys = {
         agePlaceholder: '年龄',
         weight: '体重（公斤）',
         weightPlaceholder: '公斤',
+        weightUnit: '公斤',
         height: '身高（厘米）',
         heightPlaceholder: '厘米',
+        heightUnit: '厘米',
         duration: '症状持续时间',
         durationPlaceholder: '持续多久？',
         durationOptions: {
             lessThan1Day: '少于1天', '1-3days': '1-3天', '4-7days': '4-7天',
             '1-2weeks': '1-2周', '2-4weeks': '2-4周', '1-3months': '1-3个月',
             '3-6months': '3-6个月', '6-12months': '6-12个月', over1Year: '超过1年', chronic: '慢性（长期）',
+        },
+        lockedProfile: {
+            reviewTitle: '档案确认',
+            reviewSubtitle: '您的档案信息已准备就绪。点击继续以进行下一步。',
+            notice: '档案已从您的账户自动填充',
+            editInDashboard: '在仪表盘中编辑',
+            profileReady: '档案资料完整',
+            profileIncomplete: '请先完善您的档案',
+            missingFields: '部分信息缺失 (年龄, 性别, 身高, 或体重)',
+            continueToSymptoms: '继续填写症状',
+            completeProfile: '完善我的档案',
+            wantToEdit: '想要更新您的档案?',
         },
         commonSymptoms: '常见症状',
         symptoms: {
@@ -492,6 +506,12 @@ export const zh: TranslationKeys = {
         lifestyle: '生活建议', herbalSuggestions: '中药调理', acupuncture: '穴位推荐',
         downloadPdf: '下载PDF', printReport: '打印报告', shareReport: '分享报告', saveToHistory: '保存记录', newDiagnosis: '新建诊断',
         disclaimer: '本报告由人工智能生成，仅供参考。如需专业医疗建议，请咨询持证中医师。',
+
+        // Mobile Summary
+        summary: '中医报告摘要',
+        chatReference: '对话参考',
+        viewFullReport: '查看完整报告',
+        diagnosis: '诊断',
     },
     analysisLoading: {
         title: '正在分析您的体质',

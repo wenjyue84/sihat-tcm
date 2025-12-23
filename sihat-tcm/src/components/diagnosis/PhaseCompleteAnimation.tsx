@@ -23,7 +23,7 @@ import { Check, Sparkles, Star, Heart, Zap, Award, ArrowRight } from 'lucide-rea
  * />
  */
 
-type DiagnosisPhase = 'basics' | 'inquiry' | 'tongue' | 'face' | 'audio' | 'pulse' | 'smartConnect' | 'summary'
+export type DiagnosisPhase = 'basics' | 'inquiry' | 'tongue' | 'face' | 'audio' | 'pulse' | 'smartConnect' | 'summary'
 
 interface PhaseCompleteAnimationProps {
     isVisible: boolean

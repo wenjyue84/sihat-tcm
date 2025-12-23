@@ -121,14 +121,28 @@ export const ms: TranslationKeys = {
         agePlaceholder: 'Umur',
         weight: 'Berat (kg)',
         weightPlaceholder: 'kg',
+        weightUnit: 'kg',
         height: 'Tinggi (cm)',
         heightPlaceholder: 'cm',
+        heightUnit: 'cm',
         duration: 'Tempoh',
         durationPlaceholder: 'Berapa lama?',
         durationOptions: {
             lessThan1Day: 'Kurang dari 1 hari', '1-3days': '1-3 hari', '4-7days': '4-7 hari',
             '1-2weeks': '1-2 minggu', '2-4weeks': '2-4 minggu', '1-3months': '1-3 bulan',
             '3-6months': '3-6 bulan', '6-12months': '6-12 bulan', over1Year: 'Lebih 1 tahun', chronic: 'Kronik (berterusan)',
+        },
+        lockedProfile: {
+            reviewTitle: 'Profil Disahkan',
+            reviewSubtitle: 'Maklumat profil anda telah sedia. Klik Teruskan untuk meneruskan.',
+            notice: 'Profil diisi secara automatik dari akaun anda',
+            editInDashboard: 'Edit di Papan Pemuka',
+            profileReady: 'Maklumat profil lengkap dan sedia',
+            profileIncomplete: 'Sila lengkapkan profil anda dahulu',
+            missingFields: 'Beberapa maklumat hilang (umur, jantina, tinggi, atau berat)',
+            continueToSymptoms: 'Teruskan ke Simptom',
+            completeProfile: 'Lengkapkan Profil Saya',
+            wantToEdit: 'Ingin mengemas kini profil anda?',
         },
         commonSymptoms: 'Simptom Biasa',
         symptoms: {
@@ -492,6 +506,12 @@ export const ms: TranslationKeys = {
         lifestyle: 'Cadangan Gaya Hidup', herbalSuggestions: 'Cadangan Herba', acupuncture: 'Titik Akupunktur',
         downloadPdf: 'Muat Turun PDF', printReport: 'Cetak Laporan', shareReport: 'Kongsi Laporan', saveToHistory: 'Simpan ke Sejarah', newDiagnosis: 'Diagnosis Baru',
         disclaimer: 'Laporan ini dijana oleh AI untuk tujuan rujukan sahaja. Sila dapatkan nasihat perubatan profesional daripada pengamal TCM berlesen.',
+
+        // Mobile Summary
+        summary: 'Ringkasan Laporan TCM',
+        chatReference: 'Rujukan semasa berbual',
+        viewFullReport: 'Lihat Laporan Penuh',
+        diagnosis: 'Diagnosis',
     },
     analysisLoading: {
         title: 'Menganalisis Perlembagaan Anda',

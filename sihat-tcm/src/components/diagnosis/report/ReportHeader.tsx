@@ -14,16 +14,12 @@ interface ReportHeaderProps {
     language: string
     timestamp?: string
     includeTimestamp: boolean
+    variants: any
 }
 
-export function ReportHeader({ doctorInfo, hasSaved, language, timestamp, includeTimestamp }: ReportHeaderProps) {
-    const item = {
-        hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0 }
-    }
-
+export function ReportHeader({ doctorInfo, hasSaved, language, timestamp, includeTimestamp, variants }: ReportHeaderProps) {
     return (
-        <motion.div variants={item} className="text-center space-y-1 md:space-y-2">
+        <motion.div variants={variants} className="text-center space-y-1 md:space-y-2">
             <div className="flex items-center justify-center gap-2 mb-2 flex-wrap">
                 <span className={`px-3 py-1 rounded-full text-sm font-medium border ${doctorInfo.bgColor} ${doctorInfo.borderColor} ${doctorInfo.textColor}`}>
                     {doctorInfo.icon} Analyzed by {doctorInfo.name}

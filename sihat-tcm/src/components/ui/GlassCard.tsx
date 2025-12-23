@@ -4,7 +4,7 @@ import * as React from "react"
 import { motion, type HTMLMotionProps } from "framer-motion"
 import { cn } from "@/lib/utils"
 
-interface GlassCardProps extends Omit<HTMLMotionProps<"div">, "ref"> {
+interface GlassCardProps extends Omit<HTMLMotionProps<"div">, "ref" | "glow" | "variant"> {
     /** Visual style variant */
     variant?: "default" | "elevated" | "subtle" | "glow"
     /** Blur intensity level */
@@ -72,10 +72,12 @@ function GlassCard({
             scale: 1,
             transition: {
                 duration: 0.3,
-                ease: [0.22, 1, 0.36, 1] // easeOutQuint
+                ease: [0.22, 1, 0.36, 1] as any // easeOutQuint
             }
         }
     }
+
+    const shouldShowGlow = glow === true || variant === 'glow';
 
     return (
         <motion.div
@@ -106,8 +108,7 @@ function GlassCard({
             )}
             {...props}
         >
-            {/* Animated shimmer border (only on glow variant or when glow prop is true) */}
-            {(glow || variant === 'glow') && (
+            {(shouldShowGlow && (
                 <div
                     className="absolute inset-0 -z-10 rounded-xl opacity-0 transition-opacity duration-500 md:group-hover:opacity-100 md:hover:opacity-100"
                     style={{
@@ -115,10 +116,10 @@ function GlassCard({
                         animation: shouldAnimate ? 'shimmer 2s infinite' : 'none'
                     }}
                 />
-            )}
+            )) as React.ReactNode}
 
             {/* Content */}
-            {children}
+            {children as React.ReactNode}
         </motion.div>
     )
 }
