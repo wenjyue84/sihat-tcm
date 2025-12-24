@@ -1,49 +1,109 @@
-import fs from 'fs';
-import path from 'path';
+import { supabaseAdmin } from './supabaseAdmin';
 
-// File to store admin settings (in production, use database)
-const SETTINGS_FILE = path.join(process.cwd(), 'admin-settings.json');
+// Default settings
+export const DEFAULT_SETTINGS = {
+    medicalHistorySummaryPrompt: `You are a medical assistant helping patients summarize their medical history for doctor consultations.
 
-interface AdminSettings {
+Based on the patient's previous TCM diagnosis reports and uploaded medical documents, create a clear, concise medical history summary that:
+
+1. Lists main health complaints and patterns
+2. Mentions relevant TCM diagnoses and syndrome patterns
+3. Notes important findings from medical reports
+4. Highlights chronic conditions or ongoing treatments
+5. Uses simple, patient-friendly language
+
+The summary should be 3-5 sentences that the patient can easily share with their doctor.
+
+Previous Diagnosis History:
+{inquiries}
+
+Medical Reports:
+{reports}
+
+Generate a concise medical history summary:`,
+    dietaryAdvicePrompt: `You are a TCM dietary expert capable of advising patients on what foods to eat or avoid based on their diagnosis.
+
+Context:
+Patient Profile: {profile}
+Latest Diagnosis: {diagnosis}
+Latest Dietary Advice: {advice}
+
+User Question: {question}
+
+Please answer the user's question based on the above context.
+If the food is beneficial, explain why in TCM terms (e.g., tonifies Qi, clears heat).
+If the food should be avoided, explain why (e.g., adds dampness, too cold).
+If it depends, explain the conditions.
+Keep the answer concise and helpful.`
+};
+
+export interface AdminSettings {
     geminiApiKey?: string;
     medicalHistorySummaryPrompt?: string;
     dietaryAdvicePrompt?: string;
+    backgroundMusicEnabled?: boolean;
+    backgroundMusicUrl?: string;
+    backgroundMusicVolume?: number;
     [key: string]: unknown;
 }
 
 /**
- * Read admin settings from the JSON file
+ * Fetch admin settings from Supabase (Server-side only)
  */
-export function getAdminSettings(): AdminSettings {
+export async function getAdminSettings(): Promise<AdminSettings> {
     try {
-        if (fs.existsSync(SETTINGS_FILE)) {
-            const data = fs.readFileSync(SETTINGS_FILE, 'utf-8');
-            return JSON.parse(data);
+        if (!supabaseAdmin) return DEFAULT_SETTINGS;
+
+        const { data, error } = await supabaseAdmin
+            .from('admin_settings')
+            .select('*')
+            .single();
+
+        if (error) {
+            // console.warn('[Settings] Failed to fetch admin settings from DB:', error.message);
+            return DEFAULT_SETTINGS;
+        }
+
+        if (data) {
+            return {
+                geminiApiKey: data.gemini_api_key,
+                medicalHistorySummaryPrompt: data.medical_history_summary_prompt || DEFAULT_SETTINGS.medicalHistorySummaryPrompt,
+                dietaryAdvicePrompt: data.dietary_advice_prompt || DEFAULT_SETTINGS.dietaryAdvicePrompt,
+                backgroundMusicEnabled: data.background_music_enabled ?? false,
+                backgroundMusicUrl: data.background_music_url || '',
+                backgroundMusicVolume: data.background_music_volume ?? 0.5
+            };
         }
     } catch (error) {
-        console.error('Error reading settings file:', error);
+        console.error('[Settings] Error fetching settings:', error);
     }
-    return {};
+    return DEFAULT_SETTINGS;
 }
 
 /**
- * Get the Gemini API key from admin settings or fall back to environment variable
+ * Get the Gemini API key from Environment
  */
-export function getGeminiApiKey(): string {
-    const settings = getAdminSettings();
-
-    // Use custom API key if set, otherwise fall back to environment variable
-    if (settings.geminiApiKey) {
-        return settings.geminiApiKey;
-    }
-
+export async function getGeminiApiKeyAsync(): Promise<string> {
     return process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
 }
 
 /**
- * Check if a custom API key is configured (vs using env var)
+ * Sync helper for Env var only
+ */
+export function getGeminiApiKeyEnv(): string {
+    return process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
+}
+
+/**
+ * @deprecated Use getGeminiApiKeyAsync instead
+ */
+export function getGeminiApiKey(): string {
+    return process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
+}
+
+/**
+ * Check if a custom API key is configured (Always false in env-only mode)
  */
 export function hasCustomApiKey(): boolean {
-    const settings = getAdminSettings();
-    return !!settings.geminiApiKey;
+    return false;
 }

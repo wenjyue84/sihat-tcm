@@ -2,6 +2,7 @@ import { streamText } from 'ai';
 import { supabase } from '@/lib/supabase';
 import { INTERACTIVE_CHAT_PROMPT } from '@/lib/systemPrompts';
 import { getGoogleProvider } from '@/lib/googleProvider';
+import { getGeminiApiKeyAsync } from '@/lib/settings';
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
@@ -98,8 +99,16 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
 
         console.log("[API /api/chat] Calling streamText with model:", model);
 
+        let apiKey = '';
         try {
-            const google = getGoogleProvider();
+            apiKey = await getGeminiApiKeyAsync();
+            console.log("[API /api/chat] Loaded API Key:", apiKey ? `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}` : "MISSING");
+        } catch (e) {
+            console.error('Error fetching API key:', e);
+        }
+
+        try {
+            const google = getGoogleProvider(apiKey);
             const result = streamText({
                 model: google(model),
                 system: systemPrompt,
@@ -123,7 +132,7 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
 
             // Fallback to 1.5 Flash
             console.log(`[API /api/chat] Falling back to gemini-1.5-flash`);
-            const googleFallback = getGoogleProvider();
+            const googleFallback = getGoogleProvider(apiKey); // Re-use the same API key
             const fallbackResult = streamText({
                 model: googleFallback('gemini-1.5-flash'),
                 system: systemPrompt,

@@ -7,11 +7,12 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { LogOut, Info, MessageSquare, Eye, FileText, Check, Loader2, ChevronDown, ChevronUp, Mic, Users, Settings, Shield, Key, UserCog } from 'lucide-react'
+import { LogOut, Info, MessageSquare, Eye, FileText, Check, Loader2, ChevronDown, ChevronUp, Mic, Users, Settings, Shield, Key, UserCog, Music } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Slider } from '@/components/ui/slider'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PractitionerManager } from '@/components/admin/PractitionerManager'
 import { SecuritySettings } from '@/components/admin/SecuritySettings'
-import { ApiKeySettings } from '@/components/admin/ApiKeySettings'
 import { UserManager } from '@/components/admin/UserManager'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
@@ -108,8 +109,8 @@ export default function AdminDashboard() {
     const [doctorLevel, setDoctorLevel] = useState<keyof typeof DOCTOR_MODEL_MAPPING>('Physician')
     const [loading, setLoading] = useState(true)
     const [loggingOut, setLoggingOut] = useState(false)
-    const [saving, setSaving] = useState<PromptType | 'config' | null>(null)
-    const [saved, setSaved] = useState<PromptType | 'config' | null>(null)
+    const [saving, setSaving] = useState<PromptType | 'config' | 'config_music' | null>(null)
+    const [saved, setSaved] = useState<PromptType | 'config' | 'config_music' | null>(null)
     const [expandedPrompts, setExpandedPrompts] = useState<Record<PromptType, boolean>>({
         chat: false,
         tongue: false,
@@ -119,6 +120,9 @@ export default function AdminDashboard() {
         inquiry_summary: false,
         final: false,
     })
+    const [musicEnabled, setMusicEnabled] = useState(false)
+    const [musicUrl, setMusicUrl] = useState('')
+    const [musicVolume, setMusicVolume] = useState(0.5)
     const { profile, loading: authLoading, signOut } = useAuth()
     const router = useRouter()
 
@@ -131,7 +135,25 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         fetchAllPrompts()
+        fetchAdminSettings()
     }, [])
+
+    const fetchAdminSettings = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('admin_settings')
+                .select('*')
+                .single()
+
+            if (data) {
+                setMusicEnabled(data.background_music_enabled || false)
+                setMusicUrl(data.background_music_url || '')
+                setMusicVolume(data.background_music_volume ?? 0.5)
+            }
+        } catch (error) {
+            console.error('Error fetching admin settings:', error)
+        }
+    }
 
     const fetchAllPrompts = async () => {
         try {
@@ -206,6 +228,31 @@ export default function AdminDashboard() {
         } catch (error) {
             console.error('Error saving prompt:', error)
             alert('Failed to save prompt.')
+        } finally {
+            setSaving(null)
+        }
+    }
+
+    const handleSaveMusicConfig = async () => {
+        setSaving('config_music')
+        try {
+            const response = await fetch('/api/admin/settings', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    backgroundMusicEnabled: musicEnabled,
+                    backgroundMusicUrl: musicUrl,
+                    backgroundMusicVolume: musicVolume
+                })
+            })
+
+            if (!response.ok) throw new Error('Failed to save music settings')
+
+            setSaved('config_music')
+            setTimeout(() => setSaved(null), 2000)
+        } catch (error) {
+            console.error('Error saving music config:', error)
+            alert('Failed to save music settings.')
         } finally {
             setSaving(null)
         }
@@ -360,10 +407,7 @@ export default function AdminDashboard() {
                         <Settings className="w-4 h-4" />
                         Prompts
                     </TabsTrigger>
-                    <TabsTrigger value="apikeys" className="flex items-center gap-2">
-                        <Key className="w-4 h-4" />
-                        API Keys
-                    </TabsTrigger>
+
                     <TabsTrigger value="security" className="flex items-center gap-2">
                         <Shield className="w-4 h-4" />
                         Security
@@ -375,6 +419,10 @@ export default function AdminDashboard() {
                     <TabsTrigger value="practitioners" className="flex items-center gap-2">
                         <Users className="w-4 h-4" />
                         Practitioners
+                    </TabsTrigger>
+                    <TabsTrigger value="config" className="flex items-center gap-2">
+                        <Music className="w-4 h-4" />
+                        Config
                     </TabsTrigger>
                 </TabsList>
 
@@ -528,9 +576,7 @@ export default function AdminDashboard() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="apikeys" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
-                    <ApiKeySettings />
-                </TabsContent>
+
 
                 <TabsContent value="security" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
                     <SecuritySettings />
@@ -542,6 +588,78 @@ export default function AdminDashboard() {
 
                 <TabsContent value="practitioners" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
                     <PractitionerManager />
+                </TabsContent>
+
+                <TabsContent value="config" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Music className="w-5 h-5 text-pink-500" />
+                                Background Music Settings
+                            </CardTitle>
+                            <CardDescription>
+                                Configure gentle background music for the application.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base">Enable Background Music</Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        Turn music on or off for all users
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={musicEnabled}
+                                    onCheckedChange={setMusicEnabled}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Music URL (MP3/WAV)</Label>
+                                <div className="flex gap-2">
+                                    <Textarea
+                                        value={musicUrl}
+                                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMusicUrl(e.target.value)}
+                                        placeholder="https://example.com/calm-music.mp3"
+                                        className="font-mono text-sm min-h-[40px] h-[40px] resize-none overflow-hidden py-2"
+                                    />
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    Upload your file to Supabase Storage manually and paste the public URL here, or use an external URL.
+                                </p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex justify-between">
+                                    <Label>Default Volume ({Math.round(musicVolume * 100)}%)</Label>
+                                </div>
+                                <Slider
+                                    value={[musicVolume * 100]}
+                                    max={100}
+                                    step={1}
+                                    onValueChange={(vals: number[]) => setMusicVolume(vals[0] / 100)}
+                                    className="w-full max-w-md"
+                                />
+                            </div>
+
+                            <div className="pt-4">
+                                <Button
+                                    onClick={handleSaveMusicConfig}
+                                    disabled={saving === 'config_music'}
+                                    className="bg-pink-600 hover:bg-pink-700"
+                                >
+                                    {saving === 'config_music' ? (
+                                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
+                                    ) : saved === 'config_music' ? (
+                                        <><Check className="w-4 h-4 mr-2" /> Saved!</>
+                                    ) : (
+                                        'Save Music Settings'
+                                    )}
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </TabsContent>
             </Tabs>
         </div>

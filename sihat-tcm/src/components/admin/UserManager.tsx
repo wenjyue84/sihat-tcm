@@ -309,7 +309,8 @@ export function UserManager() {
                                         <TableHead>User</TableHead>
                                         <TableHead>Role</TableHead>
                                         <TableHead className="hidden md:table-cell">Details</TableHead>
-                                        <TableHead className="hidden lg:table-cell">Last Updated</TableHead>
+                                        <TableHead className="hidden lg:table-cell">Joined</TableHead>
+                                        <TableHead className="hidden xl:table-cell">Last Updated</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -348,15 +349,31 @@ export function UserManager() {
                                                     </TableCell>
                                                     <TableCell className="hidden md:table-cell">
                                                         {user.role === 'patient' ? (
-                                                            <div className="text-sm text-muted-foreground">
-                                                                {user.age ? `${user.age} yrs` : '-'}
-                                                                {user.gender && ` • ${user.gender}`}
+                                                            <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span>{user.age ? `${user.age} yrs` : 'Age: -'}</span>
+                                                                    <span>•</span>
+                                                                    <span className="capitalize">{user.gender || 'Gender: -'}</span>
+                                                                </div>
+                                                                {(() => {
+                                                                    const bmi = calculateBMI(user.height, user.weight)
+                                                                    return bmi ? (
+                                                                        <div className="text-xs">
+                                                                            BMI: <span className="font-medium text-stone-700">{bmi}</span>
+                                                                        </div>
+                                                                    ) : null
+                                                                })()}
                                                             </div>
                                                         ) : (
                                                             <span className="text-muted-foreground">-</span>
                                                         )}
                                                     </TableCell>
                                                     <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
+                                                        {user.created_at
+                                                            ? new Date(user.created_at).toLocaleDateString()
+                                                            : '-'}
+                                                    </TableCell>
+                                                    <TableCell className="hidden xl:table-cell text-sm text-muted-foreground">
                                                         {user.updated_at
                                                             ? new Date(user.updated_at).toLocaleDateString()
                                                             : '-'}
@@ -660,6 +677,6 @@ export function UserManager() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </Card>
+        </Card >
     )
 }

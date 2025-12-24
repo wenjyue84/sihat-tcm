@@ -54,7 +54,7 @@ export function ResumeProgressDialog({
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={() => { /* Prevent closing by clicking outside */ }}>
+        <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onStartNew() }}>
             <DialogContent className="sm:max-w-md bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700/50 text-white">
                 <DialogHeader className="space-y-3">
                     <motion.div

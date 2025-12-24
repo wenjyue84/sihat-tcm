@@ -747,7 +747,7 @@ Duration: ${basicInfo.symptomDuration}
                 {/* Input Area - Sticky on mobile above nav */}
                 <div className={`flex gap-2 pt-2 md:pt-2 md:border-t ${isMaximized ? 'fixed bottom-16 md:bottom-2 left-0 right-0 p-4 bg-white z-50 md:relative md:p-0 md:bg-transparent md:z-auto' : 'fixed bottom-16 left-0 right-0 p-4 bg-white z-50 md:relative md:bottom-auto md:left-auto md:right-auto md:p-0 md:bg-transparent md:border-t-0 md:z-auto'
                     }`}>
-                    <form onSubmit={handleSubmit} className="flex-1 flex gap-2 w-full max-w-4xl mx-auto">
+                    <form onSubmit={handleSubmit} className="flex-1 flex gap-2 w-full md:max-w-4xl md:mx-auto">
                         <Button
                             type="button"
                             variant={isRecording ? "default" : "outline"}

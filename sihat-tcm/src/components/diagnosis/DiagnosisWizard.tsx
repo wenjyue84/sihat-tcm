@@ -187,7 +187,7 @@ export default function DiagnosisWizard() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-3 md:p-6 pb-24">
+        <div className="w-full px-5 md:px-6 md:max-w-4xl md:mx-auto p-3 md:p-6 pb-24">
             {/* Resume Progress Dialog */}
             <ResumeProgressDialog
                 isOpen={pendingResumeState !== null}

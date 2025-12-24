@@ -252,7 +252,7 @@ export default function UploadReportsStep({ data, onUpdate, theme, isDark }) {
                     <View style={styles.fileListSection}>
                         <Text style={styles.sectionTitle}>Uploaded Documents ({files.length})</Text>
                         {files.map((file, index) => (
-                            <BlurView key={file.id} intensity={15} tint={isDark ? 'dark' : 'light'} style={styles.fileGlassItem}>
+                            <BlurView key={index} intensity={15} tint={isDark ? 'dark' : 'light'} style={styles.fileGlassItem}>
                                 <View style={styles.fileIcon}>
                                     <Ionicons name="image" size={20} color={theme.accent.primary} />
                                 </View>

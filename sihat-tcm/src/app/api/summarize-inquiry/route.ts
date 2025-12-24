@@ -1,7 +1,8 @@
-import { google } from '@ai-sdk/google';
+import { getGoogleProvider } from '@/lib/googleProvider';
 import { generateText } from 'ai';
 import { INQUIRY_SUMMARY_PROMPT } from '@/lib/systemPrompts';
 import { supabase } from '@/lib/supabase';
+import { getGeminiApiKeyAsync } from '@/lib/settings';
 
 export const maxDuration = 60;
 
@@ -89,6 +90,19 @@ Follow the structured format specified in your system prompt.
 
         console.log('[summarize-inquiry] Calling Gemini API...');
         const generateStartTime = Date.now();
+        const apiKey = await getGeminiApiKeyAsync();
+
+        console.log('[summarize-inquiry] API Key Status:', {
+            exists: !!apiKey,
+            length: apiKey?.length || 0,
+            prefix: apiKey ? apiKey.substring(0, 10) + '...' : 'MISSING'
+        });
+
+        if (!apiKey) {
+            throw new Error('GOOGLE_GENERATIVE_AI_API_KEY is not set in environment variables');
+        }
+
+        const google = getGoogleProvider(apiKey);
 
         let text;
         try {

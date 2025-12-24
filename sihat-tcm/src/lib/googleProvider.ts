@@ -5,7 +5,7 @@ import { getGeminiApiKey } from './settings';
  * Get a Google provider instance configured with the appropriate API key.
  * Uses custom API key from admin settings if available, otherwise falls back to env var.
  */
-export function getGoogleProvider() {
-    const apiKey = getGeminiApiKey();
-    return createGoogleGenerativeAI({ apiKey });
+export function getGoogleProvider(apiKey?: string) {
+    const key = apiKey || getGeminiApiKey();
+    return createGoogleGenerativeAI({ apiKey: key });
 }
