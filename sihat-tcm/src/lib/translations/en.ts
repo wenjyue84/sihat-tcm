@@ -344,6 +344,24 @@ export const en = {
         checkPermissions: 'Check browser permissions for camera',
         useUploadInstead: 'Or use "Upload Photo" below',
         retryCamera: 'Retry Camera',
+        guideLabels: {
+            tongue: 'Position your tongue like this',
+            face: 'Position your face like this',
+            body: 'Position the body part like this',
+        },
+        referenceGuide: 'Reference Guide',
+        permissionRequired: 'Camera access permission required',
+        starting: 'Starting camera...',
+        initializing: 'Initializing...',
+        useButtonsHint: 'Use buttons below to capture or upload',
+        skipDialog: {
+            title: 'No Photo Provided',
+            titleTongue: 'No Tongue Photo',
+            titleFace: 'No Face Photo',
+            description: 'You haven\'t provided a photo. Providing one ensures better diagnosis accuracy. Do you want to provide one or skip?',
+            providePhoto: 'Provide Photo',
+            skip: 'Skip',
+        },
     },
 
     // Tongue diagnosis
@@ -688,6 +706,11 @@ export const en = {
         lifestyle: 'Lifestyle Suggestions',
         herbalSuggestions: 'Herbal Suggestions',
         acupuncture: 'Acupuncture Points',
+        actionAlerts: {
+            saved: 'Saved!',
+            requestSent: 'Request Sent!',
+            copied: 'Report link copied to clipboard!',
+        },
 
         // Actions
         downloadPdf: 'Download PDF',
@@ -1052,6 +1075,8 @@ export const en = {
             treatment: 'Treatment',
             herbalMedicine: 'Herbal Medicine Suggestions',
             nearbyDoctor: 'Nearby TCM Doctor',
+            foodsToAvoid: 'Foods to Avoid',
+            herbalSuggestions: 'Herbal Suggestions',
             dietary: 'Dietary Advice (食疗)',
             lifestyle: 'Lifestyle Tips (养生)',
             acupuncture: 'Acupuncture Points (穴位)',

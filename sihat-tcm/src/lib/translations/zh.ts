@@ -279,6 +279,24 @@ export const zh: TranslationKeys = {
         checkPermissions: '检查浏览器相机权限',
         useUploadInstead: '或使用下方的"上传照片"',
         retryCamera: '重试相机',
+        guideLabels: {
+            tongue: '请按此参考图调整舌头位置',
+            face: '请按此参考图调整面部位置',
+            body: '请按此参考图调整拍摄部位',
+        },
+        referenceGuide: '拍摄参考指南',
+        permissionRequired: '需要相机访问权限',
+        starting: '正在启动相机...',
+        initializing: '正在初始化...',
+        useButtonsHint: '您也可以使用下方按钮拍摄或上传',
+        skipDialog: {
+            title: '未提供照片',
+            titleTongue: '未提供舌象照片',
+            titleFace: '未提供面部照片',
+            description: '您尚未提供照片。提供照片有助于更准确的诊断。您确定要跳过吗？',
+            providePhoto: '提供照片',
+            skip: '跳过',
+        },
     },
     tongue: {
         title: '舌诊',
@@ -507,6 +525,11 @@ export const zh: TranslationKeys = {
         recommendations: '调理建议', dietaryAdvice: '饮食调理', foodsToEat: '宜食', foodsToAvoid: '忌食',
         lifestyle: '生活建议', herbalSuggestions: '中药调理', acupuncture: '穴位推荐',
         downloadPdf: '下载PDF', printReport: '打印报告', shareReport: '分享报告', saveToHistory: '保存记录', newDiagnosis: '新建诊断',
+        actionAlerts: {
+            saved: '已保存！',
+            requestSent: '请求已发送！',
+            copied: '报告链接已复制到剪贴板！',
+        },
         disclaimer: '本报告由人工智能生成，仅供参考。如需专业医疗建议，请咨询持证中医师。',
 
         // Mobile Summary
@@ -772,8 +795,10 @@ export const zh: TranslationKeys = {
             treatment: '治疗',
             herbalMedicine: '中药调理建议',
             nearbyDoctor: '附近中医师',
+            foodsToAvoid: '避免食物：',
             dietary: '饮食调理（食疗）',
             lifestyle: '养生建议',
+            herbalSuggestions: '草药建议',
             acupuncture: '穴位推荐',
             exercise: '运动建议',
             sleepAdvice: '睡眠调养指导',

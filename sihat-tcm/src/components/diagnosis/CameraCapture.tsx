@@ -23,6 +23,27 @@ interface CameraCaptureProps {
     mode?: 'tongue' | 'face' | 'body';
 }
 
+/**
+ * Forces a browser repaint on an element.
+ * This fixes the Chrome bug where video elements don't render after srcObject is set.
+ */
+function forceRepaint(element: HTMLElement): void {
+    // Multiple techniques to force a repaint:
+    // 1. Access offsetHeight to force a synchronous reflow
+    void element.offsetHeight
+
+    // 2. Toggle a harmless style property
+    const originalTransform = element.style.transform
+    element.style.transform = 'translateZ(0)'
+
+    // 3. Use requestAnimationFrame to schedule another reflow after paint
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            element.style.transform = originalTransform
+        })
+    })
+}
+
 export function CameraCapture({
     onComplete,
     title,
@@ -33,7 +54,10 @@ export function CameraCapture({
 }: CameraCaptureProps & { onBack?: () => void }) {
     const { t, language } = useLanguage()
     const { setNavigationState } = useDiagnosisProgress()
-    const videoRef = useRef<HTMLVideoElement>(null)
+
+    // Use separate refs for desktop and mobile video elements to avoid ref conflicts
+    const desktopVideoRef = useRef<HTMLVideoElement>(null)
+    const mobileVideoRef = useRef<HTMLVideoElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const cameraInputRef = useRef<HTMLInputElement>(null)
@@ -55,6 +79,30 @@ export function CameraCapture({
     const [isLoading, setIsLoading] = useState(false)
     const [videoPlaying, setVideoPlaying] = useState(false)
     const [hasStarted, setHasStarted] = useState(false) // Require manual start
+
+    // Track video element mounting with a version counter
+    const videoMountVersion = useRef(0)
+
+    /**
+     * Gets the currently visible/active video element.
+     * On desktop (md+), returns desktopVideoRef; on mobile, returns mobileVideoRef.
+     * Falls back to whichever one exists and is visible.
+     */
+    const getActiveVideo = useCallback((): HTMLVideoElement | null => {
+        const desktopVideo = desktopVideoRef.current
+        const mobileVideo = mobileVideoRef.current
+
+        // Check which video element is actually visible (not display:none)
+        if (desktopVideo && desktopVideo.offsetParent !== null) {
+            return desktopVideo
+        }
+        if (mobileVideo && mobileVideo.offsetParent !== null) {
+            return mobileVideo
+        }
+
+        // Fallback: return whichever exists
+        return desktopVideo || mobileVideo
+    }, [])
 
     // Store translations in ref to avoid dependency issues
     const tRef = useRef(t)
@@ -165,38 +213,149 @@ export function CameraCapture({
         }
     }, []) // NO DEPENDENCIES - uses refs for everything
 
-    // EFFECT: Attach stream to video element when stream state changes
+    // EFFECT: Attach stream to video elements when stream state changes
+    // This effect handles stream attachment robustly, including forcing repaint
     useEffect(() => {
-        if (!stream || !videoRef.current) return
+        if (!stream) return
 
-        const video = videoRef.current
-        console.log('[Camera] Attaching stream to video element via effect')
+        // Capture the current mount version to detect stale callbacks
+        const currentVersion = ++videoMountVersion.current
+        let hasSetReady = false
+        const cleanupFns: (() => void)[] = []
 
-        video.srcObject = stream
+        const handleVideoReady = (video: HTMLVideoElement) => {
+            // Guard against stale callbacks and duplicate calls
+            if (videoMountVersion.current !== currentVersion || hasSetReady) {
+                return
+            }
 
-        const handleVideoReady = () => {
+            hasSetReady = true
             console.log('[Camera] Video playing (event)')
             setVideoPlaying(true)
             setIsLoading(false)
             isStartingRef.current = false
+
+            // Force a repaint to fix the Chrome rendering bug
+            forceRepaint(video)
         }
 
-        video.addEventListener('playing', handleVideoReady)
-        video.addEventListener('loadeddata', handleVideoReady)
+        // Function to attach stream to a single video element
+        const attachStreamToVideo = (video: HTMLVideoElement | null, label: string) => {
+            if (!video) return
 
-        video.play().catch(e => {
-            if (e.name !== 'AbortError') {
-                console.warn('[Camera] Auto-play blocked in effect:', e)
-                // If autoplay fails, we still consider it "ready" enough to show controls
-                handleVideoReady()
+            console.log(`[Camera] Attaching stream to ${label} video element`)
+
+            // Check if stream is already attached
+            if (video.srcObject === stream) {
+                console.log(`[Camera] Stream already attached to ${label}`)
+                if (!video.paused && video.readyState >= 2) {
+                    handleVideoReady(video)
+                    return
+                }
             }
-        })
+
+            video.srcObject = stream
+
+            const onPlaying = () => handleVideoReady(video)
+            const onLoadedData = () => handleVideoReady(video)
+            const onCanPlay = () => handleVideoReady(video)
+
+            const onLoadedMetadata = () => {
+                if (videoMountVersion.current !== currentVersion) return
+                console.log(`[Camera] ${label} video loadedmetadata`)
+                forceRepaint(video)
+            }
+
+            // Add event listeners
+            video.addEventListener('playing', onPlaying)
+            video.addEventListener('loadeddata', onLoadedData)
+            video.addEventListener('loadedmetadata', onLoadedMetadata)
+            video.addEventListener('canplay', onCanPlay)
+
+            // Try to play the video
+            const playPromise = video.play()
+
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        if (videoMountVersion.current !== currentVersion) return
+                        console.log(`[Camera] ${label} video.play() succeeded`)
+                        forceRepaint(video)
+                        handleVideoReady(video)
+                    })
+                    .catch(e => {
+                        if (videoMountVersion.current !== currentVersion) return
+
+                        if (e.name === 'AbortError') {
+                            console.log(`[Camera] ${label} play aborted (normal during transitions)`)
+                        } else if (e.name === 'NotAllowedError') {
+                            console.warn(`[Camera] ${label} autoplay blocked by browser policy`)
+                            handleVideoReady(video)
+                        } else {
+                            console.warn(`[Camera] ${label} auto-play error:`, e)
+                            handleVideoReady(video)
+                        }
+                    })
+            }
+
+            // Store cleanup function
+            cleanupFns.push(() => {
+                video.removeEventListener('playing', onPlaying)
+                video.removeEventListener('loadeddata', onLoadedData)
+                video.removeEventListener('loadedmetadata', onLoadedMetadata)
+                video.removeEventListener('canplay', onCanPlay)
+            })
+        }
+
+        // Retry attachment until video elements are mounted
+        let retryCount = 0
+        const maxRetries = 30 // 30 frames ≈ 500ms at 60fps
+
+        const tryAttach = () => {
+            const desktopVideo = desktopVideoRef.current
+            const mobileVideo = mobileVideoRef.current
+
+            if (!desktopVideo && !mobileVideo) {
+                retryCount++
+                if (retryCount < maxRetries && videoMountVersion.current === currentVersion) {
+                    requestAnimationFrame(tryAttach)
+                } else {
+                    console.warn('[Camera] Video elements not found after retries')
+                    setIsLoading(false)
+                    isStartingRef.current = false
+                }
+                return
+            }
+
+            // Attach to both video elements so whichever is visible will work
+            attachStreamToVideo(desktopVideo, 'desktop')
+            attachStreamToVideo(mobileVideo, 'mobile')
+        }
+
+        tryAttach()
+
+        // Fallback: If video doesn't fire events within 2 seconds, force ready state
+        const fallbackTimeout = setTimeout(() => {
+            if (videoMountVersion.current !== currentVersion || hasSetReady) return
+
+            const activeVideo = getActiveVideo()
+            if (activeVideo) {
+                if (!activeVideo.paused && activeVideo.readyState >= 2) {
+                    console.log('[Camera] Fallback: Video appears to be playing')
+                    handleVideoReady(activeVideo)
+                } else if (activeVideo.srcObject === stream) {
+                    console.log('[Camera] Fallback: Stream attached, forcing ready state')
+                    forceRepaint(activeVideo)
+                    handleVideoReady(activeVideo)
+                }
+            }
+        }, 2000)
 
         return () => {
-            video.removeEventListener('playing', handleVideoReady)
-            video.removeEventListener('loadeddata', handleVideoReady)
+            clearTimeout(fallbackTimeout)
+            cleanupFns.forEach(fn => fn())
         }
-    }, [stream]) // Runs whenever we get a new stream (or new video ref due to key change)
+    }, [stream, getActiveVideo]) // Runs whenever we get a new stream
 
     // STABILITY: Cleanup camera on page unload/navigation
     useEffect(() => {
@@ -217,17 +376,21 @@ export function CameraCapture({
     // STABILITY: Handle visibility change (tab switch)
     useEffect(() => {
         const handleVisibilityChange = () => {
-            if (!document.hidden && streamRef.current && videoRef.current) {
-                if (!videoRef.current.srcObject) {
-                    videoRef.current.srcObject = streamRef.current
+            if (!document.hidden && streamRef.current) {
+                const video = getActiveVideo()
+                if (video) {
+                    if (!video.srcObject) {
+                        video.srcObject = streamRef.current
+                    }
+                    video.play().catch(() => { })
+                    forceRepaint(video)
                 }
-                videoRef.current.play().catch(() => { })
             }
         }
 
         document.addEventListener('visibilitychange', handleVisibilityChange)
         return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }, [])
+    }, [getActiveVideo])
 
     // Camera initialization effect - ONLY cleanup logic
     useEffect(() => {
@@ -244,8 +407,8 @@ export function CameraCapture({
     }, [facingMode])
 
     const captureImage = useCallback(() => {
-        if (videoRef.current && canvasRef.current) {
-            const video = videoRef.current
+        const video = getActiveVideo()
+        if (video && canvasRef.current) {
             const canvas = canvasRef.current
             canvas.width = video.videoWidth || 640
             canvas.height = video.videoHeight || 480
@@ -257,7 +420,7 @@ export function CameraCapture({
                 onCompleteRef.current({ image: imageData })
             }
         }
-    }, [stopCamera])
+    }, [stopCamera, getActiveVideo])
 
     const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -330,9 +493,9 @@ export function CameraCapture({
         }
 
         const guideLabels = {
-            tongue: language === 'zh' ? '请按此方式拍摄舌头' : language === 'ms' ? 'Ikut gaya ini untuk foto lidah' : 'Position your tongue like this',
-            face: language === 'zh' ? '请按此方式拍摄面部' : language === 'ms' ? 'Ikut gaya ini untuk foto wajah' : 'Position your face like this',
-            body: language === 'zh' ? '请按此方式拍摄身体部位' : language === 'ms' ? 'Ikut gaya ini untuk foto bahagian badan' : 'Position the body part like this'
+            tongue: t.camera.guideLabels.tongue,
+            face: t.camera.guideLabels.face,
+            body: t.camera.guideLabels.body
         }
 
         return (
@@ -373,7 +536,7 @@ export function CameraCapture({
                 {/* Guide Reference Panel - PC Only */}
                 <div className="w-1/3 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-100 flex flex-col items-center justify-center">
                     <p className="text-xs text-emerald-600 font-medium mb-3 uppercase tracking-wide">
-                        {language === 'zh' ? '参考指南' : language === 'ms' ? 'Panduan Rujukan' : 'Reference Guide'}
+                        {t.camera.referenceGuide}
                     </p>
                     {getPlaceholder()}
                 </div>
@@ -391,23 +554,18 @@ export function CameraCapture({
                                     className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
                                 >
                                     <Camera className="w-6 h-6 mr-2" />
-                                    Start Camera
+                                    {t.camera.starting}
                                 </Button>
-                                <p className="mt-4 text-sm text-stone-500">Camera access permission required</p>
+                                <p className="mt-4 text-sm text-stone-500">{t.camera.permissionRequired}</p>
                             </div>
                         ) : (
                             <>
                                 <video
-                                    key={stream ? stream.id : 'novideo'}
-                                    ref={videoRef}
+                                    ref={desktopVideoRef}
                                     autoPlay
                                     playsInline
                                     muted
                                     className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1] z-[1]"
-                                    onPlaying={() => setVideoPlaying(true)}
-                                    onLoadedData={() => setVideoPlaying(true)}
-                                    onCanPlay={() => setVideoPlaying(true)}
-                                    onPause={() => setVideoPlaying(false)}
                                 />
                                 <Button
                                     type="button"
@@ -425,7 +583,7 @@ export function CameraCapture({
                                         <div className="text-center text-gray-400">
                                             <div className="w-12 h-12 mx-auto mb-3 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin" />
                                             <p className="text-sm font-medium text-emerald-600">
-                                                {isLoading ? 'Starting camera...' : 'Initializing...'}
+                                                {isLoading ? t.camera.starting : t.camera.initializing}
                                             </p>
                                         </div>
                                     </div>
@@ -447,7 +605,7 @@ export function CameraCapture({
                                 </Button>
                             </div>
                             <p className="text-sm text-gray-500 font-medium bg-white/50 backdrop-blur-sm py-2 px-4 rounded-full shadow-sm">
-                                Use buttons below to capture or upload
+                                {t.camera.useButtonsHint}
                             </p>
                         </div>
                     )}
@@ -473,16 +631,11 @@ export function CameraCapture({
                     ) : (
                         <>
                             <video
-                                key={stream ? stream.id : 'novideo-mobile'}
-                                ref={videoRef}
+                                ref={mobileVideoRef}
                                 autoPlay
                                 playsInline
                                 muted
                                 className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1] z-[1]"
-                                onPlaying={() => setVideoPlaying(true)}
-                                onLoadedData={() => setVideoPlaying(true)}
-                                onCanPlay={() => setVideoPlaying(true)}
-                                onPause={() => setVideoPlaying(false)}
                             />
                             <Button
                                 type="button"
@@ -500,7 +653,7 @@ export function CameraCapture({
                                     {isLoading ? (
                                         <div className="text-center">
                                             <div className="w-12 h-12 mx-auto mb-3 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin" />
-                                            <p className="text-sm font-medium text-emerald-600">Starting camera...</p>
+                                            <p className="text-sm font-medium text-emerald-600">{t.camera.starting}</p>
                                         </div>
                                     ) : (
                                         getPlaceholder()
@@ -519,7 +672,7 @@ export function CameraCapture({
                         {/* Instruction Hint */}
                         <div className="absolute bottom-12 left-0 right-0 px-4">
                             <p className="text-sm text-gray-500 font-medium bg-white/50 backdrop-blur-sm py-2 px-4 rounded-full inline-block shadow-sm">
-                                Use buttons below to capture or upload
+                                {t.camera.useButtonsHint}
                             </p>
                         </div>
 
@@ -660,18 +813,14 @@ export function CameraCapture({
                     <DialogHeader>
                         <DialogTitle>
                             {mode === 'tongue'
-                                ? (language === 'zh' ? '未提供舌象照片' : language === 'ms' ? 'Tiada Foto Lidah' : 'No Tongue Photo')
+                                ? t.camera.skipDialog.titleTongue
                                 : mode === 'face'
-                                    ? (language === 'zh' ? '未提供面部照片' : language === 'ms' ? 'Tiada Foto Wajah' : 'No Face Photo')
-                                    : (language === 'zh' ? '未提供照片' : language === 'ms' ? 'Tiada Foto' : 'No Photo Provided')
+                                    ? t.camera.skipDialog.titleFace
+                                    : t.camera.skipDialog.title
                             }
                         </DialogTitle>
                         <DialogDescription>
-                            {language === 'zh'
-                                ? '您尚未提供照片。提供照片有助于更准确的诊断。您确定要跳过吗？'
-                                : language === 'ms'
-                                    ? 'Anda belum memberikan foto. Foto membantu diagnosis yang lebih tepat. Adakah anda pasti mahu melangkau?'
-                                    : 'You haven\'t provided a photo. Providing one ensures better diagnosis accuracy. Do you want to provide one or skip?'}
+                            {t.camera.skipDialog.description}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="flex-col sm:flex-row gap-2">
@@ -680,7 +829,7 @@ export function CameraCapture({
                             className="bg-emerald-600 hover:bg-emerald-700"
                             onClick={() => setIsSkipPromptOpen(false)}
                         >
-                            {language === 'zh' ? '提供照片' : language === 'ms' ? 'Berikan Foto' : 'Provide Photo'}
+                            {t.camera.skipDialog.providePhoto}
                         </Button>
                         <Button
                             variant="ghost"
@@ -689,7 +838,7 @@ export function CameraCapture({
                                 handleSkip()
                             }}
                         >
-                            {language === 'zh' ? '跳过' : language === 'ms' ? 'Langkau' : 'Skip'}
+                            {t.camera.skipDialog.skip}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

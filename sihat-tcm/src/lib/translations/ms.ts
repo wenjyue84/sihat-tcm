@@ -279,6 +279,24 @@ export const ms: TranslationKeys = {
         checkPermissions: 'Semak kebenaran kamera pelayar',
         useUploadInstead: 'Atau gunakan "Muat Naik Gambar" di bawah',
         retryCamera: 'Cuba Semula Kamera',
+        guideLabels: {
+            tongue: 'Ikut gaya ini untuk foto lidah',
+            face: 'Ikut gaya ini untuk foto wajah',
+            body: 'Ikut gaya ini untuk foto bahagian badan',
+        },
+        referenceGuide: 'Panduan Rujukan',
+        permissionRequired: 'Kebenaran akses kamera diperlukan',
+        starting: 'Memulakan kamera...',
+        initializing: 'Memulakan...',
+        useButtonsHint: 'Gunakan butang di bawah untuk ambil atau muat naik',
+        skipDialog: {
+            title: 'Tiada Foto',
+            titleTongue: 'Tiada Foto Lidah',
+            titleFace: 'Tiada Foto Wajah',
+            description: 'Anda belum memberikan foto. Foto membantu diagnosis yang lebih tepat. Adakah anda pasti mahu melangkau?',
+            providePhoto: 'Berikan Foto',
+            skip: 'Langkau',
+        },
     },
     tongue: {
         title: 'Diagnosis Lidah (舌诊)',
@@ -507,6 +525,11 @@ export const ms: TranslationKeys = {
         recommendations: 'Cadangan', dietaryAdvice: 'Nasihat Pemakanan', foodsToEat: 'Makanan Disyorkan', foodsToAvoid: 'Makanan Dielakkan',
         lifestyle: 'Cadangan Gaya Hidup', herbalSuggestions: 'Cadangan Herba', acupuncture: 'Titik Akupunktur',
         downloadPdf: 'Muat Turun PDF', printReport: 'Cetak Laporan', shareReport: 'Kongsi Laporan', saveToHistory: 'Simpan ke Sejarah', newDiagnosis: 'Diagnosis Baru',
+        actionAlerts: {
+            saved: 'Disimpan!',
+            requestSent: 'Permintaan Dihantar!',
+            copied: 'Pautan laporan disalin!',
+        },
         disclaimer: 'Laporan ini dijana oleh AI untuk tujuan rujukan sahaja. Sila dapatkan nasihat perubatan profesional daripada pengamal TCM berlesen.',
 
         // Mobile Summary
@@ -771,6 +794,8 @@ export const ms: TranslationKeys = {
             tcmRecommendations: 'Cadangan TCM',
             treatment: 'Rawatan',
             herbalMedicine: 'Cadangan Ubat Herba',
+            foodsToAvoid: 'Makanan Dielakkan',
+            herbalSuggestions: 'Cadangan Herba',
             nearbyDoctor: 'Doktor TCM Berdekatan',
             dietary: 'Nasihat Pemakanan (食疗)',
             lifestyle: 'Petua Gaya Hidup (养生)',
@@ -847,6 +872,7 @@ export const ms: TranslationKeys = {
         },
     },
 
+    // Report Chat Window
     // Report Chat Window
     reportChat: {
         title: 'Tanya Tentang Laporan Anda',
