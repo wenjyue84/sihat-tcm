@@ -6,6 +6,7 @@ import { translations, Language, getDefaultLanguage, TranslationKeys, languageNa
 interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
+    syncLanguageFromProfile: (lang: Language) => void;
     t: TranslationKeys;
     languageNames: typeof languageNames;
     isLoaded: boolean;
@@ -46,11 +47,24 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
+    // Sync language from user profile (after login) - also saves to localStorage
+    const syncLanguageFromProfile = useCallback((lang: Language) => {
+        if (['en', 'zh', 'ms'].includes(lang)) {
+            setLanguageState(lang);
+            localStorage.setItem(STORAGE_KEY, lang);
+
+            // Update document lang attribute for accessibility
+            if (typeof document !== 'undefined') {
+                document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang === 'ms' ? 'ms-MY' : 'en';
+            }
+        }
+    }, []);
+
     // Get current translations
     const t = translations[language];
 
     return (
-        <LanguageContext.Provider value={{ language, setLanguage, t, languageNames, isLoaded }}>
+        <LanguageContext.Provider value={{ language, setLanguage, syncLanguageFromProfile, t, languageNames, isLoaded }}>
             {children}
         </LanguageContext.Provider>
     );

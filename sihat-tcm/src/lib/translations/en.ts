@@ -800,7 +800,94 @@ export const en = {
 
     // Dashboard - Patient
     patientDashboard: {
+        // Header
         title: 'Patient Dashboard',
+        welcomeBack: 'Welcome back',
+        newDiagnosis: 'New Diagnosis',
+
+        // Navigation tabs
+        tabs: {
+            healthJourney: 'Health Journey',
+            mealPlanner: 'AI Meal Planner',
+            profile: 'Profile',
+            documents: 'Documents',
+            settings: 'Settings',
+        },
+
+        // Health Journey section
+        healthJourney: {
+            title: 'Your Health Journey',
+            subtitle: 'Track your wellness journey over time',
+            totalSessions: 'Total Sessions',
+            averageScore: 'Average Score',
+            progress: 'Progress',
+            points: 'points',
+            mostCommonPattern: 'Most Common Pattern',
+            times: 'times',
+            sessionRecorded: 'session recorded',
+            sessionsRecorded: 'sessions recorded',
+            startJourneyToday: 'Start your wellness journey today',
+            noSessionsYet: 'Your wellness journey starts here',
+            noSessionsDesc: 'Complete your first TCM diagnosis to track your health and wellness over time.',
+            startFirstDiagnosis: 'Start First Diagnosis',
+            restoreMockData: 'Restore Mock Data',
+            view: 'View',
+        },
+
+        // Profile section
+        profile: {
+            title: 'My Profile',
+            subtitle: 'Manage your personal information',
+            personalInfo: 'Personal Information',
+            yourProfileDetails: 'Your profile details',
+            name: 'Name',
+            age: 'Age',
+            gender: 'Gender',
+            height: 'Height',
+            weight: 'Weight',
+            medicalHistory: 'Medical History',
+            notSet: 'Not set',
+            saveChanges: 'Save Changes',
+            saving: 'Saving...',
+            male: 'Male',
+            female: 'Female',
+            other: 'Other',
+            fullName: 'Full Name',
+        },
+
+        // Documents section
+        documents: {
+            title: 'Medical Documents',
+            subtitle: 'Upload and manage your medical reports and documents',
+            yourDocuments: 'Your Documents',
+            filesUploaded: 'files uploaded',
+            upload: 'Upload',
+            noDocumentsYet: 'No documents uploaded yet',
+            deleteConfirm: 'Are you sure you want to delete this document?',
+        },
+
+        // Settings section
+        settings: {
+            title: 'Settings',
+            subtitle: 'Manage your preferences and account settings',
+            languagePreference: 'Language Preference',
+            chooseLanguage: 'Choose your preferred language for the app',
+            languageSaved: 'Your language preference is automatically saved',
+            accountInfo: 'Account Information',
+            accountDetails: 'Your account details',
+            email: 'Email',
+            accountType: 'Account Type',
+            memberSince: 'Member Since',
+            signOut: 'Sign Out',
+        },
+
+        // Meal Planner
+        mealPlanner: {
+            title: 'AI Meal Planner',
+            subtitle: 'Personalized 7-day meal plans based on your TCM constitution',
+        },
+
+        // Legacy keys for backwards compatibility
         welcome: 'Welcome',
         startNewDiagnosis: 'Start New Diagnosis',
         myInquiries: 'My Inquiries',

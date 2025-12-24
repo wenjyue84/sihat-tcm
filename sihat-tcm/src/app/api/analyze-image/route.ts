@@ -1,6 +1,7 @@
 import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { getImageAnalysisPrompt } from '@/lib/systemPrompts';
+import { ENHANCED_TONGUE_USER_PROMPT, ENHANCED_TONGUE_SYSTEM_PROMPT } from '@/lib/enhancedTonguePrompt';
 import { supabase } from '@/lib/supabase';
 
 export const maxDuration = 120;
@@ -67,10 +68,23 @@ export async function POST(req: Request) {
 
         // Get the appropriate prompt based on image type
         const imageType = type === 'tongue' ? 'tongue' : type === 'face' ? 'face' : 'other';
-        const { system: defaultSystemPrompt, user: userPrompt } = getImageAnalysisPrompt(imageType);
+        const { system: defaultSystemPrompt, user: defaultUserPrompt } = getImageAnalysisPrompt(imageType);
 
-        // Use custom prompt if set, otherwise use default from library
-        const systemPrompt = customPrompt || defaultSystemPrompt;
+        // For tongue analysis, use enhanced prompts (unless custom prompt is set)
+        // This ensures we get the analysis_tags format with confidence levels
+        let systemPrompt: string;
+        let userPrompt: string;
+
+        if (type === 'tongue' && !customPrompt) {
+            // Use enhanced prompts for detailed analysis_tags
+            systemPrompt = ENHANCED_TONGUE_SYSTEM_PROMPT;
+            userPrompt = ENHANCED_TONGUE_USER_PROMPT;
+            console.log('[analyze-image] Using ENHANCED tongue prompts for analysis_tags');
+        } else {
+            // Use custom prompt if set, otherwise use default from library
+            systemPrompt = customPrompt || defaultSystemPrompt;
+            userPrompt = defaultUserPrompt;
+        }
 
 
 
@@ -133,14 +147,23 @@ export async function POST(req: Request) {
 
                     const observation = data.observation || data.analysis || data.description || text;
 
+                    // Log analysis_tags for debugging
+                    console.log(`[analyze-image] analysis_tags found: ${data.analysis_tags?.length || 0}`,
+                        data.analysis_tags ? JSON.stringify(data.analysis_tags[0]?.title) : 'none');
+
                     if (isValidObservation(observation)) {
                         return new Response(JSON.stringify({
                             observation,
-                            potential_issues: data.potential_issues || data.issues || data.indications || [],
+                            potential_issues: data.potential_issues || data.issues || data.indications || data.pattern_suggestions || [],
                             modelUsed: i + 1,
                             status: MODEL_STATUS[modelId] || 'Analysis complete',
                             confidence: confidence,
-                            image_description: imageDescription
+                            image_description: imageDescription,
+                            // Enhanced tongue analysis fields
+                            analysis_tags: data.analysis_tags || [],
+                            tcm_indicators: data.tcm_indicators || [],
+                            pattern_suggestions: data.pattern_suggestions || [],
+                            notes: data.notes || ''
                         }), {
                             headers: { 'Content-Type': 'application/json' }
                         });

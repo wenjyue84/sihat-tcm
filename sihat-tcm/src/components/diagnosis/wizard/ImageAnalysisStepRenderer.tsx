@@ -4,6 +4,15 @@ import { ImageAnalysisLoader } from '../ImageAnalysisLoader'
 import { ObservationResult } from '../ObservationResult'
 import { CameraCapture } from '../CameraCapture'
 
+interface AnalysisTag {
+    title: string;
+    title_cn?: string;
+    category: string;
+    confidence: number;
+    description: string;
+    recommendations: string[];
+}
+
 interface AnalysisResult {
     observation?: string
     potential_issues?: string[]
@@ -11,12 +20,14 @@ interface AnalysisResult {
     message?: string
     confidence?: number
     image_description?: string
+    analysis_tags?: AnalysisTag[]
 }
 
 interface ImageData {
     image?: string
     observation?: string
     potential_issues?: string[]
+    analysis_tags?: AnalysisTag[]
 }
 
 interface CaptureResult {
@@ -103,6 +114,7 @@ export function ImageAnalysisStepRenderer({
                 message={analysisResult?.message}
                 confidence={analysisResult?.confidence}
                 imageDescription={analysisResult?.image_description}
+                analysisTags={analysisResult?.analysis_tags || existingData?.analysis_tags}
                 onRetake={onRetake}
                 onContinue={onContinue}
                 onBack={onBack}

@@ -588,8 +588,102 @@ export const zh: TranslationKeys = {
         pleaseWait: '请稍候，正在完成您的分析',
     },
     patientDashboard: {
-        title: '患者控制面板', welcome: '欢迎', startNewDiagnosis: '开始新诊断', myInquiries: '我的问诊记录',
-        viewHistory: '查看历史', noInquiries: '暂无诊断记录', noInquiriesDesc: '开始您的首次中医诊断。', recentDiagnosis: '最近诊断', viewReport: '查看报告',
+        // Header
+        title: '患者控制面板',
+        welcomeBack: '欢迎回来',
+        newDiagnosis: '新诊断',
+
+        // Navigation tabs
+        tabs: {
+            healthJourney: '健康历程',
+            mealPlanner: 'AI膳食规划',
+            profile: '个人资料',
+            documents: '文档',
+            settings: '设置',
+        },
+
+        // Health Journey section
+        healthJourney: {
+            title: '您的健康历程',
+            subtitle: '追踪您的健康之旅',
+            totalSessions: '诊断总数',
+            averageScore: '平均分数',
+            progress: '进展',
+            points: '分',
+            mostCommonPattern: '最常见证型',
+            times: '次',
+            sessionRecorded: '次诊断记录',
+            sessionsRecorded: '次诊断记录',
+            startJourneyToday: '今天开始您的健康之旅',
+            noSessionsYet: '您的健康旅程从这里开始',
+            noSessionsDesc: '完成您的首次中医诊断，追踪您的健康状况。',
+            startFirstDiagnosis: '开始首次诊断',
+            restoreMockData: '恢复测试数据',
+            view: '查看',
+        },
+
+        // Profile section
+        profile: {
+            title: '我的资料',
+            subtitle: '管理您的个人信息',
+            personalInfo: '个人信息',
+            yourProfileDetails: '您的资料详情',
+            name: '姓名',
+            age: '年龄',
+            gender: '性别',
+            height: '身高',
+            weight: '体重',
+            medicalHistory: '病史',
+            notSet: '未设置',
+            saveChanges: '保存更改',
+            saving: '保存中...',
+            male: '男',
+            female: '女',
+            other: '其他',
+            fullName: '全名',
+        },
+
+        // Documents section
+        documents: {
+            title: '医疗文档',
+            subtitle: '上传和管理您的医疗报告和文档',
+            yourDocuments: '您的文档',
+            filesUploaded: '个文件已上传',
+            upload: '上传',
+            noDocumentsYet: '暂无上传的文档',
+            deleteConfirm: '确定要删除此文档吗？',
+        },
+
+        // Settings section
+        settings: {
+            title: '设置',
+            subtitle: '管理您的偏好设置和账户设置',
+            languagePreference: '语言偏好',
+            chooseLanguage: '选择您喜欢的应用语言',
+            languageSaved: '您的语言偏好已自动保存',
+            accountInfo: '账户信息',
+            accountDetails: '您的账户详情',
+            email: '电子邮箱',
+            accountType: '账户类型',
+            memberSince: '注册时间',
+            signOut: '退出登录',
+        },
+
+        // Meal Planner
+        mealPlanner: {
+            title: 'AI膳食规划',
+            subtitle: '基于您的中医体质定制7天膳食计划',
+        },
+
+        // Legacy keys for backwards compatibility
+        welcome: '欢迎',
+        startNewDiagnosis: '开始新诊断',
+        myInquiries: '我的问诊记录',
+        viewHistory: '查看历史',
+        noInquiries: '暂无诊断记录',
+        noInquiriesDesc: '开始您的首次中医诊断。',
+        recentDiagnosis: '最近诊断',
+        viewReport: '查看报告',
     },
     doctorDashboard: {
         title: '医师控制面板', welcome: '欢迎，', patientHistory: '患者病历', searchPatients: '搜索患者',

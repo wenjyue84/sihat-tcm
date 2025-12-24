@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog"
 
 import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { ScientificResearchModal } from './ScientificResearchModal'
 
 interface CameraCaptureProps {
     onComplete: (data: any) => void;
@@ -47,72 +48,167 @@ export function CameraCapture({
     const displayTitle = title || t.camera.takePhoto
     const displayInstruction = instruction || t.camera.preparingCamera
 
-    // FIX: Memoize handlers to prevent re-renders and potential infinite loops
-    const stopCamera = useCallback(() => {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop())
-            setStream(null)
-        }
-    }, [stream])
+    // Use ref to track stream - avoids recreating callbacks on stream change
+    const streamRef = useRef<MediaStream | null>(null)
+    const [isLoading, setIsLoading] = useState(false)
+    const [videoPlaying, setVideoPlaying] = useState(false)
 
-    const startCamera = useCallback(async () => {
+    // Stable stop function using ref
+    const stopCamera = useCallback(() => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop())
+            streamRef.current = null
+            setStream(null)
+            setVideoPlaying(false) // Reset video playing state
+        }
+    }, []) // No dependencies - uses ref
+
+    // Stable start function
+    const startCamera = useCallback(async (targetFacingMode: 'user' | 'environment') => {
+        // Don't start if already loading or has stream
+        if (streamRef.current) {
+            return
+        }
+
         try {
+            setIsLoading(true)
             setError(null)
 
             // Check if mediaDevices API is available (requires HTTPS or localhost)
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                // Check if we're in a secure context
                 const isSecure = window.isSecureContext
                 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
 
                 if (!isSecure && !isLocalhost) {
-                    // Show a meaningful explanation to the user instead of a console error
                     setError("Browser security restricts camera access on non-secure (HTTP) connections. Please use the buttons below to upload or capture.")
                     setShowError(true)
                 } else {
                     setError(t.camera.cameraError)
                 }
+                setIsLoading(false)
                 return
             }
 
-            // Use selected facing mode
-            const mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: { ideal: facingMode },
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
+            // Progressive fallback: try preferred constraints first, then fallback to simpler ones
+            const constraints = [
+                { video: { facingMode: { ideal: targetFacingMode }, width: { ideal: 1280 }, height: { ideal: 720 } } },
+                { video: { facingMode: targetFacingMode, width: { ideal: 640 }, height: { ideal: 480 } } },
+                { video: true },
+            ]
+
+            let mediaStream: MediaStream | null = null
+            let lastError: unknown = null
+
+            for (const constraint of constraints) {
+                try {
+                    mediaStream = await navigator.mediaDevices.getUserMedia(constraint)
+                    break
+                } catch (err) {
+                    console.warn('Camera constraint failed, trying next:', constraint, err)
+                    lastError = err
                 }
-            })
-            setStream(mediaStream)
-            if (videoRef.current) {
-                videoRef.current.srcObject = mediaStream
+            }
+
+            if (mediaStream) {
+                streamRef.current = mediaStream
+                setStream(mediaStream)
+                if (videoRef.current) {
+                    videoRef.current.srcObject = mediaStream
+                    // Force play and trigger repaint
+                    videoRef.current.play().then(() => {
+                        // Force browser repaint by triggering a style recalculation
+                        requestAnimationFrame(() => {
+                            if (videoRef.current) {
+                                // Accessing offsetHeight forces a reflow/repaint
+                                void videoRef.current.offsetHeight
+                                setVideoPlaying(true)
+                            }
+                        })
+                    }).catch((e) => {
+                        console.warn('Auto-play failed, user may need to interact:', e)
+                        // Still set playing true as the stream is connected
+                        setVideoPlaying(true)
+                    })
+                }
+            } else {
+                console.error("All camera constraints failed:", lastError)
+                setError(t.camera.cameraError)
             }
         } catch (err) {
             console.error("Error accessing camera:", err)
             setError(t.camera.cameraError)
+        } finally {
+            setIsLoading(false)
         }
-    }, [facingMode, t])
+    }, [t]) // Only depends on translations
 
+    // STABILITY: Cleanup camera on page unload/navigation
     useEffect(() => {
-        // Check if mobile - if so, don't start camera stream, let user use native camera input
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-        if (!isMobile) {
-            startCamera()
+        const handleBeforeUnload = () => {
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop())
+            }
         }
-        return () => stopCamera()
-    }, [facingMode, startCamera, stopCamera])
+
+        window.addEventListener('beforeunload', handleBeforeUnload)
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload)
+            handleBeforeUnload()
+        }
+    }, [])
+
+    // STABILITY: Handle visibility change (tab switch) to prevent black screen
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (!document.hidden && streamRef.current && videoRef.current) {
+                if (!videoRef.current.srcObject) {
+                    videoRef.current.srcObject = streamRef.current
+                }
+                videoRef.current.play().catch((e) => {
+                    console.warn('Could not resume video playback:', e)
+                })
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }, [])
+
+    // Camera initialization effect - only runs on mount and facingMode change
+    useEffect(() => {
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+
+        if (!isMobile) {
+            // Stop existing stream before starting new one with different facing mode
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop())
+                streamRef.current = null
+                setStream(null)
+                setVideoPlaying(false) // Reset video playing state when switching cameras
+            }
+            startCamera(facingMode)
+        }
+
+        // Cleanup on unmount
+        return () => {
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop())
+                streamRef.current = null
+            }
+        }
+    }, [facingMode, startCamera])
 
     const captureImage = useCallback(() => {
         if (videoRef.current && canvasRef.current) {
             const video = videoRef.current
             const canvas = canvasRef.current
-            // Use actual video dimensions for better quality
             canvas.width = video.videoWidth || 640
             canvas.height = video.videoHeight || 480
             const context = canvas.getContext('2d')
             if (context) {
                 context.drawImage(video, 0, 0, canvas.width, canvas.height)
-                const imageData = canvas.toDataURL('image/jpeg', 0.8)
+                const imageData = canvas.toDataURL('image/jpeg', 0.9)
                 stopCamera()
                 onCompleteRef.current({ image: imageData })
             }
@@ -216,10 +312,16 @@ export function CameraCapture({
     return (
         <Card className="p-4 md:p-6 space-y-4 pb-36 md:pb-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-                <div className="text-center md:text-left">
+                <div className="text-center md:text-left flex-1">
                     <h2 className="text-xl font-semibold text-emerald-800">{displayTitle}</h2>
                     <p className="text-stone-600 text-sm mt-1">{displayInstruction}</p>
                 </div>
+                {/* Scientific Research Button - Only show for tongue analysis */}
+                {mode === 'tongue' && (
+                    <div className="self-center md:self-auto">
+                        <ScientificResearchModal />
+                    </div>
+                )}
             </div>
 
             {/* PC: Side-by-side layout with guide and camera */}
@@ -236,7 +338,17 @@ export function CameraCapture({
                 <div className="flex-1 relative h-96 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100">
                     {!error ? (
                         <>
-                            <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1]" />
+                            <video
+                                ref={videoRef}
+                                autoPlay
+                                playsInline
+                                muted
+                                className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1] z-[1]"
+                                onPlaying={() => setVideoPlaying(true)}
+                                onLoadedData={() => setVideoPlaying(true)}
+                                onCanPlay={() => setVideoPlaying(true)}
+                                onPause={() => setVideoPlaying(false)}
+                            />
                             <Button
                                 type="button"
                                 variant="secondary"
@@ -247,11 +359,14 @@ export function CameraCapture({
                                 <SwitchCamera className="w-5 h-5" />
                             </Button>
                             <canvas ref={canvasRef} className="hidden" />
-                            {!stream && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                            {/* Only show loading overlay when camera is initializing - COMPLETELY REMOVE when playing */}
+                            {!videoPlaying && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-[2]">
                                     <div className="text-center text-gray-400">
-                                        <Camera className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                                        <p className="text-sm">Camera loading...</p>
+                                        <div className="w-12 h-12 mx-auto mb-3 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin" />
+                                        <p className="text-sm font-medium text-emerald-600">
+                                            {isLoading ? 'Starting camera...' : 'Initializing...'}
+                                        </p>
                                     </div>
                                 </div>
                             )}
@@ -274,7 +389,17 @@ export function CameraCapture({
             <div className="md:hidden relative h-72 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100">
                 {!error ? (
                     <>
-                        <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1]" />
+                        <video
+                            ref={videoRef}
+                            autoPlay
+                            playsInline
+                            muted
+                            className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1] z-[1]"
+                            onPlaying={() => setVideoPlaying(true)}
+                            onLoadedData={() => setVideoPlaying(true)}
+                            onCanPlay={() => setVideoPlaying(true)}
+                            onPause={() => setVideoPlaying(false)}
+                        />
                         <Button
                             type="button"
                             variant="secondary"
@@ -285,9 +410,17 @@ export function CameraCapture({
                             <SwitchCamera className="w-5 h-5" />
                         </Button>
                         <canvas ref={canvasRef} className="hidden" />
-                        {!stream && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-                                {getPlaceholder()}
+                        {/* Only show overlay when video not yet playing - COMPLETELY REMOVE when playing */}
+                        {!videoPlaying && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-[2]">
+                                {isLoading ? (
+                                    <div className="text-center">
+                                        <div className="w-12 h-12 mx-auto mb-3 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin" />
+                                        <p className="text-sm font-medium text-emerald-600">Starting camera...</p>
+                                    </div>
+                                ) : (
+                                    getPlaceholder()
+                                )}
                             </div>
                         )}
                     </>

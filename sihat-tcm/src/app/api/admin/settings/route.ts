@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminSettings, DEFAULT_SETTINGS } from '@/lib/settings'
+import { getAdminSettings, DEFAULT_SETTINGS, AdminSettings } from '@/lib/settings'
 import { saveSettingsWithFallback } from '@/lib/settingsStorage'
 import { createClient } from '@supabase/supabase-js'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -23,7 +23,7 @@ async function getAuthenticatedUser(request: NextRequest) {
 
         // Fallback: try to get from cookies
         const cookies = request.cookies.getAll()
-        const authCookie = cookies.find(c => 
+        const authCookie = cookies.find(c =>
             c.name.includes('auth-token') && c.name.startsWith('sb-')
         )
 

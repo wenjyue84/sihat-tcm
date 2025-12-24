@@ -15,6 +15,7 @@ export interface Profile {
     height?: number
     weight?: number
     medical_history?: string
+    preferred_language?: 'en' | 'zh' | 'ms'
 }
 
 interface AuthContextType {
@@ -83,6 +84,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 console.error('Error fetching profile:', JSON.stringify(error, null, 2))
             } else {
                 setProfile(data)
+
+                // If user doesn't have a preferred language saved, sync from localStorage
+                // This captures language selected during onboarding before login
+                if (!data.preferred_language && typeof window !== 'undefined') {
+                    const localLanguage = localStorage.getItem('sihat-tcm-language') as 'en' | 'zh' | 'ms' | null
+                    if (localLanguage && ['en', 'zh', 'ms'].includes(localLanguage)) {
+                        // Save to database in background (non-blocking)
+                        supabase
+                            .from('profiles')
+                            .update({ preferred_language: localLanguage })
+                            .eq('id', userId)
+                            .then(({ error: updateError }) => {
+                                if (updateError) {
+                                    console.warn('Failed to sync language preference:', updateError)
+                                } else {
+                                    // Update local profile state
+                                    setProfile(prev => prev ? { ...prev, preferred_language: localLanguage } : prev)
+                                }
+                            })
+                    }
+                }
             }
         } catch (error) {
             console.error('Error fetching profile:', error)

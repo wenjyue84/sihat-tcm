@@ -16,7 +16,19 @@ import {
     Download,
     Eye,
     Trash2,
-    UtensilsCrossed
+    UtensilsCrossed,
+    Settings,
+    Globe,
+    Check,
+    Grid3X3,
+    List,
+    LayoutGrid,
+    ArrowUp,
+    ArrowDown,
+    Calendar,
+    TrendingUp,
+    TrendingDown,
+    Minus
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -29,6 +41,8 @@ import { supabase } from '@/lib/supabase/client'
 import { TrendWidget } from './TrendWidget'
 import { HistoryCard } from './HistoryCard'
 import { MealPlanWizard } from '../meal-planner/MealPlanWizard'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguageSync } from '@/hooks/useLanguageSync'
 
 interface Report {
     name: string
@@ -38,13 +52,26 @@ interface Report {
 }
 
 export function UnifiedDashboard() {
-    const { user, profile, signOut } = useAuth()
+    const { user, profile, signOut, refreshProfile } = useAuth()
     const router = useRouter()
+    const { language, setLanguage, languageNames } = useLanguage()
+
+    // Sync language from profile on login
+    useLanguageSync()
 
     // Health Journey State
     const [sessions, setSessions] = useState<DiagnosisSession[]>([])
     const [trendData, setTrendData] = useState<any>(null)
     const [loadingSessions, setLoadingSessions] = useState(true)
+
+    // View & Sort State
+    type ViewType = 'table' | 'list' | 'gallery'
+    type SortField = 'date' | 'score' | 'diagnosis'
+    type SortDirection = 'asc' | 'desc'
+
+    const [viewType, setViewType] = useState<ViewType>('table')
+    const [sortField, setSortField] = useState<SortField>('date')
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
 
     // Profile State
     const [profileData, setProfileData] = useState({
@@ -65,7 +92,10 @@ export function UnifiedDashboard() {
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Active Section (for mobile)
-    const [activeSection, setActiveSection] = useState<'journey' | 'profile' | 'documents' | 'meals'>('journey')
+    const [activeSection, setActiveSection] = useState<'journey' | 'profile' | 'documents' | 'meals' | 'settings'>('journey')
+
+    // Settings State
+    const [savingLanguage, setSavingLanguage] = useState(false)
 
     // Load health journey data
     useEffect(() => {
@@ -299,7 +329,8 @@ export function UnifiedDashboard() {
                             { id: 'journey', label: 'Health Journey', icon: FileHeart },
                             { id: 'meals', label: 'AI Meal Planner', icon: UtensilsCrossed },
                             { id: 'profile', label: 'Profile', icon: User },
-                            { id: 'documents', label: 'Documents', icon: FileText }
+                            { id: 'documents', label: 'Documents', icon: FileText },
+                            { id: 'settings', label: 'Settings', icon: Settings }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -337,7 +368,7 @@ export function UnifiedDashboard() {
                         transition={{ duration: 0.4, delay: 0.1 }}
                         className="mt-8"
                     >
-                        <div className="flex items-center justify-between mb-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                             <div>
                                 <h2 className="text-2xl font-bold text-slate-800">Your Health Journey</h2>
                                 <p className="text-sm text-slate-600 mt-1">
@@ -346,6 +377,61 @@ export function UnifiedDashboard() {
                                         : 'Start your wellness journey today'}
                                 </p>
                             </div>
+
+                            {/* View Controls */}
+                            {sessions.length > 0 && (
+                                <div className="flex items-center gap-3">
+                                    {/* View Type Switcher */}
+                                    <div className="flex items-center bg-white rounded-lg border border-slate-200 p-1 shadow-sm">
+                                        {[
+                                            { id: 'table' as ViewType, icon: Grid3X3, label: 'Table' },
+                                            { id: 'list' as ViewType, icon: List, label: 'List' },
+                                            { id: 'gallery' as ViewType, icon: LayoutGrid, label: 'Gallery' },
+                                        ].map(view => (
+                                            <button
+                                                key={view.id}
+                                                onClick={() => setViewType(view.id)}
+                                                className={`p-2 rounded-md transition-all duration-200 ${viewType === view.id
+                                                    ? 'bg-emerald-100 text-emerald-700 shadow-sm'
+                                                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                                                    }`}
+                                                title={view.label}
+                                            >
+                                                <view.icon className="w-4 h-4" />
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* Sort Controls */}
+                                    <div className="flex items-center gap-2">
+                                        <Select
+                                            value={sortField}
+                                            onValueChange={(value: SortField) => setSortField(value)}
+                                        >
+                                            <SelectTrigger className="w-[130px] bg-white border-slate-200 shadow-sm h-9">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="date">Date</SelectItem>
+                                                <SelectItem value="score">Score</SelectItem>
+                                                <SelectItem value="diagnosis">Diagnosis</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+
+                                        <button
+                                            onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
+                                            className="p-2 bg-white rounded-lg border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors"
+                                            title={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
+                                        >
+                                            {sortDirection === 'asc' ? (
+                                                <ArrowUp className="w-4 h-4 text-slate-600" />
+                                            ) : (
+                                                <ArrowDown className="w-4 h-4 text-slate-600" />
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Empty State */}
@@ -390,19 +476,227 @@ export function UnifiedDashboard() {
                             </Card>
                         )}
 
-                        {/* History Grid */}
-                        {sessions.length > 0 && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {sessions.map((session, index) => (
-                                    <HistoryCard
-                                        key={session.id}
-                                        session={session}
-                                        onClick={() => router.push(`/patient/history/${session.id}`)}
-                                        index={index}
-                                    />
-                                ))}
-                            </div>
-                        )}
+                        {/* Sorted Sessions */}
+                        {sessions.length > 0 && (() => {
+                            // Sort sessions
+                            const sortedSessions = [...sessions].sort((a, b) => {
+                                let comparison = 0
+
+                                switch (sortField) {
+                                    case 'date':
+                                        comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                                        break
+                                    case 'score':
+                                        comparison = (a.overall_score || 0) - (b.overall_score || 0)
+                                        break
+                                    case 'diagnosis':
+                                        comparison = (a.primary_diagnosis || '').localeCompare(b.primary_diagnosis || '')
+                                        break
+                                }
+
+                                return sortDirection === 'asc' ? comparison : -comparison
+                            })
+
+                            // Helper functions for table/list views
+                            const formatDate = (dateString: string): string => {
+                                const date = new Date(dateString)
+                                return new Intl.DateTimeFormat('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                }).format(date)
+                            }
+
+                            const extractDiagnosisTitle = (value: string | undefined | null): string => {
+                                if (!value) return 'TCM Health Assessment'
+                                if (value.startsWith('{') && value.endsWith('}')) {
+                                    try {
+                                        const parsed = JSON.parse(value)
+                                        return parsed.primary_pattern || parsed.pattern || parsed.diagnosis || 'TCM Health Assessment'
+                                    } catch {
+                                        const match = value.match(/"primary_pattern"\s*:\s*"([^"]+)"/)
+                                        if (match) return match[1]
+                                    }
+                                }
+                                return value.length > 60 ? value.substring(0, 57) + '...' : value
+                            }
+
+                            const getScoreBadge = (score?: number) => {
+                                if (score === undefined || score === null) return null
+                                if (score >= 75) return { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Good', Icon: TrendingUp }
+                                if (score >= 50) return { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Fair', Icon: Minus }
+                                return { bg: 'bg-red-100', text: 'text-red-700', label: 'Needs Attention', Icon: TrendingDown }
+                            }
+
+                            return (
+                                <>
+                                    {/* TABLE VIEW */}
+                                    {viewType === 'table' && (
+                                        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full">
+                                                    <thead className="bg-slate-50 border-b border-slate-200">
+                                                        <tr>
+                                                            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Diagnosis</th>
+                                                            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Date</th>
+                                                            <th className="text-center py-3 px-4 text-sm font-semibold text-slate-700">Score</th>
+                                                            <th className="text-center py-3 px-4 text-sm font-semibold text-slate-700">Status</th>
+                                                            <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-slate-100">
+                                                        {sortedSessions.map((session) => {
+                                                            const badge = getScoreBadge(session.overall_score)
+                                                            return (
+                                                                <tr
+                                                                    key={session.id}
+                                                                    className="hover:bg-slate-50/50 transition-colors cursor-pointer group"
+                                                                    onClick={() => router.push(`/patient/history/${session.id}`)}
+                                                                >
+                                                                    <td className="py-3 px-4">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <span className="text-2xl">🏥</span>
+                                                                            <div>
+                                                                                <p className="font-medium text-slate-800 group-hover:text-emerald-700 transition-colors">
+                                                                                    {extractDiagnosisTitle(session.primary_diagnosis)}
+                                                                                </p>
+                                                                                {session.constitution && (
+                                                                                    <p className="text-xs text-slate-500 truncate max-w-[200px]">
+                                                                                        {session.constitution}
+                                                                                    </p>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td className="py-3 px-4">
+                                                                        <div className="flex items-center gap-2 text-sm text-slate-600">
+                                                                            <Calendar className="w-4 h-4" />
+                                                                            {formatDate(session.created_at)}
+                                                                        </div>
+                                                                    </td>
+                                                                    <td className="py-3 px-4 text-center">
+                                                                        {session.overall_score !== undefined && (
+                                                                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-bold ${badge?.bg} ${badge?.text}`}>
+                                                                                {session.overall_score}
+                                                                            </span>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="py-3 px-4 text-center">
+                                                                        {badge && (
+                                                                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+                                                                                <badge.Icon className="w-3 h-3" />
+                                                                                {badge.label}
+                                                                            </span>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="py-3 px-4 text-right">
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="ghost"
+                                                                            className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation()
+                                                                                router.push(`/patient/history/${session.id}`)
+                                                                            }}
+                                                                        >
+                                                                            <Eye className="w-4 h-4 mr-1" />
+                                                                            View
+                                                                        </Button>
+                                                                    </td>
+                                                                </tr>
+                                                            )
+                                                        })}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* LIST VIEW */}
+                                    {viewType === 'list' && (
+                                        <div className="space-y-3">
+                                            {sortedSessions.map((session, index) => {
+                                                const badge = getScoreBadge(session.overall_score)
+                                                return (
+                                                    <motion.div
+                                                        key={session.id}
+                                                        initial={{ opacity: 0, x: -20 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ duration: 0.3, delay: index * 0.03 }}
+                                                    >
+                                                        <Card
+                                                            className="group p-4 bg-white hover:shadow-lg transition-all duration-300 cursor-pointer border-slate-200/60"
+                                                            onClick={() => router.push(`/patient/history/${session.id}`)}
+                                                        >
+                                                            <div className="flex items-center justify-between gap-4">
+                                                                <div className="flex items-center gap-4 flex-1 min-w-0">
+                                                                    <span className="text-3xl">🏥</span>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <h3 className="font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors truncate">
+                                                                            {extractDiagnosisTitle(session.primary_diagnosis)}
+                                                                        </h3>
+                                                                        <div className="flex items-center gap-3 mt-1">
+                                                                            <span className="text-sm text-slate-500 flex items-center gap-1">
+                                                                                <Calendar className="w-3.5 h-3.5" />
+                                                                                {formatDate(session.created_at)}
+                                                                            </span>
+                                                                            {session.constitution && (
+                                                                                <span className="text-sm text-slate-400 truncate max-w-[150px]">
+                                                                                    • {session.constitution}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-3 shrink-0">
+                                                                    {badge && (
+                                                                        <div className="flex flex-col items-center">
+                                                                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${badge.bg} ${badge.text}`}>
+                                                                                <badge.Icon className="w-3.5 h-3.5" />
+                                                                                {session.overall_score}
+                                                                            </span>
+                                                                            <span className={`text-[10px] mt-0.5 font-medium ${badge.text}`}>
+                                                                                {badge.label}
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation()
+                                                                            router.push(`/patient/history/${session.id}`)
+                                                                        }}
+                                                                    >
+                                                                        <Eye className="w-4 h-4" />
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </Card>
+                                                    </motion.div>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
+
+                                    {/* GALLERY VIEW */}
+                                    {viewType === 'gallery' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {sortedSessions.map((session, index) => (
+                                                <HistoryCard
+                                                    key={session.id}
+                                                    session={session}
+                                                    onClick={() => router.push(`/patient/history/${session.id}`)}
+                                                    index={index}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            )
+                        })()}
                     </motion.div>
                 </div>
 
@@ -651,6 +945,144 @@ export function UnifiedDashboard() {
                                         </div>
                                     ))
                                 )}
+                            </div>
+                        </Card>
+                    </motion.div>
+                </div>
+
+                {/* Settings Section */}
+                <div className={`${activeSection !== 'settings' ? 'hidden' : ''} mb-8`}>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: 0.3 }}
+                    >
+                        <div className="mb-6">
+                            <h2 className="text-2xl font-bold text-slate-800 mb-2">Settings</h2>
+                            <p className="text-sm text-slate-600">
+                                Manage your preferences and account settings
+                            </p>
+                        </div>
+
+                        {/* Language Settings */}
+                        <Card className="p-6 bg-white/80 backdrop-blur-sm max-w-2xl mb-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <Globe className="w-6 h-6 text-blue-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-800">Language Preference</h3>
+                                    <p className="text-sm text-slate-600">Choose your preferred language for the app</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                {[
+                                    { code: 'en' as const, flag: '🇬🇧', name: 'English' },
+                                    { code: 'zh' as const, flag: '🇨🇳', name: '中文 (Chinese)' },
+                                    { code: 'ms' as const, flag: '🇲🇾', name: 'Bahasa Malaysia' }
+                                ].map((lang) => (
+                                    <button
+                                        key={lang.code}
+                                        onClick={async () => {
+                                            if (language === lang.code) return
+                                            setSavingLanguage(true)
+                                            setLanguage(lang.code)
+
+                                            // Save to database if logged in
+                                            if (user) {
+                                                try {
+                                                    const { error } = await supabase
+                                                        .from('profiles')
+                                                        .update({ preferred_language: lang.code })
+                                                        .eq('id', user.id)
+
+                                                    if (error) {
+                                                        console.error('Failed to save language preference:', error)
+                                                    } else {
+                                                        // Refresh profile to sync state
+                                                        refreshProfile()
+                                                    }
+                                                } catch (err) {
+                                                    console.error('Error saving language:', err)
+                                                }
+                                            }
+                                            setSavingLanguage(false)
+                                        }}
+                                        disabled={savingLanguage}
+                                        className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${language === lang.code
+                                            ? 'border-emerald-500 bg-emerald-50'
+                                            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <span className="text-3xl">{lang.flag}</span>
+                                            <div className="text-left">
+                                                <p className={`font-medium ${language === lang.code ? 'text-emerald-700' : 'text-slate-800'}`}>
+                                                    {lang.name}
+                                                </p>
+                                                <p className="text-sm text-slate-500">
+                                                    {languageNames[lang.code].english}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {language === lang.code && (
+                                            <div className="flex items-center gap-2">
+                                                {savingLanguage ? (
+                                                    <Loader2 className="w-5 h-5 text-emerald-600 animate-spin" />
+                                                ) : (
+                                                    <Check className="w-5 h-5 text-emerald-600" />
+                                                )}
+                                            </div>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <p className="text-xs text-slate-500 mt-4 flex items-center gap-1">
+                                <span className="text-emerald-500">✓</span>
+                                Your language preference is automatically saved
+                            </p>
+                        </Card>
+
+                        {/* Account Information */}
+                        <Card className="p-6 bg-white/80 backdrop-blur-sm max-w-2xl">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
+                                    <User className="w-6 h-6 text-slate-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-slate-800">Account Information</h3>
+                                    <p className="text-sm text-slate-600">Your account details</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div className="flex justify-between py-2 border-b border-slate-100">
+                                    <span className="text-sm text-slate-600">Email:</span>
+                                    <span className="text-sm font-medium text-slate-800">{user?.email || 'Not set'}</span>
+                                </div>
+                                <div className="flex justify-between py-2 border-b border-slate-100">
+                                    <span className="text-sm text-slate-600">Account Type:</span>
+                                    <span className="text-sm font-medium text-slate-800 capitalize">{profile?.role || 'Patient'}</span>
+                                </div>
+                                <div className="flex justify-between py-2">
+                                    <span className="text-sm text-slate-600">Member Since:</span>
+                                    <span className="text-sm font-medium text-slate-800">
+                                        {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="mt-6 pt-4 border-t border-slate-100">
+                                <Button
+                                    onClick={handleLogout}
+                                    variant="outline"
+                                    className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                                >
+                                    <LogOut className="w-4 h-4 mr-2" />
+                                    Sign Out
+                                </Button>
                             </div>
                         </Card>
                     </motion.div>

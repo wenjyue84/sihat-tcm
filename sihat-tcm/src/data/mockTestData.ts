@@ -147,11 +147,46 @@ export function generateMockTestData() {
             files: []
         },
 
-        // Tongue Analysis
+        // Tongue Analysis (Enhanced with analysis_tags - myzencheck.net style)
         wang_tongue: {
             image: MOCK_TONGUE_IMAGE,
             observation: "Slightly pale tongue body with thin white coating. Tongue appears slightly swollen with visible tooth marks on the edges. The coating is evenly distributed but thin, suggesting mild Qi deficiency.",
-            potential_issues: ["Qi Deficiency", "Mild Spleen Weakness", "Blood stagnation tendency"]
+            potential_issues: ["Qi Deficiency", "Mild Spleen Weakness", "Blood stagnation tendency"],
+            analysis_tags: [
+                {
+                    title: "Swollen Tongue",
+                    title_cn: "胖大舌",
+                    category: "Qi Deficiency · Spleen Support",
+                    confidence: 94.6,
+                    description: "Swelling, especially with scalloped edges, signals spleen qi weakness and damp accumulation.",
+                    recommendations: [
+                        "Limit raw or cold foods and favour lightly cooked meals that are easy to digest.",
+                        "Consider qi-tonifying herbs such as astragalus under practitioner guidance."
+                    ]
+                },
+                {
+                    title: "Teeth Marks",
+                    title_cn: "齿痕舌",
+                    category: "Spleen Qi Deficiency · Strengthening",
+                    confidence: 91.3,
+                    description: "Teeth marks on the tongue edges indicate spleen qi deficiency with fluid metabolism issues.",
+                    recommendations: [
+                        "Eat regular, warm meals at consistent times to support spleen function.",
+                        "Avoid overthinking and worry which further depletes spleen qi."
+                    ]
+                },
+                {
+                    title: "Pale Tongue",
+                    title_cn: "淡白舌",
+                    category: "Blood Deficiency · Nourishing",
+                    confidence: 87.2,
+                    description: "A pale tongue indicates insufficient blood or qi, often seen with fatigue and cold extremities.",
+                    recommendations: [
+                        "Include iron-rich foods like spinach, red dates, and goji berries in your diet.",
+                        "Avoid excessive physical exertion and ensure adequate rest."
+                    ]
+                }
+            ]
         },
 
         // Face Analysis

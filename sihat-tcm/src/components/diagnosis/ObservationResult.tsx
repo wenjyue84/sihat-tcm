@@ -6,6 +6,7 @@ import { Check, RotateCcw, AlertCircle, AlertTriangle, Pencil, Save, X } from 'l
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
 import { Textarea } from '@/components/ui/textarea'
+import { AnalysisTagsCompact } from './AnalysisTagsDisplay'
 import {
     Dialog,
     DialogContent,
@@ -17,17 +18,27 @@ import {
 import { useState, useEffect } from 'react'
 import { Label } from '@/components/ui/label'
 
+interface AnalysisTag {
+    title: string;
+    title_cn?: string;
+    category: string;
+    confidence: number;
+    description: string;
+    recommendations: string[];
+}
+
 interface ObservationResultProps {
     image: string;
     observation: string;
     potentialIssues: string[];
     onRetake: () => void;
-    onContinue: (data?: { observation: string, potentialIssues: string[] }) => void;
+    onContinue: (data?: { observation: string, potentialIssues: string[], analysisTags?: AnalysisTag[] }) => void;
     type: 'tongue' | 'face' | 'part';
     status?: string; // 'invalid_image' when image doesn't match expected content
     message?: string; // Message explaining what was detected
     confidence?: number; // 0-100 confidence score
     imageDescription?: string; // What the AI saw in the image
+    analysisTags?: AnalysisTag[]; // Enhanced tongue analysis tags
 }
 
 export function ObservationResult({
@@ -41,6 +52,7 @@ export function ObservationResult({
     message,
     confidence,
     imageDescription,
+    analysisTags,
     onBack
 }: ObservationResultProps & { onBack?: () => void }) {
     const { t } = useLanguage()
@@ -59,6 +71,11 @@ export function ObservationResult({
         setEditedObservation(observation || "")
         setEditedIssues(potentialIssues ? potentialIssues.join('\n') : "")
     }, [observation, potentialIssues])
+
+    // Debug: Log analysisTags
+    useEffect(() => {
+        console.log('[ObservationResult] analysisTags received:', analysisTags?.length || 0, analysisTags);
+    }, [analysisTags])
 
     // Hide global navigation
     useEffect(() => {
@@ -261,6 +278,17 @@ export function ObservationResult({
                                     )
                                 )}
                             </div>
+
+                            {/* Enhanced Analysis Tags for Tongue (myzencheck.net style) */}
+                            {type === 'tongue' && analysisTags && analysisTags.length > 0 && !isEditing && (
+                                <div className="mt-4">
+                                    <h3 className="font-medium text-emerald-900 mb-3 flex items-center">
+                                        <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse" />
+                                        Detailed Analysis Tags
+                                    </h3>
+                                    <AnalysisTagsCompact tags={analysisTags} />
+                                </div>
+                            )}
                         </>
                     )}
                 </div>
