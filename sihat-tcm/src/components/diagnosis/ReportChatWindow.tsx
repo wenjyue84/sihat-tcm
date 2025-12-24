@@ -25,66 +25,16 @@ interface ReportChatWindowProps {
     onMessagesChange?: (messages: Message[]) => void;
 }
 
-const translations = {
-    en: {
-        title: 'Ask About Your Report',
-        subtitle: 'I can help explain your TCM diagnosis',
-        placeholder: 'Ask a question about your report...',
-        send: 'Send',
-        thinking: 'Thinking...',
-        suggestions: [
-            'What does my diagnosis mean?',
-            'Why should I avoid these foods?',
-            'How long until I feel better?',
-            'Explain the acupressure points',
-        ]
-    },
-    zh: {
-        title: '询问您的报告',
-        subtitle: '我可以帮助解释您的中医诊断',
-        placeholder: '请输入您关于报告的问题...',
-        send: '发送',
-        thinking: '思考中...',
-        suggestions: [
-            '我的诊断是什么意思？',
-            '为什么要避免这些食物？',
-            '多久才能感觉好转？',
-            '解释一下穴位按摩',
-        ]
-    },
-    ms: {
-        title: 'Tanya Tentang Laporan Anda',
-        subtitle: 'Saya boleh bantu jelaskan diagnosis TCM anda',
-        placeholder: 'Tanya soalan tentang laporan anda...',
-        send: 'Hantar',
-        thinking: 'Sedang berfikir...',
-        suggestions: [
-            'Apakah maksud diagnosis saya?',
-            'Mengapa saya perlu elak makanan ini?',
-            'Berapa lama untuk pulih?',
-            'Terangkan titik akupresur',
-        ]
-    }
-}
-
 export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, initialMessage, onMessageSent, isExpanded = false, onToggleExpand, messages: controlledMessages, onMessagesChange }: ReportChatWindowProps) {
-    const { language } = useLanguage()
+    const { t: globalT, language } = useLanguage()
     const { getModel, getDoctorInfo } = useDoctorLevel()
     const doctorInfo = getDoctorInfo()
-    const t = translations[language as keyof typeof translations] || translations.en
+
+    // Use the global translations for report chat
+    const t = globalT.reportChat
 
     // ============================================================================
     // CONTROLLED/UNCONTROLLED STATE PATTERN FOR MESSAGES
-    // ============================================================================
-    // This component supports both controlled and uncontrolled modes:
-    // - Controlled: Parent passes `messages` and `onMessagesChange` props
-    // - Uncontrolled: Component manages its own `internalMessages` state
-    //
-    // IMPORTANT: When using controlled mode with functional updates like
-    // `setMessages(prev => [...prev, newMessage])`, we must use a ref to track
-    // the latest messages value. This prevents the "stale closure" problem where
-    // multiple rapid state updates (e.g., adding user message then assistant message)
-    // would use an outdated `messages` value from the closure.
     // ============================================================================
 
     const [internalMessages, setInternalMessages] = useState<Message[]>([])
@@ -93,8 +43,6 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, ini
     const messages = controlledMessages || internalMessages
 
     // CRITICAL: Use a ref to always have the latest messages value
-    // This fixes the stale closure issue when using functional state updates
-    // DO NOT REMOVE THIS REF - it ensures sequential state updates work correctly
     const messagesRef = useRef(messages)
     useEffect(() => {
         messagesRef.current = messages
@@ -102,19 +50,14 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, ini
 
     // Custom setMessages that handles both controlled and uncontrolled modes
     const setMessages = (action: React.SetStateAction<Message[]>) => {
-        // IMPORTANT: Use messagesRef.current instead of `messages` to avoid stale closure
         const currentMessages = messagesRef.current
         const newMessages = typeof action === 'function' ? action(currentMessages) : action
 
-        // Update ref immediately so subsequent calls in the same render cycle 
-        // see the latest value (e.g., when adding user message then assistant message)
         messagesRef.current = newMessages
 
         if (onMessagesChange) {
-            // Controlled mode: notify parent of state change
             onMessagesChange(newMessages)
         } else {
-            // Uncontrolled mode: update internal state
             setInternalMessages(newMessages)
         }
     }
@@ -146,7 +89,6 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, ini
                 onMessageSent()
             }
         }
-        // Reset the ref when chat is closed so it can trigger again if reopened with a new message
         if (!isOpen) {
             hasSentInitialMessage.current = false
         }
@@ -161,7 +103,6 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, ini
             content: content.trim()
         }
 
-        // User message added
         setMessages(prev => [...prev, userMessage])
         setInput('')
         setIsLoading(true)
@@ -172,7 +113,7 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, ini
                 reportData,
                 patientInfo,
                 language,
-                model: doctorInfo?.model || 'gemini-2.0-flash' // Fallback if doctorInfo.model is undefined
+                model: doctorInfo?.model || 'gemini-2.0-flash'
             }
 
             const response = await fetch('/api/report-chat', {
@@ -181,15 +122,12 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, ini
                 body: JSON.stringify(requestBody)
             })
 
-            // Response received
-
             if (!response.ok) {
                 const errorText = await response.text()
                 console.error('[ReportChatWindow] Response not OK:', errorText)
                 throw new Error(`Failed to get response: ${response.status} - ${errorText}`)
             }
 
-            // Starting stream
             const reader = response.body?.getReader()
             const decoder = new TextDecoder()
             let assistantContent = ''
@@ -273,14 +211,14 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, ini
                                     <Sparkles className="w-8 h-8 text-emerald-600" />
                                 </div>
                                 <p className="text-stone-600 text-sm">
-                                    Ask me anything about your TCM diagnosis report!
+                                    {t.emptyState.text}
                                 </p>
                             </div>
 
                             {/* Suggestion Chips */}
                             <div className="space-y-2">
                                 <p className="text-xs text-stone-500 uppercase tracking-wider font-medium">
-                                    Quick questions
+                                    {t.emptyState.quickQuestions}
                                 </p>
                                 <div className="flex flex-wrap gap-2">
                                     {t.suggestions.map((suggestion, idx) => (
@@ -426,14 +364,14 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, ini
                                             <Sparkles className="w-8 h-8 text-emerald-600" />
                                         </div>
                                         <p className="text-stone-600 text-sm">
-                                            Ask me anything about your TCM diagnosis report!
+                                            {t.emptyState.text}
                                         </p>
                                     </div>
 
                                     {/* Suggestion Chips */}
                                     <div className="space-y-2">
                                         <p className="text-xs text-stone-500 uppercase tracking-wider font-medium">
-                                            Quick questions
+                                            {t.emptyState.quickQuestions}
                                         </p>
                                         <div className="flex flex-wrap gap-2">
                                             {t.suggestions.map((suggestion, idx) => (
@@ -530,6 +468,7 @@ export function ReportChatWindow({ reportData, patientInfo, isOpen, onClose, ini
 
 // Floating Chat Button Component
 export function ReportChatButton({ onClick }: { onClick: () => void }) {
+    const { t } = useLanguage()
     return (
         <motion.button
             onClick={onClick}
@@ -539,7 +478,7 @@ export function ReportChatButton({ onClick }: { onClick: () => void }) {
         >
             <MessageCircle className="w-6 h-6 text-white" />
             <span className="absolute right-full mr-3 px-3 py-1.5 bg-stone-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Ask about your report
+                {t.reportChat.floatingButton}
             </span>
         </motion.button>
     )

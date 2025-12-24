@@ -400,6 +400,8 @@ export const zh: TranslationKeys = {
         bloodPressure: '血压',
         bloodOxygen: '血氧',
         bodyTemperature: '体温',
+        hrv: '心率变异性',
+        stressLevel: '压力指数',
         // 中医脉象
         tcmPulseQualities: '中医脉象',
         tcmPractitionerRequired: '需专业中医师诊断',
@@ -605,20 +607,24 @@ export const zh: TranslationKeys = {
         // Health Journey section
         healthJourney: {
             title: '您的健康历程',
+            vitalityTitle: '您的健康活力',
             subtitle: '追踪您的健康之旅',
             totalSessions: '诊断总数',
             averageScore: '平均分数',
             progress: '进展',
             points: '分',
             mostCommonPattern: '最常见证型',
+            time: '次',
             times: '次',
-            sessionRecorded: '次诊断记录',
+            sessionRecorded: '次诊断已记录',
             sessionsRecorded: '次诊断记录',
             startJourneyToday: '今天开始您的健康之旅',
             noSessionsYet: '您的健康旅程从这里开始',
             noSessionsDesc: '完成您的首次中医诊断，追踪您的健康状况。',
             startFirstDiagnosis: '开始首次诊断',
             restoreMockData: '恢复测试数据',
+            restoring: '恢复中...',
+            cantFindData: '找不到您以前的测试数据？',
             view: '查看',
         },
 
@@ -784,6 +790,16 @@ export const zh: TranslationKeys = {
             back: '返回',
             confirmGenerate: '确认并生成报告',
         },
+        instructions: {
+            observations: '请查看并编辑下方的临床观察结果。这些内容将包含在最终报告中。',
+            inquiry: '请查看患者的基本信息和问诊详情。',
+            options: '自定义要包含在最终生成的报告中的信息。',
+        },
+        placeholders: {
+            contact: '请输入联系电话',
+            address: '请输入地址',
+            emergencyContact: '请输入紧急联系人',
+        },
     },
 
     // 恢复进度对话框
@@ -797,5 +813,57 @@ export const zh: TranslationKeys = {
         justNow: '刚刚',
         minutesAgo: '分钟前',
         hoursAgo: '小时前',
+    },
+
+    // Health Data Import Wizard
+    healthDataImport: {
+        title: '健康数据导入',
+        description: '连接您的健康应用以导入每日活动数据。',
+        selectProvider: '选择提供商:',
+        providers: {
+            samsung: '三星健康 (Samsung Health)',
+            apple: '苹果健康 (Apple Health)',
+            google: '谷歌健身 (Google Fit)',
+        },
+        connecting: {
+            title: '连接中...',
+            description: '正在建立与 {provider} 的安全连接',
+        },
+        importing: {
+            syncing: '同步数据中...',
+            activityHistory: '活动历史',
+            sleepPatterns: '睡眠模式',
+            heartRateVariability: '心率变异性',
+        },
+        result: {
+            success: '导入成功',
+            syncedFrom: '数据已从 {provider} 同步',
+            steps: '步数',
+            sleep: '睡眠',
+            avgHr: '平均心率',
+            calories: '卡路里',
+            confirm: '确认并使用数据',
+            bpm: '次/分',
+        },
+    },
+
+    // Report Chat Window
+    reportChat: {
+        title: '询问您的报告',
+        subtitle: '我可以帮助解释您的中医诊断',
+        placeholder: '请输入您关于报告的问题...',
+        send: '发送',
+        thinking: '思考中...',
+        suggestions: [
+            '我的诊断是什么意思？',
+            '为什么要避免这些食物？',
+            '多久才能感觉好转？',
+            '解释一下穴位按摩',
+        ],
+        emptyState: {
+            text: '随便问我关于您中医诊断报告的任何问题！',
+            quickQuestions: '快速提问',
+        },
+        floatingButton: '询问关于您的报告',
     },
 };

@@ -120,27 +120,27 @@ export function generateMockTestData() {
     return {
         // Basic Info
         basic_info: {
-            name: 'John Doe',
+            name: '张伟',
             age: '35',
             gender: 'male',
             weight: '72',
             height: '175',
-            symptoms: 'Headache, Fatigue, feeling tired and dizzy for the past week',
-            mainComplaint: 'Headache',
-            otherSymptoms: 'Fatigue, feeling tired and dizzy for the past week',
+            symptoms: '头痛，疲劳，过去一周感觉疲倦和头晕',
+            mainComplaint: '头痛',
+            otherSymptoms: '疲劳，过去一周感觉疲倦和头晕',
             symptomDuration: '1-2-weeks'
         },
 
         // Inquiry Step (reports, medicines, chat)
         wen_inquiry: {
-            summary: "Patient presents with recurring headaches and general fatigue over the past week. Reports feeling dizzy occasionally, especially in the morning. Sleep quality has been poor. No significant medical history. Currently taking multivitamins and Omega-3 supplements. Blood test results are within normal limits with mild LDL elevation.",
+            summary: "患者表现为过去一周反复头痛和全身疲劳。报告称偶尔感到头晕，尤其是早上。睡眠质量差。无重大病史。目前正在服用复合维生素和欧米茄-3补充剂。血液检查结果在正常范围内，低密度脂蛋白（LDL）轻微升高。",
             chatHistory: [
-                { role: 'assistant', content: 'Hello! I can see you are experiencing headaches and fatigue. Can you tell me more about when they started?' },
-                { role: 'user', content: 'They started about a week ago. The headaches are mostly in the front of my head and get worse in the afternoon.' },
-                { role: 'assistant', content: 'I understand. How would you describe the quality of your sleep recently?' },
-                { role: 'user', content: 'Not great. I wake up 2-3 times at night and feel tired even after sleeping 7-8 hours.' },
-                { role: 'assistant', content: 'Are you experiencing any other symptoms like neck stiffness, nausea, or sensitivity to light?' },
-                { role: 'user', content: 'Some neck tension yes, but no nausea. I do feel a bit more sensitive to bright screens though.' }
+                { role: 'assistant', content: '您好！我看您有头痛和疲劳的症状。能详细告诉我这些症状是什么时候开始的吗？' },
+                { role: 'user', content: '大约一周前开始的。头痛主要在额头部位，下午会加重。' },
+                { role: 'assistant', content: '明白了。您最近的睡眠质量如何？' },
+                { role: 'user', content: '不太好。我晚上会醒来2-3次，即使睡了7-8小时还是感觉很累。' },
+                { role: 'assistant', content: '通过。您还有其他症状吗，比如颈部僵硬、恶心或对光敏感？' },
+                { role: 'user', content: '颈部有些紧张，但没有恶心。不过我确实感觉对亮屏幕比较敏感。' }
             ],
             reportFiles: [MOCK_PDF_REPORT],
             medicineFiles: MOCK_MEDICINES,
@@ -150,40 +150,40 @@ export function generateMockTestData() {
         // Tongue Analysis (Enhanced with analysis_tags - myzencheck.net style)
         wang_tongue: {
             image: MOCK_TONGUE_IMAGE,
-            observation: "Slightly pale tongue body with thin white coating. Tongue appears slightly swollen with visible tooth marks on the edges. The coating is evenly distributed but thin, suggesting mild Qi deficiency.",
-            potential_issues: ["Qi Deficiency", "Mild Spleen Weakness", "Blood stagnation tendency"],
+            observation: "舌体略胖，舌质淡白，舌边有齿痕。苔薄白分布均匀。整体提示脾气虚弱，湿气内停。",
+            potential_issues: ["气虚", "脾虚湿盛", "血虚倾向"],
             analysis_tags: [
                 {
                     title: "Swollen Tongue",
                     title_cn: "胖大舌",
-                    category: "Qi Deficiency · Spleen Support",
+                    category: "气虚 · 健脾",
                     confidence: 94.6,
-                    description: "Swelling, especially with scalloped edges, signals spleen qi weakness and damp accumulation.",
+                    description: "舌体胖大，尤其是边缘有齿痕，表明脾气虚弱，水湿运化失常。",
                     recommendations: [
-                        "Limit raw or cold foods and favour lightly cooked meals that are easy to digest.",
-                        "Consider qi-tonifying herbs such as astragalus under practitioner guidance."
+                        "建议少吃生冷食物，多吃易消化、温热的熟食。",
+                        "可在医师指导下考虑使用黄芪等补气药材。"
                     ]
                 },
                 {
                     title: "Teeth Marks",
                     title_cn: "齿痕舌",
-                    category: "Spleen Qi Deficiency · Strengthening",
+                    category: "脾气虚 · 益气固表",
                     confidence: 91.3,
-                    description: "Teeth marks on the tongue edges indicate spleen qi deficiency with fluid metabolism issues.",
+                    description: "舌边有牙齿压痕，提示脾气虚弱，伴有水液代谢问题。",
                     recommendations: [
-                        "Eat regular, warm meals at consistent times to support spleen function.",
-                        "Avoid overthinking and worry which further depletes spleen qi."
+                        "按时进食温热餐点，支持脾胃功能。",
+                        "避免过度思虑和担忧，这会进一步耗伤脾气。"
                     ]
                 },
                 {
                     title: "Pale Tongue",
                     title_cn: "淡白舌",
-                    category: "Blood Deficiency · Nourishing",
+                    category: "血虚 · 养血",
                     confidence: 87.2,
-                    description: "A pale tongue indicates insufficient blood or qi, often seen with fatigue and cold extremities.",
+                    description: "舌色淡白，提示气血不足，常伴有疲劳和手脚冰凉。",
                     recommendations: [
-                        "Include iron-rich foods like spinach, red dates, and goji berries in your diet.",
-                        "Avoid excessive physical exertion and ensure adequate rest."
+                        "饮食中加入菠菜、红枣和枸杞等富含铁质的食物。",
+                        "避免过度劳累，保证充足的休息。"
                     ]
                 }
             ]
@@ -192,15 +192,15 @@ export function generateMockTestData() {
         // Face Analysis
         wang_face: {
             image: MOCK_FACE_IMAGE,
-            observation: "Complexion shows slight pallor with mild dark circles under the eyes. Skin appears slightly dull. The temple area shows subtle tension lines. Overall presentation suggests fatigue and possible sleep deficiency.",
-            potential_issues: ["Fatigue signs", "Possible blood deficiency", "Eye strain"]
+            observation: "面色略显苍白，眼下有轻微黑眼圈。皮肤略显暗沉。太阳穴区域显示细微的紧张纹路。整体表现提示疲劳和可能的睡眠不足。",
+            potential_issues: ["疲劳迹象", "可能血虚", "眼部疲劳"]
         },
 
         // Body Part Analysis (neck/shoulder area for headache patient)
         wang_part: {
             image: MOCK_BODY_IMAGE,
-            observation: "Neck and shoulder area shown. Visible tension in the trapezius muscles. Patient may benefit from relaxation techniques and acupressure on GB20 (Feng Chi) and GB21 (Jian Jing) points.",
-            potential_issues: ["Muscle tension", "Meridian blockage in Gallbladder channel"]
+            observation: "颈肩部区域显示斜方肌明显紧张。患者可能受益于放松技巧和按压风池穴（GB20）与肩井穴（GB21）。",
+            potential_issues: ["肌肉紧张", "胆经阻滞"]
         },
 
         // Audio Analysis
@@ -208,28 +208,28 @@ export function generateMockTestData() {
             audio: MOCK_AUDIO_BASE64,
             duration: 15,
             analysis: {
-                overall_observation: "Voice is clear but slightly lacks vitality. Speaking pace is moderate. Occasional sighing noted during conversation.",
+                overall_observation: "声音清晰但略显底气不足。语速中等。对话中偶尔有叹气声。",
                 voice_quality_analysis: {
-                    observation: "Clear but weak voice",
-                    severity: "mild",
-                    tcm_indicators: ["Qi Deficiency", "Possible Lung Qi weakness"]
+                    observation: "声音清晰但微弱",
+                    severity: "轻度",
+                    tcm_indicators: ["气虚", "可能的肺气虚弱"]
                 },
                 breathing_patterns: {
-                    observation: "Normal breathing rhythm, slightly shallow",
-                    indicators: ["Mild Qi deficiency"]
+                    observation: "呼吸节奏正常，略显浅促",
+                    indicators: ["轻度气虚"]
                 },
                 speech_patterns: {
-                    observation: "Normal speech clarity, mild fatigue in tone",
-                    indicators: ["Fatigue", "Stress"]
+                    observation: "语音清晰度正常，语调中略带疲劳",
+                    indicators: ["疲劳", "压力"]
                 },
                 cough_sounds: {
-                    observation: "No cough detected",
+                    observation: "未检测到咳嗽",
                     indicators: []
                 },
-                pattern_suggestions: ["Tonify Qi", "Support Spleen and Lung"],
-                recommendations: ["Breathing exercises", "Adequate rest", "Warm foods"],
-                confidence: "high",
-                notes: "Voice analysis suggests mild Qi deficiency consistent with reported fatigue symptoms.",
+                pattern_suggestions: ["补气", "健脾益肺"],
+                recommendations: ["呼吸练习", "充足休息", "温热饮食"],
+                confidence: "高",
+                notes: "语音分析提示轻度气虚，与报告的疲劳症状一致。",
                 status: "success"
             }
         },
@@ -238,7 +238,7 @@ export function generateMockTestData() {
         qie: {
             bpm: randomBPM,
             pulseQualities: pulseQualities,
-            notes: `Pulse rate: ${randomBPM} BPM. ${randomBPM < 70 ? 'Slightly slow pulse indicating possible Yang deficiency.' : randomBPM > 85 ? 'Slightly rapid pulse may indicate internal heat or stress.' : 'Normal pulse rate within healthy range.'}`
+            notes: `脉率: ${randomBPM} BPM。${randomBPM < 70 ? '脉率稍慢，提示可能的阳虚。' : randomBPM > 85 ? '脉率稍快，可能提示体内有热或压力。' : '脉率正常，在健康范围内。'}`
         },
 
         // Smart Connect Data
@@ -248,14 +248,14 @@ export function generateMockTestData() {
             bloodOxygen: 98,
             bodyTemp: 36.5,
             hrv: 55,
-            stressLevel: "Moderate",
+            stressLevel: "中等",
             healthData: {
                 provider: 'Apple Health',
                 steps: 6842,
                 sleepHours: 6.8,
                 heartRate: randomBPM,
                 calories: 2150,
-                lastUpdated: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                lastUpdated: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
             }
         }
     };

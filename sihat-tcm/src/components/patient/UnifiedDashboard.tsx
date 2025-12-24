@@ -54,7 +54,7 @@ interface Report {
 export function UnifiedDashboard() {
     const { user, profile, signOut, refreshProfile } = useAuth()
     const router = useRouter()
-    const { language, setLanguage, languageNames } = useLanguage()
+    const { language, setLanguage, languageNames, t } = useLanguage()
 
     // Sync language from profile on login
     useLanguageSync()
@@ -204,7 +204,7 @@ export function UnifiedDashboard() {
 
     // Handle document delete
     const handleDeleteReport = (index: number) => {
-        if (confirm('Are you sure you want to delete this document?')) {
+        if (confirm(t.patientDashboard.documents.deleteConfirm)) {
             setReports(reports.filter((_, i) => i !== index))
         }
     }
@@ -302,10 +302,10 @@ export function UnifiedDashboard() {
                         <div>
                             <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
                                 <FileHeart className="w-8 h-8" />
-                                Patient Dashboard
+                                {t.patientDashboard.title}
                             </h1>
                             <p className="text-emerald-100 text-sm mt-1">
-                                Welcome back, {profile?.full_name || user?.email || 'Patient'}
+                                {t.patientDashboard.welcomeBack}, {profile?.full_name || user?.email || 'Patient'}
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
@@ -314,7 +314,7 @@ export function UnifiedDashboard() {
                                 className="bg-white text-emerald-600 hover:bg-emerald-50"
                             >
                                 <Plus className="w-4 h-4 mr-2" />
-                                New Diagnosis
+                                {t.patientDashboard.newDiagnosis}
                             </Button>
                         </div>
                     </div>
@@ -326,11 +326,11 @@ export function UnifiedDashboard() {
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="flex gap-1 overflow-x-auto">
                         {[
-                            { id: 'journey', label: 'Health Journey', icon: FileHeart },
-                            { id: 'meals', label: 'AI Meal Planner', icon: UtensilsCrossed },
-                            { id: 'profile', label: 'Profile', icon: User },
-                            { id: 'documents', label: 'Documents', icon: FileText },
-                            { id: 'settings', label: 'Settings', icon: Settings }
+                            { id: 'journey', label: t.patientDashboard.tabs.healthJourney, icon: FileHeart },
+                            { id: 'meals', label: t.patientDashboard.tabs.mealPlanner, icon: UtensilsCrossed },
+                            { id: 'profile', label: t.patientDashboard.tabs.profile, icon: User },
+                            { id: 'documents', label: t.patientDashboard.tabs.documents, icon: FileText },
+                            { id: 'settings', label: t.patientDashboard.tabs.settings, icon: Settings }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -370,11 +370,11 @@ export function UnifiedDashboard() {
                     >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                             <div>
-                                <h2 className="text-2xl font-bold text-slate-800">Your Health Journey</h2>
+                                <h2 className="text-2xl font-bold text-slate-800">{t.patientDashboard.healthJourney.title}</h2>
                                 <p className="text-sm text-slate-600 mt-1">
                                     {sessions.length > 0
-                                        ? `${sessions.length} ${sessions.length === 1 ? 'session' : 'sessions'} recorded`
-                                        : 'Start your wellness journey today'}
+                                        ? `${sessions.length} ${sessions.length === 1 ? t.patientDashboard.healthJourney.sessionRecorded : t.patientDashboard.healthJourney.sessionsRecorded}`
+                                        : t.patientDashboard.healthJourney.startJourneyToday}
                                 </p>
                             </div>
 
@@ -442,10 +442,10 @@ export function UnifiedDashboard() {
                                         <FileHeart className="w-10 h-10 text-emerald-600" />
                                     </div>
                                     <h3 className="text-xl font-bold text-slate-800 mb-3">
-                                        Your wellness journey starts here
+                                        {t.patientDashboard.healthJourney.noSessionsYet}
                                     </h3>
                                     <p className="text-slate-600 mb-6">
-                                        Complete your first TCM diagnosis to track your health and wellness over time.
+                                        {t.patientDashboard.healthJourney.noSessionsDesc}
                                     </p>
                                     <Button
                                         onClick={() => router.push('/')}
@@ -453,11 +453,11 @@ export function UnifiedDashboard() {
                                         className="bg-gradient-to-r from-emerald-600 to-teal-600"
                                     >
                                         <Plus className="w-5 h-5 mr-2" />
-                                        Start First Diagnosis
+                                        {t.patientDashboard.healthJourney.startFirstDiagnosis}
                                     </Button>
 
                                     <div className="mt-4 pt-4 border-t border-slate-100">
-                                        <p className="text-xs text-slate-400 mb-2">Can't find your previous test data?</p>
+                                        <p className="text-xs text-slate-400 mb-2">{t.patientDashboard.healthJourney.cantFindData}</p>
                                         <Button
                                             onClick={handleRestoreData}
                                             variant="outline"
@@ -466,9 +466,9 @@ export function UnifiedDashboard() {
                                             className="text-slate-500 hover:text-emerald-600"
                                         >
                                             {seeding ? (
-                                                <><Loader2 className="w-3 h-3 mr-2 animate-spin" /> Restoring...</>
+                                                <><Loader2 className="w-3 h-3 mr-2 animate-spin" /> {t.patientDashboard.healthJourney.restoring}</>
                                             ) : (
-                                                'Restore Mock Data'
+                                                t.patientDashboard.healthJourney.restoreMockData
                                             )}
                                         </Button>
                                     </div>
@@ -500,7 +500,12 @@ export function UnifiedDashboard() {
                             // Helper functions for table/list views
                             const formatDate = (dateString: string): string => {
                                 const date = new Date(dateString)
-                                return new Intl.DateTimeFormat('en-US', {
+                                const localeMap: Record<string, string> = {
+                                    en: 'en-US',
+                                    zh: 'zh-CN',
+                                    ms: 'ms-MY'
+                                }
+                                return new Intl.DateTimeFormat(localeMap[language] || 'en-US', {
                                     month: 'short',
                                     day: 'numeric',
                                     year: 'numeric'
@@ -726,9 +731,9 @@ export function UnifiedDashboard() {
                         transition={{ duration: 0.4, delay: 0.2 }}
                     >
                         <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-2">My Profile</h2>
+                            <h2 className="text-2xl font-bold text-slate-800 mb-2">{t.patientDashboard.profile.title}</h2>
                             <p className="text-sm text-slate-600">
-                                Manage your personal information
+                                {t.patientDashboard.profile.subtitle}
                             </p>
                         </div>
                         <Card className="p-6 bg-white/80 backdrop-blur-sm max-w-2xl">
@@ -738,8 +743,8 @@ export function UnifiedDashboard() {
                                         <User className="w-6 h-6 text-emerald-600" />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-slate-800">Personal Information</h3>
-                                        <p className="text-sm text-slate-600">Your profile details</p>
+                                        <h3 className="text-lg font-bold text-slate-800">{t.patientDashboard.profile.personalInfo}</h3>
+                                        <p className="text-sm text-slate-600">{t.patientDashboard.profile.yourProfileDetails}</p>
                                     </div>
                                 </div>
                                 <Button
@@ -747,14 +752,14 @@ export function UnifiedDashboard() {
                                     variant={editingProfile ? 'ghost' : 'outline'}
                                     onClick={() => setEditingProfile(!editingProfile)}
                                 >
-                                    {editingProfile ? 'Cancel' : <><Edit className="w-4 h-4 mr-2" />Edit</>}
+                                    {editingProfile ? t.common.cancel : <><Edit className="w-4 h-4 mr-2" />{t.common.edit}</>}
                                 </Button>
                             </div>
 
                             {editingProfile ? (
                                 <div className="space-y-4">
                                     <div>
-                                        <Label>Full Name</Label>
+                                        <Label>{t.patientDashboard.profile.fullName}</Label>
                                         <Input
                                             value={profileData.full_name}
                                             onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
@@ -762,7 +767,7 @@ export function UnifiedDashboard() {
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <Label>Age</Label>
+                                            <Label>{t.patientDashboard.profile.age}</Label>
                                             <Input
                                                 type="number"
                                                 value={profileData.age}
@@ -805,7 +810,7 @@ export function UnifiedDashboard() {
                                         </div>
                                     </div>
                                     <div>
-                                        <Label>Medical History</Label>
+                                        <Label>{t.patientDashboard.profile.medicalHistory}</Label>
                                         <Textarea
                                             value={profileData.medical_history}
                                             onChange={(e) => setProfileData({ ...profileData, medical_history: e.target.value })}
@@ -818,37 +823,37 @@ export function UnifiedDashboard() {
                                         className="w-full bg-emerald-600 hover:bg-emerald-700"
                                     >
                                         {savingProfile ? (
-                                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</>
+                                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t.patientDashboard.profile.saving}</>
                                         ) : (
-                                            'Save Changes'
+                                            t.patientDashboard.profile.saveChanges
                                         )}
                                     </Button>
                                 </div>
                             ) : (
                                 <div className="space-y-3">
                                     <div className="flex justify-between py-2 border-b">
-                                        <span className="text-sm text-slate-600">Name:</span>
-                                        <span className="text-sm font-medium">{profileData.full_name || 'Not set'}</span>
+                                        <span className="text-sm text-slate-600">{t.patientDashboard.profile.name}:</span>
+                                        <span className="text-sm font-medium">{profileData.full_name || t.patientDashboard.profile.notSet}</span>
                                     </div>
                                     <div className="flex justify-between py-2 border-b">
-                                        <span className="text-sm text-slate-600">Age:</span>
-                                        <span className="text-sm font-medium">{profileData.age || 'Not set'}</span>
+                                        <span className="text-sm text-slate-600">{t.patientDashboard.profile.age}:</span>
+                                        <span className="text-sm font-medium">{profileData.age || t.patientDashboard.profile.notSet}</span>
                                     </div>
                                     <div className="flex justify-between py-2 border-b">
-                                        <span className="text-sm text-slate-600">Gender:</span>
-                                        <span className="text-sm font-medium capitalize">{profileData.gender || 'Not set'}</span>
+                                        <span className="text-sm text-slate-600">{t.patientDashboard.profile.gender}:</span>
+                                        <span className="text-sm font-medium capitalize">{profileData.gender || t.patientDashboard.profile.notSet}</span>
                                     </div>
                                     <div className="flex justify-between py-2 border-b">
-                                        <span className="text-sm text-slate-600">Height:</span>
-                                        <span className="text-sm font-medium">{profileData.height ? `${profileData.height} cm` : 'Not set'}</span>
+                                        <span className="text-sm text-slate-600">{t.patientDashboard.profile.height}:</span>
+                                        <span className="text-sm font-medium">{profileData.height ? `${profileData.height} cm` : t.patientDashboard.profile.notSet}</span>
                                     </div>
                                     <div className="flex justify-between py-2 border-b">
-                                        <span className="text-sm text-slate-600">Weight:</span>
-                                        <span className="text-sm font-medium">{profileData.weight ? `${profileData.weight} kg` : 'Not set'}</span>
+                                        <span className="text-sm text-slate-600">{t.patientDashboard.profile.weight}:</span>
+                                        <span className="text-sm font-medium">{profileData.weight ? `${profileData.weight} kg` : t.patientDashboard.profile.notSet}</span>
                                     </div>
                                     {profileData.medical_history && (
                                         <div className="pt-2">
-                                            <span className="text-sm text-slate-600 block mb-2">Medical History:</span>
+                                            <span className="text-sm text-slate-600 block mb-2">{t.patientDashboard.profile.medicalHistory}:</span>
                                             <p className="text-sm text-slate-800 bg-slate-50 p-3 rounded-lg">
                                                 {profileData.medical_history}
                                             </p>
@@ -868,9 +873,9 @@ export function UnifiedDashboard() {
                         transition={{ duration: 0.4, delay: 0.3 }}
                     >
                         <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-2">Medical Documents</h2>
+                            <h2 className="text-2xl font-bold text-slate-800 mb-2">{t.patientDashboard.documents.title}</h2>
                             <p className="text-sm text-slate-600">
-                                Upload and manage your medical reports and documents
+                                {t.patientDashboard.documents.subtitle}
                             </p>
                         </div>
                         <Card className="p-6 bg-white/80 backdrop-blur-sm max-w-2xl">
@@ -880,8 +885,8 @@ export function UnifiedDashboard() {
                                         <FileText className="w-6 h-6 text-blue-600" />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-slate-800">Your Documents</h3>
-                                        <p className="text-sm text-slate-600">{reports.length} files uploaded</p>
+                                        <h3 className="text-lg font-bold text-slate-800">{t.patientDashboard.documents.yourDocuments}</h3>
+                                        <p className="text-sm text-slate-600">{reports.length} {t.patientDashboard.documents.filesUploaded}</p>
                                     </div>
                                 </div>
                                 <Button
@@ -890,7 +895,7 @@ export function UnifiedDashboard() {
                                     className="bg-blue-600 hover:bg-blue-700"
                                 >
                                     <Upload className="w-4 h-4 mr-2" />
-                                    Upload
+                                    {t.patientDashboard.documents.upload}
                                 </Button>
                                 <input
                                     ref={fileInputRef}
@@ -906,7 +911,7 @@ export function UnifiedDashboard() {
                                 {reports.length === 0 ? (
                                     <div className="text-center py-8">
                                         <FileText className="w-12 h-12 mx-auto text-slate-300 mb-3" />
-                                        <p className="text-sm text-slate-500">No documents uploaded yet</p>
+                                        <p className="text-sm text-slate-500">{t.patientDashboard.documents.noDocumentsYet}</p>
                                     </div>
                                 ) : (
                                     reports.map((report, index) => (
@@ -958,9 +963,9 @@ export function UnifiedDashboard() {
                         transition={{ duration: 0.4, delay: 0.3 }}
                     >
                         <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-2">Settings</h2>
+                            <h2 className="text-2xl font-bold text-slate-800 mb-2">{t.patientDashboard.settings.title}</h2>
                             <p className="text-sm text-slate-600">
-                                Manage your preferences and account settings
+                                {t.patientDashboard.settings.subtitle}
                             </p>
                         </div>
 
@@ -971,8 +976,8 @@ export function UnifiedDashboard() {
                                     <Globe className="w-6 h-6 text-blue-600" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-slate-800">Language Preference</h3>
-                                    <p className="text-sm text-slate-600">Choose your preferred language for the app</p>
+                                    <h3 className="text-lg font-bold text-slate-800">{t.patientDashboard.settings.languagePreference}</h3>
+                                    <p className="text-sm text-slate-600">{t.patientDashboard.settings.chooseLanguage}</p>
                                 </div>
                             </div>
 
@@ -1041,7 +1046,7 @@ export function UnifiedDashboard() {
 
                             <p className="text-xs text-slate-500 mt-4 flex items-center gap-1">
                                 <span className="text-emerald-500">✓</span>
-                                Your language preference is automatically saved
+                                {t.patientDashboard.settings.languageSaved}
                             </p>
                         </Card>
 
@@ -1052,22 +1057,22 @@ export function UnifiedDashboard() {
                                     <User className="w-6 h-6 text-slate-600" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-slate-800">Account Information</h3>
-                                    <p className="text-sm text-slate-600">Your account details</p>
+                                    <h3 className="text-lg font-bold text-slate-800">{t.patientDashboard.settings.accountInfo}</h3>
+                                    <p className="text-sm text-slate-600">{t.patientDashboard.settings.accountDetails}</p>
                                 </div>
                             </div>
 
                             <div className="space-y-3">
                                 <div className="flex justify-between py-2 border-b border-slate-100">
-                                    <span className="text-sm text-slate-600">Email:</span>
-                                    <span className="text-sm font-medium text-slate-800">{user?.email || 'Not set'}</span>
+                                    <span className="text-sm text-slate-600">{t.patientDashboard.settings.email}:</span>
+                                    <span className="text-sm font-medium text-slate-800">{user?.email || t.patientDashboard.profile.notSet}</span>
                                 </div>
                                 <div className="flex justify-between py-2 border-b border-slate-100">
-                                    <span className="text-sm text-slate-600">Account Type:</span>
+                                    <span className="text-sm text-slate-600">{t.patientDashboard.settings.accountType}:</span>
                                     <span className="text-sm font-medium text-slate-800 capitalize">{profile?.role || 'Patient'}</span>
                                 </div>
                                 <div className="flex justify-between py-2">
-                                    <span className="text-sm text-slate-600">Member Since:</span>
+                                    <span className="text-sm text-slate-600">{t.patientDashboard.settings.memberSince}:</span>
                                     <span className="text-sm font-medium text-slate-800">
                                         {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
                                     </span>
@@ -1081,7 +1086,7 @@ export function UnifiedDashboard() {
                                     className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
                                 >
                                     <LogOut className="w-4 h-4 mr-2" />
-                                    Sign Out
+                                    {t.patientDashboard.settings.signOut}
                                 </Button>
                             </div>
                         </Card>

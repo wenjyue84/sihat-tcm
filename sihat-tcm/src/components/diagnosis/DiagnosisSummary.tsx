@@ -192,8 +192,8 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
             if (sc.bloodPressure) metrics.push(`${t.pulse.bloodPressure}: ${sc.bloodPressure} mmHg`)
             if (sc.bloodOxygen) metrics.push(`${t.pulse.bloodOxygen}: ${sc.bloodOxygen}%`)
             if (sc.bodyTemp) metrics.push(`${t.pulse.bodyTemperature}: ${sc.bodyTemp}°C`)
-            if (sc.hrv) metrics.push(`HRV: ${sc.hrv} ms`)
-            if (sc.stressLevel) metrics.push(`Stress Level: ${sc.stressLevel}`)
+            if (sc.hrv) metrics.push(`${t.pulse.hrv}: ${sc.hrv} ms`)
+            if (sc.stressLevel) metrics.push(`${t.pulse.stressLevel}: ${sc.stressLevel}`)
             initialSummaries['smart_connect'] = metrics.length > 0 ? metrics.join('\n') : t.diagnosisSummary.defaultMessages.noDeviceData
         }
 
@@ -294,7 +294,7 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
             <div className="space-y-6">
                 <div className="bg-blue-50/50 backdrop-blur-sm p-4 rounded-xl border border-blue-100 mb-6">
                     <p className="text-sm text-blue-800 leading-relaxed">
-                        Please review and edit the clinical observations below. These will be included in the final report.
+                        {t.diagnosisSummary.instructions.observations}
                     </p>
                 </div>
                 {observationSections.map(section => {
@@ -324,7 +324,7 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
             <div className="space-y-6">
                 <div className="bg-blue-50/50 backdrop-blur-sm p-4 rounded-xl border border-blue-100 mb-6">
                     <p className="text-sm text-blue-800 leading-relaxed">
-                        Please review the patient's basic information and inquiry details.
+                        {t.diagnosisSummary.instructions.inquiry}
                     </p>
                 </div>
                 {inquirySections.map(section => {
@@ -347,7 +347,7 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
             <div className="space-y-4">
                 <div className="bg-blue-50/50 backdrop-blur-sm p-4 rounded-xl border border-blue-100 mb-6">
                     <p className="text-sm text-blue-800 leading-relaxed">
-                        Customize what information to include in the final generated report.
+                        {t.diagnosisSummary.instructions.options}
                     </p>
                 </div>
 
@@ -388,7 +388,7 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                         onChange={(c) => handleOptionChange('includePatientContact', c)}
                     >
                         <Input
-                            placeholder="Enter contact number"
+                            placeholder={t.diagnosisSummary.placeholders.contact}
                             value={additionalInfo.contact}
                             onChange={(e) => setAdditionalInfo(prev => ({ ...prev, contact: e.target.value }))}
                             className="w-full h-9 text-sm bg-white"
@@ -401,7 +401,7 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                         onChange={(c) => handleOptionChange('includePatientAddress', c)}
                     >
                         <Input
-                            placeholder="Enter address"
+                            placeholder={t.diagnosisSummary.placeholders.address}
                             value={additionalInfo.address}
                             onChange={(e) => setAdditionalInfo(prev => ({ ...prev, address: e.target.value }))}
                             className="w-full h-9 text-sm bg-white"
@@ -414,7 +414,7 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
                         onChange={(c) => handleOptionChange('includeEmergencyContact', c)}
                     >
                         <Input
-                            placeholder="Enter emergency contact"
+                            placeholder={t.diagnosisSummary.placeholders.emergencyContact}
                             value={additionalInfo.emergencyContact}
                             onChange={(e) => setAdditionalInfo(prev => ({ ...prev, emergencyContact: e.target.value }))}
                             className="w-full h-9 text-sm bg-white"

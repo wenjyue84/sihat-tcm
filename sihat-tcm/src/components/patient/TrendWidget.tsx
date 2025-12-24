@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { TrendingUp, TrendingDown, Activity, Calendar, Zap, Info, X, Calculator, BarChart3, Target, ArrowRight, Clock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import * as Dialog from '@radix-ui/react-dialog'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface TrendData {
     sessionCount: number
@@ -346,9 +347,9 @@ function ProgressModal({
                                                 <span className="text-xs text-slate-500">{score}</span>
                                                 <div
                                                     className={`w-full rounded-t transition-all ${score >= 75 ? 'bg-emerald-500' :
-                                                            score >= 50 ? 'bg-teal-500' :
-                                                                score >= 25 ? 'bg-amber-500' :
-                                                                    'bg-red-500'
+                                                        score >= 50 ? 'bg-teal-500' :
+                                                            score >= 25 ? 'bg-amber-500' :
+                                                                'bg-red-500'
                                                         }`}
                                                     style={{ height: `${height}%` }}
                                                 />
@@ -422,6 +423,7 @@ function ProgressModal({
 export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
     const [showAverageModal, setShowAverageModal] = useState(false)
     const [showProgressModal, setShowProgressModal] = useState(false)
+    const { t } = useLanguage()
 
     if (loading) {
         return (
@@ -441,7 +443,7 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
                         <Activity className="w-8 h-8 text-slate-400" />
                     </div>
                     <p className="text-slate-600 text-sm">
-                        No health data yet. Complete your first diagnosis to start tracking!
+                        {t.patientDashboard.healthJourney.noSessionsDesc}
                     </p>
                 </div>
             </Card>
@@ -458,10 +460,10 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
                 <div className="p-6 pb-4 border-b border-emerald-100/50">
                     <h3 className="text-xl font-bold text-emerald-900 flex items-center gap-2">
                         <Zap className="w-5 h-5 text-emerald-600" />
-                        Your Health Vitality
+                        {t.patientDashboard.healthJourney.vitalityTitle}
                     </h3>
                     <p className="text-sm text-emerald-700 mt-1">
-                        Track your wellness journey over time
+                        {t.patientDashboard.healthJourney.subtitle}
                     </p>
                 </div>
 
@@ -477,7 +479,7 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="text-xs font-medium text-emerald-700 uppercase tracking-wider mb-1">
-                                    Total Sessions
+                                    {t.patientDashboard.healthJourney.totalSessions}
                                 </p>
                                 <p className="text-3xl font-bold text-emerald-900">
                                     {sessionCount}
@@ -501,7 +503,7 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
                             <div className="flex items-start justify-between">
                                 <div>
                                     <p className="text-xs font-medium text-teal-700 uppercase tracking-wider mb-1 flex items-center gap-1">
-                                        Average Score
+                                        {t.patientDashboard.healthJourney.averageScore}
                                         <Info className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </p>
                                     <p className="text-3xl font-bold text-teal-900">
@@ -512,12 +514,12 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
                                     </p>
                                 </div>
                                 <div className={`p-2 rounded-lg ${averageScore >= 75 ? 'bg-emerald-100' :
-                                        averageScore >= 50 ? 'bg-amber-100' :
-                                            'bg-red-100'
+                                    averageScore >= 50 ? 'bg-amber-100' :
+                                        'bg-red-100'
                                     }`}>
                                     <Activity className={`w-5 h-5 ${averageScore >= 75 ? 'text-emerald-600' :
-                                            averageScore >= 50 ? 'text-amber-600' :
-                                                'text-red-600'
+                                        averageScore >= 50 ? 'text-amber-600' :
+                                            'text-red-600'
                                         }`} />
                                 </div>
                             </div>
@@ -536,25 +538,25 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
                             <div className="flex items-start justify-between">
                                 <div>
                                     <p className="text-xs font-medium text-cyan-700 uppercase tracking-wider mb-1 flex items-center gap-1">
-                                        Progress
+                                        {t.patientDashboard.healthJourney.progress}
                                         <Info className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </p>
                                     <div className="flex items-baseline gap-2">
                                         <p className={`text-3xl font-bold ${improvement > 0 ? 'text-emerald-600' :
-                                                improvement < 0 ? 'text-red-600' :
-                                                    'text-slate-600'
+                                            improvement < 0 ? 'text-red-600' :
+                                                'text-slate-600'
                                             }`}>
                                             {improvement > 0 ? '+' : ''}{improvement}
                                         </p>
-                                        <span className="text-sm text-slate-500">points</span>
+                                        <span className="text-sm text-slate-500">{t.patientDashboard.healthJourney.points}</span>
                                     </div>
                                     <p className="text-xs text-cyan-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         Click for details →
                                     </p>
                                 </div>
                                 <div className={`p-2 rounded-lg ${improvement > 0 ? 'bg-emerald-100' :
-                                        improvement < 0 ? 'bg-red-100' :
-                                            'bg-slate-100'
+                                    improvement < 0 ? 'bg-red-100' :
+                                        'bg-slate-100'
                                     }`}>
                                     {improvement > 0 ? (
                                         <TrendingUp className="w-5 h-5 text-emerald-600" />
@@ -574,14 +576,14 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
                     <div className="px-6 pb-6">
                         <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-emerald-100/50">
                             <p className="text-xs font-medium text-emerald-700 uppercase tracking-wider mb-2">
-                                Most Common Pattern
+                                {t.patientDashboard.healthJourney.mostCommonPattern}
                             </p>
                             <div className="flex items-center justify-between">
                                 <p className="text-lg font-semibold text-emerald-900">
                                     {topDiagnosis[0]}
                                 </p>
                                 <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium">
-                                    {topDiagnosis[1]} {topDiagnosis[1] === 1 ? 'time' : 'times'}
+                                    {topDiagnosis[1]} {topDiagnosis[1] === 1 ? t.patientDashboard.healthJourney.time : t.patientDashboard.healthJourney.times}
                                 </span>
                             </div>
                         </div>

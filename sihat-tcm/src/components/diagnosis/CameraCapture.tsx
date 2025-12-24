@@ -48,10 +48,17 @@ export function CameraCapture({
     const displayTitle = title || t.camera.takePhoto
     const displayInstruction = instruction || t.camera.preparingCamera
 
-    // Use ref to track stream - avoids recreating callbacks on stream change
+
+    // Use refs to track state without causing re-renders
     const streamRef = useRef<MediaStream | null>(null)
+    const isStartingRef = useRef(false) // Mutex to prevent concurrent starts
     const [isLoading, setIsLoading] = useState(false)
     const [videoPlaying, setVideoPlaying] = useState(false)
+    const [hasStarted, setHasStarted] = useState(false) // Require manual start
+
+    // Store translations in ref to avoid dependency issues
+    const tRef = useRef(t)
+    useEffect(() => { tRef.current = t }, [t])
 
     // Stable stop function using ref
     const stopCamera = useCallback(() => {
@@ -59,88 +66,137 @@ export function CameraCapture({
             streamRef.current.getTracks().forEach(track => track.stop())
             streamRef.current = null
             setStream(null)
-            setVideoPlaying(false) // Reset video playing state
+            setVideoPlaying(false)
         }
-    }, []) // No dependencies - uses ref
+        isStartingRef.current = false
+    }, [])
 
-    // Stable start function
+    // Stable start function - uses refs to avoid dependency issues
     const startCamera = useCallback(async (targetFacingMode: 'user' | 'environment') => {
-        // Don't start if already loading or has stream
-        if (streamRef.current) {
+        // Mutex: Don't start if already starting or has stream
+        if (isStartingRef.current || streamRef.current) {
+            console.log('[Camera] Skipping start - already in progress or has stream')
             return
         }
+
+        isStartingRef.current = true
+        console.log('[Camera] Starting camera with facing mode:', targetFacingMode)
 
         try {
             setIsLoading(true)
             setError(null)
+            setVideoPlaying(false)
 
-            // Check if mediaDevices API is available (requires HTTPS or localhost)
+            // Check if mediaDevices API is available
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 const isSecure = window.isSecureContext
                 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
 
                 if (!isSecure && !isLocalhost) {
-                    setError("Browser security restricts camera access on non-secure (HTTP) connections. Please use the buttons below to upload or capture.")
+                    setError("Browser security restricts camera access on non-secure (HTTP) connections.")
                     setShowError(true)
                 } else {
-                    setError(t.camera.cameraError)
+                    setError(tRef.current.camera.cameraError)
+                }
+                setIsLoading(false)
+                isStartingRef.current = false
+                return
+            }
+
+            // Progressive fallback constraints
+            const constraints = [
+                { video: { facingMode: { ideal: targetFacingMode }, width: { ideal: 1280 }, height: { ideal: 720 } } },
+                // Fallback immediately to simplest constraint if high-res fails
+                { video: true },
+            ]
+
+            let mediaStream: MediaStream | null = null
+            let lastError: Error | null = null
+
+            // Helper to fetch media with timeout
+            const getMediaWithTimeout = async (constraint: MediaStreamConstraints) => {
+                return Promise.race([
+                    navigator.mediaDevices.getUserMedia(constraint),
+                    new Promise<MediaStream>((_, reject) =>
+                        setTimeout(() => reject(new Error('TIMEOUT')), 10000) // Increased to 10s for permission prompt
+                    )
+                ])
+            }
+
+            for (const constraint of constraints) {
+                try {
+                    console.log('[Camera] Requesting stream with:', JSON.stringify(constraint))
+                    mediaStream = await getMediaWithTimeout(constraint)
+                    console.log('[Camera] Got stream successfully')
+                    break
+                } catch (err: any) {
+                    console.warn('[Camera] Constraint failed:', JSON.stringify(constraint), err.message || err)
+                    lastError = err
+                }
+            }
+
+            // Check if we were stopped while waiting for camera
+            if (!isStartingRef.current) {
+                console.log('[Camera] Was stopped while waiting, cleaning up')
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop())
                 }
                 setIsLoading(false)
                 return
             }
 
-            // Progressive fallback: try preferred constraints first, then fallback to simpler ones
-            const constraints = [
-                { video: { facingMode: { ideal: targetFacingMode }, width: { ideal: 1280 }, height: { ideal: 720 } } },
-                { video: { facingMode: targetFacingMode, width: { ideal: 640 }, height: { ideal: 480 } } },
-                { video: true },
-            ]
-
-            let mediaStream: MediaStream | null = null
-            let lastError: unknown = null
-
-            for (const constraint of constraints) {
-                try {
-                    mediaStream = await navigator.mediaDevices.getUserMedia(constraint)
-                    break
-                } catch (err) {
-                    console.warn('Camera constraint failed, trying next:', constraint, err)
-                    lastError = err
-                }
-            }
-
             if (mediaStream) {
+                // Just set the stream state - let the useEffect handle the DOM attachment
                 streamRef.current = mediaStream
                 setStream(mediaStream)
-                if (videoRef.current) {
-                    videoRef.current.srcObject = mediaStream
-                    // Force play and trigger repaint
-                    videoRef.current.play().then(() => {
-                        // Force browser repaint by triggering a style recalculation
-                        requestAnimationFrame(() => {
-                            if (videoRef.current) {
-                                // Accessing offsetHeight forces a reflow/repaint
-                                void videoRef.current.offsetHeight
-                                setVideoPlaying(true)
-                            }
-                        })
-                    }).catch((e) => {
-                        console.warn('Auto-play failed, user may need to interact:', e)
-                        // Still set playing true as the stream is connected
-                        setVideoPlaying(true)
-                    })
-                }
+                // We DON'T set isLoading(false) here yet - we wait for the video to play
             } else {
-                console.error("All camera constraints failed:", lastError)
-                setError(t.camera.cameraError)
+                console.error('[Camera] All constraints failed')
+                const errorMsg = lastError ? `${lastError.name}: ${lastError.message}` : tRef.current.camera.cameraError
+                setError(errorMsg)
+                setIsLoading(false)
+                isStartingRef.current = false
             }
         } catch (err) {
-            console.error("Error accessing camera:", err)
-            setError(t.camera.cameraError)
-        } finally {
+            console.error('[Camera] Error:', err)
+            setError(tRef.current.camera.cameraError)
             setIsLoading(false)
+            isStartingRef.current = false
         }
-    }, [t]) // Only depends on translations
+    }, []) // NO DEPENDENCIES - uses refs for everything
+
+    // EFFECT: Attach stream to video element when stream state changes
+    useEffect(() => {
+        if (!stream || !videoRef.current) return
+
+        const video = videoRef.current
+        console.log('[Camera] Attaching stream to video element via effect')
+
+        video.srcObject = stream
+
+        const handleVideoReady = () => {
+            console.log('[Camera] Video playing (event)')
+            setVideoPlaying(true)
+            setIsLoading(false)
+            isStartingRef.current = false
+        }
+
+        video.addEventListener('playing', handleVideoReady)
+        video.addEventListener('loadeddata', handleVideoReady)
+
+        video.play().catch(e => {
+            if (e.name !== 'AbortError') {
+                console.warn('[Camera] Auto-play blocked in effect:', e)
+                // If autoplay fails, we still consider it "ready" enough to show controls
+                handleVideoReady()
+            }
+        })
+
+        return () => {
+            video.removeEventListener('playing', handleVideoReady)
+            video.removeEventListener('loadeddata', handleVideoReady)
+        }
+    }, [stream]) // Runs whenever we get a new stream (or new video ref due to key change)
 
     // STABILITY: Cleanup camera on page unload/navigation
     useEffect(() => {
@@ -158,16 +214,14 @@ export function CameraCapture({
         }
     }, [])
 
-    // STABILITY: Handle visibility change (tab switch) to prevent black screen
+    // STABILITY: Handle visibility change (tab switch)
     useEffect(() => {
         const handleVisibilityChange = () => {
             if (!document.hidden && streamRef.current && videoRef.current) {
                 if (!videoRef.current.srcObject) {
                     videoRef.current.srcObject = streamRef.current
                 }
-                videoRef.current.play().catch((e) => {
-                    console.warn('Could not resume video playback:', e)
-                })
+                videoRef.current.play().catch(() => { })
             }
         }
 
@@ -175,29 +229,19 @@ export function CameraCapture({
         return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
     }, [])
 
-    // Camera initialization effect - only runs on mount and facingMode change
+    // Camera initialization effect - ONLY cleanup logic
     useEffect(() => {
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-
-        if (!isMobile) {
-            // Stop existing stream before starting new one with different facing mode
-            if (streamRef.current) {
-                streamRef.current.getTracks().forEach(track => track.stop())
-                streamRef.current = null
-                setStream(null)
-                setVideoPlaying(false) // Reset video playing state when switching cameras
-            }
-            startCamera(facingMode)
-        }
-
-        // Cleanup on unmount
+        // Cleanup on unmount or facingMode change
         return () => {
             if (streamRef.current) {
                 streamRef.current.getTracks().forEach(track => track.stop())
                 streamRef.current = null
             }
+            isStartingRef.current = false
+            setVideoPlaying(false)
+            setHasStarted(false)
         }
-    }, [facingMode, startCamera])
+    }, [facingMode])
 
     const captureImage = useCallback(() => {
         if (videoRef.current && canvasRef.current) {
@@ -337,8 +381,99 @@ export function CameraCapture({
                 {/* Camera Preview - PC */}
                 <div className="flex-1 relative h-96 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100">
                     {!error ? (
+                        !hasStarted ? (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50/50">
+                                <Button
+                                    onClick={() => {
+                                        setHasStarted(true)
+                                        startCamera(facingMode)
+                                    }}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                                >
+                                    <Camera className="w-6 h-6 mr-2" />
+                                    Start Camera
+                                </Button>
+                                <p className="mt-4 text-sm text-stone-500">Camera access permission required</p>
+                            </div>
+                        ) : (
+                            <>
+                                <video
+                                    key={stream ? stream.id : 'novideo'}
+                                    ref={videoRef}
+                                    autoPlay
+                                    playsInline
+                                    muted
+                                    className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1] z-[1]"
+                                    onPlaying={() => setVideoPlaying(true)}
+                                    onLoadedData={() => setVideoPlaying(true)}
+                                    onCanPlay={() => setVideoPlaying(true)}
+                                    onPause={() => setVideoPlaying(false)}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="icon"
+                                    className="absolute top-2 right-2 z-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-none h-10 w-10"
+                                    onClick={toggleCamera}
+                                >
+                                    <SwitchCamera className="w-5 h-5" />
+                                </Button>
+                                <canvas ref={canvasRef} className="hidden" />
+                                {/* Only show loading overlay when camera is initializing - COMPLETELY REMOVE when playing */}
+                                {!videoPlaying && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-[2]">
+                                        <div className="text-center text-gray-400">
+                                            <div className="w-12 h-12 mx-auto mb-3 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin" />
+                                            <p className="text-sm font-medium text-emerald-600">
+                                                {isLoading ? 'Starting camera...' : 'Initializing...'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )
+                    ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 bg-gray-50">
+                            <div className="text-center text-gray-400 mb-4">
+                                <Camera className="w-16 h-16 mx-auto mb-2 opacity-30" />
+                                <p className="text-sm text-red-500 mb-4 opacity-90 max-w-xs mx-auto">{error}</p>
+                                <Button
+                                    onClick={() => startCamera(facingMode)}
+                                    variant="outline"
+                                    className="bg-white hover:bg-emerald-50 text-emerald-700 border-emerald-200"
+                                >
+                                    <RotateCcw className="w-4 h-4 mr-2" />
+                                    Retry Camera
+                                </Button>
+                            </div>
+                            <p className="text-sm text-gray-500 font-medium bg-white/50 backdrop-blur-sm py-2 px-4 rounded-full shadow-sm">
+                                Use buttons below to capture or upload
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Mobile: Stacked layout */}
+            <div className="md:hidden relative h-72 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100">
+                {!error ? (
+                    !hasStarted ? (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50/50">
+                            <Button
+                                onClick={() => {
+                                    setHasStarted(true)
+                                    startCamera(facingMode)
+                                }}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-6 py-4 shadow-lg"
+                            >
+                                <Camera className="w-5 h-5 mr-2" />
+                                Top to Start Camera
+                            </Button>
+                        </div>
+                    ) : (
                         <>
                             <video
+                                key={stream ? stream.id : 'novideo-mobile'}
                                 ref={videoRef}
                                 autoPlay
                                 playsInline
@@ -359,71 +494,21 @@ export function CameraCapture({
                                 <SwitchCamera className="w-5 h-5" />
                             </Button>
                             <canvas ref={canvasRef} className="hidden" />
-                            {/* Only show loading overlay when camera is initializing - COMPLETELY REMOVE when playing */}
+                            {/* Only show overlay when video not yet playing - COMPLETELY REMOVE when playing */}
                             {!videoPlaying && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-[2]">
-                                    <div className="text-center text-gray-400">
-                                        <div className="w-12 h-12 mx-auto mb-3 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin" />
-                                        <p className="text-sm font-medium text-emerald-600">
-                                            {isLoading ? 'Starting camera...' : 'Initializing...'}
-                                        </p>
-                                    </div>
+                                    {isLoading ? (
+                                        <div className="text-center">
+                                            <div className="w-12 h-12 mx-auto mb-3 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin" />
+                                            <p className="text-sm font-medium text-emerald-600">Starting camera...</p>
+                                        </div>
+                                    ) : (
+                                        getPlaceholder()
+                                    )}
                                 </div>
                             )}
                         </>
-                    ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 bg-gray-50">
-                            <div className="text-center text-gray-400 mb-4">
-                                <Camera className="w-16 h-16 mx-auto mb-2 opacity-30" />
-                                <p className="text-sm text-red-500">{error}</p>
-                            </div>
-                            <p className="text-sm text-gray-500 font-medium bg-white/50 backdrop-blur-sm py-2 px-4 rounded-full shadow-sm">
-                                Use buttons below to capture or upload
-                            </p>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Mobile: Stacked layout */}
-            <div className="md:hidden relative h-72 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100">
-                {!error ? (
-                    <>
-                        <video
-                            ref={videoRef}
-                            autoPlay
-                            playsInline
-                            muted
-                            className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1] z-[1]"
-                            onPlaying={() => setVideoPlaying(true)}
-                            onLoadedData={() => setVideoPlaying(true)}
-                            onCanPlay={() => setVideoPlaying(true)}
-                            onPause={() => setVideoPlaying(false)}
-                        />
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            size="icon"
-                            className="absolute top-2 right-2 z-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-none h-10 w-10"
-                            onClick={toggleCamera}
-                        >
-                            <SwitchCamera className="w-5 h-5" />
-                        </Button>
-                        <canvas ref={canvasRef} className="hidden" />
-                        {/* Only show overlay when video not yet playing - COMPLETELY REMOVE when playing */}
-                        {!videoPlaying && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-[2]">
-                                {isLoading ? (
-                                    <div className="text-center">
-                                        <div className="w-12 h-12 mx-auto mb-3 border-4 border-emerald-200 border-t-emerald-500 rounded-full animate-spin" />
-                                        <p className="text-sm font-medium text-emerald-600">Starting camera...</p>
-                                    </div>
-                                ) : (
-                                    getPlaceholder()
-                                )}
-                            </div>
-                        )}
-                    </>
+                    )
                 ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 bg-gray-50">
                         {/* Placeholder Graphic */}
@@ -459,6 +544,15 @@ export function CameraCapture({
                                         <span className="text-red-500 font-bold text-xl">!</span>
                                     </div>
                                     <div className="text-red-600 font-medium text-sm">{error}</div>
+                                    <Button
+                                        onClick={() => startCamera(facingMode)}
+                                        size="sm"
+                                        variant="outline"
+                                        className="w-full bg-white hover:bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    >
+                                        <RotateCcw className="w-3 h-3 mr-2" />
+                                        Retry Camera
+                                    </Button>
                                     <div className="text-xs text-stone-500 space-y-1 text-left w-full pl-2 border-l-2 border-stone-200">
                                         <p>1. Check browser permissions</p>
                                         <p>2. Try using chrome/edge</p>

@@ -400,6 +400,8 @@ export const ms: TranslationKeys = {
         bloodPressure: 'Tekanan Darah',
         bloodOxygen: 'Oksigen Darah',
         bodyTemperature: 'Suhu Badan',
+        hrv: 'HRV',
+        stressLevel: 'Tahap Tekanan',
         // TCM Pulse Qualities (脉象)
         tcmPulseQualities: 'Kualiti Nadi TCM',
         tcmPractitionerRequired: 'Memerlukan Pengamal TCM',
@@ -588,8 +590,106 @@ export const ms: TranslationKeys = {
         pleaseWait: 'Sila tunggu sementara kami melengkapkan analisis anda',
     },
     patientDashboard: {
-        title: 'Papan Pemuka Pesakit', welcome: 'Selamat Datang', startNewDiagnosis: 'Mulakan Diagnosis Baru', myInquiries: 'Pertanyaan Saya',
-        viewHistory: 'Lihat Sejarah', noInquiries: 'Tiada sejarah diagnosis lagi', noInquiriesDesc: 'Mulakan diagnosis TCM pertama anda.', recentDiagnosis: 'Diagnosis Terkini', viewReport: 'Lihat Laporan',
+        // Header
+        title: 'Papan Pemuka Pesakit',
+        welcomeBack: 'Selamat kembali',
+        newDiagnosis: 'Diagnosis Baru',
+
+        // Navigation tabs
+        tabs: {
+            healthJourney: 'Perjalanan Kesihatan',
+            mealPlanner: 'Perancang Pemakanan AI',
+            profile: 'Profil',
+            documents: 'Dokumen',
+            settings: 'Tetapan',
+        },
+
+        // Health Journey section
+        healthJourney: {
+            title: 'Perjalanan Kesihatan Anda',
+            vitalityTitle: 'Kecergasan Kesihatan Anda',
+            subtitle: 'Jejak perjalanan kesejahteraan anda dari masa ke masa',
+            totalSessions: 'Jumlah Sesi',
+            averageScore: 'Skor Purata',
+            progress: 'Kemajuan',
+            points: 'mata',
+            mostCommonPattern: 'Corak Paling Biasa',
+            time: 'kali',
+            times: 'kali',
+            sessionRecorded: 'sesi direkodkan',
+            sessionsRecorded: 'sesi direkod',
+            startJourneyToday: 'Mulakan perjalanan kesejahteraan hari ini',
+            noSessionsYet: 'Perjalanan kesejahteraan anda bermula di sini',
+            noSessionsDesc: 'Lengkapkan diagnosis TCM pertama anda untuk menjejak kesihatan anda.',
+            startFirstDiagnosis: 'Mulakan Diagnosis Pertama',
+            restoreMockData: 'Pulihkan Data Ujian',
+            restoring: 'Memulihkan...',
+            cantFindData: 'Tidak dapat mencari data ujian terdahulu anda?',
+            view: 'Lihat',
+        },
+
+        // Profile section
+        profile: {
+            title: 'Profil Saya',
+            subtitle: 'Urus maklumat peribadi anda',
+            personalInfo: 'Maklumat Peribadi',
+            yourProfileDetails: 'Butiran profil anda',
+            name: 'Nama',
+            age: 'Umur',
+            gender: 'Jantina',
+            height: 'Tinggi',
+            weight: 'Berat',
+            medicalHistory: 'Sejarah Perubatan',
+            notSet: 'Belum ditetapkan',
+            saveChanges: 'Simpan Perubahan',
+            saving: 'Menyimpan...',
+            male: 'Lelaki',
+            female: 'Perempuan',
+            other: 'Lain-lain',
+            fullName: 'Nama Penuh',
+        },
+
+        // Documents section
+        documents: {
+            title: 'Dokumen Perubatan',
+            subtitle: 'Muat naik dan urus laporan dan dokumen perubatan anda',
+            yourDocuments: 'Dokumen Anda',
+            filesUploaded: 'fail dimuat naik',
+            upload: 'Muat Naik',
+            noDocumentsYet: 'Tiada dokumen dimuat naik lagi',
+            deleteConfirm: 'Adakah anda pasti mahu memadam dokumen ini?',
+        },
+
+        // Settings section
+        settings: {
+            title: 'Tetapan',
+            subtitle: 'Urus keutamaan dan tetapan akaun anda',
+            languagePreference: 'Keutamaan Bahasa',
+            chooseLanguage: 'Pilih bahasa pilihan anda untuk aplikasi',
+            languageSaved: 'Keutamaan bahasa anda disimpan secara automatik',
+            accountInfo: 'Maklumat Akaun',
+            accountDetails: 'Butiran akaun anda',
+            email: 'Emel',
+            accountType: 'Jenis Akaun',
+            memberSince: 'Ahli Sejak',
+            signOut: 'Log Keluar',
+        },
+
+        // Meal Planner
+        mealPlanner: {
+            title: 'Perancang Pemakanan AI',
+            subtitle: 'Pelan hidangan 7 hari berdasarkan perlembagaan TCM anda',
+        },
+
+        // Legacy keys for backwards compatibility
+        welcome: 'Selamat Datang',
+        startNewDiagnosis: 'Mulakan Diagnosis Baru',
+        myInquiries: 'Pertanyaan Saya',
+        viewHistory: 'Lihat Sejarah',
+        noInquiries: 'Tiada sejarah diagnosis lagi',
+        noInquiriesDesc: 'Mulakan diagnosis TCM pertama anda.',
+        recentDiagnosis: 'Diagnosis Terkini',
+        viewReport: 'Lihat Laporan',
     },
     doctorDashboard: {
         title: 'Papan Pemuka Doktor', welcome: 'Selamat Datang, Dr.', patientHistory: 'Sejarah Pesakit', searchPatients: 'Cari Pesakit',
@@ -690,6 +790,16 @@ export const ms: TranslationKeys = {
             back: 'Kembali',
             confirmGenerate: 'Sahkan & Jana Laporan',
         },
+        instructions: {
+            observations: 'Sila semak dan edit pemerhatian klinikal di bawah. Ini akan dimasukkan dalam laporan akhir.',
+            inquiry: 'Sila semak maklumat asas pesakit dan butiran soal selidik.',
+            options: 'Sesuaikan maklumat yang ingin dimasukkan dalam laporan akhir yang dijana.',
+        },
+        placeholders: {
+            contact: 'Masukkan nombor telefon',
+            address: 'Masukkan alamat',
+            emergencyContact: 'Masukkan kenalan kecemasan',
+        },
     },
 
     // Resume Progress Dialog
@@ -703,5 +813,57 @@ export const ms: TranslationKeys = {
         justNow: 'baru sahaja',
         minutesAgo: 'minit lalu',
         hoursAgo: 'jam lalu',
+    },
+
+    // Health Data Import Wizard
+    healthDataImport: {
+        title: 'Import Data Kesihatan',
+        description: 'Sambungkan aplikasi kesihatan anda untuk import data aktiviti harian.',
+        selectProvider: 'Pilih penyedia:',
+        providers: {
+            samsung: 'Samsung Health',
+            apple: 'Apple Health',
+            google: 'Google Fit',
+        },
+        connecting: {
+            title: 'Menyambung...',
+            description: 'Mewujudkan sambungan selamat ke {provider}',
+        },
+        importing: {
+            syncing: 'Menyegerakkan data...',
+            activityHistory: 'Sejarah aktiviti',
+            sleepPatterns: 'Corak tidur',
+            heartRateVariability: 'Variabiliti kadar jantung',
+        },
+        result: {
+            success: 'Import Berjaya',
+            syncedFrom: 'Data disegerakkan dari {provider}',
+            steps: 'Langkah',
+            sleep: 'Tidur',
+            avgHr: 'Purata HR',
+            calories: 'Kalori',
+            confirm: 'Sahkan & Guna Data',
+            bpm: 'bpm',
+        },
+    },
+
+    // Report Chat Window
+    reportChat: {
+        title: 'Tanya Tentang Laporan Anda',
+        subtitle: 'Saya boleh bantu jelaskan diagnosis TCM anda',
+        placeholder: 'Tanya soalan tentang laporan anda...',
+        send: 'Hantar',
+        thinking: 'Sedang berfikir...',
+        suggestions: [
+            'Apakah maksud diagnosis saya?',
+            'Mengapa saya perlu elak makanan ini?',
+            'Berapa lama untuk pulih?',
+            'Terangkan titik akupresur',
+        ],
+        emptyState: {
+            text: 'Tanya saya apa sahaja mengenai laporan diagnosis TCM anda!',
+            quickQuestions: 'Soalan pantas',
+        },
+        floatingButton: 'Tanya tentang laporan anda',
     },
 };

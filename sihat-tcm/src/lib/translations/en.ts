@@ -534,6 +534,8 @@ export const en = {
         bloodPressure: 'Blood Pressure',
         bloodOxygen: 'Blood Oxygen',
         bodyTemperature: 'Body Temperature',
+        hrv: 'HRV',
+        stressLevel: 'Stress Level',
         // TCM Pulse Qualities (脉象)
         tcmPulseQualities: 'TCM Pulse Qualities',
         tcmPractitionerRequired: 'TCM Practitioner Required',
@@ -817,12 +819,14 @@ export const en = {
         // Health Journey section
         healthJourney: {
             title: 'Your Health Journey',
+            vitalityTitle: 'Your Health Vitality',
             subtitle: 'Track your wellness journey over time',
             totalSessions: 'Total Sessions',
             averageScore: 'Average Score',
             progress: 'Progress',
             points: 'points',
             mostCommonPattern: 'Most Common Pattern',
+            time: 'time',
             times: 'times',
             sessionRecorded: 'session recorded',
             sessionsRecorded: 'sessions recorded',
@@ -831,6 +835,8 @@ export const en = {
             noSessionsDesc: 'Complete your first TCM diagnosis to track your health and wellness over time.',
             startFirstDiagnosis: 'Start First Diagnosis',
             restoreMockData: 'Restore Mock Data',
+            restoring: 'Restoring...',
+            cantFindData: "Can't find your previous test data?",
             view: 'View',
         },
 
@@ -1065,12 +1071,22 @@ export const en = {
             back: 'Back',
             confirmGenerate: 'Confirm & Generate Report',
         },
+        instructions: {
+            observations: 'Please review and edit the clinical observations below. These will be included in the final report.',
+            inquiry: 'Please review the patient\'s basic information and inquiry details.',
+            options: 'Customize what information to include in the final generated report.',
+        },
+        placeholders: {
+            contact: 'Enter contact number',
+            address: 'Enter address',
+            emergencyContact: 'Enter emergency contact',
+        },
     },
 
     // Resume Progress Dialog
     resumeProgress: {
         title: 'Resume Previous Session?',
-        description: 'We found a previous diagnosis session. Would you like to continue where you left off?',
+        description: 'We found a previous diagnosis session. Would you like to pick up where you left off?',
         savedAt: 'Saved',
         lastStep: 'Last Step',
         resume: 'Resume',
@@ -1078,6 +1094,58 @@ export const en = {
         justNow: 'just now',
         minutesAgo: 'minutes ago',
         hoursAgo: 'hours ago',
+    },
+
+    // Health Data Import Wizard
+    healthDataImport: {
+        title: 'Health Data Import',
+        description: 'Connect to your health app to import daily activity data.',
+        selectProvider: 'Select a provider:',
+        providers: {
+            samsung: 'Samsung Health',
+            apple: 'Apple Health',
+            google: 'Google Fit',
+        },
+        connecting: {
+            title: 'Connecting...',
+            description: 'Establishing secure connection to {provider}',
+        },
+        importing: {
+            syncing: 'Syncing data...',
+            activityHistory: 'Activity history',
+            sleepPatterns: 'Sleep patterns',
+            heartRateVariability: 'Heart rate variability',
+        },
+        result: {
+            success: 'Import Successful',
+            syncedFrom: 'Data synced from {provider}',
+            steps: 'Steps',
+            sleep: 'Sleep',
+            avgHr: 'Avg HR',
+            calories: 'Calories',
+            confirm: 'Confirm & Use Data',
+            bpm: 'bpm',
+        },
+    },
+
+    // Report Chat Window
+    reportChat: {
+        title: 'Ask About Your Report',
+        subtitle: 'I can help explain your TCM diagnosis',
+        placeholder: 'Ask a question about your report...',
+        send: 'Send',
+        thinking: 'Thinking...',
+        suggestions: [
+            'What does my diagnosis mean?',
+            'Why should I avoid these foods?',
+            'How long until I feel better?',
+            'Explain the acupressure points',
+        ],
+        emptyState: {
+            text: 'Ask me anything about your TCM diagnosis report!',
+            quickQuestions: 'Quick questions',
+        },
+        floatingButton: 'Ask about your report',
     },
 };
 
