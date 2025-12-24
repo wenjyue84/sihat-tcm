@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { updateSession } from '@/lib/supabase/middleware';
 
 // Rate limit storage (in-memory for edge runtime)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
@@ -164,9 +165,13 @@ function checkRateLimit(
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // Only process protected API routes
+    // First, update the Supabase auth session for all requests
+    // This refreshes tokens and syncs cookies for server actions
+    const supabaseResponse = await updateSession(request);
+
+    // Only process rate limiting for protected API routes
     if (!isProtectedRoute(pathname)) {
-        return NextResponse.next();
+        return supabaseResponse;
     }
 
     console.log(`[Middleware] Processing protected route: ${pathname}`);
@@ -246,6 +251,16 @@ export async function middleware(request: NextRequest) {
 }
 
 // Configure which routes the middleware applies to
+// Apply to all routes except static files, images, and Next.js internals
 export const config = {
-    matcher: '/api/:path*',
+    matcher: [
+        /*
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - public files (images, etc.)
+         */
+        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    ],
 };

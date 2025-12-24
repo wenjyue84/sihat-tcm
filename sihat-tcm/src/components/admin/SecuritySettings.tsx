@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -239,8 +239,8 @@ export function SecuritySettings() {
                         <Card
                             key={level}
                             className={`cursor-pointer transition-all duration-200 ${isSelected
-                                    ? `${colors.border} border-2 ${colors.bg} ring-2 ${colors.ring} shadow-lg`
-                                    : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
+                                ? `${colors.border} border-2 ${colors.bg} ring-2 ${colors.ring} shadow-lg`
+                                : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
                                 }`}
                             onClick={() => handleLevelChange(level)}
                         >

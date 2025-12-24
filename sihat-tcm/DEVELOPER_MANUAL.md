@@ -110,6 +110,7 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 - Node.js 18+ and npm/yarn
 - PostgreSQL (via Supabase)
 - Supabase account and project
+- Supabase CLI (via npx - no installation required)
 - Google Gemini API key (for AI features)
 - Git
 
@@ -144,7 +145,22 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 
 4. **Database Setup**
    
-   Run the database schema files in order:
+   The Supabase CLI can be used via `npx` without global installation:
+   
+   ```bash
+   # Login to Supabase
+   npx supabase login
+   
+   # Link to your remote project
+   npx supabase link --project-ref <your-project-ref>
+   
+   # Pull the remote schema (optional, to sync with existing project)
+   npx supabase db pull
+   ```
+   
+   **Alternative: Manual SQL Execution**
+   
+   If you prefer to run SQL files directly via Supabase Dashboard or psql:
    ```bash
    # 1. Main schema
    psql -h <supabase-host> -U postgres -d postgres -f schema.sql
@@ -154,6 +170,46 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
    psql -h <supabase-host> -U postgres -d postgres -f add_medical_history_column.sql
    psql -h <supabase-host> -U postgres -d postgres -f update_schema.sql
    ```
+   
+   **Using Supabase CLI for Migrations**
+   
+   ```bash
+   # Initialize Supabase in your project (creates supabase/ directory)
+   npx supabase init
+   
+   # Start local Supabase (requires Docker)
+   npx supabase start
+   
+   # Create a new migration
+   npx supabase migration new <migration-name>
+   
+   # Apply migrations to local database
+   npx supabase db reset
+   
+   # Push migrations to remote database
+   npx supabase db push
+   
+   # Generate TypeScript types from your database
+   npx supabase gen types typescript --local > src/types/supabase.ts
+   ```
+   
+   **Common Supabase CLI Commands**
+   
+   ```bash
+   # View help
+   npx supabase --help
+   
+   # Check CLI version
+   npx supabase --version
+   
+   # Stop local Supabase
+   npx supabase stop
+   
+   # View database status
+   npx supabase status
+   ```
+   
+   **Note**: The first time you run any `npx supabase` command, it will download and cache the package. Subsequent runs will be faster.
 
 5. **Run the development server**
    ```bash

@@ -138,7 +138,17 @@ export default function DiagnosisWizard() {
             setAnalysisResult(null)
             setData((prev: Record<string, unknown>) => ({ ...prev, [stepKey]: null }))
         },
-        onContinue: () => {
+        onContinue: (editedData?: { observation: string, potentialIssues: string[] }) => {
+            if (editedData) {
+                setData((prev: Record<string, unknown>) => ({
+                    ...prev,
+                    [stepKey]: {
+                        ...(prev[stepKey] as any),
+                        observation: editedData.observation,
+                        potential_issues: editedData.potentialIssues
+                    }
+                }))
+            }
             setAnalysisResult(null)
             setTimeout(() => nextStep(stepKey), 0)
         },

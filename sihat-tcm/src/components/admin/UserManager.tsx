@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,6 +23,7 @@ export interface UserProfile {
     gender?: string
     height?: number
     weight?: number
+    bmi?: number
     medical_history?: string
     updated_at?: string
     created_at?: string
@@ -109,9 +110,17 @@ export function UserManager() {
             gender: user.gender || '',
             height: user.height,
             weight: user.weight,
+            bmi: user.bmi,
             medical_history: user.medical_history || '',
         })
         setIsEditDialogOpen(true)
+    }
+
+    const calculateBMI = (height?: number, weight?: number) => {
+        if (!height || !weight) return null
+        const heightInMeters = height / 100
+        const bmi = weight / (heightInMeters * heightInMeters)
+        return bmi
     }
 
     const handleSave = async () => {
@@ -120,12 +129,16 @@ export function UserManager() {
         try {
             setSaving(true)
 
+            const calculatedBmi = calculateBMI(formData.height, formData.weight)
+            const bmiToSave = calculatedBmi ? parseFloat(calculatedBmi.toFixed(1)) : null
+
             const dataToSave = {
                 full_name: formData.full_name?.trim() || null,
                 age: formData.age || null,
                 gender: formData.gender || null,
                 height: formData.height || null,
                 weight: formData.weight || null,
+                bmi: bmiToSave,
                 medical_history: formData.medical_history || null,
                 updated_at: new Date().toISOString()
             }
@@ -206,13 +219,6 @@ export function UserManager() {
         patients: users.filter(u => u.role === 'patient').length,
         doctors: users.filter(u => u.role === 'doctor').length,
         admins: users.filter(u => u.role === 'admin').length,
-    }
-
-    const calculateBMI = (height?: number, weight?: number) => {
-        if (!height || !weight) return null
-        const heightInMeters = height / 100
-        const bmi = weight / (heightInMeters * heightInMeters)
-        return bmi.toFixed(1)
     }
 
     const getBMICategory = (bmi: number) => {
@@ -308,7 +314,9 @@ export function UserManager() {
                                     <TableRow>
                                         <TableHead>User</TableHead>
                                         <TableHead>Role</TableHead>
-                                        <TableHead className="hidden md:table-cell">Details</TableHead>
+                                        <TableHead className="hidden md:table-cell">Age</TableHead>
+                                        <TableHead className="hidden md:table-cell">Gender</TableHead>
+                                        <TableHead className="hidden md:table-cell">BMI</TableHead>
                                         <TableHead className="hidden lg:table-cell">Joined</TableHead>
                                         <TableHead className="hidden xl:table-cell">Last Updated</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
@@ -317,7 +325,7 @@ export function UserManager() {
                                 <TableBody>
                                     {paginatedUsers.length === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                                            <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                                                 {searchQuery || roleFilter !== 'all'
                                                     ? 'No users match your search criteria.'
                                                     : 'No users found.'}
@@ -349,21 +357,26 @@ export function UserManager() {
                                                     </TableCell>
                                                     <TableCell className="hidden md:table-cell">
                                                         {user.role === 'patient' ? (
-                                                            <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                                                                <div className="flex items-center gap-2">
-                                                                    <span>{user.age ? `${user.age} yrs` : 'Age: -'}</span>
-                                                                    <span>•</span>
-                                                                    <span className="capitalize">{user.gender || 'Gender: -'}</span>
-                                                                </div>
-                                                                {(() => {
-                                                                    const bmi = calculateBMI(user.height, user.weight)
-                                                                    return bmi ? (
-                                                                        <div className="text-xs">
-                                                                            BMI: <span className="font-medium text-stone-700">{bmi}</span>
-                                                                        </div>
-                                                                    ) : null
-                                                                })()}
-                                                            </div>
+                                                            <span className="text-sm text-muted-foreground">{user.age ? `${user.age} yrs` : '-'}</span>
+                                                        ) : (
+                                                            <span className="text-muted-foreground">-</span>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="hidden md:table-cell">
+                                                        {user.role === 'patient' ? (
+                                                            <span className="text-sm text-muted-foreground capitalize">{user.gender || '-'}</span>
+                                                        ) : (
+                                                            <span className="text-muted-foreground">-</span>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="hidden md:table-cell">
+                                                        {user.role === 'patient' ? (
+                                                            (() => {
+                                                                const bmi = user.bmi || calculateBMI(user.height, user.weight)
+                                                                return bmi ? (
+                                                                    <span className="text-sm font-medium text-stone-700">{bmi.toFixed(1)}</span>
+                                                                ) : <span className="text-muted-foreground">-</span>
+                                                            })()
                                                         ) : (
                                                             <span className="text-muted-foreground">-</span>
                                                         )}
@@ -517,10 +530,10 @@ export function UserManager() {
                                             <div className="text-sm text-muted-foreground">BMI</div>
                                             {(() => {
                                                 const bmi = calculateBMI(selectedUser.height, selectedUser.weight)
-                                                const category = bmi ? getBMICategory(parseFloat(bmi)) : null
+                                                const category = bmi ? getBMICategory(bmi) : null
                                                 return bmi ? (
                                                     <div className="flex items-center gap-2">
-                                                        <span className="font-semibold">{bmi}</span>
+                                                        <span className="font-semibold">{bmi.toFixed(1)}</span>
                                                         <Badge variant="outline" className={category?.color}>
                                                             {category?.label}
                                                         </Badge>
@@ -642,10 +655,10 @@ export function UserManager() {
                                 <div className="flex items-center gap-2 mt-1">
                                     {(() => {
                                         const bmi = calculateBMI(formData.height, formData.weight)
-                                        const category = bmi ? getBMICategory(parseFloat(bmi)) : null
+                                        const category = bmi ? getBMICategory(bmi) : null
                                         return bmi ? (
                                             <>
-                                                <span className="text-lg font-semibold">{bmi}</span>
+                                                <span className="text-lg font-semibold">{bmi.toFixed(1)}</span>
                                                 <Badge variant="outline" className={category?.color}>
                                                     {category?.label}
                                                 </Badge>

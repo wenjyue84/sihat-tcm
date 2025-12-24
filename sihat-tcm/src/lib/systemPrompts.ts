@@ -1292,3 +1292,15 @@ Provide a brief summary including:
 6. **INTEGRATIVE**: Frame recommendations as complementary to TCM care
 `;
 
+
+
+// ============================================================================
+// TCM MEAL PLANNER PROMPT
+// ============================================================================
+export const MEAL_PLANNER_PROMPT = `You are an expert TCM (Traditional Chinese Medicine) Nutritional Therapist with decades of experience in Chinese dietary therapy.
+
+## Patient Constitution Analysis
+Constitution: {{constitution}}
+Syndrome Pattern: {{syndrome}}
+Foods to STRICTLY AVOID: {{avoid_list}}
+Beneficial Foods to PRIORITIZE: {{beneficial_list}}`;

@@ -44,7 +44,7 @@ interface ImageAnalysisStepRendererProps {
     /** Callback to retake photo */
     onRetake: () => void
     /** Callback to continue to next step */
-    onContinue: () => void
+    onContinue: (data?: { observation: string, potentialIssues: string[] }) => void
     /** Callback to skip analysis */
     onSkip: () => void
     /** Callback to go back */

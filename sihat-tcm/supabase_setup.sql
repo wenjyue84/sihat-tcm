@@ -10,6 +10,7 @@ create table if not exists public.profiles (
   gender text,
   height float,
   weight float,
+  bmi float,
   medical_history text,
   updated_at timestamp with time zone default timezone('utc'::text, now())
 );

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -20,6 +20,7 @@ import { PractitionerList } from './report/PractitionerList'
 
 import { ReportChatWindow, ReportChatButton, type Message } from './ReportChatWindow'
 import { InfographicsGenerator } from './InfographicsGenerator'
+import { SaveToDashboardBanner } from '@/components/patient/SaveToDashboardBanner'
 
 type Language = 'en' | 'zh' | 'ms'
 
@@ -344,8 +345,15 @@ export function DiagnosisReport({ data, patientInfo, reportOptions, smartConnect
                 variants={container}
                 initial="hidden"
                 animate="show"
-                className={`space-y-6 md:space-y-8 w-full px-5 md:px-6 md:max-w-4xl md:mx-auto ${isChatExpanded ? 'hidden md:block md:w-1/2 h-full overflow-y-auto p-6 border-r border-stone-200' : ''}`}
+                className={`space-y-6 md:space-y-8 w-full px-4 md:px-6 md:max-w-4xl md:mx-auto ${isChatExpanded ? 'hidden md:block md:w-1/2 h-full overflow-y-auto p-6 border-r border-stone-200' : ''}`}
             >
+                {/* Save to Dashboard Banner */}
+                <SaveToDashboardBanner
+                    isGuest={!user}
+                    isSaved={hasSaved}
+                    onViewDashboard={() => router.push('/patient/dashboard')}
+                />
+
                 <ReportHeader
                     doctorInfo={doctorInfo}
                     hasSaved={hasSaved}

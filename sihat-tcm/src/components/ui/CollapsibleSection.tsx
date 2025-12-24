@@ -102,7 +102,7 @@ export function CollapsibleSection({
                         className="overflow-hidden"
                         id={`collapsible-content-${title.replace(/\s+/g, '-').toLowerCase()}`}
                     >
-                        <div className="p-4 md:p-5 pt-0">
+                        <div className="p-3 md:p-5 pt-0">
                             <div className="pt-4 border-t border-stone-100">
                                 {children}
                             </div>

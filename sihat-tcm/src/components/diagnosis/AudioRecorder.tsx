@@ -400,11 +400,11 @@ export function AudioRecorder({ onComplete, onBack, initialData }: { onComplete:
     }, [])
 
     // Continue after analysis result (uses refs)
-    const handleContinueWithResult = useCallback(() => {
+    const handleContinueWithResult = useCallback((overriddenAnalysis?: AudioAnalysisData) => {
         if (audioDataRef.current) {
             onCompleteRef.current({
                 audio: audioDataRef.current,
-                analysis: analysisResultRef.current
+                analysis: overriddenAnalysis || analysisResultRef.current
             })
         }
     }, [])

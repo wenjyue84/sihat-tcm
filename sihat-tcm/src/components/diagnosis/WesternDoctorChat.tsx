@@ -9,7 +9,7 @@ import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { WESTERN_DOCTOR_PROMPT } from '@/lib/systemPrompts'
 import { ThinkingAnimation } from './ThinkingAnimation'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase/client'
 
 // Type declaration for Web Speech API
 interface SpeechRecognitionEvent extends Event {

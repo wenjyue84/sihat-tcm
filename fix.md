@@ -336,6 +336,67 @@
 *   **Date**: December 14, 2025
 *   **Status**: ✅ Fixed
 
+#### 14. Mobile Layout Optimization - Excessive Margins on TCM Report (Web)
+*   **Problem**: On mobile view of "Comprehensive TCM Report", there was too much margin on left and right sides, limiting text display per row. The layout was wasting horizontal space unnecessarily.
+*   **Root Causes**:
+    1. **Container Padding**: Main report container used `px-5` (20px) on mobile, which was too generous.
+    2. **Text Width Constraint**: Text content used `w-[90%]` even on mobile, further reducing usable width.
+    3. **Internal Padding**: CollapsibleSection components used `p-4` (16px) on mobile, adding extra horizontal padding.
+*   **Solution**: Applied three-layer optimization strategy:
+    1. **Reduced Container Padding**: Changed from `px-5` to `px-4` (20px → 16px) on mobile in `DiagnosisReport.tsx`.
+    2. **Removed Mobile Text Constraint**: Changed text content from `w-[90%] max-w-[680px]` to `w-full md:w-[90%] md:max-w-[680px]` in `ReportDiagnosisSection.tsx`, allowing full width on mobile while maintaining optimal reading width on desktop.
+    3. **Reduced Internal Padding**: Changed CollapsibleSection from `p-4` to `p-3` (16px → 12px) on mobile.
+
+    **Before (Wasteful)**:
+    ```tsx
+    // Container
+    className="w-full px-5 md:px-6 md:max-w-4xl md:mx-auto"
+    
+    // Text content
+    <div className="w-[90%] max-w-[680px] mx-auto">
+    
+    // CollapsibleSection
+    <div className="p-4 md:p-5 pt-0">
+    ```
+
+    **After (Optimized)**:
+    ```tsx
+    // Container - reduced mobile padding
+    className="w-full px-4 md:px-6 md:max-w-4xl md:mx-auto"
+    
+    // Text content - full width on mobile, constrained on desktop
+    <div className="w-full md:w-[90%] md:max-w-[680px] md:mx-auto">
+    
+    // CollapsibleSection - reduced mobile padding
+    <div className="p-3 md:p-5 pt-0">
+    ```
+
+*   **Impact**:
+    - **Before**: ~271px usable text width on 375px device
+    - **After**: ~319px usable text width on 375px device
+    - **Improvement**: +48px (+17.7% more text per row)
+*   **Additional Changes**:
+    - Fixed `DiagnosisWizard.tsx` main container: `max-w-4xl` → `w-full px-5 md:px-6 md:max-w-4xl md:mx-auto`
+    - Fixed `InquiryChatStep.tsx` form: `max-w-4xl` → `w-full md:max-w-4xl md:mx-auto`
+    - Created unit tests for responsive layout verification
+    - Created `/test-mobile-layout` page for visual verification
+*   **Key Learnings**:
+    1. **Mobile-First Padding**: Use minimal padding on mobile (px-4 = 16px), increase on desktop (px-6 = 24px).
+    2. **Text Width Strategy**: Full width on mobile for maximum space, constrained width on desktop for optimal reading (45-75 characters per line).
+    3. **Layered Optimization**: Container padding + internal padding + text constraints all contribute to wasted space - optimize all layers.
+*   **Files Modified**:
+    - `src/components/diagnosis/DiagnosisReport.tsx` - Reduced container padding
+    - `src/components/diagnosis/DiagnosisWizard.tsx` - Removed max-width constraint on mobile
+    - `src/components/diagnosis/InquiryChatStep.tsx` - Removed max-width constraint on mobile
+    - `src/components/diagnosis/report/ReportDiagnosisSection.tsx` - Full width text on mobile
+    - `src/components/ui/CollapsibleSection.tsx` - Reduced internal padding on mobile
+*   **Files Created**:
+    - `src/components/diagnosis/DiagnosisWizard.test.tsx` - Responsive layout tests
+    - `src/components/diagnosis/InquiryChatStep.test.tsx` - Responsive layout tests
+    - `src/app/test-mobile-layout/page.tsx` - Visual verification page
+*   **Date**: January 2025
+*   **Status**: ✅ Fixed
+
 ---
 
 ### 🔌 Connectivity Issues
@@ -358,6 +419,59 @@
     cd sihat-tcm-mobile
     npx expo start --clear
     ```
+*   **Status**: ✅ Fixed
+
+---
+
+### 🛠️ Development Tools
+
+#### 15. Supabase CLI Installation (2025-12-24)
+*   **Problem**: Cannot install Supabase CLI globally via npm. Running `npm install -g supabase` fails with error:
+    ```
+    Installing Supabase CLI as a global module is not supported.
+    Please use one of the supported package managers: https://github.com/supabase/cli#install-the-cli
+    ```
+*   **Root Cause**: Supabase CLI v2.70.4+ does not support global npm installation. The recommended installation methods are:
+    - **Windows**: Scoop or Chocolatey (both require admin privileges)
+    - **macOS**: Homebrew
+    - **Linux**: Package managers or direct binary download
+*   **Solution**: Use `npx` to run Supabase CLI without installation (recommended for Windows without admin access):
+    ```bash
+    # No installation needed! Just use npx
+    npx supabase --version
+    
+    # Login to Supabase
+    npx supabase login
+    
+    # Link to remote project
+    npx supabase link --project-ref <your-project-ref>
+    
+    # Start local Supabase (requires Docker)
+    npx supabase start
+    
+    # Generate TypeScript types
+    npx supabase gen types typescript --local > src/types/supabase.ts
+    
+    # Push migrations
+    npx supabase db push
+    ```
+*   **Advantages of npx method**:
+    - ✅ No installation required
+    - ✅ No admin privileges needed
+    - ✅ Always uses latest version
+    - ✅ Works on all platforms (Windows, macOS, Linux)
+    - ✅ First run downloads and caches the package, subsequent runs are fast
+*   **Alternative Methods** (if you prefer permanent installation):
+    - **Chocolatey** (Windows, requires admin): `choco install supabase -y`
+    - **Scoop** (Windows): 
+      ```bash
+      scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+      scoop install supabase
+      ```
+    - **Homebrew** (macOS): `brew install supabase/tap/supabase`
+*   **Files Updated**:
+    - `sihat-tcm/DEVELOPER_MANUAL.md` - Added Supabase CLI documentation
+    - `fix.md` - Documented this issue and solution
 *   **Status**: ✅ Fixed
 
 ---

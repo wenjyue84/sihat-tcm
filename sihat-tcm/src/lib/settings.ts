@@ -48,36 +48,17 @@ export interface AdminSettings {
 }
 
 /**
- * Fetch admin settings from Supabase (Server-side only)
+ * Fetch admin settings from Supabase with file fallback (Server-side only)
  */
 export async function getAdminSettings(): Promise<AdminSettings> {
     try {
-        if (!supabaseAdmin) return DEFAULT_SETTINGS;
-
-        const { data, error } = await supabaseAdmin
-            .from('admin_settings')
-            .select('*')
-            .single();
-
-        if (error) {
-            // console.warn('[Settings] Failed to fetch admin settings from DB:', error.message);
-            return DEFAULT_SETTINGS;
-        }
-
-        if (data) {
-            return {
-                geminiApiKey: data.gemini_api_key,
-                medicalHistorySummaryPrompt: data.medical_history_summary_prompt || DEFAULT_SETTINGS.medicalHistorySummaryPrompt,
-                dietaryAdvicePrompt: data.dietary_advice_prompt || DEFAULT_SETTINGS.dietaryAdvicePrompt,
-                backgroundMusicEnabled: data.background_music_enabled ?? false,
-                backgroundMusicUrl: data.background_music_url || '',
-                backgroundMusicVolume: data.background_music_volume ?? 0.5
-            };
-        }
+        // Use the new storage system with fallback
+        const { getSettingsWithFallback } = await import('./settingsStorage');
+        return await getSettingsWithFallback();
     } catch (error) {
         console.error('[Settings] Error fetching settings:', error);
+        return DEFAULT_SETTINGS;
     }
-    return DEFAULT_SETTINGS;
 }
 
 /**

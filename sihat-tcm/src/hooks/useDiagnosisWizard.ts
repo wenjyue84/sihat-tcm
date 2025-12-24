@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
@@ -67,6 +67,58 @@ export const generateMockReport = (data: any) => {
         patient_summary: { name: name },
         timestamp: new Date().toISOString()
     };
+}
+
+// Calculate an overall health score from the diagnosis report (0-100)
+function calculateOverallScore(reportData: any): number {
+    try {
+        // Default to 70 (neutral/fair) if we can't calculate
+        let score = 70;
+
+        // Extract diagnosis text - can be string or object with primary_pattern
+        let diagnosisText = '';
+        if (typeof reportData.diagnosis === 'string') {
+            diagnosisText = reportData.diagnosis;
+        } else if (reportData.diagnosis?.primary_pattern) {
+            diagnosisText = reportData.diagnosis.primary_pattern;
+        } else if (reportData.diagnosis?.pattern) {
+            diagnosisText = reportData.diagnosis.pattern;
+        }
+
+        // Factor 1: Severity keywords in diagnosis (lower score for severe conditions)
+        const diagnosisLower = diagnosisText.toLowerCase();
+        if (diagnosisLower.includes('severe') || diagnosisLower.includes('deficiency')) {
+            score -= 15;
+        } else if (diagnosisLower.includes('mild') || diagnosisLower.includes('minor')) {
+            score += 10;
+        }
+
+        // Factor 2: Number of affected organs/systems (more = lower score)
+        const affectedOrgans = reportData.diagnosis?.affected_organs?.length || 0;
+        score -= Math.min(affectedOrgans * 5, 20);
+
+        // Extract constitution text - can be string or object with type property
+        let constitutionText = '';
+        if (typeof reportData.constitution === 'string') {
+            constitutionText = reportData.constitution;
+        } else if (reportData.constitution?.type) {
+            constitutionText = reportData.constitution.type;
+        }
+
+        // Factor 3: Constitution balance
+        const constitutionLower = constitutionText.toLowerCase();
+        if (constitutionLower.includes('balanced') || constitutionLower.includes('harmonious')) {
+            score += 15;
+        } else if (constitutionLower.includes('deficient') || constitutionLower.includes('stagnant')) {
+            score -= 10;
+        }
+
+        // Ensure score is within 0-100 range
+        return Math.max(0, Math.min(100, Math.round(score)));
+    } catch (e) {
+        console.error('[calculateOverallScore] Error:', e);
+        return 70; // Default neutral score
+    }
 }
 
 
@@ -286,12 +338,48 @@ export function useDiagnosisWizard() {
                 };
 
                 if (user) {
+                    // Save to legacy inquiries table (for backward compatibility)
                     await supabase.from('inquiries').insert({
                         user_id: user.id,
                         symptoms: data.basic_info?.symptoms || 'Not provided',
                         diagnosis_report: reportWithProfile,
                         created_at: new Date().toISOString()
                     });
+
+                    // Save to new diagnosis_sessions table (Health Passport)
+                    const { saveDiagnosis } = await import('@/lib/actions');
+
+                    // Extract primary diagnosis string from object or use as-is if string
+                    let primaryDiagnosis = 'Diagnosis pending';
+                    if (typeof resultData.diagnosis === 'string') {
+                        primaryDiagnosis = resultData.diagnosis;
+                    } else if (resultData.diagnosis?.primary_pattern) {
+                        primaryDiagnosis = resultData.diagnosis.primary_pattern;
+                    } else if (resultData.diagnosis?.pattern) {
+                        primaryDiagnosis = resultData.diagnosis.pattern;
+                    }
+
+                    // Extract constitution string from object or use as-is if string
+                    let constitutionValue = undefined;
+                    if (typeof resultData.constitution === 'string') {
+                        constitutionValue = resultData.constitution;
+                    } else if (resultData.constitution?.type) {
+                        constitutionValue = resultData.constitution.type;
+                    }
+
+                    const saveResult = await saveDiagnosis({
+                        primary_diagnosis: primaryDiagnosis,
+                        constitution: constitutionValue,
+                        overall_score: calculateOverallScore(resultData),
+                        full_report: reportWithProfile
+                    });
+
+                    if (saveResult.success) {
+                        console.log('[Wizard] Saved to Health Passport:', saveResult.data?.id);
+                    } else {
+                        console.error('[Wizard] Failed to save to Health Passport:', saveResult.error);
+                    }
+
                     setIsSaved(true);
                 }
             } catch (e) {

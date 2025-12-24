@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2, Check, ArrowLeft, RefreshCw, AlertCircle, Clock, Wifi, FileText, Sparkles, CheckCircle2, Info } from 'lucide-react'
+import { Loader2, Check, ArrowLeft, RefreshCw, AlertCircle, Clock, Wifi, FileText, Sparkles, CheckCircle2, Info, SkipForward } from 'lucide-react'
 import { ModelCapabilitiesCarousel } from './ModelCapabilitiesCarousel'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
@@ -52,7 +52,10 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
     const [progressStep, setProgressStep] = useState<ProgressStep>('connecting')
     const [showReviewPrompt, setShowReviewPrompt] = useState(false)
     const timerRef = useRef<NodeJS.Timeout | null>(null)
+
     const startTimeRef = useRef<number>(0)
+    const abortControllerRef = useRef<AbortController | null>(null)
+    const hasUserEditedRef = useRef(false)
 
     // Refs for stable callbacks
     const onCompleteRef = useRef(onComplete)
@@ -80,6 +83,15 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
     }
 
     const generateSummary = async () => {
+        // Cancel any previous request
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort()
+        }
+
+        // Create new controller
+        const controller = new AbortController()
+        abortControllerRef.current = controller
+
         setIsLoading(true)
         setError(null)
         setProgressStep('connecting')
@@ -102,7 +114,8 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
                     // Model is determined by doctor level from DoctorContext
                     // gemini-1.5-flash is deprecated - now uses gemini-3-pro-preview/gemini-2.5-pro/gemini-2.0-flash
                     model: doctorInfo.model
-                })
+                }),
+                signal: controller.signal
             })
 
             if (!response.ok) {
@@ -113,10 +126,27 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
             const result = await response.json()
             stopTimer()
             setProgressStep('complete')
-            setSummary(result.summary)
+
+            // Only update summary if user hasn't edited manually
+            if (!hasUserEditedRef.current) {
+                setSummary(result.summary)
+            }
         } catch (err: any) {
+            // Check if this was an abort from unmount (check if component is still mounted/valid context)
+            if (err.name === 'AbortError') {
+                return
+            }
+
             console.error('Error generating summary:', err)
             stopTimer()
+
+            // If user has skipped/edited, we suppress the error UI to keep them in manual entry mode
+            if (hasUserEditedRef.current || !isLoading) {
+                // Even if we don't show error, we should probably stop loading if it was still true (but here check ensures safety)
+                // If !isLoading, user is already editing or done.
+                return
+            }
+
             setProgressStep('error')
 
             let errorData = { code: 'UNKNOWN', error: 'Unknown error', step: 'unknown', duration: elapsedTime * 1000 }
@@ -163,15 +193,36 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
                     duration: failedDuration
                 })
             }
-        } finally {
-            setIsLoading(false)
+        }
+        finally {
+            // Only update loading state if this is still the active controller
+            if (abortControllerRef.current === controller) {
+                setIsLoading(false)
+            }
         }
     }
 
     useEffect(() => {
         generateSummary()
-        return () => stopTimer()
+        return () => {
+            stopTimer()
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort()
+            }
+        }
     }, [])
+
+    const handleSkip = () => {
+        // Do NOT abort the controller - let it run in background
+        // if (abortControllerRef.current) {
+        //     abortControllerRef.current.abort()
+        // }
+
+        stopTimer()
+        setIsLoading(false)
+        // Ensure summary is empty so user can type (if it was empty)
+        if (!summary) setSummary('')
+    }
 
     // Handler for mobile bottom nav "Next" press
     const handleMobileNext = useCallback(() => {
@@ -253,6 +304,11 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
                 zh: '知道了',
                 ms: 'Faham'
             }
+        },
+        skipBtn: {
+            en: 'Skip Generation',
+            zh: '手动填写',
+            ms: 'Langkau Penjanaan'
         }
     }
 
@@ -340,6 +396,16 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
                         <div className="w-full max-w-md">
                             <ModelCapabilitiesCarousel />
                         </div>
+
+                        {/* Skip Button */}
+                        <Button
+                            variant="ghost"
+                            onClick={handleSkip}
+                            className="text-stone-500 hover:text-stone-700 hover:bg-stone-100 mt-2"
+                        >
+                            <SkipForward className="w-4 h-4 mr-2" />
+                            {content.skipBtn[lang]}
+                        </Button>
                     </div>
                 ) : error ? (
                     <div className="flex-1 flex flex-col p-3 sm:p-6 bg-stone-50 rounded-lg border border-stone-200 overflow-auto">
@@ -387,7 +453,10 @@ export function InquirySummaryStep({ onComplete, onBack, data }: InquirySummaryS
                     <div className="flex-1 flex flex-col min-h-0 overflow-hidden rounded-lg border border-stone-200 bg-stone-50">
                         <Textarea
                             value={summary}
-                            onChange={(e) => setSummary(e.target.value)}
+                            onChange={(e) => {
+                                setSummary(e.target.value)
+                                hasUserEditedRef.current = true
+                            }}
                             className="flex-1 min-h-[200px] sm:min-h-[300px] text-sm sm:text-base p-3 sm:p-4 leading-relaxed bg-stone-50 border-0 focus:border-emerald-500 focus:ring-emerald-500 resize-none font-mono"
                             style={{
                                 whiteSpace: 'pre-wrap',

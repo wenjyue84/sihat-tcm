@@ -2,9 +2,10 @@
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Check, RotateCcw, AlertCircle, AlertTriangle } from 'lucide-react'
+import { Check, RotateCcw, AlertCircle, AlertTriangle, Pencil, Save, X } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { Textarea } from '@/components/ui/textarea'
 import {
     Dialog,
     DialogContent,
@@ -14,13 +15,14 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { useState, useEffect } from 'react'
+import { Label } from '@/components/ui/label'
 
 interface ObservationResultProps {
     image: string;
     observation: string;
     potentialIssues: string[];
     onRetake: () => void;
-    onContinue: () => void;
+    onContinue: (data?: { observation: string, potentialIssues: string[] }) => void;
     type: 'tongue' | 'face' | 'part';
     status?: string; // 'invalid_image' when image doesn't match expected content
     message?: string; // Message explaining what was detected
@@ -47,6 +49,17 @@ export function ObservationResult({
     const [showWarning, setShowWarning] = useState(false)
     const [showGuidelines, setShowGuidelines] = useState(false)
 
+    // Editing State
+    const [isEditing, setIsEditing] = useState(false)
+    const [editedObservation, setEditedObservation] = useState(observation || "")
+    const [editedIssues, setEditedIssues] = useState<string>(potentialIssues ? potentialIssues.join('\n') : "")
+
+    // Update local state when props change
+    useEffect(() => {
+        setEditedObservation(observation || "")
+        setEditedIssues(potentialIssues ? potentialIssues.join('\n') : "")
+    }, [observation, potentialIssues])
+
     // Hide global navigation
     useEffect(() => {
         setNavigationState({
@@ -67,21 +80,86 @@ export function ObservationResult({
         if (isInvalidImage) {
             setShowWarning(true)
         } else {
-            onContinue()
+            // Parse issues back to array
+            const issuesArray = editedIssues
+                .split('\n')
+                .map(i => i.trim())
+                .filter(i => i.length > 0);
+
+            onContinue({
+                observation: editedObservation,
+                potentialIssues: issuesArray
+            })
         }
+    }
+
+    const toggleEdit = () => {
+        if (isEditing) {
+            // Saving (just toggle off, data is ready in state for Continue)
+            setIsEditing(false)
+        } else {
+            setIsEditing(true)
+        }
+    }
+
+    const cancelEdit = () => {
+        // Revert changes
+        setEditedObservation(observation || "")
+        setEditedIssues(potentialIssues ? potentialIssues.join('\n') : "")
+        setIsEditing(false)
     }
 
     return (
         <Card className="p-4 md:p-6 space-y-6 pb-24 md:pb-6">
-            <div className="text-center md:text-left">
-                <h2 className="text-xl font-semibold text-emerald-800">
-                    {type === 'tongue' ? 'Tongue Analysis Result' : type === 'face' ? 'Face Analysis Result' : 'Specific Area Analysis Result'}
-                </h2>
-                <p className="text-stone-600 text-sm mt-1">
-                    {isInvalidImage
-                        ? 'The image could not be analyzed. Please review and retake if needed.'
-                        : 'Here is what our AI observed. Please review before proceeding.'}
-                </p>
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-center md:text-left">
+                <div>
+                    <h2 className="text-xl font-semibold text-emerald-800">
+                        {type === 'tongue' ? 'Tongue Analysis Result' : type === 'face' ? 'Face Analysis Result' : 'Specific Area Analysis Result'}
+                    </h2>
+                    <p className="text-stone-600 text-sm mt-1">
+                        {isInvalidImage
+                            ? 'The image could not be analyzed. Please review and retake if needed.'
+                            : 'Here is what our AI observed. Please review before proceeding.'}
+                    </p>
+                </div>
+
+                {/* Edit Toggle Button */}
+                {!isInvalidImage && (
+                    <div className="flex justify-center md:justify-end">
+                        {!isEditing ? (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={toggleEdit}
+                                className="text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+                            >
+                                <Pencil className="w-4 h-4 mr-2" />
+                                Edit Result
+                            </Button>
+                        ) : (
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={cancelEdit}
+                                    className="text-stone-500 hover:bg-stone-100"
+                                >
+                                    <X className="w-4 h-4 mr-1" />
+                                    Cancel
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={toggleEdit}
+                                    className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                                >
+                                    <Save className="w-4 h-4 mr-2" />
+                                    Done
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -120,34 +198,69 @@ export function ObservationResult({
                         </div>
                     ) : (
                         <>
-                            <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
-                                <h3 className="font-medium text-emerald-900 mb-2 flex items-center">
-                                    <Check className="w-4 h-4 mr-2" />
-                                    Observation
-                                    {confidence !== undefined && confidence >= 60 && (
-                                        <span className="ml-2 text-xs text-emerald-600 font-normal">
-                                            ({confidence}% confidence)
-                                        </span>
-                                    )}
+                            {/* Observation Section */}
+                            <div className={`p-4 rounded-lg border transition-colors ${isEditing ? 'bg-white border-emerald-300 ring-2 ring-emerald-100' : 'bg-emerald-50 border-emerald-100'}`}>
+                                <h3 className="font-medium text-emerald-900 mb-2 flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <Check className="w-4 h-4 mr-2" />
+                                        Observation
+                                        {confidence !== undefined && confidence >= 60 && !isEditing && (
+                                            <span className="ml-2 text-xs text-emerald-600 font-normal">
+                                                ({confidence}% confidence)
+                                            </span>
+                                        )}
+                                    </div>
                                 </h3>
-                                <p className="text-sm text-emerald-800 leading-relaxed">
-                                    {observation || "No detailed observation available."}
-                                </p>
+
+                                {isEditing ? (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="observation" className="sr-only">Observation</Label>
+                                        <Textarea
+                                            id="observation"
+                                            value={editedObservation}
+                                            onChange={(e) => setEditedObservation(e.target.value)}
+                                            className="min-h-[100px] border-emerald-200 focus-visible:ring-emerald-500"
+                                            placeholder="Enter observation details..."
+                                        />
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-emerald-800 leading-relaxed whitespace-pre-wrap">
+                                        {editedObservation || "No detailed observation available."}
+                                    </p>
+                                )}
                             </div>
 
-                            {potentialIssues && potentialIssues.length > 0 && (
-                                <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
-                                    <h3 className="font-medium text-amber-900 mb-2 flex items-center">
-                                        <AlertCircle className="w-4 h-4 mr-2" />
-                                        Potential Indications
-                                    </h3>
-                                    <ul className="list-disc list-inside text-sm text-amber-800 space-y-1">
-                                        {potentialIssues.map((issue, index) => (
-                                            <li key={index}>{issue}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
+                            {/* Issues Section */}
+                            <div className={`p-4 rounded-lg border transition-colors ${isEditing ? 'bg-white border-amber-300 ring-2 ring-amber-100' : 'bg-amber-50 border-amber-100'}`}>
+                                <h3 className="font-medium text-amber-900 mb-2 flex items-center">
+                                    <AlertCircle className="w-4 h-4 mr-2" />
+                                    Potential Indications
+                                </h3>
+
+                                {isEditing ? (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="issues" className="sr-only">Potential Indications (one per line)</Label>
+                                        <p className="text-xs text-stone-500 mb-1">Enter one indication per line</p>
+                                        <Textarea
+                                            id="issues"
+                                            value={editedIssues}
+                                            onChange={(e) => setEditedIssues(e.target.value)}
+                                            className="min-h-[100px] border-amber-200 focus-visible:ring-amber-500"
+                                            placeholder="Qi Deficiency&#10;Dampness&#10;Heat"
+                                        />
+                                    </div>
+                                ) : (
+                                    (editedIssues && editedIssues.length > 0) ? (
+                                        <ul className="list-disc list-inside text-sm text-amber-800 space-y-1">
+                                            {editedIssues.split('\n').filter(i => i.trim()).map((issue, index) => (
+                                                <li key={index}>{issue}</li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-sm text-amber-800/60 italic">No specific indications noted.</p>
+                                    )
+                                )}
+                            </div>
                         </>
                     )}
                 </div>
@@ -159,6 +272,7 @@ export function ObservationResult({
                         variant="outline"
                         onClick={onBack}
                         className="h-12 w-12 p-0 flex-shrink-0 border-stone-300 text-stone-600 hover:bg-stone-100 md:hidden"
+                        disabled={isEditing}
                     >
                         <span className="text-xl">←</span>
                     </Button>
@@ -167,6 +281,7 @@ export function ObservationResult({
                     onClick={onRetake}
                     variant="outline"
                     className="flex-1 h-12 text-base"
+                    disabled={isEditing}
                 >
                     <RotateCcw className="w-4 h-4 mr-2" />
                     {t.camera.retake}
@@ -174,6 +289,7 @@ export function ObservationResult({
                 <Button
                     onClick={handleContinueClick}
                     className="flex-1 h-12 text-base bg-emerald-600 hover:bg-emerald-700"
+                    disabled={isEditing}
                 >
                     <Check className="w-4 h-4 mr-2" />
                     Continue
@@ -200,7 +316,10 @@ export function ObservationResult({
                         </Button>
                         <Button onClick={() => {
                             setShowWarning(false)
-                            onContinue()
+                            onContinue({
+                                observation: editedObservation,
+                                potentialIssues: editedIssues.split('\n').filter(i => i.trim())
+                            })
                         }}>
                             Continue Anyway
                         </Button>

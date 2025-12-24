@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { useEffect, useState, useRef } from 'react'
+import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -98,13 +98,13 @@ type PromptType = keyof typeof PROMPT_TYPES
 
 export default function AdminDashboard() {
     const [prompts, setPrompts] = useState<Record<PromptType, string>>({
-        chat: '',
-        tongue: '',
-        face: '',
-        body: '',
-        listening: '',
-        inquiry_summary: '',
-        final: '',
+        chat: PROMPT_TYPES.chat.defaultPrompt,
+        tongue: PROMPT_TYPES.tongue.defaultPrompt,
+        face: PROMPT_TYPES.face.defaultPrompt,
+        body: PROMPT_TYPES.body.defaultPrompt,
+        listening: PROMPT_TYPES.listening.defaultPrompt,
+        inquiry_summary: PROMPT_TYPES.inquiry_summary.defaultPrompt,
+        final: PROMPT_TYPES.final.defaultPrompt,
     })
     const [doctorLevel, setDoctorLevel] = useState<keyof typeof DOCTOR_MODEL_MAPPING>('Physician')
     const [loading, setLoading] = useState(true)
@@ -121,8 +121,11 @@ export default function AdminDashboard() {
         final: false,
     })
     const [musicEnabled, setMusicEnabled] = useState(false)
-    const [musicUrl, setMusicUrl] = useState('')
+    const [musicUrl, setMusicUrl] = useState('https://incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3')
     const [musicVolume, setMusicVolume] = useState(0.5)
+    const [isTestPlaying, setIsTestPlaying] = useState(false)
+    const [activeTab, setActiveTab] = useState<string>('prompts')
+    const testAudioRef = useRef<HTMLAudioElement | null>(null)
     const { profile, loading: authLoading, signOut } = useAuth()
     const router = useRouter()
 
@@ -136,22 +139,49 @@ export default function AdminDashboard() {
     useEffect(() => {
         fetchAllPrompts()
         fetchAdminSettings()
+
+        // Restore active tab from localStorage
+        const savedTab = localStorage.getItem('admin-active-tab')
+        if (savedTab) {
+            setActiveTab(savedTab)
+        }
     }, [])
+
+    // Update test audio volume when slider changes
+    useEffect(() => {
+        if (testAudioRef.current) {
+            testAudioRef.current.volume = musicVolume
+        }
+    }, [musicVolume])
 
     const fetchAdminSettings = async () => {
         try {
-            const { data, error } = await supabase
-                .from('admin_settings')
-                .select('*')
-                .single()
+            // Use API route which has fallback support
+            const response = await fetch('/api/admin/settings')
+            if (response.ok) {
+                const settings = await response.json()
+                setMusicEnabled(settings.backgroundMusicEnabled || false)
+                setMusicUrl(settings.backgroundMusicUrl || 'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3')
+                setMusicVolume(settings.backgroundMusicVolume ?? 0.5)
+            } else {
+                // Fallback: try direct Supabase call
+                const { data, error } = await supabase
+                    .from('admin_settings')
+                    .select('*')
+                    .single()
 
-            if (data) {
-                setMusicEnabled(data.background_music_enabled || false)
-                setMusicUrl(data.background_music_url || '')
-                setMusicVolume(data.background_music_volume ?? 0.5)
+                if (data) {
+                    setMusicEnabled(data.background_music_enabled || false)
+                    setMusicUrl(data.background_music_url || 'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3')
+                    setMusicVolume(data.background_music_volume ?? 0.5)
+                }
             }
         } catch (error) {
             console.error('Error fetching admin settings:', error)
+            // Set defaults on error
+            setMusicEnabled(false)
+            setMusicUrl('https://incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3')
+            setMusicVolume(0.5)
         }
     }
 
@@ -166,20 +196,22 @@ export default function AdminDashboard() {
             if (data) {
                 const newPrompts = { ...prompts }
                 data.forEach((item) => {
+                    const text = item.prompt_text
+
                     if (item.role === 'doctor_chat') {
-                        newPrompts.chat = item.prompt_text || ''
+                        newPrompts.chat = text || PROMPT_TYPES.chat.defaultPrompt
                     } else if (item.role === 'doctor_tongue') {
-                        newPrompts.tongue = item.prompt_text || ''
+                        newPrompts.tongue = text || PROMPT_TYPES.tongue.defaultPrompt
                     } else if (item.role === 'doctor_face') {
-                        newPrompts.face = item.prompt_text || ''
+                        newPrompts.face = text || PROMPT_TYPES.face.defaultPrompt
                     } else if (item.role === 'doctor_body') {
-                        newPrompts.body = item.prompt_text || ''
+                        newPrompts.body = text || PROMPT_TYPES.body.defaultPrompt
                     } else if (item.role === 'doctor_listening') {
-                        newPrompts.listening = item.prompt_text || ''
+                        newPrompts.listening = text || PROMPT_TYPES.listening.defaultPrompt
                     } else if (item.role === 'doctor_inquiry_summary') {
-                        newPrompts.inquiry_summary = item.prompt_text || ''
+                        newPrompts.inquiry_summary = text || PROMPT_TYPES.inquiry_summary.defaultPrompt
                     } else if (item.role === 'doctor_final') {
-                        newPrompts.final = item.prompt_text || ''
+                        newPrompts.final = text || PROMPT_TYPES.final.defaultPrompt
                     } else if (item.role === 'doctor' && item.config) {
                         // Legacy config for doctor level
                         setDoctorLevel(item.config.default_level || 'Physician')
@@ -233,12 +265,47 @@ export default function AdminDashboard() {
         }
     }
 
+    const handleTestMusic = () => {
+        if (!musicUrl) {
+            alert('Please enter a music URL first')
+            return
+        }
+
+        if (!testAudioRef.current) {
+            testAudioRef.current = new Audio(musicUrl)
+            testAudioRef.current.loop = true
+            testAudioRef.current.volume = musicVolume
+        } else {
+            testAudioRef.current.src = musicUrl
+            testAudioRef.current.volume = musicVolume
+        }
+
+        if (isTestPlaying) {
+            testAudioRef.current.pause()
+            setIsTestPlaying(false)
+        } else {
+            testAudioRef.current.play().catch(err => {
+                console.error('Failed to play audio:', err)
+                alert('Failed to play audio. Make sure the URL is valid and accessible.')
+            })
+            setIsTestPlaying(true)
+        }
+    }
+
     const handleSaveMusicConfig = async () => {
         setSaving('config_music')
         try {
+            // Get the session token to send with the request
+            const { data: { session } } = await supabase.auth.getSession()
+            const headers: HeadersInit = { 'Content-Type': 'application/json' }
+
+            if (session?.access_token) {
+                headers['Authorization'] = `Bearer ${session.access_token}`
+            }
+
             const response = await fetch('/api/admin/settings', {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     backgroundMusicEnabled: musicEnabled,
                     backgroundMusicUrl: musicUrl,
@@ -246,13 +313,16 @@ export default function AdminDashboard() {
                 })
             })
 
-            if (!response.ok) throw new Error('Failed to save music settings')
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+                throw new Error(errorData.error || 'Failed to save music settings')
+            }
 
             setSaved('config_music')
             setTimeout(() => setSaved(null), 2000)
         } catch (error) {
             console.error('Error saving music config:', error)
-            alert('Failed to save music settings.')
+            alert(error instanceof Error ? error.message : 'Failed to save music settings.')
         } finally {
             setSaving(null)
         }
@@ -319,6 +389,11 @@ export default function AdminDashboard() {
             console.error('Error logging out:', error)
             setLoggingOut(false)
         }
+    }
+
+    const handleTabChange = (value: string) => {
+        setActiveTab(value)
+        localStorage.setItem('admin-active-tab', value)
     }
 
     if (authLoading || loading) return <div className="p-8">Loading...</div>
@@ -401,7 +476,7 @@ export default function AdminDashboard() {
                 </Button>
             </div>
 
-            <Tabs defaultValue="prompts" className="space-y-6">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
                 <TabsList className="grid w-full grid-cols-5 max-w-3xl mx-auto mb-8">
                     <TabsTrigger value="prompts" className="flex items-center gap-2">
                         <Settings className="w-4 h-4" />
@@ -428,32 +503,33 @@ export default function AdminDashboard() {
 
                 <TabsContent value="prompts" className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
                     {/* Default Doctor Level Configuration */}
-                    <Card className="mb-6">
+                    {/* Doctor Level Configuration */}
+                    <Card className="mb-6 border-blue-100 bg-blue-50/50">
                         <CardHeader className="pb-4">
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <Info className="w-5 h-5" />
-                                Default Configuration
+                            <CardTitle className="text-lg flex items-center gap-2 text-blue-900">
+                                <UserCog className="w-5 h-5 text-blue-600" />
+                                AI Persona Configuration
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="flex flex-wrap items-end gap-4">
                                 <div className="space-y-2 flex-1 min-w-[200px]">
-                                    <Label>Default Doctor Level</Label>
+                                    <Label className="text-blue-900">Default Doctor Expertise Level</Label>
                                     <Select value={doctorLevel} onValueChange={(v) => setDoctorLevel(v as keyof typeof DOCTOR_MODEL_MAPPING)}>
-                                        <SelectTrigger className="w-full max-w-md">
+                                        <SelectTrigger className="w-full max-w-md bg-white">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Physician">💊 医师 Physician (gemini-2.0-flash)</SelectItem>
-                                            <SelectItem value="Expert">🩺 专家 Expert (gemini-2.5-pro)</SelectItem>
-                                            <SelectItem value="Master">👨‍⚕️ 名医 Master (gemini-3-pro-preview)</SelectItem>
+                                            <SelectItem value="Physician">💊 医师 Physician (Standard)</SelectItem>
+                                            <SelectItem value="Expert">🩺 专家 Expert (Advanced)</SelectItem>
+                                            <SelectItem value="Master">👨‍⚕️ 名医 Master (Premium)</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <Button
                                     onClick={handleSaveConfig}
                                     disabled={saving === 'config'}
-                                    className="h-10"
+                                    className="h-10 bg-blue-600 hover:bg-blue-700"
                                 >
                                     {saving === 'config' ? (
                                         <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
@@ -467,89 +543,143 @@ export default function AdminDashboard() {
                         </CardContent>
                     </Card>
 
-                    {/* Three System Prompts */}
-                    <div className="space-y-6">
-                        {(Object.entries(PROMPT_TYPES) as [PromptType, typeof PROMPT_TYPES[PromptType]][]).map(([type, config]) => {
-                            const colors = colorClasses[config.color as keyof typeof colorClasses]
-                            const Icon = config.icon
-
-                            const isExpanded = expandedPrompts[type]
-
-                            return (
-                                <Card key={type} className={`${colors.border} border-2 overflow-hidden`}>
-                                    <CardHeader
-                                        className={`${colors.bg} ${isExpanded ? 'rounded-t-lg' : 'rounded-lg'} cursor-pointer transition-all duration-200 hover:opacity-90`}
-                                        onClick={() => togglePrompt(type)}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <CardTitle className="flex items-center gap-3">
-                                                <Icon className={`w-6 h-6 ${colors.icon}`} />
-                                                {config.title}
-                                            </CardTitle>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className={`${colors.icon} hover:bg-white/50`}
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    togglePrompt(type)
-                                                }}
-                                            >
-                                                {isExpanded ? (
-                                                    <ChevronUp className="w-5 h-5" />
-                                                ) : (
-                                                    <ChevronDown className="w-5 h-5" />
-                                                )}
-                                            </Button>
-                                        </div>
-                                        <CardDescription className="text-gray-600">
-                                            {config.description}
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <div
-                                        className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
-                                            }`}
-                                    >
-                                        <CardContent className="pt-4 space-y-4">
-                                            <Textarea
-                                                value={prompts[type]}
-                                                onChange={(e) => setPrompts(prev => ({ ...prev, [type]: e.target.value }))}
-                                                placeholder={`Enter ${config.title} here... (Leave empty to use default)`}
-                                                className="min-h-[250px] font-mono text-sm"
-                                            />
-                                            <div className="flex items-center justify-between gap-3">
-                                                <Button
-                                                    variant="outline"
-                                                    onClick={() => handleResetToDefault(type)}
-                                                    className="text-gray-600"
-                                                >
-                                                    Reset to Default
-                                                </Button>
-                                                <Button
-                                                    onClick={() => handleSavePrompt(type)}
-                                                    disabled={saving === type}
-                                                    className={colors.button}
-                                                >
-                                                    {saving === type ? (
-                                                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
-                                                    ) : saved === type ? (
-                                                        <><Check className="w-4 h-4 mr-2" /> Saved!</>
-                                                    ) : (
-                                                        'Save Prompt'
-                                                    )}
-                                                </Button>
-                                            </div>
-                                            {!prompts[type] && (
-                                                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                                    <Info className="w-4 h-4" />
-                                                    Currently using default prompt. Edit above to customize.
-                                                </p>
-                                            )}
-                                        </CardContent>
+                    {/* Grouped System Prompts */}
+                    <div className="space-y-8">
+                        {[
+                            {
+                                id: 'step1',
+                                title: 'Step 1: Patient Inquiry (问诊)',
+                                description: 'Conversational assessment and symptom gathering',
+                                icon: MessageSquare,
+                                color: 'text-blue-600',
+                                prompts: ['chat', 'inquiry_summary'] as PromptType[]
+                            },
+                            {
+                                id: 'step2',
+                                title: 'Step 2: AI Analysis (望闻问切)',
+                                description: 'Visual and audio analysis of physical indicators',
+                                icon: Eye,
+                                color: 'text-emerald-600',
+                                prompts: ['tongue', 'face', 'body', 'listening'] as PromptType[]
+                            },
+                            {
+                                id: 'step3',
+                                title: 'Step 3: Diagnosis & Treatment (辨证论治)',
+                                description: 'Final synthesis and treatment recommendations',
+                                icon: FileText,
+                                color: 'text-amber-600',
+                                prompts: ['final'] as PromptType[]
+                            }
+                        ].map((group) => (
+                            <div key={group.id} className="space-y-4">
+                                <div className="flex items-center gap-2 border-b pb-2">
+                                    <group.icon className={`w-5 h-5 ${group.color}`} />
+                                    <div>
+                                        <h3 className="font-semibold text-lg text-gray-900">{group.title}</h3>
+                                        <p className="text-sm text-gray-500">{group.description}</p>
                                     </div>
-                                </Card>
-                            )
-                        })}
+                                </div>
+
+                                <div className="grid gap-6">
+                                    {group.prompts.map((type) => {
+                                        const config = PROMPT_TYPES[type]
+                                        const colors = colorClasses[config.color as keyof typeof colorClasses]
+                                        const Icon = config.icon
+                                        const isExpanded = expandedPrompts[type]
+
+                                        return (
+                                            <Card key={type} className={`${colors.border} border-2 overflow-hidden shadow-sm`}>
+                                                <CardHeader
+                                                    className={`${colors.bg} ${isExpanded ? 'rounded-t-lg pb-3' : 'rounded-lg'} cursor-pointer transition-all duration-200 hover:opacity-95`}
+                                                    onClick={() => togglePrompt(type)}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-start gap-4">
+                                                            <div className={`p-2 rounded-full bg-white/50 ${colors.icon}`}>
+                                                                <Icon className="w-5 h-5" />
+                                                            </div>
+                                                            <div>
+                                                                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                                                                    {config.title}
+                                                                </CardTitle>
+                                                                <CardDescription className="text-gray-600 mt-1">
+                                                                    {config.description}
+                                                                </CardDescription>
+                                                            </div>
+                                                        </div>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className={`${colors.icon} hover:bg-white/50 shrink-0 ml-4`}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                togglePrompt(type)
+                                                            }}
+                                                        >
+                                                            {isExpanded ? (
+                                                                <ChevronUp className="w-5 h-5" />
+                                                            ) : (
+                                                                <ChevronDown className="w-5 h-5" />
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                </CardHeader>
+                                                <div
+                                                    className={`transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+                                                        }`}
+                                                >
+                                                    <CardContent className="pt-4 space-y-4 bg-white">
+                                                        <div className="flex justify-between items-center text-xs text-muted-foreground mb-2 px-1">
+                                                            <span>System Role: <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-800">{config.role}</code></span>
+                                                            {prompts[type] !== config.defaultPrompt && (
+                                                                <span className="text-amber-600 font-medium">Modified</span>
+                                                            )}
+                                                        </div>
+                                                        <Textarea
+                                                            value={prompts[type]}
+                                                            onChange={(e) => setPrompts(prev => ({ ...prev, [type]: e.target.value }))}
+                                                            placeholder={`Enter ${config.title} here... (Leave empty to use default)`}
+                                                            className="min-h-[300px] font-mono text-sm leading-relaxed"
+                                                        />
+                                                        <div className="flex items-center justify-between gap-3 pt-2">
+                                                            <Button
+                                                                variant="outline"
+                                                                onClick={() => handleResetToDefault(type)}
+                                                                className="text-gray-600 hover:text-red-600 hover:bg-red-50 hover:border-red-200"
+                                                            >
+                                                                Reset to Default
+                                                            </Button>
+                                                            <Button
+                                                                onClick={() => handleSavePrompt(type)}
+                                                                disabled={saving === type}
+                                                                className={colors.button}
+                                                            >
+                                                                {saving === type ? (
+                                                                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
+                                                                ) : saved === type ? (
+                                                                    <><Check className="w-4 h-4 mr-2" /> Saved!</>
+                                                                ) : (
+                                                                    'Save Prompt'
+                                                                )}
+                                                            </Button>
+                                                        </div>
+                                                        {!prompts[type] || prompts[type] === config.defaultPrompt && (
+                                                            <div className="bg-gray-50 border border-gray-200 rounded p-3 text-sm text-muted-foreground flex items-start gap-2">
+                                                                <Info className="w-4 h-4 mt-0.5" />
+                                                                <div>
+                                                                    <span className="font-semibold block mb-1">Using Default System Prompt</span>
+                                                                    The system will use the built-in optimized prompt for this task. Edit the text area above and save to override.
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </CardContent>
+                                                </div>
+                                            </Card>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        ))}
                     </div>
 
                     {/* Model Mapping Reference Card */}
@@ -621,13 +751,35 @@ export default function AdminDashboard() {
                                     <Textarea
                                         value={musicUrl}
                                         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setMusicUrl(e.target.value)}
-                                        placeholder="https://example.com/calm-music.mp3"
+                                        placeholder="https://incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3"
                                         className="font-mono text-sm min-h-[40px] h-[40px] resize-none overflow-hidden py-2"
                                     />
                                 </div>
                                 <p className="text-xs text-muted-foreground">
                                     Upload your file to Supabase Storage manually and paste the public URL here, or use an external URL.
                                 </p>
+                                <Button
+                                    variant="outline"
+                                    onClick={handleTestMusic}
+                                    disabled={!musicUrl}
+                                    className="mt-2 flex items-center gap-2"
+                                >
+                                    {isTestPlaying ? (
+                                        <>
+                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                            </svg>
+                                            Stop Test
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                                            </svg>
+                                            Test Music
+                                        </>
+                                    )}
+                                </Button>
                             </div>
 
                             <div className="space-y-4">

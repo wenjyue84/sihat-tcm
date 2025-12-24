@@ -56,7 +56,7 @@ export function ReportDiagnosisSection({ data, diagnosisText, constitutionText, 
                     icon={BarChart3}
                     accentColor="blue"
                 >
-                    <div className="w-[90%] max-w-[680px] mx-auto">
+                    <div className="w-full md:w-[90%] md:max-w-[680px] md:mx-auto">
                         <p className="text-base md:text-lg text-stone-800 leading-[1.7] md:leading-relaxed whitespace-pre-wrap">
                             {analysisText}
                         </p>
