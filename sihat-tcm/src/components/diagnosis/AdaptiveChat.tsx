@@ -1,8 +1,9 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import type { BasicInfo } from '@/types/diagnosis'
@@ -24,16 +25,21 @@ export function AdaptiveChat({ onComplete, basicInfo, initialMessages }: Adaptiv
     Your goal is to ask relevant follow-up questions to gather more details for a TCM diagnosis. 
     Focus on the "Ten Questions" (Shi Wen) of TCM. Ask one question at a time. Keep it brief and professional.`
 
-    const { messages, sendMessage, error } = useChat({
+    // Memoize transport to avoid recreating on every render
+    const transport = useMemo(() => new DefaultChatTransport({
         api: '/api/chat',
-        initialMessages: initialMessages && initialMessages.length > 0 ? (initialMessages as any) : [
-            { id: '1', role: 'system', content: systemMessage }
-        ],
         body: {
             basicInfo: basicInfo,
             model: 'gemini-1.5-flash',
             language: 'en'
-        },
+        }
+    }), [basicInfo])
+
+    const { messages, sendMessage, error } = useChat({
+        transport,
+        messages: initialMessages && initialMessages.length > 0 ? (initialMessages as any) : [
+            { id: '1', role: 'system', content: systemMessage }
+        ],
         onError: (err: unknown) => {
             const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
             console.error("useChat error:", errorMessage)
