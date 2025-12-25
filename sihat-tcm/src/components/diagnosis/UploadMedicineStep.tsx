@@ -7,7 +7,10 @@ import { Upload, X, Pill, ArrowRight, SkipForward, History, Loader2 } from 'luci
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { getLastMedicines } from '@/lib/actions'
+import { getLastMedicines, getPatientHistory } from '@/lib/actions'
+import { DiagnosisSession } from '@/types/database'
+import { toast } from 'sonner'
+import { format } from 'date-fns'
 import { TextReviewModal } from './TextReviewModal'
 import { FileData } from './UploadReportsStep'
 import {
@@ -36,6 +39,9 @@ export function UploadMedicineStep({ onComplete, onSkip, initialFiles = [], onBa
     const [manualInput, setManualInput] = useState('')
     const [isValidating, setIsValidating] = useState(false)
     const [isImporting, setIsImporting] = useState(false)
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
+    const [historySessions, setHistorySessions] = useState<DiagnosisSession[]>([])
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false)
 
     const [showValidationPrompt, setShowValidationPrompt] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -155,35 +161,53 @@ export function UploadMedicineStep({ onComplete, onSkip, initialFiles = [], onBa
     }
 
     const handleImportHistory = async () => {
-        setIsImporting(true)
+        setIsLoadingHistory(true)
+        setIsHistoryModalOpen(true)
         try {
-            const result = await getLastMedicines()
-            if (result.success && result.data && result.data.length > 0) {
-                // Filter out any medicines already in the list to avoid duplicates
-                const existingMeds = new Set(files.map(f => f.extractedText?.toLowerCase()))
-                const newMeds = result.data.filter(med => !existingMeds.has(med.toLowerCase()))
-
-                if (newMeds.length === 0) {
-                    alert(language === 'zh' ? '所有历史药物已在列表中。' : language === 'ms' ? 'Semua ubat sejarah sudah ada dalam senarai.' : 'All historical medicines are already in the list.')
-                    setIsImporting(false)
-                    return
-                }
-
-                const newFiles: FileData[] = newMeds.map(medName => ({
-                    name: language === 'zh' ? '从历史导入' : language === 'ms' ? 'Import dari Sejarah' : 'Imported from History',
-                    type: 'text/plain',
-                    data: '',
-                    extractedText: medName
-                }))
-                setFiles(prev => [...prev, ...newFiles])
+            const result = await getPatientHistory(10)
+            if (result.success && result.data) {
+                setHistorySessions(result.data)
             } else {
-                alert(result.error || (language === 'zh' ? '未发现之前的用药记录。' : language === 'ms' ? 'Tiada sejarah ubat dijumpai.' : 'No previous medicine history found.'))
+                toast.error(result.error || t.basicInfo.importError || 'No previous history found.')
+                setIsHistoryModalOpen(false)
             }
         } catch (error) {
-            console.error("Import failed", error)
+            toast.error('Failed to fetch history.')
+            setIsHistoryModalOpen(false)
         } finally {
-            setIsImporting(false)
+            setIsLoadingHistory(false)
         }
+    }
+
+    const handleSelectSession = (session: DiagnosisSession) => {
+        const medicinesArray = session.medicines || []
+
+        if (medicinesArray.length === 0) {
+            toast.error('No medicines found in this session.')
+            return
+        }
+
+        const newEntries: FileData[] = medicinesArray.map(med => ({
+            name: `${t.common?.history || 'History'} - ${med}`,
+            type: 'text/plain',
+            data: '',
+            extractedText: med
+        }))
+
+        // Filter out duplicates
+        const existingTexts = files.map(f => f.extractedText)
+        const uniqueKeys = new Set(existingTexts)
+
+        const filteredNewEntries = newEntries.filter(entry => !uniqueKeys.has(entry.extractedText))
+
+        if (filteredNewEntries.length === 0) {
+            toast.info('All medicines from this session are already added.')
+        } else {
+            setFiles(prev => [...prev, ...filteredNewEntries])
+            toast.success(t.basicInfo.importSuccessMedicines || 'Medicines imported successfully!')
+        }
+
+        setIsHistoryModalOpen(false)
     }
 
     const removeFile = (index: number) => {
@@ -402,41 +426,79 @@ export function UploadMedicineStep({ onComplete, onSkip, initialFiles = [], onBa
                 mode="medicine"
             />
 
-            {/* Validation Prompt Dialog */}
+            {/* Validation prompt before skip/next */}
             <Dialog open={showValidationPrompt} onOpenChange={setShowValidationPrompt}>
-                <DialogContent className="sm:max-w-[400px]">
+                <DialogContent>
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-amber-600">
-                            <Pill className="w-5 h-5" />
-                            {content.validationTitle[lang]}
-                        </DialogTitle>
-                        <DialogDescription className="text-stone-600 pt-2">
-                            {content.validationMessage[lang]}
+                        <DialogTitle>{t.common?.confirm || "Confirm"}</DialogTitle>
+                        <DialogDescription>
+                            {t.basicInfo?.medicineSkipWarning || "You haven't added any medicines. Are you currently taking any prescription drugs or supplements?"}
                         </DialogDescription>
                     </DialogHeader>
-                    <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                setShowValidationPrompt(false)
-                                onSkip()
-                            }}
-                            className="text-stone-600 border-stone-300"
-                        >
-                            {content.skipStep[lang]}
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" onClick={() => setShowValidationPrompt(false)}>
+                            {t.common?.cancel || "No, let me add"}
                         </Button>
-                        <Button
-                            onClick={() => {
-                                setShowValidationPrompt(false)
-                                fileInputRef.current?.click()
-                            }}
-                            className="bg-blue-600 hover:bg-blue-700"
-                        >
-                            {content.uploadNow[lang]}
+                        <Button onClick={() => {
+                            setShowValidationPrompt(false)
+                            onComplete(files)
+                        }}>
+                            {t.common?.confirm || "Yes, proceed"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </Card>
+
+            {/* History Selection Dialog */}
+            <Dialog open={isHistoryModalOpen} onOpenChange={setIsHistoryModalOpen}>
+                <DialogContent className="max-w-md max-h-[80vh] overflow-hidden flex flex-col p-0 border-none bg-background/95 backdrop-blur-md shadow-2xl rounded-2xl">
+                    <DialogHeader className="p-6 pb-2">
+                        <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                            <History className="w-5 h-5 text-primary" />
+                            {t.basicInfo.selectHistoryTitle || "Select from History"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {t.basicInfo.selectHistoryDesc || "Choose a previous diagnosis to import medicines."}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex-1 overflow-y-auto px-6 py-2 pb-6 space-y-3">
+                        {isLoadingHistory ? (
+                            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                                <p className="text-sm text-muted-foreground">{t.common?.loading || "Loading history..."}</p>
+                            </div>
+                        ) : historySessions.length === 0 ? (
+                            <div className="text-center py-12 border-2 border-dashed border-border rounded-xl bg-muted/20">
+                                <p className="text-muted-foreground">{t.basicInfo.noHistoryFound || "No previous history found."}</p>
+                            </div>
+                        ) : (
+                            historySessions.map((session) => (
+                                <button
+                                    key={session.id}
+                                    onClick={() => handleSelectSession(session)}
+                                    className="w-full text-left p-4 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                                >
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-xs font-medium text-muted-foreground">
+                                            {format(new Date(session.created_at), 'PPP')}
+                                        </span>
+                                        <div className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
+                                            {session.constitution || 'N/A'}
+                                        </div>
+                                    </div>
+                                    <h4 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
+                                        {session.primary_diagnosis}
+                                    </h4>
+                                    <p className="text-sm text-muted-foreground line-clamp-1">
+                                        {(session.medicines || []).join(', ') || t.common?.noMedicinesFound || 'No medicines recorded'}
+                                    </p>
+                                </button>
+                            ))
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </Card >
     )
 }

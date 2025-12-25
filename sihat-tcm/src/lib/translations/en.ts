@@ -14,6 +14,7 @@ export const en = {
         next: 'Next',
         previous: 'Previous',
         back: 'Back',
+        history: 'History',
         continue: 'Continue',
         skip: 'Skip',
         close: 'Close',

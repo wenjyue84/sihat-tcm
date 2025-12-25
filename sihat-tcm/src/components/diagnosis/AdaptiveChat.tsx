@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useChat } from '@ai-sdk/react'
@@ -16,6 +16,7 @@ interface AdaptiveChatProps {
 
 export function AdaptiveChat({ onComplete, basicInfo, initialMessages }: AdaptiveChatProps) {
     const [input, setInput] = useState('')
+    const hasSentInitialMessage = useRef(false)
 
     // Construct the initial system message based on basic info
     const systemMessage = `You are a TCM assistant. The patient is a ${basicInfo?.age || 'unknown'}-year-old ${basicInfo?.gender || 'person'} named ${basicInfo?.name || 'Patient'}. 
@@ -23,7 +24,7 @@ export function AdaptiveChat({ onComplete, basicInfo, initialMessages }: Adaptiv
     Your goal is to ask relevant follow-up questions to gather more details for a TCM diagnosis. 
     Focus on the "Ten Questions" (Shi Wen) of TCM. Ask one question at a time. Keep it brief and professional.`
 
-    const { messages, append, error } = useChat({
+    const { messages, sendMessage, error } = useChat({
         api: '/api/chat',
         initialMessages: initialMessages && initialMessages.length > 0 ? (initialMessages as any) : [
             { id: '1', role: 'system', content: systemMessage }
@@ -41,16 +42,17 @@ export function AdaptiveChat({ onComplete, basicInfo, initialMessages }: Adaptiv
 
     // Trigger the first question from AI when the component mounts
     useEffect(() => {
-        if (messages.length === 1 && messages[0].role === 'system') {
-            append({ role: 'user', content: 'Please start the diagnosis.' })
+        if (!hasSentInitialMessage.current && messages.length === 1 && messages[0].role === 'system') {
+            hasSentInitialMessage.current = true
+            sendMessage({ text: 'Please start the diagnosis.' })
         }
-    }, [])
+    }, [messages, sendMessage])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!input.trim()) return
         try {
-            await append({ role: 'user', content: input })
+            await sendMessage({ text: input })
         } catch (e) {
             console.error('SendMessage error:', e)
         }

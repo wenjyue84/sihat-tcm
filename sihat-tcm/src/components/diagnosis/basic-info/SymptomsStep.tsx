@@ -8,9 +8,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BasicInfoData } from './types'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { getLastSymptoms } from '@/lib/actions'
+import { getLastSymptoms, getPatientHistory } from '@/lib/actions'
+import { DiagnosisSession } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog"
+import { format } from 'date-fns'
 
 interface SymptomsStepProps {
     formData: BasicInfoData
@@ -37,26 +46,66 @@ export function SymptomsStep({
     const [activeCategory, setActiveCategory] = useState<string>('common')
     const [isInputFocused, setIsInputFocused] = useState(false)
     const [isImporting, setIsImporting] = useState(false)
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
+    const [historySessions, setHistorySessions] = useState<DiagnosisSession[]>([])
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false)
 
     const handleImportPrevious = async () => {
-        setIsImporting(true)
+        setIsLoadingHistory(true)
+        setIsHistoryModalOpen(true)
         try {
-            const result = await getLastSymptoms()
+            const result = await getPatientHistory(10)
             if (result.success && result.data) {
-                setFormData({
-                    ...formData,
-                    mainComplaint: result.data,
-                    otherSymptoms: '' // Or append if preferred, but usually last symptoms are one block
-                })
-                toast.success(t.basicInfo.importSuccess || 'Symptoms imported successfully!')
+                setHistorySessions(result.data)
             } else {
-                toast.error(result.error || t.basicInfo.importError || 'No previous symptoms found.')
+                toast.error(result.error || t.basicInfo.importError || 'No previous history found.')
+                setIsHistoryModalOpen(false)
             }
         } catch (error) {
-            toast.error('Failed to import symptoms.')
+            toast.error('Failed to fetch history.')
+            setIsHistoryModalOpen(false)
         } finally {
-            setIsImporting(false)
+            setIsLoadingHistory(false)
         }
+    }
+
+    const handleSelectSession = (session: DiagnosisSession) => {
+        const symptomsArray = session.symptoms || []
+
+        let main = ''
+        let other = ''
+
+        if (symptomsArray.length > 0) {
+            main = symptomsArray[0]
+            other = symptomsArray.slice(1).join(', ')
+        } else if (session.primary_diagnosis) {
+            main = session.primary_diagnosis
+        }
+
+        setFormData({
+            ...formData,
+            mainComplaint: main,
+            otherSymptoms: other
+        })
+
+        // Try to sync selectedSymptoms keys
+        const newSelectedKeys: string[] = []
+        const allSymptoms = [...symptomsArray]
+        if (main && !allSymptoms.includes(main)) allSymptoms.push(main)
+
+        allSymptoms.forEach(s => {
+            const entry = Object.entries(t.basicInfo.symptoms).find(([_, value]) => value === s)
+            if (entry) {
+                newSelectedKeys.push(entry[0])
+            }
+        })
+
+        if (newSelectedKeys.length > 0) {
+            setSelectedSymptoms(newSelectedKeys)
+        }
+
+        setIsHistoryModalOpen(false)
+        toast.success(t.basicInfo.importSuccess || 'Symptoms imported successfully!')
     }
 
     // Define categories
@@ -377,6 +426,57 @@ export function SymptomsStep({
                     </SelectContent>
                 </Select>
             </div>
+
+            {/* History Selection Dialog */}
+            <Dialog open={isHistoryModalOpen} onOpenChange={setIsHistoryModalOpen}>
+                <DialogContent className="max-w-md max-h-[80vh] overflow-hidden flex flex-col p-0 border-none bg-background/95 backdrop-blur-md shadow-2xl rounded-2xl">
+                    <DialogHeader className="p-6 pb-2">
+                        <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                            <History className="w-5 h-5 text-primary" />
+                            {t.basicInfo.selectHistoryTitle || "Select from History"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {t.basicInfo.selectHistoryDesc || "Choose a previous diagnosis to import symptoms."}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex-1 overflow-y-auto px-6 py-2 pb-6 space-y-3">
+                        {isLoadingHistory ? (
+                            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                                <p className="text-sm text-muted-foreground">{t.common?.loading || "Loading history..."}</p>
+                            </div>
+                        ) : historySessions.length === 0 ? (
+                            <div className="text-center py-12 border-2 border-dashed border-border rounded-xl bg-muted/20">
+                                <p className="text-muted-foreground">{t.basicInfo.noHistoryFound || "No previous history found."}</p>
+                            </div>
+                        ) : (
+                            historySessions.map((session) => (
+                                <button
+                                    key={session.id}
+                                    onClick={() => handleSelectSession(session)}
+                                    className="w-full text-left p-4 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                                >
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-xs font-medium text-muted-foreground">
+                                            {format(new Date(session.created_at), 'PPP')}
+                                        </span>
+                                        <div className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold">
+                                            {session.constitution || 'N/A'}
+                                        </div>
+                                    </div>
+                                    <h4 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
+                                        {session.primary_diagnosis}
+                                    </h4>
+                                    <p className="text-sm text-muted-foreground line-clamp-1">
+                                        {(session.symptoms || []).join(', ') || session.primary_diagnosis}
+                                    </p>
+                                </button>
+                            ))
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
