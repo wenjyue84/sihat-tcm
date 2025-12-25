@@ -40,6 +40,7 @@ export const en = {
         filled: 'Filled!',
         clear: 'Clear',
         cleared: 'Cleared!',
+        noMedicinesFound: 'No medicines recorded',
     },
     celebration: {
         basics: { title: 'Profile Complete!', subtitle: 'Great start! Moving to inquiry...' },
@@ -226,6 +227,7 @@ export const en = {
         noHistoryFound: 'No previous diagnosis history found.',
         detailedSymptoms: 'detailedSymptoms', // Keeping for backward compat if needed or just remove references later
         detailedSymptomsPlaceholder: 'Please describe your main complaints, feelings, and any other relevant details...',
+        medicineSkipWarning: "You haven't added any medicines. Are you currently taking any prescription drugs or supplements?",
         chooseTcmDoctor: 'Choose Your TCM Doctor',
         startDiagnosis: 'Start Diagnosis',
         // Wizard step translations

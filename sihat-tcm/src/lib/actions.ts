@@ -590,6 +590,7 @@ export async function seedPatientHistory() {
                         affected_organs: ['Liver', 'Spleen', 'Stomach'],
                         pathomechanism: 'Emotional stress causing Liver Qi to stagnate.'
                     },
+                    constitution: 'Qi Stagnation Constitution',
                     analysis: {
                         summary: 'Work-related stress causing Liver Qi Stagnation.',
                         key_findings: {
@@ -619,6 +620,7 @@ export async function seedPatientHistory() {
                         secondary_patterns: ['Dampness Accumulation'],
                         affected_organs: ['Spleen', 'Stomach']
                     },
+                    constitution: 'Qi Deficiency Constitution',
                     analysis: {
                         summary: 'Irregular eating habits weakened Spleen Qi.',
                         key_findings: {
@@ -646,6 +648,7 @@ export async function seedPatientHistory() {
                         primary_pattern: 'Damp Heat in Lower Jiao',
                         affected_organs: ['Bladder', 'Large Intestine']
                     },
+                    constitution: 'Damp Heat Constitution',
                     analysis: {
                         summary: 'Greasy food and humid weather caused Damp Heat.',
                         key_findings: {
@@ -674,6 +677,7 @@ export async function seedPatientHistory() {
                         secondary_patterns: ['Heart Blood Deficiency'],
                         affected_organs: ['Heart', 'Liver', 'Spleen']
                     },
+                    constitution: 'Blood Deficiency Constitution',
                     analysis: {
                         summary: 'Overwork depleted Blood affecting Heart.',
                         key_findings: {
@@ -714,6 +718,7 @@ export async function seedPatientHistory() {
                         avoid: ['Cold drinks', 'Raw foods'],
                         herbal_formulas: [{ name: 'Jin Gui Shen Qi Wan', purpose: 'Warm Kidney Yang' }]
                     },
+                    constitution: 'Kidney Yang Deficiency Constitution',
                     patient_profile: { name: 'Test Patient', age: 42, gender: 'Male' }
                 }
             },
@@ -728,6 +733,7 @@ export async function seedPatientHistory() {
                         primary_pattern: 'Phlegm-Damp Obstruction',
                         affected_organs: ['Spleen', 'Lung']
                     },
+                    constitution: 'Phlegm-Damp Constitution',
                     analysis: {
                         summary: 'Weak Spleen led to Phlegm accumulation.',
                         key_findings: {
@@ -755,6 +761,7 @@ export async function seedPatientHistory() {
                         primary_pattern: 'Wind-Cold Invasion',
                         affected_organs: ['Lung', 'Bladder Channel']
                     },
+                    constitution: 'Normal Constitution',
                     analysis: {
                         summary: 'External Wind-Cold attacking Wei Qi level.',
                         key_findings: {

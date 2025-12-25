@@ -24,13 +24,19 @@ export function DigitalTwin({ sessions, loading }: DigitalTwinProps) {
 
     // Extract affected organs from the latest session
     const latestSession = sessions[0]
-    const affectedOrgans = latestSession?.full_report?.diagnosis?.affected_organs || []
+    const diagnosis = latestSession?.full_report?.diagnosis
+    const affectedOrgans = (typeof diagnosis === 'object' && diagnosis !== null && 'affected_organs' in diagnosis && Array.isArray((diagnosis as any).affected_organs)) 
+        ? (diagnosis as any).affected_organs 
+        : []
 
     // Check for previous sessions to see improvement
     const previousSessions = sessions.slice(1)
     const previouslyAffectedOrgans = new Set<string>()
     previousSessions.forEach(s => {
-        const organs = s.full_report?.diagnosis?.affected_organs || []
+        const prevDiagnosis = s.full_report?.diagnosis
+        const organs = (typeof prevDiagnosis === 'object' && prevDiagnosis !== null && 'affected_organs' in prevDiagnosis && Array.isArray((prevDiagnosis as any).affected_organs))
+            ? (prevDiagnosis as any).affected_organs
+            : []
         organs.forEach((o: string) => previouslyAffectedOrgans.add(o))
     })
 

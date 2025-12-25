@@ -108,3 +108,4 @@ The current implementation works for production use, though it's not as accurate
 
 To test: Build APK → Install → Turn off Demo Mode → Measure!
 
+

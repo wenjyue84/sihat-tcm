@@ -369,3 +369,4 @@ export function CameraPulseSensor({ onBpmDetected, onCancel, t }: CameraPulseSen
     )
 }
 
+

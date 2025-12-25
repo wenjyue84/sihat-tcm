@@ -90,7 +90,7 @@ export const summarizeInquiryRequestSchema = z.object({
 // /api/report-chat - Report Q&A
 export const reportChatRequestSchema = z.object({
     messages: chatMessagesSchema.min(1, 'At least one message is required'),
-    reportData: z.record(z.any()).optional(),
+    reportData: z.record(z.string(), z.any()).optional(),
     patientInfo: basicInfoSchema,
     language: languageSchema,
     model: modelSchema,
@@ -99,17 +99,17 @@ export const reportChatRequestSchema = z.object({
 // /api/consult - Final diagnosis synthesis (complex nested structure)
 export const consultRequestSchema = z.object({
     data: z.object({
-        basic_info: z.record(z.any()).optional(),
-        verified_summaries: z.record(z.any()).optional(),
+        basic_info: z.record(z.string(), z.any()).optional(),
+        verified_summaries: z.record(z.string(), z.any()).optional(),
         wen_inquiry: z.string().optional(),
         wen_chat: z.array(z.any()).optional(),
-        qie: z.record(z.any()).optional(),
-        wang_tongue: z.record(z.any()).optional(),
-        wang_face: z.record(z.any()).optional(),
-        wang_body: z.record(z.any()).optional(),
-        wen_audio: z.record(z.any()).optional(),
-        smart_connect: z.record(z.any()).optional(),
-        report_options: z.record(z.any()).optional(),
+        qie: z.record(z.string(), z.any()).optional(),
+        wang_tongue: z.record(z.string(), z.any()).optional(),
+        wang_face: z.record(z.string(), z.any()).optional(),
+        wang_body: z.record(z.string(), z.any()).optional(),
+        wen_audio: z.record(z.string(), z.any()).optional(),
+        smart_connect: z.record(z.string(), z.any()).optional(),
+        report_options: z.record(z.string(), z.any()).optional(),
     }).passthrough(),
     prompt: z.string().optional(),
     model: modelSchema,
@@ -135,7 +135,7 @@ export const validateMedicineRequestSchema = z.object({
 export const generateInfographicRequestSchema = z.object({
     prompt: z.string().optional(),
     style: z.string().optional(),
-    reportData: z.record(z.any()).optional(),
+    reportData: z.record(z.string(), z.any()).optional(),
     patientInfo: basicInfoSchema,
 });
 
@@ -150,7 +150,7 @@ export const assistantRequestSchema = z.object({
 
 export type ValidationResult<T> =
     | { success: true; data: T }
-    | { success: false; error: string; details?: z.ZodError['errors'] };
+    | { success: false; error: string; details?: z.ZodError['issues'] };
 
 /**
  * Validates request body against a Zod schema
@@ -167,21 +167,21 @@ export function validateRequest<T>(
     }
 
     // Format error message
-    const errorMessages = result.error.errors
+    const errorMessages = result.error.issues
         .map(err => `${err.path.join('.')}: ${err.message}`)
         .join('; ');
 
     return {
         success: false,
         error: errorMessages || 'Validation failed',
-        details: result.error.errors,
+        details: result.error.issues,
     };
 }
 
 /**
  * Creates a 400 Bad Request response for validation errors
  */
-export function validationErrorResponse(error: string, details?: z.ZodError['errors']) {
+export function validationErrorResponse(error: string, details?: z.ZodError['issues']) {
     return new Response(JSON.stringify({
         error: 'Validation Error',
         message: error,

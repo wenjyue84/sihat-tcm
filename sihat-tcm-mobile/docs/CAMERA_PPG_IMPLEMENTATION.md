@@ -146,3 +146,4 @@ For **best accuracy**, implement **Option 2** (native module) which gives:
 - [CameraX ImageAnalysis](https://developer.android.com/training/camerax/analyze)
 - [AVFoundation Camera](https://developer.apple.com/documentation/avfoundation/capture_setup)
 
+

@@ -41,6 +41,7 @@ export const zh: TranslationKeys = {
         filled: '已填入!',
         clear: '清除',
         cleared: '已清除!',
+        noMedicinesFound: '未记录药物',
     },
     celebration: {
         basics: { title: '资料填写完成！', subtitle: '开始问诊...' },
@@ -187,6 +188,7 @@ export const zh: TranslationKeys = {
         otherSymptomsPlaceholder: '您感受到的其他症状...',
         detailedSymptoms: '详细症状描述',
         detailedSymptomsPlaceholder: '请详细描述您的主要症状、感受以及其他相关情况...',
+        medicineSkipWarning: "您还没有添加任何药物。您目前是否正在服用任何处方药或补充剂？",
         chooseTcmDoctor: '选择您的中医医师',
         startDiagnosis: '开始诊断',
         // 向导步骤翻译

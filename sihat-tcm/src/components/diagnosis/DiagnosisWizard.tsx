@@ -5,6 +5,7 @@ import { useDiagnosisWizard, DiagnosisStep, repairJSON, generateMockReport } fro
 import { useDeveloper } from '@/contexts/DeveloperContext'
 import { MOCK_PROFILES } from '@/data/mockProfiles'
 import { generateMockTestData } from '@/data/mockTestData'
+import type { DiagnosisWizardData } from '@/types/diagnosis'
 
 // UI Components
 import { Card } from '@/components/ui/card'
@@ -70,17 +71,30 @@ export default function DiagnosisWizard() {
             const mockData = generateMockTestData()
 
             // Fill ALL diagnosis data across all steps
-            setData((prev: Record<string, unknown>) => ({
+            setData((prev) => ({
                 ...prev,
-                basic_info: mockData.basic_info,
+                basic_info: {
+                    ...mockData.basic_info,
+                    age: Number(mockData.basic_info.age) || undefined,
+                    height: Number(mockData.basic_info.height) || undefined,
+                    weight: Number(mockData.basic_info.weight) || undefined,
+                },
                 wen_inquiry: mockData.wen_inquiry,
                 wang_tongue: mockData.wang_tongue,
                 wang_face: mockData.wang_face,
                 wang_part: mockData.wang_part,
                 wen_audio: mockData.wen_audio,
-                wen_chat: mockData.wen_inquiry.chatHistory,
+                wen_chat: mockData.wen_inquiry.chatHistory.map((msg, idx) => ({
+                    id: `mock-${idx}`,
+                    role: msg.role as 'user' | 'assistant' | 'system',
+                    content: msg.content
+                })),
                 qie: mockData.qie,
-                smart_connect: mockData.smart_connect
+                smart_connect: {
+                    connected: true,
+                    device_type: 'wearable',
+                    data: mockData.smart_connect
+                }
             }))
 
             console.log('[DiagnosisWizard] Test data filled:', mockData)
@@ -127,7 +141,7 @@ export default function DiagnosisWizard() {
     // Helper to create image step handlers
     const createImageStepHandlers = (stepKey: 'wang_tongue' | 'wang_face' | 'wang_part', type: 'tongue' | 'face' | 'part') => ({
         onCapture: (result: { image?: string }) => {
-            setData((prev: Record<string, unknown>) => ({ ...prev, [stepKey]: result }))
+            setData((prev) => ({ ...prev, [stepKey]: result }))
             if (result.image) {
                 analyzeImage(result.image, type)
             } else {
@@ -136,11 +150,11 @@ export default function DiagnosisWizard() {
         },
         onRetake: () => {
             setAnalysisResult(null)
-            setData((prev: Record<string, unknown>) => ({ ...prev, [stepKey]: null }))
+            setData((prev) => ({ ...prev, [stepKey]: null }))
         },
         onContinue: (editedData?: { observation: string, potentialIssues: string[] }) => {
             if (editedData) {
-                setData((prev: Record<string, unknown>) => ({
+                setData((prev) => ({
                     ...prev,
                     [stepKey]: {
                         ...(prev[stepKey] as any),
@@ -159,7 +173,7 @@ export default function DiagnosisWizard() {
     // Handler for mock report viewing
     const handleFillAndViewMockReport = () => {
         const mockData = MOCK_PROFILES[0].data
-        setData((prev: Record<string, unknown>) => ({
+        setData((prev) => ({
             ...prev,
             ...mockData,
             report_options: createDefaultReportOptions(),
@@ -177,7 +191,7 @@ export default function DiagnosisWizard() {
     }
 
     // Handler for test profile selection
-    const handleSelectTestProfile = (profileData: Record<string, unknown>) => {
+    const handleSelectTestProfile = (profileData: DiagnosisWizardData) => {
         const newData = {
             ...data,
             ...profileData,
@@ -246,7 +260,15 @@ export default function DiagnosisWizard() {
                         <BasicInfoForm
                             initialData={data.basic_info as any}
                             onComplete={(result) => {
-                                setData((prev: Record<string, unknown>) => ({ ...prev, basic_info: result }));
+                                setData((prev) => ({ 
+                                    ...prev, 
+                                    basic_info: {
+                                        ...result,
+                                        age: Number(result.age) || undefined,
+                                        height: Number(result.height) || undefined,
+                                        weight: Number(result.weight) || undefined,
+                                    }
+                                }));
                                 setTimeout(() => nextStep('basic_info'), 0)
                             }} />
                     </div>
@@ -259,10 +281,10 @@ export default function DiagnosisWizard() {
                             basicInfo={data.basic_info as any}
                             initialData={data.wen_inquiry as any}
                             onComplete={(result) => {
-                                setData((prev: Record<string, unknown>) => ({
+                                setData((prev) => ({
                                     ...prev,
                                     wen_inquiry: result,
-                                    wen_chat: { chat: result.chatHistory }
+                                    wen_chat: result.chatHistory || []
                                 }));
                                 setTimeout(() => nextStep('wen_inquiry'), 0)
                             }}
@@ -279,7 +301,7 @@ export default function DiagnosisWizard() {
                             title={t.tongue.title}
                             instruction={t.tongue.instructions}
                             isAnalyzing={isAnalyzing}
-                            analysisResult={analysisResult}
+                            analysisResult={analysisResult as any}
                             existingData={data.wang_tongue as any | null}
                             {...createImageStepHandlers('wang_tongue', 'tongue')}
                         />
@@ -294,7 +316,7 @@ export default function DiagnosisWizard() {
                             title={t.face.title}
                             instruction={t.face.instructions}
                             isAnalyzing={isAnalyzing}
-                            analysisResult={analysisResult}
+                            analysisResult={analysisResult as any}
                             existingData={data.wang_face as any | null}
                             {...createImageStepHandlers('wang_face', 'face')}
                         />
@@ -310,7 +332,7 @@ export default function DiagnosisWizard() {
                             instruction={t.bodyPart.instructions}
                             required={false}
                             isAnalyzing={isAnalyzing}
-                            analysisResult={analysisResult}
+                            analysisResult={analysisResult as any}
                             existingData={data.wang_part as any | null}
                             {...createImageStepHandlers('wang_part', 'part')}
                         />
@@ -323,7 +345,7 @@ export default function DiagnosisWizard() {
                         <AudioRecorder
                             initialData={data.wen_audio as any}
                             onComplete={(result) => {
-                                setData((prev: Record<string, unknown>) => ({ ...prev, wen_audio: result }));
+                                setData((prev) => ({ ...prev, wen_audio: result }));
                                 setTimeout(() => nextStep('wen_audio', result.skipCelebration), 0)
                             }}
                             onBack={() => prevStep('wen_audio')}
@@ -337,7 +359,7 @@ export default function DiagnosisWizard() {
                         <PulseCheck
                             initialData={data.qie as any}
                             onComplete={(result) => {
-                                setData((prev: Record<string, unknown>) => ({ ...prev, qie: result }));
+                                setData((prev) => ({ ...prev, qie: result }));
                                 nextStep('qie');
                             }}
                             onBack={() => prevStep('qie')}
@@ -351,7 +373,14 @@ export default function DiagnosisWizard() {
                         <SmartConnectStep
                             initialData={(data.smart_connect as any) || {}}
                             onComplete={(result) => {
-                                setData((prev: Record<string, unknown>) => ({ ...prev, smart_connect: result }));
+                                setData((prev) => ({ 
+                                    ...prev, 
+                                    smart_connect: {
+                                        connected: true,
+                                        device_type: 'wearable',
+                                        data: result as Record<string, unknown>
+                                    }
+                                }));
                                 nextStep('smart_connect');
                             }}
                             onBack={() => prevStep('smart_connect')}
@@ -376,7 +405,7 @@ export default function DiagnosisWizard() {
                             <DiagnosisSummary
                                 data={data}
                                 onConfirm={(summaries, options, additionalInfo) => {
-                                    setData((prev: Record<string, unknown>) => ({
+                                    setData((prev) => ({
                                         ...prev,
                                         verified_summaries: summaries,
                                         report_options: options,
@@ -400,7 +429,7 @@ export default function DiagnosisWizard() {
                             isLoading={isLoading}
                             error={error}
                             completion={completion}
-                            data={data}
+                            data={data as any}
                             isSaved={isSaved}
                             setData={setData}
                             setStep={setStep}
@@ -428,7 +457,7 @@ export default function DiagnosisWizard() {
             <TestProfilesModal
                 isOpen={showTestProfiles}
                 onClose={() => setShowTestProfiles(false)}
-                onSelectProfile={handleSelectTestProfile}
+                onSelectProfile={(profileData) => handleSelectTestProfile(profileData as unknown as DiagnosisWizardData)}
             />
         </div>
     )
@@ -469,7 +498,7 @@ interface ProcessingStepProps {
     completion: string
     data: Record<string, unknown>
     isSaved: boolean
-    setData: (fn: (prev: Record<string, unknown>) => Record<string, unknown>) => void
+    setData: (fn: (prev: DiagnosisWizardData) => DiagnosisWizardData) => void
     setStep: (step: DiagnosisStep) => void
     setIsSaved: (saved: boolean) => void
     submitConsultation: () => void

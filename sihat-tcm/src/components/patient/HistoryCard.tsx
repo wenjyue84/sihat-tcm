@@ -62,7 +62,7 @@ const getScoreTrend = (score?: number) => {
 export function HistoryCard({ session, onClick, index = 0 }: HistoryCardProps) {
     const diagnosisTitle = extractDiagnosisTitle(session.primary_diagnosis)
     const constitutionTitle = extractConstitutionType(session.constitution)
-    const trend = getScoreTrend(session.overall_score)
+    const trend = getScoreTrend(session.overall_score ?? undefined)
     const TrendIcon = trend?.icon
 
     return (
@@ -155,4 +155,5 @@ export function HistoryCard({ session, onClick, index = 0 }: HistoryCardProps) {
         </motion.div>
     )
 }
+
 

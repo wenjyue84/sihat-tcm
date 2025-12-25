@@ -152,3 +152,4 @@ SELECT
     COUNT(treatment_plan) as sessions_with_treatment_plan
 FROM public.diagnosis_sessions;
 
+

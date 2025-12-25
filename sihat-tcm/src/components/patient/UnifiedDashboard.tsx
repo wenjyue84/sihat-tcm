@@ -365,14 +365,14 @@ export function UnifiedDashboard() {
         try {
             setSeedingReports(true)
             const result = await seedMedicalReports()
-            if (result.success) {
+            if (result?.success) {
                 alert('Sample medical reports added successfully!')
                 window.location.reload()
             } else {
-                if (result.error && (result.error.includes('does not exist') || result.error.includes('relation "public.medical_reports"'))) {
+                if (result?.error && (result.error.includes('does not exist') || result.error.includes('relation "public.medical_reports"'))) {
                     alert('Database Error: The "medical_reports" table is missing. Please run "npx supabase db push" in your terminal to create the missing tables.')
                 } else {
-                    alert('Failed to add sample reports: ' + result.error)
+                    alert('Failed to add sample reports: ' + (result?.error || 'Unknown error'))
                 }
             }
         } catch (error) {

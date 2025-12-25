@@ -269,3 +269,4 @@ Diagnosis → Auto-save → Banner ("Saved!") → Dashboard
 
 *Need help? Check the full docs or console logs.* 🛠️
 
+

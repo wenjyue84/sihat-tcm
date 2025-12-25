@@ -110,7 +110,7 @@ export async function streamTextWithFallback(
             },
             onError: (error) => {
                 devLog('error', context, 'Stream error (primary)', { error });
-                onError?.(error as Error);
+                onError?.(error as unknown as Error);
             },
         });
 
@@ -138,7 +138,7 @@ export async function streamTextWithFallback(
                     },
                     onError: (error) => {
                         devLog('error', context, 'Stream error (fallback)', { error });
-                        onError?.(error as Error);
+                        onError?.(error as unknown as Error);
                     },
                 });
 

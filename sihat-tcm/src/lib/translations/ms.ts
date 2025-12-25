@@ -41,6 +41,7 @@ export const ms: TranslationKeys = {
         filled: 'Diisi!',
         clear: 'Padam',
         cleared: 'Dipadam!',
+        noMedicinesFound: 'Tiada ubat direkodkan',
     },
     celebration: {
         basics: { title: 'Profil Lengkap!', subtitle: 'Permulaan yang baik! Ke soal jawab...' },
@@ -187,6 +188,7 @@ export const ms: TranslationKeys = {
         noHistoryFound: 'Tiada sejarah diagnosis terdahulu dijumpai.',
         detailedSymptoms: 'Simptom Terperinci / Kebimbangan',
         detailedSymptomsPlaceholder: 'Sila terangkan aduan utama, perasaan, dan butiran lain yang berkaitan...',
+        medicineSkipWarning: "Anda belum menambah sebarang ubat. Adakah anda sedang mengambil sebarang ubat preskripsi atau makanan tambahan?",
         chooseTcmDoctor: 'Pilih Doktor TCM Anda',
         startDiagnosis: 'Mulakan Diagnosis',
         // Terjemahan langkah wizard

@@ -209,3 +209,4 @@ export function ShoppingListWidget({ shoppingList, onClose }: ShoppingListWidget
     )
 }
 
+

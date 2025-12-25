@@ -23,3 +23,4 @@ create index if not exists diagnosis_sessions_symptoms_idx on public.diagnosis_s
 create index if not exists diagnosis_sessions_medicines_idx on public.diagnosis_sessions using gin(medicines);
 create index if not exists diagnosis_sessions_follow_up_date_idx on public.diagnosis_sessions(follow_up_date);
 
+

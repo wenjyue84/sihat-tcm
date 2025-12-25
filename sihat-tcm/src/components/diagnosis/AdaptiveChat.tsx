@@ -38,13 +38,19 @@ export function AdaptiveChat({ onComplete, basicInfo, initialMessages }: Adaptiv
     const { messages, sendMessage, error } = useChat({
         transport,
         messages: initialMessages && initialMessages.length > 0 ? (initialMessages as any) : [
-            { id: '1', role: 'system', content: systemMessage }
+            { id: '1', role: 'system', parts: [{ type: 'text', text: systemMessage }] }
         ],
         onError: (err: unknown) => {
             const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
             console.error("useChat error:", errorMessage)
         },
     })
+
+    // Helper function to extract text from message parts
+    const getMessageText = (message: typeof messages[0]): string => {
+        const textParts = message.parts?.filter((part): part is { type: 'text'; text: string } => part.type === 'text')
+        return textParts?.map(part => part.text).join('') || ''
+    }
 
     // Trigger the first question from AI when the component mounts
     useEffect(() => {
@@ -69,19 +75,32 @@ export function AdaptiveChat({ onComplete, basicInfo, initialMessages }: Adaptiv
         <Card className="p-6 space-y-4 h-[500px] flex flex-col">
             <h2 className="text-xl font-semibold">Wen (Inquiry)</h2>
             <ScrollArea className="flex-1 p-4 border rounded-lg">
-                {messages.filter((m) => m.role !== 'system' && m.content !== 'Please start the diagnosis.').map((m) => (
-                    <div key={m.id} className={`mb-4 ${m.role === 'user' ? 'text-right' : 'text-left'}`}>
-                        <span className={`inline-block p-2 rounded-lg ${m.role === 'user' ? 'bg-emerald-100' : 'bg-gray-100'}`}>
-                            {m.content}
-                        </span>
-                    </div>
-                ))}
+                {messages.filter((m) => {
+                    const text = getMessageText(m)
+                    return m.role !== 'system' && text !== 'Please start the diagnosis.'
+                }).map((m) => {
+                    const text = getMessageText(m)
+                    return (
+                        <div key={m.id} className={`mb-4 ${m.role === 'user' ? 'text-right' : 'text-left'}`}>
+                            <span className={`inline-block p-2 rounded-lg ${m.role === 'user' ? 'bg-emerald-100' : 'bg-gray-100'}`}>
+                                {text}
+                            </span>
+                        </div>
+                    )
+                })}
             </ScrollArea>
             <form onSubmit={handleSubmit} className="flex gap-2">
                 <Input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type your answer..." />
                 <Button type="submit">Send</Button>
             </form>
-            <Button variant="outline" onClick={() => onComplete({ chat: messages })}>Finish Chat</Button>
+            <Button variant="outline" onClick={() => {
+                const chatMessages: ChatMessage[] = messages.map(m => ({
+                    id: m.id,
+                    role: m.role,
+                    content: getMessageText(m)
+                }))
+                onComplete({ chat: chatMessages })
+            }}>Finish Chat</Button>
         </Card>
     )
 }

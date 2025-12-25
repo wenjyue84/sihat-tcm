@@ -25,16 +25,16 @@ export function DiagnosisCard({ data, diagnosisText, constitutionText }: Diagnos
                     <div className="text-xl md:text-2xl font-semibold text-emerald-900 mb-2">
                         {diagnosisText}
                     </div>
-                    {typeof data.diagnosis === 'object' && data.diagnosis.secondary_patterns && data.diagnosis.secondary_patterns.length > 0 && (
+                    {typeof data.diagnosis === 'object' && data.diagnosis !== null && 'secondary_patterns' in data.diagnosis && Array.isArray((data.diagnosis as any).secondary_patterns) && (data.diagnosis as any).secondary_patterns.length > 0 && (
                         <div className="mb-2">
                             <p className="text-sm text-emerald-700 font-medium">Secondary Patterns:</p>
-                            <p className="text-emerald-800">{data.diagnosis.secondary_patterns.join(', ')}</p>
+                            <p className="text-emerald-800">{(data.diagnosis as any).secondary_patterns.join(', ')}</p>
                         </div>
                     )}
-                    {typeof data.diagnosis === 'object' && data.diagnosis.affected_organs && data.diagnosis.affected_organs.length > 0 && (
+                    {typeof data.diagnosis === 'object' && data.diagnosis !== null && 'affected_organs' in data.diagnosis && Array.isArray((data.diagnosis as any).affected_organs) && (data.diagnosis as any).affected_organs.length > 0 && (
                         <div className="mb-2">
                             <p className="text-sm text-emerald-700 font-medium">Affected Organs:</p>
-                            <p className="text-emerald-800">{data.diagnosis.affected_organs.join(', ')}</p>
+                            <p className="text-emerald-800">{(data.diagnosis as any).affected_organs.join(', ')}</p>
                         </div>
                     )}
                     <div className="flex items-center gap-2 text-emerald-700 font-medium text-sm md:text-base mt-3 pt-3 border-t border-emerald-100/50">

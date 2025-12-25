@@ -42,7 +42,7 @@ export function DocumentViewerModal({ isOpen, onClose, report }: DocumentViewerM
                                 variant="outline"
                                 size="sm"
                                 className="gap-2 shrink-0 hidden sm:flex"
-                                onClick={() => window.open(report.file_url, '_blank')}
+                                onClick={() => report.file_url && window.open(report.file_url, '_blank')}
                             >
                                 <ExternalLink className="w-4 h-4" />
                                 Open Original
@@ -73,7 +73,7 @@ export function DocumentViewerModal({ isOpen, onClose, report }: DocumentViewerM
                                 You can view the original file by downloading it or opening it in a new tab.
                             </p>
                             {report.file_url ? (
-                                <Button onClick={() => window.open(report.file_url, '_blank')}>
+                                <Button onClick={() => report.file_url && window.open(report.file_url, '_blank')}>
                                     <ExternalLink className="w-4 h-4 mr-2" />
                                     View Original File
                                 </Button>
@@ -95,7 +95,7 @@ export function DocumentViewerModal({ isOpen, onClose, report }: DocumentViewerM
                             Close
                         </Button>
                         {report.file_url && (
-                            <Button className="sm:hidden" onClick={() => window.open(report.file_url, '_blank')}>
+                            <Button className="sm:hidden" onClick={() => report.file_url && window.open(report.file_url, '_blank')}>
                                 <ExternalLink className="w-4 h-4 mr-2" />
                                 Open
                             </Button>
