@@ -10,6 +10,7 @@ import { LanguageSelector } from '@/components/ui/LanguageSelector'
 import { SystemManual } from '@/components/ui/SystemManual'
 import { useDiagnosisProgressOptional } from '@/contexts/DiagnosisProgressContext'
 import Image from 'next/image'
+import { AppDownloadSection } from '@/components/landing/AppDownloadSection'
 
 export default function Home() {
 
@@ -188,20 +189,10 @@ export default function Home() {
       </section>
 
       {/* Promotional footer - hidden on mobile during step 2/7 and beyond to reduce confusion during data entry */}
-      <section className={`relative overflow-hidden bg-emerald-900 text-white py-12 px-4 md:px-6 text-center mt-8 ${isStep2OrBeyondMobile ? 'hidden md:block' : ''}`}>
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="relative z-10 max-w-3xl mx-auto space-y-4">
-          <div className="inline-block px-3 py-1 rounded-full bg-emerald-800 text-emerald-100 text-xs md:text-sm font-medium mb-2">
-            {t.common.appTagline}
-          </div>
-          <h1 className="text-3xl md:text-6xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-200 to-teal-100">
-            {t.common.appName}
-          </h1>
-          <p className="text-base md:text-xl text-emerald-100 max-w-2xl mx-auto leading-relaxed">
-            {t.common.appDescription}
-          </p>
-        </div>
-      </section>
+      {/* Promotional footer / App Download Section - hidden on mobile during step 2/7 and beyond */}
+      <div className={isStep2OrBeyondMobile ? 'hidden md:block' : ''}>
+        <AppDownloadSection />
+      </div>
 
 
     </main>

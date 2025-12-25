@@ -1311,6 +1311,18 @@ export const en = {
         },
         floatingButton: 'Ask about your report',
     },
+
+    // App Download Section
+    appDownload: {
+        title: 'Take Your Health Journey Anywhere',
+        subtitle: 'Download the Sihat TCM mobile app for on-the-go diagnosis, health tracking, and personalized TCM recommendations.',
+        appStore: 'Download on the App Store',
+        googlePlay: 'Get it on Google Play',
+        comingSoonTitle: 'Coming Soon!',
+        comingSoonDesc: 'The Sihat TCM mobile app is currently under development. We are working hard to bring you the best experience on iOS and Android. Stay tuned!',
+        notifyMe: 'Notify Me',
+        close: 'Close',
+    },
 };
 
 export type TranslationKeys = typeof en;

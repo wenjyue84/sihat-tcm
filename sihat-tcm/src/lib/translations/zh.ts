@@ -1030,4 +1030,16 @@ export const zh: TranslationKeys = {
         },
         floatingButton: '询问关于您的报告',
     },
+
+    // App Download Section
+    appDownload: {
+        title: '随时随地关注您的健康',
+        subtitle: '下载 Sihat TCM 移动应用，随时随地进行诊断、健康追踪和获取个性化中医建议。',
+        appStore: 'App Store 下载',
+        googlePlay: 'Google Play 下载',
+        comingSoonTitle: '即将推出！',
+        comingSoonDesc: 'Sihat TCM 移动应用正在开发中。我们需要一点时间为您打造 iOS 和 Android 上的最佳体验。敬请期待！',
+        notifyMe: '通知我',
+        close: '关闭',
+    },
 };

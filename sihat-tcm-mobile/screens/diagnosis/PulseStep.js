@@ -9,6 +9,7 @@ import {
     Modal,
     ScrollView,
     Alert,
+    Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -16,6 +17,7 @@ import { COLORS } from '../../constants/themes';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import EcgAnimation from '../../components/ui/EcgAnimation';
+import CameraPulseSensor from '../../components/CameraPulseSensor';
 
 // Traditional 12 TCM Pulse Types (脉象类型)
 const getTcmPulseTypes = (t) => [
@@ -59,6 +61,10 @@ export default function PulseStep({ data, onUpdate, theme, isDark }) {
     const [isMeasuring, setIsMeasuring] = useState(false);
     const [measureCount, setMeasureCount] = useState(0);
     const [conflictWarning, setConflictWarning] = useState(null);
+    const [showCameraMode, setShowCameraMode] = useState(false);
+    
+    // Check if camera PPG is available (Android only with camera)
+    const isCameraPPGAvailable = Platform.OS === 'android';
 
     const pulseAnim = useRef(new Animated.Value(1)).current;
     // Multi-layer ripple animations (Apple Watch inspired)
@@ -110,6 +116,13 @@ export default function PulseStep({ data, onUpdate, theme, isDark }) {
             setBpm(cleaned);
             onUpdate({ ...data, bpm: cleaned });
         }
+    };
+    
+    const handleCameraBpmDetected = (detectedBpm) => {
+        setBpm(detectedBpm.toString());
+        onUpdate({ ...data, bpm: detectedBpm.toString() });
+        setShowCameraMode(false);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     };
 
     const togglePulseQuality = (pulseType) => {
@@ -201,12 +214,38 @@ export default function PulseStep({ data, onUpdate, theme, isDark }) {
                     </View>
                 )}
 
-                {/* Quick Measure Button */}
-                {!isMeasuring ? (
-                    <TouchableOpacity style={styles.measureButton} onPress={startMeasuring}>
-                        <Ionicons name="timer-outline" size={20} color="#ffffff" />
-                        <Text style={styles.measureButtonText}>{t.pulse.guidedMeasure || 'Guided 15-Second Count'}</Text>
-                    </TouchableOpacity>
+                {/* Camera PPG Sensor */}
+                {showCameraMode && (
+                    <CameraPulseSensor
+                        onBpmDetected={handleCameraBpmDetected}
+                        onCancel={() => setShowCameraMode(false)}
+                        theme={theme}
+                        isDark={isDark}
+                        t={t}
+                    />
+                )}
+                
+                {/* Measurement Buttons */}
+                {!isMeasuring && !showCameraMode ? (
+                    <View style={styles.measureButtonsContainer}>
+                        <TouchableOpacity style={styles.measureButton} onPress={startMeasuring}>
+                            <Ionicons name="timer-outline" size={20} color="#ffffff" />
+                            <Text style={styles.measureButtonText}>{t.pulse.guidedMeasure || 'Guided 15-Second Count'}</Text>
+                        </TouchableOpacity>
+                        
+                        {/* Camera PPG Button - Only on Android */}
+                        {isCameraPPGAvailable && (
+                            <TouchableOpacity 
+                                style={[styles.measureButton, styles.cameraButton]} 
+                                onPress={() => setShowCameraMode(true)}
+                            >
+                                <Ionicons name="camera" size={20} color="#ffffff" />
+                                <Text style={styles.measureButtonText}>
+                                    {t.pulse?.measureWithCamera || 'Measure with Camera'}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 ) : (
                     <View style={styles.measuringSection}>
                         <Text style={styles.measuringHint}>{t.pulse.tapHeartbeat || 'Tap each heartbeat you feel'}</Text>
@@ -405,9 +444,16 @@ const createStyles = (theme, isDark) => StyleSheet.create({
         borderRadius: 12,
         overflow: 'hidden',
     },
+    measureButtonsContainer: {
+        gap: 12,
+        marginTop: 16,
+    },
     measureButton: {
         flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-        backgroundColor: theme.accent.secondary, paddingVertical: 14, borderRadius: 14, marginTop: 16,
+        backgroundColor: theme.accent.secondary, paddingVertical: 14, borderRadius: 14,
+    },
+    cameraButton: {
+        backgroundColor: theme.semantic.error || '#ef4444',
     },
     measureButtonText: { color: '#ffffff', fontSize: 16, fontWeight: 'bold' },
     measuringSection: { alignItems: 'center', marginTop: 16 },

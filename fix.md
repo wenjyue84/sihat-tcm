@@ -357,3 +357,36 @@ video.play()
 - [ ] Switching between front/back camera works
 - [ ] Tab visibility change resumes video
 - [ ] Capture button correctly captures from visible video
+
+---
+
+# Tina CMS Integration & 404 Troubleshooting
+
+## Date: 2025-12-25
+
+## Problem Description
+The user experienced a 404 error when navigating to `/tina-admin/index.html` after the initial setup.
+
+## Root Cause
+The Tina CMS editor files are generated dynamically by the Tina dev process. If the standard `npm run dev` command is used instead of the Tina-enabled dev command, the `public/tina-admin` directory is not populated, and the GraphQL backend is not started, resulting in a 404 from Next.js.
+
+## Solution
+Always use the specialized Tina development command to start both the Next.js app and the Tina CMS engine simultaneously.
+
+### Correct Command:
+```bash
+npm run dev:tina
+```
+
+---
+
+## Developer Manual Update
+Updated the `DEVELOPER_MANUAL.md` to include:
+- Tina CMS in the tech stack.
+- Setup instructions specifically for the blog editor.
+- Troubleshooting steps for the 404 error.
+
+---
+
+## UI Improvement
+Modified `src/app/not-found.tsx` to detect requests to `/tina-admin` and provide actionable instructions (Check if server is running with `npm run dev:tina`) instead of a generic error.

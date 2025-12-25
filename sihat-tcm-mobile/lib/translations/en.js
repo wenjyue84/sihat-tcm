@@ -372,6 +372,27 @@ export const en = {
             shuo: { name: 'Rapid', zh: '数脉' },
             normal: { name: 'Normal', zh: '平脉' },
         },
+        // Camera PPG Measurement
+        measureWithCamera: 'Measure with Camera',
+        cameraMeasurement: {
+            title: 'Measuring Heart Rate',
+            placeFingerInstruction: 'Place your finger over the camera lens',
+            coverFlash: 'Cover the flash completely with your fingertip',
+            holdStill: 'Hold still for 10 seconds',
+            detectingPulse: 'Detecting pulse...',
+            signalQuality: 'Signal Quality',
+            weak: 'Weak',
+            good: 'Good',
+            excellent: 'Excellent',
+            stable: 'Stable',
+            useThisReading: 'Use This Reading',
+            flashUnavailable: 'Flash unavailable',
+            initializing: 'Initializing camera...',
+            pressFingerHarder: 'Press finger harder',
+            detected: 'Detected!',
+            permissionRequired: 'Camera permission required',
+            grantPermission: 'Grant Permission',
+        },
     },
 
     // Smart Connect

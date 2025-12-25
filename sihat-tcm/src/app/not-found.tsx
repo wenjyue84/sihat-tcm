@@ -33,6 +33,29 @@ export default function NotFound() {
                 <h2 className="text-2xl sm:text-3xl font-semibold text-foreground mb-4">
                     Page Not Found
                 </h2>
+
+                {/* Specific Tina CMS Guidance */}
+                <div id="tina-admin-hint" className="hidden mb-8 p-6 bg-amber-50 border border-amber-200 rounded-xl text-left animate-in fade-in slide-in-from-top-4 duration-700">
+                    <h3 className="text-amber-800 font-bold flex items-center gap-2 mb-2">
+                        <span className="text-lg">🦙</span> Tina CMS Troubleshooting
+                    </h3>
+                    <p className="text-amber-700 text-sm mb-4">
+                        It looks like you&apos;re trying to access the blog editor. If you see this 404 page, it usually means the Tina CMS engine is not running.
+                    </p>
+                    <div className="bg-amber-100/50 p-3 rounded-lg border border-amber-200/50">
+                        <p className="text-xs font-mono text-amber-900 mb-2">To fix this, stop your current server and run:</p>
+                        <code className="block bg-black text-white p-2 rounded text-xs">npm run dev:tina</code>
+                    </div>
+                </div>
+
+                <script dangerouslySetInnerHTML={{
+                    __html: `
+                        if (window.location.pathname.includes('tina-admin')) {
+                            document.getElementById('tina-admin-hint').classList.remove('hidden');
+                        }
+                    `
+                }} />
+
                 <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
                     Oops! The page you&apos;re looking for seems to have wandered off the
                     path. It might have been moved, deleted, or perhaps never existed.

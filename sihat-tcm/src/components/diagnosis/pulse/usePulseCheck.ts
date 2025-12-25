@@ -18,19 +18,35 @@ async function checkCameraCapability(): Promise<boolean> {
     const isAndroid = /android/.test(userAgent)
     const isMobile = isIOS || isAndroid
     
+    console.log('[Camera PPG] Device check:', { isIOS, isAndroid, isMobile, userAgent })
+    
     // iOS doesn't support torch
-    if (isIOS) return false
+    if (isIOS) {
+        console.log('[Camera PPG] iOS detected - torch not supported')
+        return false
+    }
     
     // Desktop webcams don't have flash
-    if (!isMobile) return false
+    if (!isMobile) {
+        console.log('[Camera PPG] Desktop detected - no flash available')
+        return false
+    }
+    
+    // Check for secure context (HTTPS required for camera on non-localhost)
+    if (typeof window !== 'undefined' && !window.isSecureContext) {
+        console.log('[Camera PPG] Not a secure context (HTTPS required for camera on network addresses)')
+        return false
+    }
     
     // Check for camera and torch capability
     try {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            console.log('[Camera PPG] MediaDevices API not available')
             return false
         }
         
         // Try to get camera access to check capabilities
+        console.log('[Camera PPG] Requesting camera access...')
         const stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: 'environment' }
         })
@@ -42,8 +58,12 @@ async function checkCameraCapability(): Promise<boolean> {
         stream.getTracks().forEach(t => t.stop())
         
         // Check if torch is available
-        return !!(capabilities && 'torch' in capabilities)
-    } catch {
+        const hasTorch = !!(capabilities && 'torch' in capabilities)
+        console.log('[Camera PPG] Torch capability:', hasTorch, capabilities)
+        
+        return hasTorch
+    } catch (err) {
+        console.log('[Camera PPG] Camera access error:', err)
         return false
     }
 }
@@ -91,6 +111,13 @@ export function usePulseCheck({ initialData, onComplete, onBack, t }: UsePulseCh
             if (mounted) {
                 setShowCameraOption(hasCamera)
                 setIsCheckingCamera(false)
+                // Debug log for troubleshooting
+                console.log('[Camera PPG] Capability check result:', {
+                    hasCamera,
+                    isSecureContext: typeof window !== 'undefined' && window.isSecureContext,
+                    protocol: typeof window !== 'undefined' && window.location.protocol,
+                    userAgent: typeof navigator !== 'undefined' && navigator.userAgent
+                })
             }
         })
         

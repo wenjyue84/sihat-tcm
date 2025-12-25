@@ -371,6 +371,27 @@ export const zh = {
             shuo: { name: '数脉', zh: '数脉' },
             normal: { name: '平脉', zh: '平脉' },
         },
+        // 相机光电容积脉搏波测量
+        measureWithCamera: '用相机测量',
+        cameraMeasurement: {
+            title: '测量心率',
+            placeFingerInstruction: '将手指放在相机镜头上',
+            coverFlash: '用指尖完全遮住闪光灯',
+            holdStill: '保持静止10秒',
+            detectingPulse: '正在检测脉搏...',
+            signalQuality: '信号质量',
+            weak: '较弱',
+            good: '良好',
+            excellent: '优秀',
+            stable: '稳定',
+            useThisReading: '使用此读数',
+            flashUnavailable: '闪光灯不可用',
+            initializing: '正在初始化相机...',
+            pressFingerHarder: '请将手指更用力按在相机上',
+            detected: '已检测到！',
+            permissionRequired: '需要相机权限',
+            grantPermission: '授予权限',
+        },
     },
 
     // 智能连接

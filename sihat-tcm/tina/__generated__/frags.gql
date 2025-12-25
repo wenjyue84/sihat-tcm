@@ -1,0 +1,45 @@
+fragment Post_enParts on Post_en {
+  __typename
+  title
+  excerpt
+  coverImage
+  date
+  author {
+    __typename
+    name
+    picture
+  }
+  ogImage {
+    __typename
+    url
+  }
+  body
+}
+
+fragment Post_msParts on Post_ms {
+  __typename
+  title
+  excerpt
+  coverImage
+  date
+  author {
+    __typename
+    name
+    picture
+  }
+  body
+}
+
+fragment Post_zhParts on Post_zh {
+  __typename
+  title
+  excerpt
+  coverImage
+  date
+  author {
+    __typename
+    name
+    picture
+  }
+  body
+}

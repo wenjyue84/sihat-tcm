@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { LogOut, Info, MessageSquare, Eye, FileText, Check, Loader2, ChevronDown, ChevronUp, Mic, Users, Settings, Shield, Key, UserCog, Music } from 'lucide-react'
+import { LogOut, Info, MessageSquare, Eye, FileText, Check, Loader2, ChevronDown, ChevronUp, Mic, Users, Settings, Shield, Key, UserCog, Music, ExternalLink, NotebookPen } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Slider } from '@/components/ui/slider'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -477,12 +477,15 @@ export default function AdminDashboard() {
             </div>
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-                <TabsList className="grid w-full grid-cols-5 max-w-3xl mx-auto mb-8">
+                <TabsList className="grid w-full grid-cols-6 max-w-4xl mx-auto mb-8">
                     <TabsTrigger value="prompts" className="flex items-center gap-2">
                         <Settings className="w-4 h-4" />
                         Prompts
                     </TabsTrigger>
-
+                    <TabsTrigger value="blog" className="flex items-center gap-2">
+                        <NotebookPen className="w-4 h-4" />
+                        Blog
+                    </TabsTrigger>
                     <TabsTrigger value="security" className="flex items-center gap-2">
                         <Shield className="w-4 h-4" />
                         Security
@@ -701,6 +704,68 @@ export default function AdminDashboard() {
                                     <span>💊 医师 Physician</span>
                                     <code className="bg-blue-100 px-2 py-0.5 rounded">gemini-2.0-flash</code>
                                 </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <SystemAlerts />
+                </TabsContent>
+
+                <TabsContent value="blog" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
+                    <Card className="border-emerald-100 bg-emerald-50/30 overflow-hidden relative">
+                        {/* Decorative background element */}
+                        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-emerald-100/50 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-blue-100/50 rounded-full blur-3xl pointer-events-none" />
+
+                        <CardHeader className="text-center pb-2 relative z-10">
+                            <div className="mx-auto w-16 h-16 bg-white rounded-2xl shadow-sm border border-emerald-100 flex items-center justify-center mb-4 transition-transform hover:scale-110 duration-300">
+                                <NotebookPen className="w-8 h-8 text-emerald-600" />
+                            </div>
+                            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-emerald-800 to-teal-700 bg-clip-text text-transparent">
+                                Content Management
+                            </CardTitle>
+                            <CardDescription className="text-emerald-700 font-medium max-w-lg mx-auto mt-2">
+                                Access the visual blog editor to manage articles, translations, and media in a WordPress-like environment.
+                            </CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="flex flex-col items-center py-10 relative z-10">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl mb-12">
+                                <div className="p-5 bg-white rounded-2xl border border-emerald-100 shadow-sm flex flex-col items-center text-center gap-3 hover:shadow-md transition-shadow">
+                                    <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600">
+                                        <MessageSquare className="w-5 h-5" />
+                                    </div>
+                                    <h4 className="font-bold text-gray-900 leading-tight">Multi-language Postings</h4>
+                                    <p className="text-xs text-gray-500">English, Malay, and Chinese translations.</p>
+                                </div>
+                                <div className="p-5 bg-white rounded-2xl border border-emerald-100 shadow-sm flex flex-col items-center text-center gap-3 hover:shadow-md transition-shadow">
+                                    <div className="p-2.5 bg-amber-50 rounded-xl text-amber-600">
+                                        <Eye className="w-5 h-5" />
+                                    </div>
+                                    <h4 className="font-bold text-gray-900 leading-tight">Visual Preview</h4>
+                                    <p className="text-xs text-gray-500">See your changes in real-time as you type.</p>
+                                </div>
+                                <div className="p-5 bg-white rounded-2xl border border-emerald-100 shadow-sm flex flex-col items-center text-center gap-3 hover:shadow-md transition-shadow">
+                                    <div className="p-2.5 bg-purple-50 rounded-xl text-purple-600">
+                                        <FileText className="w-5 h-5" />
+                                    </div>
+                                    <h4 className="font-bold text-gray-900 leading-tight">Media Library</h4>
+                                    <p className="text-xs text-gray-500">Upload and manage post images instantly.</p>
+                                </div>
+                            </div>
+
+                            <Button
+                                size="lg"
+                                className="h-16 px-10 bg-emerald-600 hover:bg-emerald-700 text-white text-xl font-bold rounded-full shadow-lg hover:shadow-emerald-200/50 transition-all hover:-translate-y-1 group"
+                                onClick={() => window.open('/tina-admin/index.html', '_blank')}
+                            >
+                                <ExternalLink className="w-6 h-6 mr-2 transition-transform group-hover:rotate-12" />
+                                Open Blog Editor
+                            </Button>
+
+                            <div className="mt-8 flex items-center gap-2 text-emerald-600/70 text-sm font-medium">
+                                <Check className="w-4 h-4" />
+                                <span>Tina CMS Integration Active</span>
                             </div>
                         </CardContent>
                     </Card>

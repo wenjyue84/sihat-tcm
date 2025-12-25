@@ -1030,4 +1030,16 @@ export const ms: TranslationKeys = {
         },
         floatingButton: 'Tanya tentang laporan anda',
     },
+
+    // App Download Section
+    appDownload: {
+        title: 'Bawa Perjalanan Kesihatan Anda Ke Mana Sahaja',
+        subtitle: 'Muat turun aplikasi mudah alih Sihat TCM untuk diagnosis segera, pemantauan kesihatan, dan cadangan TCM yang diperibadikan.',
+        appStore: 'Muat turun di App Store',
+        googlePlay: 'Dapatkan di Google Play',
+        comingSoonTitle: 'Akan Datang!',
+        comingSoonDesc: 'Aplikasi mudah alih Sihat TCM sedang dalam pembangunan. Kami sedang berusaha keras untuk memberikan pengalaman terbaik di iOS dan Android. Nantikan!',
+        notifyMe: 'Beritahu Saya',
+        close: 'Tutup',
+    },
 };

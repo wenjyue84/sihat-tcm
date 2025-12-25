@@ -51,6 +51,7 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
 - **AI Integration**: Google Gemini API
+- **Content Management**: Tina CMS (Git-backed)
 
 **Mobile Application:**
 - **Framework**: React Native with Expo
@@ -217,6 +218,14 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
    ```
 
    The application will be available at `http://localhost:3000`
+
+6. **Blog Management (Tina CMS)**
+   
+   To manage blog content, use the specialized Tina dev command:
+   ```bash
+   npm run dev:tina
+   ```
+   The editor will be available at `http://localhost:3000/tina-admin/index.html`
 
 ### Mobile App Setup
 
@@ -688,6 +697,15 @@ Before deploying:
 - Check TypeScript errors: `npm run type-check`
 - Review ESLint errors: `npm run lint`
 
+#### 6. Tina CMS 404 Error
+
+**Problem**: Navigating to `/tina-admin` returns a 404 error.
+
+**Solutions**:
+- **Check Server Command**: Ensure you are running `npm run dev:tina` instead of `npm run dev`. Tina needs to build its admin assets and start a GraphQL backend.
+- **Check Output Directory**: Verify that `public/tina-admin` contains an `index.html` file. If not, the Tina build process hasn't run.
+- **Console Errors**: Check the terminal for "🦙 TinaCMS Dev Server" status. It should say "✅ TinaCMS Dev Server is active".
+
 ### Debugging Tips
 
 1. **Check Browser Console**: Look for client-side errors
@@ -749,5 +767,5 @@ Before deploying:
 
 ---
 
-**Last Updated**: [Current Date]
-**Version**: 1.0.0
+**Last Updated**: 2025-12-25
+**Version**: 1.1.0

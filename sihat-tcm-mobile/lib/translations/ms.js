@@ -371,6 +371,27 @@ export const ms = {
             shuo: { name: 'Laju', zh: '数脉' },
             normal: { name: 'Normal', zh: '平脉' },
         },
+        // Pengukuran PPG Kamera
+        measureWithCamera: 'Ukur dengan Kamera',
+        cameraMeasurement: {
+            title: 'Mengukur Kadar Jantung',
+            placeFingerInstruction: 'Letakkan jari anda pada lensa kamera',
+            coverFlash: 'Tutup lampu kilat sepenuhnya dengan hujung jari anda',
+            holdStill: 'Kekal diam selama 10 saat',
+            detectingPulse: 'Mengesan nadi...',
+            signalQuality: 'Kualiti Isyarat',
+            weak: 'Lemah',
+            good: 'Baik',
+            excellent: 'Cemerlang',
+            stable: 'Stabil',
+            useThisReading: 'Gunakan Bacaan Ini',
+            flashUnavailable: 'Lampu kilat tidak tersedia',
+            initializing: 'Memulakan kamera...',
+            pressFingerHarder: 'Tekan jari lebih kuat',
+            detected: 'Dikesan!',
+            permissionRequired: 'Kebenaran kamera diperlukan',
+            grantPermission: 'Beri Kebenaran',
+        },
     },
 
     // Sambungan pintar
