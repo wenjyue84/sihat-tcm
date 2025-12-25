@@ -28,13 +28,29 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 
 ### Key Features
 
+**Core Features:**
 - Patient onboarding and medical history collection
-- TCM diagnostic workflows (pulse, tongue, body examination)
-- AI-powered diagnostic assistance
+- TCM diagnostic workflows (Four Examinations: pulse, tongue, face, body)
+- AI-powered diagnostic assistance using Gemini AI
 - Medical report generation and management
 - Multi-language support (English, Malay, Chinese)
-- Role-based access control (Patient, Doctor, Admin)
+- Role-based access control (Guest, Patient, Doctor, Admin)
 - Real-time chat with AI for medical inquiries
+
+**Patient Portal Features:**
+- **Health Journey Dashboard**: Unified patient portal with health trends and diagnostics
+- **AI Meal Planner**: Personalized 7-day TCM meal plans with shopping lists
+- **TCM Food Checker**: Evaluate food suitability based on diagnosis
+- **Qi Dose (Baduanjin)**: Guided TCM exercises with gamified "Qi Garden"
+- **Vitality Rhythm**: Constitution tracker, seasonal alerts, and meridian clock
+- **Snore Analysis**: AI-powered TCM-based sleep and fatigue assessment
+- **Circle of Health**: Anonymous community support groups
+- **Family Health Management**: Manage family member health profiles
+- **Western Doctor Chat**: AI-powered second opinion consultation
+- **Digital Twin**: Visual health organ mapping
+- **Herb Shop**: TCM herb and product recommendations
+- **Infographics Generator**: AI-generated personalized health infographics
+- **Health Data Import**: Connect wearables and health devices (IoT integration)
 
 ---
 
@@ -43,15 +59,16 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 ### Technology Stack
 
 **Web Application:**
-- **Framework**: Next.js 14+ (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Components**: shadcn/ui
+- **Styling**: Tailwind CSS v4
+- **UI Components**: shadcn/ui, Framer Motion, Sonner
 - **State Management**: React Context API
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Supabase Auth
-- **AI Integration**: Google Gemini API
+- **AI Integration**: Google Gemini API via Vercel AI SDK (Core & React)
 - **Content Management**: Tina CMS (Git-backed)
+- **PDF Generation**: html2canvas, jspdf
 
 **Mobile Application:**
 - **Framework**: React Native with Expo
@@ -261,39 +278,92 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 sihat-tcm/
 ├── src/
 │   ├── app/                    # Next.js App Router pages
+│   │   ├── actions/            # Server Actions
+│   │   │   └── meal-planner.ts # AI meal planning actions
 │   │   ├── api/                # API routes
-│   │   │   ├── auth/           # Authentication endpoints
-│   │   │   ├── diagnosis/      # Diagnosis-related endpoints
-│   │   │   ├── reports/        # Medical report endpoints
-│   │   │   └── gemini/         # AI integration endpoints
+│   │   │   ├── admin/          # Admin management endpoints
+│   │   │   ├── analyze-audio/  # Audio/voice analysis
+│   │   │   ├── analyze-image/  # Image analysis (tongue, face, body)
+│   │   │   ├── analyze-snore/  # Snore audio analysis
+│   │   │   ├── ask-dietary-advice/ # Dietary consultation
+│   │   │   ├── chat/           # TCM inquiry chat
+│   │   │   ├── consult/        # Consultation endpoints
+│   │   │   ├── extract-text/   # OCR text extraction
+│   │   │   ├── generate-infographic/ # AI infographic generation
+│   │   │   ├── health/         # Health data endpoints
+│   │   │   ├── report-chat/    # Chat with diagnosis report
+│   │   │   ├── summarize-inquiry/ # Inquiry summary generation
+│   │   │   ├── validate-medicine/ # Medicine validation
+│   │   │   └── western-chat/   # Western doctor AI chat
 │   │   ├── admin/              # Admin dashboard
 │   │   ├── doctor/             # Doctor dashboard
-│   │   ├── patient/            # Patient dashboard
-│   │   ├── login/              # Login page
+│   │   ├── patient/            # Patient portal
+│   │   │   └── history/        # Diagnosis history pages
+│   │   ├── blog/               # Blog pages (Tina CMS)
+│   │   ├── login/              # Authentication pages
 │   │   └── test-*/             # Test/development pages
 │   ├── components/             # React components
 │   │   ├── admin/              # Admin-specific components
+│   │   ├── blog/               # Blog components
 │   │   ├── diagnosis/          # Diagnosis workflow components
+│   │   │   ├── basic-info/     # Basic information forms
+│   │   │   ├── pulse/          # Pulse examination
+│   │   │   ├── report/         # Report generation & display
+│   │   │   ├── summary/        # Diagnosis summary
+│   │   │   └── wizard/         # Wizard navigation
+│   │   ├── meal-planner/       # AI Meal Planner components
+│   │   │   ├── DietaryPreferencesForm.tsx
+│   │   │   ├── MealCard.tsx
+│   │   │   ├── MealPlanWizard.tsx
+│   │   │   ├── RecipeModal.tsx
+│   │   │   ├── ShoppingListWidget.tsx
+│   │   │   ├── TCMFoodChecker.tsx
+│   │   │   └── WeeklyCalendarView.tsx
+│   │   ├── patient/            # Patient portal components
+│   │   │   ├── CircleOfHealth.tsx      # Community feature
+│   │   │   ├── DigitalTwin.tsx         # Health organ visualization
+│   │   │   ├── DocumentViewerModal.tsx # Medical document viewer
+│   │   │   ├── FamilyManagement.tsx    # Family profiles
+│   │   │   ├── HistoryCard.tsx         # Diagnosis history cards
+│   │   │   ├── TrendWidget.tsx         # Health trends dashboard
+│   │   │   ├── UnifiedDashboard.tsx    # Main patient portal
+│   │   │   ├── VitalityRhythmTab.tsx   # Meridian clock & constitution
+│   │   │   └── snore-analysis/         # Snore analysis components
+│   │   ├── qi-dose/            # Baduanjin exercise components
+│   │   │   ├── QiDose.tsx      # Exercise interface
+│   │   │   └── QiGarden.tsx    # Gamified garden feature
 │   │   ├── onboarding/         # Patient onboarding components
 │   │   ├── landing/            # Landing page components
+│   │   ├── seo/                # SEO components
 │   │   └── ui/                 # Reusable UI components (shadcn/ui)
+│   ├── content/                # Tina CMS content (MDX blog posts)
 │   ├── contexts/               # React Context providers
 │   │   ├── AuthContext.tsx     # Authentication state
-│   │   ├── DoctorContext.tsx   # Doctor-specific state
+│   │   ├── DeveloperContext.tsx # Developer mode state
 │   │   ├── DiagnosisProgressContext.tsx  # Diagnosis workflow state
+│   │   ├── DoctorContext.tsx   # Doctor/model selection state
 │   │   ├── LanguageContext.tsx # Multi-language support
 │   │   └── OnboardingContext.tsx # Onboarding state
 │   ├── hooks/                  # Custom React hooks
+│   │   ├── useCameraHeartRate.ts    # Heart rate via camera
 │   │   ├── useDiagnosisPersistence.ts
-│   │   └── useDiagnosisWizard.ts
+│   │   ├── useDiagnosisWizard.ts
+│   │   └── useLanguageSync.ts       # Language synchronization
 │   ├── lib/                    # Utility libraries
-│   │   ├── supabase.ts         # Supabase client
-│   │   ├── systemPrompts.ts    # AI system prompts
-│   │   ├── utils.ts            # General utilities
-│   │   └── translations/       # Translation files
-│   └── middleware.ts           # Next.js middleware
+│   │   ├── actions.ts          # Server actions (health passport)
+│   │   ├── herbShopData.ts     # Herb shop product data
+│   │   ├── mockMedicalReports.ts # Demo medical reports
+│   │   ├── rateLimit.ts        # API rate limiting
+│   │   ├── settings.ts         # App settings
+│   │   ├── supabase/           # Supabase client (server/client)
+│   │   ├── systemPrompts.ts    # AI system prompts (COStar)
+│   │   ├── tcm-utils.ts        # TCM utility functions
+│   │   ├── translations/       # Translation files (en, zh, ms)
+│   │   └── utils.ts            # General utilities
+│   └── middleware.ts           # Next.js middleware (auth, routing)
 ├── public/                     # Static assets
-├── scripts/                     # Utility scripts
+├── tina/                       # Tina CMS configuration
+├── scripts/                    # Utility scripts
 │   ├── admin-db.js             # Database admin utilities
 │   └── auto-confirm.js         # Auto-confirmation script
 ├── schema.sql                  # Main database schema
@@ -340,37 +410,63 @@ The authentication system uses Supabase Auth with role-based access control:
 - **Middleware**: `src/middleware.ts` handles route protection
 - **Context**: `AuthContext` provides authentication state throughout the app
 
+### Unified Patient Portal
+
+**Location**: `src/components/patient/UnifiedDashboard.tsx`
+
+The core of the patient experience, integrating multiple health modules into a single "Health Journey" view:
+- **Health Trends**: Visualizes diagnostic scores over time
+- **Documents**: Manages medical reports with OCR capabilities
+- **Modules**: Pluggable architecture supports Vitality Rhythm, Qi Dose, and more
+
+### AI Service Modules
+
+The system now employs specialized AI modules for different health aspects:
+
+1. **AI Meal Planner** (`src/components/meal-planner/`)
+   - Generates 7-day TCM-compliant meal plans
+   - "Food Checker" validates food suitability against diagnosis
+   - Generates shopping lists organized by category
+
+2. **Snore Analysis** (`src/components/patient/snore-analysis/`)
+   - Analyzes audio recordings for sleep patterns
+   - Correlates snoring with TCM fatigue syndromes (Qi Deficiency, Phlegm-Dampness)
+
+3. **Western Doctor Chat** (`src/components/diagnosis/report/WesternDoctorChat.tsx`)
+   - Provides an AI-simulated "Second Opinion"
+   - Contextualizes TCM findings in Western medical terms
+
+4. **Infographics Generator** (`src/components/diagnosis/report/InfographicsGenerator.tsx`)
+   - Creates personalized, shareable health cards
+   - Visualizes constitution and dietary advice
+
+### Gamified Health (Qi Dose)
+
+**Location**: `src/components/qi-dose/`
+
+Encourages user engagement through gamification:
+- **Qi Garden**: Visual metaphor for health status (plants grow with healthy actions)
+- **Baduanjin**: Guided exercise routines with progress tracking
+
 ### Diagnosis Workflow
 
 **Location**: `src/components/diagnosis/`, `src/hooks/useDiagnosisWizard.ts`
 
-The diagnosis workflow is a multi-step process:
+The diagnosis workflow has been expanded to include:
 
 1. **Patient Information Collection**
-2. **Pulse Examination** - Pulse pattern analysis
-3. **Tongue Examination** - Tongue image and analysis
+2. **Pulse Examination** - Pulse pattern analysis via camera (PPG)
+3. **Tongue & Face Examination** - Image analysis
 4. **Body Examination** - Body constitution assessment
 5. **Symptom Collection** - Patient-reported symptoms
-6. **AI Analysis** - Gemini AI processes all collected data
-7. **Report Generation** - Final medical report creation
+6. **Smart Connect** - Integration with wearable devices
+7. **AI Analysis** - Gemini AI processes all collected data
+8. **Report Generation** - Final medical report with comprehensive TCM insights
 
 **Key Components:**
 - `DiagnosisProgressContext` - Tracks progress through workflow
 - `useDiagnosisWizard` - Hook for navigation and state management
 - `useDiagnosisPersistence` - Saves progress to database
-
-### AI Integration
-
-**Location**: `src/app/api/gemini/`, `src/lib/systemPrompts.ts`
-
-The system integrates with Google Gemini API for:
-
-- Diagnostic analysis
-- Report generation
-- Medical inquiry chat
-- Symptom interpretation
-
-**System Prompts** are defined in `src/lib/systemPrompts.ts` and provide context to the AI about TCM principles and diagnostic criteria.
 
 ### Multi-language Support
 
@@ -381,51 +477,59 @@ Supported languages:
 - Malay (ms)
 - Chinese (zh)
 
-Translation files are organized by feature area and loaded dynamically based on user preference.
+Translation files are organized by feature area (common, diagnosis, dashboard, etc.) and loaded dynamically.
 
 ---
 
-## API Routes
+### Server Actions
 
-### Authentication Routes
+**Location**: `src/lib/actions.ts`, `src/app/actions/`
 
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/session` - Get current session
+Data mutations and retrieval are now primarily handled by Next.js Server Actions for better performance and type safety:
 
-### Diagnosis Routes
+- **Health Passport** (`src/lib/actions.ts`):
+  - `saveDiagnosis`: Save new diagnosis session
+  - `getPatientHistory`: Retrieve diagnosis history
+  - `saveMedicalReport`: Save uploaded report metadata
 
-- `POST /api/diagnosis/create` - Create new diagnosis session
-- `GET /api/diagnosis/[id]` - Get diagnosis by ID
-- `PUT /api/diagnosis/[id]` - Update diagnosis
-- `POST /api/diagnosis/[id]/complete` - Complete diagnosis and generate report
+- **Meal Planner** (`src/app/actions/meal-planner.ts`):
+  - `generateMealPlan`: Generate AI meal plan
+  - `swapMeal`: Replace a specific meal
+  - `checkFoodSuitability`: Analyze food against patient diagnosis
 
-### Report Routes
+### API Routes (AI Services)
 
-- `GET /api/reports` - List reports (filtered by user role)
-- `GET /api/reports/[id]` - Get report by ID
-- `POST /api/reports/[id]/chat` - Chat with AI about report
-- `GET /api/reports/[id]/pdf` - Generate PDF report
+**Location**: `src/app/api/`
 
-### Gemini AI Routes
+API routes are now dedicated to AI services and specialized computations:
 
-- `POST /api/gemini/analyze` - Analyze diagnostic data
-- `POST /api/gemini/chat` - Chat with AI assistant
-- `POST /api/gemini/generate-report` - Generate medical report
+- **Diagnostic AI**:
+  - `POST /api/analyze-image`: Analyze tongue/face images
+  - `POST /api/analyze-audio`: Analyze voice/breath sounds
+  - `POST /api/analyze-snore`: Analyze sleep audio for fatigue patterns
+  - `POST /api/chat`: General TCM inquiry chat
 
-### Admin Routes
+- **Consultation & Reports**:
+  - `POST /api/consult`: Main diagnosis synthesis endpoint
+  - `POST /api/report-chat`: Chat Q&A with specific medical reports
+  - `POST /api/western-chat`: Western medicine "second opinion" chat
+  - `POST /api/generate-infographic`: Generate health summary cards
+  - `POST /api/summarize-inquiry`: Summarize chat for final diagnosis
+  - `POST /api/extract-text`: OCR for medical documents
 
-- `GET /api/admin/users` - List all users
-- `PUT /api/admin/users/[id]` - Update user
-- `GET /api/admin/stats` - System statistics
+- **Utilities**:
+  - `POST /api/validate-medicine`: Validate TCM herbal formulas
+  - `POST /api/ask-dietary-advice`: Specific dietary queries
+  - `GET /api/health`: System health check
+
+- **Admin**:
+  - `/api/admin/*`: System administration endpoints
 
 ---
 
 ## Database Schema
 
 ### Core Tables
-
 **users** - User accounts (extends Supabase auth.users)
 - `id` (UUID, primary key)
 - `email`
@@ -444,22 +548,38 @@ Translation files are organized by feature area and loaded dynamically based on 
 - `specialization`, `level`
 - `created_at`, `updated_at`
 
-**diagnoses** - Diagnosis sessions
+**diagnosis_sessions** - Diagnosis sessions (formerly 'diagnoses')
 - `id` (UUID, primary key)
 - `patient_id` (references patients)
 - `practitioner_id` (references practitioners)
 - `status` (in_progress, completed, cancelled)
 - `data` (JSONB) - All collected diagnostic data
+- `overall_score` (numeric) - Derived health score
 - `created_at`, `updated_at`, `completed_at`
 
 **medical_reports** - Generated medical reports
 - `id` (UUID, primary key)
-- `diagnosis_id` (references diagnoses)
+- `diagnosis_id` (references diagnosis_sessions)
 - `patient_id` (references patients)
 - `practitioner_id` (references practitioners)
 - `content` (JSONB) - Report content
 - `pdf_url` (text) - Link to PDF if generated
 - `created_at`, `updated_at`
+
+**meal_plans** - AI-generated meal plans
+- `id` (UUID, primary key)
+- `user_id` (references users)
+- `weekly_plan` (JSONB) - 7-day meal plan
+- `shopping_list` (JSONB)
+- `status` (active, archived)
+- `created_at`, `updated_at`
+
+**dietary_preferences** - User dietary settings
+- `user_id` (references users, primary key)
+- `allergies` (text[])
+- `dietary_type` (text)
+- `disliked_foods` (text[])
+- `serving_size` (numeric)
 
 ### Database Setup Scripts
 
@@ -706,6 +826,18 @@ Before deploying:
 - **Check Output Directory**: Verify that `public/tina-admin` contains an `index.html` file. If not, the Tina build process hasn't run.
 - **Console Errors**: Check the terminal for "🦙 TinaCMS Dev Server" status. It should say "✅ TinaCMS Dev Server is active".
 
+#### 7. Mobile App Issues
+
+**Problem**: Expo app crashes or styles don't apply.
+
+**Gotchas & Solutions**:
+- **Inline Styles**: Avoid `style={{...}}` objects as they cause re-renders. Use `StyleSheet.create()`.
+- **Layouts**: Use `SafeAreaView` for all top-level screen containers.
+- **Lists**: Use `FlatList` or `ScrollView`, never `.map()` directly in render methods.
+- **Circular Imports**: Mobile colors MUST come from `constants/Colors.js`, never import from `App.js` to other components.
+- **CORS**: If API calls fail on device but work on simulator, check Tailwind v4 CORS headers for mobile requests.
+- **Connection**: If "Blue Screen" or connection errors occur, try restarting the WiFi adapter on the host PC.
+
 ### Debugging Tips
 
 1. **Check Browser Console**: Look for client-side errors
@@ -767,5 +899,5 @@ Before deploying:
 
 ---
 
-**Last Updated**: 2025-12-25
-**Version**: 1.1.0
+**Last Updated**: 2025-12-26
+**Version**: 1.2.0

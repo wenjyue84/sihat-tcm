@@ -205,7 +205,7 @@ export const en = {
         basicInfo: 'Basic Info',
         symptoms: 'Symptoms',
         chooseDoctor: 'Doctor',
-        uploadReports: 'Reports',
+        uploadDocuments: 'Documents',
         uploadMedicine: 'Medicine',
         inquiry: 'Inquiry',
         tongue: 'Tongue',
@@ -231,9 +231,9 @@ export const en = {
     },
 
     // Upload Reports
-    uploadReports: {
-        title: 'Medical Reports',
-        subtitle: 'Upload any existing medical documents',
+    uploadDocuments: {
+        title: 'Documents',
+        subtitle: 'Medical documents',
         uploadButton: 'Upload Document',
         takePhoto: 'Take Photo',
         chooseFromLibrary: 'Choose from Library',
@@ -507,8 +507,18 @@ export const en = {
         tabs: {
             home: 'Home',
             history: 'History',
+            documents: 'Documents',
             profile: 'Profile',
         },
+    },
+
+    // Documents
+    documents: {
+        title: 'Your Documents',
+        subtitle: 'Access your uploaded medical records',
+        noRecords: 'No documents uploaded yet',
+        upload: 'Upload Document',
+        deleteConfirm: 'Are you sure you want to delete this document?',
     },
 
     // History

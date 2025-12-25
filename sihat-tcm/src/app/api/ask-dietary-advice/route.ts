@@ -1,6 +1,7 @@
 import { generateText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
 import { getGoogleProvider } from '@/lib/googleProvider';
+import { devLog } from '@/lib/systemLogger';
 import path from 'path';
 import fs from 'fs';
 
@@ -30,7 +31,7 @@ function getSettings() {
             return JSON.parse(data);
         }
     } catch (error) {
-        console.error('Error reading settings file:', error);
+        devLog('error', 'API/ask-dietary-advice', 'Error reading settings file', { error });
     }
     return {};
 }
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
             .replace('{advice}', JSON.stringify(advice || 'Not provided'))
             .replace('{question}', question);
 
-        console.log('[Ask AI Doctor] Generating response...');
+        devLog('info', 'API/ask-dietary-advice', 'Generating response...');
 
         const google = getGoogleProvider();
         const { text } = await generateText({
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ answer: text, prompt: filledPrompt }); // Return prompt for debug/transparency if needed
     } catch (error: any) {
-        console.error('[Ask AI Doctor] Error:', error);
+        devLog('error', 'API/ask-dietary-advice', 'Error generating dietary advice', { error });
         return NextResponse.json(
             { error: error.message || 'Failed to generate dietary advice' },
             { status: 500 }

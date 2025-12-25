@@ -3,9 +3,12 @@
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Coffee, Sun, Moon, Cookie, ChefHat, Clock, Flame } from 'lucide-react'
+import { Coffee, Sun, Moon, Cookie, ChefHat, Clock, Flame, RefreshCw, Loader2 } from 'lucide-react'
 import { RecipeModal } from './RecipeModal'
 import { motion } from 'framer-motion'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 
 interface MealCardProps {
     mealType: string
@@ -18,6 +21,7 @@ interface MealCardProps {
         prep_time?: string
         cook_time?: string
     }
+    onSwap?: () => Promise<void>
 }
 
 const mealIcons = {
@@ -40,11 +44,28 @@ const temperatureColors = {
     Cooling: 'bg-blue-100 text-blue-700 border-blue-200'
 }
 
-export function MealCard({ mealType, meal }: MealCardProps) {
+export function MealCard({ mealType, meal, onSwap }: MealCardProps) {
     const [showModal, setShowModal] = useState(false)
-    
+    const [swapping, setSwapping] = useState(false)
+    const { t } = useLanguage()
+    const strings = t.patientDashboard.mealPlanner
+
     const Icon = mealIcons[mealType as keyof typeof mealIcons] || ChefHat
     const gradientColor = mealColors[mealType as keyof typeof mealColors] || 'from-slate-400 to-slate-500'
+
+    const handleSwap = async () => {
+        if (!onSwap) return
+        setSwapping(true)
+        try {
+            await onSwap()
+            toast.success(strings.swapSuccess)
+        } catch (error) {
+            console.error('Swap failed:', error)
+            toast.error(strings.swapError)
+        } finally {
+            setSwapping(false)
+        }
+    }
 
     return (
         <>
@@ -63,10 +84,25 @@ export function MealCard({ mealType, meal }: MealCardProps) {
                             <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                                 <Icon className="w-5 h-5" />
                             </div>
-                            <div>
+                            <div className="flex-1 overflow-hidden">
                                 <p className="text-xs opacity-90 uppercase tracking-wide">{mealType}</p>
                                 <h4 className="text-lg font-bold line-clamp-1">{meal.name}</h4>
                             </div>
+                            {onSwap && (
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className={`w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all ${swapping ? 'cursor-not-allowed opacity-50' : 'hover:scale-110'}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleSwap()
+                                    }}
+                                    disabled={swapping}
+                                    title={strings.swap}
+                                >
+                                    {swapping ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                                </Button>
+                            )}
                         </div>
                     </div>
 

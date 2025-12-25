@@ -3,8 +3,19 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase/client'
+import { logger } from '@/lib/clientLogger'
 
-export type Role = 'admin' | 'doctor' | 'patient'
+export type Role = 'admin' | 'doctor' | 'patient' | 'developer'
+
+export interface UIPreferences {
+    language?: 'en' | 'zh' | 'ms'
+    isDeveloperMode?: boolean
+    activeTab?: string
+    viewType?: 'table' | 'list' | 'gallery'
+    sortField?: string
+    sortDirection?: 'asc' | 'desc'
+    [key: string]: any
+}
 
 export interface Profile {
     id: string
@@ -16,6 +27,7 @@ export interface Profile {
     weight?: number
     medical_history?: string
     preferred_language?: 'en' | 'zh' | 'ms'
+    preferences?: UIPreferences
 }
 
 interface AuthContextType {
@@ -25,6 +37,7 @@ interface AuthContextType {
     loading: boolean
     signOut: () => Promise<void>
     refreshProfile: (userId?: string, initialData?: Profile) => Promise<void>
+    updatePreferences: (prefs: Partial<UIPreferences>) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -38,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         supabase.auth.getSession().then(({ data, error }) => {
             if (error) {
-                console.error('Error getting session:', error)
+                logger.error('AuthContext', 'Error getting session', error)
                 setLoading(false)
                 return
             }
@@ -51,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setLoading(false)
             }
         }).catch((err) => {
-            console.error('Unexpected error getting session:', err)
+            logger.error('AuthContext', 'Unexpected error getting session', err)
             setLoading(false)
         })
 
@@ -81,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 .single()
 
             if (error) {
-                console.error('Error fetching profile:', JSON.stringify(error, null, 2))
+                logger.error('AuthContext', 'Error fetching profile', error)
             } else {
                 setProfile(data)
 
@@ -93,21 +106,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         // Save to database in background (non-blocking)
                         supabase
                             .from('profiles')
-                            .update({ preferred_language: localLanguage })
+                            .update({
+                                preferred_language: localLanguage,
+                                preferences: { ...(data.preferences || {}), language: localLanguage }
+                            })
                             .eq('id', userId)
                             .then(({ error: updateError }) => {
                                 if (updateError) {
-                                    console.warn('Failed to sync language preference:', updateError)
+                                    logger.warn('AuthContext', 'Failed to sync language preference', updateError)
                                 } else {
                                     // Update local profile state
-                                    setProfile(prev => prev ? { ...prev, preferred_language: localLanguage } : prev)
+                                    setProfile(prev => prev ? {
+                                        ...prev,
+                                        preferred_language: localLanguage,
+                                        preferences: { ...(prev.preferences || {}), language: localLanguage }
+                                    } : prev)
                                 }
                             })
                     }
                 }
             }
         } catch (error) {
-            console.error('Error fetching profile:', error)
+            logger.error('AuthContext', 'Error fetching profile', error)
         } finally {
             setLoading(false)
         }
@@ -123,8 +143,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const refreshProfile = async (userId?: string, initialData?: Profile) => {
         if (initialData) {
             setProfile(initialData)
-            // Still fetch in background to ensure consistency? Maybe not needed if we trust the source.
-            // But let's just set it and be done to be fast.
             return
         }
         const idToFetch = userId || user?.id
@@ -133,8 +151,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
+    const updatePreferences = async (newPrefs: Partial<UIPreferences>) => {
+        if (!user) return
+
+        try {
+            const currentPrefs = profile?.preferences || {}
+            const updatedPrefs = { ...currentPrefs, ...newPrefs }
+
+            // Optimized update: only update profiles table
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    preferences: updatedPrefs,
+                    // Also sync top-level preferred_language if it's being changed
+                    ...(newPrefs.language ? { preferred_language: newPrefs.language } : {})
+                })
+                .eq('id', user.id)
+
+            if (error) {
+                logger.error('AuthContext', 'Error updating preferences', error)
+                return
+            }
+
+            // Update local state
+            setProfile(prev => prev ? {
+                ...prev,
+                preferences: updatedPrefs,
+                ...(newPrefs.language ? { preferred_language: newPrefs.language } : {})
+            } : prev)
+
+        } catch (err) {
+            logger.error('AuthContext', 'Unexpected error updating preferences', err)
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{ user, session, profile, loading, signOut, refreshProfile }}>
+        <AuthContext.Provider value={{ user, session, profile, loading, signOut, refreshProfile, updatePreferences }}>
             {children}
         </AuthContext.Provider>
     )

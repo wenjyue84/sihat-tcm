@@ -28,31 +28,59 @@ import {
     Calendar,
     TrendingUp,
     TrendingDown,
-    Minus
+    Minus,
+    Home,
+    ExternalLink,
+    Activity,
+    Heart,
+    Moon,
+    Utensils,
+    Sparkles,
+    Wind,
+    ArrowRight,
+    Users,
+    Zap,
+    Menu,
+    X,
+    Pill,
+    AlertCircle
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { getPatientHistory, getHealthTrends, DiagnosisSession, seedPatientHistory } from '@/lib/actions'
+import {
+    getPatientHistory,
+    getHealthTrends,
+    DiagnosisSession,
+    seedPatientHistory,
+    getMedicalReports,
+    saveMedicalReport,
+    deleteMedicalReport,
+    seedMedicalReports,
+    MedicalReport
+} from '@/lib/actions'
 import { supabase } from '@/lib/supabase/client'
 import { TrendWidget } from './TrendWidget'
 import { HistoryCard } from './HistoryCard'
 import { MealPlanWizard } from '../meal-planner/MealPlanWizard'
+import { SnoreAnalysisTab } from './snore-analysis/SnoreAnalysisTab'
+import { VitalityRhythmTab } from './VitalityRhythmTab'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useLanguageSync } from '@/hooks/useLanguageSync'
+import { TCMFoodChecker } from '../meal-planner/TCMFoodChecker'
+import { QiDose } from '../qi-dose/QiDose'
+import { extractDiagnosisTitle, extractConstitutionType } from '@/lib/tcm-utils'
 
-interface Report {
-    name: string
-    date: string
-    size: string
-    type: string
-}
+import { DocumentViewerModal } from './DocumentViewerModal'
+import { CircleOfHealth } from './CircleOfHealth'
+import { FamilyManagement } from './FamilyManagement'
+import { PatientSettings } from './PatientSettings'
 
 export function UnifiedDashboard() {
-    const { user, profile, signOut, refreshProfile } = useAuth()
+    const { user, profile, updatePreferences, signOut, refreshProfile } = useAuth()
     const router = useRouter()
     const { language, setLanguage, languageNames, t } = useLanguage()
 
@@ -63,15 +91,16 @@ export function UnifiedDashboard() {
     const [sessions, setSessions] = useState<DiagnosisSession[]>([])
     const [trendData, setTrendData] = useState<any>(null)
     const [loadingSessions, setLoadingSessions] = useState(true)
+    const [loggingOut, setLoggingOut] = useState(false)
 
     // View & Sort State
     type ViewType = 'table' | 'list' | 'gallery'
     type SortField = 'date' | 'score' | 'diagnosis'
     type SortDirection = 'asc' | 'desc'
 
-    const [viewType, setViewType] = useState<ViewType>('table')
-    const [sortField, setSortField] = useState<SortField>('date')
-    const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+    const [viewType, setViewTypeState] = useState<ViewType>('table')
+    const [sortField, setSortFieldState] = useState<SortField>('date')
+    const [sortDirection, setSortDirectionState] = useState<SortDirection>('desc')
 
     // Profile State
     const [profileData, setProfileData] = useState({
@@ -86,16 +115,52 @@ export function UnifiedDashboard() {
     const [savingProfile, setSavingProfile] = useState(false)
 
     // Documents State
-    const [reports, setReports] = useState<Report[]>([])
-    const [isLoaded, setIsLoaded] = useState(false)
+    const [reports, setReports] = useState<MedicalReport[]>([])
+    const [loadingReports, setLoadingReports] = useState(true)
+    const [uploadingReport, setUploadingReport] = useState(false)
     const [seeding, setSeeding] = useState(false)
+    const [seedingReports, setSeedingReports] = useState(false)
+    const [selectedReport, setSelectedReport] = useState<MedicalReport | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    // Active Section (for mobile)
-    const [activeSection, setActiveSection] = useState<'journey' | 'profile' | 'documents' | 'meals' | 'settings'>('journey')
+    // Active Section
+    const [activeSection, setActiveSectionState] = useState<'journey' | 'profile' | 'documents' | 'meals' | 'snore' | 'qi-dose' | 'vitality' | 'community' | 'family' | 'settings'>('journey')
+    const [mealSubSection, setMealSubSection] = useState<'plan' | 'checker'>('plan')
 
     // Settings State
     const [savingLanguage, setSavingLanguage] = useState(false)
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+    // Initialize from profile preferences
+    useEffect(() => {
+        if (profile?.preferences) {
+            if (profile.preferences.viewType) setViewTypeState(profile.preferences.viewType as ViewType)
+            if (profile.preferences.sortField) setSortFieldState(profile.preferences.sortField as SortField)
+            if (profile.preferences.sortDirection) setSortDirectionState(profile.preferences.sortDirection as SortDirection)
+            if (profile.preferences.activeSection) setActiveSectionState(profile.preferences.activeSection as any)
+        }
+    }, [profile])
+
+    // Wrappers to update state and sync preferences
+    const setViewType = (type: ViewType) => {
+        setViewTypeState(type)
+        updatePreferences({ viewType: type })
+    }
+
+    const setSortField = (field: SortField) => {
+        setSortFieldState(field)
+        updatePreferences({ sortField: field })
+    }
+
+    const setSortDirection = (dir: SortDirection) => {
+        setSortDirectionState(dir)
+        updatePreferences({ sortDirection: dir })
+    }
+
+    const setActiveSection = (section: 'journey' | 'profile' | 'documents' | 'meals' | 'snore' | 'qi-dose' | 'vitality' | 'community' | 'family' | 'settings') => {
+        setActiveSectionState(section)
+        updatePreferences({ activeSection: section })
+    }
 
     // Load health journey data
     useEffect(() => {
@@ -140,21 +205,25 @@ export function UnifiedDashboard() {
         }
     }, [profile])
 
-    // Load documents from localStorage
+    // Load documents from Supabase
     useEffect(() => {
-        const saved = localStorage.getItem('patientReports')
-        if (saved) {
-            setReports(JSON.parse(saved))
+        async function loadReports() {
+            if (!user) return
+            try {
+                setLoadingReports(true)
+                const result = await getMedicalReports()
+                if (result.success && result.data) {
+                    setReports(result.data)
+                }
+            } catch (err) {
+                console.error('[UnifiedDashboard] Error loading reports:', err)
+            } finally {
+                setLoadingReports(false)
+            }
         }
-        setIsLoaded(true)
-    }, [])
 
-    // Save documents to localStorage
-    useEffect(() => {
-        if (isLoaded) {
-            localStorage.setItem('patientReports', JSON.stringify(reports))
-        }
-    }, [reports, isLoaded])
+        loadReports()
+    }, [user])
 
     // Handle profile save
     const handleSaveProfile = async () => {
@@ -187,32 +256,85 @@ export function UnifiedDashboard() {
     }
 
     // Handle document upload
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if (!file) return
+        if (!file || !user) return
 
-        const newReport: Report = {
-            name: file.name,
-            date: new Date().toISOString().split('T')[0],
-            size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-            type: file.type
+        try {
+            setUploadingReport(true)
+
+            // Optional: Upload to Supabase Storage
+            let file_url = undefined
+            try {
+                const fileExt = file.name.split('.').pop()
+                const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`
+                const filePath = `${user.id}/${fileName}`
+
+                const { error: uploadError } = await supabase.storage
+                    .from('medical-reports')
+                    .upload(filePath, file)
+
+                if (!uploadError) {
+                    const { data: { publicUrl } } = supabase.storage
+                        .from('medical-reports')
+                        .getPublicUrl(filePath)
+                    file_url = publicUrl
+                } else {
+                    console.warn('Storage upload failed (bucket might not exist), falling back to metadata only:', uploadError.message)
+                }
+            } catch (storageErr) {
+                console.warn('Storage error, falling back to metadata only:', storageErr)
+            }
+
+            const newReport = {
+                name: file.name,
+                date: new Date().toISOString().split('T')[0],
+                size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+                type: file.type,
+                file_url
+            }
+
+            const result = await saveMedicalReport(newReport)
+
+            if (result.success && result.data) {
+                setReports([result.data, ...reports])
+            } else if (!result.success) {
+                alert('Failed to save report: ' + result.error)
+            }
+        } catch (error) {
+            console.error('Error in handleFileChange:', error)
+            alert('An error occurred while uploading the report.')
+        } finally {
+            setUploadingReport(false)
+            e.target.value = ''
         }
-
-        setReports([newReport, ...reports])
-        e.target.value = ''
     }
 
     // Handle document delete
-    const handleDeleteReport = (index: number) => {
+    const handleDeleteReport = async (reportId: string) => {
         if (confirm(t.patientDashboard.documents.deleteConfirm)) {
-            setReports(reports.filter((_, i) => i !== index))
+            try {
+                const result = await deleteMedicalReport(reportId)
+                if (result.success) {
+                    setReports(reports.filter(r => r.id !== reportId))
+                } else {
+                    alert('Failed to delete report: ' + result.error)
+                }
+            } catch (error) {
+                console.error('Error deleting report:', error)
+            }
         }
     }
 
     // Handle logout
     const handleLogout = async () => {
-        await signOut()
-        router.push('/')
+        try {
+            setLoggingOut(true)
+            await signOut()
+            router.push('/')
+        } catch (error) {
+            setLoggingOut(false)
+        }
     }
 
     const handleRestoreData = async () => {
@@ -238,312 +360,423 @@ export function UnifiedDashboard() {
         }
     }
 
+    const handleRestoreMedicalReports = async () => {
+        if (!confirm('This will add sample medical reports to your documents. Proceed?')) return
+        try {
+            setSeedingReports(true)
+            const result = await seedMedicalReports()
+            if (result.success) {
+                alert('Sample medical reports added successfully!')
+                window.location.reload()
+            } else {
+                if (result.error && (result.error.includes('does not exist') || result.error.includes('relation "public.medical_reports"'))) {
+                    alert('Database Error: The "medical_reports" table is missing. Please run "npx supabase db push" in your terminal to create the missing tables.')
+                } else {
+                    alert('Failed to add sample reports: ' + result.error)
+                }
+            }
+        } catch (error) {
+            console.error('Error adding sample reports:', error)
+            alert('An unexpected error occurred.')
+        } finally {
+            setSeedingReports(false)
+        }
+    }
+
+    // Helper functions for views
+    const formatDate = (dateString: string): string => {
+        const date = new Date(dateString)
+        const localeMap: Record<string, string> = {
+            en: 'en-US',
+            zh: 'zh-CN',
+            ms: 'ms-MY'
+        }
+        return new Intl.DateTimeFormat(localeMap[language] || 'en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        }).format(date)
+    }
+
+
+    const getScoreBadge = (score?: number) => {
+        if (score === undefined || score === null) return null
+        if (score >= 75) return { bg: 'bg-emerald-100', text: 'text-emerald-700', label: t.patientDashboard.historyTable.good, Icon: TrendingUp }
+        if (score >= 50) return { bg: 'bg-amber-100', text: 'text-amber-700', label: t.patientDashboard.historyTable.fair, Icon: Minus }
+        return { bg: 'bg-red-100', text: 'text-red-700', label: t.patientDashboard.historyTable.needsAttention, Icon: TrendingDown }
+    }
+
+    // Sort sessions
+    const sortedSessions = [...sessions].sort((a, b) => {
+        let comparison = 0
+        switch (sortField) {
+            case 'date':
+                comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                break
+            case 'score':
+                comparison = (a.overall_score || 0) - (b.overall_score || 0)
+                break
+            case 'diagnosis':
+                comparison = (a.primary_diagnosis || '').localeCompare(b.primary_diagnosis || '')
+                break
+        }
+        return sortDirection === 'asc' ? comparison : -comparison
+    })
+
+    // Section title helper
+    const getSectionTitle = () => {
+        switch (activeSection) {
+            case 'journey': return t.patientDashboard.tabs.healthJourney
+            case 'meals': return t.patientDashboard.tabs.mealPlanner
+            case 'snore': return t.patientDashboard.snoreAnalysis.title
+            case 'qi-dose': return t.qiDose?.title || 'Qi Dose'
+            case 'vitality': return t.patientDashboard.tabs.vitalityRhythm
+            case 'community': return t.patientDashboard.tabs.community
+            case 'family': return t.familyManagement?.title || t.patientDashboard.tabs.family || 'Family Care'
+            case 'profile': return t.patientDashboard.tabs.profile
+            case 'documents': return t.patientDashboard.tabs.documents
+            case 'settings': return t.patientDashboard.tabs.settings
+            default: return t.patientDashboard.tabs.healthJourney
+        }
+    }
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
-            {/* Top Navigation Bar */}
-            <div className="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        {/* Logo / Brand */}
-                        <div
-                            className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() => router.push('/')}
+        <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
+            {/* Mobile Overlay */}
+            {isMobileMenuOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-30 md:hidden animate-in fade-in duration-200"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                />
+            )}
+
+            {/* Sidebar Navigation */}
+            <aside
+                className={`w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 z-40 shadow-sm transition-transform duration-300 ease-in-out fixed inset-y-0 left-0 md:relative md:translate-x-0 h-full ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+                    }`}
+            >
+                {/* Logo */}
+                <div className="h-16 flex items-center justify-between px-6 border-b border-slate-100">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white">
+                            <Heart className="w-4 h-4" />
+                        </div>
+                        <span className="font-bold text-lg tracking-tight">Patient <span className="text-emerald-600">Portal</span></span>
+                    </div>
+                    {/* Close button for mobile */}
+                    <button
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="md:hidden text-slate-400 hover:text-slate-600"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+
+                {/* Navigation */}
+                <div className="p-4 flex-1 overflow-y-auto">
+                    <div className="space-y-1">
+                        <p className="px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Health</p>
+                        <button
+                            onClick={() => { setActiveSection('journey'); setIsMobileMenuOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'journey' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
                         >
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                                <FileHeart className="w-5 h-5 text-white" />
-                            </div>
-                            <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                                Sihat TCM
-                            </span>
-                        </div>
+                            <Activity className="w-4 h-4" />
+                            {t.patientDashboard.tabs.healthJourney}
+                        </button>
+                        <button
+                            onClick={() => { setActiveSection('meals'); setIsMobileMenuOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'meals' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                        >
+                            <UtensilsCrossed className="w-4 h-4" />
+                            {t.patientDashboard.tabs.mealPlanner}
+                        </button>
+                        <button
+                            onClick={() => { setActiveSection('snore'); setIsMobileMenuOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'snore' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                        >
+                            <Moon className="w-4 h-4" />
+                            {t.patientDashboard.snoreAnalysis.title}
+                        </button>
+                        <button
+                            onClick={() => { setActiveSection('vitality'); setIsMobileMenuOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'vitality' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                        >
+                            <TrendingUp className="w-4 h-4" />
+                            {t.patientDashboard.tabs.vitalityRhythm}
+                        </button>
+                        <button
+                            onClick={() => { setActiveSection('qi-dose'); setIsMobileMenuOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'qi-dose' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                        >
+                            <Wind className="w-4 h-4" />
+                            {t.qiDose?.title || 'Qi Dose'}
+                        </button>
+                        <button
+                            onClick={() => { setActiveSection('community'); setIsMobileMenuOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'community' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                        >
+                            <Users className="w-4 h-4" />
+                            {t.patientDashboard.tabs.community}
+                        </button>
+                        <button
+                            onClick={() => { setActiveSection('family'); setIsMobileMenuOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'family' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                        >
+                            <Heart className="w-4 h-4" />
+                            {t.familyManagement?.title || t.patientDashboard.tabs.family || 'Family Care'}
+                        </button>
+                    </div>
 
-                        {/* Navigation Links */}
-                        <nav className="hidden md:flex items-center gap-6">
-                            <button
-                                onClick={() => router.push('/')}
-                                className="text-slate-600 hover:text-emerald-600 font-medium transition-colors"
-                            >
-                                {t.patientDashboard.navigation.home}
-                            </button>
-                            <button
-                                onClick={() => router.push('/patient')}
-                                className="text-emerald-600 font-medium border-b-2 border-emerald-600 pb-1"
-                            >
-                                {t.patientDashboard.navigation.dashboard}
-                            </button>
-                        </nav>
-
-                        {/* User Menu */}
-                        <div className="flex items-center gap-3">
-                            <div className="hidden sm:block text-right">
-                                <p className="text-sm font-medium text-slate-800">
-                                    {profile?.full_name || user?.email || 'Patient'}
-                                </p>
-                                <p className="text-xs text-slate-500">{t.patientDashboard.navigation.patientAccount}</p>
-                            </div>
-                            <Button
-                                onClick={handleLogout}
-                                variant="ghost"
-                                size="sm"
-                                className="text-slate-600 hover:text-red-600 hover:bg-red-50"
-                            >
-                                <LogOut className="w-4 h-4 sm:mr-2" />
-                                <span className="hidden sm:inline">{t.patientDashboard.navigation.logout}</span>
-                            </Button>
-                        </div>
+                    <div className="mt-6 space-y-1">
+                        <p className="px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Account</p>
+                        <button
+                            onClick={() => { setActiveSection('profile'); setIsMobileMenuOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'profile' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                        >
+                            <User className="w-4 h-4" />
+                            {t.patientDashboard.tabs.profile}
+                        </button>
+                        <button
+                            onClick={() => { setActiveSection('documents'); setIsMobileMenuOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'documents' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                        >
+                            <FileText className="w-4 h-4" />
+                            {t.patientDashboard.tabs.documents}
+                        </button>
+                        <button
+                            onClick={() => { setActiveSection('settings'); setIsMobileMenuOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'settings' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                        >
+                            <Settings className="w-4 h-4" />
+                            {t.patientDashboard.tabs.settings}
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            {/* Header */}
-            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex items-center justify-between">
+                {/* Logout Button */}
+                <div className="p-4 border-t border-slate-100">
+                    <Button
+                        variant="ghost"
+                        onClick={handleLogout}
+                        disabled={loggingOut}
+                        className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                        {loggingOut ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                        {t.patientDashboard.navigation.logout}
+                    </Button>
+                </div>
+            </aside>
+
+            {/* Main Content Area */}
+            <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/50">
+                {/* Top Header */}
+                <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
+                    <div className="flex items-center gap-3">
+                        <button
+                            className="md:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-md"
+                            onClick={() => setIsMobileMenuOpen(true)}
+                        >
+                            <Menu className="w-5 h-5" />
+                        </button>
                         <div>
-                            <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
-                                <FileHeart className="w-8 h-8" />
-                                {t.patientDashboard.title}
-                            </h1>
-                            <p className="text-emerald-100 text-sm mt-1">
+                            <h1 className="text-xl font-bold text-slate-800 line-clamp-1">{getSectionTitle()}</h1>
+                            <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 hidden sm:flex">
                                 {t.patientDashboard.welcomeBack}, {profile?.full_name || user?.email || 'Patient'}
+                                {profile?.full_name === 'Test Patient' && (
+                                    <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-[9px] font-black uppercase tracking-wider">Demo Mode</span>
+                                )}
                             </p>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <Button
-                                onClick={() => router.push('/')}
-                                className="bg-white text-emerald-600 hover:bg-emerald-50"
-                            >
-                                <Plus className="w-4 h-4 mr-2" />
-                                {t.patientDashboard.newDiagnosis}
-                            </Button>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="hidden md:flex gap-2"
+                            onClick={() => router.push('/')}
+                        >
+                            <Plus className="w-3.5 h-3.5" />
+                            {t.patientDashboard.newDiagnosis}
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="hidden md:flex gap-2"
+                            onClick={() => window.open('/', '_blank')}
+                        >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            {t.patientDashboard.navigation.home}
+                        </Button>
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white border border-emerald-200">
+                            <span className="text-xs font-bold">{(profile?.full_name?.[0] || user?.email?.[0] || 'P').toUpperCase()}</span>
                         </div>
                     </div>
-                </div>
-            </div>
+                </header>
 
-            {/* Navigation Tabs - Visible on all screen sizes */}
-            <div className="bg-white border-b border-slate-200 sticky top-16 z-10">
-                <div className="max-w-7xl mx-auto px-4">
-                    <div className="flex gap-1 overflow-x-auto">
-                        {[
-                            { id: 'journey', label: t.patientDashboard.tabs.healthJourney, icon: FileHeart },
-                            { id: 'meals', label: t.patientDashboard.tabs.mealPlanner, icon: UtensilsCrossed },
-                            { id: 'profile', label: t.patientDashboard.tabs.profile, icon: User },
-                            { id: 'documents', label: t.patientDashboard.tabs.documents, icon: FileText },
-                            { id: 'settings', label: t.patientDashboard.tabs.settings, icon: Settings }
-                        ].map(tab => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveSection(tab.id as any)}
-                                className={`flex-1 min-w-[120px] py-3 px-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeSection === tab.id
-                                    ? 'border-emerald-600 text-emerald-600 bg-emerald-50/50'
-                                    : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                                    }`}
-                            >
-                                <tab.icon className="w-4 h-4 mx-auto mb-1" />
-                                {tab.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
+                {/* Content Container */}
+                <div className="flex-1 overflow-y-auto p-4 md:p-8">
+                    <div className="max-w-6xl mx-auto pb-20">
+                        {/* Health Journey Section */}
+                        {activeSection === 'journey' && (
+                            <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+                                {/* Trend Widget */}
+                                <TrendWidget
+                                    trendData={trendData}
+                                    sessions={sessions}
+                                    loading={loadingSessions && !trendData}
+                                />
 
-            {/* Main Content */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Health Journey Section */}
-                <div className={`${activeSection !== 'journey' ? 'hidden' : ''} mb-8`}>
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4 }}
-                    >
-                        {/* Trend Widget */}
-                        <TrendWidget trendData={trendData} loading={loadingSessions && !trendData} />
-                    </motion.div>
+                                {/* Qi Dose Promotion Card */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.2 }}
+                                    className="relative overflow-hidden group cursor-pointer"
+                                    onClick={() => setActiveSection('qi-dose')}
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl opacity-90 group-hover:opacity-100 transition-opacity" />
+                                    <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
 
-                    {/* History Section */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 0.1 }}
-                        className="mt-8"
-                    >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                            <div>
-                                <h2 className="text-2xl font-bold text-slate-800">{t.patientDashboard.healthJourney.title}</h2>
-                                <p className="text-sm text-slate-600 mt-1">
-                                    {sessions.length > 0
-                                        ? `${sessions.length} ${sessions.length === 1 ? t.patientDashboard.healthJourney.sessionRecorded : t.patientDashboard.healthJourney.sessionsRecorded}`
-                                        : t.patientDashboard.healthJourney.startJourneyToday}
-                                </p>
-                            </div>
-
-                            {/* View Controls */}
-                            {sessions.length > 0 && (
-                                <div className="flex items-center gap-3">
-                                    {/* View Type Switcher */}
-                                    <div className="flex items-center bg-white rounded-lg border border-slate-200 p-1 shadow-sm">
-                                        {[
-                                            { id: 'table' as ViewType, icon: Grid3X3, label: 'Table' },
-                                            { id: 'list' as ViewType, icon: List, label: 'List' },
-                                            { id: 'gallery' as ViewType, icon: LayoutGrid, label: 'Gallery' },
-                                        ].map(view => (
-                                            <button
-                                                key={view.id}
-                                                onClick={() => setViewType(view.id)}
-                                                className={`p-2 rounded-md transition-all duration-200 ${viewType === view.id
-                                                    ? 'bg-emerald-100 text-emerald-700 shadow-sm'
-                                                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-                                                    }`}
-                                                title={view.label}
-                                            >
-                                                <view.icon className="w-4 h-4" />
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {/* Sort Controls */}
-                                    <div className="flex items-center gap-2">
-                                        <Select
-                                            value={sortField}
-                                            onValueChange={(value: SortField) => setSortField(value)}
-                                        >
-                                            <SelectTrigger className="w-[130px] bg-white border-slate-200 shadow-sm h-9">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="date">{t.patientDashboard.historyTable.sortByDate}</SelectItem>
-                                                <SelectItem value="score">{t.patientDashboard.historyTable.sortByScore}</SelectItem>
-                                                <SelectItem value="diagnosis">{t.patientDashboard.historyTable.sortByDiagnosis}</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-
-                                        <button
-                                            onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
-                                            className="p-2 bg-white rounded-lg border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors"
-                                            title={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
-                                        >
-                                            {sortDirection === 'asc' ? (
-                                                <ArrowUp className="w-4 h-4 text-slate-600" />
-                                            ) : (
-                                                <ArrowDown className="w-4 h-4 text-slate-600" />
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Empty State */}
-                        {sessions.length === 0 && !loadingSessions && (
-                            <Card className="p-12 text-center bg-white/80 backdrop-blur-sm">
-                                <div className="max-w-md mx-auto">
-                                    <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
-                                        <FileHeart className="w-10 h-10 text-emerald-600" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-slate-800 mb-3">
-                                        {t.patientDashboard.healthJourney.noSessionsYet}
-                                    </h3>
-                                    <p className="text-slate-600 mb-6">
-                                        {t.patientDashboard.healthJourney.noSessionsDesc}
-                                    </p>
-                                    <Button
-                                        onClick={() => router.push('/')}
-                                        size="lg"
-                                        className="bg-gradient-to-r from-emerald-600 to-teal-600"
-                                    >
-                                        <Plus className="w-5 h-5 mr-2" />
-                                        {t.patientDashboard.healthJourney.startFirstDiagnosis}
-                                    </Button>
-
-                                    <div className="mt-4 pt-4 border-t border-slate-100">
-                                        <p className="text-xs text-slate-400 mb-2">{t.patientDashboard.healthJourney.cantFindData}</p>
-                                        <Button
-                                            onClick={handleRestoreData}
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={seeding}
-                                            className="text-slate-500 hover:text-emerald-600"
-                                        >
-                                            {seeding ? (
-                                                <><Loader2 className="w-3 h-3 mr-2 animate-spin" /> {t.patientDashboard.healthJourney.restoring}</>
-                                            ) : (
-                                                t.patientDashboard.healthJourney.restoreMockData
-                                            )}
+                                    <div className="relative p-6 flex flex-col md:flex-row items-center justify-between gap-6 text-white text-center md:text-left">
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
+                                                <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-md">
+                                                    <Wind className="w-4 h-4" />
+                                                </div>
+                                                <span className="text-xs font-bold uppercase tracking-[0.2em]">{t.qiDose?.title || 'Qi Dose'}</span>
+                                            </div>
+                                            <h3 className="text-2xl font-black mb-2 tracking-tight">Ready for your daily 8-minute movement?</h3>
+                                            <p className="text-emerald-50 text-sm max-w-xl">
+                                                Based on your TCM constitution, we've prepared a micro-dose of vitality to regulate your inner energy. No equipment needed.
+                                            </p>
+                                        </div>
+                                        <Button className="bg-white text-emerald-700 hover:bg-emerald-50 font-bold px-8 py-6 rounded-2xl h-auto shadow-xl border-none">
+                                            START FLOW <ArrowRight className="w-4 h-4 ml-2" />
                                         </Button>
                                     </div>
-                                </div>
-                            </Card>
-                        )}
+                                </motion.div>
 
-                        {/* Sorted Sessions */}
-                        {sessions.length > 0 && (() => {
-                            // Sort sessions
-                            const sortedSessions = [...sessions].sort((a, b) => {
-                                let comparison = 0
+                                {/* History Section */}
+                                <div className="mt-8">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                                        <div>
+                                            <h2 className="text-xl font-bold text-slate-800">{t.patientDashboard.healthJourney.title}</h2>
+                                            <p className="text-sm text-slate-600 mt-1">
+                                                {sessions.length > 0
+                                                    ? `${sessions.length} ${sessions.length === 1 ? t.patientDashboard.healthJourney.sessionRecorded : t.patientDashboard.healthJourney.sessionsRecorded}`
+                                                    : t.patientDashboard.healthJourney.startJourneyToday}
+                                            </p>
+                                        </div>
 
-                                switch (sortField) {
-                                    case 'date':
-                                        comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-                                        break
-                                    case 'score':
-                                        comparison = (a.overall_score || 0) - (b.overall_score || 0)
-                                        break
-                                    case 'diagnosis':
-                                        comparison = (a.primary_diagnosis || '').localeCompare(b.primary_diagnosis || '')
-                                        break
-                                }
+                                        {/* View Controls */}
+                                        {sessions.length > 0 && (
+                                            <div className="flex items-center gap-3">
+                                                {/* View Type Switcher */}
+                                                <div className="flex items-center bg-white rounded-lg border border-slate-200 p-1 shadow-sm">
+                                                    {[
+                                                        { id: 'table' as ViewType, icon: Grid3X3, label: 'Table' },
+                                                        { id: 'list' as ViewType, icon: List, label: 'List' },
+                                                        { id: 'gallery' as ViewType, icon: LayoutGrid, label: 'Gallery' },
+                                                    ].map(view => (
+                                                        <button
+                                                            key={view.id}
+                                                            onClick={() => setViewType(view.id)}
+                                                            className={`p-2 rounded-md transition-all duration-200 ${viewType === view.id
+                                                                ? 'bg-emerald-100 text-emerald-700 shadow-sm'
+                                                                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                                                                }`}
+                                                            title={view.label}
+                                                        >
+                                                            <view.icon className="w-4 h-4" />
+                                                        </button>
+                                                    ))}
+                                                </div>
 
-                                return sortDirection === 'asc' ? comparison : -comparison
-                            })
+                                                {/* Sort Controls */}
+                                                <div className="flex items-center gap-2">
+                                                    <Select
+                                                        value={sortField}
+                                                        onValueChange={(value: SortField) => setSortField(value)}
+                                                    >
+                                                        <SelectTrigger className="w-[130px] bg-white border-slate-200 shadow-sm h-9">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="date">{t.patientDashboard.historyTable.sortByDate}</SelectItem>
+                                                            <SelectItem value="score">{t.patientDashboard.historyTable.sortByScore}</SelectItem>
+                                                            <SelectItem value="diagnosis">{t.patientDashboard.historyTable.sortByDiagnosis}</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
 
-                            // Helper functions for table/list views
-                            const formatDate = (dateString: string): string => {
-                                const date = new Date(dateString)
-                                const localeMap: Record<string, string> = {
-                                    en: 'en-US',
-                                    zh: 'zh-CN',
-                                    ms: 'ms-MY'
-                                }
-                                return new Intl.DateTimeFormat(localeMap[language] || 'en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric'
-                                }).format(date)
-                            }
+                                                    <button
+                                                        onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                                                        className="p-2 bg-white rounded-lg border border-slate-200 shadow-sm hover:bg-slate-50 transition-colors"
+                                                        title={sortDirection === 'asc' ? 'Ascending' : 'Descending'}
+                                                    >
+                                                        {sortDirection === 'asc' ? (
+                                                            <ArrowUp className="w-4 h-4 text-slate-600" />
+                                                        ) : (
+                                                            <ArrowDown className="w-4 h-4 text-slate-600" />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
 
-                            const extractDiagnosisTitle = (value: string | undefined | null): string => {
-                                if (!value) return 'TCM Health Assessment'
-                                if (value.startsWith('{') && value.endsWith('}')) {
-                                    try {
-                                        const parsed = JSON.parse(value)
-                                        return parsed.primary_pattern || parsed.pattern || parsed.diagnosis || 'TCM Health Assessment'
-                                    } catch {
-                                        const match = value.match(/"primary_pattern"\s*:\s*"([^"]+)"/)
-                                        if (match) return match[1]
-                                    }
-                                }
-                                return value.length > 60 ? value.substring(0, 57) + '...' : value
-                            }
+                                    {/* Empty State */}
+                                    {sessions.length === 0 && !loadingSessions && (
+                                        <Card className="p-12 text-center bg-white border-none shadow-md">
+                                            <div className="max-w-md mx-auto">
+                                                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                                                    <FileHeart className="w-10 h-10 text-emerald-600" />
+                                                </div>
+                                                <h3 className="text-xl font-bold text-slate-800 mb-3">
+                                                    {t.patientDashboard.healthJourney.noSessionsYet}
+                                                </h3>
+                                                <p className="text-slate-600 mb-6">
+                                                    {t.patientDashboard.healthJourney.noSessionsDesc}
+                                                </p>
+                                                <Button
+                                                    onClick={() => router.push('/')}
+                                                    size="lg"
+                                                    className="bg-gradient-to-r from-emerald-600 to-teal-600"
+                                                >
+                                                    <Plus className="w-5 h-5 mr-2" />
+                                                    {t.patientDashboard.healthJourney.startFirstDiagnosis}
+                                                </Button>
 
-                            const getScoreBadge = (score?: number) => {
-                                if (score === undefined || score === null) return null
-                                if (score >= 75) return { bg: 'bg-emerald-100', text: 'text-emerald-700', label: t.patientDashboard.historyTable.good, Icon: TrendingUp }
-                                if (score >= 50) return { bg: 'bg-amber-100', text: 'text-amber-700', label: t.patientDashboard.historyTable.fair, Icon: Minus }
-                                return { bg: 'bg-red-100', text: 'text-red-700', label: t.patientDashboard.historyTable.needsAttention, Icon: TrendingDown }
-                            }
+                                                <div className="mt-4 pt-4 border-t border-slate-100">
+                                                    <p className="text-xs text-slate-400 mb-2">{t.patientDashboard.healthJourney.cantFindData}</p>
+                                                    <Button
+                                                        onClick={handleRestoreData}
+                                                        variant="outline"
+                                                        size="sm"
+                                                        disabled={seeding}
+                                                        className="text-slate-500 hover:text-emerald-600"
+                                                    >
+                                                        {seeding ? (
+                                                            <><Loader2 className="w-3 h-3 mr-2 animate-spin" /> {t.patientDashboard.healthJourney.restoring}</>
+                                                        ) : (
+                                                            t.patientDashboard.healthJourney.restoreMockData
+                                                        )}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </Card>
+                                    )}
 
-                            return (
-                                <>
                                     {/* TABLE VIEW */}
-                                    {viewType === 'table' && (
-                                        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                                    {sessions.length > 0 && viewType === 'table' && (
+                                        <Card className="border-none shadow-md bg-white overflow-hidden">
                                             <div className="overflow-x-auto">
                                                 <table className="w-full">
                                                     <thead className="bg-slate-50 border-b border-slate-200">
                                                         <tr>
                                                             <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">{t.patientDashboard.historyTable.diagnosis}</th>
                                                             <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">{t.patientDashboard.historyTable.date}</th>
+                                                            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">{t.patientDashboard.historyTable.symptoms}</th>
+                                                            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">{t.patientDashboard.historyTable.medicines}</th>
                                                             <th className="text-center py-3 px-4 text-sm font-semibold text-slate-700">{t.patientDashboard.historyTable.score}</th>
                                                             <th className="text-center py-3 px-4 text-sm font-semibold text-slate-700">{t.patientDashboard.historyTable.status}</th>
                                                             <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700">{t.patientDashboard.historyTable.action}</th>
@@ -551,7 +784,7 @@ export function UnifiedDashboard() {
                                                     </thead>
                                                     <tbody className="divide-y divide-slate-100">
                                                         {sortedSessions.map((session) => {
-                                                            const badge = getScoreBadge(session.overall_score)
+                                                            const badge = getScoreBadge(session.overall_score ?? undefined)
                                                             return (
                                                                 <tr
                                                                     key={session.id}
@@ -567,7 +800,7 @@ export function UnifiedDashboard() {
                                                                                 </p>
                                                                                 {session.constitution && (
                                                                                     <p className="text-xs text-slate-500 truncate max-w-[200px]">
-                                                                                        {session.constitution}
+                                                                                        {extractConstitutionType(session.constitution)}
                                                                                     </p>
                                                                                 )}
                                                                             </div>
@@ -578,6 +811,50 @@ export function UnifiedDashboard() {
                                                                             <Calendar className="w-4 h-4" />
                                                                             {formatDate(session.created_at)}
                                                                         </div>
+                                                                    </td>
+                                                                    <td className="py-3 px-4">
+                                                                        {session.symptoms && session.symptoms.length > 0 ? (
+                                                                            <div className="flex flex-wrap gap-1.5">
+                                                                                {session.symptoms.slice(0, 3).map((symptom, idx) => (
+                                                                                    <span
+                                                                                        key={idx}
+                                                                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-amber-50 text-amber-700 border border-amber-200"
+                                                                                    >
+                                                                                        <AlertCircle className="w-3 h-3" />
+                                                                                        {symptom}
+                                                                                    </span>
+                                                                                ))}
+                                                                                {session.symptoms.length > 3 && (
+                                                                                    <span className="text-xs text-slate-500">
+                                                                                        +{session.symptoms.length - 3}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        ) : (
+                                                                            <span className="text-xs text-slate-400 italic">No symptoms recorded</span>
+                                                                        )}
+                                                                    </td>
+                                                                    <td className="py-3 px-4">
+                                                                        {session.medicines && session.medicines.length > 0 ? (
+                                                                            <div className="flex flex-wrap gap-1.5">
+                                                                                {session.medicines.slice(0, 2).map((medicine, idx) => (
+                                                                                    <span
+                                                                                        key={idx}
+                                                                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                                                                    >
+                                                                                        <Pill className="w-3 h-3" />
+                                                                                        <span className="truncate max-w-[120px]">{medicine}</span>
+                                                                                    </span>
+                                                                                ))}
+                                                                                {session.medicines.length > 2 && (
+                                                                                    <span className="text-xs text-slate-500">
+                                                                                        +{session.medicines.length - 2}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        ) : (
+                                                                            <span className="text-xs text-slate-400 italic">No medicines recorded</span>
+                                                                        )}
                                                                     </td>
                                                                     <td className="py-3 px-4 text-center">
                                                                         {session.overall_score !== undefined && (
@@ -614,14 +891,14 @@ export function UnifiedDashboard() {
                                                     </tbody>
                                                 </table>
                                             </div>
-                                        </div>
+                                        </Card>
                                     )}
 
                                     {/* LIST VIEW */}
-                                    {viewType === 'list' && (
+                                    {sessions.length > 0 && viewType === 'list' && (
                                         <div className="space-y-3">
                                             {sortedSessions.map((session, index) => {
-                                                const badge = getScoreBadge(session.overall_score)
+                                                const badge = getScoreBadge(session.overall_score ?? undefined)
                                                 return (
                                                     <motion.div
                                                         key={session.id}
@@ -630,7 +907,7 @@ export function UnifiedDashboard() {
                                                         transition={{ duration: 0.3, delay: index * 0.03 }}
                                                     >
                                                         <Card
-                                                            className="group p-4 bg-white hover:shadow-lg transition-all duration-300 cursor-pointer border-slate-200/60"
+                                                            className="group p-4 bg-white hover:shadow-lg transition-all duration-300 cursor-pointer border-none shadow-sm"
                                                             onClick={() => router.push(`/patient/history/${session.id}`)}
                                                         >
                                                             <div className="flex items-center justify-between gap-4">
@@ -647,7 +924,7 @@ export function UnifiedDashboard() {
                                                                             </span>
                                                                             {session.constitution && (
                                                                                 <span className="text-sm text-slate-400 truncate max-w-[150px]">
-                                                                                    • {session.constitution}
+                                                                                    • {extractConstitutionType(session.constitution)}
                                                                                 </span>
                                                                             )}
                                                                         </div>
@@ -687,7 +964,7 @@ export function UnifiedDashboard() {
                                     )}
 
                                     {/* GALLERY VIEW */}
-                                    {viewType === 'gallery' && (
+                                    {sessions.length > 0 && viewType === 'gallery' && (
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                             {sortedSessions.map((session, index) => (
                                                 <HistoryCard
@@ -699,401 +976,348 @@ export function UnifiedDashboard() {
                                             ))}
                                         </div>
                                     )}
-                                </>
-                            )
-                        })()}
-                    </motion.div>
-                </div>
-
-                {/* Meal Planner Section */}
-                <div className={`${activeSection !== 'meals' ? 'hidden' : ''} mb-8`}>
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4 }}
-                    >
-                        <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-2">{t.patientDashboard.mealPlanner.title}</h2>
-                            <p className="text-sm text-slate-600">
-                                {t.patientDashboard.mealPlanner.subtitle}
-                            </p>
-                        </div>
-
-                        <MealPlanWizard latestDiagnosis={sessions.length > 0 ? sessions[0].full_report || sessions[0] : null} />
-                    </motion.div>
-                </div>
-
-                {/* Profile Section */}
-                <div className={`${activeSection !== 'profile' ? 'hidden' : ''} mb-8`}>
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 0.2 }}
-                    >
-                        <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-2">{t.patientDashboard.profile.title}</h2>
-                            <p className="text-sm text-slate-600">
-                                {t.patientDashboard.profile.subtitle}
-                            </p>
-                        </div>
-                        <Card className="p-6 bg-white/80 backdrop-blur-sm max-w-2xl">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                                        <User className="w-6 h-6 text-emerald-600" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-slate-800">{t.patientDashboard.profile.personalInfo}</h3>
-                                        <p className="text-sm text-slate-600">{t.patientDashboard.profile.yourProfileDetails}</p>
-                                    </div>
                                 </div>
-                                <Button
-                                    size="sm"
-                                    variant={editingProfile ? 'ghost' : 'outline'}
-                                    onClick={() => setEditingProfile(!editingProfile)}
-                                >
-                                    {editingProfile ? t.common.cancel : <><Edit className="w-4 h-4 mr-2" />{t.common.edit}</>}
-                                </Button>
                             </div>
+                        )}
 
-                            {editingProfile ? (
-                                <div className="space-y-4">
-                                    <div>
-                                        <Label>{t.patientDashboard.profile.fullName}</Label>
-                                        <Input
-                                            value={profileData.full_name}
-                                            onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
-                                        />
+                        {/* Meal Planner Section */}
+                        {activeSection === 'meals' && (
+                            <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                    <div className="flex-1">
+                                        <h2 className="text-xl font-bold text-slate-800 mb-1">{t.patientDashboard.mealPlanner.title}</h2>
+                                        <p className="text-sm text-slate-600">
+                                            {t.patientDashboard.mealPlanner.subtitle}
+                                        </p>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <Label>{t.patientDashboard.profile.age}</Label>
-                                            <Input
-                                                type="number"
-                                                value={profileData.age}
-                                                onChange={(e) => setProfileData({ ...profileData, age: e.target.value })}
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Gender</Label>
-                                            <Select
-                                                value={profileData.gender}
-                                                onValueChange={(value) => setProfileData({ ...profileData, gender: value })}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="male">Male</SelectItem>
-                                                    <SelectItem value="female">Female</SelectItem>
-                                                    <SelectItem value="other">Other</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <Label>Height (cm)</Label>
-                                            <Input
-                                                type="number"
-                                                value={profileData.height}
-                                                onChange={(e) => setProfileData({ ...profileData, height: e.target.value })}
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Weight (kg)</Label>
-                                            <Input
-                                                type="number"
-                                                value={profileData.weight}
-                                                onChange={(e) => setProfileData({ ...profileData, weight: e.target.value })}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <Label>{t.patientDashboard.profile.medicalHistory}</Label>
-                                        <Textarea
-                                            value={profileData.medical_history}
-                                            onChange={(e) => setProfileData({ ...profileData, medical_history: e.target.value })}
-                                            rows={4}
-                                        />
-                                    </div>
-                                    <Button
-                                        onClick={handleSaveProfile}
-                                        disabled={savingProfile}
-                                        className="w-full bg-emerald-600 hover:bg-emerald-700"
-                                    >
-                                        {savingProfile ? (
-                                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t.patientDashboard.profile.saving}</>
-                                        ) : (
-                                            t.patientDashboard.profile.saveChanges
-                                        )}
-                                    </Button>
-                                </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    <div className="flex justify-between py-2 border-b">
-                                        <span className="text-sm text-slate-600">{t.patientDashboard.profile.name}:</span>
-                                        <span className="text-sm font-medium">{profileData.full_name || t.patientDashboard.profile.notSet}</span>
-                                    </div>
-                                    <div className="flex justify-between py-2 border-b">
-                                        <span className="text-sm text-slate-600">{t.patientDashboard.profile.age}:</span>
-                                        <span className="text-sm font-medium">{profileData.age || t.patientDashboard.profile.notSet}</span>
-                                    </div>
-                                    <div className="flex justify-between py-2 border-b">
-                                        <span className="text-sm text-slate-600">{t.patientDashboard.profile.gender}:</span>
-                                        <span className="text-sm font-medium capitalize">{profileData.gender || t.patientDashboard.profile.notSet}</span>
-                                    </div>
-                                    <div className="flex justify-between py-2 border-b">
-                                        <span className="text-sm text-slate-600">{t.patientDashboard.profile.height}:</span>
-                                        <span className="text-sm font-medium">{profileData.height ? `${profileData.height} cm` : t.patientDashboard.profile.notSet}</span>
-                                    </div>
-                                    <div className="flex justify-between py-2 border-b">
-                                        <span className="text-sm text-slate-600">{t.patientDashboard.profile.weight}:</span>
-                                        <span className="text-sm font-medium">{profileData.weight ? `${profileData.weight} kg` : t.patientDashboard.profile.notSet}</span>
-                                    </div>
-                                    {profileData.medical_history && (
-                                        <div className="pt-2">
-                                            <span className="text-sm text-slate-600 block mb-2">{t.patientDashboard.profile.medicalHistory}:</span>
-                                            <p className="text-sm text-slate-800 bg-slate-50 p-3 rounded-lg">
-                                                {profileData.medical_history}
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </Card>
-                    </motion.div>
-                </div>
 
-                {/* Documents Section */}
-                <div className={`${activeSection !== 'documents' ? 'hidden' : ''} mb-8`}>
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 0.3 }}
-                    >
-                        <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-2">{t.patientDashboard.documents.title}</h2>
-                            <p className="text-sm text-slate-600">
-                                {t.patientDashboard.documents.subtitle}
-                            </p>
-                        </div>
-                        <Card className="p-6 bg-white/80 backdrop-blur-sm max-w-2xl">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                                        <FileText className="w-6 h-6 text-blue-600" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-slate-800">{t.patientDashboard.documents.yourDocuments}</h3>
-                                        <p className="text-sm text-slate-600">{reports.length} {t.patientDashboard.documents.filesUploaded}</p>
-                                    </div>
-                                </div>
-                                <Button
-                                    size="sm"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="bg-blue-600 hover:bg-blue-700"
-                                >
-                                    <Upload className="w-4 h-4 mr-2" />
-                                    {t.patientDashboard.documents.upload}
-                                </Button>
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    className="hidden"
-                                    accept=".pdf,.jpg,.jpeg,.png"
-                                    onChange={handleFileChange}
-                                />
-                            </div>
-
-                            {/* Documents List */}
-                            <div className="space-y-2 max-h-96 overflow-y-auto">
-                                {reports.length === 0 ? (
-                                    <div className="text-center py-8">
-                                        <FileText className="w-12 h-12 mx-auto text-slate-300 mb-3" />
-                                        <p className="text-sm text-slate-500">{t.patientDashboard.documents.noDocumentsYet}</p>
-                                    </div>
-                                ) : (
-                                    reports.map((report, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                                    <div className="flex p-1 bg-slate-100/80 backdrop-blur-sm rounded-xl w-fit border border-slate-200">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className={`rounded-lg px-4 transition-all duration-200 ${mealSubSection === 'plan' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                            onClick={() => setMealSubSection('plan')}
                                         >
-                                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                <FileText className="w-5 h-5 text-blue-600 shrink-0" />
-                                                <div className="min-w-0 flex-1">
-                                                    <p className="text-sm font-medium text-slate-800 truncate">
-                                                        {report.name}
-                                                    </p>
-                                                    <p className="text-xs text-slate-500">
-                                                        {report.date} • {report.size}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-2 shrink-0">
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    className="h-8 w-8 p-0"
-                                                >
-                                                    <Eye className="w-4 h-4" />
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    onClick={() => handleDeleteReport(index)}
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ))
+                                            <Utensils className="w-4 h-4 mr-2" />
+                                            7-Day Plan
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className={`rounded-lg px-4 transition-all duration-200 ${mealSubSection === 'checker' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                            onClick={() => setMealSubSection('checker')}
+                                        >
+                                            <Sparkles className="w-4 h-4 mr-2" />
+                                            Food Checker
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                {mealSubSection === 'plan' ? (
+                                    <MealPlanWizard latestDiagnosis={sessions.length > 0 ? sessions[0].full_report || sessions[0] : null} />
+                                ) : (
+                                    <TCMFoodChecker
+                                        latestDiagnosis={sessions.length > 0 ? sessions[0].full_report || sessions[0] : null}
+                                        onBack={() => setMealSubSection('plan')}
+                                    />
                                 )}
                             </div>
-                        </Card>
-                    </motion.div>
-                </div>
+                        )}
 
-                {/* Settings Section */}
-                <div className={`${activeSection !== 'settings' ? 'hidden' : ''} mb-8`}>
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: 0.3 }}
-                    >
-                        <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-2">{t.patientDashboard.settings.title}</h2>
-                            <p className="text-sm text-slate-600">
-                                {t.patientDashboard.settings.subtitle}
-                            </p>
-                        </div>
+                        {/* Snore Analysis Section */}
+                        {activeSection === 'snore' && <SnoreAnalysisTab sessions={sessions} />}
 
-                        {/* Language Settings */}
-                        <Card className="p-6 bg-white/80 backdrop-blur-sm max-w-2xl mb-6">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                                    <Globe className="w-6 h-6 text-blue-600" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-slate-800">{t.patientDashboard.settings.languagePreference}</h3>
-                                    <p className="text-sm text-slate-600">{t.patientDashboard.settings.chooseLanguage}</p>
-                                </div>
+                        {/* Qi Dose Section */}
+                        {activeSection === 'qi-dose' && (
+                            <QiDose />
+                        )}
+
+                        {/* Vitality Rhythm Section */}
+                        {activeSection === 'vitality' && <VitalityRhythmTab sessions={sessions} />}
+
+                        {/* Circle of Health / Community Section */}
+                        {activeSection === 'community' && (
+                            <div className="animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+                                <p className="text-slate-600 mb-6">{t.circleOfHealth.subtitle}</p>
+                                <CircleOfHealth />
                             </div>
+                        )}
 
-                            <div className="space-y-3">
-                                {[
-                                    { code: 'en' as const, flag: '🇬🇧', name: 'English' },
-                                    { code: 'zh' as const, flag: '🇨🇳', name: '中文 (Chinese)' },
-                                    { code: 'ms' as const, flag: '🇲🇾', name: 'Bahasa Malaysia' }
-                                ].map((lang) => (
-                                    <button
-                                        key={lang.code}
-                                        onClick={async () => {
-                                            if (language === lang.code) return
-                                            setSavingLanguage(true)
-                                            setLanguage(lang.code)
+                        {/* Family Health Management Section */}
+                        {activeSection === 'family' && <FamilyManagement />}
 
-                                            // Save to database if logged in
-                                            if (user) {
-                                                try {
-                                                    const { error } = await supabase
-                                                        .from('profiles')
-                                                        .update({ preferred_language: lang.code })
-                                                        .eq('id', user.id)
-
-                                                    if (error) {
-                                                        console.error('Failed to save language preference:', error)
-                                                    } else {
-                                                        // Refresh profile to sync state
-                                                        refreshProfile()
-                                                    }
-                                                } catch (err) {
-                                                    console.error('Error saving language:', err)
-                                                }
-                                            }
-                                            setSavingLanguage(false)
-                                        }}
-                                        disabled={savingLanguage}
-                                        className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${language === lang.code
-                                            ? 'border-emerald-500 bg-emerald-50'
-                                            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                                            }`}
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <span className="text-3xl">{lang.flag}</span>
-                                            <div className="text-left">
-                                                <p className={`font-medium ${language === lang.code ? 'text-emerald-700' : 'text-slate-800'}`}>
-                                                    {lang.name}
-                                                </p>
-                                                <p className="text-sm text-slate-500">
-                                                    {languageNames[lang.code].english}
-                                                </p>
+                        {/* Profile Section */}
+                        {activeSection === 'profile' && (
+                            <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+                                <Card className="border-none shadow-md bg-white max-w-2xl">
+                                    <CardHeader className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-t-xl pb-6">
+                                        <CardTitle className="text-lg flex items-center gap-2">
+                                            <User className="w-5 h-5 text-white/90" />
+                                            {t.patientDashboard.profile.personalInfo}
+                                        </CardTitle>
+                                        <CardDescription className="text-emerald-100">
+                                            {t.patientDashboard.profile.yourProfileDetails}
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="pt-6">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
+                                                    <User className="w-6 h-6 text-emerald-600" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-lg font-bold text-slate-800">{profileData.full_name || 'Patient'}</h3>
+                                                    <p className="text-sm text-slate-600">{user?.email}</p>
+                                                </div>
                                             </div>
+                                            <Button
+                                                size="sm"
+                                                variant={editingProfile ? 'ghost' : 'outline'}
+                                                onClick={() => setEditingProfile(!editingProfile)}
+                                            >
+                                                {editingProfile ? t.common.cancel : <><Edit className="w-4 h-4 mr-2" />{t.common.edit}</>}
+                                            </Button>
                                         </div>
-                                        {language === lang.code && (
-                                            <div className="flex items-center gap-2">
-                                                {savingLanguage ? (
-                                                    <Loader2 className="w-5 h-5 text-emerald-600 animate-spin" />
-                                                ) : (
-                                                    <Check className="w-5 h-5 text-emerald-600" />
+
+                                        {editingProfile ? (
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <Label>{t.patientDashboard.profile.fullName}</Label>
+                                                    <Input
+                                                        value={profileData.full_name}
+                                                        onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label>{t.patientDashboard.profile.age}</Label>
+                                                        <Input
+                                                            type="number"
+                                                            value={profileData.age}
+                                                            onChange={(e) => setProfileData({ ...profileData, age: e.target.value })}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Label>Gender</Label>
+                                                        <Select
+                                                            value={profileData.gender}
+                                                            onValueChange={(value) => setProfileData({ ...profileData, gender: value })}
+                                                        >
+                                                            <SelectTrigger>
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="male">Male</SelectItem>
+                                                                <SelectItem value="female">Female</SelectItem>
+                                                                <SelectItem value="other">Other</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label>Height (cm)</Label>
+                                                        <Input
+                                                            type="number"
+                                                            value={profileData.height}
+                                                            onChange={(e) => setProfileData({ ...profileData, height: e.target.value })}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Label>Weight (kg)</Label>
+                                                        <Input
+                                                            type="number"
+                                                            value={profileData.weight}
+                                                            onChange={(e) => setProfileData({ ...profileData, weight: e.target.value })}
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <Label>{t.patientDashboard.profile.medicalHistory}</Label>
+                                                    <Textarea
+                                                        value={profileData.medical_history}
+                                                        onChange={(e) => setProfileData({ ...profileData, medical_history: e.target.value })}
+                                                        rows={4}
+                                                    />
+                                                </div>
+                                                <Button
+                                                    onClick={handleSaveProfile}
+                                                    disabled={savingProfile}
+                                                    className="w-full bg-emerald-600 hover:bg-emerald-700"
+                                                >
+                                                    {savingProfile ? (
+                                                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t.patientDashboard.profile.saving}</>
+                                                    ) : (
+                                                        t.patientDashboard.profile.saveChanges
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between py-2 border-b">
+                                                    <span className="text-sm text-slate-600">{t.patientDashboard.profile.name}:</span>
+                                                    <span className="text-sm font-medium">{profileData.full_name || t.patientDashboard.profile.notSet}</span>
+                                                </div>
+                                                <div className="flex justify-between py-2 border-b">
+                                                    <span className="text-sm text-slate-600">{t.patientDashboard.profile.age}:</span>
+                                                    <span className="text-sm font-medium">{profileData.age || t.patientDashboard.profile.notSet}</span>
+                                                </div>
+                                                <div className="flex justify-between py-2 border-b">
+                                                    <span className="text-sm text-slate-600">{t.patientDashboard.profile.gender}:</span>
+                                                    <span className="text-sm font-medium capitalize">{profileData.gender || t.patientDashboard.profile.notSet}</span>
+                                                </div>
+                                                <div className="flex justify-between py-2 border-b">
+                                                    <span className="text-sm text-slate-600">{t.patientDashboard.profile.height}:</span>
+                                                    <span className="text-sm font-medium">{profileData.height ? `${profileData.height} cm` : t.patientDashboard.profile.notSet}</span>
+                                                </div>
+                                                <div className="flex justify-between py-2 border-b">
+                                                    <span className="text-sm text-slate-600">{t.patientDashboard.profile.weight}:</span>
+                                                    <span className="text-sm font-medium">{profileData.weight ? `${profileData.weight} kg` : t.patientDashboard.profile.notSet}</span>
+                                                </div>
+                                                {profileData.medical_history && (
+                                                    <div className="pt-2">
+                                                        <span className="text-sm text-slate-600 block mb-2">{t.patientDashboard.profile.medicalHistory}:</span>
+                                                        <p className="text-sm text-slate-800 bg-slate-50 p-3 rounded-lg">
+                                                            {profileData.medical_history}
+                                                        </p>
+                                                    </div>
                                                 )}
                                             </div>
                                         )}
-                                    </button>
-                                ))}
+                                    </CardContent>
+                                </Card>
                             </div>
+                        )}
 
-                            <p className="text-xs text-slate-500 mt-4 flex items-center gap-1">
-                                <span className="text-emerald-500">✓</span>
-                                {t.patientDashboard.settings.languageSaved}
-                            </p>
-                        </Card>
+                        {/* Documents Section */}
+                        {activeSection === 'documents' && (
+                            <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+                                <Card className="border-none shadow-md bg-white max-w-2xl">
+                                    <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-xl pb-6">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <CardTitle className="text-lg flex items-center gap-2">
+                                                    <FileText className="w-5 h-5 text-white/90" />
+                                                    {t.patientDashboard.documents.yourDocuments}
+                                                </CardTitle>
+                                                <CardDescription className="text-blue-100">
+                                                    {loadingReports ? (
+                                                        <Loader2 className="w-3 h-3 inline animate-spin mr-1" />
+                                                    ) : (
+                                                        reports.length
+                                                    )} {t.patientDashboard.documents.filesUploaded}
+                                                </CardDescription>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="bg-white text-blue-600 hover:bg-blue-50"
+                                                disabled={uploadingReport}
+                                            >
+                                                {uploadingReport ? (
+                                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                ) : (
+                                                    <Upload className="w-4 h-4 mr-2" />
+                                                )}
+                                                {t.patientDashboard.documents.upload}
+                                            </Button>
+                                            <input
+                                                ref={fileInputRef}
+                                                type="file"
+                                                className="hidden"
+                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                onChange={handleFileChange}
+                                            />
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="pt-6">
+                                        {/* Documents List */}
+                                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                                            {loadingReports ? (
+                                                <div className="text-center py-12">
+                                                    <Loader2 className="w-8 h-8 mx-auto text-blue-500 animate-spin mb-3" />
+                                                    <p className="text-sm text-slate-500">Loading your reports...</p>
+                                                </div>
+                                            ) : reports.length === 0 ? (
+                                                <div className="text-center py-8">
+                                                    <FileText className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+                                                    <p className="text-sm text-slate-500 mb-4">{t.patientDashboard.documents.noDocumentsYet}</p>
+                                                    <div className="pt-4 border-t border-slate-100">
+                                                        <p className="text-xs text-slate-400 mb-2">Want to see sample documents?</p>
+                                                        <Button
+                                                            onClick={handleRestoreMedicalReports}
+                                                            variant="outline"
+                                                            size="sm"
+                                                            disabled={seedingReports}
+                                                            className="text-slate-500 hover:text-blue-600"
+                                                        >
+                                                            {seedingReports ? (
+                                                                <><Loader2 className="w-3 h-3 mr-2 animate-spin" /> Adding samples...</>
+                                                            ) : (
+                                                                'Add Sample Reports'
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                reports.map((report) => (
+                                                    <div
+                                                        key={report.id}
+                                                        className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                                                    >
+                                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                            <FileText className="w-5 h-5 text-blue-600 shrink-0" />
+                                                            <div className="min-w-0 flex-1">
+                                                                <p className="text-sm font-medium text-slate-800 truncate">
+                                                                    {report.name}
+                                                                </p>
+                                                                <p className="text-xs text-slate-500">
+                                                                    {report.date} • {report.size}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 shrink-0">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-8 w-8 p-0"
+                                                                onClick={() => setSelectedReport(report)}
+                                                            >
+                                                                <Eye className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                onClick={() => handleDeleteReport(report.id)}
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
 
-                        {/* Account Information */}
-                        <Card className="p-6 bg-white/80 backdrop-blur-sm max-w-2xl">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
-                                    <User className="w-6 h-6 text-slate-600" />
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-slate-800">{t.patientDashboard.settings.accountInfo}</h3>
-                                    <p className="text-sm text-slate-600">{t.patientDashboard.settings.accountDetails}</p>
-                                </div>
+                                <DocumentViewerModal
+                                    isOpen={!!selectedReport}
+                                    onClose={() => setSelectedReport(null)}
+                                    report={selectedReport}
+                                />
                             </div>
+                        )}
 
-                            <div className="space-y-3">
-                                <div className="flex justify-between py-2 border-b border-slate-100">
-                                    <span className="text-sm text-slate-600">{t.patientDashboard.settings.email}:</span>
-                                    <span className="text-sm font-medium text-slate-800">{user?.email || t.patientDashboard.profile.notSet}</span>
-                                </div>
-                                <div className="flex justify-between py-2 border-b border-slate-100">
-                                    <span className="text-sm text-slate-600">{t.patientDashboard.settings.accountType}:</span>
-                                    <span className="text-sm font-medium text-slate-800 capitalize">{profile?.role || 'Patient'}</span>
-                                </div>
-                                <div className="flex justify-between py-2">
-                                    <span className="text-sm text-slate-600">{t.patientDashboard.settings.memberSince}:</span>
-                                    <span className="text-sm font-medium text-slate-800">
-                                        {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
-                                    </span>
-                                </div>
+                        {/* Settings Section */}
+                        {activeSection === 'settings' && (
+                            <div className="animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+                                <PatientSettings />
                             </div>
-
-                            <div className="mt-6 pt-4 border-t border-slate-100">
-                                <Button
-                                    onClick={handleLogout}
-                                    variant="outline"
-                                    className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
-                                >
-                                    <LogOut className="w-4 h-4 mr-2" />
-                                    {t.patientDashboard.settings.signOut}
-                                </Button>
-                            </div>
-                        </Card>
-                    </motion.div>
+                        )}
+                    </div>
                 </div>
-            </div>
+            </main>
         </div>
     )
 }
-

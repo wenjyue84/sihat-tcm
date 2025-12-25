@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Shield, ShieldCheck, ShieldAlert, Check, Loader2, Info, Zap, Lock, UserCheck } from 'lucide-react'
+import { logger } from '@/lib/clientLogger'
 
 type SecurityLevel = 1 | 2 | 3;
 
@@ -115,7 +116,7 @@ export function SecuritySettings() {
                 }
             }
         } catch (error) {
-            console.log('No security config found, using defaults');
+            logger.info('SecuritySettings', 'No security config found, using defaults')
         } finally {
             setLoading(false);
         }
@@ -166,7 +167,7 @@ export function SecuritySettings() {
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
         } catch (error) {
-            console.error('Error saving security config:', error);
+            logger.error('SecuritySettings', 'Error saving security config', error)
             alert('Failed to save security configuration.');
         } finally {
             setSaving(false);

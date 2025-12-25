@@ -1,32 +1,30 @@
 import { streamText } from 'ai';
-import { supabase } from '@/lib/supabase';
-import { INTERACTIVE_CHAT_PROMPT } from '@/lib/systemPrompts';
 import { getGoogleProvider } from '@/lib/googleProvider';
 import { getGeminiApiKeyAsync } from '@/lib/settings';
+import { devLog } from '@/lib/systemLogger';
+import { chatRequestSchema, validateRequest, validationErrorResponse } from '@/lib/validations';
+import { getSystemPrompt } from '@/lib/promptLoader';
+import { prependLanguageInstruction, normalizeLanguage } from '@/lib/translations/languageInstructions';
+import { parseApiError } from '@/lib/modelFallback';
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
 
-// Language instruction templates for chat responses
-const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
-    en: `
-LANGUAGE REQUIREMENT: You MUST respond entirely in English. Ask questions and provide all responses in clear, simple English.
-`,
-    zh: `
-语言要求：你必须完全使用中文回复。所有问诊对话必须使用简体中文。
-请使用简单易懂的中文，确保老年患者能够理解。不要使用英文或马来文。
-`,
-    ms: `
-KEPERLUAN BAHASA: Anda MESTI menjawab sepenuhnya dalam Bahasa Malaysia. Tanya soalan dan berikan semua respons dalam Bahasa Malaysia yang jelas dan mudah.
-`,
-};
-
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { messages, basicInfo, model = 'gemini-1.5-pro', language = 'en' } = body;
 
-        console.log("[API /api/chat] Request received:", {
+        // Validate request body with Zod
+        const validation = validateRequest(chatRequestSchema, body);
+        if (!validation.success) {
+            devLog('warn', 'API/chat', 'Validation failed', { error: validation.error });
+            return validationErrorResponse(validation.error, validation.details);
+        }
+
+        const { messages, basicInfo, model, language: rawLanguage } = validation.data;
+        const language = normalizeLanguage(rawLanguage);
+
+        devLog('info', 'API/chat', 'Request received', {
             messageCount: messages?.length,
             hasBasicInfo: !!basicInfo,
             firstMsgRole: messages?.[0]?.role,
@@ -34,25 +32,11 @@ export async function POST(req: Request) {
             language: language
         });
 
-        // Fetch custom system prompt from admin database (uses 'doctor_chat' role)
-        let customPrompt = '';
-        try {
-            const { data } = await supabase
-                .from('system_prompts')
-                .select('prompt_text')
-                .eq('role', 'doctor_chat')
-                .single();
-            if (data && data.prompt_text) customPrompt = data.prompt_text;
-        } catch (e) {
-            console.error("Error fetching chat system prompt", e);
-        }
+        // Fetch system prompt using centralized loader
+        let systemPrompt = await getSystemPrompt('doctor_chat');
 
-        // Use the database prompt if available, otherwise use the library default
-        let systemPrompt = customPrompt || INTERACTIVE_CHAT_PROMPT;
-
-        // Add language instructions to the system prompt
-        const languageInstruction = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.en;
-        systemPrompt = languageInstruction + '\n\n' + systemPrompt;
+        // Add language instructions using centralized utility
+        systemPrompt = prependLanguageInstruction(systemPrompt, 'basic', language);
 
         // Add patient information context
         if (basicInfo) {
@@ -81,8 +65,7 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
         // Filter out system messages from the messages array
         const filteredMessages = messages?.filter((m: any) => m.role !== 'system') || [];
 
-        console.log("[API /api/chat] Filtered messages count:", filteredMessages.length);
-        console.log("[API /api/chat] First filtered message:", filteredMessages[0]);
+        devLog('debug', 'API/chat', 'Filtered messages', { count: filteredMessages.length, first: filteredMessages[0] });
 
         // Create language-appropriate initial message if no messages
         if (filteredMessages.length === 0) {
@@ -97,14 +80,14 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
             });
         }
 
-        console.log("[API /api/chat] Calling streamText with model:", model);
+        devLog('info', 'API/chat', `Calling streamText with model: ${model}`);
 
         let apiKey = '';
         try {
             apiKey = await getGeminiApiKeyAsync();
-            console.log("[API /api/chat] Loaded API Key:", apiKey ? `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}` : "MISSING");
+            devLog('debug', 'API/chat', `API Key loaded: ${apiKey ? 'OK' : 'MISSING'}`);
         } catch (e) {
-            console.error('Error fetching API key:', e);
+            devLog('error', 'API/chat', 'Error fetching API key', { error: e });
         }
 
         try {
@@ -114,34 +97,34 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
                 system: systemPrompt,
                 messages: filteredMessages,
                 onFinish: (completion) => {
-                    console.log("[API /api/chat] Stream finished. Text length:", completion.text.length);
+                    devLog('info', 'API/chat', `Stream finished. Text length: ${completion.text.length}`);
                 },
                 onError: (error) => {
-                    console.error("[API /api/chat] Stream error (primary):", error);
+                    devLog('error', 'API/chat', 'Stream error (primary)', { error });
                 },
             });
 
-            console.log("[API /api/chat] streamText called, returning stream response");
+            devLog('debug', 'API/chat', 'streamText called, returning stream response');
             return result.toTextStreamResponse({
                 headers: {
                     'X-Model-Used': model
                 }
             });
         } catch (primaryError: any) {
-            console.error(`[API /api/chat] Primary model ${model} failed:`, primaryError);
+            devLog('error', 'API/chat', `Primary model ${model} failed`, { error: primaryError });
 
             // Fallback to 1.5 Flash
-            console.log(`[API /api/chat] Falling back to gemini-1.5-flash`);
-            const googleFallback = getGoogleProvider(apiKey); // Re-use the same API key
+            devLog('info', 'API/chat', 'Falling back to gemini-1.5-flash');
+            const googleFallback = getGoogleProvider(apiKey);
             const fallbackResult = streamText({
                 model: googleFallback('gemini-1.5-flash'),
                 system: systemPrompt,
                 messages: filteredMessages,
                 onFinish: (completion) => {
-                    console.log("[API /api/chat] Fallback stream finished. Text length:", completion.text.length);
+                    devLog('info', 'API/chat', `Fallback stream finished. Text length: ${completion.text.length}`);
                 },
                 onError: (error) => {
-                    console.error("[API /api/chat] Stream error (fallback):", error);
+                    devLog('error', 'API/chat', 'Stream error (fallback)', { error });
                 },
             });
             return fallbackResult.toTextStreamResponse({
@@ -151,31 +134,14 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
             });
         }
     } catch (error: any) {
-        console.error("[API /api/chat] Error:", error);
+        devLog('error', 'API/chat', 'Request error', { error });
 
-        // Detect specific API key errors
-        const errorMessage = error.message || error.toString() || '';
-        let userFriendlyError = 'Chat API error';
-        let errorCode = 'CHAT_ERROR';
-
-        if (errorMessage.includes('leaked') || errorMessage.includes('API key was reported')) {
-            userFriendlyError = 'API key has been flagged as leaked. Please generate a new API key from Google AI Studio and update your .env.local file.';
-            errorCode = 'API_KEY_LEAKED';
-        } else if (errorMessage.includes('invalid') || errorMessage.includes('API_KEY_INVALID')) {
-            userFriendlyError = 'Invalid API key. Please check your GOOGLE_GENERATIVE_AI_API_KEY in .env.local file.';
-            errorCode = 'API_KEY_INVALID';
-        } else if (errorMessage.includes('quota') || errorMessage.includes('RATE_LIMIT') || errorMessage.includes('429')) {
-            userFriendlyError = 'API quota exceeded. Please wait a moment or check your Google AI Studio billing.';
-            errorCode = 'API_QUOTA_EXCEEDED';
-        } else if (errorMessage.includes('not found') || errorMessage.includes('does not exist')) {
-            userFriendlyError = 'AI model not available. Please try again or contact support.';
-            errorCode = 'MODEL_NOT_FOUND';
-        }
+        const { userFriendlyError, errorCode } = parseApiError(error);
 
         return new Response(JSON.stringify({
             error: userFriendlyError,
             code: errorCode,
-            details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
         }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }

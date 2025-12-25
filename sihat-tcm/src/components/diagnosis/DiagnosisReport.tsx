@@ -17,6 +17,7 @@ import { ReportDiagnosisSection } from './report/ReportDiagnosisSection'
 import { ReportRecommendations } from './report/ReportRecommendations'
 import { ReportActions } from './report/ReportActions'
 import { PractitionerList } from './report/PractitionerList'
+import { extractDiagnosisTitle, extractConstitutionType } from '@/lib/tcm-utils'
 
 import { ReportChatWindow, ReportChatButton, type Message } from './ReportChatWindow'
 import { InfographicsGenerator } from './InfographicsGenerator'
@@ -90,19 +91,6 @@ const translations = {
 }
 
 // Helper function
-function extractString(val: any, fallback: string = ''): string {
-    if (!val) return fallback;
-    if (typeof val === 'string') return val;
-    if (typeof val === 'object') {
-        if (val.primary_pattern) return val.primary_pattern;
-        if (val.type) return val.type;
-        if (val.summary) return val.summary;
-        return Object.entries(val)
-            .map(([key, value]) => `${key.replace(/_/g, ' ')}: ${typeof value === 'string' ? value : JSON.stringify(value)}`)
-            .join('\n');
-    }
-    return String(val);
-}
 
 export function DiagnosisReport({ data, patientInfo, reportOptions, smartConnectData, onRestart, saved }: DiagnosisReportProps) {
     const { getDoctorInfo } = useDoctorLevel()
@@ -166,9 +154,9 @@ export function DiagnosisReport({ data, patientInfo, reportOptions, smartConnect
     }
 
     // Process Data
-    const diagnosisText = extractString(data.diagnosis, 'Diagnosis pending');
-    const constitutionText = extractString(data.constitution, 'Not determined');
-    const analysisText = extractString(data.analysis, '');
+    const diagnosisText = extractDiagnosisTitle(data.diagnosis || data.primary_pattern);
+    const constitutionText = extractConstitutionType(data.constitution);
+    const analysisText = typeof data.analysis === 'string' ? data.analysis : (data.analysis?.summary || '');
 
     const getFoodRecommendations = () => {
         if (data.recommendations?.food_therapy?.beneficial) return data.recommendations.food_therapy.beneficial;

@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
 import { useDeveloper } from '@/contexts/DeveloperContext'
-import { Home, Mail, Lock, User as UserIcon } from 'lucide-react'
+import { Home, Mail, Lock, User as UserIcon, Terminal } from 'lucide-react'
 
 // Simple, elegant icons
 const PatientIcon = () => (
@@ -27,6 +27,12 @@ const AdminIcon = () => (
     <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+)
+
+const DeveloperIcon = () => (
+    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
     </svg>
 )
 
@@ -62,7 +68,7 @@ function LoginFormContent() {
         }
     }, [user, profile, router])
 
-    const handleQuickLogin = async (role: 'patient' | 'doctor' | 'admin') => {
+    const handleQuickLogin = async (role: 'patient' | 'doctor' | 'admin' | 'developer') => {
         setLoading(true)
         setError(null)
         const email = `${role}@sihat.com`
@@ -93,7 +99,7 @@ function LoginFormContent() {
         }
     }
 
-    const handleQuickSignup = async (role: 'patient' | 'doctor' | 'admin', email: string, password: string) => {
+    const handleQuickSignup = async (role: 'patient' | 'doctor' | 'admin' | 'developer', email: string, password: string) => {
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
             email,
             password,
@@ -197,6 +203,14 @@ function LoginFormContent() {
             icon: AdminIcon,
             color: 'slate',
         },
+        {
+            id: 'developer',
+            title: t.login.roles.developer.title,
+            chinese: t.login.roles.developer.titleZh,
+            description: t.login.roles.developer.description,
+            icon: DeveloperIcon,
+            color: 'violet',
+        },
     ]
 
     const getColorClasses = (color: string) => {
@@ -218,6 +232,12 @@ function LoginFormContent() {
                 border: 'border-gray-200 hover:border-slate-400',
                 text: 'group-hover:text-slate-700',
                 iconBg: 'bg-slate-600 group-hover:bg-slate-700',
+            },
+            violet: {
+                bg: 'hover:bg-violet-50',
+                border: 'border-gray-200 hover:border-violet-300',
+                text: 'group-hover:text-violet-700',
+                iconBg: 'bg-violet-600 group-hover:bg-violet-700',
             },
         }
         return colors[color] || colors.slate
@@ -455,14 +475,9 @@ function LoginFormContent() {
                 </div>
 
                 {/* Footer */}
-                <button
-                    onClick={() => {
-                        toggleDeveloperMode()
-                    }}
-                    className={`text-center text-xs mt-6 w-full transition-colors duration-300 ${isDeveloperMode ? 'text-emerald-600 font-medium' : 'text-gray-400 hover:text-gray-600'}`}
-                >
-                    {isDeveloperMode ? 'Developer Mode Active' : t.login.devMode}
-                </button>
+                <div className="text-center text-xs mt-6 text-gray-400">
+                    Developed by Prisma Technology Solution Sdn Bhd
+                </div>
             </div>
         </div>
     )

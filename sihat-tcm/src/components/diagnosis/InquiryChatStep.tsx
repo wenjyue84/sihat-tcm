@@ -70,14 +70,16 @@ export function InquiryChatStep({
     onBack,
     uploadedFiles = [],
     reportFiles = [],
-    medicineFiles = []
+    medicineFiles = [],
+    diagnosisMode = 'simple'
 }: {
     onComplete: (chatHistory: any[]) => void,
     basicInfo?: BasicInfoData,
     onBack?: () => void,
     uploadedFiles?: FileData[],
     reportFiles?: FileData[],
-    medicineFiles?: FileData[]
+    medicineFiles?: FileData[],
+    diagnosisMode?: string
 }) {
     const { getDoctorInfo } = useDoctorLevel()
     const { t, language } = useLanguage()
@@ -799,7 +801,11 @@ Duration: ${basicInfo.symptomDuration}
                         className="flex-1 h-12 bg-emerald-800 hover:bg-emerald-900 text-base"
                         disabled={displayMessages.length < 2}
                     >
-                        {language === 'zh' ? '生成总结' : language === 'ms' ? 'Jana Ringkasan' : 'Generate Summary'}
+                        {diagnosisMode === 'simple' ? (
+                            language === 'zh' ? '完成问诊' : language === 'ms' ? 'Selesai Konsultasi' : 'Complete Consultation'
+                        ) : (
+                            language === 'zh' ? '生成总结' : language === 'ms' ? 'Jana Ringkasan' : 'Generate Summary'
+                        )}
                     </Button>
                 </div>
             </Card>

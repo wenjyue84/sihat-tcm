@@ -204,7 +204,7 @@ export const zh = {
         basicInfo: '基本信息',
         symptoms: '症状',
         chooseDoctor: '医生',
-        uploadReports: '报告',
+        uploadDocuments: '文件',
         uploadMedicine: '药物',
         inquiry: '问诊',
         tongue: '舌诊',
@@ -230,9 +230,9 @@ export const zh = {
     },
 
     // 上传报告
-    uploadReports: {
-        title: '医疗报告',
-        subtitle: '上传已有的医疗文件',
+    uploadDocuments: {
+        title: '我的文件',
+        subtitle: '医疗报告与文档',
         uploadButton: '上传文件',
         takePhoto: '拍照',
         chooseFromLibrary: '从相册选择',
@@ -506,8 +506,18 @@ export const zh = {
         tabs: {
             home: '首页',
             history: '历史',
+            documents: '文件',
             profile: '我的',
         },
+    },
+
+    // 医疗文件
+    documents: {
+        title: '我的文件',
+        subtitle: '查看您上传的医疗记录',
+        noRecords: '暂无上传文件',
+        upload: '上传文件',
+        deleteConfirm: '确定要删除此文件吗？',
     },
 
     // 历史

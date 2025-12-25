@@ -3,12 +3,14 @@
 
 CREATE TABLE IF NOT EXISTS admin_settings (
     id INTEGER PRIMARY KEY DEFAULT 1,
-    acknowledged_alerts TEXT[] DEFAULT '{}',
-    music_url TEXT,
-    music_enabled BOOLEAN DEFAULT true,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     CONSTRAINT single_row CHECK (id = 1)
 );
+
+-- Ensure columns exist (idempotent)
+ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS acknowledged_alerts TEXT[] DEFAULT '{}';
+ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS music_url TEXT;
+ALTER TABLE admin_settings ADD COLUMN IF NOT EXISTS music_enabled BOOLEAN DEFAULT true;
 
 -- Insert default row if not exists
 INSERT INTO admin_settings (id, acknowledged_alerts)

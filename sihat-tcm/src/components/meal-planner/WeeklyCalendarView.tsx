@@ -7,8 +7,9 @@ import { ChevronLeft, ChevronRight, Calendar, ShoppingCart, RefreshCw, CheckCirc
 import { MealCard } from './MealCard'
 import { ShoppingListWidget } from './ShoppingListWidget'
 import { motion, AnimatePresence } from 'framer-motion'
-import { updateMealPlanProgress, deactivateMealPlan } from '@/app/actions/meal-planner'
+import { updateMealPlanProgress, deactivateMealPlan, swapMeal } from '@/app/actions/meal-planner'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { translateConstitution } from '@/lib/translations'
 
 interface WeeklyCalendarViewProps {
     mealPlan: any
@@ -45,6 +46,21 @@ export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewPr
         }
     }
 
+    const handleSwap = async (mealType: string, currentMeal: any) => {
+        const res = await swapMeal(
+            mealPlan.id,
+            selectedDay - 1,
+            mealType as any,
+            currentMeal
+        )
+
+        if (res.success) {
+            onRefresh?.()
+        } else {
+            throw new Error(res.error)
+        }
+    }
+
     const nextDay = () => setSelectedDay(prev => Math.min(prev + 1, 7))
     const prevDay = () => setSelectedDay(prev => Math.max(prev - 1, 1))
 
@@ -56,8 +72,7 @@ export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewPr
                     <div>
                         <h2 className="text-2xl font-bold mb-2">{t.patientDashboard.mealPlanner.yourMealPlan}</h2>
                         <p className="text-amber-100">
-                            {t.patientDashboard.mealPlanner.constitution}: {mealPlan.constitution || 'Balanced'} •
-                            {completedDays.length}/7 {t.patientDashboard.mealPlanner.daysCompleted}
+                            {t.patientDashboard.mealPlanner.constitution}: {translateConstitution(mealPlan.constitution, t)} • {completedDays.length}/7 {t.patientDashboard.mealPlanner.daysCompleted}
                         </p>
                     </div>
                     <div className="flex gap-2">
@@ -112,8 +127,8 @@ export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewPr
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         className={`relative shrink-0 px-4 py-3 rounded-lg font-medium transition-all ${selectedDay === day.day
-                                ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg'
-                                : 'bg-white border-2 border-amber-200 text-slate-700 hover:border-amber-400'
+                            ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg'
+                            : 'bg-white border-2 border-amber-200 text-slate-700 hover:border-amber-400'
                             }`}
                     >
                         <div className="text-xs opacity-80 mb-1">{t.patientDashboard.mealPlanner.day} {day.day}</div>
@@ -170,6 +185,7 @@ export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewPr
                                         key={mealType}
                                         mealType={mealType}
                                         meal={meal}
+                                        onSwap={() => handleSwap(mealType, meal)}
                                     />
                                 )
                             })}

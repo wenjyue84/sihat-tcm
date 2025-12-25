@@ -5,28 +5,44 @@ import { Card } from '@/components/ui/card'
 import { useChat } from '@ai-sdk/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
+import type { BasicInfo } from '@/types/diagnosis'
+import type { ChatMessage } from '@/types/api'
 
-export function AdaptiveChat({ onComplete, basicInfo, initialMessages }: { onComplete: (data: any) => void, basicInfo: any, initialMessages?: any[] }) {
+interface AdaptiveChatProps {
+    onComplete: (data: { chat: ChatMessage[] }) => void
+    basicInfo: BasicInfo | null
+    initialMessages?: ChatMessage[]
+}
+
+export function AdaptiveChat({ onComplete, basicInfo, initialMessages }: AdaptiveChatProps) {
     const [input, setInput] = useState('')
 
     // Construct the initial system message based on basic info
-    const systemMessage = `You are a TCM assistant. The patient is a ${basicInfo?.age}-year-old ${basicInfo?.gender} named ${basicInfo?.name}. 
-    They have reported the following symptoms: "${basicInfo?.symptoms}".
+    const systemMessage = `You are a TCM assistant. The patient is a ${basicInfo?.age || 'unknown'}-year-old ${basicInfo?.gender || 'person'} named ${basicInfo?.name || 'Patient'}. 
+    They have reported the following symptoms: "${basicInfo?.symptoms || 'Not specified'}".
     Your goal is to ask relevant follow-up questions to gather more details for a TCM diagnosis. 
     Focus on the "Ten Questions" (Shi Wen) of TCM. Ask one question at a time. Keep it brief and professional.`
 
-    const { messages, sendMessage, setMessages, reload, error } = useChat({
+    const { messages, append, error } = useChat({
         api: '/api/chat',
-        initialMessages: initialMessages && initialMessages.length > 0 ? initialMessages : [
+        initialMessages: initialMessages && initialMessages.length > 0 ? (initialMessages as any) : [
             { id: '1', role: 'system', content: systemMessage }
         ],
-        onError: (err: any) => console.error("useChat error:", err),
-    } as any) as any
+        body: {
+            basicInfo: basicInfo,
+            model: 'gemini-1.5-flash',
+            language: 'en'
+        },
+        onError: (err: unknown) => {
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+            console.error("useChat error:", errorMessage)
+        },
+    })
 
     // Trigger the first question from AI when the component mounts
     useEffect(() => {
         if (messages.length === 1 && messages[0].role === 'system') {
-            sendMessage({ role: 'user', content: 'Please start the diagnosis.' })
+            append({ role: 'user', content: 'Please start the diagnosis.' })
         }
     }, [])
 
@@ -34,7 +50,7 @@ export function AdaptiveChat({ onComplete, basicInfo, initialMessages }: { onCom
         e.preventDefault()
         if (!input.trim()) return
         try {
-            await sendMessage({ role: 'user', content: input })
+            await append({ role: 'user', content: input })
         } catch (e) {
             console.error('SendMessage error:', e)
         }
@@ -45,7 +61,7 @@ export function AdaptiveChat({ onComplete, basicInfo, initialMessages }: { onCom
         <Card className="p-6 space-y-4 h-[500px] flex flex-col">
             <h2 className="text-xl font-semibold">Wen (Inquiry)</h2>
             <ScrollArea className="flex-1 p-4 border rounded-lg">
-                {messages.filter((m: any) => m.role !== 'system' && m.content !== 'Please start the diagnosis.').map((m: any) => (
+                {messages.filter((m) => m.role !== 'system' && m.content !== 'Please start the diagnosis.').map((m) => (
                     <div key={m.id} className={`mb-4 ${m.role === 'user' ? 'text-right' : 'text-left'}`}>
                         <span className={`inline-block p-2 rounded-lg ${m.role === 'user' ? 'bg-emerald-100' : 'bg-gray-100'}`}>
                             {m.content}

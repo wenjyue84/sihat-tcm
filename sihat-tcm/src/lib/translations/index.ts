@@ -50,3 +50,20 @@ export function getTranslation(translations: typeof en, path: string): string {
 
     return typeof result === 'string' ? result : path;
 }
+
+// Helper to translate TCM constitution names
+export function translateConstitution(name: string, t: any): string {
+    if (!name) return t.constitutions.balanced;
+    const normalized = name.toLowerCase();
+    if (normalized.includes('neutral') || normalized.includes('normal') || normalized.includes('ping he') || normalized.includes('balanced')) return t.constitutions.balanced;
+    if (normalized.includes('qi deficiency')) return t.constitutions.qiDeficiency;
+    if (normalized.includes('yang deficiency')) return t.constitutions.yangDeficiency;
+    if (normalized.includes('yin deficiency')) return t.constitutions.yinDeficiency;
+    if (normalized.includes('phlegm')) return t.constitutions.phlegmDamp;
+    if (normalized.includes('damp heat')) return t.constitutions.dampHeat;
+    if (normalized.includes('blood stasis') || normalized.includes('blood deficiency')) return t.constitutions.bloodStasis; // Grouping for now if needed
+    if (normalized.includes('qi stagnation') || normalized.includes('qi depression')) return t.constitutions.qiStagnation;
+    if (normalized.includes('special')) return t.constitutions.special;
+    return name;
+}
+

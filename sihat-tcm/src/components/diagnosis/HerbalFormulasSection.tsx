@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Leaf, Pill, Info, Lock, Check } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { HerbShop } from './HerbShop'
 
 interface HerbalIngredient {
     name: string
@@ -69,7 +70,9 @@ export function HerbalFormulasSection({
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
+            {/* Formula Information Cards */}
+            <div className="space-y-4">
                 {formulas.map((formula, idx) => (
                     <div
                         key={idx}
@@ -145,6 +148,14 @@ export function HerbalFormulasSection({
                         )}
                     </div>
                 ))}
+            </div>
+
+            {/* One-Click Remedy Shop Section */}
+            <div className="mt-6 pt-4 border-t border-amber-200/30 dark:border-amber-700/30">
+                <HerbShop
+                    formulas={formulas.map(f => ({ name: f.name }))}
+                />
+            </div>
         </div>
     )
 }

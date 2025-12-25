@@ -5,22 +5,23 @@ import { Card } from '@/components/ui/card'
 import { useState, useEffect } from 'react'
 import { User, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 
 // Import sub-components from basic-info folder
 import { BasicInfoData } from './basic-info/types'
 import { StepProgress } from './basic-info/StepProgress'
 import { PersonalInfoStep } from './basic-info/PersonalInfoStep'
 import { SymptomsStep } from './basic-info/SymptomsStep'
-import { DoctorSelectionStep } from './basic-info/DoctorSelectionStep'
+// DoctorSelectionStep removed - model is now Admin-only controlled via DoctorContext
 
 // Re-export for external consumers
 export type { BasicInfoData } from './basic-info/types'
 
-// Total number of wizard steps (reduced from 5 to 3 by merging personal info)
-const TOTAL_STEPS = 3
+// Total number of wizard steps (reduced from 3 to 2 - doctor selection moved to admin-only)
+const TOTAL_STEPS = 2
 
 // Animation variants for step transitions
 const stepVariants = {
@@ -39,7 +40,7 @@ const stepVariants = {
 }
 
 export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: BasicInfoData) => void, initialData?: BasicInfoData }) {
-    const { doctorLevel, setDoctorLevel } = useDoctorLevel()
+    // Note: Model selection is now Admin-only. DoctorContext auto-loads the admin-configured default.
     const { t } = useLanguage()
     const { updateFormProgress, setNavigationState } = useDiagnosisProgress()
 
@@ -64,6 +65,59 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
     const [activeInput, setActiveInput] = useState<'main' | 'other'>('main')
     const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
 
+    // Auth context for profile check
+    const { user, profile, loading: authLoading } = useAuth()
+    const router = useRouter()
+    const [hasCheckedProfile, setHasCheckedProfile] = useState(false)
+
+    /**
+     * ============================================================================
+     * PROFILE COMPLETENESS CHECK
+     * ============================================================================
+     * If user is logged in:
+     * 1. Check if profile is complete (Name, Age, Gender, Height, Weight)
+     * 2. If COMPLETE: Auto-fill data and jump to Step 2
+     * 3. If INCOMPLETE: Prompt user to go to Patient Portal
+     */
+    useEffect(() => {
+        if (authLoading || !user || !profile || hasCheckedProfile) return
+
+        const isProfileComplete =
+            profile.full_name &&
+            profile.age &&
+            profile.gender &&
+            profile.height &&
+            profile.weight
+
+        if (isProfileComplete) {
+            // Auto-fill form data from profile
+            setFormData(prev => ({
+                ...prev,
+                name: profile.full_name || prev.name,
+                age: profile.age?.toString() || prev.age,
+                gender: profile.gender || prev.gender,
+                weight: profile.weight?.toString() || prev.weight,
+                height: profile.height?.toString() || prev.height,
+            }))
+
+            // Skip to Step 2 if currently on Step 1
+            if (currentStep === 1) {
+                setDirection(1)
+                setCurrentStep(2)
+            }
+        } else {
+            // Profile incomplete - Prompt user
+            // We use a small timeout to ensure UI is ready
+            setTimeout(() => {
+                if (confirm(t.basicInfo?.lockedProfile?.profileIncomplete || "Your profile is incomplete. Please complete your details in the Patient Portal first.")) {
+                    router.push('/patient')
+                }
+            }, 500)
+        }
+
+        setHasCheckedProfile(true)
+    }, [user, profile, authLoading, hasCheckedProfile, currentStep, router, t.basicInfo])
+
     /**
      * ============================================================================
      * GRANULAR PROGRESS TRACKING
@@ -81,14 +135,13 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
             formData.weight,
             formData.symptomDuration,
             formData.symptoms,
-            doctorLevel,
         ]
 
         const completedFields = fields.filter(field => field && String(field).trim() !== '').length
         const totalFields = fields.length
 
         updateFormProgress('basic_info', completedFields, totalFields)
-    }, [formData, doctorLevel, updateFormProgress])
+    }, [formData, updateFormProgress])
 
     // Load patient profile data from localStorage
     useEffect(() => {
@@ -118,7 +171,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                 ...prev,
                 name: initialData.name ?? prev.name ?? '',
                 age: initialData.age ?? prev.age ?? '',
-                gender: initialData.gender ?? prev.gender ?? '',
+                gender: (initialData.gender ?? prev.gender ?? '').toLowerCase(),
                 weight: initialData.weight ?? prev.weight ?? '',
                 height: initialData.height ?? prev.height ?? '',
                 symptoms: initialData.symptoms ?? prev.symptoms ?? '',
@@ -235,9 +288,6 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                     return false
                 }
                 return true
-            case 3:
-                // Doctor selection - always valid
-                return true
             default:
                 return true
         }
@@ -280,7 +330,7 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
             showSkip: false,
             canNext: canGoNext
         })
-    }, [currentStep, formData, doctorLevel, setNavigationState])
+    }, [currentStep, formData, setNavigationState])
 
     const goToPreviousStep = () => {
         setStepError(null)
@@ -307,10 +357,6 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
             2: {
                 title: t.basicInfo.wizardSteps?.step4Title || "What's bothering you?",
                 subtitle: t.basicInfo.wizardSteps?.step4Subtitle || "Describe your symptoms"
-            },
-            3: {
-                title: t.basicInfo.wizardSteps?.step5Title || "Choose your doctor",
-                subtitle: t.basicInfo.wizardSteps?.step5Subtitle || "Select your TCM practitioner level"
             }
         }
         return stepInfo[step as keyof typeof stepInfo] || { title: '', subtitle: '' }
@@ -356,13 +402,6 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                             setActiveInput={setActiveInput}
                             selectedSymptoms={selectedSymptoms}
                             setSelectedSymptoms={setSelectedSymptoms}
-                        />
-                    )}
-
-                    {currentStep === 3 && (
-                        <DoctorSelectionStep
-                            doctorLevel={doctorLevel}
-                            setDoctorLevel={setDoctorLevel}
                         />
                     )}
                 </motion.div>

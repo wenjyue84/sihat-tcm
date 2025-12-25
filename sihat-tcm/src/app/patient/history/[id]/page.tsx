@@ -8,9 +8,9 @@ import { DiagnosisReport } from '@/components/diagnosis/DiagnosisReport'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
-import { 
-    ArrowLeft, 
-    Loader2, 
+import {
+    ArrowLeft,
+    Loader2,
     Edit3,
     Save,
     X,
@@ -18,6 +18,7 @@ import {
     AlertCircle
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { extractDiagnosisTitle, extractConstitutionType } from '@/lib/tcm-utils'
 
 export default function HistoryViewerPage() {
     const { user, loading: authLoading } = useAuth()
@@ -28,12 +29,12 @@ export default function HistoryViewerPage() {
     const [session, setSession] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    
+
     // Notes editing
     const [isEditingNotes, setIsEditingNotes] = useState(false)
     const [notesValue, setNotesValue] = useState('')
     const [savingNotes, setSavingNotes] = useState(false)
-    
+
     // Delete confirmation
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
     const [deleting, setDeleting] = useState(false)
@@ -209,7 +210,7 @@ export default function HistoryViewerPage() {
                         <div className="flex items-start justify-between mb-4">
                             <div>
                                 <h2 className="text-xl font-bold text-slate-800">
-                                    {session.primary_diagnosis}
+                                    {extractDiagnosisTitle(session.primary_diagnosis)}
                                 </h2>
                                 <p className="text-sm text-slate-500 mt-1">
                                     {new Date(session.created_at).toLocaleDateString('en-US', {
@@ -221,11 +222,10 @@ export default function HistoryViewerPage() {
                                 </p>
                             </div>
                             {session.overall_score !== null && session.overall_score !== undefined && (
-                                <div className={`px-4 py-2 rounded-full font-bold ${
-                                    session.overall_score >= 75 ? 'bg-emerald-100 text-emerald-700' :
+                                <div className={`px-4 py-2 rounded-full font-bold ${session.overall_score >= 75 ? 'bg-emerald-100 text-emerald-700' :
                                     session.overall_score >= 50 ? 'bg-amber-100 text-amber-700' :
-                                    'bg-red-100 text-red-700'
-                                }`}>
+                                        'bg-red-100 text-red-700'
+                                    }`}>
                                     Score: {session.overall_score}
                                 </div>
                             )}

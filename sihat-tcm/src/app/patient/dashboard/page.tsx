@@ -170,7 +170,7 @@ export default function HealthPassportPage() {
                     transition={{ duration: 0.4 }}
                     className="mb-8"
                 >
-                    <TrendWidget trendData={trendData} loading={loading && !trendData} />
+                    <TrendWidget trendData={trendData} loading={loading && !trendData} sessions={sessions} />
                 </motion.div>
 
                 {/* History Section */}

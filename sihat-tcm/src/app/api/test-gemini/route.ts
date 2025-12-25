@@ -1,11 +1,28 @@
 import { google } from '@ai-sdk/google';
-import { streamText } from 'ai';
+import { streamText, generateText } from 'ai';
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
     try {
-        const { prompt, model = 'gemini-1.5-pro' } = await req.json();
+        const body = await req.json().catch(() => ({}));
+        const { prompt, model = 'gemini-2.0-flash', testMode } = body;
+
+        // Simple connectivity test - just verify API key works
+        if (testMode || !prompt) {
+            console.log(`[test-gemini] Running connectivity test...`);
+            const result = await generateText({
+                model: google(model),
+                prompt: 'Reply with just the word "ok"',
+            });
+            return Response.json({
+                success: true,
+                message: 'Gemini API is working',
+                model: model
+            });
+        }
+
+        // Normal streaming mode
         console.log(`[test-gemini] Testing model (stream): ${model}`);
 
         const result = streamText({
@@ -16,6 +33,9 @@ export async function POST(req: Request) {
         return result.toTextStreamResponse();
     } catch (error: any) {
         console.error(`[test-gemini] FAILED:`, error.message);
-        return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+        return Response.json({
+            success: false,
+            error: error.message || 'API test failed'
+        }, { status: 500 });
     }
 }

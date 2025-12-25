@@ -2,9 +2,10 @@
 
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Calendar, Eye, FileText, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Calendar, Eye, FileText, TrendingUp, TrendingDown, Minus, Activity, Wind, Droplets, Zap, Shield, Heart, Thermometer } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { DiagnosisSession } from '@/lib/actions'
+import { extractDiagnosisTitle, extractConstitutionType } from '@/lib/tcm-utils'
 
 interface HistoryCardProps {
     session: DiagnosisSession
@@ -12,78 +13,34 @@ interface HistoryCardProps {
     index?: number
 }
 
-/**
- * Safely extracts a clean title from diagnosis data.
- * Handles cases where the field might contain:
- * - A clean string (ideal)
- * - A stringified JSON object (malformed data)
- * - A JSON object (if somehow passed as object)
- */
-const extractDiagnosisTitle = (value: string | undefined | null): string => {
-    if (!value) return 'TCM Health Assessment';
 
-    // If it looks like JSON, try to parse and extract
-    if (value.startsWith('{') && value.endsWith('}')) {
-        try {
-            const parsed = JSON.parse(value);
-            // Look for common diagnosis field names
-            return parsed.primary_pattern
-                || parsed.pattern
-                || parsed.diagnosis
-                || 'TCM Health Assessment';
-        } catch {
-            // If parsing fails, try to extract with regex as fallback
-            const match = value.match(/"primary_pattern"\s*:\s*"([^"]+)"/);
-            if (match) return match[1];
-        }
-    }
-
-    // Already clean or not parseable - return as-is (truncate if too long)
-    return value.length > 60 ? value.substring(0, 57) + '...' : value;
-};
-
-const extractConstitutionTitle = (value: string | undefined | null): string => {
-    if (!value) return '';
-
-    // If it looks like JSON, try to parse and extract
-    if (value.startsWith('{') && value.endsWith('}')) {
-        try {
-            const parsed = JSON.parse(value);
-            // Look for common constitution field names
-            return parsed.type
-                || parsed.constitution_type
-                || parsed.name
-                || '';
-        } catch {
-            // If parsing fails, try to extract with regex as fallback
-            const match = value.match(/"type"\s*:\s*"([^"]+)"/);
-            if (match) return match[1];
-        }
-    }
-
-    // Already clean or not parseable
-    return value.length > 50 ? value.substring(0, 47) + '...' : value;
-};
-
-const diagnosisIcons: Record<string, string> = {
-    'Yin Deficiency': '☯️',
-    'Yang Deficiency': '☯️',
-    'Qi Deficiency': '🌀',
-    'Blood Deficiency': '💉',
-    'Damp Heat': '💧',
-    'Phlegm': '🌫️',
-    'Blood Stasis': '🩸',
-    'Liver Qi Stagnation': '🌿',
-    'default': '🏥'
+const diagnosisIcons: Record<string, any> = {
+    'Yin Deficiency': Heart,
+    'Yang Deficiency': Zap,
+    'Qi Deficiency': Wind,
+    'Blood Deficiency': Activity,
+    'Damp Heat': Droplets,
+    'Phlegm': Shield,
+    'Blood Stasis': Thermometer,
+    'Liver Qi Stagnation': Heart,
+    'default': FileText
 }
 
-const getDiagnosisIcon = (diagnosis: string): string => {
-    for (const key in diagnosisIcons) {
-        if (diagnosis.toLowerCase().includes(key.toLowerCase())) {
-            return diagnosisIcons[key]
-        }
+const getDiagnosisIcon = (title: string) => {
+    const Icon = diagnosisIcons[title] || diagnosisIcons['default']
+    const colors: Record<string, string> = {
+        'Yin Deficiency': 'text-blue-500 bg-blue-50',
+        'Yang Deficiency': 'text-amber-500 bg-amber-50',
+        'Qi Deficiency': 'text-emerald-500 bg-emerald-50',
+        'Blood Deficiency': 'text-rose-500 bg-rose-50',
+        'Damp Heat': 'text-orange-500 bg-orange-50',
+        'Phlegm': 'text-slate-500 bg-slate-50',
+        'Blood Stasis': 'text-purple-500 bg-purple-50',
+        'Liver Qi Stagnation': 'text-indigo-500 bg-indigo-50',
+        'default': 'text-slate-500 bg-slate-50'
     }
-    return diagnosisIcons['default']
+    const colorClass = colors[title] || colors['default']
+    return <div className={`p-2 rounded-lg ${colorClass}`}><Icon className="w-5 h-5" /></div>
 }
 
 const formatDate = (dateString: string): string => {
@@ -104,7 +61,7 @@ const getScoreTrend = (score?: number) => {
 
 export function HistoryCard({ session, onClick, index = 0 }: HistoryCardProps) {
     const diagnosisTitle = extractDiagnosisTitle(session.primary_diagnosis)
-    const constitutionTitle = extractConstitutionTitle(session.constitution)
+    const constitutionTitle = extractConstitutionType(session.constitution)
     const trend = getScoreTrend(session.overall_score)
     const TrendIcon = trend?.icon
 
@@ -121,22 +78,28 @@ export function HistoryCard({ session, onClick, index = 0 }: HistoryCardProps) {
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-transparent to-teal-500/0 group-hover:from-emerald-500/5 group-hover:to-teal-500/5 transition-all duration-500 pointer-events-none" />
 
                 <div className="relative p-5">
+                    {/* Date Badge - Floating Top Right */}
+                    <div className="flex justify-end mb-4">
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50/80 backdrop-blur-sm rounded-full border border-slate-100/80 shadow-sm">
+                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{formatDate(session.created_at)}</span>
+                        </div>
+                    </div>
+
                     {/* Header: Icon, Diagnosis, Score */}
-                    <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <div className="text-3xl shrink-0">
-                                {getDiagnosisIcon(diagnosisTitle)}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                                <h3 className="text-lg font-semibold text-slate-800 truncate group-hover:text-emerald-700 transition-colors">
-                                    {diagnosisTitle}
-                                </h3>
-                                {constitutionTitle && (
-                                    <p className="text-sm text-slate-500 truncate">
-                                        {constitutionTitle}
-                                    </p>
-                                )}
-                            </div>
+                    <div className="flex items-start gap-4 mb-4">
+                        <div className="shrink-0">
+                            {getDiagnosisIcon(diagnosisTitle)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <h3 className="text-lg font-extrabold text-slate-800 leading-tight group-hover:text-emerald-700 transition-colors">
+                                {diagnosisTitle}
+                            </h3>
+                            {constitutionTitle && (
+                                <p className="text-sm font-medium text-slate-500 mt-1 truncate">
+                                    {constitutionTitle}
+                                </p>
+                            )}
                         </div>
 
                         {/* Score Badge */}
@@ -158,12 +121,6 @@ export function HistoryCard({ session, onClick, index = 0 }: HistoryCardProps) {
                                 </div>
                             </div>
                         )}
-                    </div>
-
-                    {/* Date */}
-                    <div className="flex items-center gap-2 text-sm text-slate-600 mb-3">
-                        <Calendar className="w-4 h-4" />
-                        <span>{formatDate(session.created_at)}</span>
                     </div>
 
                     {/* Notes Preview (if exists) */}

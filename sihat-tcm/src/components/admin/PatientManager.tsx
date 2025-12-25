@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Loader2, Plus, Pencil, Trash2, User, Search, ChevronLeft, ChevronRight, Eye, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
+import { logger } from '@/lib/clientLogger'
 
 export type Patient = {
     id: string
@@ -71,7 +72,7 @@ export function PatientManager() {
             if (error) throw error
             setPatients(data || [])
         } catch (error) {
-            console.error('Error fetching patients:', error)
+            logger.error('PatientManager', 'Error fetching patients', error)
             toast.error('Failed to load patients')
         } finally {
             setLoading(false)
@@ -148,7 +149,7 @@ export function PatientManager() {
             setIsDialogOpen(false)
             fetchPatients()
         } catch (error) {
-            console.error('Error saving:', error)
+            logger.error('PatientManager', 'Error saving patient', error)
             toast.error('Failed to save patient')
         } finally {
             setSaving(false)
@@ -177,7 +178,7 @@ export function PatientManager() {
             toast.success('Patient deleted successfully')
             fetchPatients()
         } catch (error) {
-            console.error('Error deleting:', error)
+            logger.error('PatientManager', 'Error deleting patient', error)
             toast.error('Failed to delete patient. They may have associated records that need to be removed first.')
         } finally {
             setDeleting(null)

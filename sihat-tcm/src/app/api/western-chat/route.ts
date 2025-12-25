@@ -1,5 +1,6 @@
 import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
+import { devLog } from '@/lib/systemLogger';
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
@@ -29,8 +30,8 @@ export async function POST(req: Request) {
             language = 'en'
         } = await req.json();
 
-        console.log(`[API /api/western-chat] Received request with model: ${model}, language: ${language}`);
-        console.log(`[API /api/western-chat] Messages count: ${messages?.length}`);
+        devLog('info', 'API/western-chat', `Received request with model: ${model}, language: ${language}`);
+        devLog('info', 'API/western-chat', `Messages count: ${messages?.length}`);
 
         // Build the full system prompt with language instructions
         const languageInstruction = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.en;
@@ -56,7 +57,7 @@ ${tcmContext}
             content: m.content
         }));
 
-        console.log(`[API /api/western-chat] Calling streamText with model: ${model}`);
+        devLog('info', 'API/western-chat', `Calling streamText with model: ${model}`);
 
         // Try the requested model first
         try {
@@ -65,34 +66,34 @@ ${tcmContext}
                 system: fullSystemPrompt,
                 messages: formattedMessages,
                 onFinish: (completion) => {
-                    console.log(`[API /api/western-chat] Stream finished with ${model}. Text length: ${completion.text.length}`);
+                    devLog('info', 'API/western-chat', `Stream finished with ${model}. Text length: ${completion.text.length}`);
                 },
             });
 
             return result.toTextStreamResponse();
         } catch (primaryError: unknown) {
             const errorMessage = primaryError instanceof Error ? primaryError.message : 'Unknown error';
-            console.error(`[API /api/western-chat] Primary model ${model} failed:`, errorMessage);
+            devLog('error', 'API/western-chat', `Primary model ${model} failed`, { error: errorMessage });
 
             // Try fallback models in order
             for (const fallbackModel of FALLBACK_MODELS) {
                 if (fallbackModel === model) continue;
 
                 try {
-                    console.log(`[API /api/western-chat] Attempting fallback model: ${fallbackModel}`);
+                    devLog('info', 'API/western-chat', `Attempting fallback model: ${fallbackModel}`);
                     const fallbackResult = streamText({
                         model: google(fallbackModel),
                         system: fullSystemPrompt,
                         messages: formattedMessages,
                         onFinish: (completion) => {
-                            console.log(`[API /api/western-chat] Fallback ${fallbackModel} finished. Text length: ${completion.text.length}`);
+                            devLog('info', 'API/western-chat', `Fallback ${fallbackModel} finished. Text length: ${completion.text.length}`);
                         },
                     });
 
                     return fallbackResult.toTextStreamResponse();
                 } catch (fallbackError: unknown) {
                     const fallbackErrorMessage = fallbackError instanceof Error ? fallbackError.message : 'Unknown error';
-                    console.error(`[API /api/western-chat] Fallback ${fallbackModel} also failed:`, fallbackErrorMessage);
+                    devLog('error', 'API/western-chat', `Fallback ${fallbackModel} also failed`, { error: fallbackErrorMessage });
                 }
             }
 
@@ -100,7 +101,7 @@ ${tcmContext}
         }
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Western chat API error';
-        console.error("[API /api/western-chat] Fatal Error:", error);
+        devLog('error', 'API/western-chat', 'Fatal Error', { error });
         return new Response(JSON.stringify({
             error: errorMessage
         }), {

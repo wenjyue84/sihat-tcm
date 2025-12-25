@@ -5,6 +5,14 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { useDoctorLevel } from '@/contexts/DoctorContext'
 import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
 import { useDiagnosisPersistence } from '@/hooks/useDiagnosisPersistence'
+import { logger } from '@/lib/clientLogger'
+import type { DiagnosisReport } from '@/types/database'
+import type {
+    DiagnosisWizardData,
+    BasicInfo,
+    AnalysisResult,
+    PendingResumeState
+} from '@/types/diagnosis'
 
 // Type definitions
 export type DiagnosisStep = 'basic_info' | 'wen_inquiry' | 'wang_tongue' | 'wang_face' | 'wang_part' | 'wen_audio' | 'qie' | 'smart_connect' | 'summary' | 'processing' | 'report'
@@ -44,12 +52,12 @@ export function repairJSON(jsonString: string): string {
         }
         return current;
     } catch (e) {
-        console.error('[repairJSON] Error:', e);
+        logger.error('repairJSON', 'Error repairing JSON', e);
         return jsonString;
     }
 }
 
-export const generateMockReport = (data: any) => {
+export const generateMockReport = (data: DiagnosisWizardData): DiagnosisReport => {
     // Basic mock logic identical to original
     const name = data.basic_info?.name || "";
     // ... (rest of mock generation logic would go here ideally, but for brevity we can externalize or keep simplified)
@@ -70,7 +78,7 @@ export const generateMockReport = (data: any) => {
 }
 
 // Calculate an overall health score from the diagnosis report (0-100)
-function calculateOverallScore(reportData: any): number {
+function calculateOverallScore(reportData: DiagnosisReport | Partial<DiagnosisReport>): number {
     try {
         // Default to 70 (neutral/fair) if we can't calculate
         let score = 70;
@@ -79,10 +87,10 @@ function calculateOverallScore(reportData: any): number {
         let diagnosisText = '';
         if (typeof reportData.diagnosis === 'string') {
             diagnosisText = reportData.diagnosis;
-        } else if (reportData.diagnosis?.primary_pattern) {
+        } else if (reportData.diagnosis && typeof reportData.diagnosis === 'object' && 'primary_pattern' in reportData.diagnosis) {
             diagnosisText = reportData.diagnosis.primary_pattern;
-        } else if (reportData.diagnosis?.pattern) {
-            diagnosisText = reportData.diagnosis.pattern;
+        } else if (reportData.diagnosis && typeof reportData.diagnosis === 'object' && 'pattern' in reportData.diagnosis) {
+            diagnosisText = String((reportData.diagnosis as any).pattern);
         }
 
         // Factor 1: Severity keywords in diagnosis (lower score for severe conditions)
@@ -94,14 +102,17 @@ function calculateOverallScore(reportData: any): number {
         }
 
         // Factor 2: Number of affected organs/systems (more = lower score)
-        const affectedOrgans = reportData.diagnosis?.affected_organs?.length || 0;
+        const diagnosisObj = typeof reportData.diagnosis === 'object' && reportData.diagnosis !== null ? reportData.diagnosis : null;
+        const affectedOrgans = (diagnosisObj && 'affected_organs' in diagnosisObj && Array.isArray(diagnosisObj.affected_organs))
+            ? diagnosisObj.affected_organs.length
+            : 0;
         score -= Math.min(affectedOrgans * 5, 20);
 
         // Extract constitution text - can be string or object with type property
         let constitutionText = '';
         if (typeof reportData.constitution === 'string') {
             constitutionText = reportData.constitution;
-        } else if (reportData.constitution?.type) {
+        } else if (reportData.constitution && typeof reportData.constitution === 'object' && 'type' in reportData.constitution) {
             constitutionText = reportData.constitution.type;
         }
 
@@ -116,7 +127,7 @@ function calculateOverallScore(reportData: any): number {
         // Ensure score is within 0-100 range
         return Math.max(0, Math.min(100, Math.round(score)));
     } catch (e) {
-        console.error('[calculateOverallScore] Error:', e);
+        logger.error('calculateOverallScore', 'Error calculating overall score', e);
         return 70; // Default neutral score
     }
 }
@@ -130,10 +141,23 @@ export function useDiagnosisWizard() {
     const { user, profile } = useAuth()
     const { saveProgress, loadProgress, clearProgress } = useDiagnosisPersistence()
 
+    // Determine if we should include summary step
+    // Mode is 'advanced' ONLY if user is logged in AND has 'advanced' setting
+    // Using explicit check for 'advanced' to default to 'simple' for everyone else (including guests)
+    const isAdvancedMode = profile?.preferences?.diagnosisMode === 'advanced';
+
+    // Filter steps based on mode
+    const activeStepsConfig = useMemo(() => {
+        if (isAdvancedMode) {
+            return STEPS_CONFIG;
+        }
+        return STEPS_CONFIG.filter(s => s.id !== 'summary'); // Hide summary for Simple Mode / Guests
+    }, [isAdvancedMode]);
+
     // Local State
     const [step, setStep] = useState<DiagnosisStep>('basic_info')
     const [maxStepReached, setMaxStepReached] = useState(0)
-    const [data, setData] = useState<any>({
+    const [data, setData] = useState<DiagnosisWizardData>({
         basic_info: null,
         wen_inquiry: null,
         wang_tongue: null,
@@ -146,7 +170,7 @@ export function useDiagnosisWizard() {
     })
 
     // Analysis State
-    const [analysisResult, setAnalysisResult] = useState<any>(null)
+    const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
     const [isAnalyzing, setIsAnalyzing] = useState(false)
     const [pendingAnalysis, setPendingAnalysis] = useState<{ type: AnalysisType, image: string } | null>(null)
     const [currentAnalysisType, setCurrentAnalysisType] = useState<AnalysisType>('tongue')
@@ -161,13 +185,9 @@ export function useDiagnosisWizard() {
     // Persistence Check State
     const [hasCheckedPersistence, setHasCheckedPersistence] = useState(false)
     // Pending resume state - stored here for dialog to use
-    const [pendingResumeState, setPendingResumeState] = useState<{
-        step: DiagnosisStep
-        data: any
-        timestamp: string
-    } | null>(null)
+    const [pendingResumeState, setPendingResumeState] = useState<PendingResumeState | null>(null)
 
-    // 1. Load Persistence on Mount (but don't auto-apply - show dialog instead)
+    // 1. Load Persistence on Mount
     useEffect(() => {
         if (hasCheckedPersistence) return
 
@@ -179,45 +199,54 @@ export function useDiagnosisWizard() {
                 data: savedState.data,
                 timestamp: savedState.timestamp
             })
-        } else if (profile && !data.basic_info) {
-            // Seed from Profile (for new sessions)
-            setData((prev: any) => ({
+        }
+        setHasCheckedPersistence(true)
+    }, [loadProgress, hasCheckedPersistence])
+
+    // 2. Seed Data from Profile (runs when profile loads, if no saved state found/resumed)
+    useEffect(() => {
+        if (hasCheckedPersistence && profile && !data.basic_info && !pendingResumeState) {
+            setData((prev) => ({
                 ...prev,
                 basic_info: {
-                    name: profile.full_name,
-                    age: profile.age,
-                    gender: profile.gender,
-                    height: profile.height,
-                    weight: profile.weight,
+                    name: profile.full_name || undefined,
+                    age: profile.age || undefined,
+                    gender: profile.gender ? profile.gender.toLowerCase() : undefined,
+                    height: profile.height || undefined,
+                    weight: profile.weight || undefined,
                 }
             }))
         }
-        setHasCheckedPersistence(true)
-    }, [loadProgress, hasCheckedPersistence, profile])
+    }, [hasCheckedPersistence, profile, data.basic_info, pendingResumeState])
 
     // Handler to resume saved progress (called from dialog)
     const handleResumeProgress = useCallback(() => {
         if (!pendingResumeState) return
 
-        setData(pendingResumeState.data)
-        if (pendingResumeState.step === 'processing' || pendingResumeState.step === 'report') {
-            setStep('summary')
-        } else {
-            setStep(pendingResumeState.step)
+        let targetStep = pendingResumeState.step;
+
+        // Redirect if trying to access Summary in Simple Mode (e.g. Guest resumed session)
+        if (!isAdvancedMode && (targetStep === 'summary' || targetStep === 'processing' || targetStep === 'report')) {
+            targetStep = 'smart_connect';
+        } else if (targetStep === 'processing' || targetStep === 'report') {
+            targetStep = 'summary'; // Advanced mode resumes at summary if near end
         }
 
-        // Restore max step
-        let restoredStepId = pendingResumeState.step;
-        if (pendingResumeState.step === 'wang_part') restoredStepId = 'wang_face';
-        else if (pendingResumeState.step === 'processing' || pendingResumeState.step === 'report') restoredStepId = 'smart_connect';
+        setData(pendingResumeState.data)
+        setStep(targetStep as DiagnosisStep)
 
-        const restoredIndex = STEPS_CONFIG.findIndex(s => s.id === restoredStepId)
+        // Restore max step
+        let restoredStepId = targetStep;
+        if (targetStep === 'wang_part') restoredStepId = 'wang_face';
+
+        const restoredIndex = activeStepsConfig.findIndex(s => s.id === restoredStepId)
         if (restoredIndex > 0) {
             setMaxStepReached(restoredIndex)
         }
 
         setPendingResumeState(null)
-    }, [pendingResumeState])
+    }, [pendingResumeState, activeStepsConfig, isAdvancedMode])
+
 
     // Handler to start new (discard saved progress)
     const handleStartNew = useCallback(() => {
@@ -225,14 +254,14 @@ export function useDiagnosisWizard() {
         setPendingResumeState(null)
         // Seed from profile if available
         if (profile) {
-            setData((prev: any) => ({
+            setData((prev) => ({
                 ...prev,
                 basic_info: {
-                    name: profile.full_name,
-                    age: profile.age,
-                    gender: profile.gender,
-                    height: profile.height,
-                    weight: profile.weight,
+                    name: profile.full_name || undefined,
+                    age: profile.age || undefined,
+                    gender: profile.gender ? profile.gender.toLowerCase() : undefined,
+                    height: profile.height || undefined,
+                    weight: profile.weight || undefined,
                 }
             }))
         }
@@ -274,7 +303,7 @@ export function useDiagnosisWizard() {
         if (step === 'wang_part') currentStepperId = 'wang_face';
         else if (step === 'processing' || step === 'report') currentStepperId = 'smart_connect';
 
-        const currentIndex = STEPS_CONFIG.findIndex(s => s.id === currentStepperId)
+        const currentIndex = activeStepsConfig.findIndex(s => s.id === currentStepperId)
         if (currentIndex > maxStepReached) {
             setMaxStepReached(currentIndex)
         }
@@ -282,7 +311,7 @@ export function useDiagnosisWizard() {
 
     // 4. Submit Consultation Logic
     const submitConsultation = useCallback(async () => {
-        console.log('[WizardController] Submitting...')
+        logger.info('useDiagnosisWizard', 'Submitting consultation...')
         setIsLoading(true)
         setError(null)
         setCompletion('')
@@ -334,6 +363,9 @@ export function useDiagnosisWizard() {
                         gender: data.basic_info?.gender,
                         height: data.basic_info?.height,
                         weight: data.basic_info?.weight
+                    },
+                    input_data: {
+                        medicines: data.wen_inquiry?.medicineFiles?.map((f: any) => f.extractedText).filter(Boolean) || []
                     }
                 };
 
@@ -367,28 +399,40 @@ export function useDiagnosisWizard() {
                         constitutionValue = resultData.constitution.type;
                     }
 
+                    // Extract symptoms from basic_info
+                    const symptoms = data.basic_info?.symptoms 
+                        ? data.basic_info.symptoms.split(',').map(s => s.trim()).filter(Boolean)
+                        : undefined;
+                    
+                    // Extract medicines from medicineFiles
+                    const medicines = data.wen_inquiry?.medicineFiles
+                        ?.map((f: any) => f.extractedText)
+                        .filter(Boolean) || undefined;
+
                     const saveResult = await saveDiagnosis({
                         primary_diagnosis: primaryDiagnosis,
                         constitution: constitutionValue,
                         overall_score: calculateOverallScore(resultData),
-                        full_report: reportWithProfile
+                        full_report: reportWithProfile,
+                        symptoms: symptoms,
+                        medicines: medicines
                     });
 
                     if (saveResult.success) {
-                        console.log('[Wizard] Saved to Health Passport:', saveResult.data?.id);
+                        logger.info('useDiagnosisWizard', 'Saved to Health Passport', saveResult.data?.id);
                     } else {
-                        console.error('[Wizard] Failed to save to Health Passport:', saveResult.error);
+                        logger.error('useDiagnosisWizard', 'Failed to save to Health Passport', saveResult.error);
                     }
 
                     setIsSaved(true);
                 }
             } catch (e) {
-                console.error('Failed to auto-save:', e);
+                logger.error('useDiagnosisWizard', 'Failed to auto-save', e);
             }
 
-        } catch (err: any) {
-            console.error(err)
-            setError(err)
+        } catch (err: unknown) {
+            logger.error('useDiagnosisWizard', 'Error during consultation submission', err)
+            setError(err instanceof Error ? err : new Error('Unknown error occurred'))
         } finally {
             setIsLoading(false)
         }
@@ -415,6 +459,8 @@ export function useDiagnosisWizard() {
             // Logic to set celebration could go here if keeping animation
         }
 
+        const diagnosisMode = profile?.preferences?.diagnosisMode || 'simple';
+
         // State Machine
         switch (current) {
             case 'basic_info': setStep('wen_inquiry'); break;
@@ -422,18 +468,33 @@ export function useDiagnosisWizard() {
             case 'wang_tongue': setStep('wang_face'); break;
             case 'wang_face': setStep('wang_part'); break;
             case 'wang_part': setStep('wen_audio'); break; // Correct flow
-            case 'wen_audio': setStep('qie'); break;
+            case 'wen_audio':
+                if (diagnosisMode === 'simple') {
+                    setStep('smart_connect'); // Skip Pulse in Simple Mode
+                } else {
+                    setStep('qie');
+                }
+                break;
             case 'qie': setStep('smart_connect'); break;
-            case 'smart_connect': setStep('summary'); break;
+            case 'smart_connect':
+                if (diagnosisMode === 'simple') {
+                    setStep('processing'); // Skip Summary in Simple Mode
+                    submitConsultation();
+                } else {
+                    setStep('summary');
+                }
+                break;
             case 'summary':
                 setStep('processing');
                 submitConsultation();
                 break;
             default: break;
         }
-    }, [submitConsultation])
+    }, [submitConsultation, profile])
 
     const prevStep = useCallback((current: DiagnosisStep) => {
+        const diagnosisMode = profile?.preferences?.diagnosisMode || 'simple';
+
         switch (current) {
             case 'wen_inquiry': setStep('basic_info'); break;
             case 'wang_tongue': setStep('wen_inquiry'); break;
@@ -441,11 +502,17 @@ export function useDiagnosisWizard() {
             case 'wang_part': setStep('wang_face'); break;
             case 'wen_audio': setStep('wang_part'); break; // Back to parts from audio
             case 'qie': setStep('wen_audio'); break;
-            case 'smart_connect': setStep('qie'); break;
+            case 'smart_connect':
+                if (diagnosisMode === 'simple') {
+                    setStep('wen_audio'); // Back to Audio, skipping Qie
+                } else {
+                    setStep('qie');
+                }
+                break;
             case 'summary': setStep('smart_connect'); break;
             default: break;
         }
-    }, [])
+    }, [profile])
 
     // 6. Navigation Sync Effect
     useEffect(() => {
@@ -485,7 +552,7 @@ export function useDiagnosisWizard() {
             const result = await response.json()
 
             const dataKey = type === 'tongue' ? 'wang_tongue' : type === 'face' ? 'wang_face' : 'wang_part'
-            setData((prev: any) => ({
+            setData((prev) => ({
                 ...prev,
                 [dataKey]: {
                     ...prev[dataKey],
@@ -503,7 +570,7 @@ export function useDiagnosisWizard() {
                 setAnalysisResult(result)
             }
         } catch (error) {
-            console.error('Analysis failed:', error)
+            logger.error('useDiagnosisWizard', 'Image analysis failed', error)
             setAnalysisResult({
                 observation: "Analysis failed, will be reviewed in final report.",
                 potential_issues: []
@@ -519,7 +586,7 @@ export function useDiagnosisWizard() {
         setAnalysisResult(null)
         setPendingAnalysis(null)
         const dataKey = currentStep === 'tongue' ? 'wang_tongue' : currentStep === 'face' ? 'wang_face' : 'wang_part'
-        setData((prev: any) => ({
+        setData((prev) => ({
             ...prev,
             [dataKey]: {
                 ...prev[dataKey],
@@ -563,7 +630,7 @@ export function useDiagnosisWizard() {
         submitConsultation,
 
         // Helpers
-        STEPS: STEPS_CONFIG.map(s => ({ id: s.id, label: (t.steps as Record<string, string>)[s.labelKey] })),
+        STEPS: activeStepsConfig.map(s => ({ id: s.id, label: (t.steps as Record<string, string>)[s.labelKey] })),
         language,
         t
     }

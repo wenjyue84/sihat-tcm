@@ -3,9 +3,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Upload, X, Pill, ArrowRight, SkipForward, Loader2 } from 'lucide-react'
+import { Upload, X, Pill, ArrowRight, SkipForward, History, Loader2 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { useAuth } from '@/contexts/AuthContext'
+import { getLastMedicines } from '@/lib/actions'
 import { TextReviewModal } from './TextReviewModal'
 import { FileData } from './UploadReportsStep'
 import {
@@ -26,13 +28,15 @@ interface UploadMedicineStepProps {
 
 export function UploadMedicineStep({ onComplete, onSkip, initialFiles = [], onBack }: UploadMedicineStepProps) {
     const { t, language } = useLanguage()
+    const { user } = useAuth()
     const { setNavigationState } = useDiagnosisProgress()
     const [files, setFiles] = useState<FileData[]>(initialFiles)
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
     const [currentReviewFile, setCurrentReviewFile] = useState<File | null>(null)
     const [manualInput, setManualInput] = useState('')
     const [isValidating, setIsValidating] = useState(false)
-    const [validatingText, setValidatingText] = useState<string | null>(null)
+    const [isImporting, setIsImporting] = useState(false)
+
     const [showValidationPrompt, setShowValidationPrompt] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -134,6 +138,10 @@ export function UploadMedicineStep({ onComplete, onSkip, initialFiles = [], onBa
     const handleManualAdd = async () => {
         if (!manualInput.trim()) return
 
+        setIsValidating(true)
+        const validation = await validateMedicine(manualInput)
+        setIsValidating(false)
+
         const medicineText = manualInput.trim()
         const newEntry: FileData = {
             name: language === 'zh' ? '手动输入' : language === 'ms' ? 'Input Manual' : 'Manual Entry',
@@ -142,40 +150,39 @@ export function UploadMedicineStep({ onComplete, onSkip, initialFiles = [], onBa
             extractedText: medicineText
         }
 
-        // Add the medicine immediately - this will persist no matter what
         setFiles(prev => [...prev, newEntry])
         setManualInput('')
+    }
 
-        // Validate in background - but NEVER auto-delete
-        setIsValidating(true)
-        setValidatingText(medicineText)
+    const handleImportHistory = async () => {
+        setIsImporting(true)
         try {
-            const validation = await validateMedicine(medicineText)
-            setIsValidating(false)
-            setValidatingText(null)
+            const result = await getLastMedicines()
+            if (result.success && result.data && result.data.length > 0) {
+                // Filter out any medicines already in the list to avoid duplicates
+                const existingMeds = new Set(files.map(f => f.extractedText?.toLowerCase()))
+                const newMeds = result.data.filter(med => !existingMeds.has(med.toLowerCase()))
 
-            // Only show confirmation if invalid - ask user if they want to delete
-            if (!validation.isValid) {
-                // Use setTimeout to ensure state has updated before showing confirm
-                setTimeout(() => {
-                    const confirmMessage = language === 'zh'
-                        ? `AI检测到 "${medicineText}" 可能不是有效的药物名称。\n\n${validation.message || ''}\n\n是否要从列表中删除此项？\n\n点击"确定"删除，点击"取消"保留。`
-                        : language === 'ms'
-                            ? `AI mengesan "${medicineText}" mungkin bukan nama ubat yang sah.\n\n${validation.message || ''}\n\nAdakah anda mahu memadamkan item ini daripada senarai?\n\nKlik "OK" untuk memadam, klik "Batal" untuk menyimpan.`
-                            : `AI detected that "${medicineText}" may not be a valid medicine name.\n\n${validation.message || ''}\n\nDo you want to delete this item from the list?\n\nClick "OK" to delete, click "Cancel" to keep.`
+                if (newMeds.length === 0) {
+                    alert(language === 'zh' ? '所有历史药物已在列表中。' : language === 'ms' ? 'Semua ubat sejarah sudah ada dalam senarai.' : 'All historical medicines are already in the list.')
+                    setIsImporting(false)
+                    return
+                }
 
-                    const shouldDelete = window.confirm(confirmMessage)
-
-                    if (shouldDelete) {
-                        setFiles(prev => prev.filter(f => f.extractedText !== medicineText))
-                    }
-                }, 100)
+                const newFiles: FileData[] = newMeds.map(medName => ({
+                    name: language === 'zh' ? '从历史导入' : language === 'ms' ? 'Import dari Sejarah' : 'Imported from History',
+                    type: 'text/plain',
+                    data: '',
+                    extractedText: medName
+                }))
+                setFiles(prev => [...prev, ...newFiles])
+            } else {
+                alert(result.error || (language === 'zh' ? '未发现之前的用药记录。' : language === 'ms' ? 'Tiada sejarah ubat dijumpai.' : 'No previous medicine history found.'))
             }
         } catch (error) {
-            console.error('Validation error:', error)
-            setIsValidating(false)
-            setValidatingText(null)
-            // Keep the medicine on error - don't block user
+            console.error("Import failed", error)
+        } finally {
+            setIsImporting(false)
         }
     }
 
@@ -260,6 +267,16 @@ export function UploadMedicineStep({ onComplete, onSkip, initialFiles = [], onBa
             en: 'Skip This Step',
             zh: '跳过此步骤',
             ms: 'Langkau Langkah Ini'
+        },
+        importHistoryBtn: {
+            en: 'Import from History',
+            zh: '从历史导入',
+            ms: 'Import dari Sejarah'
+        },
+        importing: {
+            en: 'Importing...',
+            zh: '正在导入...',
+            ms: 'Mengimport...'
         }
     }
 
@@ -273,14 +290,31 @@ export function UploadMedicineStep({ onComplete, onSkip, initialFiles = [], onBa
             <div className="flex flex-col gap-6 mb-6">
                 {/* File Upload Area */}
                 <div className="flex flex-col items-center justify-center border-2 border-dashed border-stone-200 rounded-xl bg-stone-50 p-8">
-                    <div className="text-center">
+                    <div className="text-center w-full">
                         <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                             <Pill className="w-8 h-8" />
                         </div>
-                        <Button onClick={() => fileInputRef.current?.click()} className="bg-blue-600 hover:bg-blue-700">
-                            {content.uploadBtn[lang]}
-                        </Button>
-                        <p className="text-xs text-stone-400 mt-2">{content.fileTypes[lang]}</p>
+
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
+                            <Button onClick={() => fileInputRef.current?.click()} className="bg-blue-600 hover:bg-blue-700 h-10 px-6 gap-2 flex-1 w-full sm:w-auto">
+                                <Upload className="w-4 h-4" />
+                                {content.uploadBtn[lang]}
+                            </Button>
+
+                            {user && (
+                                <Button
+                                    variant="outline"
+                                    onClick={handleImportHistory}
+                                    disabled={isImporting}
+                                    className="border-emerald-600 text-emerald-700 hover:bg-emerald-50 h-10 px-6 gap-2 flex-1 w-full sm:w-auto"
+                                >
+                                    {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <History className="w-4 h-4" />}
+                                    {isImporting ? content.importing[lang] : content.importHistoryBtn[lang]}
+                                </Button>
+                            )}
+                        </div>
+
+                        <p className="text-xs text-stone-400 mt-4">{content.fileTypes[lang]}</p>
                     </div>
                 </div>
 
@@ -310,14 +344,10 @@ export function UploadMedicineStep({ onComplete, onSkip, initialFiles = [], onBa
                     <h3 className="text-sm font-medium text-stone-700 mb-3">{content.uploadedFiles[lang]}</h3>
                     <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2">
                         {files.map((file, index) => (
-                            <div key={index} className={`flex items-center justify-between bg-white border p-3 rounded-lg shadow-sm ${validatingText === file.extractedText ? 'border-amber-300 bg-amber-50' : 'border-stone-200'}`}>
+                            <div key={index} className="flex items-center justify-between bg-white border border-stone-200 p-3 rounded-lg shadow-sm">
                                 <div className="flex items-center gap-3 overflow-hidden">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${validatingText === file.extractedText ? 'bg-amber-100' : 'bg-blue-100'}`}>
-                                        {validatingText === file.extractedText ? (
-                                            <Loader2 className="w-5 h-5 text-amber-600 animate-spin" />
-                                        ) : (
-                                            <Pill className="w-5 h-5 text-blue-600" />
-                                        )}
+                                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-blue-100">
+                                        <Pill className="w-5 h-5 text-blue-600" />
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-2">
@@ -325,11 +355,6 @@ export function UploadMedicineStep({ onComplete, onSkip, initialFiles = [], onBa
                                                 {file.extractedText ? file.extractedText.substring(0, 50) : file.name}
                                                 {file.extractedText && file.extractedText.length > 50 && '...'}
                                             </p>
-                                            {validatingText === file.extractedText && (
-                                                <span className="text-xs text-amber-600 whitespace-nowrap bg-amber-100 px-2 py-0.5 rounded-full">
-                                                    {language === 'zh' ? '验证中...' : language === 'ms' ? 'Mengesahkan...' : 'Validating...'}
-                                                </span>
-                                            )}
                                         </div>
                                         <p className="text-xs text-stone-400 truncate">{file.name}</p>
                                     </div>

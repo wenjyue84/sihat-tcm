@@ -7,23 +7,26 @@ import { DeveloperProvider } from "@/contexts/DeveloperContext";
 import { DiagnosisProgressProvider } from "@/contexts/DiagnosisProgressContext";
 import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import { OnboardingWrapper } from "@/components/onboarding/OnboardingWrapper";
+import { DeveloperAssistantWrapper } from "@/components/developer";
 
 export function Providers({ children }: { children: React.ReactNode }) {
     return (
-        <LanguageProvider>
-            <OnboardingProvider>
-                <OnboardingWrapper>
-                    <AuthProvider>
+        <AuthProvider>
+            <LanguageProvider>
+                <OnboardingProvider>
+                    <OnboardingWrapper>
                         <DoctorProvider>
                             <DeveloperProvider>
                                 <DiagnosisProgressProvider>
                                     {children}
+                                    <DeveloperAssistantWrapper />
                                 </DiagnosisProgressProvider>
                             </DeveloperProvider>
                         </DoctorProvider>
-                    </AuthProvider>
-                </OnboardingWrapper>
-            </OnboardingProvider>
-        </LanguageProvider>
+                    </OnboardingWrapper>
+                </OnboardingProvider>
+            </LanguageProvider>
+        </AuthProvider>
     );
 }
+

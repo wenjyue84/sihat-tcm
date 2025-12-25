@@ -204,7 +204,7 @@ export const ms = {
         basicInfo: 'Info Asas',
         symptoms: 'Gejala',
         chooseDoctor: 'Doktor',
-        uploadReports: 'Laporan',
+        uploadDocuments: 'Dokumen',
         uploadMedicine: 'Ubat',
         inquiry: 'Soal Siasat',
         tongue: 'Lidah',
@@ -230,9 +230,9 @@ export const ms = {
     },
 
     // Muat naik laporan
-    uploadReports: {
-        title: 'Laporan Perubatan',
-        subtitle: 'Muat naik dokumen perubatan sedia ada',
+    uploadDocuments: {
+        title: 'Dokumen Perubatan',
+        subtitle: 'Muat naik dokumen perubatan',
         uploadButton: 'Muat Naik Dokumen',
         takePhoto: 'Ambil Gambar',
         chooseFromLibrary: 'Pilih dari Galeri',
@@ -506,8 +506,18 @@ export const ms = {
         tabs: {
             home: 'Utama',
             history: 'Sejarah',
+            documents: 'Dokumen',
             profile: 'Profil',
         },
+    },
+
+    // Dokumen Perubatan
+    documents: {
+        title: 'Dokumen Anda',
+        subtitle: 'Akses rekod perubatan yang dimuat naik',
+        noRecords: 'Tiada dokumen dimuat naik',
+        upload: 'Muat Naik Dokumen',
+        deleteConfirm: 'Pasti mahu padam dokumen ini?',
     },
 
     // Sejarah

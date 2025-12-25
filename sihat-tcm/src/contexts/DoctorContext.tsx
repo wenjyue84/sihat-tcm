@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { supabase } from '@/lib/supabase/client'
+import { logger } from '@/lib/clientLogger'
 
 import { DOCTOR_LEVELS, DoctorLevel } from '@/lib/doctorLevels'
 
@@ -41,11 +42,11 @@ export function DoctorProvider({ children }: { children: ReactNode }) {
                     const mappedLevel = ADMIN_LEVEL_MAPPING[data.config.default_level]
                     if (mappedLevel) {
                         setDoctorLevel(mappedLevel)
-                        console.log('[DoctorContext] Loaded default level from admin:', data.config.default_level, '→', mappedLevel)
+                        logger.info('DoctorContext', `Loaded default level from admin: ${data.config.default_level} → ${mappedLevel}`)
                     }
                 }
             } catch (error) {
-                console.error('[DoctorContext] Error fetching default level:', error)
+                logger.error('DoctorContext', 'Error fetching default level', error)
                 // Keep the fallback 'physician' on error
             } finally {
                 setIsLoadingDefault(false)

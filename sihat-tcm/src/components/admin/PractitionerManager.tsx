@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Loader2, Plus, Pencil, Trash2, MapPin, Phone, Users, Clock, Database, BadgeInfo } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
+import { logger } from '@/lib/clientLogger'
 
 export type Practitioner = {
     id: string
@@ -129,7 +130,7 @@ export function PractitionerManager() {
             if (error) throw error
             setPractitioners(data || [])
         } catch (error) {
-            console.error('Error fetching practitioners:', error)
+            logger.error('PractitionerManager', 'Error fetching practitioners', error)
             toast.error('Failed to load practitioners')
         } finally {
             setLoading(false)
@@ -194,7 +195,7 @@ export function PractitionerManager() {
             setIsDialogOpen(false)
             fetchPractitioners()
         } catch (error) {
-            console.error('Error saving:', error)
+            logger.error('PractitionerManager', 'Error saving practitioner', error)
             toast.error('Failed to save practitioner. Make sure the database schema is updated.')
         } finally {
             setSaving(false)
@@ -214,7 +215,7 @@ export function PractitionerManager() {
             toast.success('Practitioner deleted')
             fetchPractitioners()
         } catch (error) {
-            console.error('Error deleting:', error)
+            logger.error('PractitionerManager', 'Error deleting practitioner', error)
             toast.error('Failed to delete practitioner')
         }
     }
@@ -244,7 +245,7 @@ export function PractitionerManager() {
             toast.success(`Added ${newPractitioners.length} practitioners`)
             fetchPractitioners()
         } catch (error) {
-            console.error('Error seeding:', error)
+            logger.error('PractitionerManager', 'Error seeding practitioners', error)
             toast.error('Failed to add practitioners. Check if "notes" column exists in database.')
         } finally {
             setSeeding(false)

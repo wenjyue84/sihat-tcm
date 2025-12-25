@@ -1,5 +1,6 @@
 import { generateText } from 'ai';
 import { getGoogleProvider } from '@/lib/googleProvider';
+import { devLog } from '@/lib/systemLogger';
 
 export const maxDuration = 60;
 
@@ -45,7 +46,7 @@ export async function POST(req: Request) {
 
         return Response.json(result);
     } catch (error: any) {
-        console.error('Validation error:', error);
+        devLog('error', 'API/validate-medicine', 'Validation error', { error });
         return Response.json({ error: error.message }, { status: 500 });
     }
 }

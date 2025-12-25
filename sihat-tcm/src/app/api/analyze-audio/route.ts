@@ -2,6 +2,8 @@ import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { LISTENING_ANALYSIS_PROMPT } from '@/lib/systemPrompts';
 import { supabase } from '@/lib/supabase';
+import { analyzeAudioRequestSchema, validateRequest, validationErrorResponse } from '@/lib/validations';
+import { devLog } from '@/lib/systemLogger';
 
 export const maxDuration = 120;
 
@@ -19,21 +21,16 @@ const MODEL_STATUS: Record<string, string> = {
 
 export async function POST(req: Request) {
     try {
-        const { audio } = await req.json();
+        const body = await req.json();
 
-        if (!audio) {
-            return new Response(JSON.stringify({
-                overall_observation: 'No audio was provided. Please record your voice.',
-                voice_quality_analysis: null,
-                breathing_patterns: null,
-                speech_patterns: null,
-                cough_sounds: null,
-                status: 'error'
-            }), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' }
-            });
+        // Validate request body with Zod
+        const validation = validateRequest(analyzeAudioRequestSchema, body);
+        if (!validation.success) {
+            devLog('warn', 'API/analyze-audio', 'Validation failed', { error: validation.error });
+            return validationErrorResponse(validation.error, validation.details);
         }
+
+        const { audio } = validation.data;
 
         // Fetch custom listening analysis prompt from admin (if exists)
         let customPrompt = '';
@@ -45,7 +42,7 @@ export async function POST(req: Request) {
                 .single();
             if (data && data.prompt_text) customPrompt = data.prompt_text;
         } catch (e) {
-            console.error("Error fetching listening analysis prompt", e);
+            devLog('error', 'API/analyze-audio', 'Error fetching listening analysis prompt', { error: e });
         }
 
         // Use custom prompt if set, otherwise use default from library
@@ -65,13 +62,13 @@ Provide your analysis in the specified JSON format with detailed observations fo
         // Try each model in order until we get a valid result
         for (let i = 0; i < MODEL_FALLBACK_ORDER.length; i++) {
             const modelId = MODEL_FALLBACK_ORDER[i];
-            console.log(`[analyze-audio] Trying model ${i + 1}/${MODEL_FALLBACK_ORDER.length}: ${modelId}`);
+            devLog('info', 'API/analyze-audio', `Trying model ${i + 1}/${MODEL_FALLBACK_ORDER.length}: ${modelId}`);
 
             try {
                 // Extract base64 data and mime type from data URL
                 const matches = audio.match(/^data:([^;]+);base64,(.+)$/);
                 if (!matches) {
-                    console.error('[analyze-audio] Invalid audio data format');
+                    devLog('error', 'API/analyze-audio', 'Invalid audio data format');
                     continue;
                 }
                 const [, mimeType, base64Data] = matches;
@@ -95,10 +92,10 @@ Provide your analysis in the specified JSON format with detailed observations fo
                 });
 
                 const text = result.text;
-                console.log(`[analyze-audio] Model ${modelId} response:`, text?.substring(0, 200));
+                devLog('debug', 'API/analyze-audio', `Model ${modelId} response`, { preview: text?.substring(0, 200) });
 
                 if (!text || text.trim() === '') {
-                    console.log(`[analyze-audio] Model ${modelId} returned empty response, trying next...`);
+                    devLog('warn', 'API/analyze-audio', `Model ${modelId} returned empty response, trying next...`);
                     continue;
                 }
 
@@ -119,9 +116,9 @@ Provide your analysis in the specified JSON format with detailed observations fo
                         });
                     }
 
-                    console.log(`[analyze-audio] Model ${modelId} returned invalid structure, trying next...`);
+                    devLog('warn', 'API/analyze-audio', `Model ${modelId} returned invalid structure, trying next...`);
                 } catch (parseError) {
-                    console.error(`[analyze-audio] JSON parse error for model ${modelId}:`, parseError);
+                    devLog('error', 'API/analyze-audio', `JSON parse error for model ${modelId}`, { error: parseError });
                     // If we can't parse JSON but have text, create a basic response
                     if (text.length > 50) {
                         return new Response(JSON.stringify({
@@ -144,13 +141,13 @@ Provide your analysis in the specified JSON format with detailed observations fo
                     }
                 }
             } catch (modelError: any) {
-                console.error(`[analyze-audio] Model ${modelId} failed:`, modelError.message);
+                devLog('error', 'API/analyze-audio', `Model ${modelId} failed`, { error: modelError.message });
                 // Continue to next model
             }
         }
 
         // All models failed - return a mock/placeholder response for development
-        console.log('[analyze-audio] All models failed, returning placeholder response');
+        devLog('warn', 'API/analyze-audio', 'All models failed, returning placeholder response');
         return new Response(JSON.stringify({
             overall_observation: 'Audio analysis will be processed with your final diagnosis report.',
             voice_quality_analysis: {
@@ -188,7 +185,7 @@ Provide your analysis in the specified JSON format with detailed observations fo
         });
 
     } catch (error: any) {
-        console.error('[analyze-audio] Critical error:', error);
+        devLog('error', 'API/analyze-audio', 'Critical error', { error });
         return new Response(JSON.stringify({
             overall_observation: 'Audio analysis encountered an issue. Your recording is saved for later review.',
             voice_quality_analysis: null,

@@ -2,7 +2,7 @@
 
 **AI-Powered Traditional Chinese Medicine Diagnosis System**
 
-Version 2.0 | Last Updated: December 2024
+Version 3.0 | Last Updated: December 2024
 
 ---
 
@@ -13,11 +13,21 @@ Version 2.0 | Last Updated: December 2024
 3. [User Roles](#3-user-roles)
 4. [The Diagnosis Process](#4-the-diagnosis-process)
 5. [Understanding Your Report](#5-understanding-your-report)
-6. [Key Features](#6-key-features)
-7. [Language Support](#7-language-support)
-8. [Troubleshooting](#8-troubleshooting)
-9. [Frequently Asked Questions](#9-frequently-asked-questions)
-10. [Privacy & Security](#10-privacy--security)
+6. [Patient Portal Features](#6-patient-portal-features)
+   - 6.1 [Health Journey Dashboard](#61-health-journey-dashboard)
+   - 6.2 [AI Meal Planner](#62-ai-meal-planner)
+   - 6.3 [Snore Analysis](#63-snore-analysis)
+   - 6.4 [Vitality Rhythm](#64-vitality-rhythm)
+   - 6.5 [Qi Dose & Qi Garden](#65-qi-dose--qi-garden)
+   - 6.6 [Circle of Health](#66-circle-of-health)
+   - 6.7 [Family Care](#67-family-care)
+   - 6.8 [One-Click Remedy (Herb Shop)](#68-one-click-remedy-herb-shop)
+   - 6.9 [Digital Twin](#69-digital-twin)
+7. [Report Features](#7-report-features)
+8. [Language Support](#8-language-support)
+9. [Troubleshooting](#9-troubleshooting)
+10. [Frequently Asked Questions](#10-frequently-asked-questions)
+11. [Privacy & Security](#11-privacy--security)
 
 ---
 
@@ -33,6 +43,7 @@ Version 2.0 | Last Updated: December 2024
 - **Multi-Language Support**: Available in English, Chinese (Simplified), and Bahasa Malaysia
 - **Holistic Approach**: Focuses on treating root causes (Ben) rather than just symptoms (Biao)
 - **AI-Powered**: Uses advanced Google Gemini AI to provide consistent, objective analysis
+- **Comprehensive Wellness Platform**: Beyond diagnosis, access meal planning, exercise routines, sleep analysis, and community support
 
 ### 1.3 The Four Examinations (四诊 Sì Zhěn)
 
@@ -68,24 +79,31 @@ Sihat TCM digitizes the four classical TCM diagnostic methods:
 
 ### 2.2 Guest Mode
 
-You can use Sihat TCM without creating an account! Simply click "Start Consultation" on the homepage. However, creating an account allows you to:
+You can use Sihat TCM without creating an account! Simply click "Start Consultation" on the homepage. However, creating an account gives you access to:
 - Save your diagnosis history
 - Access past reports
 - Pre-fill your information for faster consultations
+- **AI Meal Planner** with personalized 7-day meal plans
+- **Snore Analysis** for sleep quality tracking
+- **Vitality Rhythm** for seasonal health guidance
+- **Qi Dose & Qi Garden** for gamified TCM exercises
+- **Circle of Health** community support groups
+- **Family Care** for managing family health profiles
+- **One-Click Remedy** for purchasing herbal products
 
 ### 2.3 Logging In
 
 1. Click "Login" in the top-right corner
 2. Enter your email and password
 3. Click "Sign In"
-4. You'll be redirected to your dashboard (if you're a patient) or the homepage
+4. You'll be redirected to your Patient Dashboard
 
 ### 2.4 First-Time Setup
 
 After creating your account:
-1. You'll be taken to the **Patient Dashboard** (if you're a patient)
-2. Complete your profile information
-3. Click "Save Profile" to store your details
+1. You'll be taken to the **Patient Dashboard**
+2. Complete your profile information in the "Profile" section
+3. Click "Save Changes" to store your details
 4. Your information will be pre-filled in future consultations
 
 ---
@@ -100,10 +118,18 @@ Sihat TCM supports three user roles, each with different access levels:
 
 **What you can do**:
 - Start new diagnoses
-- View your diagnosis history
+- View your diagnosis history (Health Journey)
 - Download PDF reports
+- Generate shareable infographics
 - Chat with your reports (Report Q&A)
 - Upload medical documents
+- Access AI Meal Planner
+- Use Snore Analysis
+- View Vitality Rhythm (Meridian Clock, Solar Terms)
+- Practice Qi Dose exercises
+- Manage Family Care profiles
+- Shop for herbal remedies (One-Click Remedy)
+- Participate in Circle of Health communities
 - Manage your profile
 
 **How to access**: Create an account and you'll automatically be assigned the Patient role.
@@ -126,7 +152,7 @@ Sihat TCM supports three user roles, each with different access levels:
 
 **What you can do**:
 - Manage system prompts
-- Configure AI settings
+- Configure AI settings (default model selection)
 - Monitor system usage
 - Manage user roles
 - Access security settings
@@ -147,13 +173,16 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 - Gender
 - Height (cm)
 - Weight (kg)
-- Current symptoms (brief description)
+- Main concern / primary complaint
+- Other symptoms / secondary complaints
 - Duration of symptoms
 
 **Tips**:
 - If you're logged in, your profile information will be pre-filled
 - Be as accurate as possible with measurements
-- Describe your main complaint clearly
+- Describe your main complaint clearly and focus on ONE major issue
+- Use the symptom chips for common symptoms (Fever, Cough, Headache, etc.)
+- You can view symptoms by category: Simple View, Body Systems, or TCM Elements
 
 **What happens next**: Click "Next" to proceed to the Inquiry step.
 
@@ -181,7 +210,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 - Mention any medications you're currently taking
 - Describe how symptoms affect your daily life
 
-**Optional**: You can upload medical reports (PDF, Word, etc.) if you have them.
+**Optional**: You can upload medical reports (PDF, Word, images, etc.) if you have them.
 
 **What happens next**: After the inquiry is complete, you'll see a summary. Click "Continue" to proceed.
 
@@ -222,7 +251,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 - Don't brush your tongue before taking the photo
 - Make sure your tongue is fully extended
 
-**What happens next**: After analysis, you'll see the AI's findings. Click "Continue" to proceed.
+**What happens next**: After analysis, you'll see the AI's findings with detailed tags. Click "Continue" to proceed.
 
 ---
 
@@ -267,19 +296,20 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **How to record**:
 1. Click "Start Recording"
 2. Allow microphone permissions when prompted
-3. Speak naturally for about 10-15 seconds:
-   - You can describe your symptoms
-   - Or simply talk about your day
-   - The AI analyzes voice quality, not content
+3. Say "Ahhh" for 5-10 seconds, then describe how you feel:
+   - Mention any breathing difficulties
+   - Describe any cough patterns
+   - The AI analyzes voice quality, tone, and breathing
 4. Click "Stop Recording" when done
 5. Review the recording
-6. Click "Retake" or "Continue"
+6. Click "Record Again" or "Continue"
 
 **What the AI analyzes**:
 - Voice strength (weak, strong, hoarse)
 - Tone quality
 - Breathing patterns
 - Any audible respiratory issues
+- Speech patterns
 
 **Tips**:
 - Speak in a quiet environment
@@ -287,7 +317,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 - Don't whisper or shout
 - If you have a cold, that's okay - the AI will note it
 
-**Optional**: You can skip this step if you prefer.
+**Optional**: You can skip this step if you prefer, or upload an existing audio file.
 
 **What happens next**: Continue to the Pulse step.
 
@@ -303,7 +333,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 1. Find your pulse:
    - Place two fingers on your wrist (below the thumb)
    - Or on your neck (beside your Adam's apple)
-2. Click "Tap BPM" button
+2. Click "Tap to Measure" button
 3. Tap the button each time you feel a heartbeat
 4. Continue for 15-30 seconds
 5. The system will calculate your BPM (beats per minute)
@@ -311,8 +341,13 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **Method 2: Manual Entry**
 - If you know your heart rate (from a fitness tracker, etc.), you can enter it directly
 
-**Pulse Quality Selection**:
-After entering your BPM, you'll be asked to identify your pulse quality:
+**Method 3: Camera Measurement** (Android Chrome only)
+- Use your phone's camera and flash to detect pulse through your fingertip
+- Place your finger over the camera lens and flash
+- Hold still for 10 seconds while the app detects your pulse
+
+**Pulse Quality Selection** (Optional - for TCM practitioners):
+After entering your BPM, you can identify your pulse quality:
 - **Slippery (滑)**: Feels smooth and flowing
 - **Wiry (弦)**: Feels tight, like a guitar string
 - **Thready (细)**: Feels thin and weak
@@ -320,13 +355,14 @@ After entering your BPM, you'll be asked to identify your pulse quality:
 - **Slow (迟)**: Slow pulse
 - **Deep (沉)**: Hard to feel, requires pressure
 - **Floating (浮)**: Easy to feel, superficial
+- **Normal (平)**: Normal and balanced
 
 **Tips**:
-- If you're unsure about pulse quality, select "Normal" or "Unsure"
+- If you're unsure about pulse quality, select "Normal" or skip this section
 - The BPM measurement is more important than quality for beginners
 - You can use a fitness tracker or smartwatch to get your BPM
 
-**What happens next**: Continue to Smart Connect (optional) or proceed to Analysis.
+**What happens next**: Continue to Smart Connect (optional) or proceed to Summary.
 
 ---
 
@@ -335,24 +371,25 @@ After entering your BPM, you'll be asked to identify your pulse quality:
 **What this is**: Integration with wearable devices and health apps
 
 **Supported integrations**:
+- Samsung Health
 - Apple Health
 - Google Fit
 - Fitness trackers (Fitbit, Garmin, etc.)
 - Smartwatches
 
 **What data you can import**:
-- Heart Rate (HR)
+- Steps count
+- Sleep data
+- Average Heart Rate
+- Calories burned
 - Heart Rate Variability (HRV)
 - Blood Oxygen (SpO2)
-- Blood Pressure
-- Sleep data
-- Activity data
 
 **How to connect**:
-1. Click "Connect Device" or "Import from Health App"
+1. Click "Custom Setup" or select a health app provider
 2. Follow the authorization prompts
 3. Select which data to import
-4. Click "Import"
+4. Click "Confirm & Use Data"
 
 **Note**: This step is optional. You can skip it if you don't have compatible devices.
 
@@ -363,20 +400,29 @@ After entering your BPM, you'll be asked to identify your pulse quality:
 ### 4.8 Step 8: Summary & Analysis
 
 **What happens**:
-1. You'll see a summary of all the information you've provided
-2. Review the summary for accuracy
-3. Click "Start Analysis" or "Generate Report"
-4. The AI will process all your data using the selected doctor level
+1. You'll see a comprehensive summary of all the information you've provided
+2. Review each section for accuracy:
+   - Basic Information
+   - Inquiry (Wen)
+   - Tongue Diagnosis (Wang)
+   - Face Diagnosis (Wang)
+   - Audio Analysis (Wen)
+   - Pulse Diagnosis (Qie)
+   - Smart Connect Health Metrics
+3. Customize your report options (what to include)
+4. Click "Confirm & Generate Report"
+
+**Report Options**:
+You can customize what information to include:
+- Patient demographics
+- Vital signs & measurements
+- Medical history
+- TCM Recommendations (herbal medicine, dietary advice, acupuncture points, etc.)
+- Report formatting options
 
 **Processing time**: 
-- Physician Level: 30-60 seconds
-- Expert Level: 1-2 minutes
-- Master Level: 2-3 minutes
-
-**What you'll see**:
-- A progress indicator
-- "Thinking..." animation
-- The system is synthesizing all four examinations
+- Typically 30 seconds to 2 minutes depending on AI model
+- You'll see a progress indicator with TCM educational facts
 
 **What happens next**: Your comprehensive diagnosis report will be generated.
 
@@ -386,6 +432,7 @@ After entering your BPM, you'll be asked to identify your pulse quality:
 
 **What you'll receive**:
 - **TCM Diagnosis**: Your syndrome pattern (e.g., "Spleen Qi Deficiency")
+- **Constitution Type**: Your body constitution (e.g., "Qi Deficiency", "Damp-Heat")
 - **Affected Organs**: Which organ systems are involved
 - **Pathomechanism**: How the imbalance developed
 - **Dietary Recommendations**: Foods to eat and avoid
@@ -395,9 +442,11 @@ After entering your BPM, you'll be asked to identify your pulse quality:
 
 **What you can do**:
 - **Read the full report**: Scroll through all sections
-- **Download PDF**: Click "Download Report" to save a PDF copy
-- **Share Infographic**: Generate and share a visual summary
-- **Chat with Report**: Ask questions about your diagnosis (see Section 6.2)
+- **Download PDF**: Click "Download PDF" to save a copy
+- **Generate Infographic**: Create a shareable visual summary
+- **Chat with Report**: Ask questions about your diagnosis (Report Q&A)
+- **Save to History**: Store in your Health Journey (logged-in users)
+- **Shop for Remedies**: Purchase recommended herbal products
 
 ---
 
@@ -414,6 +463,7 @@ Your diagnosis report contains several key sections:
 
 #### 5.1.2 TCM Diagnosis
 - **Primary Pattern**: Your main syndrome (e.g., "Liver Fire Uprising")
+- **Constitution Type**: Your body type (Qi Deficiency, Yang Deficiency, etc.)
 - **Secondary Patterns**: Additional contributing factors
 - **Affected Organs**: Which organ systems are involved (Heart, Liver, Spleen, Lung, Kidney)
 
@@ -428,7 +478,7 @@ Your diagnosis report contains several key sections:
 
 #### 5.1.5 Recommendations
 
-**Dietary Therapy**:
+**Dietary Therapy (食疗)**:
 - **Foods to Eat**: Specific foods that help your condition
 - **Foods to Avoid**: Items that may worsen symptoms
 - **Cooking Methods**: Recommended preparation styles
@@ -439,31 +489,33 @@ Your diagnosis report contains several key sections:
 - Formula names (e.g., "Gui Pi Tang")
 - **Note**: Consult a licensed TCM practitioner before taking herbs
 
-**Lifestyle**:
+**Lifestyle (养生)**:
 - Sleep recommendations
 - Exercise suggestions (Qigong, Tai Chi, etc.)
 - Stress management
 - Daily routine adjustments
 
-**Acupressure**:
+**Acupressure (穴位)**:
 - Specific acupressure points
 - Location guides with diagrams
 - Massage techniques
 - Frequency and duration
 
-### 5.2 Interpreting Your Diagnosis
+### 5.2 Constitution Types
 
-**Common TCM Patterns**:
+The Nine TCM Constitution Types:
 
-- **Qi Deficiency (气虚)**: Lack of energy, fatigue, weak voice
-- **Blood Deficiency (血虚)**: Pale complexion, dizziness, poor memory
-- **Yang Deficiency (阳虚)**: Cold intolerance, low energy, frequent urination
-- **Yin Deficiency (阴虚)**: Night sweats, dry mouth, insomnia
-- **Dampness (湿)**: Heavy feeling, bloating, sticky stool
-- **Heat (热)**: Feeling hot, thirst, red face
-- **Cold (寒)**: Feeling cold, preference for warmth, pale complexion
-
-**Remember**: TCM diagnosis is holistic. Multiple patterns can coexist, and the AI considers all factors together.
+| Constitution | Chinese | Characteristics |
+|--------------|---------|-----------------|
+| **Balanced (Ping He)** | 平和质 | Energetic, adaptable, rarely ill |
+| **Qi Deficiency** | 气虚质 | Fatigue, weak voice, prone to colds |
+| **Yang Deficiency** | 阳虚质 | Cold intolerance, low energy, frequent urination |
+| **Yin Deficiency** | 阴虚质 | Night sweats, dry mouth, insomnia |
+| **Phlegm-Dampness** | 痰湿质 | Heavy feeling, bloating, oily skin |
+| **Damp-Heat** | 湿热质 | Feeling hot, bitter taste, acne-prone |
+| **Blood Stasis** | 血瘀质 | Dark complexion, fixed pain, bruises easily |
+| **Qi Stagnation** | 气郁质 | Depression, mood swings, sighing |
+| **Special Diathesis** | 特禀质 | Allergies, sensitive to medications |
 
 ### 5.3 Next Steps
 
@@ -472,77 +524,309 @@ Your diagnosis report contains several key sections:
 3. **Consider dietary adjustments**: Gradually incorporate recommended foods
 4. **Try acupressure**: Follow the guides for self-massage
 5. **Consult a practitioner**: For herbal formulas, consult a licensed TCM doctor
-6. **Follow up**: Consider another consultation in 2-4 weeks to track progress
+6. **Use the AI Meal Planner**: Generate a personalized 7-day meal plan
+7. **Practice Qi Dose**: Try the recommended exercises
+8. **Follow up**: Consider another consultation in 2-4 weeks to track progress
 
 ---
 
-## 6. Key Features
+## 6. Patient Portal Features
 
-### 6.1 Doctor Level Selection
+### 6.1 Health Journey Dashboard
 
-**What it is**: Choose the AI "doctor" level for your consultation
+**What it is**: Your central hub for tracking health over time
 
-**Available Levels**:
+**Features**:
+- **Total Sessions**: Number of diagnoses completed
+- **Average Score**: Your wellness score trend
+- **Most Common Pattern**: Recurring syndrome patterns
+- **Health History Cards**: View past diagnoses with dates, scores, and quick access to reports
+- **Digital Twin**: Visual representation of organ health
 
-1. **Physician Level** (Default)
-   - Model: Gemini 2.0 Flash
-   - Speed: Fast (30-60 seconds)
-   - Best for: Routine checkups, general wellness
-   - Cost: Most economical
+**How to access**:
+1. Log in to your account
+2. Click "Dashboard" or navigate to Patient Portal
+3. The "Health Journey" tab is the default view
 
-2. **Expert Level**
-   - Model: Gemini 2.5 Flash
-   - Speed: Moderate (1-2 minutes)
-   - Best for: Moderate complexity cases
-   - Cost: Moderate
-
-3. **Master Level**
-   - Model: Gemini 2.5 Pro
-   - Speed: Slower (2-3 minutes)
-   - Best for: Complex cases, detailed analysis
-   - Cost: Highest
-
-**How to select**:
-- During the diagnosis process, you'll see a "Choose Doctor" step
-- Select your preferred level
-- Higher levels provide more detailed analysis but take longer
-
-**Recommendation**: Start with Physician Level for routine consultations. Upgrade to Expert or Master for complex or chronic conditions.
+**Viewing Past Reports**:
+- Each diagnosis card shows the date, diagnosis title, and constitution type
+- Click "View" to open the full report
+- Use sort options (Date, Score, Diagnosis) to organize your history
 
 ---
 
-### 6.2 Report Q&A (Chat with Your Report)
+### 6.2 AI Meal Planner
 
-**What it is**: Ask questions about your diagnosis report
+**What it is**: Personalized 7-day meal plans based on your TCM constitution
+
+**Features**:
+- **7-Day Meal Plans**: Breakfast, lunch, dinner, and snacks
+- **TCM Principles**: Meals aligned with your constitution needs
+- **Shopping List**: Auto-generated grocery list by category
+- **Meal Swapping**: Swap individual meals for alternatives
+- **Dietary Preferences**: Set allergies, dietary type, and serving size
+- **TCM Food Checker**: Check if any food is suitable for your body type
 
 **How to use**:
-1. After viewing your report, look for the "Chat" or "Ask Questions" button
-2. A chat window will open
-3. Type your questions, such as:
-   - "Can I still drink coffee with this condition?"
-   - "What soup should I eat?"
-   - "How long until I see improvement?"
-   - "Can I exercise with this diagnosis?"
-4. The AI will answer based on your specific diagnosis
+1. Go to "AI Meal Planner" in your Patient Dashboard
+2. Set your dietary preferences:
+   - Allergies (Nuts, Shellfish, Dairy, Eggs, Gluten, Soy, Sesame)
+   - Dietary type (Vegetarian, Vegan, Pescatarian, Halal, Kosher)
+   - Disliked foods
+   - Serving size (number of people)
+3. Click "Generate 7-Day Plan"
+4. View your personalized meal plan with recipes
+5. Use the Shopping List for grocery preparation
 
-**Tips**:
-- Ask specific questions for better answers
-- Reference your diagnosis when asking
-- You can ask multiple questions
-- The chat remembers your diagnosis context
+**TCM Food Checker**:
+1. In the Meal Planner section, find "TCM Food Checker"
+2. Type a food name (e.g., "Watermelon") or take a photo
+3. View the suitability assessment:
+   - Suitable / Eat in Moderation / Avoid
+   - TCM properties (thermal nature, flavors)
+   - Better alternatives for your constitution
 
-**Example Questions**:
-- "What foods should I avoid for Spleen Qi Deficiency?"
-- "Is it safe to take this diagnosis with my current medications?"
-- "Can you explain what 'Dampness' means in simple terms?"
-- "What acupressure points should I focus on?"
+**Requirements**: Complete at least one TCM diagnosis to unlock this feature.
 
 ---
 
-### 6.3 Download PDF Report
+### 6.3 Snore Analysis
+
+**What it is**: AI-powered sleep sound analysis for snoring detection
+
+**Features**:
+- **Sleep Recording**: Record your sleep sounds overnight
+- **Snoring Detection**: AI identifies snoring patterns
+- **Severity Assessment**: None, Mild, Moderate, Severe
+- **Sleep Apnea Indicators**: Warning signs for sleep apnea
+- **TCM Correlation**: How snoring relates to your TCM diagnosis
+- **Recommendations**: Personalized tips for better sleep
+
+**How to use**:
+1. Go to "Snore Analysis" in your Patient Dashboard
+2. Before bed, click "Start Recording"
+3. Place your phone near your bed
+4. Record for at least 30 minutes for best results
+5. In the morning, upload or analyze the recording
+6. View your analysis results with TCM insights
+
+**Tips for Better Recording**:
+- Record in a quiet room
+- Ensure phone has enough battery
+- Keep phone within 3 feet of your head
+- Record multiple nights for better patterns
+
+---
+
+### 6.4 Vitality Rhythm
+
+**What it is**: Harmonize your body with natural cycles using TCM wisdom
+
+**Features**:
+
+**Meridian Organ Clock (子午流注)**:
+- 24-hour cycle showing which organ is most active
+- Current active organ and what's coming next
+- Health tips based on the time of day
+- Each organ has a 2-hour peak period
+
+| Time | Organ | Focus |
+|------|-------|-------|
+| 11pm-1am | Gallbladder | Deep sleep, decision-making rest |
+| 1am-3am | Liver | Blood detoxification, deep sleep |
+| 3am-5am | Lung | Breathing, skin regeneration |
+| 5am-7am | Large Intestine | Elimination, wake up |
+| 7am-9am | Stomach | Breakfast, digestion |
+| 9am-11am | Spleen | Thinking, metabolism |
+| 11am-1pm | Heart | Joy, connection, lunch |
+| 1pm-3pm | Small Intestine | Sorting nutrients, light rest |
+| 3pm-5pm | Bladder | Energy storage, hydration |
+| 5pm-7pm | Kidney | Vitality peak, dinner |
+| 7pm-9pm | Pericardium | Relaxation, socialization |
+| 9pm-11pm | Triple Burner | Sleep preparation |
+
+**24 Solar Terms (二十四节气)**:
+- Current solar term in the TCM calendar
+- Seasonal health wisdom and guidance
+- Dietary adjustments for the season
+- Exercise recommendations
+
+**Constitution Tracker**:
+- Track how your constitution evolves over time
+- View historical constitution assessments
+- Understand seasonal changes in your health
+
+**How to access**:
+1. Go to "Vitality Rhythm" in your Patient Dashboard
+2. View the Meridian Clock for current organ focus
+3. Check Solar Terms for seasonal guidance
+4. Review Constitution Tracker for your health history
+
+---
+
+### 6.5 Qi Dose & Qi Garden
+
+**What it is**: Gamified TCM exercise routines for daily wellness
+
+**Qi Dose Features**:
+
+**The 8-Minute Brocade (Baduanjin)**:
+- Bite-sized movements from traditional Baduanjin
+- 60-second Quick Fix exercises for specific ailments
+- Animated guides with Sifu voice guidance
+
+**Desk-Friendly Circuits**:
+- Exercises for office workers
+- Relieve back pain, eye strain, and stress
+- No equipment needed
+
+**Special Routines**:
+- **The Meridian Slap (Paida)**: Energize by patting along your limbs
+- **The Iron Ox Ploughs the Land**: Target belly stagnation with Five Animal Frolics
+- **Digital Detox Eyes**: Relieve screen fatigue with daily acupressure
+
+**Qi Garden (Gamification)**:
+
+**What it is**: A virtual garden where you nurture TCM herbs through healthy habits
+
+**Features**:
+- **Essence & Water Droplets**: Earn by completing activities
+- **Virtual Herbs**: Grow Ginseng, Reishi Mushroom, Goji Berry
+- **Dan Tian Filling**: Track your energy reservoir (streak system)
+- **Unlock Scrolls**: Earn achievements and badges
+- **Coupons**: Unlock discounts for the Herb Shop
+
+**Daily Habits to Earn Points**:
+- Log a Meal
+- Complete Qi Dose Exercise
+- Daily Check-in
+
+**How to use**:
+1. Go to "Qi Dose" in your Patient Dashboard
+2. Switch between "Daily Practices" and "Qi Garden" tabs
+3. Start an exercise routine
+4. Complete activities to earn Essence and Water Droplets
+5. Watch your garden grow!
+
+---
+
+### 6.6 Circle of Health
+
+**What it is**: Anonymous support groups based on TCM constitution
+
+**Features**:
+- **Constitution-Based Groups**: Connect with others who share your condition
+- **Anonymous Participation**: Share without revealing identity
+- **Success Stories**: Read and share healing journeys
+- **Meal Sharing**: Share photos of TCM-friendly meals
+- **Remedy Sharing**: Post tips and traditional remedies
+
+**Available Circles**:
+- Damp-Heat Detox Group
+- Qi Vitality Circle
+- Yang Warming Tribe
+- Yin Nourishing Community
+- Dampness Clearing Squad
+- Flow & Harmony Group (Blood Stasis)
+- Emotional Balance Circle (Qi Stagnation)
+- Maintenance & Longevity (Balanced)
+- Special Care Group
+
+**How to use**:
+1. Go to "Circle of Health" in your Patient Dashboard
+2. View circles matching your constitution
+3. Click "Join Circle" to participate
+4. Share your progress, meals, or remedies anonymously
+5. Read and support others in the community
+
+---
+
+### 6.7 Family Care
+
+**What it is**: Manage health profiles for your family members
+
+**Features**:
+- **Sub-Profiles**: Create profiles for parents, spouse, children, siblings
+- **Diagnosis on Behalf**: Start diagnoses for family members
+- **Health History**: Track each family member's health journey
+- **Quick Actions**: Upload tongue photos, view recent activity
+
+**How to use**:
+1. Go to "Family Care" in your Patient Dashboard
+2. Click "Add Member" to create a new profile
+3. Fill in:
+   - Full Name
+   - Age
+   - Gender
+   - Relationship (Mother, Father, Spouse, Child, Sibling, Other)
+   - Medical History (optional)
+4. Click "Create Profile"
+5. Start diagnoses for family members from their profile
+
+**Benefits**:
+- Track your mother's health easily
+- Manage children's wellness checkups
+- Keep elderly parents' health history organized
+- One account for the whole family
+
+---
+
+### 6.8 One-Click Remedy (Herb Shop)
+
+**What it is**: Purchase herbal remedies recommended in your diagnosis
+
+**Features**:
+- **Personalized Recommendations**: Products based on your diagnosis
+- **Product Types**: Tea Bags, Granules, Raw Herbs, Capsules
+- **Detailed Information**: Indications, ingredients, preparation time
+- **WhatsApp Ordering**: Easy order placement via WhatsApp
+- **Pharmacy Fulfillment**: Orders handled by licensed pharmacy partners
+
+**How to use**:
+1. After receiving a diagnosis, look for herbal formula recommendations
+2. Click "One-Click Remedy" or "Buy Now"
+3. View product details (indications, ingredients)
+4. Add to cart or proceed to buy
+5. Confirm order via WhatsApp
+6. Your order is fulfilled by a licensed pharmacy partner
+
+**Important Disclaimer**: 
+⚠️ These products are for reference only. Please consult a licensed TCM practitioner before use.
+
+**Requirements**: Must be logged in to purchase.
+
+---
+
+### 6.9 Digital Twin
+
+**What it is**: Visual representation of your organ health based on TCM reports
+
+**Features**:
+- Body visualization with organ highlights
+- Color-coded health status (red = heat/stagnation, normal = healthy)
+- Active Focus areas based on current diagnosis
+- Restoring indicators for organs under treatment
+
+**What it shows**:
+- Heart status
+- Lungs status
+- Liver status
+- Spleen status
+- Kidneys status
+
+**How to access**:
+- The Digital Twin appears in your Health Journey dashboard
+- It updates based on your latest diagnosis
+- Red areas indicate active heat or stagnation being addressed
+
+---
+
+## 7. Report Features
+
+### 7.1 Download PDF Report
 
 **How to download**:
-1. After your report is generated, click "Download Report" or "Download PDF"
+1. After your report is generated, click "Download PDF"
 2. The PDF will be generated (may take 10-20 seconds)
 3. Your browser will download the file
 4. Save it to your device
@@ -554,43 +838,55 @@ Your diagnosis report contains several key sections:
 - Professional formatting
 - Suitable for printing or sharing with practitioners
 
-**Tips**:
-- PDFs are saved with the date in the filename
-- You can share PDFs with your TCM practitioner
-- Keep PDFs for your health records
+### 7.2 Generate Infographic
 
----
-
-### 6.4 Share Infographic
-
-**What it is**: A visual summary of your diagnosis
+**What it is**: A shareable visual summary of your diagnosis
 
 **How to generate**:
-1. Click "Generate Infographic" or "Share"
+1. Click "Generate Infographic" in your report
 2. Wait for the image to generate
-3. Download or share the image
+3. Download or share the infographic
 
 **What it shows**:
+- Your constitution type
 - Key diagnosis points
-- Visual representation of patterns
-- Quick reference guide
-- Easy to share on social media (optional)
+- Essential recommendations
+- Visual icons and graphics
+- Easy to share on social media
 
----
+### 7.3 Report Q&A (Chat with Your Report)
 
-### 6.5 Diagnosis History
+**What it is**: Ask questions about your diagnosis report
+
+**How to use**:
+1. After viewing your report, click the "Chat" button
+2. A chat window will open
+3. Type your questions, such as:
+   - "What does my diagnosis mean?"
+   - "Why should I avoid these foods?"
+   - "How long until I feel better?"
+   - "Explain the acupressure points"
+4. The AI will answer based on your specific diagnosis
+
+**Quick Question Suggestions**:
+- What does my diagnosis mean?
+- Why should I avoid these foods?
+- How long until I feel better?
+- Explain the acupressure points
+
+### 7.4 Diagnosis History
 
 **For logged-in users**:
 
 **Access your history**:
 1. Go to your Patient Dashboard
-2. Click "My Inquiries" or "Diagnosis History"
-3. View all past consultations
+2. The "Health Journey" tab shows all past consultations
 
 **What you can see**:
 - Date and time of each consultation
-- Main complaint/symptoms
-- Diagnosis received
+- Main diagnosis
+- Constitution type
+- Health score
 - Quick access to view full reports
 
 **Benefits**:
@@ -601,56 +897,9 @@ Your diagnosis report contains several key sections:
 
 ---
 
-### 6.6 Medical Reports Upload
+## 8. Language Support
 
-**What it is**: Upload existing medical documents for the AI to consider
-
-**Supported formats**:
-- PDF files
-- Word documents (.doc, .docx)
-- Text files
-- Images of reports
-
-**How to upload**:
-1. During the diagnosis process, look for "Upload Reports" step
-2. Click "Upload" or "Choose File"
-3. Select your medical documents
-4. Wait for upload to complete
-5. The AI will analyze the documents along with your other information
-
-**What to upload**:
-- Blood test results
-- X-ray reports
-- Previous TCM diagnoses
-- Western medicine reports
-- Prescription lists
-
-**Privacy**: All uploaded documents are securely stored and only used for your diagnosis.
-
----
-
-### 6.7 Progress Saving & Resume
-
-**What it is**: Your progress is automatically saved as you go
-
-**How it works**:
-- The system saves your progress after each step
-- If you close the browser or lose connection, you can resume
-- When you return, you'll see a prompt to resume your previous session
-
-**To resume**:
-1. Start a new consultation
-2. If you have saved progress, a dialog will appear
-3. Click "Resume" to continue where you left off
-4. Or click "Start New" to begin fresh
-
-**Note**: Saved progress expires after 7 days for privacy.
-
----
-
-## 7. Language Support
-
-### 7.1 Available Languages
+### 8.1 Available Languages
 
 Sihat TCM supports three languages:
 
@@ -658,7 +907,7 @@ Sihat TCM supports three languages:
 2. **Chinese Simplified** (中文)
 3. **Bahasa Malaysia** (MS)
 
-### 7.2 How to Change Language
+### 8.2 How to Change Language
 
 **On Web**:
 1. Look for the language selector in the top-right corner
@@ -666,12 +915,12 @@ Sihat TCM supports three languages:
 3. Select your preferred language from the dropdown
 4. The entire interface will switch immediately
 
-**On Mobile**:
+**On Mobile App**:
 1. Tap the language icon in the header
 2. Select your language
 3. The app will update instantly
 
-### 7.3 What Gets Translated
+### 8.3 What Gets Translated
 
 - All user interface elements
 - Button labels
@@ -679,14 +928,15 @@ Sihat TCM supports three languages:
 - AI chat conversations
 - Diagnosis reports
 - Recommendations
+- All Patient Portal features
 
 **Note**: Medical terminology may include both English and Chinese terms for accuracy.
 
 ---
 
-## 8. Troubleshooting
+## 9. Troubleshooting
 
-### 8.1 Camera Not Working
+### 9.1 Camera Not Working
 
 **Problem**: Camera doesn't start or shows black screen
 
@@ -706,7 +956,7 @@ Sihat TCM supports three languages:
 
 ---
 
-### 8.2 Microphone Not Working
+### 9.2 Microphone Not Working
 
 **Problem**: Can't record audio or microphone not detected
 
@@ -725,26 +975,26 @@ Sihat TCM supports three languages:
 
 ---
 
-### 8.3 Report Not Generating
+### 9.3 Report Not Generating
 
 **Problem**: Analysis step is stuck or taking too long
 
 **Solutions**:
 1. **Wait longer**: 
-   - Master level can take 2-3 minutes
+   - Analysis can take 1-3 minutes
    - Don't refresh the page
 2. **Check internet**: 
    - Ensure stable internet connection
    - Try refreshing if connection was lost
 3. **Try again**: 
-   - Go back one step and click "Start Analysis" again
+   - Go back one step and click "Generate Report" again
    - If problem persists, start a new consultation
 4. **Contact support**: 
    - If issue continues, report it to support
 
 ---
 
-### 8.4 Can't Login
+### 9.4 Can't Login
 
 **Problem**: Login fails or password not working
 
@@ -764,7 +1014,7 @@ Sihat TCM supports three languages:
 
 ---
 
-### 8.5 PDF Won't Download
+### 9.5 PDF Won't Download
 
 **Problem**: PDF download button doesn't work
 
@@ -783,7 +1033,7 @@ Sihat TCM supports three languages:
 
 ---
 
-### 8.6 Progress Lost
+### 9.6 Progress Lost
 
 **Problem**: Lost progress during diagnosis
 
@@ -800,7 +1050,7 @@ Sihat TCM supports three languages:
 
 ---
 
-### 8.7 Language Not Changing
+### 9.7 Language Not Changing
 
 **Problem**: Language selector doesn't work
 
@@ -817,9 +1067,26 @@ Sihat TCM supports three languages:
 
 ---
 
-## 9. Frequently Asked Questions
+### 9.8 Meal Planner Not Loading
 
-### 9.1 General Questions
+**Problem**: AI Meal Planner won't generate plans
+
+**Solutions**:
+1. **Complete a diagnosis first**: 
+   - The Meal Planner requires a completed TCM diagnosis
+   - Your constitution type is needed for personalization
+2. **Check internet connection**: 
+   - AI generation requires stable internet
+3. **Set dietary preferences**: 
+   - Fill in your allergies and dietary type
+4. **Try regenerating**: 
+   - Click "New Plan" to generate a fresh meal plan
+
+---
+
+## 10. Frequently Asked Questions
+
+### 10.1 General Questions
 
 **Q: Is Sihat TCM a replacement for seeing a real doctor?**
 A: No. Sihat TCM is a diagnostic tool and educational resource. It should complement, not replace, professional medical care. Always consult licensed healthcare practitioners for serious conditions.
@@ -831,14 +1098,14 @@ A: The AI uses advanced models trained on TCM knowledge, but accuracy depends on
 A: No. Sihat TCM is not for emergencies. If you have a medical emergency, call emergency services immediately.
 
 **Q: Is my data private and secure?**
-A: Yes. All data is encrypted and stored securely. See Section 10 for details.
+A: Yes. All data is encrypted and stored securely. See Section 11 for details.
 
 **Q: How often should I get a diagnosis?**
 A: For general wellness, every 2-4 weeks is reasonable. For chronic conditions, consult with a practitioner for frequency recommendations.
 
 ---
 
-### 9.2 About TCM Diagnosis
+### 10.2 About TCM Diagnosis
 
 **Q: What is a "syndrome pattern"?**
 A: In TCM, a syndrome pattern describes the state of imbalance in your body. It's not a disease name but a description of how your body's systems are functioning.
@@ -854,13 +1121,13 @@ A: Use the "Report Q&A" feature to ask questions. You can also consult a TCM pra
 
 ---
 
-### 9.3 About Recommendations
+### 10.3 About Recommendations
 
 **Q: Should I follow all the dietary recommendations?**
 A: Start gradually. Introduce recommended foods slowly and see how your body responds. Everyone is different.
 
 **Q: Can I take the herbal formulas suggested?**
-A: No. Herbal formulas should only be taken under the guidance of a licensed TCM practitioner. The formulas are for educational purposes.
+A: Herbal formulas should only be taken under the guidance of a licensed TCM practitioner. You can use the One-Click Remedy feature to connect with pharmacy partners who can advise you.
 
 **Q: How long until I see results?**
 A: TCM is about gradual, long-term improvement. Some people notice changes in days, others in weeks. Be patient and consistent.
@@ -870,10 +1137,26 @@ A: Yes, but inform both your TCM practitioner and Western doctor about all treat
 
 ---
 
-### 9.4 Technical Questions
+### 10.4 About Patient Portal Features
+
+**Q: Do I need a diagnosis to use the Meal Planner?**
+A: Yes, you need at least one completed TCM diagnosis. The Meal Planner uses your constitution type to personalize recommendations.
+
+**Q: How does the Snore Analysis work?**
+A: Record your sleep sounds for at least 30 minutes. The AI analyzes the audio for snoring patterns, severity, and potential sleep apnea indicators.
+
+**Q: What is the Qi Garden?**
+A: It's a gamified feature where you nurture virtual TCM herbs by completing healthy habits like logging meals, doing exercises, and daily check-ins.
+
+**Q: Can I manage my family's health profiles?**
+A: Yes! Use the Family Care feature to create profiles for family members and track their health journeys.
+
+---
+
+### 10.5 Technical Questions
 
 **Q: Do I need to create an account?**
-A: No, you can use guest mode. However, creating an account allows you to save your history and access past reports.
+A: No, you can use guest mode for basic diagnosis. However, creating an account unlocks all Patient Portal features including Meal Planner, Qi Dose, Family Care, and more.
 
 **Q: Can I use this on my phone?**
 A: Yes. Sihat TCM is fully responsive and works on mobile devices. There's also a dedicated mobile app available.
@@ -886,9 +1169,9 @@ A: No. Sihat TCM requires an internet connection for AI processing and data stor
 
 ---
 
-## 10. Privacy & Security
+## 11. Privacy & Security
 
-### 10.1 Data Collection
+### 11.1 Data Collection
 
 **What we collect**:
 - Account information (email, profile data)
@@ -901,14 +1184,14 @@ A: No. Sihat TCM requires an internet connection for AI processing and data stor
 - Unnecessary personal identifiers
 - Data from other apps or services (unless you explicitly connect them)
 
-### 10.2 Data Storage
+### 11.2 Data Storage
 
 - All data is encrypted in transit (HTTPS)
 - Data at rest is encrypted
 - Stored in secure databases with access controls
 - Regular security audits and updates
 
-### 10.3 Data Usage
+### 11.3 Data Usage
 
 **How we use your data**:
 - To generate your diagnosis
@@ -921,14 +1204,14 @@ A: No. Sihat TCM requires an internet connection for AI processing and data stor
 - Share your data without your consent
 - Use your data for advertising (without permission)
 
-### 10.4 Your Rights
+### 11.4 Your Rights
 
 - **Access**: You can view all your stored data
 - **Correction**: You can update your profile and information
 - **Deletion**: You can request deletion of your account and data
 - **Export**: You can download your diagnosis reports
 
-### 10.5 Security Measures
+### 11.5 Security Measures
 
 - Role-based access control (RBAC)
 - Secure authentication (Supabase Auth)
@@ -936,7 +1219,7 @@ A: No. Sihat TCM requires an internet connection for AI processing and data stor
 - Monitoring for suspicious activity
 - Data backup and recovery procedures
 
-### 10.6 Contact for Privacy Concerns
+### 11.6 Contact for Privacy Concerns
 
 If you have privacy concerns or questions:
 - Check the Privacy Policy (link in footer)
@@ -959,6 +1242,17 @@ If you have privacy concerns or questions:
 - [ ] Step 8: Review Summary
 - [ ] Step 9: View Report
 
+### Patient Portal Features
+
+- [ ] Health Journey Dashboard
+- [ ] AI Meal Planner with TCM Food Checker
+- [ ] Snore Analysis
+- [ ] Vitality Rhythm (Meridian Clock, Solar Terms)
+- [ ] Qi Dose & Qi Garden
+- [ ] Circle of Health (Community)
+- [ ] Family Care
+- [ ] One-Click Remedy (Herb Shop)
+
 ### Tips for Best Results
 
 1. **Be thorough**: Provide complete information
@@ -967,6 +1261,8 @@ If you have privacy concerns or questions:
 4. **Don't rush**: Take your time with each step
 5. **Follow recommendations**: Implement lifestyle changes gradually
 6. **Consult practitioners**: For herbal formulas and complex cases
+7. **Use the Meal Planner**: Personalized nutrition support
+8. **Practice Qi Dose**: Daily exercises for better health
 
 ### Keyboard Shortcuts
 
@@ -984,9 +1280,29 @@ If you have privacy concerns or questions:
 **Yin (阴)**: Cooling, nourishing, passive energy
 **Yang (阳)**: Warming, active, dynamic energy
 **Syndrome Pattern (证型)**: TCM diagnosis describing body's state
+**Constitution (体质)**: Your body type based on TCM classification
 **Pathomechanism (病机)**: How a disease or imbalance develops
 **Acupressure (指压)**: Pressure point massage
 **Herbal Formula (方剂)**: Traditional TCM prescription
+**Meridian (经络)**: Energy pathways in the body
+**Dan Tian (丹田)**: Energy center, lower abdomen
+**Baduanjin (八段锦)**: Eight Brocades, traditional Qigong exercise
+**Paida (拍打)**: Slapping/patting therapy for meridians
+**Solar Terms (节气)**: 24 seasonal divisions in Chinese calendar
+
+---
+
+## Appendix C: TCM Constitution Quick Guide
+
+| Constitution | Key Signs | Foods to Eat | Foods to Avoid |
+|--------------|-----------|--------------|----------------|
+| **Qi Deficiency** | Fatigue, weak voice, sweating | Ginseng, yam, beef, chicken | Cold/raw foods, excessive dairy |
+| **Yang Deficiency** | Cold hands/feet, pale face | Lamb, ginger, cinnamon, walnuts | Cold drinks, watermelon, pear |
+| **Yin Deficiency** | Night sweats, dry mouth | Duck, pear, lily bulb, honey | Spicy foods, alcohol, fried foods |
+| **Phlegm-Dampness** | Heavy body, oily skin | Barley, winter melon, lotus leaf | Fatty foods, sweets, dairy |
+| **Damp-Heat** | Bitter taste, acne | Mung bean, bitter melon, lotus root | Spicy foods, alcohol, greasy foods |
+| **Blood Stasis** | Dark complexion, pain | Hawthorn, brown sugar, turmeric | Cold drinks, fatty meat |
+| **Qi Stagnation** | Mood swings, sighing | Rose tea, orange peel, mint | Stimulants, heavy meals |
 
 ---
 
@@ -1012,6 +1328,4 @@ If you have privacy concerns or questions:
 ---
 
 *Last Updated: December 2024*
-*Version: 2.0*
-
-
+*Version: 3.0*

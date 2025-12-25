@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/lib/supabase/client';
+import { logger } from '@/lib/clientLogger';
 
 /**
  * Hook that syncs language preference between user profile and local state.
@@ -40,9 +41,9 @@ export function useLanguageSync() {
                     .eq('id', user.id)
                     .then(({ error }) => {
                         if (error) {
-                            console.warn('Failed to save language preference to profile:', error);
+                            logger.warn('useLanguageSync', 'Failed to save language preference to profile', error);
                         } else {
-                            console.log(`[LanguageSync] Saved language "${currentLanguage}" to profile`);
+                            logger.info('useLanguageSync', `Saved language "${currentLanguage}" to profile`);
                             // Refresh profile to get the updated preferred_language
                             refreshProfile();
                         }

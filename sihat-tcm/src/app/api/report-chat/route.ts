@@ -1,34 +1,34 @@
 import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
+import { devLog } from '@/lib/systemLogger';
+import { getLanguageInstruction, normalizeLanguage } from '@/lib/translations/languageInstructions';
+import { DEFAULT_FALLBACK_MODELS, parseApiError } from '@/lib/modelFallback';
+import { reportChatRequestSchema, validateRequest, validationErrorResponse } from '@/lib/validations';
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
 
-// Language instruction templates
-const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
-    en: `You MUST respond entirely in English. Be clear, friendly, and educational.`,
-    zh: `你必须完全使用简体中文回复。语言要清晰、友好、有教育性。`,
-    ms: `Anda MESTI menjawab sepenuhnya dalam Bahasa Malaysia. Jelas, mesra, dan bersifat mendidik.`,
-};
-
-// Fallback model cascade - if primary model fails, try these in order
-const FALLBACK_MODELS = [
-    'gemini-2.5-flash',
-    'gemini-2.0-flash-exp',
-    'gemini-2.0-flash',
-];
-
 export async function POST(req: Request) {
     try {
-        // Accept 'model' directly like /api/chat does (this is the working pattern)
-        const { messages, reportData, patientInfo, language = 'en', model = 'gemini-2.0-flash' } = await req.json();
+        const body = await req.json();
 
-        console.log(`[API /api/report-chat] Received request with model: ${model}, language: ${language}`);
+        // Validate request body with Zod
+        const validation = validateRequest(reportChatRequestSchema, body);
+        if (!validation.success) {
+            devLog('warn', 'API/report-chat', 'Validation failed', { error: validation.error });
+            return validationErrorResponse(validation.error, validation.details);
+        }
+
+        const { messages, reportData, patientInfo, language: rawLanguage, model } = validation.data;
+        const language = normalizeLanguage(rawLanguage);
+
+        devLog('info', 'API/report-chat', `Received request`, { model, language });
 
         // Build context from the report data
         const reportContext = buildReportContext(reportData, patientInfo);
 
-        const languageInstruction = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.en;
+        // Get language instruction using centralized utility
+        const languageInstruction = getLanguageInstruction('friendly', language);
 
         const systemPrompt = `${languageInstruction}
 
@@ -66,7 +66,7 @@ Remember: You're here to help them understand their existing report, not to cond
             content: m.content
         }));
 
-        console.log(`[API /api/report-chat] Calling streamText with model: ${model}`);
+        devLog('info', 'API/report-chat', `Calling streamText with model: ${model}`);
 
         // Try the requested model first
         try {
@@ -75,33 +75,33 @@ Remember: You're here to help them understand their existing report, not to cond
                 system: systemPrompt,
                 messages: formattedMessages,
                 onFinish: (completion) => {
-                    console.log(`[API /api/report-chat] Stream finished with ${model}. Text length: ${completion.text.length}`);
+                    devLog('info', 'API/report-chat', `Stream finished with ${model}`, { textLength: completion.text.length });
                 },
             });
 
             return result.toTextStreamResponse();
         } catch (primaryError: any) {
-            console.error(`[API /api/report-chat] Primary model ${model} failed:`, primaryError.message);
+            devLog('error', 'API/report-chat', `Primary model ${model} failed`, { error: primaryError.message });
 
-            // Try fallback models in order
-            for (const fallbackModel of FALLBACK_MODELS) {
+            // Try fallback models in order using centralized fallback list
+            for (const fallbackModel of DEFAULT_FALLBACK_MODELS) {
                 // Skip if it's the same as the failed model
                 if (fallbackModel === model) continue;
 
                 try {
-                    console.log(`[API /api/report-chat] Attempting fallback model: ${fallbackModel}`);
+                    devLog('info', 'API/report-chat', `Attempting fallback model: ${fallbackModel}`);
                     const fallbackResult = streamText({
                         model: google(fallbackModel),
                         system: systemPrompt,
                         messages: formattedMessages,
                         onFinish: (completion) => {
-                            console.log(`[API /api/report-chat] Fallback ${fallbackModel} finished. Text length: ${completion.text.length}`);
+                            devLog('info', 'API/report-chat', `Fallback ${fallbackModel} finished`, { textLength: completion.text.length });
                         },
                     });
 
                     return fallbackResult.toTextStreamResponse();
                 } catch (fallbackError: any) {
-                    console.error(`[API /api/report-chat] Fallback ${fallbackModel} also failed:`, fallbackError.message);
+                    devLog('error', 'API/report-chat', `Fallback ${fallbackModel} also failed`, { error: fallbackError.message });
                     // Continue to next fallback
                 }
             }
@@ -110,9 +110,14 @@ Remember: You're here to help them understand their existing report, not to cond
             throw new Error(`All models failed. Primary error: ${primaryError.message}`);
         }
     } catch (error: any) {
-        console.error("[API /api/report-chat] Fatal Error:", error);
+        devLog('error', 'API/report-chat', 'Fatal Error', { error });
+
+        const { userFriendlyError, errorCode } = parseApiError(error);
+
         return new Response(JSON.stringify({
-            error: error.message || 'Report chat API error'
+            error: userFriendlyError,
+            code: errorCode,
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
         }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }

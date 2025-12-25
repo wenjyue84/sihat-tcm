@@ -8,6 +8,8 @@ import { InquiryChatStep } from './InquiryChatStep'
 import { InquirySummaryStep } from './InquirySummaryStep'
 import { BasicInfoData } from './BasicInfoForm'
 
+import { useAuth } from '@/contexts/AuthContext'
+
 // Doctor selection is now done in BasicInfoForm step 5/5, so removed from here
 type InquiryStepType = 'upload_reports' | 'upload_medicine' | 'chat' | 'summary'
 
@@ -24,6 +26,9 @@ interface InquiryWizardProps {
 }
 
 export function InquiryWizard({ basicInfo, initialData, onComplete, onBack }: InquiryWizardProps) {
+    const { profile } = useAuth()
+    const diagnosisMode = profile?.preferences?.diagnosisMode || 'simple'
+
     // Start directly with upload_reports since doctor is already selected in BasicInfoForm step 5/5
     const [step, setStep] = useState<InquiryStepType>('upload_reports')
     const [data, setData] = useState<{
@@ -70,7 +75,19 @@ export function InquiryWizard({ basicInfo, initialData, onComplete, onBack }: In
 
     const handleChatComplete = (history: any[]) => {
         setData(prev => ({ ...prev, chatHistory: history }))
-        nextStep('summary')
+
+        if (diagnosisMode === 'simple') {
+            // In Simple Mode, skip the summary review step
+            onComplete({
+                inquiryText: "Chat consultation completed (Analysis pending)",
+                chatHistory: history,
+                reportFiles: data.reportFiles,
+                medicineFiles: data.medicineFiles,
+                files: [...data.reportFiles, ...data.medicineFiles]
+            })
+        } else {
+            nextStep('summary')
+        }
     }
 
     const handleSummaryComplete = (summary: string) => {
@@ -123,6 +140,7 @@ export function InquiryWizard({ basicInfo, initialData, onComplete, onBack }: In
                             medicineFiles={data.medicineFiles}
                             onComplete={handleChatComplete}
                             onBack={() => prevStep('upload_medicine')}
+                            diagnosisMode={diagnosisMode}
                         />
                     </motion.div>
                 )}

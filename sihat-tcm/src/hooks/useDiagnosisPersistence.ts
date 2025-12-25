@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { logger } from '@/lib/clientLogger'
 import type { DiagnosisStep } from './useDiagnosisWizard'
 
 const STORAGE_KEY = 'sihat-tcm-diagnosis-progress'
@@ -23,7 +24,7 @@ export function useDiagnosisPersistence() {
             }
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
         } catch (error) {
-            console.error('[useDiagnosisPersistence] Failed to save progress:', error)
+            logger.error('useDiagnosisPersistence', 'Failed to save progress', error)
         }
     }, [])
 
@@ -47,7 +48,7 @@ export function useDiagnosisPersistence() {
 
             return state
         } catch (error) {
-            console.error('[useDiagnosisPersistence] Failed to load progress:', error)
+            logger.error('useDiagnosisPersistence', 'Failed to load progress', error)
             return null
         }
     }, [])
@@ -56,7 +57,7 @@ export function useDiagnosisPersistence() {
         try {
             localStorage.removeItem(STORAGE_KEY)
         } catch (error) {
-            console.error('[useDiagnosisPersistence] Failed to clear progress:', error)
+            logger.error('useDiagnosisPersistence', 'Failed to clear progress', error)
         }
     }, [])
 

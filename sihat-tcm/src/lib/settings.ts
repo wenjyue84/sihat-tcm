@@ -1,4 +1,5 @@
 import { supabaseAdmin } from './supabaseAdmin';
+import { devLog } from './systemLogger';
 
 // Default settings
 export const DEFAULT_SETTINGS = {
@@ -56,7 +57,7 @@ export async function getAdminSettings(): Promise<AdminSettings> {
         const { getSettingsWithFallback } = await import('./settingsStorage');
         return await getSettingsWithFallback();
     } catch (error) {
-        console.error('[Settings] Error fetching settings:', error);
+        devLog('error', 'Settings', 'Error fetching settings', { error });
         return DEFAULT_SETTINGS;
     }
 }

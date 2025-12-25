@@ -2,23 +2,12 @@ import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { getImageAnalysisPrompt } from '@/lib/systemPrompts';
 import { ENHANCED_TONGUE_USER_PROMPT, ENHANCED_TONGUE_SYSTEM_PROMPT } from '@/lib/enhancedTonguePrompt';
-import { supabase } from '@/lib/supabase';
+import { logInfo, logError, devLog } from '@/lib/systemLogger';
+import { analyzeImageRequestSchema, validateRequest, validationErrorResponse } from '@/lib/validations';
+import { fetchCustomPrompt } from '@/lib/promptLoader';
+import { ADVANCED_FALLBACK_MODELS, MODEL_STATUS_MESSAGES } from '@/lib/modelFallback';
 
 export const maxDuration = 120;
-
-// Models ordered from most advanced to least advanced
-const MODEL_FALLBACK_ORDER = [
-    'gemini-3-pro-preview',
-    'gemini-2.5-pro',
-    'gemini-2.0-flash',
-];
-
-// Friendly names for status updates (without mentioning Gemini)
-const MODEL_STATUS: Record<string, string> = {
-    'gemini-3-pro-preview': 'Using master-level comprehensive analysis...',
-    'gemini-2.5-pro': 'Using expert-level analysis...',
-    'gemini-2.0-flash': 'Using rapid analysis...',
-};
 
 function isValidObservation(text: string): boolean {
     if (!text || text.trim().length < 50) return false;
@@ -39,32 +28,26 @@ function isValidObservation(text: string): boolean {
 
 export async function POST(req: Request) {
     try {
-        const { image, type, symptoms, mainComplaint } = await req.json();
+        const body = await req.json();
 
-        if (!image) {
-            return new Response(JSON.stringify({
-                observation: 'No image was provided. Please take a photo.',
-                potential_issues: [],
-                modelUsed: 0,
-                status: 'error'
-            }), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' }
-            });
+        // Validate request body with Zod
+        const validation = validateRequest(analyzeImageRequestSchema, body);
+        if (!validation.success) {
+            devLog('warn', 'API/analyze-image', 'Validation failed', { error: validation.error });
+            return validationErrorResponse(validation.error, validation.details);
         }
 
-        // Fetch custom image analysis prompt from admin (if exists)
-        let customPrompt = '';
-        try {
-            const { data } = await supabase
-                .from('system_prompts')
-                .select('prompt_text')
-                .eq('role', 'doctor_image')
-                .single();
-            if (data && data.prompt_text) customPrompt = data.prompt_text;
-        } catch (e) {
-            console.error("Error fetching image analysis prompt", e);
-        }
+        const { image, type, symptoms, mainComplaint } = validation.data;
+
+        // Log the analysis request
+        logInfo('ImageProc', `Image analysis started for type: ${type || 'unknown'}`, {
+            imageType: type,
+            hasSymptoms: !!symptoms,
+            hasMainComplaint: !!mainComplaint
+        });
+
+        // Fetch custom image analysis prompt using centralized loader
+        const customPrompt = await fetchCustomPrompt('doctor_image');
 
         // Get the appropriate prompt based on image type
         const imageType = type === 'tongue' ? 'tongue' : type === 'face' ? 'face' : 'other';
@@ -79,7 +62,7 @@ export async function POST(req: Request) {
             // Use enhanced prompts for detailed analysis_tags
             systemPrompt = ENHANCED_TONGUE_SYSTEM_PROMPT;
             userPrompt = ENHANCED_TONGUE_USER_PROMPT;
-            console.log('[analyze-image] Using ENHANCED tongue prompts for analysis_tags');
+            devLog('debug', 'API/analyze-image', 'Using ENHANCED tongue prompts for analysis_tags');
         } else {
             // Use custom prompt if set, otherwise use default from library
             systemPrompt = customPrompt || defaultSystemPrompt;
@@ -91,10 +74,10 @@ export async function POST(req: Request) {
             userPrompt += `\n\nPATIENT CONTEXT:\nMain Complaint: ${mainComplaint || 'Not provided'}\nSymptoms: ${symptoms || 'Not provided'}`;
         }
 
-        // Try each model in order until we get a valid result
-        for (let i = 0; i < MODEL_FALLBACK_ORDER.length; i++) {
-            const modelId = MODEL_FALLBACK_ORDER[i];
-            console.log(`[analyze-image] Trying model ${i + 1}/${MODEL_FALLBACK_ORDER.length}: ${modelId}`);
+        // Try each model in order until we get a valid result using centralized fallback list
+        for (let i = 0; i < ADVANCED_FALLBACK_MODELS.length; i++) {
+            const modelId = ADVANCED_FALLBACK_MODELS[i];
+            devLog('info', 'API/analyze-image', `Trying model ${i + 1}/${ADVANCED_FALLBACK_MODELS.length}: ${modelId}`);
 
             try {
                 const result = await generateText({
@@ -112,10 +95,10 @@ export async function POST(req: Request) {
                 });
 
                 const text = result.text;
-                console.log(`[analyze-image] Model ${modelId} response:`, text?.substring(0, 200));
+                devLog('debug', 'API/analyze-image', `Model ${modelId} response`, { preview: text?.substring(0, 200) });
 
                 if (!text || text.trim() === '') {
-                    console.log(`[analyze-image] Model ${modelId} returned empty response, trying next...`);
+                    devLog('warn', 'API/analyze-image', `Model ${modelId} returned empty response, trying next...`);
                     continue;
                 }
 
@@ -130,11 +113,11 @@ export async function POST(req: Request) {
                     const isValidImage = data.is_valid_image ?? true;
                     const imageDescription = data.image_description || '';
 
-                    console.log(`[analyze-image] Model ${modelId} confidence: ${confidence}, valid: ${isValidImage}, desc: ${imageDescription}`);
+                    devLog('debug', 'API/analyze-image', `Model ${modelId} analysis`, { confidence, isValidImage, imageDescription });
 
                     // If confidence is too low or image is invalid, return appropriate response
                     if (!isValidImage || confidence < 60) {
-                        console.log(`[analyze-image] Image not valid for ${type} analysis. Confidence: ${confidence}%`);
+                        devLog('warn', 'API/analyze-image', `Image not valid for ${type} analysis`, { confidence });
                         return new Response(JSON.stringify({
                             observation: '',
                             potential_issues: [],
@@ -151,15 +134,24 @@ export async function POST(req: Request) {
                     const observation = data.observation || data.analysis || data.description || text;
 
                     // Log analysis_tags for debugging
-                    console.log(`[analyze-image] analysis_tags found: ${data.analysis_tags?.length || 0}`,
-                        data.analysis_tags ? JSON.stringify(data.analysis_tags[0]?.title) : 'none');
+                    devLog('debug', 'API/analyze-image', `analysis_tags found: ${data.analysis_tags?.length || 0}`, {
+                        firstTag: data.analysis_tags?.[0]?.title
+                    });
 
                     if (isValidObservation(observation)) {
+                        // Log successful analysis
+                        logInfo('AI', `Image analysis completed with model ${i + 1}`, {
+                            modelUsed: modelId,
+                            confidence,
+                            imageType: type,
+                            analysisTagsCount: data.analysis_tags?.length || 0
+                        });
+
                         return new Response(JSON.stringify({
                             observation,
                             potential_issues: data.potential_issues || data.issues || data.indications || data.pattern_suggestions || [],
                             modelUsed: i + 1,
-                            status: MODEL_STATUS[modelId] || 'Analysis complete',
+                            status: MODEL_STATUS_MESSAGES[modelId] || 'Analysis complete',
                             confidence: confidence,
                             image_description: imageDescription,
                             // Enhanced tongue analysis fields
@@ -171,7 +163,7 @@ export async function POST(req: Request) {
                             headers: { 'Content-Type': 'application/json' }
                         });
                     }
-                    console.log(`[analyze-image] Model ${modelId} returned invalid observation, trying next...`);
+                    devLog('warn', 'API/analyze-image', `Model ${modelId} returned invalid observation, trying next...`);
                 } catch {
                     // JSON parse failed, check if raw text is valid
                     if (isValidObservation(text)) {
@@ -179,7 +171,7 @@ export async function POST(req: Request) {
                             observation: text,
                             potential_issues: [],
                             modelUsed: i + 1,
-                            status: MODEL_STATUS[modelId] || 'Analysis complete',
+                            status: MODEL_STATUS_MESSAGES[modelId] || 'Analysis complete',
                             confidence: 100 // Assume high confidence for raw text responses
                         }), {
                             headers: { 'Content-Type': 'application/json' }
@@ -187,7 +179,7 @@ export async function POST(req: Request) {
                     }
                 }
             } catch (modelError: any) {
-                console.error(`[analyze-image] Model ${modelId} failed:`, modelError.message);
+                devLog('error', 'API/analyze-image', `Model ${modelId} failed`, { error: modelError.message });
                 // Continue to next model
             }
         }
@@ -203,7 +195,9 @@ export async function POST(req: Request) {
         });
 
     } catch (error: any) {
-        console.error('[analyze-image] Critical error:', error);
+        devLog('error', 'API/analyze-image', 'Critical error', { error });
+        // Log the error
+        logError('ImageProc', `Image analysis failed: ${error.message}`, { error: error.message });
         return new Response(JSON.stringify({
             observation: `Analysis encountered an issue. Please continue and we'll review the image later.`,
             potential_issues: [],

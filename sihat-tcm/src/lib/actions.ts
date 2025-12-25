@@ -1,32 +1,177 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { mockMedicalReports } from '@/lib/mockMedicalReports'
+import { devLog } from '@/lib/systemLogger'
+import type {
+    DiagnosisSession,
+    SaveDiagnosisInput,
+    MedicalReport,
+    SaveMedicalReportInput,
+    HealthTrends,
+    ActionResult,
+    DiagnosisReport,
+    VitalSigns
+} from '@/types/database'
+
+// Re-export types for backward compatibility
+export type { DiagnosisSession, SaveDiagnosisInput, MedicalReport, SaveMedicalReportInput }
 
 /**
- * Server Actions for "My Health Passport" - Patient History System
- * 
- * These actions handle saving, retrieving, and managing diagnosis sessions
- * for logged-in users. All operations respect RLS policies.
+ * Helper function to extract symptoms from diagnosis report
  */
-
-export interface DiagnosisSession {
-    id: string
-    user_id: string
-    primary_diagnosis: string
-    constitution?: string
-    overall_score?: number
-    full_report: any // JSONB - complete report from AI
-    notes?: string
-    created_at: string
-    updated_at: string
+function extractSymptomsFromReport(report: DiagnosisReport): string[] | null {
+    const symptoms: string[] = []
+    
+    // Extract from analysis key_findings - parse common symptom keywords
+    if (report.analysis?.key_findings?.from_inquiry) {
+        const inquiryText = report.analysis.key_findings.from_inquiry.toLowerCase()
+        
+        // Common symptom keywords to look for
+        const symptomKeywords: Record<string, string> = {
+            'headache': 'Headache',
+            'fatigue': 'Fatigue',
+            'dizziness': 'Dizziness',
+            'nausea': 'Nausea',
+            'insomnia': 'Insomnia',
+            'night sweats': 'Night sweats',
+            'dry mouth': 'Dry mouth',
+            'chest tightness': 'Chest tightness',
+            'bloating': 'Bloating',
+            'palpitations': 'Palpitations',
+            'shortness of breath': 'Shortness of breath',
+            'back pain': 'Back pain',
+            'joint pain': 'Joint pain',
+            'cold extremities': 'Cold extremities',
+            'hot flashes': 'Hot flashes'
+        }
+        
+        // Check for each symptom keyword
+        for (const [keyword, symptom] of Object.entries(symptomKeywords)) {
+            if (inquiryText.includes(keyword) && !symptoms.includes(symptom)) {
+                symptoms.push(symptom)
+            }
+        }
+    }
+    
+    return symptoms.length > 0 ? symptoms : null
 }
 
-export interface SaveDiagnosisInput {
-    primary_diagnosis: string
-    constitution?: string
-    overall_score?: number
-    full_report: any
-    notes?: string
+/**
+ * Helper function to extract medicines from diagnosis report
+ */
+function extractMedicinesFromReport(report: DiagnosisReport): string[] | null {
+    // Check input_data first (most reliable)
+    if (report.input_data?.medicines && report.input_data.medicines.length > 0) {
+        return report.input_data.medicines
+    }
+    
+    // Extract from herbal_formulas in recommendations
+    const medicines: string[] = []
+    if (report.recommendations?.herbal_formulas) {
+        report.recommendations.herbal_formulas.forEach(formula => {
+            if (formula.name) {
+                medicines.push(formula.name)
+            }
+        })
+    }
+    
+    return medicines.length > 0 ? medicines : null
+}
+
+/**
+ * Helper function to extract vital signs from diagnosis report
+ */
+function extractVitalSignsFromReport(report: DiagnosisReport): VitalSigns | null {
+    if (report.patient_summary?.vital_signs) {
+        return report.patient_summary.vital_signs
+    }
+    return null
+}
+
+/**
+ * Helper function to get mock symptoms based on diagnosis type
+ */
+function getMockSymptomsForDiagnosis(diagnosis: string): string[] {
+    const diagnosisLower = diagnosis.toLowerCase()
+    
+    if (diagnosisLower.includes('yin deficiency') || diagnosisLower.includes('阴虚')) {
+        return ['Night sweats', 'Insomnia', 'Dry mouth', 'Hot palms and soles']
+    } else if (diagnosisLower.includes('yang deficiency') || diagnosisLower.includes('阳虚')) {
+        return ['Cold extremities', 'Lower back pain', 'Fatigue', 'Frequent urination']
+    } else if (diagnosisLower.includes('qi deficiency') || diagnosisLower.includes('气虚')) {
+        return ['Fatigue', 'Shortness of breath', 'Weak voice', 'Spontaneous sweating']
+    } else if (diagnosisLower.includes('qi stagnation') || diagnosisLower.includes('气滞')) {
+        return ['Chest tightness', 'Irritability', 'Bloating', 'Sighing']
+    } else if (diagnosisLower.includes('blood deficiency') || diagnosisLower.includes('血虚')) {
+        return ['Dizziness', 'Palpitations', 'Poor memory', 'Pale complexion']
+    } else if (diagnosisLower.includes('damp heat') || diagnosisLower.includes('湿热')) {
+        return ['Heavy feeling', 'Sticky mouth', 'Yellow discharge', 'Urinary discomfort']
+    } else if (diagnosisLower.includes('wind-cold') || diagnosisLower.includes('风寒')) {
+        return ['Chills', 'Runny nose', 'Body aches', 'Headache']
+    } else if (diagnosisLower.includes('phlegm') || diagnosisLower.includes('痰')) {
+        return ['Chest oppression', 'Cough with phlegm', 'Heaviness', 'Foggy thinking']
+    }
+    
+    return ['Fatigue', 'General discomfort', 'Sleep issues']
+}
+
+/**
+ * Helper function to get mock medicines based on diagnosis type
+ */
+function getMockMedicinesForDiagnosis(diagnosis: string): string[] {
+    const diagnosisLower = diagnosis.toLowerCase()
+    
+    if (diagnosisLower.includes('yin deficiency') || diagnosisLower.includes('阴虚')) {
+        return ['Liu Wei Di Huang Wan', 'Zhi Bai Di Huang Wan']
+    } else if (diagnosisLower.includes('yang deficiency') || diagnosisLower.includes('阳虚')) {
+        return ['Jin Gui Shen Qi Wan', 'You Gui Wan']
+    } else if (diagnosisLower.includes('qi deficiency') || diagnosisLower.includes('气虚')) {
+        return ['Si Jun Zi Tang', 'Bu Zhong Yi Qi Tang']
+    } else if (diagnosisLower.includes('qi stagnation') || diagnosisLower.includes('气滞')) {
+        return ['Xiao Yao San', 'Chai Hu Shu Gan San']
+    } else if (diagnosisLower.includes('blood deficiency') || diagnosisLower.includes('血虚')) {
+        return ['Si Wu Tang', 'Gui Pi Tang']
+    } else if (diagnosisLower.includes('damp heat') || diagnosisLower.includes('湿热')) {
+        return ['Ba Zheng San', 'Long Dan Xie Gan Tang']
+    } else if (diagnosisLower.includes('wind-cold') || diagnosisLower.includes('风寒')) {
+        return ['Gui Zhi Tang', 'Ma Huang Tang']
+    } else if (diagnosisLower.includes('phlegm') || diagnosisLower.includes('痰')) {
+        return ['Er Chen Tang', 'Wen Dan Tang']
+    }
+    
+    return ['General TCM Formula']
+}
+
+/**
+ * Helper function to extract treatment plan summary from diagnosis report
+ */
+function extractTreatmentPlanFromReport(report: DiagnosisReport): string | null {
+    const planParts: string[] = []
+    
+    if (report.recommendations) {
+        const rec = report.recommendations
+        
+        // Dietary recommendations
+        if (rec.food_therapy?.beneficial && rec.food_therapy.beneficial.length > 0) {
+            planParts.push(`Diet: ${rec.food_therapy.beneficial.slice(0, 3).join(', ')}`)
+        } else if (rec.food && rec.food.length > 0) {
+            planParts.push(`Diet: ${rec.food.slice(0, 3).join(', ')}`)
+        }
+        
+        // Lifestyle recommendations
+        if (rec.lifestyle && rec.lifestyle.length > 0) {
+            planParts.push(`Lifestyle: ${rec.lifestyle.slice(0, 2).join(', ')}`)
+        }
+        
+        // Herbal formulas
+        if (rec.herbal_formulas && rec.herbal_formulas.length > 0) {
+            const formulaNames = rec.herbal_formulas.map(f => f.name).join(', ')
+            planParts.push(`Herbs: ${formulaNames}`)
+        }
+    }
+    
+    return planParts.length > 0 ? planParts.join(' | ') : null
 }
 
 /**
@@ -34,7 +179,7 @@ export interface SaveDiagnosisInput {
  * @param reportData - The diagnosis report data to save
  * @returns The created diagnosis session or error
  */
-export async function saveDiagnosis(reportData: SaveDiagnosisInput) {
+export async function saveDiagnosis(reportData: SaveDiagnosisInput): Promise<ActionResult<DiagnosisSession>> {
     try {
         const supabase = await createClient()
 
@@ -48,6 +193,18 @@ export async function saveDiagnosis(reportData: SaveDiagnosisInput) {
             }
         }
 
+        // Extract symptoms from full_report or use provided symptoms
+        const symptoms = reportData.symptoms || extractSymptomsFromReport(reportData.full_report)
+        
+        // Extract medicines from full_report or use provided medicines
+        const medicines = reportData.medicines || extractMedicinesFromReport(reportData.full_report)
+        
+        // Extract vital signs from full_report or use provided vital_signs
+        const vitalSigns = reportData.vital_signs || extractVitalSignsFromReport(reportData.full_report)
+        
+        // Extract treatment plan from recommendations
+        const treatmentPlan = reportData.treatment_plan || extractTreatmentPlanFromReport(reportData.full_report)
+
         // Insert diagnosis session
         const { data, error } = await supabase
             .from('diagnosis_sessions')
@@ -57,13 +214,19 @@ export async function saveDiagnosis(reportData: SaveDiagnosisInput) {
                 constitution: reportData.constitution,
                 overall_score: reportData.overall_score,
                 full_report: reportData.full_report,
-                notes: reportData.notes
+                notes: reportData.notes,
+                symptoms: symptoms,
+                medicines: medicines,
+                vital_signs: vitalSigns,
+                clinical_notes: reportData.clinical_notes,
+                treatment_plan: treatmentPlan,
+                follow_up_date: reportData.follow_up_date
             })
             .select()
             .single()
 
         if (error) {
-            console.error('[saveDiagnosis] Error:', error)
+            devLog('error', 'Actions', '[saveDiagnosis] Error', { error })
             return {
                 success: false,
                 error: error.message
@@ -74,11 +237,12 @@ export async function saveDiagnosis(reportData: SaveDiagnosisInput) {
             success: true,
             data: data as DiagnosisSession
         }
-    } catch (error: any) {
-        console.error('[saveDiagnosis] Unexpected error:', error)
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[saveDiagnosis] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to save diagnosis'
         return {
             success: false,
-            error: error.message || 'Failed to save diagnosis'
+            error: errorMessage
         }
     }
 }
@@ -89,7 +253,7 @@ export async function saveDiagnosis(reportData: SaveDiagnosisInput) {
  * @param offset - Offset for pagination (default: 0)
  * @returns Array of diagnosis sessions or error
  */
-export async function getPatientHistory(limit: number = 50, offset: number = 0) {
+export async function getPatientHistory(limit: number = 50, offset: number = 0): Promise<ActionResult<DiagnosisSession[]>> {
     try {
         const supabase = await createClient()
 
@@ -112,7 +276,7 @@ export async function getPatientHistory(limit: number = 50, offset: number = 0) 
             .range(offset, offset + limit - 1)
 
         if (error) {
-            console.error('[getPatientHistory] Error:', error)
+            devLog('error', 'Actions', '[getPatientHistory] Error', { error })
             return {
                 success: false,
                 error: error.message
@@ -124,11 +288,12 @@ export async function getPatientHistory(limit: number = 50, offset: number = 0) 
             data: data as DiagnosisSession[],
             total: count || 0
         }
-    } catch (error: any) {
-        console.error('[getPatientHistory] Unexpected error:', error)
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[getPatientHistory] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch history'
         return {
             success: false,
-            error: error.message || 'Failed to fetch history'
+            error: errorMessage
         }
     }
 }
@@ -138,7 +303,7 @@ export async function getPatientHistory(limit: number = 50, offset: number = 0) 
  * @param sessionId - The ID of the diagnosis session
  * @returns The diagnosis session or error
  */
-export async function getSessionById(sessionId: string) {
+export async function getSessionById(sessionId: string): Promise<ActionResult<DiagnosisSession>> {
     try {
         const supabase = await createClient()
 
@@ -160,7 +325,7 @@ export async function getSessionById(sessionId: string) {
             .single()
 
         if (error) {
-            console.error('[getSessionById] Error:', error)
+            devLog('error', 'Actions', '[getSessionById] Error', { error })
             return {
                 success: false,
                 error: error.code === 'PGRST116' ? 'Session not found' : error.message
@@ -171,11 +336,12 @@ export async function getSessionById(sessionId: string) {
             success: true,
             data: data as DiagnosisSession
         }
-    } catch (error: any) {
-        console.error('[getSessionById] Unexpected error:', error)
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[getSessionById] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch session'
         return {
             success: false,
-            error: error.message || 'Failed to fetch session'
+            error: errorMessage
         }
     }
 }
@@ -186,7 +352,7 @@ export async function getSessionById(sessionId: string) {
  * @param notes - The updated notes text
  * @returns Success status or error
  */
-export async function updateSessionNotes(sessionId: string, notes: string) {
+export async function updateSessionNotes(sessionId: string, notes: string): Promise<ActionResult> {
     try {
         const supabase = await createClient()
 
@@ -208,7 +374,7 @@ export async function updateSessionNotes(sessionId: string, notes: string) {
             .eq('user_id', user.id)
 
         if (error) {
-            console.error('[updateSessionNotes] Error:', error)
+            devLog('error', 'Actions', '[updateSessionNotes] Error', { error })
             return {
                 success: false,
                 error: error.message
@@ -218,11 +384,12 @@ export async function updateSessionNotes(sessionId: string, notes: string) {
         return {
             success: true
         }
-    } catch (error: any) {
-        console.error('[updateSessionNotes] Unexpected error:', error)
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[updateSessionNotes] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to update notes'
         return {
             success: false,
-            error: error.message || 'Failed to update notes'
+            error: errorMessage
         }
     }
 }
@@ -232,7 +399,7 @@ export async function updateSessionNotes(sessionId: string, notes: string) {
  * @param sessionId - The ID of the diagnosis session to delete
  * @returns Success status or error
  */
-export async function deleteSession(sessionId: string) {
+export async function deleteSession(sessionId: string): Promise<ActionResult> {
     try {
         const supabase = await createClient()
 
@@ -254,7 +421,7 @@ export async function deleteSession(sessionId: string) {
             .eq('user_id', user.id)
 
         if (error) {
-            console.error('[deleteSession] Error:', error)
+            devLog('error', 'Actions', '[deleteSession] Error', { error })
             return {
                 success: false,
                 error: error.message
@@ -264,11 +431,12 @@ export async function deleteSession(sessionId: string) {
         return {
             success: true
         }
-    } catch (error: any) {
-        console.error('[deleteSession] Unexpected error:', error)
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[deleteSession] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to delete session'
         return {
             success: false,
-            error: error.message || 'Failed to delete session'
+            error: errorMessage
         }
     }
 }
@@ -278,7 +446,7 @@ export async function deleteSession(sessionId: string) {
  * @param days - Number of days to analyze (default: 30)
  * @returns Trend statistics or error
  */
-export async function getHealthTrends(days: number = 30) {
+export async function getHealthTrends(days: number = 30): Promise<ActionResult<HealthTrends>> {
     try {
         const supabase = await createClient()
 
@@ -305,7 +473,7 @@ export async function getHealthTrends(days: number = 30) {
             .order('created_at', { ascending: true })
 
         if (error) {
-            console.error('[getHealthTrends] Error:', error)
+            devLog('error', 'Actions', '[getHealthTrends] Error', { error })
             return {
                 success: false,
                 error: error.message
@@ -343,11 +511,12 @@ export async function getHealthTrends(days: number = 30) {
                 }))
             }
         }
-    } catch (error: any) {
-        console.error('[getHealthTrends] Unexpected error:', error)
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[getHealthTrends] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to calculate trends'
         return {
             success: false,
-            error: error.message || 'Failed to calculate trends'
+            error: errorMessage
         }
     }
 }
@@ -608,6 +777,18 @@ export async function seedPatientHistory() {
         const sessions = mockSessions.map(session => {
             const date = new Date(now)
             date.setDate(date.getDate() - session.daysAgo)
+            
+            // Extract symptoms and medicines from full_report for mock data
+            const symptoms = extractSymptomsFromReport(session.full_report) || getMockSymptomsForDiagnosis(session.primary_diagnosis)
+            const medicines = extractMedicinesFromReport(session.full_report) || getMockMedicinesForDiagnosis(session.primary_diagnosis)
+            const vitalSigns = extractVitalSignsFromReport(session.full_report) || {
+                bpm: 70 + Math.floor(Math.random() * 20),
+                blood_pressure: `${110 + Math.floor(Math.random() * 20)}/${70 + Math.floor(Math.random() * 15)}`,
+                temperature: 36.5 + (Math.random() * 0.8),
+                heart_rate: 65 + Math.floor(Math.random() * 25)
+            }
+            const treatmentPlan = extractTreatmentPlanFromReport(session.full_report) || 'Dietary adjustments | Lifestyle modifications | Herbal support'
+            
             return {
                 user_id: user.id,
                 primary_diagnosis: session.primary_diagnosis,
@@ -615,6 +796,11 @@ export async function seedPatientHistory() {
                 overall_score: session.overall_score,
                 full_report: session.full_report,
                 notes: session.notes,
+                symptoms: symptoms,
+                medicines: medicines,
+                vital_signs: vitalSigns,
+                treatment_plan: treatmentPlan,
+                clinical_notes: `Patient presented with ${symptoms?.slice(0, 2).join(' and ') || 'symptoms'}. Recommended ${medicines?.[0] || 'herbal support'} for treatment.`,
                 created_at: date.toISOString()
             }
         })
@@ -624,7 +810,7 @@ export async function seedPatientHistory() {
             .insert(sessions)
 
         if (error) {
-            console.error('[seedPatientHistory] Error:', error)
+            devLog('error', 'Actions', '[seedPatientHistory] Error', { error })
             return {
                 success: false,
                 error: error.message
@@ -634,11 +820,375 @@ export async function seedPatientHistory() {
         return {
             success: true
         }
-    } catch (error: any) {
-        console.error('[seedPatientHistory] Unexpected error:', error)
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[seedPatientHistory] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to seed patient history'
         return {
             success: false,
-            error: error.message
+            error: errorMessage
         }
     }
 }
+
+/**
+ * Get all medical reports for the current user
+ * @returns Array of medical reports or error
+ */
+export async function getMedicalReports(): Promise<ActionResult<MedicalReport[]>> {
+    try {
+        const supabase = await createClient()
+
+        // Get current user
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+            return {
+                success: false,
+                error: 'Not authenticated.'
+            }
+        }
+
+        // Fetch reports ordered by date (newest first)
+        const { data, error } = await supabase
+            .from('medical_reports')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+
+        if (error) {
+            devLog('error', 'Actions', '[getMedicalReports] Error', { error })
+            return {
+                success: false,
+                error: error.message
+            }
+        }
+
+        return {
+            success: true,
+            data: data as MedicalReport[]
+        }
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[getMedicalReports] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch medical reports'
+        return {
+            success: false,
+            error: errorMessage
+        }
+    }
+}
+
+/**
+ * Save a new medical report metadata to the database
+ * @param reportData - The report metadata to save
+ */
+export async function saveMedicalReport(reportData: SaveMedicalReportInput): Promise<ActionResult<MedicalReport>> {
+    try {
+        const supabase = await createClient()
+
+        // Get current user
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+            return {
+                success: false,
+                error: 'Not authenticated.'
+            }
+        }
+
+        const { data, error } = await supabase
+            .from('medical_reports')
+            .insert({
+                user_id: user.id,
+                name: reportData.name,
+                date: reportData.date,
+                size: reportData.size,
+                type: reportData.type,
+                file_url: reportData.file_url,
+                extracted_text: reportData.extracted_text
+            })
+            .select()
+            .single()
+
+        if (error) {
+            devLog('error', 'Actions', '[saveMedicalReport] Error', { error })
+            return {
+                success: false,
+                error: error.message
+            }
+        }
+
+        return {
+            success: true,
+            data: data as MedicalReport
+        }
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[saveMedicalReport] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to save medical report'
+        return {
+            success: false,
+            error: errorMessage
+        }
+    }
+}
+
+/**
+ * Delete a medical report
+ * @param reportId - The ID of the report to delete
+ */
+export async function deleteMedicalReport(reportId: string): Promise<ActionResult> {
+    try {
+        const supabase = await createClient()
+
+        // Get current user
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+            return {
+                success: false,
+                error: 'Not authenticated.'
+            }
+        }
+
+        const { error } = await supabase
+            .from('medical_reports')
+            .delete()
+            .eq('id', reportId)
+            .eq('user_id', user.id)
+
+        if (error) {
+            devLog('error', 'Actions', '[deleteMedicalReport] Error', { error })
+            return {
+                success: false,
+                error: error.message
+            }
+        }
+
+        return {
+            success: true
+        }
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[deleteMedicalReport] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to delete medical report'
+        return {
+            success: false,
+            error: errorMessage
+        }
+    }
+}
+
+/**
+ * Seed the patient's medical reports with mock documents
+ * Useful for development or restoring demo data for testing
+ */
+export async function seedMedicalReports() {
+    try {
+        const supabase = await createClient()
+
+        // Get current user
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+            return {
+                success: false,
+                error: 'Not authenticated.'
+            }
+        }
+
+        const now = new Date()
+
+        // Mock medical reports matching the content in mockMedicalReports.ts
+        const mockReports = [
+            {
+                name: 'Blood Test Result.pdf',
+                date: '2023-11-15',
+                size: '245 KB',
+                type: 'application/pdf',
+                daysAgo: 40
+            },
+            {
+                name: 'X-Ray Report - Chest.pdf',
+                date: '2023-10-20',
+                size: '1.2 MB',
+                type: 'application/pdf',
+                daysAgo: 66
+            },
+            {
+                name: 'Annual Health Checkup.pdf',
+                date: '2023-08-12',
+                size: '520 KB',
+                type: 'application/pdf',
+                daysAgo: 135
+            },
+            {
+                name: 'MRI Scan Report.pdf',
+                date: '2023-06-05',
+                size: '3.8 MB',
+                type: 'application/pdf',
+                daysAgo: 203
+            },
+            {
+                name: 'Prescription History.pdf',
+                date: '2023-05-20',
+                size: '180 KB',
+                type: 'application/pdf',
+                daysAgo: 219
+            }
+        ]
+
+        const reports = mockReports.map(report => {
+            const createdDate = new Date(now)
+            createdDate.setDate(createdDate.getDate() - report.daysAgo)
+
+            // Get mock content if available
+            const extractedText = mockMedicalReports[report.name] || null
+
+            return {
+                user_id: user.id,
+                name: report.name,
+                date: report.date,
+                size: report.size,
+                type: report.type,
+                file_url: null, // No actual file, just metadata
+                extracted_text: extractedText,
+                created_at: createdDate.toISOString()
+            }
+        })
+
+        const { error } = await supabase
+            .from('medical_reports')
+            .insert(reports)
+
+        if (error) {
+            devLog('error', 'Actions', '[seedMedicalReports] Error', { error })
+            return {
+                success: false,
+                error: error.message
+            }
+        }
+
+        return {
+            success: true
+        }
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[seedMedicalReports] Unexpected error', { error })
+    }
+}
+
+/**
+ * Get the symptoms from the last inquiry for the current user
+ * @returns The symptoms string or error
+ */
+export async function getLastSymptoms(): Promise<ActionResult<string>> {
+    try {
+        const supabase = await createClient()
+
+        // Get current user
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+            return {
+                success: false,
+                error: 'Not authenticated. Please log in to import symptoms.'
+            }
+        }
+
+        // Fetch last inquiry ordered by created_at (newest first)
+        const { data, error } = await supabase
+            .from('inquiries')
+            .select('symptoms')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+        if (error) {
+            devLog('error', 'Actions', '[getLastSymptoms] Error', { error })
+            return {
+                success: false,
+                error: error.message
+            }
+        }
+
+        if (!data) {
+            return {
+                success: false,
+                error: 'No previous symptoms found.'
+            }
+        }
+
+        return {
+            success: true,
+            data: data.symptoms || ''
+        }
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[getLastSymptoms] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch symptoms'
+        return {
+            success: false,
+            error: errorMessage
+        }
+    }
+}
+
+/**
+ * Get the medicines from the last diagnosis for the current user
+ * @returns Array of medicine names or error
+ */
+export async function getLastMedicines(): Promise<ActionResult<string[]>> {
+    try {
+        const supabase = await createClient()
+
+        // Get current user
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+            return {
+                success: false,
+                error: 'Not authenticated. Please log in to import medicines.'
+            }
+        }
+
+        // Fetch last diagnosis session ordered by created_at (newest first)
+        const { data, error } = await supabase
+            .from('diagnosis_sessions')
+            .select('full_report')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+        if (error) {
+            devLog('error', 'Actions', '[getLastMedicines] Error', { error })
+            return {
+                success: false,
+                error: error.message
+            }
+        }
+
+        if (!data) {
+            return {
+                success: false,
+                error: 'No previous diagnosis found.'
+            }
+        }
+
+        // Try to extract medicines from the full_report
+        // We look for reportWithProfile.input_data.medicines (new format)
+        // or recommendations.herbal_formulas (as long-term meds often overlap)
+        const report = data.full_report as any
+        const medicines = report.input_data?.medicines || []
+
+        return {
+            success: true,
+            data: medicines
+        }
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[getLastMedicines] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to fetch medicines'
+        return {
+            success: false,
+            error: errorMessage
+        }
+    }
+}
+

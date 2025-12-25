@@ -8,6 +8,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useLanguage } from '@/contexts/LanguageContext'
 
+import { DiagnosisSession } from '@/lib/actions'
+import { DigitalTwin } from './DigitalTwin'
+
 interface TrendData {
     sessionCount: number
     averageScore: number | null
@@ -19,7 +22,9 @@ interface TrendData {
 interface TrendWidgetProps {
     trendData: TrendData | null
     loading?: boolean
+    sessions: DiagnosisSession[]
 }
+
 
 // Score breakdown modal for Average Score
 function AverageScoreModal({
@@ -420,7 +425,7 @@ function ProgressModal({
     )
 }
 
-export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
+export function TrendWidget({ trendData, loading, sessions }: TrendWidgetProps) {
     const [showAverageModal, setShowAverageModal] = useState(false)
     const [showProgressModal, setShowProgressModal] = useState(false)
     const { t } = useLanguage()
@@ -428,12 +433,16 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
     if (loading) {
         return (
             <Card className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-100">
-                <div className="flex items-center justify-center h-32">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
+                <div className="flex flex-col md:flex-row gap-6">
+                    <div className="flex-1 flex items-center justify-center h-64">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
+                    </div>
+                    <div className="w-full md:w-80 h-80 bg-slate-100 rounded-3xl animate-pulse" />
                 </div>
             </Card>
         )
     }
+
 
     if (!trendData || trendData.sessionCount === 0) {
         return (
@@ -450,12 +459,13 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
         )
     }
 
-    const { sessionCount, averageScore, improvement, diagnosisCounts, sessions } = trendData
+    const { sessionCount, averageScore, improvement, diagnosisCounts, sessions: trendSessions } = trendData
     const topDiagnosis = Object.entries(diagnosisCounts).sort((a, b) => b[1] - a[1])[0]
 
+
     return (
-        <>
-            <Card className="overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 border-emerald-100/50">
+        <div className="flex flex-col lg:flex-row gap-6">
+            <Card className="flex-1 overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 border-emerald-100/50 flex flex-col">
                 {/* Header */}
                 <div className="p-6 pb-4 border-b border-emerald-100/50">
                     <h3 className="text-xl font-bold text-emerald-900 flex items-center gap-2">
@@ -468,25 +478,25 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
                 </div>
 
                 {/* Stats Grid */}
-                <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3 gap-3 flex-1">
                     {/* Total Sessions */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: 0.1 }}
-                        className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-emerald-100/50"
+                        className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-sm border border-emerald-100/50"
                     >
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-emerald-700 uppercase tracking-wider mb-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[10px] font-medium text-emerald-700 uppercase tracking-wide mb-0.5">
                                     {t.patientDashboard.healthJourney.totalSessions}
                                 </p>
-                                <p className="text-3xl font-bold text-emerald-900">
+                                <p className="text-2xl font-bold text-emerald-900 leading-tight">
                                     {sessionCount}
                                 </p>
                             </div>
-                            <div className="p-2 bg-emerald-100 rounded-lg">
-                                <Calendar className="w-5 h-5 text-emerald-600" />
+                            <div className="p-1.5 bg-emerald-100 rounded-md ml-2 flex-shrink-0">
+                                <Calendar className="w-4 h-4 text-emerald-600" />
                             </div>
                         </div>
                     </motion.div>
@@ -498,26 +508,26 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.3, delay: 0.2 }}
                             onClick={() => setShowAverageModal(true)}
-                            className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-teal-100/50 cursor-pointer hover:shadow-md hover:border-teal-300 transition-all group"
+                            className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-sm border border-teal-100/50 cursor-pointer hover:shadow-md hover:border-teal-300 transition-all group"
                         >
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <p className="text-xs font-medium text-teal-700 uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <div className="flex items-center justify-between">
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[10px] font-medium text-teal-700 uppercase tracking-wide mb-0.5 flex items-center gap-1">
                                         {t.patientDashboard.healthJourney.averageScore}
-                                        <Info className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <Info className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                                     </p>
-                                    <p className="text-3xl font-bold text-teal-900">
+                                    <p className="text-2xl font-bold text-teal-900 leading-tight">
                                         {averageScore}
                                     </p>
-                                    <p className="text-xs text-teal-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <p className="text-[9px] text-teal-600 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                         Click for details →
                                     </p>
                                 </div>
-                                <div className={`p-2 rounded-lg ${averageScore >= 75 ? 'bg-emerald-100' :
+                                <div className={`p-1.5 rounded-md ml-2 flex-shrink-0 ${averageScore >= 75 ? 'bg-emerald-100' :
                                     averageScore >= 50 ? 'bg-amber-100' :
                                         'bg-red-100'
                                     }`}>
-                                    <Activity className={`w-5 h-5 ${averageScore >= 75 ? 'text-emerald-600' :
+                                    <Activity className={`w-4 h-4 ${averageScore >= 75 ? 'text-emerald-600' :
                                         averageScore >= 50 ? 'text-amber-600' :
                                             'text-red-600'
                                         }`} />
@@ -533,37 +543,37 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.3, delay: 0.3 }}
                             onClick={() => setShowProgressModal(true)}
-                            className="bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-cyan-100/50 cursor-pointer hover:shadow-md hover:border-cyan-300 transition-all group"
+                            className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-sm border border-cyan-100/50 cursor-pointer hover:shadow-md hover:border-cyan-300 transition-all group"
                         >
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <p className="text-xs font-medium text-cyan-700 uppercase tracking-wider mb-1 flex items-center gap-1">
+                            <div className="flex items-center justify-between">
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[10px] font-medium text-cyan-700 uppercase tracking-wide mb-0.5 flex items-center gap-1">
                                         {t.patientDashboard.healthJourney.progress}
-                                        <Info className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <Info className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                                     </p>
-                                    <div className="flex items-baseline gap-2">
-                                        <p className={`text-3xl font-bold ${improvement > 0 ? 'text-emerald-600' :
+                                    <div className="flex items-baseline gap-1.5">
+                                        <p className={`text-2xl font-bold leading-tight ${improvement > 0 ? 'text-emerald-600' :
                                             improvement < 0 ? 'text-red-600' :
                                                 'text-slate-600'
                                             }`}>
                                             {improvement > 0 ? '+' : ''}{improvement}
                                         </p>
-                                        <span className="text-sm text-slate-500">{t.patientDashboard.healthJourney.points}</span>
+                                        <span className="text-xs text-slate-500">{t.patientDashboard.healthJourney.points}</span>
                                     </div>
-                                    <p className="text-xs text-cyan-600 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <p className="text-[9px] text-cyan-600 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                         Click for details →
                                     </p>
                                 </div>
-                                <div className={`p-2 rounded-lg ${improvement > 0 ? 'bg-emerald-100' :
+                                <div className={`p-1.5 rounded-md ml-2 flex-shrink-0 ${improvement > 0 ? 'bg-emerald-100' :
                                     improvement < 0 ? 'bg-red-100' :
                                         'bg-slate-100'
                                     }`}>
                                     {improvement > 0 ? (
-                                        <TrendingUp className="w-5 h-5 text-emerald-600" />
+                                        <TrendingUp className="w-4 h-4 text-emerald-600" />
                                     ) : improvement < 0 ? (
-                                        <TrendingDown className="w-5 h-5 text-red-600" />
+                                        <TrendingDown className="w-4 h-4 text-red-600" />
                                     ) : (
-                                        <Activity className="w-5 h-5 text-slate-600" />
+                                        <Activity className="w-4 h-4 text-slate-600" />
                                     )}
                                 </div>
                             </div>
@@ -591,13 +601,18 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
                 )}
             </Card>
 
+            {/* Digital Twin Visualizer */}
+            <div className="w-full lg:w-80">
+                <DigitalTwin sessions={sessions} loading={loading} />
+            </div>
+
             {/* Modals */}
             {averageScore !== null && (
                 <AverageScoreModal
                     open={showAverageModal}
                     onOpenChange={setShowAverageModal}
                     averageScore={averageScore}
-                    sessions={sessions}
+                    sessions={trendSessions}
                 />
             )}
 
@@ -606,10 +621,12 @@ export function TrendWidget({ trendData, loading }: TrendWidgetProps) {
                     open={showProgressModal}
                     onOpenChange={setShowProgressModal}
                     improvement={improvement}
-                    sessions={sessions}
+                    sessions={trendSessions}
                 />
             )}
-        </>
+
+        </div>
     )
+
 }
 

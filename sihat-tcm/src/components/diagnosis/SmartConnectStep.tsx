@@ -3,12 +3,14 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronRight, ChevronLeft, Wifi, Heart, Activity, Droplets, Thermometer, Brain, Zap, Check, Settings, Smartphone, Footprints, Moon, Database, FileBarChart, ArrowRight, SkipForward } from 'lucide-react'
+import { ChevronRight, Heart, Activity, Droplets, Thermometer, Brain, Check, Smartphone, ArrowRight, Zap, Download, Wifi } from 'lucide-react'
 import { IoTConnectionWizard, IoTDeviceType } from './IoTConnectionWizard'
-import { HealthDataImportWizard, ImportedHealthData } from './HealthDataImportWizard'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { supabase } from '@/lib/supabase/client'
+import { PractitionerList } from './report/PractitionerList'
 
 export interface SmartConnectData {
     pulseRate?: number | string
@@ -17,7 +19,7 @@ export interface SmartConnectData {
     bodyTemp?: number | string
     hrv?: number | string
     stressLevel?: number | string
-    healthData?: ImportedHealthData
+    // Removed imported health data as it is mobile only
 }
 
 interface SmartConnectStepProps {
@@ -26,8 +28,8 @@ interface SmartConnectStepProps {
     initialData?: SmartConnectData
 }
 
-// Section types for internal navigation
-type SectionType = 'overview' | 'iot-metrics' | 'health-import' | 'summary'
+// Simplified sections: Overview -> Manual Input
+type SectionType = 'overview' | 'iot-metrics'
 
 const healthMetrics = [
     {
@@ -98,17 +100,19 @@ const healthMetrics = [
     }
 ]
 
-const sections: SectionType[] = ['overview', 'iot-metrics', 'health-import', 'summary']
+const sections: SectionType[] = ['overview', 'iot-metrics']
 
 export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConnectStepProps) {
     const { t } = useLanguage()
     const { setNavigationState } = useDiagnosisProgress()
     const [data, setData] = useState<SmartConnectData>(initialData || {})
     const [activeWizard, setActiveWizard] = useState<IoTDeviceType | null>(null)
-    const [showHealthWizard, setShowHealthWizard] = useState(false)
     const [currentSection, setCurrentSection] = useState<SectionType>('overview')
+    const [showPractitioners, setShowPractitioners] = useState(false)
+    const [doctors, setDoctors] = useState<any[]>([])
+    const [loadingDoctors, setLoadingDoctors] = useState(false)
 
-    // Ref pattern to allow stable callbacks even if props change (prevents setNavigationState loop)
+    // Ref pattern to allow stable callbacks
     const onCompleteRef = useRef(onComplete)
     const onBackRef = useRef(onBack)
 
@@ -116,6 +120,36 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
         onCompleteRef.current = onComplete
         onBackRef.current = onBack
     }, [onComplete, onBack])
+
+    useEffect(() => {
+        if (showPractitioners && doctors.length === 0) {
+            setLoadingDoctors(true)
+            const fetchDoctors = async () => {
+                try {
+                    const { data } = await supabase.from('tcm_practitioners').select('*')
+                    if (data) {
+                        setDoctors(data.map((d: any) => ({
+                            id: d.id,
+                            name: d.name,
+                            photo: d.photo,
+                            clinicName: d.clinic_name,
+                            specialties: d.specialties || [],
+                            address: d.address,
+                            phone: d.phone,
+                            experience: d.experience,
+                            wazeLink: d.waze_link,
+                            workingHours: d.working_hours
+                        })))
+                    }
+                } catch (error) {
+                    console.error('Error fetching doctors:', error)
+                } finally {
+                    setLoadingDoctors(false)
+                }
+            }
+            fetchDoctors()
+        }
+    }, [showPractitioners, doctors.length])
 
     const currentSectionIndex = sections.indexOf(currentSection)
 
@@ -128,34 +162,6 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
         setActiveWizard(null)
     }
 
-    const handleHealthDataImport = (healthData: ImportedHealthData) => {
-        setData(prev => ({ ...prev, healthData }))
-        setShowHealthWizard(false)
-    }
-
-    // Generate mock data for all health metrics
-    const generateMockData = () => {
-        const mockData: SmartConnectData = {
-            pulseRate: Math.floor(Math.random() * (95 - 65) + 65),
-            bloodPressure: `${Math.floor(Math.random() * (130 - 110) + 110)}/${Math.floor(Math.random() * (85 - 70) + 70)}`,
-            bloodOxygen: Math.floor(Math.random() * (99 - 96) + 96),
-            bodyTemp: (Math.random() * (37.1 - 36.3) + 36.3).toFixed(1),
-            hrv: Math.floor(Math.random() * (80 - 30) + 30),
-            stressLevel: Math.floor(Math.random() * (45 - 15) + 15),
-            healthData: {
-                provider: 'Demo Data',
-                steps: Math.floor(Math.random() * (15000 - 5000) + 5000),
-                sleepHours: Number((Math.random() * (9 - 6) + 6).toFixed(1)),
-                heartRate: Math.floor(Math.random() * (85 - 60) + 60),
-                calories: Math.floor(Math.random() * (2500 - 1500) + 1500),
-                lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            },
-        }
-        setData(mockData)
-        // Go directly to summary after loading all data
-        setCurrentSection('summary')
-    }
-
     const handleSubmit = useCallback(() => {
         onCompleteRef.current(data)
     }, [data])
@@ -164,8 +170,10 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
         const nextIndex = currentSectionIndex + 1
         if (nextIndex < sections.length) {
             setCurrentSection(sections[nextIndex])
+        } else {
+            handleSubmit()
         }
-    }, [currentSectionIndex])
+    }, [currentSectionIndex, handleSubmit])
 
     const goToPreviousSection = useCallback(() => {
         const prevIndex = currentSectionIndex - 1
@@ -182,13 +190,12 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
 
     // Sync with global navigation state
     useEffect(() => {
-        const isFirst = currentSection === 'overview'
-        const isLast = currentSection === 'summary'
+        const isLast = currentSection === 'iot-metrics'
 
         setNavigationState({
             showNext: true,
             showBack: true,
-            showSkip: isFirst, // Show skip only on overview
+            showSkip: true,
             canNext: true,
             onNext: isLast ? handleSubmit : goToNextSection,
             onBack: goToPreviousSection,
@@ -196,19 +203,12 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
         })
     }, [currentSection, handleSubmit, goToNextSection, goToPreviousSection, handleSkip, setNavigationState])
 
-    // Count only IoT metrics for the counter (exclude healthData)
-    const iotMetricCount = Object.entries(data).filter(([key, v]) =>
-        key !== 'healthData' && v !== undefined && v !== null && v !== ''
-    ).length
-
-    const hasAnyData = iotMetricCount > 0 || data.healthData !== undefined
+    const filledCount = Object.values(data).filter(v => v !== undefined && v !== '' && v !== null).length
 
     // Section titles for the stepper
     const sectionTitles: Record<SectionType, string> = {
         'overview': t.smartConnect.overview || 'Overview',
-        'iot-metrics': t.smartConnect.iotDevices || 'IoT Devices',
-        'health-import': t.smartConnect.healthAppData || 'Health Apps',
-        'summary': t.smartConnect.summary || 'Summary'
+        'iot-metrics': t.smartConnect.iotDevices || 'Manual Input',
     }
 
     // Render section stepper
@@ -257,91 +257,63 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                     <div className="relative z-10 w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-full border border-emerald-500/30 flex items-center justify-center shadow-xl shadow-emerald-500/10">
                         <Activity className="w-10 h-10 text-emerald-400" />
                     </div>
-                    {/* Floating satellites */}
-                    <motion.div
-                        animate={{ y: [0, -8, 0] }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                        className="absolute -top-1 -right-1 p-2 bg-slate-800 rounded-full border border-slate-700 shadow-lg z-20"
-                    >
-                        <Heart className="w-4 h-4 text-rose-400" />
-                    </motion.div>
-                    <motion.div
-                        animate={{ y: [0, 8, 0] }}
-                        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                        className="absolute -bottom-1 -left-1 p-2 bg-slate-800 rounded-full border border-slate-700 shadow-lg z-20"
-                    >
-                        <Smartphone className="w-4 h-4 text-blue-400" />
-                    </motion.div>
+                    {/* Phone Icon */}
+                    <div className="absolute -bottom-2 -right-2 p-2 bg-slate-800 rounded-full border border-slate-700 shadow-lg z-20">
+                        <Smartphone className="w-5 h-5 text-blue-400" />
+                    </div>
                 </div>
 
                 <h3 className="text-2xl font-bold text-white mb-3">
-                    {t.smartConnect.welcomeTitle || 'Connect Your Health Devices'}
+                    Connect Health Data
                 </h3>
-                <p className="text-slate-400 text-sm leading-relaxed max-w-xs mx-auto">
-                    {t.smartConnect.welcomeDescription || 'Sync data from your smart devices and health apps for a more comprehensive health analysis.'}
+                <p className="text-slate-400 text-sm leading-relaxed max-w-sm mx-auto mb-6">
+                    For automatic device syncing, please download our mobile app.
+                    On the web portal, you can manually enter your health readings.
                 </p>
-            </div>
 
-            {/* Metrics Preview */}
-            <div className="grid grid-cols-2 gap-3 mb-8 max-w-md mx-auto">
-                <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/50 flex items-center gap-3">
-                    <div className="p-2 bg-rose-500/10 rounded-lg">
-                        <Heart className="w-5 h-5 text-rose-500" />
-                    </div>
-                    <div className="text-left">
-                        <div className="text-xs text-slate-400">Monitor</div>
-                        <div className="text-sm font-semibold text-slate-200">{t.smartConnect.iotDevices || 'Vitals'}</div>
-                    </div>
-                </div>
-                <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/50 flex items-center gap-3">
-                    <div className="p-2 bg-blue-500/10 rounded-lg">
-                        <Smartphone className="w-5 h-5 text-blue-500" />
-                    </div>
-                    <div className="text-left">
-                        <div className="text-xs text-slate-400">Sync</div>
-                        <div className="text-sm font-semibold text-slate-200">{t.smartConnect.healthAppData || 'Health Apps'}</div>
-                    </div>
+                <div className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-sm text-emerald-300 max-w-sm mx-auto">
+                    <p className="font-semibold mb-1">Mobile App Exclusive</p>
+                    <p className="opacity-80">Automatic device detection is available on iOS and Android.</p>
                 </div>
             </div>
 
             {/* Action Buttons */}
             <div className="space-y-3 max-w-md mx-auto">
                 <Button
-                    onClick={generateMockData}
-                    className="w-full h-16 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-blue-500/20 active:scale-[0.98] transition-all rounded-xl border border-white/10 touch-manipulation"
+                    onClick={goToNextSection}
+                    className="w-full h-16 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg active:scale-[0.98] transition-all rounded-xl border border-white/10 touch-manipulation"
                 >
                     <div className="flex items-center gap-4">
                         <div className="p-2 bg-white/20 rounded-lg">
-                            <Database className="w-5 h-5 text-white" />
+                            <Activity className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1 text-left">
-                            <div className="font-semibold text-base leading-none mb-1">{t.smartConnect.useAllData || 'Use All Available Data'}</div>
-                            <div className="text-xs text-blue-100/80">Populate with demo values</div>
+                            <div className="font-semibold text-base leading-none mb-1">Enter Data Manually</div>
+                            <div className="text-xs text-white/80">Input your pulse, BP, etc.</div>
                         </div>
+                        <ArrowRight className="w-5 h-5 text-white/70" />
                     </div>
                 </Button>
 
                 <Button
-                    onClick={goToNextSection}
                     variant="outline"
-                    className="w-full h-16 bg-slate-800/50 backdrop-blur-sm border-slate-700 hover:bg-slate-800 hover:border-emerald-500/50 active:scale-[0.98] transition-all rounded-xl group touch-manipulation"
+                    className="w-full h-16 bg-slate-800/50 backdrop-blur-sm border-slate-700 hover:bg-slate-800 active:scale-[0.98] transition-all rounded-xl group touch-manipulation"
                 >
                     <div className="flex items-center gap-4 w-full">
-                        <div className="p-2 bg-slate-700/50 rounded-lg group-hover:bg-emerald-500/20 transition-colors">
-                            <Settings className="w-5 h-5 text-slate-400 group-hover:text-emerald-400" />
+                        <div className="p-2 bg-slate-700/50 rounded-lg group-hover:bg-blue-500/20 transition-colors">
+                            <Download className="w-5 h-5 text-slate-400 group-hover:text-blue-400" />
                         </div>
                         <div className="flex-1 text-left">
-                            <div className="font-semibold text-base text-slate-200 group-hover:text-white leading-none mb-1">{t.smartConnect.customSetup || 'Custom Setup'}</div>
-                            <div className="text-xs text-slate-500 group-hover:text-emerald-400/70">Configure devices manually</div>
+                            <div className="font-semibold text-base text-slate-200 group-hover:text-white leading-none mb-1">Download Mobile App</div>
+                            <div className="text-xs text-slate-500 group-hover:text-blue-400/70">iOS & Android</div>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-emerald-500" />
                     </div>
                 </Button>
             </div>
         </motion.div>
     )
 
-    // IoT Metrics Section
+    // IoT Metrics Section (Renamed to Manual Input)
     const renderIoTMetricsSection = () => (
         <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -349,20 +321,21 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
             exit={{ opacity: 0, x: -20 }}
             className="p-4 sm:p-6"
         >
-            <div className="text-center mb-4">
+            <div className="text-center mb-6">
                 <h3 className="text-lg font-semibold text-white mb-1">
-                    {t.smartConnect.connectDevices || 'Connect IoT Devices'}
+                    Manual Health Data Input
                 </h3>
                 <p className="text-slate-400 text-sm">
-                    {t.smartConnect.tapToConnectDescription || 'Tap each card to connect a device'}
+                    Tap a card to enter your readings manually
                 </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 mb-8">
                 {healthMetrics.map((metric, index) => {
                     const Icon = metric.icon
                     const value = data[metric.key as keyof SmartConnectData]
-                    const isConnected = value !== undefined && value !== null && value !== '' && typeof value !== 'object'
+                    // Basic check: is there a value?
+                    const isFilled = value !== undefined && value !== null && value !== ''
 
                     return (
                         <motion.div
@@ -376,13 +349,13 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                                 className={`
                                     relative w-full min-h-[100px] p-3 rounded-xl border transition-all duration-300
                                     active:scale-[0.98] touch-manipulation
-                                    ${isConnected
+                                    ${isFilled
                                         ? `${metric.bgColor} ${metric.borderColor} shadow-lg`
                                         : 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600'
                                     }
                                 `}
                             >
-                                {isConnected && (
+                                {isFilled && (
                                     <motion.div
                                         initial={{ scale: 0 }}
                                         animate={{ scale: 1 }}
@@ -394,27 +367,26 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
 
                                 <div className={`
                                     w-10 h-10 rounded-lg flex items-center justify-center mb-2 mx-auto
-                                    ${isConnected
+                                    ${isFilled
                                         ? `bg-gradient-to-br ${metric.color}`
                                         : 'bg-slate-700/50'
                                     }
                                 `}>
-                                    <Icon className={`w-5 h-5 ${isConnected ? 'text-white' : metric.textColor}`} />
+                                    <Icon className={`w-5 h-5 ${isFilled ? 'text-white' : metric.textColor}`} />
                                 </div>
 
-                                <p className={`text-sm font-medium mb-1 ${isConnected ? metric.textColor : 'text-slate-300'}`}>
+                                <p className={`text-sm font-medium mb-1 ${isFilled ? metric.textColor : 'text-slate-300'}`}>
                                     {t.smartConnect[metric.labelKey as keyof typeof t.smartConnect]}
                                 </p>
 
-                                {isConnected ? (
+                                {isFilled ? (
                                     <div className="flex items-baseline justify-center gap-1">
                                         <span className="text-lg font-bold text-white">{String(value)}</span>
                                         <span className="text-xs text-slate-400">{metric.unit}</span>
                                     </div>
                                 ) : (
-                                    <span className="text-xs text-emerald-400 font-semibold flex items-center justify-center gap-1">
-                                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-                                        {t.smartConnect.connect}
+                                    <span className="text-xs text-slate-500 flex items-center justify-center gap-1">
+                                        Tap to enter
                                     </span>
                                 )}
                             </button>
@@ -423,207 +395,34 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                 })}
             </div>
 
+            {/* Panel Practitioner Note */}
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 text-left">
+                <div className="flex gap-3">
+                    <div className="p-2 bg-blue-500/20 rounded-lg h-fit">
+                        <Activity className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-semibold text-blue-300 mb-1">Want higher accuracy?</h4>
+                        <p className="text-xs text-slate-300 leading-relaxed">
+                            Visit our <button onClick={() => setShowPractitioners(true)} className="font-semibold text-white hover:underline focus:outline-none hover:text-blue-200 transition-colors">Panel Practitioners</button> listed in your final report.
+                            Our doctors use certified medical devices to measure your vitals with clinical accuracy, ensuring the best possible diagnosis for you.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {/* Progress indicator */}
             <div className="mt-4 p-3 bg-slate-800/50 rounded-xl">
                 <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-slate-400">{t.smartConnect.metricsConnected}</span>
-                    <span className="text-sm font-semibold text-emerald-400">{iotMetricCount}/{healthMetrics.length}</span>
+                    <span className="text-sm text-slate-400">Metrics Entered</span>
+                    <span className="text-sm font-semibold text-emerald-400">{filledCount}/{healthMetrics.length}</span>
                 </div>
                 <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                     <motion.div
                         className="h-full bg-gradient-to-r from-emerald-500 to-teal-400"
                         initial={{ width: 0 }}
-                        animate={{ width: `${(iotMetricCount / healthMetrics.length) * 100}%` }}
+                        animate={{ width: `${(filledCount / healthMetrics.length) * 100}%` }}
                     />
-                </div>
-            </div>
-        </motion.div>
-    )
-
-    // Health Import Section
-    const renderHealthImportSection = () => (
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="p-4 sm:p-6"
-        >
-            <div className="text-center mb-6">
-                <div className="inline-flex p-3 bg-emerald-500/20 rounded-xl mb-3">
-                    <Smartphone className="w-8 h-8 text-emerald-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-white mb-1">
-                    {t.smartConnect.healthAppData || 'Health App Data'}
-                </h3>
-                <p className="text-slate-400 text-sm">
-                    {t.smartConnect.importDescription || 'Import data from your favorite health apps'}
-                </p>
-            </div>
-
-            {!data.healthData ? (
-                <div className="space-y-4 max-w-md mx-auto">
-                    <Button
-                        type="button"
-                        onClick={() => setShowHealthWizard(true)}
-                        className="w-full h-14 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg active:scale-[0.98] touch-manipulation"
-                    >
-                        <Activity className="w-5 h-5 mr-2" />
-                        <span>{t.smartConnect.importHealthData || 'Import Health Data'}</span>
-                    </Button>
-
-                    {/* Brand icons row */}
-                    <div className="flex items-center justify-center gap-4 text-slate-400">
-                        <div className="flex items-center gap-1.5 text-xs">
-                            <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
-                                <Activity className="w-3.5 h-3.5 text-blue-400" />
-                            </div>
-                            <span>Samsung</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs">
-                            <div className="w-6 h-6 rounded-full bg-rose-500/20 flex items-center justify-center">
-                                <Heart className="w-3.5 h-3.5 text-rose-400" />
-                            </div>
-                            <span>Apple</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs">
-                            <div className="w-6 h-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                                <Footprints className="w-3.5 h-3.5 text-yellow-400" />
-                            </div>
-                            <span>Google</span>
-                        </div>
-                    </div>
-                </div>
-            ) : (
-                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 max-w-md mx-auto">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                            <div className="p-2 bg-emerald-500/30 rounded-full">
-                                <Check className="w-4 h-4 text-emerald-400" />
-                            </div>
-                            <span className="font-semibold text-emerald-300">{t.smartConnect.importedFrom} {data.healthData.provider}</span>
-                        </div>
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowHealthWizard(true)}
-                            className="text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20"
-                        >
-                            {t.smartConnect.update}
-                        </Button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                        <div className="flex items-center gap-2 p-3 bg-slate-800/60 rounded-lg">
-                            <Footprints className="w-5 h-5 text-blue-400" />
-                            <div>
-                                <span className="text-sm font-medium text-white block">{data.healthData.steps.toLocaleString()}</span>
-                                <span className="text-xs text-slate-500">{t.smartConnect.steps}</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 p-3 bg-slate-800/60 rounded-lg">
-                            <Moon className="w-5 h-5 text-indigo-400" />
-                            <div>
-                                <span className="text-sm font-medium text-white block">{data.healthData.sleepHours}h</span>
-                                <span className="text-xs text-slate-500">{t.smartConnect.sleep}</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 p-3 bg-slate-800/60 rounded-lg">
-                            <Heart className="w-5 h-5 text-rose-400" />
-                            <div>
-                                <span className="text-sm font-medium text-white block">{data.healthData.heartRate}</span>
-                                <span className="text-xs text-slate-500">bpm</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 p-3 bg-slate-800/60 rounded-lg">
-                            <Activity className="w-5 h-5 text-orange-400" />
-                            <div>
-                                <span className="text-sm font-medium text-white block">{data.healthData.calories}</span>
-                                <span className="text-xs text-slate-500">kcal</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </motion.div>
-    )
-
-    // Summary Section
-    const renderSummarySection = () => (
-        <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="p-4 sm:p-6"
-        >
-            <div className="text-center mb-6">
-                <div className="inline-flex p-3 bg-emerald-500/20 rounded-xl mb-3">
-                    <FileBarChart className="w-8 h-8 text-emerald-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-white mb-1">
-                    {t.smartConnect.dataReady || 'Your Data Summary'}
-                </h3>
-            </div>
-
-            <div className="space-y-4 max-w-md mx-auto">
-                {/* IoT Metrics Summary */}
-                <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                            <Wifi className="w-5 h-5 text-emerald-400" />
-                            <span className="font-medium text-white">{t.smartConnect.iotDevices || 'IoT Devices'}</span>
-                        </div>
-                        <span className="text-sm text-emerald-400">{iotMetricCount}/{healthMetrics.length}</span>
-                    </div>
-                    {iotMetricCount > 0 ? (
-                        <div className="grid grid-cols-3 gap-2">
-                            {healthMetrics.filter(m => {
-                                const value = data[m.key as keyof SmartConnectData]
-                                return value !== undefined && value !== null && value !== '' && typeof value !== 'object'
-                            }).map(metric => (
-                                <div key={metric.id} className={`p-2 rounded-lg ${metric.bgColor} ${metric.borderColor} border text-center`}>
-                                    <span className="text-xs text-slate-300 block">{t.smartConnect[metric.labelKey as keyof typeof t.smartConnect]}</span>
-                                    <span className="text-sm font-bold text-white">{String(data[metric.key as keyof SmartConnectData])}</span>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-sm text-slate-500 text-center py-2">{t.smartConnect.noDevicesConnected || 'No devices connected'}</p>
-                    )}
-                    <button
-                        onClick={() => setCurrentSection('iot-metrics')}
-                        className="w-full mt-3 text-sm text-emerald-400 hover:text-emerald-300 flex items-center justify-center gap-1"
-                    >
-                        <Settings className="w-4 h-4" />
-                        {iotMetricCount > 0 ? t.smartConnect.editDevices || 'Edit devices' : t.smartConnect.addDevices || 'Add devices'}
-                    </button>
-                </div>
-
-                {/* Health App Summary */}
-                <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                            <Smartphone className="w-5 h-5 text-emerald-400" />
-                            <span className="font-medium text-white">{t.smartConnect.healthAppData || 'Health App'}</span>
-                        </div>
-                        {data.healthData && <Check className="w-5 h-5 text-emerald-400" />}
-                    </div>
-                    {data.healthData ? (
-                        <div className="flex items-center gap-3 p-2 bg-emerald-500/10 rounded-lg">
-                            <div className="flex-1 grid grid-cols-2 gap-2 text-sm">
-                                <div><span className="text-slate-400">{t.smartConnect.steps}:</span> <span className="text-white">{data.healthData.steps.toLocaleString()}</span></div>
-                                <div><span className="text-slate-400">{t.smartConnect.sleep}:</span> <span className="text-white">{data.healthData.sleepHours}h</span></div>
-                            </div>
-                        </div>
-                    ) : (
-                        <p className="text-sm text-slate-500 text-center py-2">{t.smartConnect.noHealthData || 'No health app connected'}</p>
-                    )}
-                    <button
-                        onClick={() => setCurrentSection('health-import')}
-                        className="w-full mt-3 text-sm text-emerald-400 hover:text-emerald-300 flex items-center justify-center gap-1"
-                    >
-                        <Settings className="w-4 h-4" />
-                        {data.healthData ? t.smartConnect.editHealthApp || 'Edit health app' : t.smartConnect.addHealthApp || 'Add health app'}
-                    </button>
                 </div>
             </div>
         </motion.div>
@@ -663,14 +462,10 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                 <AnimatePresence mode="wait">
                     {currentSection === 'overview' && renderOverviewSection()}
                     {currentSection === 'iot-metrics' && renderIoTMetricsSection()}
-                    {currentSection === 'health-import' && renderHealthImportSection()}
-                    {currentSection === 'summary' && renderSummarySection()}
                 </AnimatePresence>
             </div>
 
-
-
-            {/* IoT Connection Wizard */}
+            {/* Manual Input Wizard (formerly IoT Connection Wizard) */}
             {activeWizard && (
                 <IoTConnectionWizard
                     isOpen={true}
@@ -685,12 +480,16 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                 />
             )}
 
-            {/* Health Data Import Wizard */}
-            <HealthDataImportWizard
-                isOpen={showHealthWizard}
-                onClose={() => setShowHealthWizard(false)}
-                onDataImported={handleHealthDataImport}
-            />
+            <Dialog open={showPractitioners} onOpenChange={setShowPractitioners}>
+                <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto bg-slate-50">
+                    <DialogHeader>
+                        <DialogTitle className="text-emerald-800">Our Panel Practitioners</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <PractitionerList doctors={doctors} loading={loadingDoctors} variants={{}} />
+                    </div>
+                </DialogContent>
+            </Dialog>
         </Card>
     )
 }

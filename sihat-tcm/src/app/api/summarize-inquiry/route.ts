@@ -3,40 +3,36 @@ import { generateText } from 'ai';
 import { INQUIRY_SUMMARY_PROMPT } from '@/lib/systemPrompts';
 import { supabase } from '@/lib/supabase';
 import { getGeminiApiKeyAsync } from '@/lib/settings';
+import { devLog } from '@/lib/systemLogger';
+import { summarizeInquiryRequestSchema, validateRequest, validationErrorResponse } from '@/lib/validations';
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
     const startTime = Date.now();
-    console.log('[summarize-inquiry] Request started');
+    devLog('info', 'API/summarize-inquiry', 'Request started');
 
     try {
+        const body = await req.json();
+
+        // Validate request body with Zod
+        const validation = validateRequest(summarizeInquiryRequestSchema, body);
+        if (!validation.success) {
+            devLog('warn', 'API/summarize-inquiry', 'Validation failed', { error: validation.error });
+            return validationErrorResponse(validation.error, validation.details);
+        }
+
         // Model is now passed from frontend based on doctor level selection:
         // - Master (名医): gemini-3-pro-preview
-        // - Expert (专家): gemini-2.5-pro  
+        // - Expert (专家): gemini-2.5-pro
         // - Physician (医师): gemini-2.0-flash
-        // NOTE: gemini-1.5-flash is deprecated and no longer used
-        const { chatHistory, reportFiles, medicineFiles, basicInfo, language = 'en', model = 'gemini-1.5-pro' } = await req.json();
-        console.log('[summarize-inquiry] Language:', language);
-        console.log('[summarize-inquiry] Using model:', model);
-        console.log('[summarize-inquiry] Chat history length:', chatHistory?.length || 0);
-
-        // Validate chat history
-        if (!chatHistory || chatHistory.length === 0) {
-            return new Response(JSON.stringify({
-                error: 'No consultation history found. Please complete the consultation first.',
-                code: 'NO_HISTORY',
-                step: 'validation'
-            }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
+        const { chatHistory, reportFiles, medicineFiles, basicInfo, language, model } = validation.data;
+        devLog('info', 'API/summarize-inquiry', 'Request params', { language, model, chatHistoryLength: chatHistory?.length || 0 });
 
         // Fetch custom prompt from admin (if exists)
         let customPrompt = '';
         try {
-            console.log('[summarize-inquiry] Fetching custom prompt...');
+            devLog('debug', 'API/summarize-inquiry', 'Fetching custom prompt...');
             const { data: promptData } = await supabase
                 .from('system_prompts')
                 .select('prompt_text')
@@ -44,10 +40,10 @@ export async function POST(req: Request) {
                 .single();
             if (promptData && promptData.prompt_text) {
                 customPrompt = promptData.prompt_text;
-                console.log('[summarize-inquiry] Using custom prompt from admin');
+                devLog('debug', 'API/summarize-inquiry', 'Using custom prompt from admin');
             }
-        } catch (e) {
-            console.log('[summarize-inquiry] No custom prompt found, using default');
+        } catch {
+            devLog('debug', 'API/summarize-inquiry', 'No custom prompt found, using default');
         }
 
         // Use custom prompt if set, otherwise use default
@@ -67,13 +63,13 @@ export async function POST(req: Request) {
 - Symptom Duration: ${basicInfo?.symptomDuration || 'Not provided'}
 
 ## Uploaded Medical Reports:
-${reportFiles?.length > 0
-                ? reportFiles.map((f: any) => `- ${f.name}:\n${f.extractedText || 'No text extracted'}`).join('\n\n')
+${(reportFiles?.length || 0) > 0
+                ? (reportFiles || []).map((f: any) => `- ${f.name}:\n${f.extractedText || 'No text extracted'}`).join('\n\n')
                 : 'None uploaded'}
 
 ## Current Medications (from uploaded images):
-${medicineFiles?.length > 0
-                ? medicineFiles.map((f: any) => `- ${f.name}: ${f.extractedText || 'No medication info extracted'}`).join('\n')
+${(medicineFiles?.length || 0) > 0
+                ? (medicineFiles || []).map((f: any) => `- ${f.name}: ${f.extractedText || 'No medication info extracted'}`).join('\n')
                 : 'None uploaded'}
 
 ## Complete Chat History (问诊记录):
@@ -88,15 +84,11 @@ Respond in ${language === 'zh' ? 'Chinese (Simplified/简体中文)' : language 
 Follow the structured format specified in your system prompt.
 `;
 
-        console.log('[summarize-inquiry] Calling Gemini API...');
+        devLog('info', 'API/summarize-inquiry', 'Calling Gemini API...');
         const generateStartTime = Date.now();
         const apiKey = await getGeminiApiKeyAsync();
 
-        console.log('[summarize-inquiry] API Key Status:', {
-            exists: !!apiKey,
-            length: apiKey?.length || 0,
-            prefix: apiKey ? apiKey.substring(0, 10) + '...' : 'MISSING'
-        });
+        devLog('debug', 'API/summarize-inquiry', `API Key loaded: ${apiKey ? 'OK' : 'MISSING'}`);
 
         if (!apiKey) {
             throw new Error('GOOGLE_GENERATIVE_AI_API_KEY is not set in environment variables');
@@ -114,11 +106,11 @@ Follow the structured format specified in your system prompt.
             });
             text = result.text;
         } catch (primaryError: any) {
-            console.error(`[summarize-inquiry] Primary model ${model} failed:`, primaryError.message);
+            devLog('error', 'API/summarize-inquiry', `Primary model ${model} failed`, { error: primaryError.message });
 
             // Fallback to gemini-1.5-flash
             const fallbackModel = 'gemini-1.5-flash';
-            console.log(`[summarize-inquiry] Attempting fallback to ${fallbackModel}...`);
+            devLog('info', 'API/summarize-inquiry', `Attempting fallback to ${fallbackModel}...`);
 
             try {
                 const fallbackResult = await generateText({
@@ -127,18 +119,18 @@ Follow the structured format specified in your system prompt.
                     prompt: userPrompt,
                 });
                 text = fallbackResult.text;
-                console.log(`[summarize-inquiry] Fallback to ${fallbackModel} successful`);
+                devLog('info', 'API/summarize-inquiry', `Fallback to ${fallbackModel} successful`);
             } catch (fallbackError: any) {
-                console.error(`[summarize-inquiry] Fallback model ${fallbackModel} also failed:`, fallbackError.message);
+                devLog('error', 'API/summarize-inquiry', `Fallback model ${fallbackModel} also failed`, { error: fallbackError.message });
                 throw primaryError; // Throw the original error to be handled by the outer catch
             }
         }
 
         const generateDuration = Date.now() - generateStartTime;
-        console.log(`[summarize-inquiry] Gemini API responded in ${generateDuration}ms`);
+        devLog('info', 'API/summarize-inquiry', `Gemini API responded in ${generateDuration}ms`);
 
         const totalDuration = Date.now() - startTime;
-        console.log(`[summarize-inquiry] Total request completed in ${totalDuration}ms`);
+        devLog('info', 'API/summarize-inquiry', `Total request completed in ${totalDuration}ms`);
 
         return new Response(JSON.stringify({
             summary: text,
@@ -151,7 +143,7 @@ Follow the structured format specified in your system prompt.
         });
     } catch (error: any) {
         const duration = Date.now() - startTime;
-        console.error(`[summarize-inquiry] FAILED after ${duration}ms:`, error.message);
+        devLog('error', 'API/summarize-inquiry', `FAILED after ${duration}ms`, { error: error.message });
 
         // Determine which step failed and provide specific error messages
         let step = 'unknown';

@@ -10,14 +10,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Loader2, Pencil, Trash2, User, Search, ChevronLeft, ChevronRight, Eye, Users, UserCog, Shield, Stethoscope } from 'lucide-react'
+import { Loader2, Pencil, Trash2, User, Search, ChevronLeft, ChevronRight, Eye, Users, UserCog, Shield, Stethoscope, Terminal } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
+import { logger } from '@/lib/clientLogger'
 
 export interface UserProfile {
     id: string
     email?: string
-    role: 'patient' | 'doctor' | 'admin'
+    role: 'patient' | 'doctor' | 'admin' | 'developer'
     full_name?: string
     age?: number
     gender?: string
@@ -29,7 +30,7 @@ export interface UserProfile {
     created_at?: string
 }
 
-type RoleFilter = 'all' | 'patient' | 'doctor' | 'admin'
+type RoleFilter = 'all' | 'patient' | 'doctor' | 'admin' | 'developer'
 
 const ITEMS_PER_PAGE = 10
 
@@ -51,6 +52,12 @@ const ROLE_CONFIG = {
         icon: Shield,
         color: 'bg-amber-100 text-amber-700 border-amber-200',
         bgColor: 'bg-amber-50',
+    },
+    developer: {
+        label: 'Developer',
+        icon: UserCog,
+        color: 'bg-violet-100 text-violet-700 border-violet-200',
+        bgColor: 'bg-violet-50',
     },
 }
 
@@ -86,7 +93,7 @@ export function UserManager() {
             if (error) throw error
             setUsers(data || [])
         } catch (error) {
-            console.error('Error fetching users:', error)
+            logger.error('UserManager', 'Error fetching users', error)
             toast.error('Failed to load users')
         } finally {
             setLoading(false)
@@ -153,7 +160,7 @@ export function UserManager() {
             setIsEditDialogOpen(false)
             fetchUsers()
         } catch (error) {
-            console.error('Error saving:', error)
+            logger.error('UserManager', 'Error saving patient', error)
             toast.error('Failed to save patient')
         } finally {
             setSaving(false)
@@ -187,7 +194,7 @@ export function UserManager() {
             toast.success('Patient deleted successfully')
             fetchUsers()
         } catch (error) {
-            console.error('Error deleting:', error)
+            logger.error('UserManager', 'Error deleting patient', error)
             toast.error('Failed to delete patient. They may have associated records.')
         } finally {
             setDeleting(null)
@@ -219,6 +226,7 @@ export function UserManager() {
         patients: users.filter(u => u.role === 'patient').length,
         doctors: users.filter(u => u.role === 'doctor').length,
         admins: users.filter(u => u.role === 'admin').length,
+        developers: users.filter(u => u.role === 'developer').length,
     }
 
     const getBMICategory = (bmi: number) => {
@@ -283,6 +291,16 @@ export function UserManager() {
                             <span className="text-sm text-muted-foreground">Admins</span>
                         </div>
                         <div className="text-2xl font-bold text-amber-600">{stats.admins}</div>
+                    </div>
+                    <div
+                        className={`p-4 rounded-lg border cursor-pointer transition-all ${roleFilter === 'developer' ? 'ring-2 ring-violet-400' : 'hover:bg-violet-50'}`}
+                        onClick={() => { setRoleFilter('developer'); setCurrentPage(1) }}
+                    >
+                        <div className="flex items-center gap-2 mb-1">
+                            <Terminal className="w-4 h-4 text-violet-600" />
+                            <span className="text-sm text-muted-foreground">Developers</span>
+                        </div>
+                        <div className="text-2xl font-bold text-violet-600">{stats.developers}</div>
                     </div>
                 </div>
 

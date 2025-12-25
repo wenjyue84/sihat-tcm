@@ -1,63 +1,37 @@
 import { google } from '@ai-sdk/google';
-import { generateText, streamText } from 'ai';
-import { FINAL_ANALYSIS_PROMPT } from '@/lib/systemPrompts';
-import { supabase } from '@/lib/supabase';
+import { streamText } from 'ai';
+import { devLog } from '@/lib/systemLogger';
+import { getSystemPrompt } from '@/lib/promptLoader';
+import {
+  prependLanguageInstruction,
+  getLanguageInstruction,
+  normalizeLanguage,
+} from '@/lib/translations/languageInstructions';
+import { parseApiError } from '@/lib/modelFallback';
 
 export const maxDuration = 60;
 
-// Language instruction templates for consistent AI responses
-const LANGUAGE_INSTRUCTIONS: Record<string, string> = {
-  en: `
-IMPORTANT: You MUST respond entirely in English. All text, including section headers, diagnosis terms, food names, and recommendations must be in English. 
-- DO NOT use any Chinese characters.
-- DO NOT use Pinyin.
-- DO NOT provide bilingual terms (e.g., do NOT write "Qi Deficiency (气虚)", just write "Qi Deficiency").
-- Translate all TCM terms into standard English medical/TCM terminology.
-`,
-  zh: `
-重要提示：你必须完全使用中文回复。所有文字，包括标题、诊断术语、食物名称和建议都必须使用中文。
-- 不要使用英文。
-- 不要使用拼音。
-- 不要提供双语术语（例如，不要写 "Spleen Qi Deficiency (脾气虚)"，只写 "脾气虚"）。
-请确保所有内容对不懂英文的老年华人用户友好。使用简体中文。
-`,
-  ms: `
-PENTING: Anda MESTI menjawab sepenuhnya dalam Bahasa Malaysia. Semua teks, termasuk tajuk seksyen, terma diagnosis, nama makanan, dan cadangan mesti dalam Bahasa Malaysia. Jangan gunakan huruf Cina atau perkataan Inggeris.
-`,
-};
-
 export async function POST(req: Request) {
   const startTime = Date.now();
-  console.log('[consult] Request started');
+  devLog('info', 'API/consult', 'Request started');
 
   try {
     const body = await req.json();
-    const { data, prompt, model = 'gemini-1.5-pro', language = 'en' } = body;
+    const { data, prompt, model = 'gemini-1.5-pro', language: rawLanguage = 'en' } = body;
+    const language = normalizeLanguage(rawLanguage);
 
-    console.log('[consult] Received prompt:', prompt?.substring(0, 50));
-    console.log('[consult] Patient name:', data?.basic_info?.name);
-    console.log('[consult] Using model:', model);
-    console.log('[consult] Language:', language);
+    devLog('info', 'API/consult', 'Request params', {
+      promptPreview: prompt?.substring(0, 50),
+      patientName: data?.basic_info?.name,
+      model,
+      language
+    });
 
-    // Fetch custom final analysis prompt from admin (if exists)
-    let customPrompt = '';
-    try {
-      const { data: promptData } = await supabase
-        .from('system_prompts')
-        .select('prompt_text')
-        .eq('role', 'doctor_final')
-        .single();
-      if (promptData && promptData.prompt_text) customPrompt = promptData.prompt_text;
-    } catch (e) {
-      console.error("Error fetching final analysis prompt", e);
-    }
+    // Fetch system prompt using centralized loader
+    let systemPrompt = await getSystemPrompt('doctor_final');
 
-    // Use custom prompt if set, otherwise use default from library
-    let systemPrompt = customPrompt || FINAL_ANALYSIS_PROMPT;
-
-    // Add language instructions to the system prompt
-    const languageInstruction = LANGUAGE_INSTRUCTIONS[language] || LANGUAGE_INSTRUCTIONS.en;
-    systemPrompt = languageInstruction + '\n\n' + systemPrompt;
+    // Add language instructions using centralized utility
+    systemPrompt = prependLanguageInstruction(systemPrompt, 'strict', language);
 
     // Build a comprehensive text summary of all the data
     const { basic_info } = data;
@@ -389,31 +363,10 @@ Include a comprehensive TCM diagnosis with:
 `;
     }
 
-    // Add language-specific final instruction
-    const finalInstructions: Record<string, string> = {
-      en: `
-═══════════════════════════════════════════════════════════════════════════════
-         Please provide a comprehensive diagnosis based on the above data
-                    ALL RESPONSE TEXT MUST BE IN ENGLISH
-═══════════════════════════════════════════════════════════════════════════════
-`,
-      zh: `
-═══════════════════════════════════════════════════════════════════════════════
-                      请根据以上资料进行综合诊断
-                    所有回复内容必须使用中文
-═══════════════════════════════════════════════════════════════════════════════
-`,
-      ms: `
-═══════════════════════════════════════════════════════════════════════════════
-         Sila berikan diagnosis komprehensif berdasarkan data di atas
-              SEMUA TEKS RESPONS MESTI DALAM BAHASA MALAYSIA
-═══════════════════════════════════════════════════════════════════════════════
-`,
-    };
+    // Add language-specific final instruction using centralized utility
+    diagnosisInfo += getLanguageInstruction('final', language);
 
-    diagnosisInfo += finalInstructions[language] || finalInstructions.en;
-
-    console.log('[consult] Calling Gemini streamText...');
+    devLog('info', 'API/consult', 'Calling Gemini streamText...');
 
     const result = streamText({
       model: google(model),
@@ -422,31 +375,16 @@ Include a comprehensive TCM diagnosis with:
     });
 
     const duration = Date.now() - startTime;
-    console.log(`[consult] Returning stream response after ${duration}ms setup`);
+    devLog('info', 'API/consult', `Returning stream response after ${duration}ms setup`);
 
     return result.toTextStreamResponse();
-  } catch (error: any) {
+  } catch (error: unknown) {
     const duration = Date.now() - startTime;
-    console.error(`[consult] FAILED after ${duration}ms:`, error.message);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    devLog('error', 'API/consult', `FAILED after ${duration}ms`, { error: errorMessage });
 
-    // Detect specific API key errors
-    const errorMessage = error.message || error.toString() || '';
-    let userFriendlyError = 'An error occurred. Please try again.';
-    let errorCode = 'CONSULT_ERROR';
-
-    if (errorMessage.includes('leaked') || errorMessage.includes('API key was reported')) {
-      userFriendlyError = 'API key has been flagged as leaked. Please generate a new API key from Google AI Studio and update your .env.local file.';
-      errorCode = 'API_KEY_LEAKED';
-    } else if (errorMessage.includes('invalid') || errorMessage.includes('API_KEY_INVALID')) {
-      userFriendlyError = 'Invalid API key. Please check your GOOGLE_GENERATIVE_AI_API_KEY in .env.local file.';
-      errorCode = 'API_KEY_INVALID';
-    } else if (errorMessage.includes('quota') || errorMessage.includes('RATE_LIMIT') || errorMessage.includes('429')) {
-      userFriendlyError = 'API quota exceeded. Please wait a moment or check your Google AI Studio billing.';
-      errorCode = 'API_QUOTA_EXCEEDED';
-    } else if (errorMessage.includes('not found') || errorMessage.includes('does not exist')) {
-      userFriendlyError = 'AI model not available. Please try again or contact support.';
-      errorCode = 'MODEL_NOT_FOUND';
-    }
+    // Parse error using centralized utility
+    const { userFriendlyError, errorCode } = parseApiError(errorMessage);
 
     // Return a valid JSON response even on error
     const errorResponse = {

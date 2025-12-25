@@ -1,5 +1,6 @@
 import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
+import { devLog } from '@/lib/systemLogger';
 
 export const maxDuration = 60;
 
@@ -33,7 +34,7 @@ Return ONLY a JSON object:
 
         const prompt = 'Analyze this image. Describe exactly what you see in detail - colors, shapes, textures, and any notable features.';
 
-        console.log(`[test-image] Calling model: ${model}`);
+        devLog('info', 'API/test-image', `Calling model: ${model}`);
         const startTime = Date.now();
 
         const result = await generateText({
@@ -52,7 +53,7 @@ Return ONLY a JSON object:
 
         const duration = Date.now() - startTime;
         const text = result.text;
-        console.log(`[test-image] Model ${model} responded in ${duration}ms:`, text?.substring(0, 200));
+        devLog('info', 'API/test-image', `Model ${model} responded in ${duration}ms`, { preview: text?.substring(0, 200) });
 
         // Try to parse JSON
         const cleanJson = text.replace(/```json\n?|\n?```/g, '').trim();
@@ -81,7 +82,7 @@ Return ONLY a JSON object:
         }
 
     } catch (error: any) {
-        console.error('[test-image] Error:', error);
+        devLog('error', 'API/test-image', 'Error analyzing test image', { error });
         return new Response(JSON.stringify({
             error: error.message,
             observation: null
