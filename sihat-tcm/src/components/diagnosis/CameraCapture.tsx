@@ -554,7 +554,7 @@ export function CameraCapture({
                                     className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
                                 >
                                     <Camera className="w-6 h-6 mr-2" />
-                                    {t.camera.starting}
+                                    {t.camera.startCamera}
                                 </Button>
                                 <p className="mt-4 text-sm text-stone-500">{t.camera.permissionRequired}</p>
                             </div>

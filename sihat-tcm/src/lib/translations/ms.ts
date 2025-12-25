@@ -70,6 +70,7 @@ export const ms: TranslationKeys = {
         test: 'Ujian',
         loginShort: 'Log Masuk',
         dashboardShort: 'Panel',
+        blog: 'Blog',
     },
     login: {
         title: 'Sihat TCM',
@@ -171,6 +172,7 @@ export const ms: TranslationKeys = {
         mainConcernTooltip: 'Sila fokus kepada SATU aduan utama di sini. Ini membantu AI membuat diagnosis yang lebih tepat.',
         otherSymptoms: 'Simptom Lain / Aduan Sekunder',
         otherSymptomsPlaceholder: 'Sebarang simptom lain yang anda alami...',
+        otherSymptomsTooltip: 'Senaraikan sebarang simptom tambahan atau ketidakselesaan di sini. Ini memberikan gambaran yang lebih menyeluruh tentang konteks kesihatan anda.',
         detailedSymptoms: 'Simptom Terperinci / Kebimbangan',
         detailedSymptomsPlaceholder: 'Sila terangkan aduan utama, perasaan, dan butiran lain yang berkaitan...',
         chooseTcmDoctor: 'Pilih Doktor TCM Anda',
@@ -287,6 +289,7 @@ export const ms: TranslationKeys = {
         referenceGuide: 'Panduan Rujukan',
         permissionRequired: 'Kebenaran akses kamera diperlukan',
         starting: 'Memulakan kamera...',
+        startCamera: 'Mulakan kamera',
         initializing: 'Memulakan...',
         useButtonsHint: 'Gunakan butang di bawah untuk ambil atau muat naik',
         skipDialog: {
@@ -462,6 +465,28 @@ export const ms: TranslationKeys = {
             continueAnyway: 'Sahkan & Teruskan',
             confirmMessage: 'Jika anda telah menolak faktor di atas, anda boleh meneruskan; jika tidak, pertimbangkan untuk mengukur semula.',
         },
+        // Pengukuran PPG Kamera
+        measureWithCamera: 'Ukur dengan Kamera',
+        cameraMeasurement: {
+            title: 'Mengukur Kadar Jantung',
+            placeFingerInstruction: 'Letakkan jari anda pada lensa kamera',
+            coverFlash: 'Tutup lampu kilat sepenuhnya dengan hujung jari anda',
+            holdStill: 'Kekal diam selama 10 saat',
+            detectingPulse: 'Mengesan nadi...',
+            signalQuality: 'Kualiti Isyarat',
+            weak: 'Lemah',
+            good: 'Baik',
+            excellent: 'Cemerlang',
+            stable: 'Stabil',
+            useThisReading: 'Gunakan Bacaan Ini',
+            flashUnavailable: 'Lampu kilat tidak tersedia - sila gunakan mod manual',
+            initializing: 'Memulakan kamera...',
+            pressFingerHarder: 'Tekan jari lebih kuat pada kamera',
+            detected: 'Dikesan!',
+            androidChromeOnly: 'Ciri ini memerlukan Android Chrome dengan lampu kilat kamera',
+            notSupported: 'Pengukuran nadi kamera tidak disokong pada peranti ini',
+        },
+        cancel: 'Batal',
     },
     smartConnect: {
         smartConnect: 'Sambungan Pintar',
@@ -702,6 +727,55 @@ export const ms: TranslationKeys = {
         mealPlanner: {
             title: 'Perancang Pemakanan AI',
             subtitle: 'Pelan hidangan 7 hari berdasarkan perlembagaan TCM anda',
+            yourMealPlan: 'Pelan Hidangan TCM 7 Hari Anda',
+            constitution: 'Perlembagaan',
+            daysCompleted: 'hari selesai',
+            shoppingList: 'Senarai Beli-belah',
+            newPlan: 'Pelan Baru',
+            tcmPrinciples: 'Prinsip Pemakanan TCM untuk Anda',
+            day: 'Hari',
+            completed: 'Selesai',
+            markComplete: 'Tandakan Selesai',
+            generateNewPlanConfirm: 'Jana pelan hidangan baru? Ini akan nyahaktifkan pelan semasa anda.',
+            // Shopping List
+            itemsChecked: 'item ditanda',
+            categories: 'kategori',
+            printList: 'Cetak Senarai',
+            doneShopping: 'Selesai Membeli',
+            // Categories
+            categoryProduce: 'Sayur-sayuran',
+            categoryProteins: 'Protein',
+            categoryGrains: 'Bijirin',
+            categorySpices: 'Rempah',
+            categoryHerbs: 'Herba',
+            categoryDairy: 'Tenusu',
+            categoryPantry: 'Dapur',
+            categoryBeverages: 'Minuman',
+            categoryOther: 'Lain-lain',
+        },
+        // Health Journey Table
+        historyTable: {
+            diagnosis: 'Diagnosis',
+            date: 'Tarikh',
+            score: 'Skor',
+            status: 'Status',
+            action: 'Tindakan',
+            view: 'Lihat',
+            // Status labels
+            good: 'Baik',
+            fair: 'Sederhana',
+            needsAttention: 'Perlu Perhatian',
+            // Sort options
+            sortByDate: 'Tarikh',
+            sortByScore: 'Skor',
+            sortByDiagnosis: 'Diagnosis',
+        },
+        // Navigation
+        navigation: {
+            home: 'Laman Utama',
+            dashboard: 'Papan Pemuka',
+            patientAccount: 'Akaun Pesakit',
+            logout: 'Log Keluar',
         },
 
         // Legacy keys for backwards compatibility
@@ -727,6 +801,71 @@ export const ms: TranslationKeys = {
     observation: {
         title: 'Hasil Pemerhatian', noObservation: 'Tiada pemerhatian direkod', pendingAnalysis: 'Analisis sedang berjalan...', confidence: 'Keyakinan',
         potentialIssues: 'Petunjuk Potensi', viewDetails: 'Lihat Butiran', hideDetails: 'Sembunyikan Butiran',
+        // Analysis Result Titles
+        tongueAnalysisResult: 'Hasil Analisis Lidah',
+        faceAnalysisResult: 'Hasil Analisis Muka',
+        specificAreaAnalysisResult: 'Hasil Analisis Bahagian Khusus',
+        // Subtitles
+        reviewBeforeProceeding: 'Berikut adalah pemerhatian AI kami. Sila semak sebelum meneruskan.',
+        imageNotAnalyzed: 'Imej tidak dapat dianalisis. Sila semak dan ambil semula jika perlu.',
+        // Buttons
+        editResult: 'Sunting Hasil',
+        cancel: 'Batal',
+        done: 'Selesai',
+        continue: 'Teruskan',
+        // Section Labels
+        observation: 'Pemerhatian',
+        detailedAnalysisTags: 'Tag Analisis Terperinci',
+        noDetailedObservation: 'Tiada pemerhatian terperinci tersedia.',
+        noSpecificIndications: 'Tiada petunjuk khusus dicatatkan.',
+        enterOnePerLine: 'Masukkan satu petunjuk setiap baris',
+        // Invalid Image Dialog
+        imageNotRecognized: 'Imej Tidak Dikenali',
+        detected: 'Dikesan',
+        // Warning Dialog
+        warningImageQuality: 'Amaran: Kualiti Imej',
+        warningDescription: 'Ketepatan laporan akhir akan terjejas sekiranya kami tidak mempunyai foto yang betul.',
+        guidelines: 'Panduan',
+        continueAnyway: 'Teruskan Juga',
+        // Photo Guidelines Dialog
+        photoGuidelines: 'Panduan Foto',
+        photoGuidelinesIntro: 'Sila ikut panduan ini untuk hasil analisis terbaik:',
+        guidelineLighting: 'Pastikan cahaya mencukupi dan sekata.',
+        guidelineNoEdit: 'Jangan edit atau cantikkan foto.',
+        guidelineClearlyVisible: 'Pastikan {part} kelihatan jelas dan dalam fokus.',
+        guidelineNoShadow: 'Elakkan bayang atau silau.',
+        guidelineTongueRelax: 'Rehatkan lidah anda, jangan kaku.',
+        guidelineFaceNoGlasses: 'Tanggalkan cermin mata dan pastikan muka tidak ditutup rambut.',
+    },
+    // Audio/Listening Analysis Result
+    audioAnalysis: {
+        listeningAnalysisComplete: 'Analisis Pendengaran Selesai',
+        wenZhenResults: '闻诊 (Wén Zhěn) Keputusan',
+        // Confidence
+        highConfidence: 'Keyakinan Tinggi',
+        mediumConfidence: 'Keyakinan Sederhana',
+        lowConfidence: 'Keyakinan Rendah',
+        // Section Labels
+        overallObservation: 'Pemerhatian Keseluruhan',
+        tcmIndicators: 'Petunjuk TCM',
+        clinicalSignificance: 'Kepentingan Klinikal',
+        patternSuggestions: 'Cadangan Corak',
+        note: 'Nota',
+        onePatternPerLine: 'Satu corak setiap baris',
+        oneIndicatorPerLine: 'Satu petunjuk setiap baris',
+        // Category Titles
+        voiceQualityAnalysis: 'Analisis Kualiti Suara',
+        breathingPatterns: 'Corak Pernafasan',
+        speechPatterns: 'Corak Pertuturan',
+        coughSounds: 'Bunyi Batuk',
+        // Severity Labels
+        normal: 'Normal',
+        mild: 'Ringan',
+        moderate: 'Sederhana',
+        significant: 'Ketara',
+        // Buttons
+        recordAgain: 'Rakam Semula',
+        uploadAudio: 'Muat Naik Audio',
     },
     errors: {
         genericError: 'Sesuatu tidak kena. Sila cuba lagi.', networkError: 'Ralat rangkaian. Sila semak sambungan anda.', sessionExpired: 'Sesi tamat. Sila log masuk semula.',
@@ -872,7 +1011,6 @@ export const ms: TranslationKeys = {
         },
     },
 
-    // Report Chat Window
     // Report Chat Window
     reportChat: {
         title: 'Tanya Tentang Laporan Anda',

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useMemo } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 // Support both new array format and legacy Record format
 type ShoppingCategory = { category: string; items: string[] }
@@ -25,6 +26,7 @@ function normalizeShoppingList(data: ShoppingListData): ShoppingCategory[] {
 }
 
 export function ShoppingListWidget({ shoppingList, onClose }: ShoppingListWidgetProps) {
+    const { t } = useLanguage()
     const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set())
 
     // Normalize the shopping list to always be an array
@@ -46,6 +48,22 @@ export function ShoppingListWidget({ shoppingList, onClose }: ShoppingListWidget
 
     const totalItems = normalizedList.reduce((sum, cat) => sum + cat.items.length, 0)
     const checkedCount = checkedItems.size
+
+    // Dynamic category translations
+    const getCategoryName = (category: string): string => {
+        const categoryMap: Record<string, string> = {
+            'Produce': t.patientDashboard.mealPlanner.categoryProduce,
+            'Proteins': t.patientDashboard.mealPlanner.categoryProteins,
+            'Grains': t.patientDashboard.mealPlanner.categoryGrains,
+            'Spices': t.patientDashboard.mealPlanner.categorySpices,
+            'Herbs': t.patientDashboard.mealPlanner.categoryHerbs,
+            'Dairy': t.patientDashboard.mealPlanner.categoryDairy,
+            'Pantry': t.patientDashboard.mealPlanner.categoryPantry,
+            'Beverages': t.patientDashboard.mealPlanner.categoryBeverages,
+            'Other': t.patientDashboard.mealPlanner.categoryOther,
+        }
+        return categoryMap[category] || category
+    }
 
     const categoryEmojis: Record<string, string> = {
         'Produce': '🥬',
@@ -85,10 +103,10 @@ export function ShoppingListWidget({ shoppingList, onClose }: ShoppingListWidget
                             <div className="flex-1">
                                 <h2 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-3">
                                     <ShoppingCart className="w-8 h-8" />
-                                    Shopping List
+                                    {t.patientDashboard.mealPlanner.shoppingList}
                                 </h2>
                                 <p className="text-emerald-100 print:text-slate-600">
-                                    {checkedCount}/{totalItems} items checked • {normalizedList.length} categories
+                                    {checkedCount}/{totalItems} {t.patientDashboard.mealPlanner.itemsChecked} • {normalizedList.length} {t.patientDashboard.mealPlanner.categories}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2 print:hidden">
@@ -133,7 +151,7 @@ export function ShoppingListWidget({ shoppingList, onClose }: ShoppingListWidget
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
                                             <span className="text-2xl">{emoji}</span>
-                                            {category}
+                                            {getCategoryName(category)}
                                         </h3>
                                         <Badge variant="secondary" className="text-xs">
                                             {categoryChecked}/{items.length}
@@ -176,13 +194,13 @@ export function ShoppingListWidget({ shoppingList, onClose }: ShoppingListWidget
                     <div className="sticky bottom-0 bg-gradient-to-t from-white via-white to-transparent p-6 flex justify-end gap-3 print:hidden">
                         <Button variant="outline" onClick={handlePrint}>
                             <Printer className="w-4 h-4 mr-2" />
-                            Print List
+                            {t.patientDashboard.mealPlanner.printList}
                         </Button>
                         <Button
                             onClick={onClose}
                             className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white"
                         >
-                            Done Shopping
+                            {t.patientDashboard.mealPlanner.doneShopping}
                         </Button>
                     </div>
                 </motion.div>

@@ -73,6 +73,7 @@ export const en = {
         test: 'Test',
         loginShort: 'Login',
         dashboardShort: 'Dash',
+        blog: 'Blog',
     },
 
     // Login page
@@ -206,6 +207,7 @@ export const en = {
         mainConcernTooltip: 'Please focus on your ONE major complaint here. This helps the AI allow for a more targeted diagnosis.',
         otherSymptoms: 'Other Symptoms / Secondary Complaints',
         otherSymptomsPlaceholder: 'Any other symptoms you are experiencing...',
+        otherSymptomsTooltip: 'List any additional symptoms or discomforts here. This provides a more complete picture of your health context.',
         detailedSymptoms: 'detailedSymptoms', // Keeping for backward compat if needed or just remove references later
         detailedSymptomsPlaceholder: 'Please describe your main complaints, feelings, and any other relevant details...',
         chooseTcmDoctor: 'Choose Your TCM Doctor',
@@ -352,6 +354,7 @@ export const en = {
         referenceGuide: 'Reference Guide',
         permissionRequired: 'Camera access permission required',
         starting: 'Starting camera...',
+        startCamera: 'Start camera',
         initializing: 'Initializing...',
         useButtonsHint: 'Use buttons below to capture or upload',
         skipDialog: {
@@ -596,6 +599,28 @@ export const en = {
             continueAnyway: 'Confirm & Continue',
             confirmMessage: 'If you have ruled out the above factors, you may continue; otherwise, consider remeasuring.',
         },
+        // Camera PPG Measurement
+        measureWithCamera: 'Measure with Camera',
+        cameraMeasurement: {
+            title: 'Measuring Heart Rate',
+            placeFingerInstruction: 'Place your finger over the camera lens',
+            coverFlash: 'Cover the flash completely with your fingertip',
+            holdStill: 'Hold still for 10 seconds',
+            detectingPulse: 'Detecting pulse...',
+            signalQuality: 'Signal Quality',
+            weak: 'Weak',
+            good: 'Good',
+            excellent: 'Excellent',
+            stable: 'Stable',
+            useThisReading: 'Use This Reading',
+            flashUnavailable: 'Flash unavailable - please use manual mode',
+            initializing: 'Initializing camera...',
+            pressFingerHarder: 'Press finger harder on camera',
+            detected: 'Detected!',
+            androidChromeOnly: 'This feature requires Android Chrome with camera flash',
+            notSupported: 'Camera pulse measurement is not supported on this device',
+        },
+        cancel: 'Cancel',
     },
 
     // Smart Connect Step
@@ -914,6 +939,55 @@ export const en = {
         mealPlanner: {
             title: 'AI Meal Planner',
             subtitle: 'Personalized 7-day meal plans based on your TCM constitution',
+            yourMealPlan: 'Your 7-Day TCM Meal Plan',
+            constitution: 'Constitution',
+            daysCompleted: 'days completed',
+            shoppingList: 'Shopping List',
+            newPlan: 'New Plan',
+            tcmPrinciples: 'TCM Dietary Principles for You',
+            day: 'Day',
+            completed: 'Completed',
+            markComplete: 'Mark Complete',
+            generateNewPlanConfirm: 'Generate a new meal plan? This will deactivate your current plan.',
+            // Shopping List
+            itemsChecked: 'items checked',
+            categories: 'categories',
+            printList: 'Print List',
+            doneShopping: 'Done Shopping',
+            // Categories
+            categoryProduce: 'Produce',
+            categoryProteins: 'Proteins',
+            categoryGrains: 'Grains',
+            categorySpices: 'Spices',
+            categoryHerbs: 'Herbs',
+            categoryDairy: 'Dairy',
+            categoryPantry: 'Pantry',
+            categoryBeverages: 'Beverages',
+            categoryOther: 'Other',
+        },
+        // Health Journey Table
+        historyTable: {
+            diagnosis: 'Diagnosis',
+            date: 'Date',
+            score: 'Score',
+            status: 'Status',
+            action: 'Action',
+            view: 'View',
+            // Status labels
+            good: 'Good',
+            fair: 'Fair',
+            needsAttention: 'Needs Attention',
+            // Sort options
+            sortByDate: 'Date',
+            sortByScore: 'Score',
+            sortByDiagnosis: 'Diagnosis',
+        },
+        // Navigation
+        navigation: {
+            home: 'Home',
+            dashboard: 'Dashboard',
+            patientAccount: 'Patient Account',
+            logout: 'Logout',
         },
 
         // Legacy keys for backwards compatibility
@@ -974,6 +1048,71 @@ export const en = {
         potentialIssues: 'Potential Indications',
         viewDetails: 'View Details',
         hideDetails: 'Hide Details',
+        // Analysis Result Titles
+        tongueAnalysisResult: 'Tongue Analysis Result',
+        faceAnalysisResult: 'Face Analysis Result',
+        specificAreaAnalysisResult: 'Specific Area Analysis Result',
+        // Subtitles
+        reviewBeforeProceeding: 'Here is what our AI observed. Please review before proceeding.',
+        imageNotAnalyzed: 'The image could not be analyzed. Please review and retake if needed.',
+        // Buttons
+        editResult: 'Edit Result',
+        cancel: 'Cancel',
+        done: 'Done',
+        continue: 'Continue',
+        // Section Labels
+        observation: 'Observation',
+        detailedAnalysisTags: 'Detailed Analysis Tags',
+        noDetailedObservation: 'No detailed observation available.',
+        noSpecificIndications: 'No specific indications noted.',
+        enterOnePerLine: 'Enter one indication per line',
+        // Invalid Image Dialog
+        imageNotRecognized: 'Image Not Recognized',
+        detected: 'Detected',
+        // Warning Dialog
+        warningImageQuality: 'Warning: Image Quality',
+        warningDescription: 'The accuracy of the final report will be affected should we not have the correct photo.',
+        guidelines: 'Guidelines',
+        continueAnyway: 'Continue Anyway',
+        // Photo Guidelines Dialog
+        photoGuidelines: 'Photo Guidelines',
+        photoGuidelinesIntro: 'Please follow these guidelines for the best analysis results:',
+        guidelineLighting: 'Make sure the light is sufficient and even.',
+        guidelineNoEdit: 'Do not edit or beautify the photo.',
+        guidelineClearlyVisible: 'Ensure the {part} is clearly visible and in focus.',
+        guidelineNoShadow: 'Avoid shadows or glare.',
+        guidelineTongueRelax: 'Relax your tongue, do not stiffen it.',
+        guidelineFaceNoGlasses: 'Remove glasses and ensure your face is not covered by hair.',
+    },
+    // Audio/Listening Analysis Result
+    audioAnalysis: {
+        listeningAnalysisComplete: 'Listening Analysis Complete',
+        wenZhenResults: '闻诊 (Wén Zhěn) Results',
+        // Confidence
+        highConfidence: 'High Confidence',
+        mediumConfidence: 'Medium Confidence',
+        lowConfidence: 'Low Confidence',
+        // Section Labels
+        overallObservation: 'Overall Observation',
+        tcmIndicators: 'TCM Indicators',
+        clinicalSignificance: 'Clinical Significance',
+        patternSuggestions: 'Pattern Suggestions',
+        note: 'Note',
+        onePatternPerLine: 'One pattern per line',
+        oneIndicatorPerLine: 'One indicator per line',
+        // Category Titles
+        voiceQualityAnalysis: 'Voice Quality Analysis',
+        breathingPatterns: 'Breathing Patterns',
+        speechPatterns: 'Speech Patterns',
+        coughSounds: 'Cough Sounds',
+        // Severity Labels
+        normal: 'Normal',
+        mild: 'Mild',
+        moderate: 'Moderate',
+        significant: 'Significant',
+        // Buttons
+        recordAgain: 'Record Again',
+        uploadAudio: 'Upload Audio',
     },
 
     // Errors and Warnings

@@ -98,10 +98,11 @@ export default function Home() {
               width={40}
               height={40}
               className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+              priority
             />
           </div>
           <div className="flex flex-col">
-            <h1 className="text-lg sm:text-xl font-bold leading-none tracking-tight text-white group-hover:text-emerald-50 transition-colors whitespace-nowrap">Sihat TCM</h1>
+            <span className="text-lg sm:text-xl font-bold leading-none tracking-tight text-white group-hover:text-emerald-50 transition-colors whitespace-nowrap">Sihat TCM</span>
             {/* Tagline hidden on mobile/tablet to save space */}
             <p className="text-xs text-emerald-200 font-medium tracking-wide hidden lg:block">AI-Powered Traditional Chinese Medicine</p>
           </div>
@@ -110,6 +111,12 @@ export default function Home() {
 
         {/* Top right buttons */}
         <div className="relative z-50 flex items-center gap-2 shrink-0">
+          <Link
+            href="/blog"
+            className="flex items-center gap-1 text-sm font-medium text-emerald-100 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors"
+          >
+            {t.nav.blog}
+          </Link>
           <SystemManual />
           <LanguageSelector variant="compact" className="sm:hidden" />
           <div className="hidden sm:block">

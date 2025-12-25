@@ -104,9 +104,27 @@ interface CategoryCardProps {
 }
 
 function CategoryCard({ title, icon, iconBgColor, data, isExpanded, onToggle, isEditing, onUpdate }: CategoryCardProps) {
+    const { t } = useLanguage()
     if (!data) return null
 
     const colors = getSeverityColor(data.severity)
+
+    // Helper to get translated severity text
+    const getTranslatedSeverity = (severity: string) => {
+        switch (severity?.toLowerCase()) {
+            case 'normal':
+            case 'none':
+                return t.audioAnalysis.normal
+            case 'mild':
+                return t.audioAnalysis.mild
+            case 'moderate':
+                return t.audioAnalysis.moderate
+            case 'significant':
+                return t.audioAnalysis.significant
+            default:
+                return t.audioAnalysis.normal
+        }
+    }
 
     // Local state for editing form inputs
     // We update parent on every change or on blur/submit? 
@@ -127,7 +145,7 @@ function CategoryCard({ title, icon, iconBgColor, data, isExpanded, onToggle, is
                         <h4 className="font-semibold text-gray-800">{title}</h4>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${colors.badge} flex items-center gap-1`}>
                             {getSeverityIcon(data.severity)}
-                            <span className="capitalize">{data.severity || 'Normal'}</span>
+                            <span>{getTranslatedSeverity(data.severity)}</span>
                         </span>
                     </div>
                     {!isExpanded && !isEditing && (
@@ -146,7 +164,7 @@ function CategoryCard({ title, icon, iconBgColor, data, isExpanded, onToggle, is
                     <div className="h-px bg-gray-200" />
 
                     <div>
-                        <p className="text-sm font-medium text-gray-600 mb-1">Observation</p>
+                        <p className="text-sm font-medium text-gray-600 mb-1">{t.observation.observation}</p>
                         {isEditing ? (
                             <Textarea
                                 value={data.observation}
@@ -161,10 +179,10 @@ function CategoryCard({ title, icon, iconBgColor, data, isExpanded, onToggle, is
 
                     {(isEditing || (data.tcm_indicators && data.tcm_indicators.length > 0)) && (
                         <div>
-                            <p className="text-sm font-medium text-gray-600 mb-1.5">TCM Indicators</p>
+                            <p className="text-sm font-medium text-gray-600 mb-1.5">{t.audioAnalysis.tcmIndicators}</p>
                             {isEditing ? (
                                 <>
-                                    <p className="text-xs text-gray-400 mb-1">One indicator per line</p>
+                                    <p className="text-xs text-gray-400 mb-1">{t.audioAnalysis.oneIndicatorPerLine}</p>
                                     <Textarea
                                         value={data.tcm_indicators?.join('\n') || ''}
                                         onChange={(e) => onUpdate({
@@ -192,7 +210,7 @@ function CategoryCard({ title, icon, iconBgColor, data, isExpanded, onToggle, is
 
                     {!isEditing && data.clinical_significance && (
                         <div className="bg-white/70 rounded-lg p-3 border border-gray-100">
-                            <p className="text-sm font-medium text-gray-600 mb-1">Clinical Significance</p>
+                            <p className="text-sm font-medium text-gray-600 mb-1">{t.audioAnalysis.clinicalSignificance}</p>
                             <p className="text-sm text-gray-700 leading-relaxed">{data.clinical_significance}</p>
                         </div>
                     )}
@@ -258,28 +276,28 @@ export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContin
     const categories = [
         {
             key: 'voice_quality_analysis' as keyof AudioAnalysisData,
-            title: 'Voice Quality Analysis',
+            title: t.audioAnalysis.voiceQualityAnalysis,
             icon: <Volume2 className="w-5 h-5 text-white" />,
             iconBgColor: 'bg-gradient-to-br from-blue-500 to-indigo-500',
             data: editedData.voice_quality_analysis
         },
         {
             key: 'breathing_patterns' as keyof AudioAnalysisData,
-            title: 'Breathing Patterns',
+            title: t.audioAnalysis.breathingPatterns,
             icon: <Wind className="w-5 h-5 text-white" />,
             iconBgColor: 'bg-gradient-to-br from-cyan-500 to-teal-500',
             data: editedData.breathing_patterns
         },
         {
             key: 'speech_patterns' as keyof AudioAnalysisData,
-            title: 'Speech Patterns',
+            title: t.audioAnalysis.speechPatterns,
             icon: <MessageSquare className="w-5 h-5 text-white" />,
             iconBgColor: 'bg-gradient-to-br from-violet-500 to-purple-500',
             data: editedData.speech_patterns
         },
         {
             key: 'cough_sounds' as keyof AudioAnalysisData,
-            title: 'Cough Sounds',
+            title: t.audioAnalysis.coughSounds,
             icon: <Mic className="w-5 h-5 text-white" />,
             iconBgColor: 'bg-gradient-to-br from-rose-500 to-pink-500',
             data: editedData.cough_sounds
@@ -296,8 +314,8 @@ export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContin
                             <Mic className="w-7 h-7 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-gray-800">Listening Analysis Complete</h2>
-                            <p className="text-sm text-gray-500">闻诊 (Wén Zhěn) Results</p>
+                            <h2 className="text-xl font-bold text-gray-800">{t.audioAnalysis.listeningAnalysisComplete}</h2>
+                            <p className="text-sm text-gray-500">{t.audioAnalysis.wenZhenResults}</p>
                         </div>
                     </div>
 
@@ -311,7 +329,7 @@ export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContin
                                 className="text-emerald-700 border-emerald-200 hover:bg-emerald-50"
                             >
                                 <Pencil className="w-4 h-4 mr-2" />
-                                Edit Result
+                                {t.observation.editResult}
                             </Button>
                         ) : (
                             <div className="flex gap-2">
@@ -322,7 +340,7 @@ export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContin
                                     className="text-stone-500 hover:bg-stone-100"
                                 >
                                     <X className="w-4 h-4 mr-1" />
-                                    Cancel
+                                    {t.observation.cancel}
                                 </Button>
                                 <Button
                                     variant="outline"
@@ -331,7 +349,7 @@ export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContin
                                     className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
                                 >
                                     <Save className="w-4 h-4 mr-2" />
-                                    Done
+                                    {t.observation.done}
                                 </Button>
                             </div>
                         )}
@@ -344,8 +362,8 @@ export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContin
                         editedData.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700' :
                             'bg-gray-100 text-gray-700'
                         }`}>
-                        {editedData.confidence === 'high' ? 'High' :
-                            editedData.confidence === 'medium' ? 'Medium' : 'Low'} Confidence
+                        {editedData.confidence === 'high' ? t.audioAnalysis.highConfidence :
+                            editedData.confidence === 'medium' ? t.audioAnalysis.mediumConfidence : t.audioAnalysis.lowConfidence}
                     </div>
                 )}
 
@@ -353,7 +371,7 @@ export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContin
                 <div className={`rounded-xl p-4 border transition-colors ${isEditing ? 'bg-white border-green-300 ring-2 ring-green-100' : 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-100'}`}>
                     {isEditing ? (
                         <>
-                            <Label htmlFor="overall" className="text-green-800 mb-2 block">Overall Observation</Label>
+                            <Label htmlFor="overall" className="text-green-800 mb-2 block">{t.audioAnalysis.overallObservation}</Label>
                             <Textarea
                                 id="overall"
                                 value={editedData.overall_observation}
@@ -388,11 +406,11 @@ export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContin
             {(editedData.pattern_suggestions && (editedData.pattern_suggestions.length > 0 || isEditing)) && (
                 <Card className={`p-4 border border-purple-100 ${isEditing ? 'bg-white ring-2 ring-purple-100' : 'bg-gradient-to-r from-purple-50 to-indigo-50'}`}>
                     <h4 className="font-semibold text-purple-800 mb-2 flex items-center gap-2">
-                        <span>🔮</span> Pattern Suggestions
+                        <span>🔮</span> {t.audioAnalysis.patternSuggestions}
                     </h4>
                     {isEditing ? (
                         <>
-                            <p className="text-xs text-stone-500 mb-1">One pattern per line</p>
+                            <p className="text-xs text-stone-500 mb-1">{t.audioAnalysis.onePatternPerLine}</p>
                             <Textarea
                                 value={editedData.pattern_suggestions?.join('\n') || ''}
                                 onChange={(e) => setEditedData(prev => ({
@@ -420,7 +438,7 @@ export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContin
                 <div className={`rounded-xl p-4 border transition-colors ${isEditing ? 'bg-white border-amber-300 ring-2 ring-amber-100' : 'bg-amber-50 border-amber-100'}`}>
                     <div className="flex items-center gap-2 mb-1">
                         <Info className="w-4 h-4 text-amber-600" />
-                        <span className="font-medium text-amber-800 text-sm">Note</span>
+                        <span className="font-medium text-amber-800 text-sm">{t.audioAnalysis.note}</span>
                     </div>
                     {isEditing ? (
                         <Textarea
@@ -444,7 +462,7 @@ export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContin
                     disabled={isEditing}
                 >
                     <RefreshCw className="w-4 h-4 mr-2" />
-                    Record Again
+                    {t.audioAnalysis.recordAgain}
                 </Button>
                 <Button
                     variant="outline"
@@ -453,14 +471,14 @@ export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContin
                     disabled={isEditing}
                 >
                     <Upload className="w-4 h-4 mr-2" />
-                    Upload Audio
+                    {t.audioAnalysis.uploadAudio}
                 </Button>
                 <Button
                     onClick={() => onContinue(editedData)}
                     className="hidden md:flex flex-1 h-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-md"
                     disabled={isEditing}
                 >
-                    Continue
+                    {t.observation.continue}
                     <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
             </div>
@@ -474,7 +492,7 @@ export function AudioAnalysisResult({ analysisData, onRetake, onUpload, onContin
                     className="h-12 w-full shadow-xl bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-6"
                     disabled={isEditing}
                 >
-                    Continue <ArrowRight className="w-4 h-4 ml-2" />
+                    {t.observation.continue} <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
             </div>
         </div>

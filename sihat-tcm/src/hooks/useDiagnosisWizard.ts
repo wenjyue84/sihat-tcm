@@ -475,7 +475,12 @@ export function useDiagnosisWizard() {
             const response = await fetch('/api/analyze-image', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image, type })
+                body: JSON.stringify({
+                    image,
+                    type,
+                    symptoms: data.basic_info?.symptoms || data.basic_info?.otherSymptoms,
+                    mainComplaint: data.basic_info?.mainComplaint
+                })
             })
             const result = await response.json()
 

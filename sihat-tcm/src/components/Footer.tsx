@@ -12,13 +12,17 @@ export function Footer() {
                 <div className="mb-4 md:mb-0">
                     <p>{t.common.copyright.replace('{year}', new Date().getFullYear().toString())}</p>
                 </div>
-                <div className="flex items-center space-x-4">
+                <nav aria-label="Footer navigation" className="flex items-center space-x-4">
                     <span>{t.common.developedBy}</span>
                     <Link href="/about" className="hover:text-gray-900 dark:hover:text-gray-200 underline">
                         {t.common.companyProfile}
                     </Link>
-                </div>
+                    <Link href="/blog" className="hover:text-gray-900 dark:hover:text-gray-200 underline">
+                        {t.nav.blog}
+                    </Link>
+                </nav>
             </div>
         </footer>
     );
 }
+

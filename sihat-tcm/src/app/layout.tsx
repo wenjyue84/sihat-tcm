@@ -20,6 +20,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://sihat-tcm.vercel.app'),
+  alternates: {
+    canonical: './',
+  },
   title: {
     default: "Sihat TCM - AI-Powered Traditional Chinese Medicine",
     template: "%s | Sihat TCM",
@@ -35,13 +39,21 @@ export const metadata: Metadata = {
     "Tongue Diagnosis",
     "Pulse Diagnosis",
     "Chinese Herbal Medicine",
+    "Malaysia Health App",
+    "Sihat TCM",
+    "中医诊断",
+    "Perubatan Tradisional Cina",
   ],
   authors: [{ name: "Sihat TCM Team" }],
   creator: "Sihat TCM",
+  publisher: "Prisma Technology Solution Sdn. Bhd.",
+  applicationName: "Sihat TCM",
+  category: "Health & Wellness",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://sihat-tcm.vercel.app",
+    alternateLocale: ["ms_MY", "zh_CN"],
+    url: "./",
     title: "Sihat TCM - AI-Powered Traditional Chinese Medicine",
     description:
       "Experience the wisdom of ancient healing combined with modern AI technology. AI-powered TCM diagnosis with tongue analysis, pulse diagnosis, and personalized recommendations.",
@@ -61,13 +73,33 @@ export const metadata: Metadata = {
     description:
       "Experience the wisdom of ancient healing combined with modern AI technology. AI-powered TCM diagnosis with tongue analysis, pulse diagnosis, and personalized recommendations.",
     images: ["/og-image.png"],
+    // Add your Twitter handle when available
+    // site: "@SihatTCM",
+    // creator: "@SihatTCM",
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   formatDetection: {
     telephone: false,
+  },
+  verification: {
+    // Add Google Search Console verification when available
+    // google: 'your-verification-code',
+  },
+  other: {
+    'geo.region': 'MY-01', // Johor, Malaysia
+    'geo.placename': 'Skudai, Johor',
+    'geo.position': '1.5355;103.6591',
+    'ICBM': '1.5355, 103.6591',
   },
 };
 
@@ -80,6 +112,14 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Preconnect to critical external domains for faster resource loading */}
+        <link rel="preconnect" href="https://qbvmcxfbwianojnxoouf.supabase.co" />
+        <link rel="dns-prefetch" href="https://qbvmcxfbwianojnxoouf.supabase.co" />
+        {/* Preconnect to Google Fonts (used by next/font) */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
         suppressHydrationWarning

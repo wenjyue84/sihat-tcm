@@ -8,6 +8,7 @@ import { MealCard } from './MealCard'
 import { ShoppingListWidget } from './ShoppingListWidget'
 import { motion, AnimatePresence } from 'framer-motion'
 import { updateMealPlanProgress, deactivateMealPlan } from '@/app/actions/meal-planner'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface WeeklyCalendarViewProps {
     mealPlan: any
@@ -15,6 +16,7 @@ interface WeeklyCalendarViewProps {
 }
 
 export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewProps) {
+    const { t } = useLanguage()
     const [selectedDay, setSelectedDay] = useState(1)
     const [showShoppingList, setShowShoppingList] = useState(false)
     const [completedDays, setCompletedDays] = useState<number[]>([])
@@ -28,16 +30,16 @@ export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewPr
         const newCompleted = completedDays.includes(day)
             ? completedDays.filter(d => d !== day)
             : [...completedDays, day]
-        
+
         setCompletedDays(newCompleted)
-        
+
         // Update in database
         await updateMealPlanProgress(mealPlan.id, newCompleted.length)
     }
 
     // Handle regeneration
     const handleRegenerate = async () => {
-        if (confirm('Generate a new meal plan? This will deactivate your current plan.')) {
+        if (confirm(t.patientDashboard.mealPlanner.generateNewPlanConfirm)) {
             await deactivateMealPlan(mealPlan.id)
             onRefresh?.()
         }
@@ -52,10 +54,10 @@ export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewPr
             <Card className="p-6 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-2xl font-bold mb-2">Your 7-Day TCM Meal Plan</h2>
+                        <h2 className="text-2xl font-bold mb-2">{t.patientDashboard.mealPlanner.yourMealPlan}</h2>
                         <p className="text-amber-100">
-                            Constitution: {mealPlan.constitution || 'Balanced'} • 
-                            {completedDays.length}/7 days completed
+                            {t.patientDashboard.mealPlanner.constitution}: {mealPlan.constitution || 'Balanced'} •
+                            {completedDays.length}/7 {t.patientDashboard.mealPlanner.daysCompleted}
                         </p>
                     </div>
                     <div className="flex gap-2">
@@ -65,7 +67,7 @@ export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewPr
                             className="bg-white/20 hover:bg-white/30 text-white border-white/40"
                         >
                             <ShoppingCart className="w-4 h-4 mr-2" />
-                            Shopping List
+                            {t.patientDashboard.mealPlanner.shoppingList}
                         </Button>
                         <Button
                             onClick={handleRegenerate}
@@ -73,7 +75,7 @@ export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewPr
                             className="bg-white/20 hover:bg-white/30 text-white border-white/40"
                         >
                             <RefreshCw className="w-4 h-4 mr-2" />
-                            New Plan
+                            {t.patientDashboard.mealPlanner.newPlan}
                         </Button>
                     </div>
                 </div>
@@ -83,7 +85,7 @@ export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewPr
             {planData.tcm_principles && (
                 <Card className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
                     <h3 className="text-lg font-semibold text-emerald-900 mb-2">
-                        🌿 TCM Dietary Principles for You
+                        🌿 {t.patientDashboard.mealPlanner.tcmPrinciples}
                     </h3>
                     <p className="text-emerald-800 leading-relaxed">
                         {planData.tcm_principles}
@@ -109,14 +111,13 @@ export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewPr
                         onClick={() => setSelectedDay(day.day)}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`relative shrink-0 px-4 py-3 rounded-lg font-medium transition-all ${
-                            selectedDay === day.day
+                        className={`relative shrink-0 px-4 py-3 rounded-lg font-medium transition-all ${selectedDay === day.day
                                 ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg'
                                 : 'bg-white border-2 border-amber-200 text-slate-700 hover:border-amber-400'
-                        }`}
+                            }`}
                     >
-                        <div className="text-xs opacity-80 mb-1">Day {day.day}</div>
-                        <div className="text-sm font-bold">{day.theme || `Day ${day.day}`}</div>
+                        <div className="text-xs opacity-80 mb-1">{t.patientDashboard.mealPlanner.day} {day.day}</div>
+                        <div className="text-sm font-bold">{day.theme || `${t.patientDashboard.mealPlanner.day} ${day.day}`}</div>
                         {completedDays.includes(day.day) && (
                             <CheckCircle2 className="absolute -top-2 -right-2 w-5 h-5 text-emerald-500 bg-white rounded-full" />
                         )}
@@ -155,7 +156,7 @@ export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewPr
                                 className={completedDays.includes(selectedDay) ? 'bg-emerald-600' : ''}
                             >
                                 <CheckCircle2 className="w-4 h-4 mr-2" />
-                                {completedDays.includes(selectedDay) ? 'Completed' : 'Mark Complete'}
+                                {completedDays.includes(selectedDay) ? t.patientDashboard.mealPlanner.completed : t.patientDashboard.mealPlanner.markComplete}
                             </Button>
                         </div>
 
@@ -163,7 +164,7 @@ export function WeeklyCalendarView({ mealPlan, onRefresh }: WeeklyCalendarViewPr
                             {['breakfast', 'lunch', 'dinner', 'snack'].map((mealType) => {
                                 const meal = currentDayPlan.meals[mealType]
                                 if (!meal) return null
-                                
+
                                 return (
                                     <MealCard
                                         key={mealType}

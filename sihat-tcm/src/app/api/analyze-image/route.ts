@@ -39,7 +39,7 @@ function isValidObservation(text: string): boolean {
 
 export async function POST(req: Request) {
     try {
-        const { image, type } = await req.json();
+        const { image, type, symptoms, mainComplaint } = await req.json();
 
         if (!image) {
             return new Response(JSON.stringify({
@@ -86,7 +86,10 @@ export async function POST(req: Request) {
             userPrompt = defaultUserPrompt;
         }
 
-
+        // Add patient context to user prompt if available
+        if (symptoms || mainComplaint) {
+            userPrompt += `\n\nPATIENT CONTEXT:\nMain Complaint: ${mainComplaint || 'Not provided'}\nSymptoms: ${symptoms || 'Not provided'}`;
+        }
 
         // Try each model in order until we get a valid result
         for (let i = 0; i < MODEL_FALLBACK_ORDER.length; i++) {

@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: ['/admin/', '/api/', '/test-*', '/credentials'],
+            disallow: ['/admin/', '/api/', '/test-*', '/credentials', '/patient/', '/doctor/'],
         },
         sitemap: 'https://sihat-tcm.vercel.app/sitemap.xml',
     };

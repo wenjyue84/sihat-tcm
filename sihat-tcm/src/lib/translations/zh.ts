@@ -70,6 +70,7 @@ export const zh: TranslationKeys = {
         test: '测试',
         loginShort: '登录',
         dashboardShort: '面板',
+        blog: '博客',
     },
     login: {
         title: '思和中医',
@@ -170,6 +171,7 @@ export const zh: TranslationKeys = {
         mainConcernPlaceholder: '例如：头痛剧烈',
         mainConcernTooltip: '请在此处重点填写一个最主要的症状。这有助于AI进行更针对性的诊断。',
         otherSymptoms: '兼症 / 其他不适',
+        otherSymptomsTooltip: '请在此处列出任何其他症状或不适。这有助于更全面地了解您的健康状况。',
         otherSymptomsPlaceholder: '您感受到的其他症状...',
         detailedSymptoms: '详细症状描述',
         detailedSymptomsPlaceholder: '请详细描述您的主要症状、感受以及其他相关情况...',
@@ -287,6 +289,7 @@ export const zh: TranslationKeys = {
         referenceGuide: '拍摄参考指南',
         permissionRequired: '需要相机访问权限',
         starting: '正在启动相机...',
+        startCamera: '启动相机',
         initializing: '正在初始化...',
         useButtonsHint: '您也可以使用下方按钮拍摄或上传',
         skipDialog: {
@@ -462,6 +465,28 @@ export const zh: TranslationKeys = {
             continueAnyway: '确认继续',
             confirmMessage: '如果您已排除以上因素，可以继续；否则建议重新测量。',
         },
+        // 相机光电容积脉搏波测量
+        measureWithCamera: '用相机测量',
+        cameraMeasurement: {
+            title: '测量心率',
+            placeFingerInstruction: '将手指放在相机镜头上',
+            coverFlash: '用指尖完全遮住闪光灯',
+            holdStill: '保持静止10秒',
+            detectingPulse: '正在检测脉搏...',
+            signalQuality: '信号质量',
+            weak: '较弱',
+            good: '良好',
+            excellent: '优秀',
+            stable: '稳定',
+            useThisReading: '使用此读数',
+            flashUnavailable: '闪光灯不可用 - 请使用手动模式',
+            initializing: '正在初始化相机...',
+            pressFingerHarder: '请将手指更用力按在相机上',
+            detected: '已检测到！',
+            androidChromeOnly: '此功能需要带有相机闪光灯的安卓Chrome浏览器',
+            notSupported: '此设备不支持相机脉搏测量',
+        },
+        cancel: '取消',
     },
     smartConnect: {
         smartConnect: '智能连接',
@@ -702,6 +727,55 @@ export const zh: TranslationKeys = {
         mealPlanner: {
             title: 'AI膳食规划',
             subtitle: '基于您的中医体质定制7天膳食计划',
+            yourMealPlan: '您的7天中医膳食计划',
+            constitution: '体质',
+            daysCompleted: '天已完成',
+            shoppingList: '购物清单',
+            newPlan: '新计划',
+            tcmPrinciples: '专属于您的中医饮食原则',
+            day: '第',
+            completed: '已完成',
+            markComplete: '标记完成',
+            generateNewPlanConfirm: '生成新的膳食计划？这将停用您当前的计划。',
+            // Shopping List
+            itemsChecked: '项已勾选',
+            categories: '个分类',
+            printList: '打印清单',
+            doneShopping: '完成购物',
+            // Categories
+            categoryProduce: '蔬果',
+            categoryProteins: '蛋白质',
+            categoryGrains: '谷物',
+            categorySpices: '调料',
+            categoryHerbs: '草药',
+            categoryDairy: '乳制品',
+            categoryPantry: '厨房用品',
+            categoryBeverages: '饮品',
+            categoryOther: '其他',
+        },
+        // Health Journey Table
+        historyTable: {
+            diagnosis: '诊断',
+            date: '日期',
+            score: '评分',
+            status: '状态',
+            action: '操作',
+            view: '查看',
+            // Status labels
+            good: '良好',
+            fair: '一般',
+            needsAttention: '需要关注',
+            // Sort options
+            sortByDate: '日期',
+            sortByScore: '评分',
+            sortByDiagnosis: '诊断',
+        },
+        // Navigation
+        navigation: {
+            home: '首页',
+            dashboard: '控制面板',
+            patientAccount: '患者账户',
+            logout: '退出登录',
         },
 
         // Legacy keys for backwards compatibility
@@ -727,6 +801,71 @@ export const zh: TranslationKeys = {
     observation: {
         title: '观察结果', noObservation: '未记录观察结果', pendingAnalysis: '分析中...', confidence: '置信度',
         potentialIssues: '可能指征', viewDetails: '查看详情', hideDetails: '隐藏详情',
+        // Analysis Result Titles
+        tongueAnalysisResult: '舌诊分析结果',
+        faceAnalysisResult: '面诊分析结果',
+        specificAreaAnalysisResult: '局部分析结果',
+        // Subtitles
+        reviewBeforeProceeding: '以下是 AI 医师的观察结果。请在继续之前仔细查看。',
+        imageNotAnalyzed: '无法分析该图片。请检查并重新拍摄。',
+        // Buttons
+        editResult: '编辑结果',
+        cancel: '取消',
+        done: '完成',
+        continue: '继续',
+        // Section Labels
+        observation: '观察',
+        detailedAnalysisTags: '详细分析标签',
+        noDetailedObservation: '暂无详细观察。',
+        noSpecificIndications: '暂无具体指征。',
+        enterOnePerLine: '每行输入一项指征',
+        // Invalid Image Dialog
+        imageNotRecognized: '图像无法识别',
+        detected: '检测到',
+        // Warning Dialog
+        warningImageQuality: '警告：图像质量',
+        warningDescription: '如果没有正确的照片，最终报告的准确性将受到影响。',
+        guidelines: '拍摄指南',
+        continueAnyway: '仍然继续',
+        // Photo Guidelines Dialog
+        photoGuidelines: '拍照指南',
+        photoGuidelinesIntro: '请遵循以下指南以获得最佳分析效果：',
+        guidelineLighting: '确保光线充足且均匀。',
+        guidelineNoEdit: '请勿编辑或美化照片。',
+        guidelineClearlyVisible: '确保{part}清晰可见且对焦准确。',
+        guidelineNoShadow: '避免阴影或眩光。',
+        guidelineTongueRelax: '放松舌头，不要用力。',
+        guidelineFaceNoGlasses: '摘下眼镜，确保头发不遮挡面部。',
+    },
+    // 闻诊分析结果
+    audioAnalysis: {
+        listeningAnalysisComplete: '闻诊分析完成',
+        wenZhenResults: '闻诊 (Wén Zhěn) 结果',
+        // Confidence
+        highConfidence: '高置信度',
+        mediumConfidence: '中置信度',
+        lowConfidence: '低置信度',
+        // Section Labels
+        overallObservation: '综合观察',
+        tcmIndicators: '中医指征',
+        clinicalSignificance: '临床意义',
+        patternSuggestions: '证型建议',
+        note: '备注',
+        onePatternPerLine: '每行一个证型',
+        oneIndicatorPerLine: '每行一个指征',
+        // Category Titles
+        voiceQualityAnalysis: '声音质量分析',
+        breathingPatterns: '呼吸模式',
+        speechPatterns: '言语模式',
+        coughSounds: '咳嗽声音',
+        // Severity Labels
+        normal: '正常',
+        mild: '轻度',
+        moderate: '中度',
+        significant: '明显',
+        // Buttons
+        recordAgain: '重新录音',
+        uploadAudio: '上传录音',
     },
     errors: {
         genericError: '出现错误，请重试。', networkError: '网络错误，请检查您的网络连接。', sessionExpired: '会话已过期，请重新登录。',

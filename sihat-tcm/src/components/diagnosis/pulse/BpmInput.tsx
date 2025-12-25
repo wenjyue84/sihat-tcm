@@ -2,12 +2,13 @@
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Heart, Activity, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Heart, Activity, CheckCircle2, AlertCircle, Camera } from 'lucide-react'
 import { EcgAnimation } from '@/components/ui/EcgAnimation'
+import { CameraPulseSensor } from './CameraPulseSensor'
 
 interface BpmInputProps {
-    inputMode: 'tap' | 'manual';
-    setInputMode: (mode: 'tap' | 'manual') => void;
+    inputMode: 'tap' | 'manual' | 'camera';
+    setInputMode: (mode: 'tap' | 'manual' | 'camera') => void;
     // Manual mode
     manualBpm: string;
     handleManualInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -17,6 +18,9 @@ interface BpmInputProps {
     bpm: number | null;
     handleTap: () => void;
     resetTaps: () => void;
+    // Camera mode
+    showCameraOption?: boolean;
+    onCameraBpmDetected?: (bpm: number) => void;
     // Translations
     t: any;
 }
@@ -31,47 +35,72 @@ export function BpmInput({
     bpm,
     handleTap,
     resetTaps,
+    showCameraOption = false,
+    onCameraBpmDetected,
     t
 }: BpmInputProps) {
+    // Translations for camera mode with fallbacks
+    const cameraLabel = t.pulse?.measureWithCamera || 'Measure with Camera'
+    
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
             {/* Input Mode Selection */}
-            <div className="flex gap-3">
+            <div className={`grid gap-3 ${showCameraOption ? 'grid-cols-3' : 'grid-cols-2'}`}>
                 <Button
                     variant={inputMode === 'manual' ? 'default' : 'outline'}
-                    className={`flex-1 ${inputMode === 'manual' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}`}
+                    className={`${inputMode === 'manual' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}`}
                     onClick={() => setInputMode('manual')}
                 >
                     {t.pulse.enterBpmManually}
                 </Button>
                 <Button
                     variant={inputMode === 'tap' ? 'default' : 'outline'}
-                    className={`flex-1 ${inputMode === 'tap' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}`}
+                    className={`${inputMode === 'tap' ? 'bg-emerald-500 hover:bg-emerald-600' : ''}`}
                     onClick={() => { setInputMode('tap'); resetTaps(); }}
                 >
                     {t.pulse.tapToMeasure}
                 </Button>
+                {showCameraOption && (
+                    <Button
+                        variant={inputMode === 'camera' ? 'default' : 'outline'}
+                        className={`${inputMode === 'camera' ? 'bg-rose-500 hover:bg-rose-600' : 'border-rose-200 text-rose-600 hover:bg-rose-50'}`}
+                        onClick={() => setInputMode('camera')}
+                    >
+                        <Camera className="w-4 h-4 mr-2" />
+                        {cameraLabel}
+                    </Button>
+                )}
             </div>
 
             {/* Input Area */}
-            <div className="bg-gradient-to-br from-slate-50 to-emerald-50 rounded-xl p-6">
-                {inputMode === 'manual' ? (
-                    <ManualBpmInput
-                        manualBpm={manualBpm}
-                        handleManualInput={handleManualInput}
-                        bpmInputRef={bpmInputRef}
-                        t={t}
-                    />
-                ) : (
-                    <TapBpmInput
-                        taps={taps}
-                        bpm={bpm}
-                        handleTap={handleTap}
-                        resetTaps={resetTaps}
-                        t={t}
-                    />
-                )}
-            </div>
+            {inputMode === 'camera' ? (
+                <CameraPulseSensor
+                    onBpmDetected={(detectedBpm) => {
+                        onCameraBpmDetected?.(detectedBpm)
+                    }}
+                    onCancel={() => setInputMode('manual')}
+                    t={t}
+                />
+            ) : (
+                <div className="bg-gradient-to-br from-slate-50 to-emerald-50 rounded-xl p-6">
+                    {inputMode === 'manual' ? (
+                        <ManualBpmInput
+                            manualBpm={manualBpm}
+                            handleManualInput={handleManualInput}
+                            bpmInputRef={bpmInputRef}
+                            t={t}
+                        />
+                    ) : (
+                        <TapBpmInput
+                            taps={taps}
+                            bpm={bpm}
+                            handleTap={handleTap}
+                            resetTaps={resetTaps}
+                            t={t}
+                        />
+                    )}
+                </div>
+            )}
         </div>
     )
 }

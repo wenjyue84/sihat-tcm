@@ -10,12 +10,54 @@ interface UsePulseCheckOptions {
     t: any; // Language translations
 }
 
+// Camera PPG capability detection
+async function checkCameraCapability(): Promise<boolean> {
+    // Quick checks for known unsupported environments
+    const userAgent = navigator.userAgent.toLowerCase()
+    const isIOS = /iphone|ipad|ipod/.test(userAgent)
+    const isAndroid = /android/.test(userAgent)
+    const isMobile = isIOS || isAndroid
+    
+    // iOS doesn't support torch
+    if (isIOS) return false
+    
+    // Desktop webcams don't have flash
+    if (!isMobile) return false
+    
+    // Check for camera and torch capability
+    try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            return false
+        }
+        
+        // Try to get camera access to check capabilities
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' }
+        })
+        
+        const track = stream.getVideoTracks()[0]
+        const capabilities = track.getCapabilities?.()
+        
+        // Stop the stream immediately
+        stream.getTracks().forEach(t => t.stop())
+        
+        // Check if torch is available
+        return !!(capabilities && 'torch' in capabilities)
+    } catch {
+        return false
+    }
+}
+
 export function usePulseCheck({ initialData, onComplete, onBack, t }: UsePulseCheckOptions) {
     // BPM State
     const [taps, setTaps] = useState<number[]>([])
     const [bpm, setBpm] = useState<number | null>(initialData?.bpm || null)
     const [manualBpm, setManualBpm] = useState<string>(initialData?.bpm ? String(initialData.bpm) : '')
-    const [inputMode, setInputMode] = useState<'tap' | 'manual'>('manual')
+    const [inputMode, setInputMode] = useState<'tap' | 'manual' | 'camera'>('manual')
+    
+    // Camera capability state
+    const [showCameraOption, setShowCameraOption] = useState(false)
+    const [isCheckingCamera, setIsCheckingCamera] = useState(true)
 
     // TCM Qualities State
     const [selectedPulseQualities, setSelectedPulseQualities] = useState<string[]>(
@@ -40,6 +82,20 @@ export function usePulseCheck({ initialData, onComplete, onBack, t }: UsePulseCh
         selectedPulseQualitiesRef.current = selectedPulseQualities
         wizardStepRef.current = wizardStep
     }, [bpm, manualBpm, inputMode, selectedPulseQualities, wizardStep])
+    
+    // Check camera capability on mount
+    useEffect(() => {
+        let mounted = true
+        
+        checkCameraCapability().then(hasCamera => {
+            if (mounted) {
+                setShowCameraOption(hasCamera)
+                setIsCheckingCamera(false)
+            }
+        })
+        
+        return () => { mounted = false }
+    }, [])
 
     // Tap Handler for BPM calculation
     const handleTap = useCallback(() => {
@@ -68,6 +124,13 @@ export function usePulseCheck({ initialData, onComplete, onBack, t }: UsePulseCh
         if (value === '' || (/^\d+$/.test(value) && parseInt(value) <= 200)) {
             setManualBpm(value)
         }
+    }, [])
+    
+    // Handle BPM detected from camera
+    const handleCameraBpm = useCallback((detectedBpm: number) => {
+        setBpm(detectedBpm)
+        setManualBpm(String(detectedBpm))
+        setInputMode('manual') // Switch back to manual mode to show the result
     }, [])
 
     // Pulse Quality Toggle with Conflict Detection
@@ -150,6 +213,11 @@ export function usePulseCheck({ initialData, onComplete, onBack, t }: UsePulseCh
         handleTap,
         resetTaps,
         handleManualInput,
+        
+        // Camera State
+        showCameraOption,
+        isCheckingCamera,
+        handleCameraBpm,
 
         // Qualities State
         selectedPulseQualities,

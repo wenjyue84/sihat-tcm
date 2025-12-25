@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase/client';
 import { Language } from '@/lib/translations';
 import { Globe, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,8 +21,29 @@ export function LanguageSelector({
     showLabel = true
 }: LanguageSelectorProps) {
     const { language, setLanguage, languageNames, t } = useLanguage();
+    const { user, refreshProfile } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const handleLanguageSelect = async (code: Language) => {
+        setLanguage(code);
+        setIsOpen(false);
+
+        if (user) {
+            try {
+                const { error } = await supabase
+                    .from('profiles')
+                    .update({ preferred_language: code })
+                    .eq('id', user.id);
+
+                if (!error) {
+                    refreshProfile();
+                }
+            } catch (err) {
+                console.error('Error updating language preference:', err);
+            }
+        }
+    };
 
     const languages: { code: Language; flag: string }[] = [
         { code: 'en', flag: '🇬🇧' },
@@ -52,7 +75,7 @@ export function LanguageSelector({
                     {languages.map(({ code, flag }) => (
                         <button
                             key={code}
-                            onClick={() => setLanguage(code)}
+                            onClick={() => handleLanguageSelect(code)}
                             className={`
                 px-3 py-1.5 text-sm font-medium transition-all flex items-center gap-1.5
                 ${language === code
@@ -93,10 +116,7 @@ export function LanguageSelector({
                             {languages.map(({ code, flag }) => (
                                 <button
                                     key={code}
-                                    onClick={() => {
-                                        setLanguage(code);
-                                        setIsOpen(false);
-                                    }}
+                                    onClick={() => handleLanguageSelect(code)}
                                     className={`
                     w-full px-3 py-2 text-sm text-left flex items-center justify-between
                     ${language === code
@@ -152,10 +172,7 @@ export function LanguageSelector({
                             {languages.map(({ code, flag }) => (
                                 <button
                                     key={code}
-                                    onClick={() => {
-                                        setLanguage(code);
-                                        setIsOpen(false);
-                                    }}
+                                    onClick={() => handleLanguageSelect(code)}
                                     className={`
                     w-full px-4 py-2.5 text-sm text-left flex items-center justify-between
                     ${language === code

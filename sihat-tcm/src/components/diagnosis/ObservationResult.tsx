@@ -131,12 +131,12 @@ export function ObservationResult({
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 text-center md:text-left">
                 <div>
                     <h2 className="text-xl font-semibold text-emerald-800">
-                        {type === 'tongue' ? 'Tongue Analysis Result' : type === 'face' ? 'Face Analysis Result' : 'Specific Area Analysis Result'}
+                        {type === 'tongue' ? t.observation.tongueAnalysisResult : type === 'face' ? t.observation.faceAnalysisResult : t.observation.specificAreaAnalysisResult}
                     </h2>
                     <p className="text-stone-600 text-sm mt-1">
                         {isInvalidImage
-                            ? 'The image could not be analyzed. Please review and retake if needed.'
-                            : 'Here is what our AI observed. Please review before proceeding.'}
+                            ? t.observation.imageNotAnalyzed
+                            : t.observation.reviewBeforeProceeding}
                     </p>
                 </div>
 
@@ -151,7 +151,7 @@ export function ObservationResult({
                                 className="text-emerald-700 border-emerald-200 hover:bg-emerald-50"
                             >
                                 <Pencil className="w-4 h-4 mr-2" />
-                                Edit Result
+                                {t.observation.editResult}
                             </Button>
                         ) : (
                             <div className="flex gap-2">
@@ -162,7 +162,7 @@ export function ObservationResult({
                                     className="text-stone-500 hover:bg-stone-100"
                                 >
                                     <X className="w-4 h-4 mr-1" />
-                                    Cancel
+                                    {t.observation.cancel}
                                 </Button>
                                 <Button
                                     variant="outline"
@@ -171,7 +171,7 @@ export function ObservationResult({
                                     className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
                                 >
                                     <Save className="w-4 h-4 mr-2" />
-                                    Done
+                                    {t.observation.done}
                                 </Button>
                             </div>
                         )}
@@ -197,19 +197,19 @@ export function ObservationResult({
                         <div className="bg-red-50 p-4 rounded-lg border border-red-100">
                             <h3 className="font-medium text-red-900 mb-2 flex items-center">
                                 <AlertTriangle className="w-4 h-4 mr-2" />
-                                Image Not Recognized
+                                {t.observation.imageNotRecognized}
                             </h3>
                             <p className="text-sm text-red-800 leading-relaxed mb-3">
                                 {message || `This image does not appear to contain a ${typeLabels[type].toLowerCase()}. Please retake the photo with a clear view of your ${typeLabels[type].toLowerCase()}.`}
                             </p>
                             {imageDescription && (
                                 <p className="text-xs text-red-600 italic">
-                                    Detected: {imageDescription}
+                                    {t.observation.detected}: {imageDescription}
                                 </p>
                             )}
                             {confidence !== undefined && confidence > 0 && (
                                 <p className="text-xs text-red-600 mt-1">
-                                    Confidence: {confidence}%
+                                    {t.observation.confidence}: {confidence}%
                                 </p>
                             )}
                         </div>
@@ -220,10 +220,10 @@ export function ObservationResult({
                                 <h3 className="font-medium text-emerald-900 mb-2 flex items-center justify-between">
                                     <div className="flex items-center">
                                         <Check className="w-4 h-4 mr-2" />
-                                        Observation
+                                        {t.observation.observation}
                                         {confidence !== undefined && confidence >= 60 && !isEditing && (
                                             <span className="ml-2 text-xs text-emerald-600 font-normal">
-                                                ({confidence}% confidence)
+                                                ({confidence}% {t.observation.confidence.toLowerCase()})
                                             </span>
                                         )}
                                     </div>
@@ -242,7 +242,7 @@ export function ObservationResult({
                                     </div>
                                 ) : (
                                     <p className="text-sm text-emerald-800 leading-relaxed whitespace-pre-wrap">
-                                        {editedObservation || "No detailed observation available."}
+                                        {editedObservation || t.observation.noDetailedObservation}
                                     </p>
                                 )}
                             </div>
@@ -251,13 +251,13 @@ export function ObservationResult({
                             <div className={`p-4 rounded-lg border transition-colors ${isEditing ? 'bg-white border-amber-300 ring-2 ring-amber-100' : 'bg-amber-50 border-amber-100'}`}>
                                 <h3 className="font-medium text-amber-900 mb-2 flex items-center">
                                     <AlertCircle className="w-4 h-4 mr-2" />
-                                    Potential Indications
+                                    {t.observation.potentialIssues}
                                 </h3>
 
                                 {isEditing ? (
                                     <div className="space-y-2">
-                                        <Label htmlFor="issues" className="sr-only">Potential Indications (one per line)</Label>
-                                        <p className="text-xs text-stone-500 mb-1">Enter one indication per line</p>
+                                        <Label htmlFor="issues" className="sr-only">{t.observation.potentialIssues}</Label>
+                                        <p className="text-xs text-stone-500 mb-1">{t.observation.enterOnePerLine}</p>
                                         <Textarea
                                             id="issues"
                                             value={editedIssues}
@@ -274,17 +274,17 @@ export function ObservationResult({
                                             ))}
                                         </ul>
                                     ) : (
-                                        <p className="text-sm text-amber-800/60 italic">No specific indications noted.</p>
+                                        <p className="text-sm text-amber-800/60 italic">{t.observation.noSpecificIndications}</p>
                                     )
                                 )}
                             </div>
 
-                            {/* Enhanced Analysis Tags for Tongue (myzencheck.net style) */}
-                            {type === 'tongue' && analysisTags && analysisTags.length > 0 && !isEditing && (
+                            {/* Enhanced Analysis Tags for Tongue, Face, and Body Part (myzencheck.net style) */}
+                            {analysisTags && analysisTags.length > 0 && !isEditing && (
                                 <div className="mt-4">
                                     <h3 className="font-medium text-emerald-900 mb-3 flex items-center">
                                         <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse" />
-                                        Detailed Analysis Tags
+                                        {t.observation.detailedAnalysisTags}
                                     </h3>
                                     <AnalysisTagsCompact tags={analysisTags} />
                                 </div>
@@ -320,7 +320,7 @@ export function ObservationResult({
                     disabled={isEditing}
                 >
                     <Check className="w-4 h-4 mr-2" />
-                    Continue
+                    {t.observation.continue}
                 </Button>
             </div>
 
@@ -329,10 +329,10 @@ export function ObservationResult({
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-amber-600">
                             <AlertTriangle className="h-5 w-5" />
-                            Warning: Image Quality
+                            {t.observation.warningImageQuality}
                         </DialogTitle>
                         <DialogDescription className="pt-2">
-                            The accuracy of the final report will be affected should we not have the correct photo.
+                            {t.observation.warningDescription}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="gap-2 sm:gap-0">
@@ -340,7 +340,7 @@ export function ObservationResult({
                             setShowWarning(false)
                             setShowGuidelines(true)
                         }}>
-                            Guidelines
+                            {t.observation.guidelines}
                         </Button>
                         <Button onClick={() => {
                             setShowWarning(false)
@@ -349,7 +349,7 @@ export function ObservationResult({
                                 potentialIssues: editedIssues.split('\n').filter(i => i.trim())
                             })
                         }}>
-                            Continue Anyway
+                            {t.observation.continueAnyway}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -358,24 +358,24 @@ export function ObservationResult({
             <Dialog open={showGuidelines} onOpenChange={setShowGuidelines}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Photo Guidelines</DialogTitle>
+                        <DialogTitle>{t.observation.photoGuidelines}</DialogTitle>
                         <DialogDescription>
-                            Please follow these guidelines for the best analysis results:
+                            {t.observation.photoGuidelinesIntro}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <ul className="list-disc list-inside space-y-2 text-sm text-stone-600">
-                            <li>Make sure the light is sufficient and even.</li>
-                            <li>Do not edit or beautify the photo.</li>
-                            <li>Ensure the {typeLabels[type].toLowerCase()} is clearly visible and in focus.</li>
-                            <li>Avoid shadows or glare.</li>
-                            {type === 'tongue' && <li>Relax your tongue, do not stiffen it.</li>}
-                            {type === 'face' && <li>Remove glasses and ensure your face is not covered by hair.</li>}
+                            <li>{t.observation.guidelineLighting}</li>
+                            <li>{t.observation.guidelineNoEdit}</li>
+                            <li>{t.observation.guidelineClearlyVisible.replace('{part}', typeLabels[type].toLowerCase())}</li>
+                            <li>{t.observation.guidelineNoShadow}</li>
+                            {type === 'tongue' && <li>{t.observation.guidelineTongueRelax}</li>}
+                            {type === 'face' && <li>{t.observation.guidelineFaceNoGlasses}</li>}
                         </ul>
                     </div>
                     <DialogFooter>
                         <Button onClick={() => setShowGuidelines(false)}>
-                            Close
+                            {t.common.close}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

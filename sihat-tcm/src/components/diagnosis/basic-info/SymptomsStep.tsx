@@ -141,6 +141,115 @@ export function SymptomsStep({
         setSelectedSymptoms(newSelection)
     }
 
+    const quickSelectionsSection = (
+        <div onMouseDown={(e) => e.preventDefault()}>
+            <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">Quick Selections</span>
+                </div>
+            </div>
+
+            {/* Symptom Selection (Priority 2) */}
+            <div>
+                {/* Category Mode Switcher */}
+                <div className="flex justify-between items-center bg-muted/40 p-1 rounded-lg mb-4">
+                    {(['simple', 'western', 'tcm'] as const).map(mode => (
+                        <button
+                            key={mode}
+                            type="button"
+                            onClick={() => setCategoryMode(mode)}
+                            className={`
+                                flex-1 py-1.5 text-xs font-medium rounded-md transition-all
+                                ${categoryMode === mode
+                                    ? 'bg-card text-primary shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
+                                }
+                            `}
+                        >
+                            {t.basicInfo.symptomCategories?.modes?.[mode] || mode}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Category Tabs */}
+                <div className="flex overflow-x-auto gap-2 pb-2 mb-2 scrollbar-hide -mx-1 px-1">
+                    {categories[categoryMode].map(cat => (
+                        <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setActiveCategory(cat.id)}
+                            className={`
+                                whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium border transition-colors
+                                ${activeCategory === cat.id
+                                    ? 'bg-primary/20 text-primary border-primary/30'
+                                    : 'bg-card text-muted-foreground border-border hover:bg-muted'
+                                }
+                            `}
+                        >
+                            {cat.label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Symptom Grid - Filtered by Active Category */}
+                <div className="space-y-3 min-h-44">
+                    <Label className="text-muted-foreground font-medium flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Activity className="w-4 h-4 text-primary" />
+                            {categories[categoryMode].find(c => c.id === activeCategory)?.label}
+                        </div>
+                    </Label>
+
+                    <motion.div
+                        key={activeCategory}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex flex-wrap gap-2"
+                    >
+                        {categories[categoryMode]
+                            .find(c => c.id === activeCategory)
+                            ?.symptoms.map((symptomKey) => (
+                                <div key={symptomKey} className="relative group">
+                                    {/* Tooltip - hidden on mobile, shows on hover for desktop */}
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2.5 bg-popover border border-border text-popover-foreground text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 hidden md:block">
+                                        <p className="font-medium text-foreground mb-1">
+                                            {t.basicInfo.symptoms[symptomKey as keyof typeof t.basicInfo.symptoms]}
+                                        </p>
+                                        <p className="text-muted-foreground leading-relaxed">
+                                            {t.basicInfo.symptomDescriptions?.[symptomKey as keyof typeof t.basicInfo.symptomDescriptions] || 'No description available'}
+                                        </p>
+                                        {/* Arrow pointing down */}
+                                        <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-popover"></div>
+                                    </div>
+
+                                    <motion.button
+                                        type="button"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => handleSymptomClick(symptomKey)}
+                                        className={`
+                                        px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 border min-h-10
+                                        ${selectedSymptoms.includes(symptomKey)
+                                                ? "bg-primary/20 border-primary/30 text-primary shadow-sm"
+                                                : "bg-card border-border text-muted-foreground hover:border-primary/50 hover:bg-muted"
+                                            }
+                                    `}
+                                    >
+                                        {selectedSymptoms.includes(symptomKey) && <Check className="w-3 h-3" />}
+                                        {t.basicInfo.symptoms[symptomKey as keyof typeof t.basicInfo.symptoms]}
+                                    </motion.button>
+                                </div>
+                            ))}
+                    </motion.div>
+                </div>
+            </div>
+        </div>
+    )
+
     return (
         <div className="space-y-6">
             {/* Main Concern Input (Priority 1) */}
@@ -170,6 +279,7 @@ export function SymptomsStep({
                     suppressHydrationWarning
                 />
             </div>
+            {isInputFocused && activeInput === 'main' && quickSelectionsSection}
 
             {/* Other Symptoms Input */}
             <div className="space-y-2">
@@ -195,116 +305,7 @@ export function SymptomsStep({
                     Select from below to add to <strong>{activeInput === 'main' ? (t.basicInfo.mainConcern || "Main Concern") : (t.basicInfo.otherSymptoms || "Other Symptoms")}</strong>
                 </p>
             </div>
-
-            {/* Quick Selections - only show when an input field is focused */}
-            {isInputFocused && (
-                <div onMouseDown={(e) => e.preventDefault()}>
-                    <div className="relative py-2">
-                        <div className="absolute inset-0 flex items-center">
-                            <span className="w-full border-t border-border" />
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-card px-2 text-muted-foreground">Quick Selections</span>
-                        </div>
-                    </div>
-
-                    {/* Symptom Selection (Priority 2) */}
-                    <div>
-                        {/* Category Mode Switcher */}
-                        <div className="flex justify-between items-center bg-muted/40 p-1 rounded-lg mb-4">
-                            {(['simple', 'western', 'tcm'] as const).map(mode => (
-                                <button
-                                    key={mode}
-                                    type="button"
-                                    onClick={() => setCategoryMode(mode)}
-                                    className={`
-                                        flex-1 py-1.5 text-xs font-medium rounded-md transition-all
-                                        ${categoryMode === mode
-                                            ? 'bg-card text-primary shadow-sm'
-                                            : 'text-muted-foreground hover:text-foreground'
-                                        }
-                                    `}
-                                >
-                                    {t.basicInfo.symptomCategories?.modes?.[mode] || mode}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Category Tabs */}
-                        <div className="flex overflow-x-auto gap-2 pb-2 mb-2 scrollbar-hide -mx-1 px-1">
-                            {categories[categoryMode].map(cat => (
-                                <button
-                                    key={cat.id}
-                                    type="button"
-                                    onClick={() => setActiveCategory(cat.id)}
-                                    className={`
-                                        whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium border transition-colors
-                                        ${activeCategory === cat.id
-                                            ? 'bg-primary/20 text-primary border-primary/30'
-                                            : 'bg-card text-muted-foreground border-border hover:bg-muted'
-                                        }
-                                    `}
-                                >
-                                    {cat.label}
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Symptom Grid - Filtered by Active Category */}
-                        <div className="space-y-3 min-h-44">
-                            <Label className="text-muted-foreground font-medium flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Activity className="w-4 h-4 text-primary" />
-                                    {categories[categoryMode].find(c => c.id === activeCategory)?.label}
-                                </div>
-                            </Label>
-
-                            <motion.div
-                                key={activeCategory}
-                                initial={{ opacity: 0, y: 5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="flex flex-wrap gap-2"
-                            >
-                                {categories[categoryMode]
-                                    .find(c => c.id === activeCategory)
-                                    ?.symptoms.map((symptomKey) => (
-                                        <div key={symptomKey} className="relative group">
-                                            {/* Tooltip - hidden on mobile, shows on hover for desktop */}
-                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-2.5 bg-popover border border-border text-popover-foreground text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 hidden md:block">
-                                                <p className="font-medium text-foreground mb-1">
-                                                    {t.basicInfo.symptoms[symptomKey as keyof typeof t.basicInfo.symptoms]}
-                                                </p>
-                                                <p className="text-muted-foreground leading-relaxed">
-                                                    {t.basicInfo.symptomDescriptions?.[symptomKey as keyof typeof t.basicInfo.symptomDescriptions] || 'No description available'}
-                                                </p>
-                                                {/* Arrow pointing down */}
-                                                <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-popover"></div>
-                                            </div>
-
-                                            <motion.button
-                                                type="button"
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                                onClick={() => handleSymptomClick(symptomKey)}
-                                                className={`
-                                                px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 border min-h-10
-                                                ${selectedSymptoms.includes(symptomKey)
-                                                        ? "bg-primary/20 border-primary/30 text-primary shadow-sm"
-                                                        : "bg-card border-border text-muted-foreground hover:border-primary/50 hover:bg-muted"
-                                                    }
-                                            `}
-                                            >
-                                                {selectedSymptoms.includes(symptomKey) && <Check className="w-3 h-3" />}
-                                                {t.basicInfo.symptoms[symptomKey as keyof typeof t.basicInfo.symptoms]}
-                                            </motion.button>
-                                        </div>
-                                    ))}
-                            </motion.div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {isInputFocused && activeInput === 'other' && quickSelectionsSection}
 
             {/* Symptom Duration (Priority 3) */}
             <div className="space-y-2" id="symptomDuration-wrapper">

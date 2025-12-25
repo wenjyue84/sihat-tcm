@@ -263,13 +263,13 @@ export function UnifiedDashboard() {
                                 onClick={() => router.push('/')}
                                 className="text-slate-600 hover:text-emerald-600 font-medium transition-colors"
                             >
-                                Home
+                                {t.patientDashboard.navigation.home}
                             </button>
                             <button
                                 onClick={() => router.push('/patient')}
                                 className="text-emerald-600 font-medium border-b-2 border-emerald-600 pb-1"
                             >
-                                Dashboard
+                                {t.patientDashboard.navigation.dashboard}
                             </button>
                         </nav>
 
@@ -279,7 +279,7 @@ export function UnifiedDashboard() {
                                 <p className="text-sm font-medium text-slate-800">
                                     {profile?.full_name || user?.email || 'Patient'}
                                 </p>
-                                <p className="text-xs text-slate-500">Patient Account</p>
+                                <p className="text-xs text-slate-500">{t.patientDashboard.navigation.patientAccount}</p>
                             </div>
                             <Button
                                 onClick={handleLogout}
@@ -288,7 +288,7 @@ export function UnifiedDashboard() {
                                 className="text-slate-600 hover:text-red-600 hover:bg-red-50"
                             >
                                 <LogOut className="w-4 h-4 sm:mr-2" />
-                                <span className="hidden sm:inline">Logout</span>
+                                <span className="hidden sm:inline">{t.patientDashboard.navigation.logout}</span>
                             </Button>
                         </div>
                     </div>
@@ -412,9 +412,9 @@ export function UnifiedDashboard() {
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="date">Date</SelectItem>
-                                                <SelectItem value="score">Score</SelectItem>
-                                                <SelectItem value="diagnosis">Diagnosis</SelectItem>
+                                                <SelectItem value="date">{t.patientDashboard.historyTable.sortByDate}</SelectItem>
+                                                <SelectItem value="score">{t.patientDashboard.historyTable.sortByScore}</SelectItem>
+                                                <SelectItem value="diagnosis">{t.patientDashboard.historyTable.sortByDiagnosis}</SelectItem>
                                             </SelectContent>
                                         </Select>
 
@@ -528,9 +528,9 @@ export function UnifiedDashboard() {
 
                             const getScoreBadge = (score?: number) => {
                                 if (score === undefined || score === null) return null
-                                if (score >= 75) return { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Good', Icon: TrendingUp }
-                                if (score >= 50) return { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Fair', Icon: Minus }
-                                return { bg: 'bg-red-100', text: 'text-red-700', label: 'Needs Attention', Icon: TrendingDown }
+                                if (score >= 75) return { bg: 'bg-emerald-100', text: 'text-emerald-700', label: t.patientDashboard.historyTable.good, Icon: TrendingUp }
+                                if (score >= 50) return { bg: 'bg-amber-100', text: 'text-amber-700', label: t.patientDashboard.historyTable.fair, Icon: Minus }
+                                return { bg: 'bg-red-100', text: 'text-red-700', label: t.patientDashboard.historyTable.needsAttention, Icon: TrendingDown }
                             }
 
                             return (
@@ -542,11 +542,11 @@ export function UnifiedDashboard() {
                                                 <table className="w-full">
                                                     <thead className="bg-slate-50 border-b border-slate-200">
                                                         <tr>
-                                                            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Diagnosis</th>
-                                                            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Date</th>
-                                                            <th className="text-center py-3 px-4 text-sm font-semibold text-slate-700">Score</th>
-                                                            <th className="text-center py-3 px-4 text-sm font-semibold text-slate-700">Status</th>
-                                                            <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700">Action</th>
+                                                            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">{t.patientDashboard.historyTable.diagnosis}</th>
+                                                            <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">{t.patientDashboard.historyTable.date}</th>
+                                                            <th className="text-center py-3 px-4 text-sm font-semibold text-slate-700">{t.patientDashboard.historyTable.score}</th>
+                                                            <th className="text-center py-3 px-4 text-sm font-semibold text-slate-700">{t.patientDashboard.historyTable.status}</th>
+                                                            <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700">{t.patientDashboard.historyTable.action}</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody className="divide-y divide-slate-100">
@@ -605,7 +605,7 @@ export function UnifiedDashboard() {
                                                                             }}
                                                                         >
                                                                             <Eye className="w-4 h-4 mr-1" />
-                                                                            View
+                                                                            {t.patientDashboard.historyTable.view}
                                                                         </Button>
                                                                     </td>
                                                                 </tr>
@@ -713,9 +713,9 @@ export function UnifiedDashboard() {
                         transition={{ duration: 0.4 }}
                     >
                         <div className="mb-6">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-2">AI Meal Planner</h2>
+                            <h2 className="text-2xl font-bold text-slate-800 mb-2">{t.patientDashboard.mealPlanner.title}</h2>
                             <p className="text-sm text-slate-600">
-                                Personalized 7-day meal plans based on your TCM constitution
+                                {t.patientDashboard.mealPlanner.subtitle}
                             </p>
                         </div>
 

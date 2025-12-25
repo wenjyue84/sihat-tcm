@@ -270,6 +270,7 @@ Return a ** valid JSON object only ** - NO markdown, NO code blocks:
 2. ** ALWAYS provide detailed observations ** if valid.
 3. ** Use BOTH Chinese and English ** terminology.
 4. ** Return ONLY the JSON object **.
+5. ** CLINICAL CONSISTENCY **: If symptoms are provided, ensure your analysis does NOT contradict them (e.g., don't diagnose "Excess Heat" if patient reports "Severe Cold symptoms") unless visual evidence is overwhelming. Explain any discrepancies in "notes".
 `;
 
 export const FACE_ANALYSIS_PROMPT = `
@@ -358,6 +359,7 @@ Return a ** valid JSON object only ** - NO markdown, NO code blocks:
 2. ** ALWAYS provide detailed observations ** if valid.
 3. ** Use BOTH Chinese and English ** terminology.
 4. ** Return ONLY the JSON object **.
+5. ** CLINICAL CONSISTENCY **: If symptoms are provided, ensure your analysis does NOT contradict them unless visual evidence is overwhelming. Explain any discrepancies in "notes".
 `;
 
 export const BODY_ANALYSIS_PROMPT = `
@@ -424,6 +426,7 @@ Return a ** valid JSON object only ** - NO markdown, NO code blocks:
 1. ** ALWAYS provide detailed observations ** - never say "unable to analyze" unless truly impossible.
 2. ** Use BOTH Chinese and English ** terminology.
 3. ** Return ONLY the JSON object **.
+4. ** CLINICAL CONSISTENCY **: If symptoms are provided, ensure your analysis does NOT contradict them.
 `;
 
 

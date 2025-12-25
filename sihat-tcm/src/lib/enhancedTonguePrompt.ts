@@ -36,6 +36,9 @@ CRITICAL INSTRUCTIONS - You MUST follow these exactly:
    - Tongue spirit (舌神): lively or withered appearance
    - Any special features: spots, vessels, ulcers, trembling
 
+5. **CLINICAL CONSISTENCY:**
+   - If patient symptoms are mentioned, ensure your observation DOES NOT contradict them (e.g., if "Cold limbs" reported, be cautious about diagnosing "Excess Heat" without explanation).
+
 5. **RESPONSE FORMAT - Return ONLY this JSON structure:**
 {
   "is_valid_image": true,
@@ -95,6 +98,7 @@ Analyze the provided tongue image and return a detailed JSON response with EXACT
 3. Each analysis_tag MUST have: title, title_cn, category, confidence (decimal 60.0-99.9), description, recommendations (array of 2)
 4. The "category" format MUST be: "[TCM Pattern] · [Treatment Focus]"
 5. Recommendations must be specific and actionable (not generic advice)
+6. **CLINICAL CONSISTENCY**: Your analysis MUST NOT totally contradict the patient's main symptoms if provided. If a contradiction exists, you must address it in "notes" or "observation".
 
 # RESPONSE STRUCTURE
 {

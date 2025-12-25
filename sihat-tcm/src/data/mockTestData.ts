@@ -189,18 +189,110 @@ export function generateMockTestData() {
             ]
         },
 
-        // Face Analysis
+        // Face Analysis (Enhanced with analysis_tags - consistent with tongue analysis)
         wang_face: {
             image: MOCK_FACE_IMAGE,
-            observation: "面色略显苍白，眼下有轻微黑眼圈。皮肤略显暗沉。太阳穴区域显示细微的紧张纹路。整体表现提示疲劳和可能的睡眠不足。",
-            potential_issues: ["疲劳迹象", "可能血虚", "眼部疲劳"]
+            observation: "面色略显苍白，缺乏光泽。眼下有明显黑眼圈，伴有眼袋。印堂区域略显暗淡。颧骨处微红，嘴唇颜色偏淡。整体面相提示脾胃虚弱、肝肾不足，伴有心血亏虚的征象。",
+            potential_issues: ["脾胃虚弱", "肝肾不足", "心血亏虚", "气血不畅"],
+            analysis_tags: [
+                {
+                    title: "Pale Complexion",
+                    title_cn: "面色苍白",
+                    category: "气血虚 · 补血养气",
+                    confidence: 92.3,
+                    description: "面色苍白无华，提示气血两虚，常伴有疲劳、头晕、心悸等症状。此证多见于久病体虚或失血过多者。",
+                    recommendations: [
+                        "多食用红枣、桂圆、当归等补血食材，增强气血生成。",
+                        "避免过度劳累，保证每日7-8小时的充足睡眠。"
+                    ]
+                },
+                {
+                    title: "Dark Eye Circles",
+                    title_cn: "眼圈发黑",
+                    category: "肾虚 · 滋肾养肝",
+                    confidence: 89.7,
+                    description: "眼周发黑，提示肾精不足，水液代谢失调。常见于熬夜、睡眠不足或肾虚体质者。",
+                    recommendations: [
+                        "建议晚上11点前入睡，养成规律作息习惯。",
+                        "可适量食用黑芝麻、核桃、山药等滋补肾阴的食物。"
+                    ]
+                },
+                {
+                    title: "Dull Forehead",
+                    title_cn: "印堂暗淡",
+                    category: "心气虚 · 安神定志",
+                    confidence: 85.4,
+                    description: "印堂区域暗淡无光，提示心气不足，精神不振。患者可能伴有心慌、多梦、健忘等症状。",
+                    recommendations: [
+                        "保持心情舒畅，避免过度焦虑和思虑过度。",
+                        "可饮用莲子心茶或酸枣仁汤来安神养心。"
+                    ]
+                },
+                {
+                    title: "Pale Lips",
+                    title_cn: "唇色淡白",
+                    category: "脾虚血弱 · 健脾益气",
+                    confidence: 87.1,
+                    description: "嘴唇颜色偏淡，提示脾胃功能虚弱，气血生化不足。常伴有食欲不振、腹胀、大便溏薄。",
+                    recommendations: [
+                        "饮食宜温热易消化，忌食生冷油腻之品。",
+                        "建议多食用山药、莲子、白扁豆等健脾食材。"
+                    ]
+                }
+            ]
         },
 
-        // Body Part Analysis (neck/shoulder area for headache patient)
+        // Body Part Analysis (neck/shoulder area for headache patient - Enhanced with analysis_tags)
         wang_part: {
             image: MOCK_BODY_IMAGE,
-            observation: "颈肩部区域显示斜方肌明显紧张。患者可能受益于放松技巧和按压风池穴（GB20）与肩井穴（GB21）。",
-            potential_issues: ["肌肉紧张", "胆经阻滞"]
+            observation: "颈肩部区域斜方肌明显紧张，触之有条索状结节。肩井穴处压痛明显。颈部活动受限，右侧为甚。局部皮肤温度正常，无明显红肿。整体表现提示经络气血瘀滞，与肝胆经、膀胱经循行区域相关，与患者主诉的头痛症状高度吻合。",
+            potential_issues: ["气血瘀滞", "肝胆经不通", "膀胱经阻滞", "筋膜紧张"],
+            analysis_tags: [
+                {
+                    title: "Trapezius Tension",
+                    title_cn: "斜方肌紧张",
+                    category: "经络阻滞 · 疏通经脉",
+                    confidence: 93.8,
+                    description: "斜方肌区域明显紧张僵硬，常因久坐、姿势不良或情志不畅导致气血运行不畅，经络阻滞。",
+                    recommendations: [
+                        "建议每工作1小时起身活动颈肩，做颈部拉伸运动。",
+                        "可配合热敷或艾灸肩井穴（GB21）、天柱穴（BL10）以舒筋活络。"
+                    ]
+                },
+                {
+                    title: "Gallbladder Meridian Block",
+                    title_cn: "胆经阻滞",
+                    category: "肝胆不和 · 疏肝利胆",
+                    confidence: 88.5,
+                    description: "胆经循行于颈侧及肩部，经络阻滞可导致偏头痛、颈肩酸痛。常与情志郁结、肝气不舒有关。",
+                    recommendations: [
+                        "保持情绪稳定，避免生气、焦虑等负面情绪。",
+                        "可按揉风池穴（GB20）、肩井穴（GB21）、阳陵泉（GB34）以疏通胆经。"
+                    ]
+                },
+                {
+                    title: "Nodular Formation",
+                    title_cn: "条索结节",
+                    category: "气滞血瘀 · 活血化瘀",
+                    confidence: 86.2,
+                    description: "肌肉层可触及条索状结节，提示局部气血瘀滞日久，形成有形之结。需要活血化瘀、软坚散结。",
+                    recommendations: [
+                        "可配合推拿按摩，重点揉散结节部位。",
+                        "适量运动如游泳、太极拳有助于促进气血流通。"
+                    ]
+                },
+                {
+                    title: "Bladder Meridian Stagnation",
+                    title_cn: "膀胱经不畅",
+                    category: "太阳经证 · 温经散寒",
+                    confidence: 84.9,
+                    description: "膀胱经循行于背部脊柱两侧，经气不畅可导致背部僵硬、头痛、颈部不适。常与受寒或长期劳损有关。",
+                    recommendations: [
+                        "注意颈肩部保暖，避免空调直吹或冷风侵袭。",
+                        "可艾灸大椎穴（GV14）、风门穴（BL12）以温经散寒。"
+                    ]
+                }
+            ]
         },
 
         // Audio Analysis

@@ -704,6 +704,8 @@ export default function AdminDashboard() {
                             </div>
                         </CardContent>
                     </Card>
+
+                    <SystemAlerts />
                 </TabsContent>
 
 
@@ -812,9 +814,331 @@ export default function AdminDashboard() {
                             </div>
                         </CardContent>
                     </Card>
+
+                    <SystemAlerts />
                 </TabsContent>
             </Tabs>
         </div>
     )
 }
+
+interface SystemAlert {
+    id: string;
+    category: 'translation' | 'content' | 'database' | 'config';
+    severity: 'warning' | 'error' | 'info';
+    message: string;
+    solution: string;
+}
+
+interface AlertSummary {
+    total: number;
+    errors: number;
+    warnings: number;
+    info: number;
+}
+
+function SystemAlerts() {
+    const [alerts, setAlerts] = useState<SystemAlert[]>([])
+    const [summary, setSummary] = useState<AlertSummary>({ total: 0, errors: 0, warnings: 0, info: 0 })
+    const [acknowledgedCount, setAcknowledgedCount] = useState(0)
+    const [loading, setLoading] = useState(true)
+    const [expandedAlerts, setExpandedAlerts] = useState<Set<string>>(new Set())
+    const [acknowledging, setAcknowledging] = useState<string | null>(null)
+    const [localAcknowledged, setLocalAcknowledged] = useState<Set<string>>(new Set())
+
+    // Load localStorage acknowledged alerts on mount
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem('system_alerts_acknowledged')
+            if (stored) {
+                setLocalAcknowledged(new Set(JSON.parse(stored)))
+            }
+        } catch (e) {
+            // Ignore localStorage errors
+        }
+    }, [])
+
+    const fetchAlerts = async () => {
+        try {
+            const res = await fetch('/api/admin/translation-status')
+            if (res.ok) {
+                const data = await res.json()
+                let fetchedAlerts = data.alerts || []
+                let serverAcknowledgedCount = data.acknowledgedCount || 0
+
+                // Also filter out locally acknowledged alerts
+                const localAck = new Set<string>()
+                try {
+                    const stored = localStorage.getItem('system_alerts_acknowledged')
+                    if (stored) {
+                        JSON.parse(stored).forEach((id: string) => localAck.add(id))
+                    }
+                } catch (e) { }
+
+                // Filter alerts that are locally acknowledged
+                fetchedAlerts = fetchedAlerts.filter((a: SystemAlert) => !localAck.has(a.id))
+
+                setAlerts(fetchedAlerts)
+                setSummary({
+                    total: fetchedAlerts.length,
+                    errors: fetchedAlerts.filter((a: SystemAlert) => a.severity === 'error').length,
+                    warnings: fetchedAlerts.filter((a: SystemAlert) => a.severity === 'warning').length,
+                    info: fetchedAlerts.filter((a: SystemAlert) => a.severity === 'info').length,
+                })
+                setAcknowledgedCount(serverAcknowledgedCount + localAck.size)
+                setLocalAcknowledged(localAck)
+            }
+        } catch (err) {
+            console.error('Failed to fetch system alerts', err)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchAlerts()
+    }, [])
+
+    const handleAcknowledge = async (alertId: string) => {
+        setAcknowledging(alertId)
+
+        // Immediately update UI
+        setAlerts(prev => prev.filter(a => a.id !== alertId))
+        setSummary(prev => ({ ...prev, total: prev.total - 1 }))
+        setAcknowledgedCount(prev => prev + 1)
+
+        // Save to localStorage (always works)
+        try {
+            const stored = localStorage.getItem('system_alerts_acknowledged')
+            const acknowledged = stored ? JSON.parse(stored) : []
+            if (!acknowledged.includes(alertId)) {
+                acknowledged.push(alertId)
+                localStorage.setItem('system_alerts_acknowledged', JSON.stringify(acknowledged))
+            }
+            setLocalAcknowledged(new Set(acknowledged))
+        } catch (e) {
+            console.error('Failed to save to localStorage', e)
+        }
+
+        // Also try to save to database (may fail if table doesn't exist)
+        try {
+            await fetch('/api/admin/translation-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ alertId, action: 'acknowledge' }),
+            })
+        } catch (err) {
+            // Database save failed, but localStorage worked
+            console.log('Database save failed, using localStorage only')
+        }
+
+        setAcknowledging(null)
+    }
+
+    const handleResetAll = async () => {
+        if (!confirm('Reset all acknowledged alerts? They will appear again in the list.')) return
+
+        setLoading(true)
+
+        // Clear localStorage
+        try {
+            localStorage.removeItem('system_alerts_acknowledged')
+            setLocalAcknowledged(new Set())
+        } catch (e) { }
+
+        // Try to reset database
+        try {
+            await fetch('/api/admin/translation-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'reset_all' }),
+            })
+        } catch (err) {
+            console.log('Database reset failed, localStorage cleared')
+        }
+
+        // Refetch alerts
+        await fetchAlerts()
+        setLoading(false)
+    }
+
+
+    const toggleExpand = (alertId: string) => {
+        setExpandedAlerts(prev => {
+            const next = new Set(prev)
+            if (next.has(alertId)) {
+                next.delete(alertId)
+            } else {
+                next.add(alertId)
+            }
+            return next
+        })
+    }
+
+    if (loading) {
+        return (
+            <Card className="mt-6 border-stone-100">
+                <CardContent className="py-8 flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 animate-spin text-stone-400 mr-2" />
+                    <span className="text-stone-500">Checking system health...</span>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    if (alerts.length === 0) {
+        return (
+            <Card className="mt-6 border-green-100 bg-green-50/50">
+                <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg flex items-center gap-2 text-green-800">
+                            <Check className="w-5 h-5" />
+                            System Status: All Clear
+                        </CardTitle>
+                        {acknowledgedCount > 0 && (
+                            <button
+                                onClick={handleResetAll}
+                                className="text-xs text-stone-500 hover:text-stone-700 underline"
+                            >
+                                Reset {acknowledgedCount} acknowledged
+                            </button>
+                        )}
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-green-700">All systems operational. No issues detected.</p>
+                    <div className="mt-3 flex flex-wrap gap-4 text-xs text-green-600">
+                        <span>✓ Blog translations</span>
+                        <span>✓ UI translations</span>
+                        <span>✓ Images</span>
+                        <span>✓ Config</span>
+                    </div>
+                    {acknowledgedCount > 0 && (
+                        <p className="text-xs text-stone-500 mt-3">
+                            ({acknowledgedCount} alert{acknowledgedCount > 1 ? 's' : ''} acknowledged and hidden)
+                        </p>
+                    )}
+                </CardContent>
+            </Card>
+        )
+    }
+
+    const getSeverityIcon = (severity: string) => {
+        if (severity === 'error') return '🔴'
+        if (severity === 'warning') return '🟡'
+        return '🔵'
+    }
+
+    const getCategoryLabel = (category: string) => {
+        switch (category) {
+            case 'translation': return 'Translation'
+            case 'content': return 'Content'
+            case 'database': return 'Database'
+            case 'config': return 'Config'
+            default: return category
+        }
+    }
+
+    const hasErrors = summary.errors > 0
+    const cardBorderClass = hasErrors ? 'border-red-200' : 'border-amber-200'
+    const cardBgClass = hasErrors ? 'bg-red-50' : 'bg-amber-50'
+    const titleColor = hasErrors ? 'text-red-800' : 'text-amber-800'
+    const iconColor = hasErrors ? 'text-red-600' : 'text-amber-600'
+
+    return (
+        <Card className={`mt-6 ${cardBorderClass} ${cardBgClass}`}>
+            <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                    <CardTitle className={`text-lg flex items-center gap-2 ${titleColor}`}>
+                        <Info className={`w-5 h-5 ${iconColor}`} />
+                        System Alerts ({summary.total})
+                    </CardTitle>
+                    {acknowledgedCount > 0 && (
+                        <button
+                            onClick={handleResetAll}
+                            className="text-xs text-stone-500 hover:text-stone-700 underline"
+                        >
+                            Reset {acknowledgedCount} acknowledged
+                        </button>
+                    )}
+                </div>
+                <div className="flex gap-4 text-xs mt-1">
+                    {summary.errors > 0 && (
+                        <span className="text-red-600 font-medium">🔴 {summary.errors} error{summary.errors > 1 ? 's' : ''}</span>
+                    )}
+                    {summary.warnings > 0 && (
+                        <span className="text-amber-600 font-medium">🟡 {summary.warnings} warning{summary.warnings > 1 ? 's' : ''}</span>
+                    )}
+                    {summary.info > 0 && (
+                        <span className="text-blue-600 font-medium">🔵 {summary.info} info</span>
+                    )}
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                    {alerts.map((alert) => {
+                        const isExpanded = expandedAlerts.has(alert.id)
+                        const isAcknowledging = acknowledging === alert.id
+                        const bgColor = alert.severity === 'error' ? 'bg-red-50 border-red-100'
+                            : alert.severity === 'warning' ? 'bg-white border-amber-100'
+                                : 'bg-blue-50 border-blue-100'
+
+                        return (
+                            <div key={alert.id} className={`text-sm p-3 rounded border shadow-sm ${bgColor}`}>
+                                <div className="flex items-start gap-2">
+                                    <span className="shrink-0 mt-0.5">{getSeverityIcon(alert.severity)}</span>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">
+                                                {getCategoryLabel(alert.category)}
+                                            </span>
+                                        </div>
+                                        <p className="text-stone-800 break-words">{alert.message}</p>
+
+                                        <button
+                                            onClick={() => toggleExpand(alert.id)}
+                                            className="text-xs text-emerald-600 hover:text-emerald-700 mt-2 flex items-center gap-1"
+                                        >
+                                            {isExpanded ? '▼' : '▶'} How to fix
+                                        </button>
+
+                                        {isExpanded && (
+                                            <div className="mt-2 p-3 bg-emerald-50 border border-emerald-100 rounded text-xs text-emerald-800">
+                                                <strong>💡 Solution:</strong>
+                                                <p className="mt-1 whitespace-pre-wrap">{alert.solution}</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="shrink-0 flex items-center gap-2">
+                                        <button
+                                            onClick={() => handleAcknowledge(alert.id)}
+                                            disabled={isAcknowledging}
+                                            className="flex items-center gap-1.5 px-2 py-1 text-xs rounded bg-white border border-stone-200 hover:bg-stone-50 hover:border-stone-300 transition-colors disabled:opacity-50"
+                                            title="Acknowledge and hide this alert"
+                                        >
+                                            {isAcknowledging ? (
+                                                <Loader2 className="w-3 h-3 animate-spin" />
+                                            ) : (
+                                                <Check className="w-3 h-3" />
+                                            )}
+                                            <span>Acknowledge</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+                <p className="text-xs text-stone-500 mt-4 pt-3 border-t border-stone-200">
+                    💡 Click &quot;How to fix&quot; for solutions. Acknowledged alerts are hidden until you reset them.
+                </p>
+            </CardContent>
+        </Card>
+    )
+}
+
+
+
+
 

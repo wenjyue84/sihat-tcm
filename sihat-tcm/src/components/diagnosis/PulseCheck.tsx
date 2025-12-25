@@ -45,6 +45,8 @@ export function PulseCheck({ onComplete, onBack, initialData }: PulseCheckProps)
         handleTap,
         resetTaps,
         handleManualInput,
+        showCameraOption,
+        handleCameraBpm,
         selectedPulseQualities,
         conflictWarning,
         togglePulseQuality,
@@ -167,6 +169,8 @@ export function PulseCheck({ onComplete, onBack, initialData }: PulseCheckProps)
                         bpm={bpm}
                         handleTap={handleTap}
                         resetTaps={resetTaps}
+                        showCameraOption={showCameraOption}
+                        onCameraBpmDetected={handleCameraBpm}
                         t={t}
                     />
                 </>
