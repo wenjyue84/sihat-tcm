@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This specification outlines comprehensive improvements for the Sihat TCM (Traditional Chinese Medicine) platform, which currently provides AI-powered TCM consultations through web and mobile applications. The system digitizes the four classical TCM diagnostic methods (望闻问切) using Google Gemini AI models. The enhancements focus on improving user experience, expanding diagnostic capabilities, enhancing system reliability, and adding new features to make TCM more accessible and effective for modern users.
+This specification outlines comprehensive improvements for the Sihat TCM (Traditional Chinese Medicine) platform, which currently provides AI-powered TCM consultations through Next.js 16 web application and Expo React Native mobile application. The system digitizes the four classical TCM diagnostic methods (望闻问切) using Google Gemini AI models (2.0-flash, 2.5-pro, 3-pro-preview) with Supabase backend. The enhancements focus on improving user experience, expanding diagnostic capabilities, enhancing system reliability, adding comprehensive health tracking, and implementing advanced features like IoT integration, practitioner collaboration tools, and personalized AI learning to make TCM more accessible and effective for modern users.
 
 ## Glossary
 
@@ -127,14 +127,50 @@ This specification outlines comprehensive improvements for the Sihat TCM (Tradit
 4. WHEN scheduling appointments THEN the TCM System SHALL integrate with external calendar and healthcare systems
 5. WHEN sharing treatment plans THEN the TCM System SHALL export data in standard medical formats
 
-### Requirement 10
+### Requirement 11
 
-**User Story:** As a patient, I want enhanced accessibility and multilingual support, so that the platform serves diverse user needs effectively.
+**User Story:** As a patient, I want advanced IoT and wearable device integration, so that my health data is automatically collected and analyzed for more comprehensive TCM assessments.
 
 #### Acceptance Criteria
 
-1. WHEN using assistive technologies THEN the TCM System SHALL provide full screen reader compatibility and keyboard navigation
-2. WHEN accessing content in different languages THEN the TCM System SHALL maintain medical accuracy across all translations
-3. WHEN using voice commands THEN the TCM System SHALL support hands-free operation for mobility-impaired users
-4. WHEN adjusting display settings THEN the TCM System SHALL accommodate visual impairments with customizable fonts and contrast
-5. WHEN providing audio content THEN the TCM System SHALL include captions and transcripts for hearing-impaired users
+1. WHEN connecting wearable devices THEN the TCM System SHALL automatically sync heart rate, sleep patterns, and activity data
+2. WHEN integrating with smart health devices THEN the TCM System SHALL collect blood pressure, SpO2, and temperature measurements
+3. WHEN analyzing IoT health data THEN the TCM System SHALL correlate device measurements with TCM diagnostic patterns
+4. WHEN detecting anomalies in device data THEN the TCM System SHALL alert users and suggest appropriate TCM interventions
+5. WHEN managing multiple connected devices THEN the TCM System SHALL provide unified device management and data visualization
+
+### Requirement 12
+
+**User Story:** As a patient, I want gamified wellness features and social engagement, so that I stay motivated to follow my TCM treatment plan and connect with others on similar health journeys.
+
+#### Acceptance Criteria
+
+1. WHEN completing treatment recommendations THEN the TCM System SHALL award points and unlock achievement badges
+2. WHEN participating in Qi exercises THEN the TCM System SHALL track progress and provide virtual rewards
+3. WHEN maintaining consistent health habits THEN the TCM System SHALL create streak counters and milestone celebrations
+4. WHEN connecting with community members THEN the TCM System SHALL facilitate anonymous support groups based on constitution types
+5. WHEN sharing progress updates THEN the TCM System SHALL allow selective sharing while maintaining privacy controls
+
+### Requirement 11
+
+**User Story:** As a patient, I want advanced IoT and wearable device integration, so that my health data is automatically collected and analyzed for more comprehensive TCM assessments.
+
+#### Acceptance Criteria
+
+1. WHEN connecting wearable devices THEN the TCM System SHALL automatically sync heart rate, sleep patterns, and activity data
+2. WHEN integrating with smart health devices THEN the TCM System SHALL collect blood pressure, SpO2, and temperature measurements
+3. WHEN analyzing IoT health data THEN the TCM System SHALL correlate device measurements with TCM diagnostic patterns
+4. WHEN detecting anomalies in device data THEN the TCM System SHALL alert users and suggest appropriate TCM interventions
+5. WHEN managing multiple connected devices THEN the TCM System SHALL provide unified device management and data visualization
+
+### Requirement 12
+
+**User Story:** As a patient, I want gamified wellness features and social engagement, so that I stay motivated to follow my TCM treatment plan and connect with others on similar health journeys.
+
+#### Acceptance Criteria
+
+1. WHEN completing treatment recommendations THEN the TCM System SHALL award points and unlock achievement badges
+2. WHEN participating in Qi exercises THEN the TCM System SHALL track progress and provide virtual rewards
+3. WHEN maintaining consistent health habits THEN the TCM System SHALL create streak counters and milestone celebrations
+4. WHEN connecting with community members THEN the TCM System SHALL facilitate anonymous support groups based on constitution types
+5. WHEN sharing progress updates THEN the TCM System SHALL allow selective sharing while maintaining privacy controls

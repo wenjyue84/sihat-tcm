@@ -393,7 +393,67 @@ This implementation plan converts the Sihat TCM enhancement design into a series
   - Implement security monitoring and compliance
   - _Requirements: 5.1, 5.4_
 
-- [ ] 16. Final Checkpoint - Complete system validation
+- [ ] 16. IoT and Wearable Device Integration
+  - Implement comprehensive IoT device connectivity
+  - Add health data aggregation and correlation
+  - Create device management and monitoring features
+  - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
+
+- [ ] 16.1 Create IoTDeviceManager
+  - Implement Bluetooth and WiFi device discovery
+  - Add device pairing and authentication
+  - Create device-specific data parsers
+  - _Requirements: 11.1, 11.2_
+
+- [ ]* 16.2 Write property test for IoT data integration
+  - **Property 11: IoT data integration consistency**
+  - **Validates: Requirements 11.1, 11.2**
+
+- [ ] 16.3 Implement HealthDataAggregator
+  - Create multi-source data correlation algorithms
+  - Add TCM pattern recognition for device data
+  - Implement anomaly detection and alerting
+  - _Requirements: 11.3, 11.4_
+
+- [ ] 16.4 Create DeviceManagementDashboard
+  - Implement unified device configuration interface
+  - Add device status monitoring and troubleshooting
+  - Create data visualization for device metrics
+  - _Requirements: 11.5_
+
+- [ ] 17. Gamification and Social Engagement Features
+  - Implement comprehensive gamification system
+  - Add social community features with privacy protection
+  - Create achievement and progress tracking systems
+  - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5_
+
+- [ ] 17.1 Create GamificationEngine
+  - Implement points, badges, and achievement system
+  - Add streak tracking and milestone celebrations
+  - Create virtual rewards for Qi exercises
+  - _Requirements: 12.1, 12.2, 12.3_
+
+- [ ]* 17.2 Write property test for gamification integrity
+  - **Property 12: Gamification progress integrity**
+  - **Validates: Requirements 12.1, 12.3**
+
+- [ ] 17.3 Implement SocialCommunityManager
+  - Create constitution-based support groups
+  - Add anonymous peer interaction features
+  - Implement privacy-preserving communication
+  - _Requirements: 12.4, 12.5_
+
+- [ ]* 17.4 Write property test for social privacy protection
+  - **Property 13: Social privacy protection**
+  - **Validates: Requirements 12.4, 12.5**
+
+- [ ] 17.5 Create ProgressSharingManager
+  - Implement selective progress sharing controls
+  - Add privacy settings for community interactions
+  - Create moderation tools for community safety
+  - _Requirements: 12.5_
+
+- [ ] 18. Final Checkpoint - Complete system validation
   - Ensure all tests pass, ask the user if questions arise.
   - Validate all requirements are implemented
   - Perform final system integration testing

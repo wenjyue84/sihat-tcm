@@ -10,12 +10,14 @@ The design focuses on improving user experience, expanding AI capabilities, addi
 
 ### Current System Architecture
 The existing system follows a modern full-stack architecture:
-- **Frontend**: Next.js 16 with App Router, React 19, Tailwind CSS
-- **Mobile**: Expo/React Native with TypeScript
-- **Backend**: Supabase (PostgreSQL) with Row Level Security
-- **AI**: Google Gemini models (2.0-flash, 2.5-pro, 3-pro-preview)
+- **Frontend**: Next.js 16 with App Router, React 19.2.1, Tailwind CSS v4
+- **Mobile**: Expo/React Native with TypeScript, React 19.1.0
+- **Backend**: Supabase (PostgreSQL) with Row Level Security and Supabase Auth
+- **AI**: Google Gemini models (2.0-flash, 2.5-pro, 3-pro-preview) via Vercel AI SDK
 - **State Management**: React Context API with specialized contexts
-- **Authentication**: Supabase Auth with role-based access control
+- **UI Components**: Radix UI, Framer Motion for animations
+- **Testing**: Vitest, React Testing Library, Jest-DOM
+- **Development**: TypeScript, ESLint, PostCSS
 
 ### Enhanced Architecture Components
 
@@ -46,6 +48,20 @@ The existing system follows a modern full-stack architecture:
 - **Notification Service** with multi-channel delivery (push, email, SMS)
 - **Export/Import Service** for medical record interoperability
 - **Third-party Integrations** (Apple Health, Google Fit, FHIR systems)
+
+#### 5. IoT and Wearable Integration Layer
+- **Device Connection Manager** for Bluetooth and WiFi health devices
+- **Health Data Aggregator** for multi-source data correlation
+- **Real-time Monitoring** for continuous health parameter tracking
+- **Anomaly Detection Engine** for health pattern irregularities
+- **Device Management Dashboard** for user device configuration
+
+#### 6. Gamification and Social Engagement Layer
+- **Achievement System** for treatment adherence and health goals
+- **Social Community Manager** for constitution-based support groups
+- **Progress Tracking** with streaks, badges, and milestone rewards
+- **Privacy-Preserving Social Features** for anonymous peer support
+- **Qi Exercise Tracking** with virtual rewards and progress visualization
 
 ## Components and Interfaces
 
@@ -272,6 +288,18 @@ interface TreatmentOutcome {
 ### Property 10: Data Privacy and Audit Trail
 *For any* access to patient health data, the system should log the access with user identification, timestamp, and purpose, ensuring HIPAA-compliant audit trails.
 **Validates: Requirements 5.4**
+
+### Property 11: IoT Data Integration Consistency
+*For any* health data received from connected IoT devices, the system should validate data integrity, timestamp accuracy, and device authentication before storage.
+**Validates: Requirements 11.1, 11.2**
+
+### Property 12: Gamification Progress Integrity
+*For any* user achievement or progress tracking, the system should ensure points, badges, and streaks are calculated correctly and cannot be artificially manipulated.
+**Validates: Requirements 12.1, 12.3**
+
+### Property 13: Social Privacy Protection
+*For any* community interaction or data sharing, the system should enforce privacy controls and ensure no personally identifiable information is exposed without explicit consent.
+**Validates: Requirements 12.4, 12.5**
 
 ## Error Handling
 

@@ -99,7 +99,7 @@ async function getSecurityConfig() {
             return securityConfig;
         }
     } catch (error) {
-        console.error('[Middleware] Error fetching security config:', error);
+        console.error('[Proxy] Error fetching security config:', error);
     }
 
     // Default to Level 1
@@ -162,7 +162,7 @@ function checkRateLimit(
     };
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // First, update the Supabase auth session for all requests
@@ -174,11 +174,11 @@ export async function middleware(request: NextRequest) {
         return supabaseResponse;
     }
 
-    console.log(`[Middleware] Processing protected route: ${pathname}`);
+    console.log(`[Proxy] Processing protected route: ${pathname}`);
 
     // Get security configuration
     const config = await getSecurityConfig();
-    console.log(`[Middleware] Security Level: ${config.level}`);
+    console.log(`[Proxy] Security Level: ${config.level}`);
 
     // Get identifier for rate limiting
     let identifier = getClientIP(request);
@@ -196,7 +196,7 @@ export async function middleware(request: NextRequest) {
             const authCookie = cookies.find(c => c.name.includes('auth-token'));
 
             if (!authCookie) {
-                console.log(`[Middleware] Auth required but no token found`);
+                console.log(`[Proxy] Auth required but no token found`);
                 return NextResponse.json(
                     {
                         error: 'Authentication required',
@@ -220,7 +220,7 @@ export async function middleware(request: NextRequest) {
     const rateLimitResult = checkRateLimit(identifier, config);
 
     if (!rateLimitResult.allowed) {
-        console.log(`[Middleware] Rate limit exceeded for ${identifier}: ${rateLimitResult.reason}`);
+        console.log(`[Proxy] Rate limit exceeded for ${identifier}: ${rateLimitResult.reason}`);
         return NextResponse.json(
             {
                 error: 'Rate limit exceeded',
@@ -250,7 +250,7 @@ export async function middleware(request: NextRequest) {
     return response;
 }
 
-// Configure which routes the middleware applies to
+// Configure which routes the proxy applies to
 // Apply to all routes except static files, images, and Next.js internals
 export const config = {
     matcher: [
@@ -264,3 +264,4 @@ export const config = {
         '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 };
+
