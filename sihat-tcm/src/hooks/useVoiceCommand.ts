@@ -21,7 +21,7 @@ import {
   getVoiceCommandHandler,
   checkVoiceSupport
 } from '@/lib/voiceCommandHandler'
-import { useAccessibilityContext } from '@/contexts/AccessibilityContext'
+import { useAccessibilityContext } from '@/stores/useAppStore'
 
 export interface UseVoiceCommandOptions extends Partial<VoiceCommandHandlerOptions> {
   enabled?: boolean

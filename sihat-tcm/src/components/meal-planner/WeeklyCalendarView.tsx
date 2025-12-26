@@ -8,7 +8,7 @@ import { MealCard } from './MealCard'
 import { ShoppingListWidget } from './ShoppingListWidget'
 import { motion, AnimatePresence } from 'framer-motion'
 import { updateMealPlanProgress, deactivateMealPlan, swapMeal } from '@/app/actions/meal-planner'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import { translateConstitution } from '@/lib/translations'
 
 interface WeeklyCalendarViewProps {

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { Loader2, Utensils, AlertTriangle } from 'lucide-react'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import { saveDietaryPreferences, DietaryPreferences } from '@/app/actions/meal-planner'
 
 interface DietaryPreferencesFormProps {

@@ -3,8 +3,8 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, Send, X, Minimize2, Maximize2, Sparkles, User, Bot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useDoctorLevel } from '@/contexts/DoctorContext'
+import { useLanguage } from '@/stores/useAppStore'
+import { useDoctorLevel } from '@/stores/useAppStore'
 
 export interface Message {
     id: string;

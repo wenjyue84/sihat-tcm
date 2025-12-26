@@ -12,8 +12,8 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { useVoiceCommand, useVoiceDictation, UseVoiceCommandOptions } from '@/hooks/useVoiceCommand'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useAccessibilityContext } from '@/contexts/AccessibilityContext'
+import { useLanguage } from '@/stores/useAppStore'
+import { useAccessibilityContext } from '@/stores/useAppStore'
 import { VoiceCommand } from '@/lib/voiceCommandHandler'
 
 interface VoiceCommandContextType {

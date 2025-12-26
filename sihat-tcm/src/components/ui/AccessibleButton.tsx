@@ -13,7 +13,7 @@
 
 import React, { forwardRef, useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
-import { useAccessibilityContext } from '@/contexts/AccessibilityContext'
+import { useAccessibilityContext } from '@/stores/useAppStore'
 import { Loader2 } from 'lucide-react'
 
 export interface AccessibleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

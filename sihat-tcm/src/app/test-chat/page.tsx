@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { ReportChatWindow } from '@/components/diagnosis/ReportChatWindow'
 import { Button } from '@/components/ui/button'
-import { DoctorProvider, useDoctorLevel } from '@/contexts/DoctorContext'
-import { LanguageProvider } from '@/contexts/LanguageContext'
+// Note: Providers are no longer needed - using Zustand store instead
+import { useDoctorLevel } from '@/stores/useAppStore'
 
 function TestChatContent() {
     const [isChatOpen, setIsChatOpen] = useState(false)
@@ -85,11 +85,6 @@ function TestChatContent() {
 }
 
 export default function TestChatPage() {
-    return (
-        <LanguageProvider>
-            <DoctorProvider>
-                <TestChatContent />
-            </DoctorProvider>
-        </LanguageProvider>
-    )
+    // Providers are no longer needed - Zustand store is initialized globally
+    return <TestChatContent />
 }

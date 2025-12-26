@@ -19,8 +19,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useAuth } from '@/contexts/AuthContext'
+import { useLanguage } from '@/stores/useAppStore'
+import { useAuth } from '@/stores/useAppStore'
 import { FiveElementsRadar } from './FiveElementsRadar'
 
 // Mock data for demo purposes

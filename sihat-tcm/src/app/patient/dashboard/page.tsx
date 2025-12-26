@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/stores/useAppStore'
 import { getPatientHistory, getHealthTrends, DiagnosisSession } from '@/lib/actions'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'

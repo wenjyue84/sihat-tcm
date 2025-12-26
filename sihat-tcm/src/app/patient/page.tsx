@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/stores/useAppStore'
 import { useRouter } from 'next/navigation'
 import { UnifiedDashboard } from '@/components/patient/UnifiedDashboard'
 import { Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 export default function PatientDashboardPage() {
     const { user, loading: authLoading } = useAuth()
@@ -35,6 +36,16 @@ export default function PatientDashboardPage() {
         return null // Will redirect
     }
 
-    // Render the unified dashboard
-    return <UnifiedDashboard />
+    // Render the unified dashboard with error boundary
+    return (
+        <ErrorBoundary
+            category="PatientDashboard"
+            userId={user.id}
+            fallbackTitle="Dashboard Error"
+            fallbackMessage="An error occurred while loading your dashboard. Please try refreshing the page."
+            onRetry={() => window.location.reload()}
+        >
+            <UnifiedDashboard />
+        </ErrorBoundary>
+    )
 }

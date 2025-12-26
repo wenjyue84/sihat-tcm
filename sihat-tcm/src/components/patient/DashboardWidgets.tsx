@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 interface DashboardWidgetsProps {
     onNavigate: (section: 'journey' | 'profile' | 'documents' | 'meals' | 'snore' | 'qi-dose' | 'vitality' | 'community' | 'family' | 'settings') => void

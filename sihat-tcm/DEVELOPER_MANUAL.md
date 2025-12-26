@@ -244,6 +244,35 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
    ```
    The editor will be available at `http://localhost:3100/tina-admin/index.html`
 
+7. **Troubleshooting Hot Reload Issues**
+   
+   If you experience hot reload problems (changes not reflecting, slow updates), try these solutions in order:
+   
+   **Quick Fix - Clear Next.js Cache:**
+   ```bash
+   npm run dev:clear
+   # Or manually:
+   rm -rf .next && npm run dev
+   ```
+   
+   **Full Reset - Clear node_modules (if cache clearing doesn't help):**
+   ```bash
+   rm -rf node_modules package-lock.json
+   npm install
+   npm run dev
+   ```
+   
+   **Test with Turbopack (experimental, faster bundler):**
+   ```bash
+   npm run dev:turbo
+   ```
+   Note: Turbopack is experimental and may have compatibility issues with some plugins. Test thoroughly before using in production.
+   
+   **Increase Node.js Memory (if you see "out of memory" errors):**
+   - Windows (PowerShell): `$env:NODE_OPTIONS="--max-old-space-size=8192"; npm run dev`
+   - Windows (CMD): `set NODE_OPTIONS=--max-old-space-size=8192 && npm run dev`
+   - Linux/Mac: `NODE_OPTIONS="--max-old-space-size=8192" npm run dev`
+
 ### Mobile App Setup
 
 1. **Navigate to mobile directory**

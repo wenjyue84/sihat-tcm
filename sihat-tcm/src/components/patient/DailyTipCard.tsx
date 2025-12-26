@@ -10,7 +10,7 @@ import {
     getDailyGradient,
     type DailyTip
 } from '@/lib/daily-tips'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 const STORAGE_KEY = 'sihat-tcm-daily-tip'
 

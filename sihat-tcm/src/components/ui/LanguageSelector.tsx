@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/stores/useAppStore';
+import { useAuth } from '@/stores/useAppStore';
 import { supabase } from '@/lib/supabase/client';
 import { Language } from '@/lib/translations';
 import { Globe, Check } from 'lucide-react';

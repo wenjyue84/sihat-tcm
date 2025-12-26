@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { BasicInfoData } from './types'
 import { MobileNumericInput } from './MobileNumericInput'
 import { BMIExplanationModal } from '../BMIExplanationModal'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 interface BodyMeasurementsStepProps {
     formData: BasicInfoData

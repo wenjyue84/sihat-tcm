@@ -14,7 +14,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
-import { useAccessibilityContext } from '@/contexts/AccessibilityContext'
+import { useAccessibilityContext } from '@/stores/useAppStore'
 import { useFocusTrap } from '@/hooks/useAccessibility'
 import { X } from 'lucide-react'
 

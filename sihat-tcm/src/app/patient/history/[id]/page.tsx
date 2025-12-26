@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/stores/useAppStore'
 import { getSessionById, updateSessionNotes, deleteSession } from '@/lib/actions'
 import { DiagnosisReport } from '@/components/diagnosis/DiagnosisReport'
 import { Button } from '@/components/ui/button'

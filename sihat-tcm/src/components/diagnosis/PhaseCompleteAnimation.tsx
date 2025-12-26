@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import { Check, Sparkles, Star, Heart, Zap, Award, ArrowRight } from 'lucide-react'
 
 /**

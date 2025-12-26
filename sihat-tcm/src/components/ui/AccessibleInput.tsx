@@ -13,7 +13,7 @@
 
 import React, { forwardRef, useId } from 'react'
 import { cn } from '@/lib/utils'
-import { useAccessibilityContext } from '@/contexts/AccessibilityContext'
+import { useAccessibilityContext } from '@/stores/useAppStore'
 import { AlertCircle, CheckCircle } from 'lucide-react'
 
 export interface AccessibleInputProps extends React.InputHTMLAttributes<HTMLInputElement> {

@@ -3,7 +3,7 @@ import { User, Check } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { BasicInfoData } from './types'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 interface PersonalDetailsStepProps {
     formData: BasicInfoData

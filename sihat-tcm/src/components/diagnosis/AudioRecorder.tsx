@@ -13,8 +13,8 @@ import {
 
 import { AudioAnalysisLoader } from './AudioAnalysisLoader'
 import { AudioAnalysisResult } from './AudioAnalysisResult'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { useLanguage } from '@/stores/useAppStore'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
 
 interface AudioAnalysisData {
     overall_observation: string

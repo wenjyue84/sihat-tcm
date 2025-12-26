@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Loader2, Brain, User, Scale, Ruler, Activity, Clock, AlertCircle, Sparkles } from 'lucide-react'
 import { BasicInfoData } from './BasicInfoForm'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 interface ThinkingAnimationProps {
     basicInfo?: BasicInfoData

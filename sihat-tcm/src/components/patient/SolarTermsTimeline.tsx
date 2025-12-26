@@ -22,7 +22,7 @@ import {
     type SolarTerm,
     type Season,
 } from '@/lib/solar-terms';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/stores/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 

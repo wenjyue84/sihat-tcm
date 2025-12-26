@@ -3,8 +3,9 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/stores/useAppStore'
 import { useRouter } from 'next/navigation'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { format, isAfter, isBefore, parseISO, startOfDay, endOfDay } from 'date-fns'
 import {
     Dialog,
@@ -326,7 +327,16 @@ export default function DoctorDashboard() {
         )
     }
 
+    const userId = profile?.id || undefined
+
     return (
+        <ErrorBoundary
+            category="DoctorDashboard"
+            userId={userId}
+            fallbackTitle="Doctor Dashboard Error"
+            fallbackMessage="An error occurred while loading the doctor dashboard. Please refresh the page."
+            onRetry={() => window.location.reload()}
+        >
         <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
             {/* Sidebar Navigation */}
             <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 z-20 shadow-sm">
@@ -730,5 +740,6 @@ export default function DoctorDashboard() {
                 </div>
             </main>
         </div>
+        </ErrorBoundary>
     )
 }

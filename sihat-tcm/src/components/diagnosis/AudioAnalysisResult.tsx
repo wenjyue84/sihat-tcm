@@ -3,7 +3,7 @@
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import { Mic, Wind, MessageSquare, Volume2, ChevronDown, ChevronUp, RefreshCw, ArrowRight, CheckCircle, AlertCircle, Info, Upload, Pencil, Save, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Label } from '@/components/ui/label'

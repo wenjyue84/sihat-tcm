@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@/test-utils'
 import { DiagnosisSummary } from './DiagnosisSummary'
 import { translations } from '@/lib/translations'
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
 
 // Mock Data
 const mockData = {

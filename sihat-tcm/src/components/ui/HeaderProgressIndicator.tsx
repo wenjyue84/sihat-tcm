@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useDiagnosisProgressOptional } from '@/contexts/DiagnosisProgressContext'
+import { useDiagnosisProgressOptional } from '@/stores/useAppStore'
 
 interface HeaderProgressIndicatorProps {
     /** Size of the indicator in pixels */

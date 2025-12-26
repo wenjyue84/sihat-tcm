@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Eye, X, Lock, Check, Info } from 'lucide-react'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 interface ShowPromptButtonProps {
     promptType: 'chat' | 'image' | 'final' | 'audio'

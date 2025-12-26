@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Loader2, Camera, Search, ArrowLeft, Thermometer, Droplets, CheckCircle2, AlertTriangle, XCircle, Info, Sparkles, Image as ImageIcon, UtensilsCrossed } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 interface TCMFoodCheckerProps {
     latestDiagnosis?: any

@@ -1,6 +1,6 @@
 'use client';
 
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/stores/useAppStore';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Smartphone, Stethoscope, UtensilsCrossed, Activity, Moon, Calendar, Heart, Users, ShoppingCart, Brain, CheckCircle2, Camera, Wifi, WifiOff, Fingerprint, Bell, Watch, Zap, Smartphone as MobileIcon } from 'lucide-react';

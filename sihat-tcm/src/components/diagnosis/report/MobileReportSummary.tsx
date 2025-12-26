@@ -1,5 +1,5 @@
 import { Stethoscope } from 'lucide-react'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 interface MobileReportSummaryProps {
     t: any

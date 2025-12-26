@@ -13,7 +13,8 @@
 
 import React, { useState, useRef } from 'react'
 import { useAccessibility, useKeyboardNavigation } from '@/hooks/useAccessibility'
-import { useAccessibilityContext, AccessibilitySettings, SkipNavigation } from '@/contexts/AccessibilityContext'
+import { useAccessibilityContext } from '@/stores/useAppStore'
+import { AccessibilitySettings, SkipNavigation } from '@/components/accessibility/AccessibilityComponents'
 import { AccessibleButton } from '@/components/ui/AccessibleButton'
 import { AccessibleInput } from '@/components/ui/AccessibleInput'
 import { AccessibleModal } from '@/components/ui/AccessibleModal'

@@ -3,9 +3,9 @@
 import { Home, User, LogIn, ChevronLeft, ArrowRight, SkipForward } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext';
+import { useAuth } from '@/stores/useAppStore';
+import { useLanguage } from '@/stores/useAppStore';
+import { useDiagnosisProgress } from '@/stores/useAppStore';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 

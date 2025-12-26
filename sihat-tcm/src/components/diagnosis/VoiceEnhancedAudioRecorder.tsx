@@ -12,8 +12,8 @@
 import React, { useEffect } from 'react'
 import { AudioRecorder } from './AudioRecorder'
 import { useVoiceCommandContext } from '@/components/ui/VoiceCommandProvider'
-import { useAccessibilityContext } from '@/contexts/AccessibilityContext'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useAccessibilityContext } from '@/stores/useAppStore'
+import { useLanguage } from '@/stores/useAppStore'
 import { VoiceCommand } from '@/lib/voiceCommandHandler'
 
 interface VoiceEnhancedAudioRecorderProps {

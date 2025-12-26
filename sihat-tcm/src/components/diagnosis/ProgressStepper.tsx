@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
 import { Check, User, MessageCircle, Camera, Mic, Activity, FileText, Wifi } from 'lucide-react'
 import { ShowPromptButton } from './ShowPromptButton'
 

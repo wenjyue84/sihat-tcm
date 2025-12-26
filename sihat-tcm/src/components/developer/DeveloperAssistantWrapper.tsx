@@ -1,6 +1,6 @@
 'use client';
 
-import { useDeveloper } from '@/contexts/DeveloperContext';
+import { useDeveloper } from '@/stores/useAppStore';
 import { DeveloperAssistant } from './DeveloperAssistant';
 
 /**

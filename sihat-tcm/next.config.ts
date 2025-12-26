@@ -14,6 +14,16 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '100mb',
     },
+    // Uncomment below to enable Turbopack (experimental, faster bundler)
+    // Note: Test thoroughly with TinaCMS before enabling in production
+    // turbo: {
+    //   // Turbopack is faster for large codebases but may have compatibility issues
+    // },
+  },
+  // Reduce file watcher load by ignoring unnecessary directories
+  // This helps with hot reload performance on large codebases
+  watchOptions: {
+    ignored: ['**/node_modules/**', '**/.git/**'],
   },
 };
 

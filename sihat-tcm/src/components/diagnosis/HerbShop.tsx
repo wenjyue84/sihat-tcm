@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useAuth } from '@/contexts/AuthContext'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useAuth } from '@/stores/useAppStore'
+import { useLanguage } from '@/stores/useAppStore'
 import { useRouter } from 'next/navigation'
 import {
     HerbalProduct,

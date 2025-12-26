@@ -10,7 +10,7 @@ import {
     Database, Send, Cpu, FileJson, Layout
 } from 'lucide-react'
 import { BasicInfoData } from './BasicInfoForm'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 interface AnalysisLoadingScreenProps {
     basicInfo: BasicInfoData | null

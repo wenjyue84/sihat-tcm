@@ -10,7 +10,7 @@ import { StepperInput } from '@/components/ui/stepper-input'
 import { QuickSelectChips } from '@/components/ui/quick-select-chips'
 import { BasicInfoData } from './types'
 import { BMIExplanationModal } from '../BMIExplanationModal'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 interface PersonalInfoStepProps {
     formData: BasicInfoData

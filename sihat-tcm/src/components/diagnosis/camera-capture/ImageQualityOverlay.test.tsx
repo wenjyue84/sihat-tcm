@@ -9,7 +9,7 @@ import { CompositionGuideOverlay } from './CompositionGuideOverlay'
 import { ImageQualityResult } from '@/lib/imageQualityValidator'
 
 // Mock the useLanguage hook
-vi.mock('@/contexts/LanguageContext', () => ({
+vi.mock('@/stores/useAppStore', () => ({
     useLanguage: () => ({
         t: {
             camera: {

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
-import { useDeveloper } from '@/contexts/DeveloperContext'
+import { useAuth } from '@/stores/useAppStore'
+import { useDeveloper } from '@/stores/useAppStore'
 import {
     Terminal,
     Cpu,

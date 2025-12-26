@@ -3,8 +3,8 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Check, RotateCcw, AlertCircle, AlertTriangle, Pencil, Save, X } from 'lucide-react'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { useLanguage } from '@/stores/useAppStore'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
 import { Textarea } from '@/components/ui/textarea'
 import { AnalysisTagsCompact } from './AnalysisTagsDisplay'
 import {

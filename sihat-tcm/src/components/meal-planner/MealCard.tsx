@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Coffee, Sun, Moon, Cookie, ChefHat, Clock, Flame, RefreshCw, Loader2 } from 'lucide-react'
 import { RecipeModal } from './RecipeModal'
 import { motion } from 'framer-motion'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 

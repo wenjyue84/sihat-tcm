@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useOnboarding } from '@/stores/useAppStore';
 import { OnboardingScreen } from './OnboardingScreen';
 
 interface OnboardingWrapperProps {

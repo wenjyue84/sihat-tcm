@@ -25,7 +25,7 @@ import {
     Droplets,
     Leaf
 } from 'lucide-react'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 // Five Elements data structure
 export interface FiveElementsScore {

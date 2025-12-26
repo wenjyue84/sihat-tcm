@@ -4,6 +4,7 @@ import React, { Component, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { logError } from '@/lib/systemLogger'
 
 interface Props {
     children: ReactNode
@@ -13,6 +14,8 @@ interface Props {
     onBack?: () => void
     showBackButton?: boolean
     showRetryButton?: boolean
+    userId?: string
+    category?: string
 }
 
 interface State {
@@ -51,9 +54,27 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        // Log the error for debugging
-        console.error('[ErrorBoundary] Caught error:', error)
-        console.error('[ErrorBoundary] Error info:', errorInfo)
+        // Log the error to structured logging system
+        const category = this.props.category || 'ErrorBoundary'
+        const errorMetadata = {
+            error: error.toString(),
+            stack: error.stack,
+            componentStack: errorInfo.componentStack,
+            errorName: error.name,
+            errorMessage: error.message,
+        }
+
+        // Use structured logging (fire-and-forget to avoid blocking)
+        logError(
+            category,
+            `React error boundary caught error: ${error.message}`,
+            errorMetadata,
+            this.props.userId
+        ).catch(() => {
+            // Fallback to console if logging fails (shouldn't happen, but safety net)
+            console.error('[ErrorBoundary] Caught error:', error)
+            console.error('[ErrorBoundary] Error info:', errorInfo)
+        })
 
         this.setState({
             error,
@@ -181,6 +202,8 @@ interface ErrorBoundaryWrapperProps {
     onRetry?: () => void
     errorTitle?: string
     errorMessage?: string
+    userId?: string
+    category?: string
 }
 
 export function ErrorBoundaryWrapper({
@@ -188,7 +211,9 @@ export function ErrorBoundaryWrapper({
     onBack,
     onRetry,
     errorTitle,
-    errorMessage
+    errorMessage,
+    userId,
+    category
 }: ErrorBoundaryWrapperProps) {
     return (
         <ErrorBoundary
@@ -198,6 +223,8 @@ export function ErrorBoundaryWrapper({
             fallbackMessage={errorMessage}
             showBackButton={!!onBack}
             showRetryButton={true}
+            userId={userId}
+            category={category}
         >
             {children}
         </ErrorBoundary>

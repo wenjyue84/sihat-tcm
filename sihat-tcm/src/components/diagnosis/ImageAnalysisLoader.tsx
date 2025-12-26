@@ -10,7 +10,7 @@ interface ImageAnalysisLoaderProps {
     onSkip: () => void
 }
 
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
 
 const ANALYSIS_TIPS = [
     { icon: Eye, text: "Examining visual characteristics..." },

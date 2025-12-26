@@ -8,7 +8,7 @@ import { InquiryChatStep } from './InquiryChatStep'
 import { InquirySummaryStep } from './InquirySummaryStep'
 import { BasicInfoData } from './BasicInfoForm'
 
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/stores/useAppStore'
 
 // Doctor selection is now done in BasicInfoForm step 5/5, so removed from here
 type InquiryStepType = 'upload_reports' | 'upload_medicine' | 'chat' | 'summary'

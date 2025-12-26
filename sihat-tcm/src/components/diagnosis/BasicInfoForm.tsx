@@ -5,9 +5,9 @@ import { Card } from '@/components/ui/card'
 import { useState, useEffect } from 'react'
 import { User, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
-import { useAuth } from '@/contexts/AuthContext'
+import { useLanguage } from '@/stores/useAppStore'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
+import { useAuth } from '@/stores/useAppStore'
 import { useRouter } from 'next/navigation'
 
 // Import sub-components from basic-info folder

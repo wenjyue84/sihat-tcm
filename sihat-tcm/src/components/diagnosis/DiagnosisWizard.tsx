@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react'
 import { useDiagnosisWizard, DiagnosisStep, repairJSON, generateMockReport } from '@/hooks/useDiagnosisWizard'
-import { useDeveloper } from '@/contexts/DeveloperContext'
+import { useDeveloper } from '@/stores/useAppStore'
 import { MOCK_PROFILES } from '@/data/mockProfiles'
 import { generateMockTestData } from '@/data/mockTestData'
 import type { DiagnosisWizardData } from '@/types/diagnosis'

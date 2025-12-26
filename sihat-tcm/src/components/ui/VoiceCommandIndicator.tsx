@@ -20,7 +20,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { useVoiceCommandContext } from '@/components/ui/VoiceCommandProvider'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import { 
   Mic, 
   MicOff, 

@@ -5,8 +5,8 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { Heart } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { ShowPromptButton } from './ShowPromptButton'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { useLanguage } from '@/stores/useAppStore'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
 
 // Import sub-components and hook
 import {

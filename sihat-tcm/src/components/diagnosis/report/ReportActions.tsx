@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, Download, Share2, Save, Loader2, ImageIcon, BadgeCheck, Check, X, UserPlus, Home } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/stores/useAppStore'
 
 interface ReportActionsProps {
     onChatOpen: () => void

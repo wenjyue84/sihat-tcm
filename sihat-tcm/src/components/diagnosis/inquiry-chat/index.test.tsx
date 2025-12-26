@@ -1,15 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@/test-utils'
-import { InquiryChatStep } from './InquiryChatStep'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { InquiryChatStep } from './index'
+import { useLanguage } from '@/stores/useAppStore'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
 
 // Mock the hooks
-vi.mock('@/contexts/LanguageContext', () => ({
-    useLanguage: vi.fn()
-}))
-
-vi.mock('@/contexts/DiagnosisProgressContext', () => ({
+vi.mock('@/stores/useAppStore', () => ({
+    useLanguage: vi.fn(),
     useDiagnosisProgress: vi.fn()
 }))
 
@@ -81,7 +78,17 @@ describe('InquiryChatStep - Responsive Layout', () => {
         const { container } = render(
             <InquiryChatStep
                 onComplete={vi.fn()}
-                basicInfo={{ name: 'Test', age: '30', gender: 'male' }}
+                basicInfo={{
+                    name: 'Test',
+                    age: '30',
+                    gender: 'male',
+                    weight: '70',
+                    height: '175',
+                    symptoms: 'Headache',
+                    symptomDuration: '2 days',
+                    mainComplaint: 'Headache',
+                    otherSymptoms: ''
+                }}
             />
         )
 
@@ -115,7 +122,17 @@ describe('InquiryChatStep - Responsive Layout', () => {
         const { container } = render(
             <InquiryChatStep
                 onComplete={vi.fn()}
-                basicInfo={{ name: 'Test', age: '30', gender: 'male' }}
+                basicInfo={{
+                    name: 'Test',
+                    age: '30',
+                    gender: 'male',
+                    weight: '70',
+                    height: '175',
+                    symptoms: 'Headache',
+                    symptomDuration: '2 days',
+                    mainComplaint: 'Headache',
+                    otherSymptoms: ''
+                }}
             />
         )
 
@@ -134,7 +151,17 @@ describe('InquiryChatStep - Responsive Layout', () => {
         const { container } = render(
             <InquiryChatStep
                 onComplete={vi.fn()}
-                basicInfo={{ name: 'Test', age: '30', gender: 'male' }}
+                basicInfo={{
+                    name: 'Test',
+                    age: '30',
+                    gender: 'male',
+                    weight: '70',
+                    height: '175',
+                    symptoms: 'Headache',
+                    symptomDuration: '2 days',
+                    mainComplaint: 'Headache',
+                    otherSymptoms: ''
+                }}
             />
         )
 
@@ -176,7 +203,17 @@ describe('InquiryChatStep - Responsive Layout', () => {
         const { container } = render(
             <InquiryChatStep
                 onComplete={vi.fn()}
-                basicInfo={{ name: 'Test', age: '30', gender: 'male' }}
+                basicInfo={{
+                    name: 'Test',
+                    age: '30',
+                    gender: 'male',
+                    weight: '70',
+                    height: '175',
+                    symptoms: 'Headache',
+                    symptomDuration: '2 days',
+                    mainComplaint: 'Headache',
+                    otherSymptoms: ''
+                }}
             />
         )
 

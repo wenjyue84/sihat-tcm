@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { User, Calendar, Ruler, Scale, Check, ChevronRight, Edit2 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useDoctorLevel } from '@/contexts/DoctorContext'
+import { useLanguage } from '@/stores/useAppStore'
+import { useDoctorLevel } from '@/stores/useAppStore'
 import { useState, useEffect, useRef } from 'react'
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
 
 export interface ProfileSummaryData {
     name: string

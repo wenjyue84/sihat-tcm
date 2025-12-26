@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { useLanguage } from "@/contexts/LanguageContext"
+import { useLanguage } from "@/stores/useAppStore"
 import { motion } from "framer-motion"
 import { Info, Scale, Ruler, Calculator } from "lucide-react"
 

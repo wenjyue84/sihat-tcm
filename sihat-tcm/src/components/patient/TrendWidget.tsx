@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { TrendingUp, TrendingDown, Activity, Calendar, Zap, Info, X, Calculator, BarChart3, Target, ArrowRight, Clock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import * as Dialog from '@radix-ui/react-dialog'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 import { DiagnosisSession } from '@/lib/actions'
 import { DigitalTwin } from './DigitalTwin'

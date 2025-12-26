@@ -14,9 +14,9 @@ import React, { useEffect, useCallback } from 'react'
 import DiagnosisWizard from './DiagnosisWizard'
 import { VoiceCommandProvider } from '@/components/ui/VoiceCommandProvider'
 import { VoiceCommandIndicator } from '@/components/ui/VoiceCommandIndicator'
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useAccessibilityContext } from '@/contexts/AccessibilityContext'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
+import { useLanguage } from '@/stores/useAppStore'
+import { useAccessibilityContext } from '@/stores/useAppStore'
 
 interface VoiceEnabledDiagnosisWizardProps {
   enableVoiceCommands?: boolean

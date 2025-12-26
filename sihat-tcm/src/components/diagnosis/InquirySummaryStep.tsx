@@ -6,9 +6,9 @@ import { Card } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2, Check, ArrowLeft, RefreshCw, AlertCircle, Clock, Wifi, FileText, Sparkles, CheckCircle2, Info, SkipForward } from 'lucide-react'
 import { ModelCapabilitiesCarousel } from './ModelCapabilitiesCarousel'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useDoctorLevel } from '@/contexts/DoctorContext'
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { useLanguage } from '@/stores/useAppStore'
+import { useDoctorLevel } from '@/stores/useAppStore'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
 import { FileData } from './UploadReportsStep'
 
 interface InquirySummaryStepProps {

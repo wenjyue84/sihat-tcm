@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Loader2, CheckCircle2, Activity, Heart, Moon, Footprints, Smartphone, ArrowRight, Watch } from 'lucide-react'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 export type HealthAppProvider = 'samsung' | 'apple' | 'google'
 

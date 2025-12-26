@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useAuth } from '@/stores/useAppStore'
+import { useLanguage } from '@/stores/useAppStore'
 import { supabase } from '@/lib/supabase/client'
 import { motion } from 'framer-motion'
 import {

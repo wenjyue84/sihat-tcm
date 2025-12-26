@@ -3,7 +3,7 @@ import { Calendar as CalendarIcon } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { BasicInfoData } from './types'
 import { MobileNumericInput } from './MobileNumericInput'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 interface AgeSelectionStepProps {
     formData: BasicInfoData

@@ -21,7 +21,7 @@ import {
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import { DiagnosisSession } from '@/lib/actions'
 import { parseConstitution } from '@/lib/tcm-utils'
 

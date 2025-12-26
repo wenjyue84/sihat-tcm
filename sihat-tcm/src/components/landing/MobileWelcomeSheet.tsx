@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Clock, Target, Shield, ChevronRight, X } from 'lucide-react'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import Image from 'next/image'
 
 const STORAGE_KEY = 'sihat-tcm-welcome-seen'

@@ -19,7 +19,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/api/*": ["./src/app/api/*"],
+      "@/diagnosis/*": ["./src/components/diagnosis/*"],
+      "@/patient/*": ["./src/components/patient/*"]
     }
   },
   "include": [

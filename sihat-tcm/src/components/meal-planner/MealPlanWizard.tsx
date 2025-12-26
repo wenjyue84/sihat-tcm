@@ -8,7 +8,7 @@ import { Loader2, Sparkles, UtensilsCrossed, RefreshCw, Settings, ChefHat } from
 import { WeeklyCalendarView } from './WeeklyCalendarView'
 import { DietaryPreferencesForm } from './DietaryPreferencesForm'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import { translateConstitution } from '@/lib/translations'
 import { ALLERGIES, DIETARY_TYPES } from './DietaryPreferencesForm'
 import { extractConstitutionType } from '@/lib/tcm-utils'

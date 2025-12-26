@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -43,7 +44,7 @@ import { PractitionerManager } from '@/components/admin/PractitionerManager';
 import { SecuritySettings } from '@/components/admin/SecuritySettings';
 import { UserManager } from '@/components/admin/UserManager';
 import { AdminAIChatbot } from '@/components/admin/AdminAIChatbot';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/stores/useAppStore';
 import { useRouter } from 'next/navigation';
 import {
     INTERACTIVE_CHAT_PROMPT,
@@ -406,7 +407,16 @@ export default function AdminDashboard() {
         );
     }
 
+    const userId = profile?.id || undefined
+
     return (
+        <ErrorBoundary
+            category="AdminDashboard"
+            userId={userId}
+            fallbackTitle="Admin Console Error"
+            fallbackMessage="An error occurred in the admin console. Please refresh the page or contact support."
+            onRetry={() => window.location.reload()}
+        >
         <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
             {/* Mobile Overlay */}
             {isMobileMenuOpen && (
@@ -847,6 +857,7 @@ export default function AdminDashboard() {
             {/* AI Assistant Floating Action Button */}
             <AdminAIChatbot />
         </div>
+        </ErrorBoundary>
     );
 }
 

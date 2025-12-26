@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/stores/useAppStore';
+import { useLanguage } from '@/stores/useAppStore';
 import { supabase } from '@/lib/supabase/client';
 import { logger } from '@/lib/clientLogger';
 

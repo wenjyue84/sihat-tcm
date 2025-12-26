@@ -12,9 +12,9 @@ import {
     ClipboardList,
     FileOutput
 } from 'lucide-react'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
 
 // Extracted Sub-Components
 import { CollapsibleOptionsSection, CheckboxOption, SummaryEditCard } from './summary'

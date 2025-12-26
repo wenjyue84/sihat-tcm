@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Image as ImageIcon, X, Download, Loader2, Sparkles, Palette, ChevronLeft, ChevronRight, Check, FileText, Utensils, Leaf, Activity, Dumbbell, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 interface InfographicsGeneratorProps {
     reportData: any;

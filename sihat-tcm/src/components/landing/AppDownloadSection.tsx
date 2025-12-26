@@ -1,6 +1,6 @@
 'use client';
 
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/stores/useAppStore';
 import Link from 'next/link';
 import { Smartphone } from 'lucide-react';
 

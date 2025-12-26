@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 
 export function StepProgress({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) {
     const { t } = useLanguage()

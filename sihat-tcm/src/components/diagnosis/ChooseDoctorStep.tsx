@@ -4,10 +4,10 @@ import { motion } from 'framer-motion'
 import { Stethoscope, Check, ChevronRight, ChevronLeft, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { useDoctorLevel } from '@/contexts/DoctorContext'
+import { useDoctorLevel } from '@/stores/useAppStore'
 import { DOCTOR_LEVELS, DoctorLevel } from '@/lib/doctorLevels'
-import { useLanguage } from '@/contexts/LanguageContext'
-import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
+import { useLanguage } from '@/stores/useAppStore'
+import { useDiagnosisProgress } from '@/stores/useAppStore'
 import { useEffect, useRef, useCallback } from 'react'
 
 interface ChooseDoctorStepProps {

@@ -3,8 +3,8 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, Hand, Ear, ShieldCheck, Stethoscope, ClipboardList, HelpCircle, Share2, Wallet, Rocket, ArrowRight, Check, Sparkles } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useOnboarding } from '@/contexts/OnboardingContext';
+import { useLanguage } from '@/stores/useAppStore';
+import { useOnboarding } from '@/stores/useAppStore';
 
 // Color palette matching the app theme
 const COLORS = {

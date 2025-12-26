@@ -6,6 +6,8 @@
     "dev": "next dev -p 3100",
     "dev-https": "next dev -H 0.0.0.0 -p 3100 --experimental-https",
     "dev:tina": "tinacms dev -c \"next dev -p 3100\"",
+    "dev:turbo": "next dev -p 3100 --turbo",
+    "dev:clear": "rm -rf .next && npm run dev",
     "build": "next build",
     "build:tina": "tinacms build && next build",
     "start": "next start -p 3100",
@@ -70,7 +72,8 @@
     "tailwind-merge": "^3.4.0",
     "tinacms": "^3.1.2",
     "use-debounce": "^10.0.6",
-    "zod": "^4.2.1"
+    "zod": "^4.2.1",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

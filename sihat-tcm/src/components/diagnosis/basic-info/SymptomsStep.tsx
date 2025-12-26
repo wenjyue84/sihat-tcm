@@ -7,12 +7,12 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BasicInfoData } from './types'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import { getLastSymptoms, getPatientHistory } from '@/lib/actions'
 import { DiagnosisSession } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/stores/useAppStore'
 import {
     Dialog,
     DialogContent,

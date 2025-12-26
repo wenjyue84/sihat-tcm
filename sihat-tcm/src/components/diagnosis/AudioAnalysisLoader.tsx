@@ -2,7 +2,7 @@
 
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import { Mic, Volume2, Wind, MessageSquare, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 

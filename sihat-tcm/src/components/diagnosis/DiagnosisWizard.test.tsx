@@ -2,15 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@/test-utils'
 import DiagnosisWizard from './DiagnosisWizard'
 import { useDiagnosisWizard } from '@/hooks/useDiagnosisWizard'
-import { useDeveloper } from '@/contexts/DeveloperContext'
+import { useDeveloper } from '@/stores/useAppStore'
 
 // Mock the hooks
 vi.mock('@/hooks/useDiagnosisWizard', () => ({
     useDiagnosisWizard: vi.fn()
 }))
 
-vi.mock('@/contexts/DeveloperContext', () => ({
-    useDeveloper: vi.fn()
+vi.mock('@/stores/useAppStore', () => ({
+    useDeveloper: vi.fn(),
+    ...vi.importActual('@/stores/useAppStore')
 }))
 
 // Mock child components to focus on layout

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/stores/useAppStore'
 import { motion } from 'framer-motion'
 import {
     FileHeart,
@@ -70,7 +70,7 @@ import { HistoryCard } from './HistoryCard'
 import { MealPlanWizard } from '../meal-planner/MealPlanWizard'
 import { SnoreAnalysisTab } from './snore-analysis/SnoreAnalysisTab'
 import { VitalityRhythmTab } from './VitalityRhythmTab'
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/stores/useAppStore'
 import { useLanguageSync } from '@/hooks/useLanguageSync'
 import { TCMFoodChecker } from '../meal-planner/TCMFoodChecker'
 import { QiDose } from '../qi-dose/QiDose'
