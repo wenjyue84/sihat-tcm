@@ -110,6 +110,16 @@ export const zh: TranslationKeys = {
             toSignup: '新用户？创建账号',
             toLogin: '已有账号？登录',
         },
+        guestSessionWarning: {
+            title: '诊断数据将不会被保存',
+            message: '您已作为访客完成了诊断。如果您现在登录，您的诊断数据将不会被保存到您的账户。要保存您的诊断历史，请先登录，然后再开始新的诊断。',
+            understand: '我明白了',
+            cancel: '取消',
+        },
+        guestSessionMigrated: {
+            title: '诊断数据已保存',
+            message: '您的访客诊断已成功保存到您的账户！',
+        },
     },
     basicInfo: {
         title: '患者资料',
@@ -1002,10 +1012,26 @@ export const zh: TranslationKeys = {
             constitutionTrackerDesc: '追踪您的体质随时间或季节的变化。',
             getNewAssessment: '获取新评估',
             didYouKnow: '您知道吗？',
+            didYouKnowQuote: '智者顺应时间和季节，就像水顺应引导它的渠道。',
+            didYouKnowDesc: '中医强调<strong>子午流注</strong>（气在经络中的流动）作为通过使生物节律与太阳和月亮周期保持一致来维持健康的一种方式。',
             noData: '尚未发现体质数据。开始诊断以开始追踪。',
             latest: '最新',
             element: '五行',
             hour: '小时',
+            organClock: {
+                gallbladder: { name: '胆', time: '23:00 - 01:00', advice: '宜入睡，养胆疏肝', element: '木' },
+                liver: { name: '肝', time: '01:00 - 03:00', advice: '深度睡眠，肝血回流', element: '木' },
+                lung: { name: '肺', time: '03:00 - 05:00', advice: '熟睡养肺，切勿熬夜', element: '金' },
+                largeIntestine: { name: '大肠', time: '05:00 - 07:00', advice: '起床排毒，饮温水', element: '金' },
+                stomach: { name: '胃', time: '07:00 - 09:00', advice: '早餐时辰，宜营养丰富', element: '土' },
+                spleen: { name: '脾', time: '09:00 - 11:00', advice: '脾经当令，宜清淡早餐', element: '土' },
+                heart: { name: '心', time: '11:00 - 13:00', advice: '午时养心，可小憩片刻', element: '火' },
+                smallIntestine: { name: '小肠', time: '13:00 - 15:00', advice: '分清浊，午餐消化时', element: '火' },
+                bladder: { name: '膀胱', time: '15:00 - 17:00', advice: '多饮水，排毒利尿', element: '水' },
+                kidney: { name: '肾', time: '17:00 - 19:00', advice: '补肾时辰，可适度运动', element: '水' },
+                pericardium: { name: '心包', time: '19:00 - 21:00', advice: '舒畅情志，散步轻运动', element: '火' },
+                tripleBurner: { name: '三焦', time: '21:00 - 23:00', advice: '准备休息，勿过劳', element: '火' },
+            },
         },
 
         // Qi Dose / 导引功法
@@ -1098,7 +1124,7 @@ export const zh: TranslationKeys = {
         genericError: '出现错误，请重试。', networkError: '网络错误，请检查您的网络连接。', sessionExpired: '会话已过期，请重新登录。',
         unauthorized: '您无权访问此页面。', notFound: '页面未找到。', serverError: '服务器错误，请稍后重试。',
         validationError: '请检查您的输入后重试。', requiredField: '此项为必填项', invalidEmail: '请输入有效的电子邮件地址',
-        invalidAge: '请输入有效的年龄', fileTooBig: '文件过大，最大允许{size}MB。', unsupportedFormat: '不支持的文件格式',
+        invalidAge: '请输入有效的年龄', invalidRange: '数值必须在 {min} 到 {max} 之间', fileTooBig: '文件过大，最大允许{size}MB。', unsupportedFormat: '不支持的文件格式',
         cameraError: '相机错误，请重试。', microphoneError: '麦克风错误，请重试。', analysisError: '分析失败，请重试。',
         // API错误消息
         apiError: 'API 错误',
@@ -1270,6 +1296,97 @@ export const zh: TranslationKeys = {
         close: '关闭',
         downloadApk: '下载 APK',
         directDownload: '直接下载',
+    },
+    mobileFeatures: {
+        pageTitle: 'Sihat TCM 移动应用',
+        pageSubtitle: '您的健康伴侣，随时随地',
+        heroTitle: '移动端专属功能',
+        heroDescription: '发现仅在移动端可用的强大功能：相机脉搏测量、健康应用集成、生物识别安全、离线模式等。以前所未有的方式体验中医健康管理。',
+        exclusiveFeaturesTitle: '仅限移动端的功能',
+        exclusiveFeaturesSubtitle: '这些强大的功能专为移动设备设计，充分利用您手机的功能。',
+        webFeaturesTitle: '也可在网页端使用',
+        webFeaturesSubtitle: '这些功能在网页和移动端都可用，移动端体验更佳。',
+        diagnosis: {
+            title: '四诊合参',
+            description: '使用望、闻、问、切四种诊断方法的 AI 驱动中医诊断。',
+        },
+        mealPlanner: {
+            title: 'AI 膳食规划',
+            description: '基于您的中医体质，提供个性化的 7 天膳食计划，包含购物清单和食物适宜性检查。',
+        },
+        healthTracking: {
+            title: '健康追踪',
+            description: '通过可视化分析追踪您的活力分数、诊断模式和健康趋势。',
+        },
+        snoreAnalysis: {
+            title: '鼾声分析',
+            description: 'AI 驱动的睡眠声音录制和分析，用于检测打鼾和睡眠呼吸暂停指标。',
+        },
+        vitalityRhythm: {
+            title: '活力节律',
+            description: '经络器官时钟、二十四节气指导和符合中医原理的季节性健康提示。',
+        },
+        qiDose: {
+            title: '气功剂量与气园',
+            description: '游戏化的中医运动（八段锦等）和虚拟草药种植，促进健康。',
+        },
+        community: {
+            title: '健康圈',
+            description: '基于体质的匿名支持社区，分享健康经验。',
+        },
+        familyCare: {
+            title: '家庭健康管理',
+            description: '为整个家庭管理健康档案，提供独立的追踪和建议。',
+        },
+        herbShop: {
+            title: '一键购药',
+            description: '集成的草药商店，购买推荐的中药配方和中医药物。',
+        },
+        digitalTwin: {
+            title: '数字孪生',
+            description: '基于您的中医诊断和体质，实时可视化器官健康状态。',
+        },
+        cameraPPG: {
+            title: '相机脉搏测量',
+            description: '革命性的基于相机的脉搏测量，使用光电容积描记法（PPG）。只需将手指放在带闪光灯的相机上即可测量心率 - 无需额外设备。',
+        },
+        healthAppSync: {
+            title: '健康应用集成',
+            description: '与 Apple Health、Google Fit 和 Samsung Health 无缝同步。自动导入步数、睡眠、心率和其他重要指标，进行全面健康追踪。',
+        },
+        biometricAuth: {
+            title: '生物识别安全',
+            description: '使用 Face ID、Touch ID 或指纹认证保护您的健康数据。快速安全地访问您的个人健康信息。',
+        },
+        offlineMode: {
+            title: '离线诊断',
+            description: '即使没有互联网连接也能完成中医诊断。所有核心功能均可离线使用，重新连接时自动同步。',
+        },
+        pushNotifications: {
+            title: '智能通知',
+            description: '个性化的推送通知，包括用药提醒、健康检查、季节性中医提示和经络器官时钟提醒。不错过任何重要的健康时刻。',
+        },
+        wearableIntegration: {
+            title: '可穿戴设备支持',
+            description: '通过蓝牙连接智能手表和健身追踪器。来自可穿戴设备的实时健康数据自动集成到您的中医诊断中。',
+        },
+        enhancedCamera: {
+            title: '增强相机拍摄',
+            description: '用于舌、面、体分析的先进相机功能，包括连拍模式、定时器、手势控制和质量叠加。针对准确的中医视觉诊断进行了优化。',
+        },
+        hapticFeedback: {
+            title: '触觉反馈',
+            description: '每次交互的触觉反馈。通过增强移动体验并使导航直观的触觉响应感受不同。',
+        },
+        benefitsTitle: '为什么选择 Sihat TCM 移动应用？',
+        benefit1: '多语言支持（英语、中文、马来语）',
+        benefit2: '离线诊断功能',
+        benefit3: '安全的跨设备云同步',
+        benefit4: '实时 AI 驱动洞察',
+        benefit5: '隐私优先的健康数据管理',
+        benefit6: '定期更新新功能',
+        ctaTitle: '准备开始您的健康之旅了吗？',
+        ctaDescription: '立即下载 Sihat TCM 移动应用，体验中医健康管理的未来。',
     },
     constitutions: {
         balanced: '平和质 (Ping He)',

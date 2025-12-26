@@ -55,72 +55,72 @@ export function ResumeProgressDialog({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onStartNew() }}>
-            <DialogContent className="sm:max-w-md bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700/50 text-white">
-                <DialogHeader className="space-y-3">
+            <DialogContent className="sm:max-w-sm bg-white border-gray-200 shadow-xl">
+                <DialogHeader className="space-y-2 pb-3">
                     <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
+                        initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/25"
+                        className="mx-auto w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center shadow-md"
                     >
-                        <Play className="w-8 h-8 text-white ml-1" />
+                        <Play className="w-5 h-5 text-white ml-0.5" />
                     </motion.div>
-                    <DialogTitle className="text-xl font-bold text-center text-white">
+                    <DialogTitle className="text-lg font-semibold text-center text-gray-900">
                         {t.resumeProgress?.title || 'Resume Previous Session?'}
                     </DialogTitle>
-                    <DialogDescription className="text-center text-slate-300">
+                    <DialogDescription className="text-center text-gray-600 text-sm leading-relaxed">
                         {t.resumeProgress?.description || 'We found a previous diagnosis session. Would you like to continue where you left off?'}
                     </DialogDescription>
                 </DialogHeader>
 
                 {/* Session Info Card */}
                 <motion.div
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 space-y-3"
+                    className="bg-gray-50 rounded-lg p-3 border border-gray-200 space-y-2.5"
                 >
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                            <Clock className="w-5 h-5 text-emerald-400" />
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 bg-emerald-100 rounded-md flex items-center justify-center flex-shrink-0">
+                            <Clock className="w-4 h-4 text-emerald-600" />
                         </div>
-                        <div>
-                            <p className="text-sm text-slate-400">
+                        <div className="min-w-0 flex-1">
+                            <p className="text-xs text-gray-500 mb-0.5">
                                 {t.resumeProgress?.savedAt || 'Saved'}
                             </p>
-                            <p className="font-medium text-white">
+                            <p className="text-sm font-medium text-gray-900 truncate">
                                 {formatTimeAgo(savedTimestamp)}
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                            <span className="text-lg">📍</span>
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center flex-shrink-0">
+                            <span className="text-sm">📍</span>
                         </div>
-                        <div>
-                            <p className="text-sm text-slate-400">
+                        <div className="min-w-0 flex-1">
+                            <p className="text-xs text-gray-500 mb-0.5">
                                 {t.resumeProgress?.lastStep || 'Last Step'}
                             </p>
-                            <p className="font-medium text-white">
+                            <p className="text-sm font-medium text-gray-900 truncate">
                                 {getStepDisplayName(savedStep)}
                             </p>
                         </div>
                     </div>
                 </motion.div>
 
-                <DialogFooter className="flex flex-col sm:flex-row gap-3 mt-4">
+                <DialogFooter className="flex flex-row gap-2.5 mt-4 pt-3 border-t border-gray-200">
                     <Button
                         variant="outline"
                         onClick={onStartNew}
-                        className="flex-1 bg-transparent border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white hover:border-slate-500 transition-all"
+                        className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors"
                     >
-                        <RotateCcw className="w-4 h-4 mr-2" />
+                        <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
                         {t.resumeProgress?.startNew || 'Start New'}
                     </Button>
                     <Button
                         onClick={onResume}
-                        className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 transition-all"
+                        className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-sm transition-all"
                     >
-                        <Play className="w-4 h-4 mr-2" />
+                        <Play className="w-3.5 h-3.5 mr-1.5" />
                         {t.resumeProgress?.resume || 'Resume'}
                     </Button>
                 </DialogFooter>

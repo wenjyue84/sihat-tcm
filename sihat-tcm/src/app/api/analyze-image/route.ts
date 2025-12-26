@@ -6,6 +6,8 @@ import { logInfo, logError, devLog } from '@/lib/systemLogger';
 import { analyzeImageRequestSchema, validateRequest, validationErrorResponse } from '@/lib/validations';
 import { fetchCustomPrompt } from '@/lib/promptLoader';
 import { ADVANCED_FALLBACK_MODELS, MODEL_STATUS_MESSAGES } from '@/lib/modelFallback';
+import { getCorsHeaders } from '@/lib/cors';
+
 
 export const maxDuration = 120;
 
@@ -127,8 +129,12 @@ export async function POST(req: Request) {
                             image_description: imageDescription,
                             message: `This image does not appear to contain a ${type}. Detected: ${imageDescription || 'unrecognized content'}`
                         }), {
-                            headers: { 'Content-Type': 'application/json' }
+                            headers: {
+                                ...getCorsHeaders(req),
+                                'Content-Type': 'application/json'
+                            }
                         });
+
                     }
 
                     const observation = data.observation || data.analysis || data.description || text;
@@ -160,8 +166,12 @@ export async function POST(req: Request) {
                             pattern_suggestions: data.pattern_suggestions || [],
                             notes: data.notes || ''
                         }), {
-                            headers: { 'Content-Type': 'application/json' }
+                            headers: {
+                                ...getCorsHeaders(req),
+                                'Content-Type': 'application/json'
+                            }
                         });
+
                     }
                     devLog('warn', 'API/analyze-image', `Model ${modelId} returned invalid observation, trying next...`);
                 } catch {
@@ -174,8 +184,12 @@ export async function POST(req: Request) {
                             status: MODEL_STATUS_MESSAGES[modelId] || 'Analysis complete',
                             confidence: 100 // Assume high confidence for raw text responses
                         }), {
-                            headers: { 'Content-Type': 'application/json' }
+                            headers: {
+                                ...getCorsHeaders(req),
+                                'Content-Type': 'application/json'
+                            }
                         });
+
                     }
                 }
             } catch (modelError: any) {
@@ -191,8 +205,12 @@ export async function POST(req: Request) {
             modelUsed: 0,
             status: 'Analysis pending'
         }), {
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                ...getCorsHeaders(req),
+                'Content-Type': 'application/json'
+            }
         });
+
 
     } catch (error: any) {
         devLog('error', 'API/analyze-image', 'Critical error', { error });
@@ -206,7 +224,19 @@ export async function POST(req: Request) {
             error: error.message
         }), {
             status: 200,
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                ...getCorsHeaders(req),
+                'Content-Type': 'application/json'
+            }
         });
+
     }
 }
+
+export async function OPTIONS(req: Request) {
+    return new Response(null, {
+        status: 204,
+        headers: getCorsHeaders(req)
+    });
+}
+

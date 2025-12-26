@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     Sparkles,
@@ -16,7 +16,9 @@ import {
     Search,
     Dumbbell,
     Coffee,
-    Leaf
+    Leaf,
+    Pause,
+    CheckCircle
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,12 +34,27 @@ interface QuickFix {
     color: string
 }
 
+interface DeskRoutine {
+    id: string
+    title: string
+    desc: string
+    duration: number // in seconds
+    icon: React.ElementType
+    steps: string[]
+    color?: string
+}
+
 export function QiDose() {
     const { t } = useLanguage()
     const [selectedRoutine, setSelectedRoutine] = useState<string | null>(null)
     const [isExercising, setIsExercising] = useState(false)
+    const [isPaused, setIsPaused] = useState(false)
     const [countdown, setCountdown] = useState(60)
     const [showGarden, setShowGarden] = useState(false)
+    const [isCompleted, setIsCompleted] = useState(false)
+    const [selectedDeskRoutine, setSelectedDeskRoutine] = useState<string | null>(null)
+    const [currentStep, setCurrentStep] = useState(0)
+    const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
     const quickFixes: QuickFix[] = [
         {
@@ -66,26 +83,183 @@ export function QiDose() {
         }
     ]
 
-    const deskRoutines = [
+    const deskRoutines: DeskRoutine[] = [
         {
+            id: 'meridianSlap',
             title: t.qiDose.meridianSlap,
             desc: t.qiDose.meridianSlapDesc,
-            duration: '3m',
-            icon: Zap
+            duration: 180, // 3 minutes
+            icon: Zap,
+            steps: [
+                'Sit or stand comfortably with your back straight',
+                'Start with your right arm: Use your left palm to gently slap from your right shoulder down to your wrist',
+                'Slap along the outer side of your arm (Large Intestine meridian) - 10 times',
+                'Slap along the inner side of your arm (Lung meridian) - 10 times',
+                'Switch to your left arm: Use your right palm to slap from shoulder to wrist',
+                'Repeat the outer and inner sides - 10 times each',
+                'Now slap your legs: Start from your hips down to your ankles',
+                'Slap the front of your thighs and shins - 10 times each leg',
+                'Slap the back of your thighs and calves - 10 times each leg',
+                'Finish by gently patting your chest and abdomen in circular motions',
+                'Take 3 deep breaths and feel the energy flowing through your meridians'
+            ]
         },
         {
+            id: 'ironOx',
             title: t.qiDose.ironOx,
             desc: t.qiDose.ironOxDesc,
-            duration: '5m',
-            icon: Dumbbell
+            duration: 300, // 5 minutes
+            icon: Dumbbell,
+            steps: [
+                'Stand with feet shoulder-width apart, knees slightly bent',
+                'Place your hands on your lower back (kidney area) with palms facing outward',
+                'Slowly lean forward from your hips, keeping your back straight',
+                'As you lean forward, imagine an ox plowing the earth - move slowly and deliberately',
+                'Lean forward until you feel a gentle stretch in your hamstrings and lower back',
+                'Hold this position for 3 deep breaths',
+                'Slowly return to standing, pushing through your heels',
+                'Repeat the forward lean 5 times, moving slowly with each breath',
+                'After the 5th repetition, place your hands on your lower abdomen',
+                'Massage your abdomen in clockwise circles - 20 times',
+                'Then massage counterclockwise - 20 times',
+                'This helps move stagnant Qi in your digestive system',
+                'Finish by standing tall and taking 5 deep breaths, feeling your Dan Tian fill with energy'
+            ]
         },
         {
+            id: 'digitalDetox',
             title: t.qiDose.digitalDetox,
             desc: t.qiDose.digitalDetoxDesc,
-            duration: '2m',
-            icon: Eye
+            duration: 120, // 2 minutes
+            icon: Eye,
+            steps: [
+                'Sit comfortably and close your eyes gently',
+                'Rub your palms together vigorously until they feel warm',
+                'Place your warm palms over your closed eyes (without pressing)',
+                'Feel the warmth and energy transfer to your eyes - hold for 30 seconds',
+                'Remove your hands and slowly open your eyes',
+                'Look into the distance (out a window if possible) for 10 seconds',
+                'Look at something close for 10 seconds',
+                'Repeat the distance/near focus 5 times',
+                'Now massage the acupressure points around your eyes:',
+                'Use your index fingers to press gently on the inner corners of your eyes (Jingming point)',
+                'Hold for 5 seconds, then release',
+                'Move to the outer corners (Tongziliao point) - press for 5 seconds',
+                'Press below your eyes at the midpoint (Chengqi point) - 5 seconds',
+                'Press above your eyebrows at the midpoint (Yuyao point) - 5 seconds',
+                'Finish by gently massaging your temples in circular motions - 10 times each side',
+                'Close your eyes and take 3 deep breaths, feeling refreshed'
+            ]
         }
     ]
+
+    // Get the selected routine details
+    const currentRoutine = selectedRoutine ? quickFixes.find(f => f.id === selectedRoutine) : null
+    const currentDeskRoutine = selectedDeskRoutine ? deskRoutines.find(r => r.id === selectedDeskRoutine) : null
+    const activeRoutine = currentRoutine || currentDeskRoutine
+    const isDeskRoutine = !!selectedDeskRoutine
+
+    // Timer effect
+    useEffect(() => {
+        if (isExercising && !isPaused && countdown > 0) {
+            intervalRef.current = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        setIsExercising(false)
+                        setIsCompleted(true)
+                        return 0
+                    }
+                    return prev - 1
+                })
+            }, 1000)
+        } else {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current)
+                intervalRef.current = null
+            }
+        }
+
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current)
+            }
+        }
+    }, [isExercising, isPaused, countdown])
+
+    // Reset states when routine changes
+    useEffect(() => {
+        if (selectedRoutine) {
+            const routine = quickFixes.find(f => f.id === selectedRoutine)
+            if (routine) {
+                setCountdown(routine.duration)
+                setIsExercising(false)
+                setIsPaused(false)
+                setIsCompleted(false)
+                setCurrentStep(0)
+            }
+        }
+        if (selectedDeskRoutine) {
+            const routine = deskRoutines.find(r => r.id === selectedDeskRoutine)
+            if (routine) {
+                setCountdown(routine.duration)
+                setIsExercising(false)
+                setIsPaused(false)
+                setIsCompleted(false)
+                setCurrentStep(0)
+            }
+        }
+    }, [selectedRoutine, selectedDeskRoutine])
+
+    // Format time as MM:SS
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60)
+        const secs = seconds % 60
+        return {
+            minutes: mins.toString().padStart(2, '0'),
+            seconds: secs.toString().padStart(2, '0')
+        }
+    }
+
+    const handleStartExercise = () => {
+        if (activeRoutine) {
+            setIsExercising(true)
+            setIsPaused(false)
+            setCountdown(activeRoutine.duration)
+            setCurrentStep(0)
+        }
+    }
+
+    const handlePauseResume = () => {
+        setIsPaused(!isPaused)
+    }
+
+    const handleCancel = () => {
+        setIsExercising(false)
+        setIsPaused(false)
+        setIsCompleted(false)
+        setCurrentStep(0)
+        if (activeRoutine) {
+            setCountdown(activeRoutine.duration)
+        }
+    }
+
+    const handleClose = () => {
+        setIsExercising(false)
+        setIsPaused(false)
+        setIsCompleted(false)
+        setSelectedRoutine(null)
+        setSelectedDeskRoutine(null)
+        setCurrentStep(0)
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current)
+            intervalRef.current = null
+        }
+    }
+
+    const handleComplete = () => {
+        handleClose()
+        // Here you could add logic to update user progress, unlock achievements, etc.
+    }
 
     return (
         <div className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
@@ -187,10 +361,16 @@ export function QiDose() {
                                 {t.qiDose.deskFriendly}
                             </h3>
                             <div className="space-y-3">
-                                {deskRoutines.map((routine, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-100 shadow-sm hover:border-emerald-200 transition-all hover:bg-emerald-50/30 group"
+                                {deskRoutines.map((routine) => (
+                                    <motion.button
+                                        key={routine.id}
+                                        whileHover={{ x: 4 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => {
+                                            setSelectedDeskRoutine(routine.id)
+                                            setSelectedRoutine(null)
+                                        }}
+                                        className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-slate-100 shadow-sm hover:border-emerald-200 transition-all hover:bg-emerald-50/30 group text-left"
                                     >
                                         <div className="flex items-center gap-4">
                                             <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-white transition-colors">
@@ -202,12 +382,14 @@ export function QiDose() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <span className="text-xs font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md">{routine.duration}</span>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full group-hover:bg-emerald-100 group-hover:text-emerald-600">
-                                                <ChevronRight className="w-4 h-4" />
-                                            </Button>
+                                            <span className="text-xs font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
+                                                {Math.floor(routine.duration / 60)}m
+                                            </span>
+                                            <div className="h-8 w-8 rounded-full group-hover:bg-emerald-100 flex items-center justify-center transition-colors">
+                                                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600" />
+                                            </div>
                                         </div>
-                                    </div>
+                                    </motion.button>
                                 ))}
                             </div>
                         </section>
@@ -317,14 +499,19 @@ export function QiDose() {
                 </div>
             )}
 
-            {/* Routine Execution Modal (Simplified for prototype) */}
+            {/* Routine Execution Modal */}
             <AnimatePresence>
-                {selectedRoutine && (
+                {activeRoutine && (selectedRoutine || selectedDeskRoutine) && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-sm"
+                        onClick={(e) => {
+                            if (e.target === e.currentTarget && !isExercising) {
+                                handleClose()
+                            }
+                        }}
                     >
                         <motion.div
                             initial={{ scale: 0.9, y: 20 }}
@@ -332,48 +519,211 @@ export function QiDose() {
                             exit={{ scale: 0.9, y: 20 }}
                             className="bg-white rounded-3xl overflow-hidden max-w-2xl w-full shadow-2xl"
                         >
-                            <div className="p-8 text-center space-y-6">
-                                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Play className="w-10 h-10 text-emerald-600 fill-emerald-600" />
-                                </div>
-                                <h3 className="text-2xl font-black text-slate-800 tracking-tight">
-                                    {quickFixes.find(f => f.id === selectedRoutine)?.movement}
-                                </h3>
-                                <p className="text-slate-500 max-w-sm mx-auto">
-                                    "{t.qiDose.sifuVoice}": Sink your weight into your heels. Imagine your breath filling your lower Dan Tian...
-                                </p>
-
-                                <div className="flex justify-center gap-4">
-                                    <div className="text-center p-4 bg-slate-50 rounded-2xl w-24 border border-slate-100">
-                                        <p className="text-2xl font-black text-slate-800">01</p>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.qiDose.minutes}</p>
-                                    </div>
-                                    <div className="flex items-center text-2xl font-black text-slate-300">:</div>
-                                    <div className="text-center p-4 bg-slate-50 rounded-2xl w-24 border border-slate-100">
-                                        <p className="text-2xl font-black text-slate-800">00</p>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.qiDose.seconds}</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-4 pt-4">
-                                    <Button
-                                        variant="outline"
-                                        className="flex-1 py-6 rounded-2xl font-bold border-2"
-                                        onClick={() => setSelectedRoutine(null)}
+                            {isCompleted ? (
+                                // Completion Screen
+                                <div className="p-8 text-center space-y-6">
+                                    <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                                        className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4"
                                     >
-                                        CANCEL
-                                    </Button>
+                                        <CheckCircle className="w-10 h-10 text-emerald-600 fill-emerald-600" />
+                                    </motion.div>
+                                    <h3 className="text-2xl font-black text-slate-800 tracking-tight">
+                                        Exercise Complete!
+                                    </h3>
+                                    <p className="text-slate-500 max-w-sm mx-auto">
+                                        Great job completing {isDeskRoutine ? currentDeskRoutine?.title : currentRoutine?.movement}. Your energy is flowing!
+                                    </p>
                                     <Button
-                                        className="flex-1 py-6 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200"
-                                        onClick={() => {
-                                            setSelectedRoutine(null)
-                                            // Handle exercise completion state logic here
-                                        }}
+                                        className="w-full py-6 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200"
+                                        onClick={handleComplete}
                                     >
-                                        {t.qiDose.startExercise}
+                                        Done
                                     </Button>
                                 </div>
-                            </div>
+                            ) : isExercising ? (
+                                // Exercise in Progress Screen
+                                <div className="p-8 text-center space-y-6">
+                                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <motion.div
+                                            animate={{ scale: [1, 1.2, 1] }}
+                                            transition={{ duration: 2, repeat: Infinity }}
+                                        >
+                                            {isDeskRoutine && currentDeskRoutine ? (
+                                                <currentDeskRoutine.icon className="w-10 h-10 text-emerald-600" />
+                                            ) : (
+                                                <Play className="w-10 h-10 text-emerald-600 fill-emerald-600" />
+                                            )}
+                                        </motion.div>
+                                    </div>
+                                    <h3 className="text-2xl font-black text-slate-800 tracking-tight">
+                                        {isDeskRoutine ? currentDeskRoutine?.title : currentRoutine?.movement}
+                                    </h3>
+                                    {isDeskRoutine && currentDeskRoutine ? (
+                                        <div className="space-y-4 max-h-64 overflow-y-auto px-2">
+                                            <div className="text-left space-y-2">
+                                                <p className="text-sm font-bold text-slate-700 mb-3">
+                                                    Step {currentStep + 1} of {currentDeskRoutine.steps.length}:
+                                                </p>
+                                                <div className="bg-emerald-50 rounded-xl p-4 border-2 border-emerald-200">
+                                                    <p className="text-slate-700 leading-relaxed font-medium">
+                                                        {currentDeskRoutine.steps[currentStep]}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-center gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+                                                    disabled={currentStep === 0 || !isPaused}
+                                                    className="text-xs"
+                                                >
+                                                    Previous
+                                                </Button>
+                                                <span className="text-xs text-slate-400">
+                                                    {currentStep + 1} / {currentDeskRoutine.steps.length}
+                                                </span>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setCurrentStep(Math.min(currentDeskRoutine.steps.length - 1, currentStep + 1))}
+                                                    disabled={currentStep === currentDeskRoutine.steps.length - 1 || !isPaused}
+                                                    className="text-xs"
+                                                >
+                                                    Next
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-slate-500 max-w-sm mx-auto">
+                                            "{t.qiDose.sifuVoice}": Sink your weight into your heels. Imagine your breath filling your lower Dan Tian...
+                                        </p>
+                                    )}
+
+                                    <div className="flex justify-center gap-4">
+                                        <div className="text-center p-4 bg-slate-50 rounded-2xl w-24 border border-slate-100">
+                                            <p className="text-2xl font-black text-slate-800">{formatTime(countdown).minutes}</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.qiDose.minutes}</p>
+                                        </div>
+                                        <div className="flex items-center text-2xl font-black text-slate-300">:</div>
+                                        <div className="text-center p-4 bg-slate-50 rounded-2xl w-24 border border-slate-100">
+                                            <p className="text-2xl font-black text-slate-800">{formatTime(countdown).seconds}</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.qiDose.seconds}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-4 pt-4">
+                                        <Button
+                                            variant="outline"
+                                            className="flex-1 py-6 rounded-2xl font-bold border-2"
+                                            onClick={handleCancel}
+                                        >
+                                            CANCEL
+                                        </Button>
+                                        <Button
+                                            className="flex-1 py-6 rounded-2xl font-bold bg-amber-600 hover:bg-amber-700 shadow-lg shadow-amber-200"
+                                            onClick={handlePauseResume}
+                                        >
+                                            {isPaused ? (
+                                                <>
+                                                    <Play className="w-4 h-4 mr-2" />
+                                                    Resume
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Pause className="w-4 h-4 mr-2" />
+                                                    Pause
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                // Pre-Exercise Screen
+                                <div className="p-8 text-center space-y-6">
+                                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        {isDeskRoutine && currentDeskRoutine ? (
+                                            <currentDeskRoutine.icon className="w-10 h-10 text-emerald-600" />
+                                        ) : (
+                                            <Play className="w-10 h-10 text-emerald-600 fill-emerald-600" />
+                                        )}
+                                    </div>
+                                    <h3 className="text-2xl font-black text-slate-800 tracking-tight">
+                                        {isDeskRoutine ? currentDeskRoutine?.title : currentRoutine?.movement}
+                                    </h3>
+                                    {isDeskRoutine && currentDeskRoutine ? (
+                                        <div className="space-y-4 max-h-80 overflow-y-auto px-2">
+                                            <div className="text-left space-y-3">
+                                                <p className="text-sm font-bold text-slate-700 mb-2">
+                                                    Step-by-Step Instructions:
+                                                </p>
+                                                <div className="space-y-2">
+                                                    {currentDeskRoutine.steps.map((step, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            className={`bg-slate-50 rounded-lg p-3 border transition-all ${
+                                                                idx === currentStep
+                                                                    ? 'border-emerald-300 bg-emerald-50'
+                                                                    : 'border-slate-200'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-start gap-3">
+                                                                <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                                                    idx === currentStep
+                                                                        ? 'bg-emerald-600 text-white'
+                                                                        : 'bg-slate-200 text-slate-600'
+                                                                }`}>
+                                                                    {idx + 1}
+                                                                </div>
+                                                                <p className={`text-sm leading-relaxed ${
+                                                                    idx === currentStep ? 'text-slate-800 font-medium' : 'text-slate-600'
+                                                                }`}>
+                                                                    {step}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="text-slate-500 max-w-sm mx-auto">
+                                            "{t.qiDose.sifuVoice}": Sink your weight into your heels. Imagine your breath filling your lower Dan Tian...
+                                        </p>
+                                    )}
+
+                                    <div className="flex justify-center gap-4">
+                                        <div className="text-center p-4 bg-slate-50 rounded-2xl w-24 border border-slate-100">
+                                            <p className="text-2xl font-black text-slate-800">{formatTime(countdown).minutes}</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.qiDose.minutes}</p>
+                                        </div>
+                                        <div className="flex items-center text-2xl font-black text-slate-300">:</div>
+                                        <div className="text-center p-4 bg-slate-50 rounded-2xl w-24 border border-slate-100">
+                                            <p className="text-2xl font-black text-slate-800">{formatTime(countdown).seconds}</p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.qiDose.seconds}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-4 pt-4">
+                                        <Button
+                                            variant="outline"
+                                            className="flex-1 py-6 rounded-2xl font-bold border-2"
+                                            onClick={handleClose}
+                                        >
+                                            CANCEL
+                                        </Button>
+                                        <Button
+                                            className="flex-1 py-6 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200"
+                                            onClick={handleStartExercise}
+                                        >
+                                            {t.qiDose.startExercise}
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                         </motion.div>
                     </motion.div>
                 )}

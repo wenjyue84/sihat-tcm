@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { extractDiagnosisTitle, extractConstitutionType } from '@/lib/tcm-utils'
+import { DiagnosisInputDataViewer } from '@/components/patient/DiagnosisInputDataViewer'
 
 export default function HistoryViewerPage() {
     const { user, loading: authLoading } = useAuth()
@@ -292,6 +293,16 @@ export default function HistoryViewerPage() {
                             )}
                         </div>
                     </Card>
+                </motion.div>
+
+                {/* Input Data Display */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                    className="mb-6"
+                >
+                    <DiagnosisInputDataViewer session={session} />
                 </motion.div>
 
                 {/* Report Display */}

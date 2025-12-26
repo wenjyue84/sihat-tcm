@@ -3,6 +3,31 @@
  * 
  * This module provides a unified interface that combines the AIModelRouter,
  * PersonalizationEngine, and MedicalSafetyValidator for comprehensive AI diagnostics.
+ * 
+ * Key Features:
+ * - Intelligent AI model selection based on request complexity
+ * - Automatic fallback handling for improved reliability
+ * - Personalized recommendations based on user history and preferences
+ * - Comprehensive medical safety validation
+ * - Performance monitoring and optimization
+ * - Learning from user feedback for continuous improvement
+ * 
+ * Usage Example:
+ * ```typescript
+ * const engine = new EnhancedAIDiagnosticEngine('MyApp');
+ * const result = await engine.processEnhancedDiagnosis({
+ *   userId: 'user123',
+ *   doctorLevel: 'expert',
+ *   messages: chatHistory,
+ *   images: tongueImages,
+ *   requiresPersonalization: true,
+ *   requiresSafetyValidation: true
+ * });
+ * ```
+ * 
+ * @author Sihat TCM Development Team
+ * @version 4.0.0
+ * @since 2024-12-26
  */
 
 import { AIModelRouter, ModelSelectionCriteria, RequestComplexity } from './aiModelRouter';
@@ -12,6 +37,22 @@ import { DoctorLevel } from './doctorLevels';
 import { DiagnosisReport } from '@/types/database';
 import { devLog, logError, logInfo } from './systemLogger';
 
+/**
+ * Request interface for enhanced diagnostic processing
+ * 
+ * @interface EnhancedDiagnosticRequest
+ * @property {string} userId - Unique identifier for the user requesting diagnosis
+ * @property {DoctorLevel} [doctorLevel] - AI practitioner level (physician|expert|master)
+ * @property {'en'|'zh'|'ms'} [language] - Preferred language for responses
+ * @property {any[]} [messages] - Chat history for inquiry-based diagnosis
+ * @property {any[]} [images] - Medical images (tongue, face, body) for analysis
+ * @property {any[]} [files] - Additional medical documents or files
+ * @property {any} [basicInfo] - Patient basic information (age, gender, etc.)
+ * @property {boolean} [requiresPersonalization] - Whether to apply personalization
+ * @property {boolean} [requiresSafetyValidation] - Whether to perform safety checks
+ * @property {string} [preferredModel] - Specific AI model to use if available
+ * @property {ValidationContext['medical_history']} [medicalHistory] - Medical history for safety validation
+ */
 export interface EnhancedDiagnosticRequest {
     // User context
     userId: string;
@@ -33,6 +74,20 @@ export interface EnhancedDiagnosticRequest {
     medicalHistory?: ValidationContext['medical_history'];
 }
 
+/**
+ * Response interface for enhanced diagnostic processing
+ * 
+ * @interface EnhancedDiagnosticResponse
+ * @property {DiagnosisReport} diagnosis - Complete TCM diagnosis report
+ * @property {string} modelUsed - AI model that generated the diagnosis
+ * @property {number} responseTime - Time taken for AI processing (ms)
+ * @property {number} confidenceScore - Overall confidence in diagnosis (0-1)
+ * @property {object} [personalizedRecommendations] - Personalized recommendations if requested
+ * @property {SafetyValidationResult} [safetyValidation] - Safety validation results if requested
+ * @property {RequestComplexity} complexity - Analyzed complexity of the request
+ * @property {PersonalizationFactors} [personalizationFactors] - Factors used for personalization
+ * @property {object} processingMetadata - Metadata about the processing pipeline
+ */
 export interface EnhancedDiagnosticResponse {
     // AI Response
     diagnosis: DiagnosisReport;
@@ -62,6 +117,25 @@ export interface EnhancedDiagnosticResponse {
 
 /**
  * Enhanced AI Diagnostic Engine that orchestrates all AI components
+ * 
+ * This class serves as the main orchestrator for AI-powered TCM diagnosis,
+ * integrating model routing, personalization, and safety validation into
+ * a single, cohesive system.
+ * 
+ * Architecture:
+ * - AIModelRouter: Selects optimal AI models based on request complexity
+ * - PersonalizationEngine: Adapts recommendations to user preferences
+ * - MedicalSafetyValidator: Ensures all recommendations are medically safe
+ * 
+ * The engine follows a pipeline approach:
+ * 1. Analyze request complexity
+ * 2. Select optimal AI model
+ * 3. Generate base diagnosis
+ * 4. Apply personalization (if requested)
+ * 5. Validate safety (if requested)
+ * 6. Return comprehensive results
+ * 
+ * @class EnhancedAIDiagnosticEngine
  */
 export class EnhancedAIDiagnosticEngine {
     private modelRouter: AIModelRouter;
@@ -69,6 +143,12 @@ export class EnhancedAIDiagnosticEngine {
     private safetyValidator: MedicalSafetyValidator;
     private context: string;
 
+    /**
+     * Initialize the Enhanced AI Diagnostic Engine
+     * 
+     * @param {string} context - Context identifier for logging and debugging
+     * @constructor
+     */
     constructor(context: string = 'EnhancedAIDiagnosticEngine') {
         this.context = context;
         this.modelRouter = new AIModelRouter(`${context}/ModelRouter`);
@@ -78,6 +158,42 @@ export class EnhancedAIDiagnosticEngine {
 
     /**
      * Process a complete diagnostic request with all enhancements
+     * 
+     * This is the main entry point for enhanced diagnosis processing.
+     * It orchestrates the entire pipeline from request analysis to
+     * final result generation.
+     * 
+     * Processing Pipeline:
+     * 1. Analyze request complexity and requirements
+     * 2. Select optimal AI model based on criteria
+     * 3. Generate base diagnosis using selected model
+     * 4. Apply personalization if requested
+     * 5. Validate safety if requested
+     * 6. Calculate overall confidence score
+     * 7. Return comprehensive results with metadata
+     * 
+     * @param {EnhancedDiagnosticRequest} request - The diagnostic request
+     * @returns {Promise<EnhancedDiagnosticResponse>} Complete diagnostic response
+     * @throws {Error} If any step in the processing pipeline fails
+     * 
+     * @example
+     * ```typescript
+     * const result = await engine.processEnhancedDiagnosis({
+     *   userId: 'user123',
+     *   doctorLevel: 'expert',
+     *   messages: chatHistory,
+     *   requiresPersonalization: true,
+     *   requiresSafetyValidation: true
+     * });
+     * 
+     * if (result.safetyValidation?.is_safe) {
+     *   // Safe to proceed with recommendations
+     *   console.log('Diagnosis:', result.diagnosis);
+     * } else {
+     *   // Handle safety concerns
+     *   console.log('Safety concerns:', result.safetyValidation?.concerns);
+     * }
+     * ```
      */
     async processEnhancedDiagnosis(request: EnhancedDiagnosticRequest): Promise<EnhancedDiagnosticResponse> {
         const startTime = Date.now();

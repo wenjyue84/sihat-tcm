@@ -82,11 +82,12 @@ export function DietaryPreferencesForm({ initialPreferences, onSaved }: DietaryP
                 toast.success(strings.preferencesSaved)
                 onSaved(finalPreferences)
             } else {
-                toast.error(result.error || 'Failed to save preferences')
+                toast.error(result.error || strings.savePreferencesError || 'Failed to save preferences')
             }
-        } catch (error) {
-            toast.error('An unexpected error occurred')
-            console.error(error)
+        } catch (error: any) {
+            const errorMessage = error?.message || error?.toString() || 'An unexpected error occurred'
+            toast.error(errorMessage)
+            console.error('Error saving dietary preferences:', error)
         } finally {
             setLoading(false)
         }

@@ -35,6 +35,7 @@ export interface AccessibilityAnnouncement {
 
 export class AccessibilityManager {
   private preferences: AccessibilityPreferences
+  private initialPreferences: Partial<AccessibilityPreferences>
   private focusableElements: Map<string, FocusableElement[]> = new Map()
   private currentFocusGroup: string | null = null
   private currentFocusIndex: number = 0
@@ -43,6 +44,7 @@ export class AccessibilityManager {
   private keyboardListeners: Map<string, (event: KeyboardEvent) => void> = new Map()
 
   constructor(initialPreferences?: Partial<AccessibilityPreferences>) {
+    this.initialPreferences = initialPreferences || {}
     this.preferences = {
       highContrast: false,
       reducedMotion: false,
@@ -101,22 +103,30 @@ export class AccessibilityManager {
   private detectSystemPreferences(): void {
     if (typeof window === 'undefined') return
 
-    // Detect reduced motion preference
+    // Detect reduced motion preference (only if not explicitly set)
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-    this.preferences.reducedMotion = prefersReducedMotion.matches
+    if (!('reducedMotion' in this.initialPreferences)) {
+      this.preferences.reducedMotion = prefersReducedMotion.matches
+    }
     
     prefersReducedMotion.addEventListener('change', (e) => {
-      this.preferences.reducedMotion = e.matches
-      this.applyAccessibilityStyles()
+      if (!('reducedMotion' in this.initialPreferences)) {
+        this.preferences.reducedMotion = e.matches
+        this.applyAccessibilityStyles()
+      }
     })
 
-    // Detect high contrast preference
+    // Detect high contrast preference (only if not explicitly set)
     const prefersHighContrast = window.matchMedia('(prefers-contrast: high)')
-    this.preferences.highContrast = prefersHighContrast.matches
+    if (!('highContrast' in this.initialPreferences)) {
+      this.preferences.highContrast = prefersHighContrast.matches
+    }
 
     prefersHighContrast.addEventListener('change', (e) => {
-      this.preferences.highContrast = e.matches
-      this.applyAccessibilityStyles()
+      if (!('highContrast' in this.initialPreferences)) {
+        this.preferences.highContrast = e.matches
+        this.applyAccessibilityStyles()
+      }
     })
 
     // Detect screen reader usage (heuristic)

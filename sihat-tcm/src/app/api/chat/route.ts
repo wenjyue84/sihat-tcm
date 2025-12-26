@@ -6,6 +6,8 @@ import { chatRequestSchema, validateRequest, validationErrorResponse } from '@/l
 import { getSystemPrompt } from '@/lib/promptLoader';
 import { prependLanguageInstruction, normalizeLanguage } from '@/lib/translations/languageInstructions';
 import { parseApiError } from '@/lib/modelFallback';
+import { getCorsHeaders } from '@/lib/cors';
+
 
 export const maxDuration = 30;
 export const dynamic = 'force-dynamic';
@@ -107,6 +109,7 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
             devLog('debug', 'API/chat', 'streamText called, returning stream response');
             return result.toTextStreamResponse({
                 headers: {
+                    ...getCorsHeaders(req),
                     'X-Model-Used': model
                 }
             });
@@ -129,6 +132,7 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
             });
             return fallbackResult.toTextStreamResponse({
                 headers: {
+                    ...getCorsHeaders(req),
                     'X-Model-Used': 'gemini-1.5-flash-fallback'
                 }
             });
@@ -144,7 +148,18 @@ Symptom Duration: ${basicInfo.symptomDuration || 'Not provided'}
             details: process.env.NODE_ENV === 'development' ? error.message : undefined
         }), {
             status: 500,
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                ...getCorsHeaders(req),
+                'Content-Type': 'application/json'
+            }
         });
     }
 }
+
+export async function OPTIONS(req: Request) {
+    return new Response(null, {
+        status: 204,
+        headers: getCorsHeaders(req)
+    });
+}
+

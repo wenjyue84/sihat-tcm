@@ -369,63 +369,157 @@ export function useDiagnosisWizard() {
                     }
                 };
 
+                // Save to legacy inquiries table (for backward compatibility) - only for authenticated users
                 if (user) {
-                    // Save to legacy inquiries table (for backward compatibility)
                     await supabase.from('inquiries').insert({
                         user_id: user.id,
                         symptoms: data.basic_info?.symptoms || 'Not provided',
                         diagnosis_report: reportWithProfile,
                         created_at: new Date().toISOString()
                     });
-
-                    // Save to new diagnosis_sessions table (Health Passport)
-                    const { saveDiagnosis } = await import('@/lib/actions');
-
-                    // Extract primary diagnosis string from object or use as-is if string
-                    let primaryDiagnosis = 'Diagnosis pending';
-                    if (typeof resultData.diagnosis === 'string') {
-                        primaryDiagnosis = resultData.diagnosis;
-                    } else if (resultData.diagnosis?.primary_pattern) {
-                        primaryDiagnosis = resultData.diagnosis.primary_pattern;
-                    } else if (resultData.diagnosis?.pattern) {
-                        primaryDiagnosis = resultData.diagnosis.pattern;
-                    }
-
-                    // Extract constitution string from object or use as-is if string
-                    let constitutionValue = undefined;
-                    if (typeof resultData.constitution === 'string') {
-                        constitutionValue = resultData.constitution;
-                    } else if (resultData.constitution?.type) {
-                        constitutionValue = resultData.constitution.type;
-                    }
-
-                    // Extract symptoms from basic_info
-                    const symptoms = data.basic_info?.symptoms 
-                        ? data.basic_info.symptoms.split(',').map(s => s.trim()).filter(Boolean)
-                        : undefined;
-                    
-                    // Extract medicines from medicineFiles
-                    const medicines = data.wen_inquiry?.medicineFiles
-                        ?.map((f: any) => f.extractedText)
-                        .filter(Boolean) || undefined;
-
-                    const saveResult = await saveDiagnosis({
-                        primary_diagnosis: primaryDiagnosis,
-                        constitution: constitutionValue,
-                        overall_score: calculateOverallScore(resultData),
-                        full_report: reportWithProfile,
-                        symptoms: symptoms,
-                        medicines: medicines
-                    });
-
-                    if (saveResult.success) {
-                        logger.info('useDiagnosisWizard', 'Saved to Health Passport', saveResult.data?.id);
-                    } else {
-                        logger.error('useDiagnosisWizard', 'Failed to save to Health Passport', saveResult.error);
-                    }
-
-                    setIsSaved(true);
                 }
+
+                // Save to diagnosis_sessions table (Health Passport) - supports both authenticated and guest users
+                const { saveDiagnosis } = await import('@/lib/actions');
+                const { generateGuestSessionToken, saveGuestSessionToken } = await import('@/lib/guestSession');
+
+                // Extract primary diagnosis string from object or use as-is if string
+                let primaryDiagnosis = 'Diagnosis pending';
+                if (typeof resultData.diagnosis === 'string') {
+                    primaryDiagnosis = resultData.diagnosis;
+                } else if (resultData.diagnosis?.primary_pattern) {
+                    primaryDiagnosis = resultData.diagnosis.primary_pattern;
+                } else if (resultData.diagnosis?.pattern) {
+                    primaryDiagnosis = resultData.diagnosis.pattern;
+                }
+
+                // Extract constitution string from object or use as-is if string
+                let constitutionValue = undefined;
+                if (typeof resultData.constitution === 'string') {
+                    constitutionValue = resultData.constitution;
+                } else if (resultData.constitution?.type) {
+                    constitutionValue = resultData.constitution.type;
+                }
+
+                // Extract symptoms from basic_info
+                // Build symptoms array from mainComplaint and otherSymptoms
+                const symptomsArray: string[] = []
+                if (data.basic_info?.mainComplaint?.trim()) {
+                    symptomsArray.push(data.basic_info.mainComplaint.trim())
+                }
+                if (data.basic_info?.otherSymptoms?.trim()) {
+                    // Split otherSymptoms by comma and add each one
+                    const otherSymptoms = data.basic_info.otherSymptoms
+                        .split(',')
+                        .map(s => s.trim())
+                        .filter(Boolean)
+                    symptomsArray.push(...otherSymptoms)
+                }
+                const symptoms = symptomsArray.length > 0 ? symptomsArray : undefined;
+                
+                // Extract medicines from medicineFiles
+                const medicines = data.wen_inquiry?.medicineFiles
+                    ?.map((f: any) => f.extractedText)
+                    .filter(Boolean) || undefined;
+
+                // Phase 1: Collect all input data
+                const inputData = {
+                    // Inquiry data
+                    inquiry_summary: data.wen_inquiry?.inquiryText || data.wen_inquiry?.summary,
+                    inquiry_chat_history: data.wen_inquiry?.chatHistory || data.wen_chat || [],
+                    inquiry_report_files: data.wen_inquiry?.reportFiles?.map((f: any) => ({
+                        name: f.name || 'Unknown',
+                        url: f.url || f.publicUrl || '',
+                        type: f.type || 'application/octet-stream',
+                        size: f.size,
+                        extracted_text: f.extractedText
+                    })).filter((f: any) => f.url) || [],
+                    inquiry_medicine_files: data.wen_inquiry?.medicineFiles?.map((f: any) => ({
+                        name: f.name || 'Unknown',
+                        url: f.url || f.publicUrl || '',
+                        type: f.type || 'application/octet-stream',
+                        size: f.size,
+                        extracted_text: f.extractedText
+                    })).filter((f: any) => f.url) || [],
+                    
+                    // Visual analysis
+                    tongue_analysis: data.wang_tongue ? {
+                        image_url: data.wang_tongue.image,
+                        observation: data.wang_tongue.observation,
+                        analysis_tags: data.wang_tongue.analysis_tags,
+                        tcm_indicators: data.wang_tongue.tcm_indicators,
+                        pattern_suggestions: data.wang_tongue.pattern_suggestions,
+                        potential_issues: data.wang_tongue.potential_issues
+                    } : undefined,
+                    
+                    face_analysis: data.wang_face ? {
+                        image_url: data.wang_face.image,
+                        observation: data.wang_face.observation,
+                        analysis_tags: data.wang_face.analysis_tags,
+                        tcm_indicators: data.wang_face.tcm_indicators,
+                        potential_issues: data.wang_face.potential_issues
+                    } : undefined,
+                    
+                    body_analysis: data.wang_part ? {
+                        image_url: data.wang_part.image,
+                        observation: data.wang_part.observation,
+                        analysis_tags: data.wang_part.analysis_tags,
+                        potential_issues: data.wang_part.potential_issues
+                    } : undefined,
+                    
+                    // Audio analysis
+                    audio_analysis: data.wen_audio ? {
+                        audio_url: data.wen_audio.audio,
+                        observation: data.wen_audio.observation,
+                        potential_issues: data.wen_audio.potential_issues
+                    } : undefined,
+                    
+                    // Pulse data
+                    pulse_data: data.qie ? {
+                        bpm: data.qie.bpm,
+                        quality: data.qie.quality,
+                        rhythm: data.qie.rhythm,
+                        strength: data.qie.strength,
+                        notes: data.qie.notes
+                    } : undefined
+                };
+
+                // Determine if this is a guest session
+                const isGuest = !user;
+                let guestSessionToken: string | undefined = undefined;
+
+                if (isGuest) {
+                    // Generate and save guest session token
+                    guestSessionToken = generateGuestSessionToken();
+                    saveGuestSessionToken(guestSessionToken);
+                }
+
+                const saveResult = await saveDiagnosis({
+                    primary_diagnosis: primaryDiagnosis,
+                    constitution: constitutionValue,
+                    overall_score: calculateOverallScore(resultData),
+                    full_report: reportWithProfile,
+                    symptoms: symptoms,
+                    medicines: medicines,
+                    // Phase 1: Add all input data
+                    ...inputData,
+                    // Guest session fields
+                    is_guest_session: isGuest,
+                    guest_email: isGuest ? data.basic_info?.email : undefined,
+                    guest_name: isGuest ? data.basic_info?.name : undefined
+                });
+
+                if (saveResult.success) {
+                    if (isGuest) {
+                        logger.info('useDiagnosisWizard', 'Saved guest session', saveResult.data?.id);
+                    } else {
+                        logger.info('useDiagnosisWizard', 'Saved to Health Passport', saveResult.data?.id);
+                    }
+                } else {
+                    logger.error('useDiagnosisWizard', 'Failed to save diagnosis', saveResult.error);
+                }
+
+                setIsSaved(true);
             } catch (e) {
                 logger.error('useDiagnosisWizard', 'Failed to auto-save', e);
             }

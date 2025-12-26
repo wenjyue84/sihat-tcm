@@ -27,11 +27,13 @@ import {
     PlayCircle,
     Home,
     Menu,
-    X
+    X,
+    Target
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import TestingDashboard from '@/components/developer/TestingDashboard'
 
 export default function DeveloperDashboard() {
     const { profile, loading: authLoading, signOut } = useAuth()
@@ -50,7 +52,95 @@ export default function DeveloperDashboard() {
     const [envTestStatus, setEnvTestStatus] = useState<{ [key: string]: 'idle' | 'testing' | 'success' | 'error' }>({})
     const [envTestMessage, setEnvTestMessage] = useState<{ [key: string]: string }>({})
 
-    // System Logs State
+    // System Diagnostics State
+    const [diagnosticsResults, setDiagnosticsResults] = useState<{ [key: string]: any }>({})
+    const [runningTests, setRunningTests] = useState<{ [key: string]: boolean }>({})
+    const [testSuites] = useState([
+        {
+            id: 'accessibility',
+            name: 'Accessibility Manager',
+            description: 'WCAG 2.1 AA compliance and accessibility features',
+            testCommand: 'npm test -- accessibilityManager.test.ts --run',
+            category: 'Core Features'
+        },
+        {
+            id: 'imageQuality',
+            name: 'Image Quality Validator',
+            description: 'Real-time image quality assessment',
+            testCommand: 'npm test -- imageQualityValidator.test.ts --run',
+            category: 'AI Features'
+        },
+        {
+            id: 'medicalSafety',
+            name: 'Medical Safety Validator',
+            description: 'Treatment recommendation safety validation',
+            testCommand: 'npm test -- medicalSafetyValidator.test.ts --run',
+            category: 'Safety Systems'
+        },
+        {
+            id: 'aiModelRouter',
+            name: 'AI Model Router',
+            description: 'Intelligent AI model selection and fallback',
+            testCommand: 'npm test -- aiModelRouter.test.ts --run',
+            category: 'AI Features'
+        },
+        {
+            id: 'platformOptimizer',
+            name: 'Platform Optimizer',
+            description: 'Cross-platform performance optimization',
+            testCommand: 'npm test -- platformOptimizer.test.ts --run',
+            category: 'Performance'
+        },
+        {
+            id: 'voiceCommandHandler',
+            name: 'Voice Command Handler',
+            description: 'Voice recognition and command processing',
+            testCommand: 'npm test -- voiceCommandHandler.test.ts --run',
+            category: 'Accessibility'
+        },
+        {
+            id: 'propertyTestFramework',
+            name: 'Property Test Framework',
+            description: 'Property-based testing framework validation',
+            testCommand: 'npm test -- propertyTestFramework.test.ts --run',
+            category: 'Testing Infrastructure'
+        },
+        {
+            id: 'correctnessProperties',
+            name: 'Correctness Properties',
+            description: 'System correctness properties validation',
+            testCommand: 'npm test -- correctnessProperties.test.ts --run',
+            category: 'Correctness Validation'
+        },
+        {
+            id: 'propertyTests',
+            name: 'All Property-Based Tests',
+            description: 'Complete property-based testing suite',
+            testCommand: 'npm run test:pbt',
+            category: 'Property-Based Testing'
+        },
+        {
+            id: 'unitTests',
+            name: 'Unit Test Suite',
+            description: 'All unit tests for core functionality',
+            testCommand: 'npm test -- --run',
+            category: 'Unit Testing'
+        },
+        {
+            id: 'integrationTests',
+            name: 'Integration Tests',
+            description: 'End-to-end integration testing',
+            testCommand: 'npm test -- --run --testPathPattern=integration',
+            category: 'Integration Testing'
+        },
+        {
+            id: 'performanceTests',
+            name: 'Performance Tests',
+            description: 'Performance benchmarking and optimization tests',
+            testCommand: 'npm test -- --run --testPathPattern=performance',
+            category: 'Performance Testing'
+        }
+    ])
     interface SystemLog {
         id: string;
         timestamp: string;
@@ -285,6 +375,52 @@ Please analyze the implementation of this route (likely in \`src/app${endpoint.p
         }
     }
 
+    const runTestSuite = async (testId: string) => {
+        setRunningTests(prev => ({ ...prev, [testId]: true }))
+        
+        try {
+            const response = await fetch('/api/developer/run-tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ testId })
+            })
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+            }
+
+            const result = await response.json()
+            
+            setDiagnosticsResults(prev => ({
+                ...prev,
+                [testId]: result
+            }))
+        } catch (error) {
+            setDiagnosticsResults(prev => ({
+                ...prev,
+                [testId]: {
+                    status: 'error',
+                    error: error instanceof Error ? error.message : 'Test execution failed',
+                    timestamp: new Date().toISOString()
+                }
+            }))
+        } finally {
+            setRunningTests(prev => ({ ...prev, [testId]: false }))
+        }
+    }
+
+    const runAllTests = async () => {
+        for (const testSuite of testSuites) {
+            if (!runningTests[testSuite.id]) {
+                await runTestSuite(testSuite.id)
+                // Small delay between tests
+                await new Promise(resolve => setTimeout(resolve, 500))
+            }
+        }
+    }
+
     if (authLoading) return (
         <div className="min-h-screen bg-[#0a0a0b] flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
@@ -389,12 +525,28 @@ Please analyze the implementation of this route (likely in \`src/app${endpoint.p
                             Dashboard
                         </TabsTrigger>
                         <TabsTrigger
+                            value="testing"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="w-full justify-start px-4 py-3 data-[state=active]:bg-violet-600/10 data-[state=active]:text-violet-400 data-[state=active]:border-r-2 data-[state=active]:border-violet-500 rounded-none rounded-r-sm transition-all text-sm font-medium"
+                        >
+                            <Target className="w-4 h-4 mr-3" />
+                            Testing Suite
+                        </TabsTrigger>
+                        <TabsTrigger
                             value="api"
                             onClick={() => setIsMobileMenuOpen(false)}
                             className="w-full justify-start px-4 py-3 data-[state=active]:bg-violet-600/10 data-[state=active]:text-violet-400 data-[state=active]:border-r-2 data-[state=active]:border-violet-500 rounded-none rounded-r-sm transition-all text-sm font-medium"
                         >
                             <Activity className="w-4 h-4 mr-3" />
                             API Monitor
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="diagnostics"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="w-full justify-start px-4 py-3 data-[state=active]:bg-violet-600/10 data-[state=active]:text-violet-400 data-[state=active]:border-r-2 data-[state=active]:border-violet-500 rounded-none rounded-r-sm transition-all text-sm font-medium"
+                        >
+                            <Bug className="w-4 h-4 mr-3" />
+                            System Diagnostics
                         </TabsTrigger>
                         <TabsTrigger
                             value="logs"
@@ -606,6 +758,10 @@ Please analyze the implementation of this route (likely in \`src/app${endpoint.p
                         </div>
                     </TabsContent>
 
+                    <TabsContent value="testing" className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-2 m-0 outline-none">
+                        <TestingDashboard />
+                    </TabsContent>
+
                     <TabsContent value="api" className="space-y-6 m-0 outline-none animate-in fade-in-50">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-bold text-white">API Monitor</h2>
@@ -688,6 +844,227 @@ Please analyze the implementation of this route (likely in \`src/app${endpoint.p
                                 </Card>
                             ))}
                         </div>
+                    </TabsContent>
+
+                    <TabsContent value="diagnostics" className="space-y-6 m-0 outline-none animate-in fade-in-50">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-xl font-bold text-white">System Diagnostics</h2>
+                                <p className="text-sm text-gray-400 mt-1">Automated test suites and system validation</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-violet-500/10 border-violet-500/20 text-violet-400 hover:bg-violet-500/20"
+                                    onClick={runAllTests}
+                                    disabled={Object.values(runningTests).some(Boolean)}
+                                >
+                                    {Object.values(runningTests).some(Boolean) ? (
+                                        <>
+                                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                            Running Tests...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <PlayCircle className="w-4 h-4 mr-2" />
+                                            Run All Tests
+                                        </>
+                                    )}
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-gray-400 hover:text-white"
+                                    onClick={() => router.push('/test-accessibility')}
+                                >
+                                    <ExternalLink className="w-4 h-4 mr-2" />
+                                    Manual Testing
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Test Categories */}
+                        {['Core Features', 'AI Features', 'Safety Systems', 'Performance', 'Accessibility', 'Testing Infrastructure', 'Correctness Validation', 'Property-Based Testing', 'Unit Testing', 'Integration Testing', 'Performance Testing'].map(category => {
+                            const categoryTests = testSuites.filter(test => test.category === category)
+                            if (categoryTests.length === 0) return null
+
+                            return (
+                                <Card key={category} className="bg-[#0f0f11] border-white/10">
+                                    <CardHeader className="border-b border-white/5 bg-white/[0.02] py-4 px-6">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <CardTitle className="text-base font-medium text-violet-100">{category}</CardTitle>
+                                                <CardDescription className="text-xs text-gray-500 mt-1">
+                                                    {categoryTests.length} test suite{categoryTests.length !== 1 ? 's' : ''}
+                                                </CardDescription>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {categoryTests.map(test => {
+                                                    const result = diagnosticsResults[test.id]
+                                                    const isRunning = runningTests[test.id]
+                                                    
+                                                    if (isRunning) return <div key={test.id} className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
+                                                    if (!result) return <div key={test.id} className="w-2 h-2 bg-gray-600 rounded-full" />
+                                                    if (result.status === 'passed') return <div key={test.id} className="w-2 h-2 bg-emerald-500 rounded-full" />
+                                                    if (result.status === 'failed' || result.status === 'error') return <div key={test.id} className="w-2 h-2 bg-red-500 rounded-full" />
+                                                    return <div key={test.id} className="w-2 h-2 bg-gray-600 rounded-full" />
+                                                })}
+                                            </div>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="p-0">
+                                        <div className="divide-y divide-white/5">
+                                            {categoryTests.map(test => {
+                                                const result = diagnosticsResults[test.id]
+                                                const isRunning = runningTests[test.id]
+                                                
+                                                return (
+                                                    <div key={test.id} className="p-6 hover:bg-white/[0.02] transition-colors group">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center gap-3 mb-2">
+                                                                    <h4 className="font-medium text-white">{test.name}</h4>
+                                                                    {isRunning && (
+                                                                        <div className="flex items-center gap-2 text-amber-400">
+                                                                            <RefreshCw className="w-3 h-3 animate-spin" />
+                                                                            <span className="text-xs">Running...</span>
+                                                                        </div>
+                                                                    )}
+                                                                    {result && !isRunning && (
+                                                                        <div className={`flex items-center gap-2 text-xs ${
+                                                                            result.status === 'passed' ? 'text-emerald-400' :
+                                                                            result.status === 'failed' ? 'text-red-400' :
+                                                                            result.status === 'error' ? 'text-red-400' : 'text-gray-400'
+                                                                        }`}>
+                                                                            {result.status === 'passed' && <CheckCircle2 className="w-3 h-3" />}
+                                                                            {(result.status === 'failed' || result.status === 'error') && <Bug className="w-3 h-3" />}
+                                                                            <span className="capitalize">{result.status}</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <p className="text-sm text-gray-400 mb-3">{test.description}</p>
+                                                                
+                                                                {result && !isRunning && (
+                                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                                                                        {result.passed !== undefined && (
+                                                                            <div>
+                                                                                <span className="text-gray-500">Passed:</span>
+                                                                                <span className="ml-2 text-emerald-400 font-mono">{result.passed}</span>
+                                                                            </div>
+                                                                        )}
+                                                                        {result.failed !== undefined && (
+                                                                            <div>
+                                                                                <span className="text-gray-500">Failed:</span>
+                                                                                <span className="ml-2 text-red-400 font-mono">{result.failed}</span>
+                                                                            </div>
+                                                                        )}
+                                                                        {result.duration && (
+                                                                            <div>
+                                                                                <span className="text-gray-500">Duration:</span>
+                                                                                <span className="ml-2 text-gray-300 font-mono">{result.duration}</span>
+                                                                            </div>
+                                                                        )}
+                                                                        {result.coverage && (
+                                                                            <div>
+                                                                                <span className="text-gray-500">Coverage:</span>
+                                                                                <span className="ml-2 text-blue-400 font-mono">{result.coverage}</span>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                                
+                                                                {result?.error && (
+                                                                    <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                                                                        <p className="text-xs text-red-400 font-mono">{result.error}</p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            
+                                                            <div className="flex items-center gap-2 ml-4">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-8 px-3 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                    onClick={() => runTestSuite(test.id)}
+                                                                    disabled={isRunning}
+                                                                >
+                                                                    {isRunning ? (
+                                                                        <RefreshCw className="w-3 h-3 animate-spin" />
+                                                                    ) : (
+                                                                        <PlayCircle className="w-3 h-3" />
+                                                                    )}
+                                                                </Button>
+                                                                {result?.timestamp && (
+                                                                    <span className="text-xs text-gray-600 font-mono">
+                                                                        {new Date(result.timestamp).toLocaleTimeString()}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="mt-3 pt-3 border-t border-white/5">
+                                                            <details className="group/details">
+                                                                <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-400 flex items-center gap-2">
+                                                                    <span>Test Command</span>
+                                                                    <span className="text-gray-600 group-open/details:rotate-90 transition-transform">▶</span>
+                                                                </summary>
+                                                                <div className="mt-2 p-2 bg-black/20 rounded border border-white/5">
+                                                                    <code className="text-xs text-gray-300 font-mono">{test.testCommand}</code>
+                                                                </div>
+                                                            </details>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )
+                        })}
+
+                        {/* Test Summary */}
+                        {Object.keys(diagnosticsResults).length > 0 && (
+                            <Card className="bg-gradient-to-r from-violet-500/10 to-blue-500/10 border-violet-500/20">
+                                <CardHeader>
+                                    <CardTitle className="text-base text-violet-100">Test Summary</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-emerald-400">
+                                                {Object.values(diagnosticsResults).filter(r => r.status === 'passed').length}
+                                            </div>
+                                            <div className="text-xs text-gray-400">Passed</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-red-400">
+                                                {Object.values(diagnosticsResults).filter(r => r.status === 'failed' || r.status === 'error').length}
+                                            </div>
+                                            <div className="text-xs text-gray-400">Failed</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-gray-300">
+                                                {Object.values(diagnosticsResults).reduce((acc, r) => acc + (r.passed || 0), 0)}
+                                            </div>
+                                            <div className="text-xs text-gray-400">Total Tests</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-blue-400">
+                                                {Math.round(Object.values(diagnosticsResults).reduce((acc, r) => {
+                                                    if (r.coverage) {
+                                                        const coverage = parseInt(r.coverage.replace('%', ''))
+                                                        return acc + coverage
+                                                    }
+                                                    return acc
+                                                }, 0) / Object.keys(diagnosticsResults).length) || 0}%
+                                            </div>
+                                            <div className="text-xs text-gray-400">Avg Coverage</div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
                     </TabsContent>
 
                     <TabsContent value="logs" className="h-[calc(100vh-10rem)] m-0 outline-none animate-in fade-in-50">

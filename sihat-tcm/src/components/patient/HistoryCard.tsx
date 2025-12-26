@@ -123,6 +123,38 @@ export function HistoryCard({ session, onClick, index = 0 }: HistoryCardProps) {
                         )}
                     </div>
 
+                    {/* Input Data Indicators */}
+                    {(session.inquiry_summary || session.tongue_analysis || session.face_analysis || 
+                      session.audio_analysis || session.pulse_data) && (
+                        <div className="mb-3 flex flex-wrap gap-1.5">
+                            {session.inquiry_summary && (
+                                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[10px] font-medium">
+                                    Inquiry
+                                </span>
+                            )}
+                            {session.tongue_analysis && (
+                                <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-[10px] font-medium">
+                                    Tongue
+                                </span>
+                            )}
+                            {session.face_analysis && (
+                                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-[10px] font-medium">
+                                    Face
+                                </span>
+                            )}
+                            {session.audio_analysis && (
+                                <span className="px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full text-[10px] font-medium">
+                                    Voice
+                                </span>
+                            )}
+                            {session.pulse_data && (
+                                <span className="px-2 py-0.5 bg-rose-100 text-rose-700 rounded-full text-[10px] font-medium">
+                                    Pulse
+                                </span>
+                            )}
+                        </div>
+                    )}
+
                     {/* Notes Preview (if exists) */}
                     {session.notes && (
                         <div className="mb-3 p-2.5 bg-amber-50/50 border border-amber-100 rounded-lg">

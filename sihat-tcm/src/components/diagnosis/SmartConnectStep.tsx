@@ -11,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
 import { supabase } from '@/lib/supabase/client'
 import { PractitionerList } from './report/PractitionerList'
+import Link from 'next/link'
 
 export interface SmartConnectData {
     pulseRate?: number | string
@@ -295,20 +296,22 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                     </div>
                 </Button>
 
-                <Button
-                    variant="outline"
-                    className="w-full h-16 bg-slate-800/50 backdrop-blur-sm border-slate-700 hover:bg-slate-800 active:scale-[0.98] transition-all rounded-xl group touch-manipulation"
-                >
-                    <div className="flex items-center gap-4 w-full">
-                        <div className="p-2 bg-slate-700/50 rounded-lg group-hover:bg-blue-500/20 transition-colors">
-                            <Download className="w-5 h-5 text-slate-400 group-hover:text-blue-400" />
+                <Link href="/mobile-app" className="w-full">
+                    <Button
+                        variant="outline"
+                        className="w-full h-16 bg-slate-800/50 backdrop-blur-sm border-slate-700 hover:bg-slate-800 active:scale-[0.98] transition-all rounded-xl group touch-manipulation"
+                    >
+                        <div className="flex items-center gap-4 w-full">
+                            <div className="p-2 bg-slate-700/50 rounded-lg group-hover:bg-blue-500/20 transition-colors">
+                                <Download className="w-5 h-5 text-slate-400 group-hover:text-blue-400" />
+                            </div>
+                            <div className="flex-1 text-left">
+                                <div className="font-semibold text-base text-slate-200 group-hover:text-white leading-none mb-1">Download Mobile App</div>
+                                <div className="text-xs text-slate-500 group-hover:text-blue-400/70">iOS & Android</div>
+                            </div>
                         </div>
-                        <div className="flex-1 text-left">
-                            <div className="font-semibold text-base text-slate-200 group-hover:text-white leading-none mb-1">Download Mobile App</div>
-                            <div className="text-xs text-slate-500 group-hover:text-blue-400/70">iOS & Android</div>
-                        </div>
-                    </div>
-                </Button>
+                    </Button>
+                </Link>
             </div>
         </motion.div>
     )

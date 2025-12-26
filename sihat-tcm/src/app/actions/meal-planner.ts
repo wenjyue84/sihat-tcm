@@ -369,7 +369,15 @@ export async function saveDietaryPreferences(preferences: DietaryPreferences) {
         if (authError || !user) {
             return {
                 success: false,
-                error: 'Not authenticated'
+                error: 'Not authenticated. Please log in again.'
+            }
+        }
+
+        // Validate preferences structure
+        if (!preferences || typeof preferences !== 'object') {
+            return {
+                success: false,
+                error: 'Invalid preferences data'
             }
         }
 
@@ -378,7 +386,13 @@ export async function saveDietaryPreferences(preferences: DietaryPreferences) {
             .update({ dietary_preferences: preferences })
             .eq('id', user.id)
 
-        if (error) throw error
+        if (error) {
+            console.error('Supabase error saving preferences:', error)
+            return {
+                success: false,
+                error: error.message || 'Database error: Failed to save preferences'
+            }
+        }
 
         return {
             success: true
@@ -387,7 +401,7 @@ export async function saveDietaryPreferences(preferences: DietaryPreferences) {
         console.error('Error saving preferences:', error)
         return {
             success: false,
-            error: error.message
+            error: error?.message || error?.toString() || 'An unexpected error occurred while saving preferences'
         }
     }
 }

@@ -106,25 +106,25 @@ export function IoTConnectionWizard({ isOpen, onClose, deviceType, onDataReceive
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-md bg-slate-950 text-white border-slate-800">
+            <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] max-w-md mx-auto bg-slate-950 text-white border-slate-800">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-emerald-400">
+                    <DialogTitle className="flex items-center gap-2 text-emerald-400 text-base sm:text-lg">
                         <Watch className="w-5 h-5" />
                         Manual Input: {config.name}
                     </DialogTitle>
-                    <DialogDescription className="text-slate-400">
+                    <DialogDescription className="text-slate-400 text-sm">
                         Please enter your reading from your device.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="py-6 relative">
+                <div className="py-4 sm:py-6 relative">
                     <AnimatePresence>
                         {showExplanation && (
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
-                                className="absolute inset-0 bg-slate-900/95 z-20 flex flex-col p-4 rounded-lg border border-slate-700"
+                                className="absolute inset-0 bg-slate-900/95 z-20 flex flex-col p-4 sm:p-6 rounded-lg border border-slate-700 overflow-y-auto"
                             >
                                 <div className="flex justify-between items-start mb-4">
                                     <h3 className="text-lg font-bold text-emerald-400 flex items-center gap-2">
@@ -148,14 +148,14 @@ export function IoTConnectionWizard({ isOpen, onClose, deviceType, onDataReceive
                         )}
                     </AnimatePresence>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="flex flex-col items-center justify-center gap-4">
-                            <div className={`p-4 rounded-full bg-slate-900 border-2 border-${config.color.split('-')[1]}-500/50`}>
-                                <Icon className={`w-8 h-8 ${config.color}`} />
+                    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                        <div className="flex flex-col items-center justify-center gap-4 sm:gap-6">
+                            <div className={`p-3 sm:p-4 rounded-full bg-slate-900 border-2 ${config.color.replace('text-', 'border-')}/50`}>
+                                <Icon className={`w-7 h-7 sm:w-8 sm:h-8 ${config.color}`} />
                             </div>
 
                             {deviceType === 'bp' ? (
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center">
                                     <div className="space-y-1">
                                         <Label className="text-xs text-slate-400">Systolic</Label>
                                         <Input
@@ -163,11 +163,11 @@ export function IoTConnectionWizard({ isOpen, onClose, deviceType, onDataReceive
                                             placeholder="120"
                                             value={systolic}
                                             onChange={(e) => setSystolic(e.target.value)}
-                                            className="w-24 bg-slate-900 border-slate-700 text-center text-lg font-mono placeholder:text-slate-600"
+                                            className="w-20 sm:w-24 bg-slate-900 border-slate-700 text-center text-base sm:text-lg font-mono placeholder:text-slate-600 h-12"
                                             autoFocus
                                         />
                                     </div>
-                                    <span className="text-2xl text-slate-500 pt-5">/</span>
+                                    <span className="text-xl sm:text-2xl text-slate-500 pt-5">/</span>
                                     <div className="space-y-1">
                                         <Label className="text-xs text-slate-400">Diastolic</Label>
                                         <Input
@@ -175,40 +175,40 @@ export function IoTConnectionWizard({ isOpen, onClose, deviceType, onDataReceive
                                             placeholder="80"
                                             value={diastolic}
                                             onChange={(e) => setDiastolic(e.target.value)}
-                                            className="w-24 bg-slate-900 border-slate-700 text-center text-lg font-mono placeholder:text-slate-600"
+                                            className="w-20 sm:w-24 bg-slate-900 border-slate-700 text-center text-base sm:text-lg font-mono placeholder:text-slate-600 h-12"
                                         />
                                     </div>
-                                    <span className="text-sm text-slate-500 pt-5">{config.unit}</span>
+                                    <span className="text-xs sm:text-sm text-slate-500 pt-5">{config.unit}</span>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 sm:gap-3 justify-center w-full">
                                     <Input
                                         type="number"
                                         step={deviceType === 'temp' ? "0.1" : "1"}
                                         placeholder={config.placeholder}
                                         value={value}
                                         onChange={(e) => setValue(e.target.value)}
-                                        className="w-32 bg-slate-900 border-slate-700 text-center text-lg font-mono placeholder:text-slate-600"
+                                        className="w-28 sm:w-32 bg-slate-900 border-slate-700 text-center text-base sm:text-lg font-mono placeholder:text-slate-600 h-12"
                                         autoFocus
                                     />
-                                    <span className="text-sm text-slate-500">{config.unit}</span>
+                                    <span className="text-xs sm:text-sm text-slate-500">{config.unit}</span>
                                 </div>
                             )}
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                             <Button
                                 type="button"
                                 variant="ghost"
                                 onClick={() => setShowExplanation(true)}
-                                className="flex-1 border border-slate-600 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"
+                                className="flex-1 border border-slate-600 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 h-11 sm:h-10"
                             >
                                 <Info className="w-4 h-4 mr-2" />
                                 Guide
                             </Button>
                             <Button
                                 type="submit"
-                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white h-11 sm:h-10"
                                 disabled={deviceType === 'bp' ? (!systolic || !diastolic) : !value}
                             >
                                 Save Reading

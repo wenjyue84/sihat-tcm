@@ -23,8 +23,8 @@ export async function POST(req: Request) {
         }
 
         // Model is now passed from frontend based on doctor level selection:
-        // - Master (名医): gemini-3-pro-preview
-        // - Expert (专家): gemini-2.5-pro
+        // - Master (名医): gemini-1.5-pro
+        // - Expert (专家): gemini-1.5-flash
         // - Physician (医师): gemini-2.0-flash
         const { chatHistory, reportFiles, medicineFiles, basicInfo, language, model } = validation.data;
         devLog('info', 'API/summarize-inquiry', 'Request params', { language, model, chatHistoryLength: chatHistory?.length || 0 });
@@ -84,59 +84,32 @@ Respond in ${language === 'zh' ? 'Chinese (Simplified/简体中文)' : language 
 Follow the structured format specified in your system prompt.
 `;
 
-        devLog('info', 'API/summarize-inquiry', 'Calling Gemini API...');
-        const generateStartTime = Date.now();
+        devLog('info', 'API/summarize-inquiry', 'Calling Gemini API with fallback support...');
         const apiKey = await getGeminiApiKeyAsync();
-
-        devLog('debug', 'API/summarize-inquiry', `API Key loaded: ${apiKey ? 'OK' : 'MISSING'}`);
 
         if (!apiKey) {
             throw new Error('GOOGLE_GENERATIVE_AI_API_KEY is not set in environment variables');
         }
 
-        const google = getGoogleProvider(apiKey);
+        const { generateTextWithFallback } = await import('@/lib/modelFallback');
 
-        let text;
-        try {
-            // Try primary model
-            const result = await generateText({
-                model: google(model),
-                system: systemPrompt,
-                prompt: userPrompt,
-            });
-            text = result.text;
-        } catch (primaryError: any) {
-            devLog('error', 'API/summarize-inquiry', `Primary model ${model} failed`, { error: primaryError.message });
-
-            // Fallback to gemini-1.5-flash
-            const fallbackModel = 'gemini-1.5-flash';
-            devLog('info', 'API/summarize-inquiry', `Attempting fallback to ${fallbackModel}...`);
-
-            try {
-                const fallbackResult = await generateText({
-                    model: google(fallbackModel),
-                    system: systemPrompt,
-                    prompt: userPrompt,
-                });
-                text = fallbackResult.text;
-                devLog('info', 'API/summarize-inquiry', `Fallback to ${fallbackModel} successful`);
-            } catch (fallbackError: any) {
-                devLog('error', 'API/summarize-inquiry', `Fallback model ${fallbackModel} also failed`, { error: fallbackError.message });
-                throw primaryError; // Throw the original error to be handled by the outer catch
-            }
-        }
-
-        const generateDuration = Date.now() - generateStartTime;
-        devLog('info', 'API/summarize-inquiry', `Gemini API responded in ${generateDuration}ms`);
+        const result = await generateTextWithFallback({
+            primaryModel: model,
+            context: 'API/summarize-inquiry',
+            useAsyncApiKey: true
+        }, {
+            system: systemPrompt,
+            messages: [{ role: 'user', content: userPrompt }] as any // generateTextWithFallback expects messages array
+        });
 
         const totalDuration = Date.now() - startTime;
-        devLog('info', 'API/summarize-inquiry', `Total request completed in ${totalDuration}ms`);
+        devLog('info', 'API/summarize-inquiry', `Total request completed in ${totalDuration}ms using model: ${result.modelId}`);
 
         return new Response(JSON.stringify({
-            summary: text,
+            summary: result.text,
+            modelUsed: result.modelId,
             timing: {
-                total: totalDuration,
-                generation: generateDuration
+                total: totalDuration
             }
         }), {
             headers: { 'Content-Type': 'application/json' },
@@ -145,40 +118,19 @@ Follow the structured format specified in your system prompt.
         const duration = Date.now() - startTime;
         devLog('error', 'API/summarize-inquiry', `FAILED after ${duration}ms`, { error: error.message });
 
-        // Determine which step failed and provide specific error messages
-        let step = 'unknown';
-        let errorMessage = error.message || 'An unknown error occurred';
-        let errorCode = 'GENERATION_FAILED';
+        const { parseApiError } = await import('@/lib/modelFallback');
+        const { userFriendlyError, errorCode } = parseApiError(error);
 
-        // Check for API key specific errors
-        if (errorMessage.includes('leaked') || errorMessage.includes('API key was reported')) {
-            step = 'api_key';
-            errorCode = 'API_KEY_LEAKED';
-            errorMessage = 'API key has been flagged as leaked. Please generate a new API key from Google AI Studio and update your .env.local file.';
-        } else if (errorMessage.includes('invalid') || errorMessage.includes('API_KEY_INVALID')) {
-            step = 'api_key';
-            errorCode = 'API_KEY_INVALID';
-            errorMessage = 'Invalid API key. Please check your GOOGLE_GENERATIVE_AI_API_KEY in .env.local file.';
-        } else if (errorMessage.includes('quota') || errorMessage.includes('RATE_LIMIT') || errorMessage.includes('429')) {
-            step = 'rate_limit';
-            errorCode = 'API_QUOTA_EXCEEDED';
-            errorMessage = 'API quota exceeded. Please wait a moment or check your Google AI Studio billing.';
-        } else if (errorMessage.includes('fetch') || errorMessage.includes('network')) {
-            step = 'connection';
-            errorMessage = 'Failed to connect to AI service';
-        } else if (errorMessage.includes('timeout')) {
-            step = 'timeout';
-            errorMessage = 'Request timed out while generating summary';
-        } else if (errorMessage.includes('not found') || errorMessage.includes('does not exist')) {
-            step = 'model';
-            errorCode = 'MODEL_NOT_FOUND';
-            errorMessage = 'AI model not available. Please try again or contact support.';
-        } else {
-            step = 'generation';
-        }
+        // Map errorCode back to step for frontend compatibility
+        let step = 'generation';
+        if (errorCode === 'API_KEY_INVALID' || errorCode === 'API_KEY_LEAKED') step = 'api_key';
+        else if (errorCode === 'API_QUOTA_EXCEEDED') step = 'rate_limit';
+        else if (errorCode === 'MODEL_NOT_FOUND') step = 'model';
+        else if (error.message?.includes('fetch') || error.message?.includes('network')) step = 'connection';
+        else if (error.message?.includes('timeout')) step = 'timeout';
 
         return new Response(JSON.stringify({
-            error: errorMessage,
+            error: userFriendlyError,
             code: errorCode,
             step: step,
             duration: duration,

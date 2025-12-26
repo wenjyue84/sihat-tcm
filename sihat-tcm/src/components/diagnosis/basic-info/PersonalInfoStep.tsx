@@ -110,7 +110,7 @@ export function PersonalInfoStep({ formData, setFormData }: PersonalInfoStepProp
                         value={formData.age}
                         onChange={(val) => setFormData({ ...formData, age: val })}
                         min={1}
-                        max={120}
+                        max={150}
                         step={1}
                         placeholder="25"
                         unit="yr"

@@ -269,13 +269,33 @@ export function BasicInfoForm({ onComplete, initialData }: { onComplete: (data: 
                     if (scrollToField) scrollToAndFocusField('age')
                     return false
                 }
+                const ageNum = parseInt(formData.age)
+                if (isNaN(ageNum) || ageNum < 0 || ageNum > 150) {
+                    setStepError(t.basicInfo.age + ' ' + (t.errors?.invalidRange || 'must be between 0 and 150'))
+                    if (scrollToField) scrollToAndFocusField('age')
+                    return false
+                }
+
                 if (!formData.height) {
                     setStepError(t.basicInfo.height + ' ' + (t.errors?.requiredField || 'This field is required'))
                     if (scrollToField) scrollToAndFocusField('height')
                     return false
                 }
+                const heightNum = parseFloat(formData.height)
+                if (isNaN(heightNum) || heightNum < 50 || heightNum > 250) {
+                    setStepError(t.basicInfo.height + ' ' + (t.errors?.invalidRange || 'must be between 50 and 250'))
+                    if (scrollToField) scrollToAndFocusField('height')
+                    return false
+                }
+
                 if (!formData.weight) {
                     setStepError(t.basicInfo.weight + ' ' + (t.errors?.requiredField || 'This field is required'))
+                    if (scrollToField) scrollToAndFocusField('weight')
+                    return false
+                }
+                const weightNum = parseFloat(formData.weight)
+                if (isNaN(weightNum) || weightNum < 20 || weightNum > 300) {
+                    setStepError(t.basicInfo.weight + ' ' + (t.errors?.invalidRange || 'must be between 20 and 300'))
                     if (scrollToField) scrollToAndFocusField('weight')
                     return false
                 }

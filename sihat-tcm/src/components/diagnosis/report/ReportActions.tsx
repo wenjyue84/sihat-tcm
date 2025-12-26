@@ -99,88 +99,102 @@ export function ReportActions({
         onRestart()
     }
     return (
-        <motion.div variants={variants} className="flex flex-col items-center gap-4 pt-6 md:pt-8">
-            {/* Primary CTA */}
-            <button
-                onClick={onChatOpen}
-                className="relative group px-8 py-4 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-500 bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-white rounded-full shadow-xl shadow-emerald-200 hover:shadow-2xl hover:shadow-emerald-300 flex items-center justify-center gap-3 text-lg font-bold min-w-[280px] transform hover:-translate-y-1 ring-4 ring-emerald-100"
-            >
-                <div className="absolute inset-0 rounded-full bg-white/20 group-hover:bg-transparent transition-colors" />
-                <MessageCircle className="h-6 w-6 animate-pulse" />
-                <span>Ask About Report</span>
-                <span className="absolute -top-2 -right-2 flex h-4 w-4">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-4 w-4 bg-amber-500"></span>
-                </span>
-            </button>
+        <motion.div variants={variants} className="w-full pt-6 md:pt-8">
+            <div className="max-w-4xl mx-auto px-4 space-y-6">
+                {/* Primary CTA - Chat Button */}
+                <div className="flex justify-center">
+                    <button
+                        onClick={onChatOpen}
+                        className="relative group px-8 py-4 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-500 bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-white rounded-full shadow-xl shadow-emerald-200 hover:shadow-2xl hover:shadow-emerald-300 flex items-center justify-center gap-3 text-lg font-bold min-w-[280px] md:min-w-[320px] transform hover:-translate-y-1 ring-4 ring-emerald-100"
+                    >
+                        <div className="absolute inset-0 rounded-full bg-white/20 group-hover:bg-transparent transition-colors" />
+                        <MessageCircle className="h-6 w-6 animate-pulse" />
+                        <span>Ask About Report</span>
+                        <span className="absolute -top-2 -right-2 flex h-4 w-4">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-4 w-4 bg-amber-500"></span>
+                        </span>
+                    </button>
+                </div>
 
-            {/* Secondary Actions */}
-            <div className="flex flex-wrap justify-center gap-3">
-                <button
-                    onClick={onDownloadPDF}
-                    className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow flex items-center gap-2 text-sm font-medium"
-                >
-                    <Download className="h-4 w-4" />
-                    Download PDF
-                </button>
+                {/* Action Groups */}
+                <div className="space-y-4">
+                    {/* Export & Share Group */}
+                    <div className="flex flex-wrap justify-center gap-3">
+                        <button
+                            onClick={onDownloadPDF}
+                            className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center"
+                        >
+                            <Download className="h-4 w-4" />
+                            Download PDF
+                        </button>
 
-                <button
-                    onClick={onShare}
-                    className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full hover:from-green-600 hover:to-emerald-600 transition-all shadow-sm hover:shadow flex items-center gap-2 text-sm font-medium"
-                >
-                    <Share2 className="h-4 w-4" />
-                    Share
-                </button>
+                        <button
+                            onClick={onShare}
+                            className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full hover:from-green-600 hover:to-emerald-600 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center"
+                        >
+                            <Share2 className="h-4 w-4" />
+                            Share
+                        </button>
 
-                <button
-                    onClick={onSave}
-                    disabled={isSaving || hasSaved}
-                    className={`px-5 py-2.5 rounded-full transition-all shadow-sm hover:shadow flex items-center gap-2 text-sm font-medium ${hasSaved
-                        ? 'bg-green-100 border border-green-200 text-green-700 cursor-default'
-                        : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600'
-                        }`}
-                >
-                    {isSaving ? (
-                        <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            {language === 'zh' ? '保存中...' : language === 'ms' ? 'Menyimpan...' : 'Saving...'}
-                        </>
-                    ) : hasSaved ? (
-                        <>
-                            <Check className="h-4 w-4" />
-                            {language === 'zh' ? '已保存' : language === 'ms' ? 'Disimpan' : 'Saved'}
-                        </>
-                    ) : (
-                        <>
-                            <Save className="h-4 w-4" />
-                            {language === 'zh' ? '保存' : language === 'ms' ? 'Simpan' : 'Save'}
-                        </>
-                    )}
-                </button>
+                        <button
+                            onClick={onInfographicsOpen}
+                            className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center"
+                        >
+                            <ImageIcon className="h-4 w-4" />
+                            Infographics
+                        </button>
+                    </div>
 
-                <button
-                    onClick={onInfographicsOpen}
-                    className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow flex items-center gap-2 text-sm font-medium"
-                >
-                    <ImageIcon className="h-4 w-4" />
-                    Infographics
-                </button>
+                    {/* Save & Verify Group */}
+                    <div className="flex flex-wrap justify-center gap-3">
+                        <button
+                            onClick={onSave}
+                            disabled={isSaving || hasSaved}
+                            className={`px-5 py-2.5 rounded-full transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center ${hasSaved
+                                ? 'bg-green-100 border border-green-200 text-green-700 cursor-default'
+                                : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600'
+                                }`}
+                        >
+                            {isSaving ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    {language === 'zh' ? '保存中...' : language === 'ms' ? 'Menyimpan...' : 'Saving...'}
+                                </>
+                            ) : hasSaved ? (
+                                <>
+                                    <Check className="h-4 w-4" />
+                                    {language === 'zh' ? '已保存' : language === 'ms' ? 'Disimpan' : 'Saved'}
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="h-4 w-4" />
+                                    {language === 'zh' ? '保存' : language === 'ms' ? 'Simpan' : 'Save'}
+                                </>
+                            )}
+                        </button>
 
-                <button
-                    onClick={onRequestVerification}
-                    className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow flex items-center gap-2 text-sm font-medium"
-                >
-                    <BadgeCheck className="h-4 w-4" />
-                    Request Doctor Verification
-                </button>
+                        <button
+                            onClick={onRequestVerification}
+                            className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center"
+                        >
+                            <BadgeCheck className="h-4 w-4" />
+                            <span className="hidden sm:inline">Request Doctor Verification</span>
+                            <span className="sm:hidden">Verify</span>
+                        </button>
+                    </div>
 
-                <button
-                    onClick={handleStartNewConsultation}
-                    className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow flex items-center gap-2 text-sm font-medium"
-                >
-                    <Home className="h-4 w-4" />
-                    {language === 'zh' ? '返回首页' : language === 'ms' ? 'Kembali ke Laman Utama' : 'Return to Home'}
-                </button>
+                    {/* Navigation Group */}
+                    <div className="flex justify-center pt-2 border-t border-stone-200">
+                        <button
+                            onClick={handleStartNewConsultation}
+                            className="px-6 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
+                        >
+                            <Home className="h-4 w-4" />
+                            {language === 'zh' ? '返回首页' : language === 'ms' ? 'Kembali ke Laman Utama' : 'Return to Home'}
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {/* Guest Login/Signup Dialog */}

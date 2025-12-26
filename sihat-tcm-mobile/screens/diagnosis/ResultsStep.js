@@ -925,35 +925,42 @@ ${avoid}
             <View style={styles.floatingDockContainer}>
                 <BlurView intensity={80} tint={theme.mode === 'dark' ? 'dark' : 'light'} style={styles.dockBlur}>
                     <View style={styles.actionsContainer}>
+                        {/* Primary CTA - Chat Button */}
+                        <TouchableOpacity
+                            style={styles.primaryChatButton}
+                            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setShowChat(true); }}
+                        >
+                            <LinearGradient
+                                colors={theme.gradients.accent}
+                                style={styles.primaryChatGradient}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                            >
+                                <Ionicons name="chatbubbles" size={24} color={theme.text.inverse} />
+                                <Text style={styles.primaryChatText}>Ask About Report</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
 
-                        {/* Row 1: Primary AI & Visual Tools */}
+                        {/* Row 1: AI & Visual Tools */}
                         <View style={styles.actionRow}>
                             <TouchableOpacity
-                                style={styles.primaryActionButton}
-                                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setShowChat(true); }}
-                            >
-                                <Ionicons name="chatbubbles" size={22} color={theme.accent.primary} />
-                                <Text style={styles.primaryActionText}>TCM Chat</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={styles.primaryActionButton}
+                                style={styles.secondaryActionButton}
                                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setShowWesternChat(true); }}
                             >
-                                <Ionicons name="medkit" size={22} color="#0ea5e9" />
-                                <Text style={styles.primaryActionText}>Western MD</Text>
+                                <Ionicons name="medkit" size={20} color="#0ea5e9" />
+                                <Text style={styles.secondaryActionText}>Western MD</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                style={styles.primaryActionButton}
+                                style={styles.secondaryActionButton}
                                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setShowInfographic(true); }}
                             >
-                                <Ionicons name="image" size={22} color={theme.accent.secondary} />
-                                <Text style={styles.primaryActionText}>Visual</Text>
+                                <Ionicons name="image" size={20} color={theme.accent.secondary} />
+                                <Text style={styles.secondaryActionText}>Visual</Text>
                             </TouchableOpacity>
                         </View>
 
-                        {/* Row 2: Secondary Utilities (PDF, Share, Verify) */}
+                        {/* Row 2: Export & Share */}
                         <View style={styles.actionRow}>
                             <TouchableOpacity
                                 style={styles.secondaryActionButton}
@@ -1521,7 +1528,7 @@ const createStyles = (theme, isDark) => StyleSheet.create({
     },
     actionRow: {
         flexDirection: 'row',
-        gap: 12,
+        gap: 10,
         width: '100%',
     },
     navRow: {
@@ -1530,27 +1537,33 @@ const createStyles = (theme, isDark) => StyleSheet.create({
         marginTop: 4,
     },
 
-    // Primary Actions (Ask AI, Visual)
-    primaryActionButton: {
+    // Primary Chat Button
+    primaryChatButton: {
+        width: '100%',
+        borderRadius: 18,
+        overflow: 'hidden',
+        height: 56,
+        shadowColor: theme.accent.primary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+    primaryChatGradient: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: theme.surface.elevated,
-        paddingVertical: 14,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: theme.border.subtle,
-        gap: 8,
-        height: 54, // Consistent height
+        gap: 10,
+        paddingHorizontal: 20,
     },
-    primaryActionText: {
-        fontSize: 15,
+    primaryChatText: {
+        fontSize: 16,
         fontWeight: '700',
-        color: theme.text.primary,
+        color: theme.text.inverse,
     },
 
-    // Secondary Actions (PDF, Share, Verify)
+    // Secondary Actions (PDF, Share, Verify, etc.)
     secondaryActionButton: {
         flex: 1,
         flexDirection: 'row',
@@ -1560,9 +1573,10 @@ const createStyles = (theme, isDark) => StyleSheet.create({
         paddingVertical: 12,
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: 'transparent',
+        borderColor: theme.border.subtle,
         gap: 6,
         height: 48,
+        minWidth: 80,
     },
     secondaryActionText: {
         fontSize: 13,

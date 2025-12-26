@@ -9,6 +9,17 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { LanguageSelector } from '@/components/ui/LanguageSelector'
 import { useDeveloper } from '@/contexts/DeveloperContext'
 import { Home, Mail, Lock, User as UserIcon, Terminal } from 'lucide-react'
+import { getGuestSessionToken, clearGuestSessionToken } from '@/lib/guestSession'
+import { migrateGuestSessionToUser } from '@/lib/actions'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 // Simple, elegant icons
 const PatientIcon = () => (
@@ -45,6 +56,8 @@ function LoginFormContent() {
         password: '',
         fullName: ''
     })
+    const [showGuestWarning, setShowGuestWarning] = useState(false)
+    const [pendingSignIn, setPendingSignIn] = useState(false)
 
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -153,29 +166,82 @@ function LoginFormContent() {
                 if (error) throw error
                 if (data.user) {
                     await handleProfileUpsert(data.user.id, 'patient', formData.fullName)
+                    
+                    // Check for guest session token and migrate it
+                    const guestToken = getGuestSessionToken()
+                    if (guestToken) {
+                        const migrateResult = await migrateGuestSessionToUser(guestToken, data.user.id)
+                        if (migrateResult.success) {
+                            clearGuestSessionToken()
+                            // Show success message (optional - could use a toast)
+                            console.log('Guest diagnosis migrated successfully')
+                        } else {
+                            console.warn('Failed to migrate guest session:', migrateResult.error)
+                        }
+                    }
+                    
                     // Optionally show success message or auto-login
                     router.push('/patient')
                 }
             } else {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: formData.email,
-                    password: formData.password,
-                })
-                if (error) throw error
-                if (data.user) {
-                    // Fetch profile to know role
-                    // Refresh profile handles fetching
-                    await refreshProfile(data.user.id)
-                    // We need to wait for profile to update or fetch it directly to redirect
-                    const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-                    router.push(`/${profile?.role || 'patient'}`)
+                // Check for guest session token before signing in
+                const guestToken = getGuestSessionToken()
+                if (guestToken) {
+                    // Show warning dialog
+                    setPendingSignIn(true)
+                    setShowGuestWarning(true)
+                    setLoading(false)
+                    return
                 }
+                
+                // Proceed with sign in if no guest token
+                await performSignIn()
             }
         } catch (err: any) {
             setError(err.message)
         } finally {
             setLoading(false)
         }
+    }
+
+    const performSignIn = async () => {
+        setLoading(true)
+        setError(null)
+        
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: formData.email,
+                password: formData.password,
+            })
+            if (error) throw error
+            if (data.user) {
+                // Fetch profile to know role
+                // Refresh profile handles fetching
+                await refreshProfile(data.user.id)
+                // We need to wait for profile to update or fetch it directly to redirect
+                const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
+                router.push(`/${profile?.role || 'patient'}`)
+            }
+        } catch (err: any) {
+            setError(err.message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleGuestWarningConfirm = async () => {
+        setShowGuestWarning(false)
+        // Clear guest session token since user is choosing to sign in anyway
+        clearGuestSessionToken()
+        // Proceed with sign in
+        await performSignIn()
+        setPendingSignIn(false)
+    }
+
+    const handleGuestWarningCancel = () => {
+        setShowGuestWarning(false)
+        setPendingSignIn(false)
+        setLoading(false)
     }
 
     const roles = [
@@ -479,6 +545,32 @@ function LoginFormContent() {
                     Developed by Prisma Technology Solution Sdn Bhd
                 </div>
             </div>
+
+            {/* Guest Session Warning Dialog */}
+            <Dialog open={showGuestWarning} onOpenChange={setShowGuestWarning}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t.login.guestSessionWarning.title}</DialogTitle>
+                        <DialogDescription className="pt-2">
+                            {t.login.guestSessionWarning.message}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={handleGuestWarningCancel}
+                        >
+                            {t.login.guestSessionWarning.cancel}
+                        </Button>
+                        <Button
+                            onClick={handleGuestWarningConfirm}
+                            className="bg-emerald-600 hover:bg-emerald-700"
+                        >
+                            {t.login.guestSessionWarning.understand}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

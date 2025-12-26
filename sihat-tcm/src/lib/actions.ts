@@ -6,6 +6,8 @@ import { devLog } from '@/lib/systemLogger'
 import type {
     DiagnosisSession,
     SaveDiagnosisInput,
+    GuestDiagnosisSession,
+    SaveGuestDiagnosisInput,
     MedicalReport,
     SaveMedicalReportInput,
     HealthTrends,
@@ -176,16 +178,87 @@ function extractTreatmentPlanFromReport(report: DiagnosisReport): string | null 
 
 /**
  * Save a new diagnosis session to the database
+ * Supports both authenticated users and guest sessions
  * @param reportData - The diagnosis report data to save
  * @returns The created diagnosis session or error
  */
-export async function saveDiagnosis(reportData: SaveDiagnosisInput): Promise<ActionResult<DiagnosisSession>> {
+export async function saveDiagnosis(reportData: SaveDiagnosisInput): Promise<ActionResult<DiagnosisSession | GuestDiagnosisSession>> {
     try {
         const supabase = await createClient()
 
-        // Get current user
+        // Get current user (may be null for guests)
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
+        // Determine if this is a guest session
+        const isGuest = reportData.is_guest_session || (!user && !authError)
+
+        // For guest sessions, use guest_diagnosis_sessions table
+        if (isGuest) {
+            // Generate a session token for guest
+            const sessionToken = crypto.randomUUID()
+
+            // Extract data (same logic as authenticated users)
+            const symptoms = reportData.symptoms || extractSymptomsFromReport(reportData.full_report)
+            const medicines = reportData.medicines || extractMedicinesFromReport(reportData.full_report)
+            const vitalSigns = reportData.vital_signs || extractVitalSignsFromReport(reportData.full_report)
+            const treatmentPlan = reportData.treatment_plan || extractTreatmentPlanFromReport(reportData.full_report)
+
+            const { data, error } = await supabase
+                .from('guest_diagnosis_sessions')
+                .insert({
+                    session_token: sessionToken,
+                    guest_email: reportData.guest_email,
+                    guest_name: reportData.guest_name,
+                    primary_diagnosis: reportData.primary_diagnosis,
+                    constitution: reportData.constitution,
+                    overall_score: reportData.overall_score,
+                    full_report: reportData.full_report,
+                    notes: reportData.notes,
+                    symptoms: symptoms,
+                    medicines: medicines,
+                    vital_signs: vitalSigns,
+                    clinical_notes: reportData.clinical_notes,
+                    treatment_plan: treatmentPlan,
+                    follow_up_date: reportData.follow_up_date,
+                    // Phase 1: Input data fields
+                    inquiry_summary: reportData.inquiry_summary,
+                    inquiry_chat_history: reportData.inquiry_chat_history,
+                    inquiry_report_files: reportData.inquiry_report_files,
+                    inquiry_medicine_files: reportData.inquiry_medicine_files,
+                    tongue_analysis: reportData.tongue_analysis,
+                    face_analysis: reportData.face_analysis,
+                    body_analysis: reportData.body_analysis,
+                    audio_analysis: reportData.audio_analysis,
+                    pulse_data: reportData.pulse_data
+                })
+                .select()
+                .single()
+
+            if (error) {
+                devLog('error', 'Actions', '[saveDiagnosis] Guest session error', { error })
+                
+                // Provide helpful error message if table doesn't exist
+                if (error.message.includes('does not exist') || error.message.includes('schema cache')) {
+                    return {
+                        success: false,
+                        error: 'Database migration required. Please run the migration file: supabase/migrations/20250102000001_add_diagnosis_input_data.sql in Supabase Dashboard → SQL Editor. See FIX_MIGRATION_ERROR.md for instructions.'
+                    }
+                }
+                
+                return {
+                    success: false,
+                    error: error.message
+                }
+            }
+
+            // Return with session token for guest access
+            return {
+                success: true,
+                data: { ...data, session_token: sessionToken } as GuestDiagnosisSession
+            }
+        }
+
+        // For authenticated users, use diagnosis_sessions table
         if (authError || !user) {
             return {
                 success: false,
@@ -205,7 +278,7 @@ export async function saveDiagnosis(reportData: SaveDiagnosisInput): Promise<Act
         // Extract treatment plan from recommendations
         const treatmentPlan = reportData.treatment_plan || extractTreatmentPlanFromReport(reportData.full_report)
 
-        // Insert diagnosis session
+        // Insert diagnosis session with all input data
         const { data, error } = await supabase
             .from('diagnosis_sessions')
             .insert({
@@ -220,13 +293,36 @@ export async function saveDiagnosis(reportData: SaveDiagnosisInput): Promise<Act
                 vital_signs: vitalSigns,
                 clinical_notes: reportData.clinical_notes,
                 treatment_plan: treatmentPlan,
-                follow_up_date: reportData.follow_up_date
+                follow_up_date: reportData.follow_up_date,
+                // Phase 1: Input data fields
+                inquiry_summary: reportData.inquiry_summary,
+                inquiry_chat_history: reportData.inquiry_chat_history,
+                inquiry_report_files: reportData.inquiry_report_files,
+                inquiry_medicine_files: reportData.inquiry_medicine_files,
+                tongue_analysis: reportData.tongue_analysis,
+                face_analysis: reportData.face_analysis,
+                body_analysis: reportData.body_analysis,
+                audio_analysis: reportData.audio_analysis,
+                pulse_data: reportData.pulse_data,
+                // Guest session fields (should be false for authenticated users)
+                is_guest_session: false,
+                guest_email: null,
+                guest_name: null
             })
             .select()
             .single()
 
         if (error) {
             devLog('error', 'Actions', '[saveDiagnosis] Error', { error })
+            
+            // Provide helpful error message if column doesn't exist
+            if (error.message.includes('medicines') && (error.message.includes('does not exist') || error.message.includes('schema cache'))) {
+                return {
+                    success: false,
+                    error: 'Database migration required. Please run the migration file: supabase/migrations/20251226000001_add_doctor_record_fields.sql in Supabase Dashboard → SQL Editor. Or use the quick fix: fix_medicines_column.sql. See FIX_MIGRATION_ERROR.md for instructions.'
+                }
+            }
+            
             return {
                 success: false,
                 error: error.message
@@ -240,6 +336,111 @@ export async function saveDiagnosis(reportData: SaveDiagnosisInput): Promise<Act
     } catch (error: unknown) {
         devLog('error', 'Actions', '[saveDiagnosis] Unexpected error', { error })
         const errorMessage = error instanceof Error ? error.message : 'Failed to save diagnosis'
+        return {
+            success: false,
+            error: errorMessage
+        }
+    }
+}
+
+/**
+ * Migrate a guest diagnosis session to an authenticated user account
+ * @param sessionToken - The guest session token
+ * @param userId - The authenticated user ID
+ * @returns The migrated diagnosis session or error
+ */
+export async function migrateGuestSessionToUser(
+    sessionToken: string,
+    userId: string
+): Promise<ActionResult<DiagnosisSession>> {
+    try {
+        const supabase = await createClient()
+
+        // Get current user
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user || user.id !== userId) {
+            return {
+                success: false,
+                error: 'Not authenticated or user mismatch.'
+            }
+        }
+
+        // Fetch guest session
+        const { data: guestSession, error: fetchError } = await supabase
+            .from('guest_diagnosis_sessions')
+            .select('*')
+            .eq('session_token', sessionToken)
+            .is('migrated_to_user_id', null)
+            .single()
+
+        if (fetchError || !guestSession) {
+            return {
+                success: false,
+                error: 'Guest session not found or already migrated.'
+            }
+        }
+
+        // Create new diagnosis session for authenticated user
+        const { data: newSession, error: insertError } = await supabase
+            .from('diagnosis_sessions')
+            .insert({
+                user_id: userId,
+                primary_diagnosis: guestSession.primary_diagnosis,
+                constitution: guestSession.constitution,
+                overall_score: guestSession.overall_score,
+                full_report: guestSession.full_report,
+                notes: guestSession.notes,
+                symptoms: guestSession.symptoms,
+                medicines: guestSession.medicines,
+                vital_signs: guestSession.vital_signs,
+                clinical_notes: guestSession.clinical_notes,
+                treatment_plan: guestSession.treatment_plan,
+                follow_up_date: guestSession.follow_up_date,
+                // Phase 1: Input data fields
+                inquiry_summary: guestSession.inquiry_summary,
+                inquiry_chat_history: guestSession.inquiry_chat_history,
+                inquiry_report_files: guestSession.inquiry_report_files,
+                inquiry_medicine_files: guestSession.inquiry_medicine_files,
+                tongue_analysis: guestSession.tongue_analysis,
+                face_analysis: guestSession.face_analysis,
+                body_analysis: guestSession.body_analysis,
+                audio_analysis: guestSession.audio_analysis,
+                pulse_data: guestSession.pulse_data,
+                is_guest_session: false
+            })
+            .select()
+            .single()
+
+        if (insertError) {
+            devLog('error', 'Actions', '[migrateGuestSessionToUser] Insert error', { error: insertError })
+            return {
+                success: false,
+                error: insertError.message
+            }
+        }
+
+        // Mark guest session as migrated
+        const { error: updateError } = await supabase
+            .from('guest_diagnosis_sessions')
+            .update({
+                migrated_to_user_id: userId,
+                migrated_at: new Date().toISOString()
+            })
+            .eq('id', guestSession.id)
+
+        if (updateError) {
+            devLog('error', 'Actions', '[migrateGuestSessionToUser] Update error', { error: updateError })
+            // Don't fail the migration if update fails, but log it
+        }
+
+        return {
+            success: true,
+            data: newSession as DiagnosisSession
+        }
+    } catch (error: unknown) {
+        devLog('error', 'Actions', '[migrateGuestSessionToUser] Unexpected error', { error })
+        const errorMessage = error instanceof Error ? error.message : 'Failed to migrate guest session'
         return {
             success: false,
             error: errorMessage

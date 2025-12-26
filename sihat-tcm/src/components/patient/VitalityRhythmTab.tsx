@@ -39,24 +39,50 @@ export function VitalityRhythmTab({ sessions }: VitalityRhythmTabProps) {
         return () => clearInterval(timer)
     }, [])
 
-    // TCM Organ Clock Logic
+    // TCM Organ Clock Logic - using translations
     const getActiveOrgan = (hour: number) => {
-        if (hour >= 23 || hour < 1) return { name: 'Gallbladder', time: '11 PM - 1 AM', advice: 'Sleep deeply for Yin restoration.', organ: 'Gallbladder', element: 'Wood' }
-        if (hour >= 1 && hour < 3) return { name: 'Liver', time: '1 AM - 3 AM', advice: 'Deep sleep is vital for blood detoxification.', organ: 'Liver', element: 'Wood' }
-        if (hour >= 3 && hour < 5) return { name: 'Lung', time: '3 AM - 5 AM', advice: 'Body is detoxing the lungs. Keep warm.', organ: 'Lung', element: 'Metal' }
-        if (hour >= 5 && hour < 7) return { name: 'Large Intestine', time: '5 AM - 7 AM', advice: 'Perfect time for bowel movements and drinking warm water.', organ: 'Large Intestine', element: 'Metal' }
-        if (hour >= 7 && hour < 9) return { name: 'Stomach', time: '7 AM - 9 AM', advice: 'Eat a warm, nutrient-rich breakfast for best absorption.', organ: 'Stomach', element: 'Earth' }
-        if (hour >= 9 && hour < 11) return { name: 'Spleen', time: '9 AM - 11 AM', advice: 'Mental focus is high. Good time for work/study.', organ: 'Spleen', element: 'Earth' }
-        if (hour >= 11 && hour < 13) return { name: 'Heart', time: '11 AM - 1 PM', advice: 'Eat a light lunch and take a short nap.', organ: 'Heart', element: 'Fire' }
-        if (hour >= 13 && hour < 15) return { name: 'Small Intestine', time: '1 PM - 3 PM', advice: 'Assimilation time. Stay active but don\'t overwork.', organ: 'Small Intestine', element: 'Fire' }
-        if (hour >= 15 && hour < 17) return { name: 'Bladder', time: '3 PM - 5 PM', advice: 'Good time for physical activity and hydration.', organ: 'Bladder', element: 'Water' }
-        if (hour >= 17 && hour < 19) return { name: 'Kidney', time: '5 PM - 19 PM', advice: 'Restore energy. Light dinner and gentle activity.', organ: 'Kidney', element: 'Water' }
-        if (hour >= 19 && hour < 21) return { name: 'Pericardium', time: '7 PM - 9 PM', advice: 'Emotional connection and relaxation. Prepare for sleep.', organ: 'Pericardium', element: 'Fire' }
-        if (hour >= 21 && hour < 23) return { name: 'Triple Burner', time: '9 PM - 11 PM', advice: 'Final winding down. Avoid screens; keep the body warm.', organ: 'Triple Burner', element: 'Fire' }
-        return { name: 'Unknown', time: '', advice: '', organ: '', element: '' }
+        const organClock = vitalityT.organClock
+        let organKey: keyof typeof organClock
+        
+        if (hour >= 23 || hour < 1) organKey = 'gallbladder'
+        else if (hour >= 1 && hour < 3) organKey = 'liver'
+        else if (hour >= 3 && hour < 5) organKey = 'lung'
+        else if (hour >= 5 && hour < 7) organKey = 'largeIntestine'
+        else if (hour >= 7 && hour < 9) organKey = 'stomach'
+        else if (hour >= 9 && hour < 11) organKey = 'spleen'
+        else if (hour >= 11 && hour < 13) organKey = 'heart'
+        else if (hour >= 13 && hour < 15) organKey = 'smallIntestine'
+        else if (hour >= 15 && hour < 17) organKey = 'bladder'
+        else if (hour >= 17 && hour < 19) organKey = 'kidney'
+        else if (hour >= 19 && hour < 21) organKey = 'pericardium'
+        else if (hour >= 21 && hour < 23) organKey = 'tripleBurner'
+        else {
+            return { name: language === 'zh' ? '未知' : 'Unknown', time: '', advice: '', organ: '', element: '' }
+        }
+        
+        const organ = organClock[organKey]
+        return {
+            name: organ.name,
+            time: organ.time,
+            advice: organ.advice,
+            organ: organ.name,
+            element: organ.element
+        }
     }
 
     const currentOrgan = getActiveOrgan(currentTime.getHours())
+    
+    // Helper function to get element type for styling (works with both English and Chinese)
+    const getElementType = (element: string): 'Wood' | 'Fire' | 'Earth' | 'Metal' | 'Water' => {
+        const elementLower = element.toLowerCase()
+        if (elementLower === 'wood' || elementLower === '木' || elementLower === 'kayu') return 'Wood'
+        if (elementLower === 'fire' || elementLower === '火' || elementLower === 'api') return 'Fire'
+        if (elementLower === 'earth' || elementLower === '土' || elementLower === 'tanah') return 'Earth'
+        if (elementLower === 'metal' || elementLower === '金' || elementLower === 'logam') return 'Metal'
+        return 'Water' // Default to Water (水, air)
+    }
+    
+    const elementType = getElementType(currentOrgan.element)
 
     // 24 Solar Terms Logic (Simplified for demonstration)
     const getSolarTerm = (date: Date) => {
@@ -152,10 +178,10 @@ export function VitalityRhythmTab({ sessions }: VitalityRhythmTabProps) {
                                             </div>
                                             <h3 className="text-2xl font-black text-indigo-900 mb-2">{currentOrgan.name}</h3>
                                             <div className="flex items-center gap-2 mb-4">
-                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${currentOrgan.element === 'Wood' ? 'bg-emerald-100 text-emerald-700' :
-                                                    currentOrgan.element === 'Fire' ? 'bg-orange-100 text-orange-700' :
-                                                        currentOrgan.element === 'Earth' ? 'bg-amber-100 text-amber-700' :
-                                                            currentOrgan.element === 'Metal' ? 'bg-slate-100 text-slate-700' :
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${elementType === 'Wood' ? 'bg-emerald-100 text-emerald-700' :
+                                                    elementType === 'Fire' ? 'bg-orange-100 text-orange-700' :
+                                                        elementType === 'Earth' ? 'bg-amber-100 text-amber-700' :
+                                                            elementType === 'Metal' ? 'bg-slate-100 text-slate-700' :
                                                                 'bg-blue-100 text-blue-700'
                                                     }`}>
                                                     {vitalityT.element}: {currentOrgan.element}
@@ -316,11 +342,9 @@ export function VitalityRhythmTab({ sessions }: VitalityRhythmTabProps) {
                         </CardHeader>
                         <CardContent className="p-6">
                             <p className="text-sm text-slate-600 leading-relaxed italic">
-                                "The wise man adapts himself to the time and the season, as the water adapts itself to the channel that guides it."
+                                {vitalityT.didYouKnowQuote}
                             </p>
-                            <p className="text-xs text-slate-400 mt-4">
-                                TCM emphasizes <strong>Ziwu Liuzhu</strong> (The Flow of Qi through Meridians) as a way to maintain health by aligning biological rhythms with solar and lunar cycles.
-                            </p>
+                            <p className="text-xs text-slate-400 mt-4" dangerouslySetInnerHTML={{ __html: vitalityT.didYouKnowDesc }} />
                         </CardContent>
                     </Card>
                 </div>

@@ -1,3 +1,15 @@
+/**
+ * @fileoverview Main TCM consultation API endpoint
+ * 
+ * This endpoint processes comprehensive TCM diagnostic data collected through
+ * the four classical examination methods (望闻问切) and generates a complete
+ * TCM diagnosis report using Google Gemini AI models.
+ * 
+ * @author Sihat TCM Development Team
+ * @version 3.0
+ * @since 1.0
+ */
+
 import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import { devLog } from '@/lib/systemLogger';
@@ -7,10 +19,176 @@ import {
   getLanguageInstruction,
   normalizeLanguage,
 } from '@/lib/translations/languageInstructions';
-import { parseApiError } from '@/lib/modelFallback';
+import { streamTextWithFallback, parseApiError } from '@/lib/modelFallback';
 
+/**
+ * Maximum execution duration for the consultation endpoint (60 seconds)
+ * This allows sufficient time for complex AI analysis and report generation
+ */
 export const maxDuration = 60;
 
+/**
+ * TCM Consultation API Endpoint
+ * 
+ * Processes comprehensive Traditional Chinese Medicine diagnostic data and generates
+ * a complete diagnosis report using AI analysis. This endpoint implements the four
+ * classical TCM examination methods:
+ * 
+ * - 望 (Wang) - Visual observation (tongue, face, body)
+ * - 闻 (Wen) - Listening and smelling (voice, breathing)
+ * - 问 (Wen) - Inquiry (symptoms, medical history, lifestyle)
+ * - 切 (Qie) - Palpation (pulse examination)
+ * 
+ * @route POST /api/consult
+ * @access Public (no authentication required for basic diagnosis)
+ * 
+ * @param {Request} req - HTTP request containing diagnostic data
+ * @param {Object} req.body - Request body with diagnostic information
+ * @param {Object} req.body.data - Complete diagnostic data from all examination steps
+ * @param {Object} req.body.data.basic_info - Patient basic information
+ * @param {string} req.body.data.basic_info.name - Patient name
+ * @param {number} req.body.data.basic_info.age - Patient age
+ * @param {string} req.body.data.basic_info.gender - Patient gender (male|female|other)
+ * @param {number} req.body.data.basic_info.height - Height in centimeters
+ * @param {number} req.body.data.basic_info.weight - Weight in kilograms
+ * @param {string[]} req.body.data.basic_info.symptoms - Array of reported symptoms
+ * @param {string} req.body.data.basic_info.symptomDuration - Duration of symptoms
+ * @param {Object} [req.body.data.wen_inquiry] - Inquiry examination data
+ * @param {string} req.body.data.wen_inquiry.inquiryText - Summary of patient inquiry
+ * @param {Object} [req.body.data.wen_chat] - Chat history from inquiry
+ * @param {Array} req.body.data.wen_chat.chat - Array of chat messages
+ * @param {Object} [req.body.data.wang_tongue] - Tongue examination data
+ * @param {string} req.body.data.wang_tongue.image - Base64 encoded tongue image
+ * @param {string} req.body.data.wang_tongue.observation - AI analysis of tongue
+ * @param {string[]} req.body.data.wang_tongue.potential_issues - Identified issues
+ * @param {Object} [req.body.data.wang_face] - Face examination data
+ * @param {string} req.body.data.wang_face.image - Base64 encoded face image
+ * @param {string} req.body.data.wang_face.observation - AI analysis of face
+ * @param {Object} [req.body.data.wang_part] - Body part examination data
+ * @param {Object} [req.body.data.wen_audio] - Audio examination data
+ * @param {string} req.body.data.wen_audio.audio - Base64 encoded audio recording
+ * @param {Object} req.body.data.wen_audio.analysis - AI analysis of voice/breathing
+ * @param {string} req.body.data.wen_audio.transcription - Voice transcription
+ * @param {Object} [req.body.data.qie] - Pulse examination data
+ * @param {number} req.body.data.qie.bpm - Beats per minute
+ * @param {string} [req.body.data.qie.quality] - Pulse quality (floating|deep|rapid|etc)
+ * @param {Object} [req.body.data.smart_connect] - Smart device health data
+ * @param {number} req.body.data.smart_connect.pulseRate - Heart rate from device
+ * @param {string} req.body.data.smart_connect.bloodPressure - Blood pressure reading
+ * @param {number} req.body.data.smart_connect.bloodOxygen - SpO2 percentage
+ * @param {Object} [req.body.data.report_options] - Report customization options
+ * @param {boolean} req.body.data.report_options.includePatientName - Include patient name
+ * @param {boolean} req.body.data.report_options.includeVitalSigns - Include vital signs
+ * @param {boolean} req.body.data.report_options.suggestMedicine - Include herbal formulas
+ * @param {boolean} req.body.data.report_options.includeDietary - Include dietary advice
+ * @param {Object} [req.body.data.verified_summaries] - Pre-verified analysis summaries
+ * @param {string} [req.body.prompt] - Custom prompt (rarely used)
+ * @param {string} [req.body.model='gemini-1.5-pro'] - AI model to use
+ * @param {string} [req.body.language='en'] - Response language (en|zh|ms)
+ * 
+ * @returns {Response} Streaming text response with TCM diagnosis report
+ * @returns {Object} response.body - JSON structured diagnosis report
+ * @returns {Object} response.body.patient_summary - Patient information summary
+ * @returns {Object} response.body.diagnosis - TCM diagnosis details
+ * @returns {string} response.body.diagnosis.primary_pattern - Main syndrome pattern
+ * @returns {string[]} response.body.diagnosis.secondary_patterns - Additional patterns
+ * @returns {string[]} response.body.diagnosis.affected_organs - Involved organ systems
+ * @returns {string} response.body.diagnosis.pathomechanism - Disease mechanism explanation
+ * @returns {Object} response.body.constitution - Body constitution assessment
+ * @returns {string} response.body.constitution.type - Constitution type (qi_deficiency|yang_deficiency|etc)
+ * @returns {string} response.body.constitution.description - Constitution description
+ * @returns {Object} response.body.analysis - Comprehensive analysis
+ * @returns {string} response.body.analysis.summary - Overall analysis summary
+ * @returns {Object} response.body.analysis.key_findings - Key findings from each examination
+ * @returns {Object} response.body.recommendations - Treatment recommendations
+ * @returns {Object} [response.body.recommendations.food_therapy] - Dietary recommendations
+ * @returns {string[]} response.body.recommendations.food_therapy.beneficial - Foods to eat
+ * @returns {string[]} response.body.recommendations.food_therapy.recipes - Therapeutic recipes
+ * @returns {string[]} response.body.recommendations.food_therapy.avoid - Foods to avoid
+ * @returns {string[]} [response.body.recommendations.lifestyle] - Lifestyle recommendations
+ * @returns {string[]} [response.body.recommendations.acupoints] - Acupressure points
+ * @returns {string[]} [response.body.recommendations.exercise] - Exercise recommendations
+ * @returns {Object[]} [response.body.recommendations.herbal_formulas] - Herbal prescriptions
+ * @returns {Object} [response.body.precautions] - Safety precautions and warnings
+ * @returns {Object} [response.body.follow_up] - Follow-up guidance
+ * @returns {string} response.body.disclaimer - Medical disclaimer
+ * 
+ * @throws {Error} When AI model fails or request is malformed
+ * @throws {Error} When required diagnostic data is missing
+ * @throws {Error} When system prompts cannot be loaded
+ * 
+ * @example
+ * // Basic consultation request
+ * const response = await fetch('/api/consult', {
+ *   method: 'POST',
+ *   headers: { 'Content-Type': 'application/json' },
+ *   body: JSON.stringify({
+ *     data: {
+ *       basic_info: {
+ *         name: 'John Doe',
+ *         age: 35,
+ *         gender: 'male',
+ *         height: 175,
+ *         weight: 70,
+ *         symptoms: ['fatigue', 'digestive issues'],
+ *         symptomDuration: '3 months'
+ *       },
+ *       wen_inquiry: {
+ *         inquiryText: 'Patient reports chronic fatigue and bloating after meals...'
+ *       },
+ *       wang_tongue: {
+ *         observation: 'Pale tongue with thick white coating',
+ *         potential_issues: ['spleen_qi_deficiency']
+ *       },
+ *       qie: {
+ *         bpm: 68,
+ *         quality: 'weak'
+ *       },
+ *       report_options: {
+ *         includePatientName: true,
+ *         includeDietary: true,
+ *         suggestMedicine: true
+ *       }
+ *     },
+ *     language: 'en'
+ *   })
+ * });
+ * 
+ * @example
+ * // Response structure
+ * {
+ *   "patient_summary": {
+ *     "name": "John Doe",
+ *     "age": 35,
+ *     "gender": "male"
+ *   },
+ *   "diagnosis": {
+ *     "primary_pattern": "Spleen Qi Deficiency (脾气虚)",
+ *     "secondary_patterns": ["Dampness Accumulation"],
+ *     "affected_organs": ["spleen", "stomach"],
+ *     "pathomechanism": "Chronic stress and irregular eating..."
+ *   },
+ *   "constitution": {
+ *     "type": "qi_deficiency",
+ *     "description": "Qi Deficiency constitution characterized by..."
+ *   },
+ *   "recommendations": {
+ *     "food_therapy": {
+ *       "beneficial": ["Sweet potato", "Ginger", "Chicken soup"],
+ *       "avoid": ["Cold drinks", "Raw foods", "Dairy"]
+ *     },
+ *     "herbal_formulas": [{
+ *       "name": "Si Jun Zi Tang (四君子汤)",
+ *       "ingredients": ["Ginseng", "Atractylodes", "Poria", "Licorice"],
+ *       "purpose": "Tonify Spleen Qi"
+ *     }]
+ *   }
+ * }
+ * 
+ * @see {@link https://docs.sihat-tcm.com/api/consult} API Documentation
+ * @see {@link /lib/systemPrompts.ts} System prompts for AI models
+ * @see {@link /lib/translations/languageInstructions.ts} Language handling
+ */
 export async function POST(req: Request) {
   const startTime = Date.now();
   devLog('info', 'API/consult', 'Request started');
@@ -366,41 +544,47 @@ Include a comprehensive TCM diagnosis with:
     // Add language-specific final instruction using centralized utility
     diagnosisInfo += getLanguageInstruction('final', language);
 
-    devLog('info', 'API/consult', 'Calling Gemini streamText...');
+    devLog('info', 'API/consult', `Calling streamTextWithFallback with model: ${model}`);
 
-    const result = streamText({
-      model: google(model),
-      system: systemPrompt,
-      messages: [{ role: 'user', content: diagnosisInfo }],
-    });
-
-    const duration = Date.now() - startTime;
-    devLog('info', 'API/consult', `Returning stream response after ${duration}ms setup`);
-
-    return result.toTextStreamResponse();
+    return await streamTextWithFallback(
+      {
+        primaryModel: model,
+        fallbackModels: ['gemini-1.5-flash', 'gemini-2.0-flash'],
+        context: 'API/consult',
+        useAsyncApiKey: true
+      },
+      {
+        system: systemPrompt,
+        messages: [{ role: 'user', content: diagnosisInfo }],
+        onFinish: (completion) => {
+          const duration = Date.now() - startTime;
+          devLog('info', 'API/consult', `Stream finished after ${duration}ms. Text length: ${completion.text.length}`);
+        },
+        onError: (error) => {
+          devLog('error', 'API/consult', 'Stream error encountered', { error: error.message });
+        },
+      }
+    );
   } catch (error: unknown) {
     const duration = Date.now() - startTime;
     const errorMessage = error instanceof Error ? error.message : String(error);
     devLog('error', 'API/consult', `FAILED after ${duration}ms`, { error: errorMessage });
 
-    // Parse error using centralized utility
+    // Return a proper error response (500) so the client knows it failed
     const { userFriendlyError, errorCode } = parseApiError(errorMessage);
 
-    // Return a valid JSON response even on error
-    const errorResponse = {
+    return new Response(JSON.stringify({
+      error: userFriendlyError,
+      code: errorCode,
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
       diagnosis: "Analysis Error",
-      constitution: "Unable to determine",
-      analysis: userFriendlyError,
-      error_code: errorCode,
       recommendations: {
         food: ["Please retry the analysis"],
         avoid: ["N/A"],
         lifestyle: ["Please try again with the diagnosis"]
-      },
-      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
-    };
-    return new Response(JSON.stringify(errorResponse), {
-      status: 200,
+      }
+    }), {
+      status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
   }

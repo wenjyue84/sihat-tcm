@@ -71,25 +71,54 @@ export function SymptomsStep({
     }
 
     const handleSelectSession = (session: DiagnosisSession) => {
-        const symptomsArray = session.symptoms || []
+        let symptomsArray = session.symptoms || []
+
+        // If symptoms array is empty, try to extract from full_report for backward compatibility
+        if (symptomsArray.length === 0 && session.full_report) {
+            try {
+                const report = session.full_report as any
+                // Try to extract from input_data.symptoms or mainComplaint
+                if (report.input_data?.symptoms && Array.isArray(report.input_data.symptoms)) {
+                    symptomsArray = report.input_data.symptoms
+                } else if (report.input_data?.mainComplaint) {
+                    symptomsArray = [report.input_data.mainComplaint]
+                    if (report.input_data.otherSymptoms) {
+                        const other = typeof report.input_data.otherSymptoms === 'string'
+                            ? report.input_data.otherSymptoms.split(',').map((s: string) => s.trim()).filter(Boolean)
+                            : Array.isArray(report.input_data.otherSymptoms) ? report.input_data.otherSymptoms : []
+                        symptomsArray.push(...other)
+                    }
+                } else if (report.mainComplaint) {
+                    symptomsArray = [report.mainComplaint]
+                }
+            } catch (e) {
+                console.warn('Failed to extract symptoms from full_report', e)
+            }
+        }
 
         let main = ''
         let other = ''
 
         if (symptomsArray.length > 0) {
+            // First symptom is the main complaint
             main = symptomsArray[0]
-            other = symptomsArray.slice(1).join(', ')
+            // Rest are other symptoms
+            if (symptomsArray.length > 1) {
+                other = symptomsArray.slice(1).join(', ')
+            }
         } else if (session.primary_diagnosis) {
+            // Fallback to primary diagnosis if no symptoms found
             main = session.primary_diagnosis
         }
 
+        // Update form data
         setFormData({
             ...formData,
             mainComplaint: main,
             otherSymptoms: other
         })
 
-        // Try to sync selectedSymptoms keys
+        // Try to sync selectedSymptoms keys for quick selection UI
         const newSelectedKeys: string[] = []
         const allSymptoms = [...symptomsArray]
         if (main && !allSymptoms.includes(main)) allSymptoms.push(main)

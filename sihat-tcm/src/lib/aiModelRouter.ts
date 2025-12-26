@@ -3,6 +3,40 @@
  * 
  * This module provides intelligent model selection based on request complexity,
  * automatic fallback handling, and performance monitoring for optimal AI responses.
+ * 
+ * Key Features:
+ * - Dynamic model selection based on request complexity and requirements
+ * - Automatic fallback to alternative models on failure
+ * - Performance monitoring and adaptive selection
+ * - Support for different doctor levels and capabilities
+ * - Streaming and non-streaming request handling
+ * - Comprehensive error handling and retry logic
+ * 
+ * Model Selection Criteria:
+ * - Request complexity (simple, moderate, complex, advanced)
+ * - Doctor level requirements (physician, expert, master)
+ * - Vision capabilities (for image analysis)
+ * - Streaming requirements
+ * - Historical performance data
+ * 
+ * Usage Example:
+ * ```typescript
+ * const router = new AIModelRouter('MyApp');
+ * const complexity = router.analyzeComplexity({
+ *   messages: chatHistory,
+ *   images: medicalImages,
+ *   requiresAnalysis: true
+ * });
+ * 
+ * const result = await router.generateWithRouting(
+ *   { complexity, doctorLevel: 'expert' },
+ *   { messages: [...] }
+ * );
+ * ```
+ * 
+ * @author Sihat TCM Development Team
+ * @version 4.0.0
+ * @since 2024-12-26
  */
 
 import { 
@@ -17,6 +51,18 @@ import {
 import { DOCTOR_LEVELS, DoctorLevel } from './doctorLevels';
 import { devLog, logError, logInfo } from './systemLogger';
 
+/**
+ * Performance metrics for tracking AI model performance
+ * 
+ * @interface ModelPerformanceMetrics
+ * @property {string} modelId - Identifier of the AI model
+ * @property {string} requestType - Type of request (simple|moderate|complex|advanced)
+ * @property {number} responseTime - Time taken to process request (ms)
+ * @property {boolean} success - Whether the request was successful
+ * @property {string} [errorType] - Type of error if request failed
+ * @property {number} [confidenceScore] - Confidence score of the response (0-1)
+ * @property {Date} timestamp - When the request was processed
+ */
 export interface ModelPerformanceMetrics {
     modelId: string;
     requestType: string;
@@ -27,6 +73,19 @@ export interface ModelPerformanceMetrics {
     timestamp: Date;
 }
 
+/**
+ * Request complexity analysis result
+ * 
+ * @interface RequestComplexity
+ * @property {'simple'|'moderate'|'complex'|'advanced'} type - Overall complexity classification
+ * @property {object} factors - Individual complexity factors
+ * @property {boolean} factors.hasImages - Whether request includes images
+ * @property {boolean} factors.hasMultipleFiles - Whether request has multiple files
+ * @property {boolean} factors.hasLongHistory - Whether chat history is extensive
+ * @property {boolean} factors.requiresAnalysis - Whether deep analysis is needed
+ * @property {boolean} factors.requiresPersonalization - Whether personalization is needed
+ * @property {number} score - Numerical complexity score (0-100)
+ */
 export interface RequestComplexity {
     type: 'simple' | 'moderate' | 'complex' | 'advanced';
     factors: {
@@ -57,12 +116,39 @@ export interface ModelRouterConfig {
 
 /**
  * AI Model Router class for intelligent model selection and routing
+ * 
+ * This class implements intelligent AI model selection based on various criteria
+ * including request complexity, performance history, and specific requirements.
+ * It maintains performance metrics for all models and uses this data to make
+ * optimal routing decisions.
+ * 
+ * Key Responsibilities:
+ * - Analyze request complexity based on multiple factors
+ * - Select optimal AI model for each request
+ * - Handle automatic fallback on model failures
+ * - Monitor and record performance metrics
+ * - Provide adaptive selection based on historical performance
+ * 
+ * Performance Monitoring:
+ * - Tracks response times for each model
+ * - Records success/failure rates
+ * - Maintains rolling history of recent performance
+ * - Uses performance data for future model selection
+ * 
+ * @class AIModelRouter
  */
 export class AIModelRouter {
     private performanceHistory: Map<string, ModelPerformanceMetrics[]> = new Map();
     private config: ModelRouterConfig;
     private context: string;
 
+    /**
+     * Initialize the AI Model Router
+     * 
+     * @param {string} context - Context identifier for logging and debugging
+     * @param {Partial<ModelRouterConfig>} [config] - Optional configuration overrides
+     * @constructor
+     */
     constructor(context: string = 'AIModelRouter', config?: Partial<ModelRouterConfig>) {
         this.context = context;
         this.config = {
@@ -76,6 +162,40 @@ export class AIModelRouter {
 
     /**
      * Analyze request complexity based on various factors
+     * 
+     * This method evaluates multiple aspects of a request to determine
+     * its complexity level, which is then used for optimal model selection.
+     * 
+     * Complexity Factors:
+     * - Images: +25 points (requires vision-capable models)
+     * - Multiple files: +20 points (increases processing complexity)
+     * - Long chat history: +15 points (requires more context processing)
+     * - Analysis requirements: +25 points (needs advanced reasoning)
+     * - Personalization: +15 points (requires additional processing)
+     * 
+     * Complexity Levels:
+     * - Simple (0-24): Basic text processing
+     * - Moderate (25-49): Some complexity factors present
+     * - Complex (50-74): Multiple complexity factors
+     * - Advanced (75-100): Highly complex, needs most capable models
+     * 
+     * @param {object} request - Request to analyze
+     * @param {any[]} [request.messages] - Chat messages
+     * @param {any[]} [request.images] - Images for analysis
+     * @param {any[]} [request.files] - Additional files
+     * @param {boolean} [request.requiresAnalysis] - Whether deep analysis is needed
+     * @param {boolean} [request.requiresPersonalization] - Whether personalization is needed
+     * @returns {RequestComplexity} Complexity analysis result
+     * 
+     * @example
+     * ```typescript
+     * const complexity = router.analyzeComplexity({
+     *   messages: chatHistory,
+     *   images: [tongueImage, faceImage],
+     *   requiresAnalysis: true
+     * });
+     * // Result: { type: 'complex', score: 65, factors: {...} }
+     * ```
      */
     analyzeComplexity(request: {
         messages?: any[];

@@ -3,6 +3,51 @@
  * 
  * This module provides medical safety validation including contraindication checking,
  * drug-herb interactions, emergency condition detection, and safety alerts.
+ * 
+ * Key Features:
+ * - Comprehensive allergy checking against recommendations
+ * - Drug-herb interaction analysis using AI and knowledge base
+ * - Contraindication detection for medical conditions
+ * - Emergency symptom recognition and alerting
+ * - Pregnancy and age-specific safety considerations
+ * - Multi-language safety guidelines and warnings
+ * 
+ * Safety Validation Process:
+ * 1. Allergy cross-checking against all recommendations
+ * 2. Drug interaction analysis for herbal recommendations
+ * 3. Contraindication checking based on medical conditions
+ * 4. Emergency condition detection from diagnosis
+ * 5. Pregnancy-specific safety validation
+ * 6. Age-appropriate recommendation verification
+ * 7. Overall risk assessment and alternative suggestions
+ * 
+ * Risk Levels:
+ * - Low: Minor concerns, monitoring recommended
+ * - Medium: Moderate concerns, medical consultation advised
+ * - High: Significant concerns, avoid or modify recommendations
+ * - Critical: Serious safety issues, emergency care may be needed
+ * 
+ * Usage Example:
+ * ```typescript
+ * const validator = new MedicalSafetyValidator('MyApp');
+ * const result = await validator.validateRecommendations(
+ *   {
+ *     dietary: ['ginger tea', 'goji berries'],
+ *     herbal: ['ginseng', 'angelica root']
+ *   },
+ *   {
+ *     medical_history: {
+ *       current_medications: ['warfarin'],
+ *       allergies: ['shellfish'],
+ *       pregnancy_status: 'pregnant'
+ *     }
+ *   }
+ * );
+ * ```
+ * 
+ * @author Sihat TCM Development Team
+ * @version 4.0.0
+ * @since 2024-12-26
  */
 
 import { generateText } from 'ai';
@@ -11,6 +56,20 @@ import { devLog, logError, logInfo } from './systemLogger';
 import { DietaryPreferences } from '@/app/actions/meal-planner';
 import { DiagnosisReport } from '@/types/database';
 
+/**
+ * Medical history interface for safety validation
+ * 
+ * @interface MedicalHistory
+ * @property {string[]} current_medications - List of current medications
+ * @property {string[]} allergies - Known allergies and sensitivities
+ * @property {string[]} medical_conditions - Current medical conditions
+ * @property {string[]} [previous_surgeries] - History of surgical procedures
+ * @property {string[]} [family_history] - Relevant family medical history
+ * @property {'pregnant'|'breastfeeding'|'trying_to_conceive'|'none'} [pregnancy_status] - Pregnancy status
+ * @property {number} [age] - Patient age in years
+ * @property {number} [weight] - Patient weight in kg
+ * @property {number} [height] - Patient height in cm
+ */
 export interface MedicalHistory {
     current_medications: string[];
     allergies: string[];
@@ -23,6 +82,19 @@ export interface MedicalHistory {
     height?: number;
 }
 
+/**
+ * Comprehensive safety validation result
+ * 
+ * @interface SafetyValidationResult
+ * @property {boolean} is_safe - Overall safety assessment
+ * @property {'low'|'medium'|'high'|'critical'} risk_level - Overall risk level
+ * @property {SafetyConcern[]} concerns - List of identified safety concerns
+ * @property {string[]} recommendations - Safety recommendations for the user
+ * @property {EmergencyFlag[]} emergency_flags - Emergency conditions requiring immediate attention
+ * @property {Contraindication[]} contraindications - Absolute or relative contraindications
+ * @property {DrugInteraction[]} drug_interactions - Identified drug-herb interactions
+ * @property {string[]} alternative_suggestions - Safe alternatives to flagged recommendations
+ */
 export interface SafetyValidationResult {
     is_safe: boolean;
     risk_level: 'low' | 'medium' | 'high' | 'critical';
@@ -80,6 +152,28 @@ export interface ValidationContext {
 
 /**
  * Medical Safety Validator class for comprehensive safety checking
+ * 
+ * This class provides comprehensive medical safety validation for TCM
+ * recommendations, including drug interactions, contraindications,
+ * allergies, and emergency condition detection.
+ * 
+ * Key Components:
+ * - Knowledge base of known interactions and contraindications
+ * - AI-powered interaction analysis for unknown combinations
+ * - Emergency symptom recognition system
+ * - Pregnancy and age-specific safety rules
+ * - Multi-language safety guideline generation
+ * 
+ * Validation Process:
+ * 1. Cross-reference recommendations against known allergies
+ * 2. Check for drug-herb interactions using knowledge base and AI
+ * 3. Validate against contraindications for medical conditions
+ * 4. Detect emergency symptoms requiring immediate attention
+ * 5. Apply pregnancy-specific safety rules
+ * 6. Consider age-appropriate recommendations
+ * 7. Generate comprehensive safety report with alternatives
+ * 
+ * @class MedicalSafetyValidator
  */
 export class MedicalSafetyValidator {
     private context: string;
@@ -87,6 +181,15 @@ export class MedicalSafetyValidator {
     private emergencyKeywords: Set<string> = new Set();
     private contraindications: Map<string, Contraindication[]> = new Map();
 
+    /**
+     * Initialize the Medical Safety Validator
+     * 
+     * Sets up the knowledge base with known interactions, contraindications,
+     * and emergency keywords for comprehensive safety validation.
+     * 
+     * @param {string} context - Context identifier for logging and debugging
+     * @constructor
+     */
     constructor(context: string = 'MedicalSafetyValidator') {
         this.context = context;
         this.initializeKnowledgeBase();
@@ -94,6 +197,52 @@ export class MedicalSafetyValidator {
 
     /**
      * Validate a set of TCM recommendations for safety
+     * 
+     * This is the main entry point for comprehensive safety validation.
+     * It performs multiple parallel safety checks and combines the results
+     * into a comprehensive safety assessment.
+     * 
+     * Validation Steps:
+     * 1. Allergy checking against all recommendations
+     * 2. Drug interaction analysis for herbal recommendations
+     * 3. Contraindication checking based on medical conditions
+     * 4. Emergency condition detection from diagnosis
+     * 5. Pregnancy-specific safety validation
+     * 6. Age-appropriate recommendation verification
+     * 7. Overall risk assessment and alternative generation
+     * 
+     * @param {object} recommendations - TCM recommendations to validate
+     * @param {string[]} [recommendations.dietary] - Dietary recommendations
+     * @param {string[]} [recommendations.herbal] - Herbal formula recommendations
+     * @param {string[]} [recommendations.lifestyle] - Lifestyle recommendations
+     * @param {string[]} [recommendations.acupressure] - Acupressure point recommendations
+     * @param {ValidationContext} validationContext - Medical context for validation
+     * @returns {Promise<SafetyValidationResult>} Comprehensive safety validation result
+     * 
+     * @example
+     * ```typescript
+     * const result = await validator.validateRecommendations(
+     *   {
+     *     dietary: ['ginger tea', 'avoid cold foods'],
+     *     herbal: ['Four Gentlemen Decoction', 'ginseng'],
+     *     lifestyle: ['moderate exercise', 'early sleep']
+     *   },
+     *   {
+     *     medical_history: {
+     *       current_medications: ['warfarin', 'metformin'],
+     *       allergies: ['shellfish', 'peanuts'],
+     *       medical_conditions: ['diabetes', 'hypertension'],
+     *       pregnancy_status: 'none',
+     *       age: 45
+     *     }
+     *   }
+     * );
+     * 
+     * if (!result.is_safe) {
+     *   console.log('Safety concerns:', result.concerns);
+     *   console.log('Alternatives:', result.alternative_suggestions);
+     * }
+     * ```
      */
     async validateRecommendations(
         recommendations: {

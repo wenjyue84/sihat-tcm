@@ -115,6 +115,63 @@ export interface DiagnosisReport {
   }
 }
 
+// ============================================================================
+// Input Data Types (Phase 1: Diagnosis Data Recording)
+// ============================================================================
+
+export interface ChatMessage {
+  id?: string
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  timestamp?: string
+}
+
+export interface FileMetadata {
+  name: string
+  url: string
+  type: string
+  size?: number
+  extracted_text?: string
+}
+
+export interface TongueAnalysisData {
+  image_url?: string
+  observation?: string
+  analysis_tags?: string[]
+  tcm_indicators?: string[]
+  pattern_suggestions?: string[]
+  potential_issues?: string[]
+}
+
+export interface FaceAnalysisData {
+  image_url?: string
+  observation?: string
+  analysis_tags?: string[]
+  tcm_indicators?: string[]
+  potential_issues?: string[]
+}
+
+export interface BodyAnalysisData {
+  image_url?: string
+  observation?: string
+  analysis_tags?: string[]
+  potential_issues?: string[]
+}
+
+export interface AudioAnalysisData {
+  audio_url?: string
+  observation?: string
+  potential_issues?: string[]
+}
+
+export interface PulseData {
+  bpm?: number
+  quality?: string
+  rhythm?: string
+  strength?: string
+  notes?: string
+}
+
 /**
  * Database row type for diagnosis_sessions table
  */
@@ -135,6 +192,20 @@ export interface DiagnosisSession {
   follow_up_date?: string | null
   // Family care link
   family_member_id?: string | null
+  // Phase 1: Input data fields
+  inquiry_summary?: string | null
+  inquiry_chat_history?: ChatMessage[] | null
+  inquiry_report_files?: FileMetadata[] | null
+  inquiry_medicine_files?: FileMetadata[] | null
+  tongue_analysis?: TongueAnalysisData | null
+  face_analysis?: FaceAnalysisData | null
+  body_analysis?: BodyAnalysisData | null
+  audio_analysis?: AudioAnalysisData | null
+  pulse_data?: PulseData | null
+  // Guest session fields
+  is_guest_session?: boolean | null
+  guest_email?: string | null
+  guest_name?: string | null
   created_at: string
   updated_at: string
 }
@@ -155,6 +226,81 @@ export interface SaveDiagnosisInput {
   clinical_notes?: string
   treatment_plan?: string
   follow_up_date?: string
+  // Phase 1: Input data fields
+  inquiry_summary?: string
+  inquiry_chat_history?: ChatMessage[]
+  inquiry_report_files?: FileMetadata[]
+  inquiry_medicine_files?: FileMetadata[]
+  tongue_analysis?: TongueAnalysisData
+  face_analysis?: FaceAnalysisData
+  body_analysis?: BodyAnalysisData
+  audio_analysis?: AudioAnalysisData
+  pulse_data?: PulseData
+  // Guest session fields
+  is_guest_session?: boolean
+  guest_email?: string
+  guest_name?: string
+}
+
+// ============================================================================
+// Guest Diagnosis Sessions (guest_diagnosis_sessions table)
+// ============================================================================
+
+export interface GuestDiagnosisSession {
+  id: string
+  session_token: string
+  guest_email?: string | null
+  guest_name?: string | null
+  primary_diagnosis: string
+  constitution?: string | null
+  overall_score?: number | null
+  full_report: DiagnosisReport
+  notes?: string | null
+  symptoms?: string[] | null
+  medicines?: string[] | null
+  vital_signs?: VitalSigns | null
+  clinical_notes?: string | null
+  treatment_plan?: string | null
+  follow_up_date?: string | null
+  inquiry_summary?: string | null
+  inquiry_chat_history?: ChatMessage[] | null
+  inquiry_report_files?: FileMetadata[] | null
+  inquiry_medicine_files?: FileMetadata[] | null
+  tongue_analysis?: TongueAnalysisData | null
+  face_analysis?: FaceAnalysisData | null
+  body_analysis?: BodyAnalysisData | null
+  audio_analysis?: AudioAnalysisData | null
+  pulse_data?: PulseData | null
+  created_at: string
+  updated_at: string
+  migrated_to_user_id?: string | null
+  migrated_at?: string | null
+}
+
+export interface SaveGuestDiagnosisInput {
+  session_token: string
+  guest_email?: string
+  guest_name?: string
+  primary_diagnosis: string
+  constitution?: string
+  overall_score?: number
+  full_report: DiagnosisReport
+  notes?: string
+  symptoms?: string[]
+  medicines?: string[]
+  vital_signs?: VitalSigns
+  clinical_notes?: string
+  treatment_plan?: string
+  follow_up_date?: string
+  inquiry_summary?: string
+  inquiry_chat_history?: ChatMessage[]
+  inquiry_report_files?: FileMetadata[]
+  inquiry_medicine_files?: FileMetadata[]
+  tongue_analysis?: TongueAnalysisData
+  face_analysis?: FaceAnalysisData
+  body_analysis?: BodyAnalysisData
+  audio_analysis?: AudioAnalysisData
+  pulse_data?: PulseData
 }
 
 // ============================================================================

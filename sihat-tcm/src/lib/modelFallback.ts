@@ -13,25 +13,18 @@ import { devLog, logError, logInfo } from '@/lib/systemLogger';
 
 // Default fallback models ordered by preference
 export const DEFAULT_FALLBACK_MODELS = [
-    'gemini-2.5-flash',
-    'gemini-2.0-flash-exp',
     'gemini-2.0-flash',
     'gemini-1.5-flash',
 ];
 
 // Advanced fallback models for vision/analysis tasks
 export const ADVANCED_FALLBACK_MODELS = [
-    'gemini-3-pro-preview',
-    'gemini-2.5-pro',
+    'gemini-1.5-pro',
     'gemini-2.0-flash',
 ];
 
 // Model status messages (user-friendly, no model names exposed)
 export const MODEL_STATUS_MESSAGES: Record<string, string> = {
-    'gemini-3-pro-preview': 'Using master-level comprehensive analysis...',
-    'gemini-2.5-pro': 'Using expert-level analysis...',
-    'gemini-2.5-flash': 'Using advanced rapid analysis...',
-    'gemini-2.0-flash-exp': 'Using experimental analysis...',
     'gemini-2.0-flash': 'Using rapid analysis...',
     'gemini-1.5-pro': 'Using professional analysis...',
     'gemini-1.5-flash': 'Using standard analysis...',
@@ -178,10 +171,24 @@ export async function generateTextWithFallback<T = string>(
     const {
         primaryModel,
         fallbackModels = ADVANCED_FALLBACK_MODELS,
+        apiKey: providedApiKey,
         context = 'API',
+        useAsyncApiKey = false,
     } = options;
 
     const { system, messages } = callOptions;
+
+    // Get API key
+    let apiKey = providedApiKey || '';
+    if (!apiKey && useAsyncApiKey) {
+        try {
+            apiKey = await getGeminiApiKeyAsync();
+        } catch (e) {
+            logError(context, 'Error fetching API key', { error: e });
+        }
+    }
+
+    const getProvider = () => apiKey ? getGoogleProvider(apiKey) : google;
 
     // Build the model order: primary first, then fallbacks
     const modelOrder = [primaryModel, ...fallbackModels.filter(m => m !== primaryModel)];
@@ -191,8 +198,9 @@ export async function generateTextWithFallback<T = string>(
         devLog('info', context, `Trying model ${i + 1}/${modelOrder.length}: ${modelId}`);
 
         try {
+            const provider = getProvider();
             const result = await generateText({
-                model: google(modelId),
+                model: typeof provider === 'function' ? provider(modelId) : (provider as any)(modelId),
                 system,
                 messages: messages as any,
             });

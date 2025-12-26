@@ -131,6 +131,16 @@ export const en = {
             toSignup: 'New here? Create an account',
             toLogin: 'Already have an account? Log in',
         },
+        guestSessionWarning: {
+            title: 'Diagnosis Data Will Not Be Saved',
+            message: 'You have completed a diagnosis as a guest. If you sign in now, your diagnosis data will NOT be saved to your account. To save your diagnosis history, please sign in first before starting a new diagnosis.',
+            understand: 'I Understand',
+            cancel: 'Cancel',
+        },
+        guestSessionMigrated: {
+            title: 'Diagnosis Data Saved',
+            message: 'Your guest diagnosis has been successfully saved to your account!',
+        },
     },
 
     // Basic Info Form
@@ -1226,10 +1236,26 @@ export const en = {
             constitutionTrackerDesc: 'Track how your body constitution evolves over time or with the seasons.',
             getNewAssessment: 'Get New Assessment',
             didYouKnow: 'Did You Know?',
+            didYouKnowQuote: '"The wise man adapts himself to the time and the season, as the water adapts itself to the channel that guides it."',
+            didYouKnowDesc: 'TCM emphasizes <strong>Ziwu Liuzhu</strong> (The Flow of Qi through Meridians) as a way to maintain health by aligning biological rhythms with solar and lunar cycles.',
             noData: 'No constitution data found yet. Start a diagnosis to begin tracking.',
             latest: 'Latest',
             element: 'Element',
             hour: 'Hour',
+            organClock: {
+                gallbladder: { name: 'Gallbladder', time: '11 PM - 1 AM', advice: 'Sleep deeply for Yin restoration.', element: 'Wood' },
+                liver: { name: 'Liver', time: '1 AM - 3 AM', advice: 'Deep sleep is vital for blood detoxification.', element: 'Wood' },
+                lung: { name: 'Lung', time: '3 AM - 5 AM', advice: 'Body is detoxing the lungs. Keep warm.', element: 'Metal' },
+                largeIntestine: { name: 'Large Intestine', time: '5 AM - 7 AM', advice: 'Perfect time for bowel movements and drinking warm water.', element: 'Metal' },
+                stomach: { name: 'Stomach', time: '7 AM - 9 AM', advice: 'Eat a warm, nutrient-rich breakfast for best absorption.', element: 'Earth' },
+                spleen: { name: 'Spleen', time: '9 AM - 11 AM', advice: 'Mental focus is high. Good time for work/study.', element: 'Earth' },
+                heart: { name: 'Heart', time: '11 AM - 1 PM', advice: 'Eat a light lunch and take a short nap.', element: 'Fire' },
+                smallIntestine: { name: 'Small Intestine', time: '1 PM - 3 PM', advice: 'Assimilation time. Stay active but don\'t overwork.', element: 'Fire' },
+                bladder: { name: 'Bladder', time: '3 PM - 5 PM', advice: 'Good time for physical activity and hydration.', element: 'Water' },
+                kidney: { name: 'Kidney', time: '5 PM - 7 PM', advice: 'Restore energy. Light dinner and gentle activity.', element: 'Water' },
+                pericardium: { name: 'Pericardium', time: '7 PM - 9 PM', advice: 'Emotional connection and relaxation. Prepare for sleep.', element: 'Fire' },
+                tripleBurner: { name: 'Triple Burner', time: '9 PM - 11 PM', advice: 'Final winding down. Avoid screens; keep the body warm.', element: 'Fire' },
+            },
         },
 
         // Qi Dose / Guided Exercise (导引功法)
@@ -1366,6 +1392,7 @@ export const en = {
         requiredField: 'This field is required',
         invalidEmail: 'Please enter a valid email address',
         invalidAge: 'Please enter a valid age',
+        invalidRange: 'value must be between {min} and {max}',
         fileTooBig: 'File is too large. Maximum size is {size}MB.',
         unsupportedFormat: 'Unsupported file format',
         cameraError: 'Camera error. Please try again.',
@@ -1563,6 +1590,97 @@ export const en = {
         close: 'Close',
         downloadApk: 'Download APK',
         directDownload: 'Direct Download',
+    },
+    mobileFeatures: {
+        pageTitle: 'Sihat TCM Mobile App',
+        pageSubtitle: 'Your health companion, anytime, anywhere',
+        heroTitle: 'Mobile-Exclusive Features',
+        heroDescription: 'Discover powerful features available only on mobile: camera pulse measurement, health app integration, biometric security, offline mode, and more. Experience TCM health management like never before.',
+        exclusiveFeaturesTitle: 'Features Only Available on Mobile',
+        exclusiveFeaturesSubtitle: 'These powerful features are designed specifically for mobile devices and take full advantage of your phone\'s capabilities.',
+        webFeaturesTitle: 'Also Available on Web',
+        webFeaturesSubtitle: 'These features are available on both web and mobile, with enhanced mobile experience.',
+        diagnosis: {
+            title: 'Four Pillars Diagnosis',
+            description: 'AI-powered TCM diagnosis using Observation, Listening, Inquiry, and Pulse examination methods.',
+        },
+        mealPlanner: {
+            title: 'AI Meal Planner',
+            description: 'Personalized 7-day meal plans based on your TCM constitution with shopping lists and food suitability checker.',
+        },
+        healthTracking: {
+            title: 'Health Tracking',
+            description: 'Track your vitality scores, diagnosis patterns, and health trends over time with visual analytics.',
+        },
+        snoreAnalysis: {
+            title: 'Snore Analysis',
+            description: 'AI-powered sleep sound recording and analysis for snoring and sleep apnea indicators.',
+        },
+        vitalityRhythm: {
+            title: 'Vitality Rhythm',
+            description: 'Meridian Organ Clock, 24 Solar Terms guidance, and seasonal health tips aligned with TCM principles.',
+        },
+        qiDose: {
+            title: 'Qi Dose & Qi Garden',
+            description: 'Gamified TCM exercise routines (Baduanjin) and virtual herb gardening for wellness.',
+        },
+        community: {
+            title: 'Circle of Health',
+            description: 'Constitution-based anonymous support communities for sharing wellness experiences.',
+        },
+        familyCare: {
+            title: 'Family Health Management',
+            description: 'Manage health profiles for your entire family with separate tracking and recommendations.',
+        },
+        herbShop: {
+            title: 'One-Click Remedy',
+            description: 'Integrated Herb Shop for purchasing recommended herbal formulas and TCM remedies.',
+        },
+        digitalTwin: {
+            title: 'Digital Twin',
+            description: 'Live visualization of organ health status based on your TCM diagnosis and constitution.',
+        },
+        cameraPPG: {
+            title: 'Camera Pulse Measurement',
+            description: 'Revolutionary camera-based pulse measurement using photoplethysmography (PPG). Simply place your finger over the camera with flash to measure your heart rate - no additional devices needed.',
+        },
+        healthAppSync: {
+            title: 'Health App Integration',
+            description: 'Seamlessly sync with Apple Health, Google Fit, and Samsung Health. Automatically import steps, sleep, heart rate, and other vital metrics for comprehensive health tracking.',
+        },
+        biometricAuth: {
+            title: 'Biometric Security',
+            description: 'Secure your health data with Face ID, Touch ID, or fingerprint authentication. Quick and secure access to your personal health information.',
+        },
+        offlineMode: {
+            title: 'Offline Diagnosis',
+            description: 'Complete TCM diagnosis even without internet connection. All core features work offline, with automatic sync when you reconnect.',
+        },
+        pushNotifications: {
+            title: 'Smart Notifications',
+            description: 'Personalized push notifications for medication reminders, health check-ups, seasonal TCM tips, and meridian organ clock alerts. Never miss important health moments.',
+        },
+        wearableIntegration: {
+            title: 'Wearable Device Support',
+            description: 'Connect with smartwatches and fitness trackers via Bluetooth. Real-time health data from your wearable devices automatically integrated into your TCM diagnosis.',
+        },
+        enhancedCamera: {
+            title: 'Enhanced Camera Capture',
+            description: 'Advanced camera features for tongue, face, and body analysis with burst mode, timer, gesture controls, and quality overlays. Optimized for accurate TCM visual diagnosis.',
+        },
+        hapticFeedback: {
+            title: 'Haptic Feedback',
+            description: 'Tactile feedback for every interaction. Feel the difference with haptic responses that enhance your mobile experience and make navigation intuitive.',
+        },
+        benefitsTitle: 'Why Choose Sihat TCM Mobile?',
+        benefit1: 'Multi-language support (English, Chinese, Malay)',
+        benefit2: 'Offline diagnosis capabilities',
+        benefit3: 'Secure cloud sync across devices',
+        benefit4: 'Real-time AI-powered insights',
+        benefit5: 'Privacy-first health data management',
+        benefit6: 'Regular updates with new features',
+        ctaTitle: 'Ready to Start Your Health Journey?',
+        ctaDescription: 'Download the Sihat TCM mobile app today and experience the future of TCM health management.',
     },
     constitutions: {
         balanced: 'Neutral (Ping He)',

@@ -11,7 +11,7 @@ export const languageSchema = z.enum(['en', 'zh', 'ms']).default('en');
 export const modelSchema = z.string().refine(
     (val) => val.startsWith('gemini-') || val === '',
     { message: 'Invalid model name - must be a Gemini model' }
-).default('gemini-1.5-pro');
+).default('gemini-2.0-flash');
 
 // Base64 data URI pattern (for images/audio)
 const dataUriRegex = /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9.+-]+);base64,[A-Za-z0-9+/]+=*$/;

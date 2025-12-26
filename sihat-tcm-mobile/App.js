@@ -35,6 +35,8 @@ import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { LanguageSelector, LanguageButton } from './components/LanguageSelector';
 import { performBiometricLogin, hasStoredCredentials, isBiometricEnabled } from './lib/biometricAuth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getGuestSessionToken, clearGuestSessionToken } from './lib/guestSession';
+import { API_CONFIG } from './lib/apiConfig';
 import { fetchApiKey } from './lib/apiConfig';
 
 
@@ -380,6 +382,45 @@ function AppContent() {
       return;
     }
 
+    // Check for guest session token before signing in
+    const guestToken = await getGuestSessionToken();
+    if (guestToken) {
+      // Show warning alert
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Alert.alert(
+        language === 'zh' ? '诊断数据将不会被保存' : language === 'ms' ? 'Data Diagnosis Tidak Akan Disimpan' : 'Diagnosis Data Will Not Be Saved',
+        language === 'zh'
+          ? '您已作为访客完成了诊断。如果您现在登录，您的诊断数据将不会被保存到您的账户。要保存您的诊断历史，请先登录，然后再开始新的诊断。'
+          : language === 'ms'
+            ? 'Anda telah menyelesaikan diagnosis sebagai tetamu. Jika anda log masuk sekarang, data diagnosis anda TIDAK akan disimpan ke akaun anda. Untuk menyimpan sejarah diagnosis anda, sila log masuk terlebih dahulu sebelum memulakan diagnosis baru.'
+            : 'You have completed a diagnosis as a guest. If you sign in now, your diagnosis data will NOT be saved to your account. To save your diagnosis history, please sign in first before starting a new diagnosis.',
+        [
+          {
+            text: language === 'zh' ? '取消' : language === 'ms' ? 'Batal' : 'Cancel',
+            style: 'cancel',
+            onPress: () => {
+              setLoading(false);
+            },
+          },
+          {
+            text: language === 'zh' ? '我明白了' : language === 'ms' ? 'Saya Faham' : 'I Understand',
+            onPress: async () => {
+              // Clear guest session token since user is choosing to sign in anyway
+              await clearGuestSessionToken();
+              // Proceed with sign in
+              await performSignIn();
+            },
+          },
+        ]
+      );
+      return;
+    }
+
+    // Proceed with sign in if no guest token
+    await performSignIn();
+  };
+
+  const performSignIn = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setLoading(true);
 
@@ -499,6 +540,35 @@ function AppContent() {
           full_name: fullName.trim(),
           role: 'patient',
         });
+
+        // Check for guest session token and migrate it
+        const guestToken = await getGuestSessionToken();
+        if (guestToken) {
+          try {
+            // Get the session token from Supabase
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+              const response = await fetch(`${API_CONFIG.WEB_SERVER_URL}/api/migrate-guest-session`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({ sessionToken: guestToken }),
+              });
+
+              const result = await response.json();
+              if (result.success) {
+                await clearGuestSessionToken();
+                console.log('Guest diagnosis migrated successfully');
+              } else {
+                console.warn('Failed to migrate guest session:', result.error);
+              }
+            }
+          } catch (error) {
+            console.warn('Error migrating guest session:', error);
+          }
+        }
 
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Alert.alert(

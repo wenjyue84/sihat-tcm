@@ -110,6 +110,16 @@ export const ms: TranslationKeys = {
             toSignup: 'Baru di sini? Buat akaun',
             toLogin: 'Sudah ada akaun? Log masuk',
         },
+        guestSessionWarning: {
+            title: 'Data Diagnosis Tidak Akan Disimpan',
+            message: 'Anda telah menyelesaikan diagnosis sebagai tetamu. Jika anda log masuk sekarang, data diagnosis anda TIDAK akan disimpan ke akaun anda. Untuk menyimpan sejarah diagnosis anda, sila log masuk terlebih dahulu sebelum memulakan diagnosis baru.',
+            understand: 'Saya Faham',
+            cancel: 'Batal',
+        },
+        guestSessionMigrated: {
+            title: 'Data Diagnosis Disimpan',
+            message: 'Diagnosis tetamu anda telah berjaya disimpan ke akaun anda!',
+        },
     },
     basicInfo: {
         title: 'Profil Pesakit',
@@ -1004,10 +1014,26 @@ export const ms: TranslationKeys = {
             constitutionTrackerDesc: 'Jejak bagaimana konstitusi badan anda berkembang dari semasa ke semasa atau mengikut musim.',
             getNewAssessment: 'Dapatkan Penilaian Baru',
             didYouKnow: 'Adakah Anda Tahu?',
+            didYouKnowQuote: '"Orang bijak menyesuaikan dirinya dengan masa dan musim, seperti air menyesuaikan dirinya dengan saluran yang membimbingnya."',
+            didYouKnowDesc: 'TCM menekankan <strong>Ziwu Liuzhu</strong> (Aliran Qi melalui Meridian) sebagai cara untuk mengekalkan kesihatan dengan menyelaraskan irama biologi dengan kitaran solar dan lunar.',
             noData: 'Tiada data konstitusi ditemui lagi. Mulakan diagnosis untuk memulakan penjejakan.',
             latest: 'Terbaru',
             element: 'Elemen',
             hour: 'Jam',
+            organClock: {
+                gallbladder: { name: 'Pundi Hempedu', time: '11 PM - 1 AM', advice: 'Tidur nyenyak untuk pemulihan Yin.', element: 'Kayu' },
+                liver: { name: 'Hati', time: '1 AM - 3 AM', advice: 'Tidur nyenyak penting untuk detoksifikasi darah.', element: 'Kayu' },
+                lung: { name: 'Paru-paru', time: '3 AM - 5 AM', advice: 'Badan sedang detoksifikasi paru-paru. Kekalkan kehangatan.', element: 'Logam' },
+                largeIntestine: { name: 'Usus Besar', time: '5 AM - 7 AM', advice: 'Masa yang sesuai untuk pergerakan usus dan minum air suam.', element: 'Logam' },
+                stomach: { name: 'Perut', time: '7 AM - 9 AM', advice: 'Makan sarapan hangat yang kaya dengan nutrien untuk penyerapan terbaik.', element: 'Tanah' },
+                spleen: { name: 'Limpa', time: '9 AM - 11 AM', advice: 'Tumpuan mental tinggi. Masa yang baik untuk bekerja/belajar.', element: 'Tanah' },
+                heart: { name: 'Jantung', time: '11 AM - 1 PM', advice: 'Makan tengah hari ringan dan berehat sebentar.', element: 'Api' },
+                smallIntestine: { name: 'Usus Kecil', time: '1 PM - 3 PM', advice: 'Masa asimilasi. Tetap aktif tetapi jangan terlalu letih.', element: 'Api' },
+                bladder: { name: 'Pundi Kencing', time: '3 PM - 5 PM', advice: 'Masa yang baik untuk aktiviti fizikal dan penghidratan.', element: 'Air' },
+                kidney: { name: 'Buah Pinggang', time: '5 PM - 7 PM', advice: 'Pulihkan tenaga. Makan malam ringan dan aktiviti lembut.', element: 'Air' },
+                pericardium: { name: 'Perikardium', time: '7 PM - 9 PM', advice: 'Hubungan emosi dan relaksasi. Bersedia untuk tidur.', element: 'Api' },
+                tripleBurner: { name: 'Triple Burner', time: '9 PM - 11 PM', advice: 'Akhir hari. Elakkan skrin; kekalkan badan hangat.', element: 'Api' },
+            },
         },
 
         // Qi Dose / Senaman Qi
@@ -1100,7 +1126,7 @@ export const ms: TranslationKeys = {
         genericError: 'Sesuatu tidak kena. Sila cuba lagi.', networkError: 'Ralat rangkaian. Sila semak sambungan anda.', sessionExpired: 'Sesi tamat. Sila log masuk semula.',
         unauthorized: 'Anda tidak dibenarkan mengakses halaman ini.', notFound: 'Halaman tidak dijumpai.', serverError: 'Ralat pelayan. Sila cuba lagi nanti.',
         validationError: 'Sila semak input anda dan cuba lagi.', requiredField: 'Medan ini diperlukan', invalidEmail: 'Sila masukkan alamat emel yang sah',
-        invalidAge: 'Sila masukkan umur yang sah', fileTooBig: 'Fail terlalu besar. Saiz maksimum ialah {size}MB.', unsupportedFormat: 'Format fail tidak disokong',
+        invalidAge: 'Sila masukkan umur yang sah', invalidRange: 'nilai mestilah antara {min} dan {max}', fileTooBig: 'Fail terlalu besar. Saiz maksimum ialah {size}MB.', unsupportedFormat: 'Format fail tidak disokong',
         cameraError: 'Ralat kamera. Sila cuba lagi.', microphoneError: 'Ralat mikrofon. Sila cuba lagi.', analysisError: 'Analisis gagal. Sila cuba lagi.',
         // Mesej ralat API
         apiError: 'Ralat API',
@@ -1272,6 +1298,97 @@ export const ms: TranslationKeys = {
         close: 'Tutup',
         downloadApk: 'Muat Turun APK',
         directDownload: 'Muat Turun Terus',
+    },
+    mobileFeatures: {
+        pageTitle: 'Aplikasi Mudah Alih Sihat TCM',
+        pageSubtitle: 'Rakan kesihatan anda, bila-bila masa, di mana-mana',
+        heroTitle: 'Ciri-ciri Eksklusif Mudah Alih',
+        heroDescription: 'Temui ciri-ciri berkuasa yang hanya tersedia pada mudah alih: pengukuran nadi kamera, integrasi aplikasi kesihatan, keselamatan biometrik, mod luar talian, dan banyak lagi. Alami pengurusan kesihatan TCM seperti tidak pernah sebelum ini.',
+        exclusiveFeaturesTitle: 'Ciri-ciri Hanya Tersedia pada Mudah Alih',
+        exclusiveFeaturesSubtitle: 'Ciri-ciri berkuasa ini direka khusus untuk peranti mudah alih dan memanfaatkan sepenuhnya keupayaan telefon anda.',
+        webFeaturesTitle: 'Juga Tersedia di Web',
+        webFeaturesSubtitle: 'Ciri-ciri ini tersedia di web dan mudah alih, dengan pengalaman mudah alih yang dipertingkatkan.',
+        diagnosis: {
+            title: 'Diagnosis Empat Rukun',
+            description: 'Diagnosis TCM berkuasa AI menggunakan kaedah pemeriksaan Pemerhatian, Pendengaran, Pertanyaan, dan Nadi.',
+        },
+        mealPlanner: {
+            title: 'Perancang Makanan AI',
+            description: 'Pelan makanan 7 hari yang diperibadikan berdasarkan perlembagaan TCM anda dengan senarai beli-belah dan pemeriksa kesesuaian makanan.',
+        },
+        healthTracking: {
+            title: 'Penjejakan Kesihatan',
+            description: 'Jejaki skor vitaliti, corak diagnosis, dan trend kesihatan anda dari masa ke masa dengan analitik visual.',
+        },
+        snoreAnalysis: {
+            title: 'Analisis Dengkuran',
+            description: 'Rakaman dan analisis bunyi tidur berkuasa AI untuk penunjuk dengkuran dan apnea tidur.',
+        },
+        vitalityRhythm: {
+            title: 'Rentak Vitaliti',
+            description: 'Jam Organ Meridian, panduan 24 Istilah Solar, dan tip kesihatan bermusim yang selaras dengan prinsip TCM.',
+        },
+        qiDose: {
+            title: 'Dos Qi & Taman Qi',
+            description: 'Rutin senaman TCM bergamifikasi (Baduanjin) dan penanaman herba maya untuk kesejahteraan.',
+        },
+        community: {
+            title: 'Bulatan Kesihatan',
+            description: 'Komuniti sokongan tanpa nama berdasarkan perlembagaan untuk berkongsi pengalaman kesejahteraan.',
+        },
+        familyCare: {
+            title: 'Pengurusan Kesihatan Keluarga',
+            description: 'Urus profil kesihatan untuk seluruh keluarga anda dengan penjejakan dan cadangan yang berasingan.',
+        },
+        herbShop: {
+            title: 'Ubat Satu Klik',
+            description: 'Kedai Herba Bersepadu untuk membeli formula herba dan ubat TCM yang disyorkan.',
+        },
+        digitalTwin: {
+            title: 'Kembar Digital',
+            description: 'Visualisasi langsung status kesihatan organ berdasarkan diagnosis dan perlembagaan TCM anda.',
+        },
+        cameraPPG: {
+            title: 'Pengukuran Nadi Kamera',
+            description: 'Pengukuran nadi berasaskan kamera yang revolusioner menggunakan fotopletismografi (PPG). Hanya letakkan jari anda di atas kamera dengan lampu suluh untuk mengukur kadar denyutan jantung - tiada peranti tambahan diperlukan.',
+        },
+        healthAppSync: {
+            title: 'Integrasi Aplikasi Kesihatan',
+            description: 'Segerakkan dengan lancar dengan Apple Health, Google Fit, dan Samsung Health. Import langkah, tidur, kadar denyutan jantung, dan metrik penting lain secara automatik untuk penjejakan kesihatan yang komprehensif.',
+        },
+        biometricAuth: {
+            title: 'Keselamatan Biometrik',
+            description: 'Lindungi data kesihatan anda dengan Face ID, Touch ID, atau pengesahan cap jari. Akses pantas dan selamat kepada maklumat kesihatan peribadi anda.',
+        },
+        offlineMode: {
+            title: 'Diagnosis Luar Talian',
+            description: 'Lengkapkan diagnosis TCM walaupun tanpa sambungan internet. Semua ciri teras berfungsi luar talian, dengan segerakan automatik apabila anda menyambung semula.',
+        },
+        pushNotifications: {
+            title: 'Notifikasi Pintar',
+            description: 'Notifikasi push yang diperibadikan untuk peringatan ubat, pemeriksaan kesihatan, tip TCM bermusim, dan amaran jam organ meridian. Jangan terlepas momen kesihatan penting.',
+        },
+        wearableIntegration: {
+            title: 'Sokongan Peranti Boleh Pakai',
+            description: 'Sambungkan dengan jam pintar dan pelacak kecergasan melalui Bluetooth. Data kesihatan masa nyata dari peranti boleh pakai anda disepadukan secara automatik ke dalam diagnosis TCM anda.',
+        },
+        enhancedCamera: {
+            title: 'Tangkapan Kamera Dipertingkatkan',
+            description: 'Ciri kamera canggih untuk analisis lidah, muka, dan badan dengan mod letupan, pemasa, kawalan isyarat, dan overlay kualiti. Dioptimumkan untuk diagnosis visual TCM yang tepat.',
+        },
+        hapticFeedback: {
+            title: 'Maklum Balas Haptik',
+            description: 'Maklum balas taktil untuk setiap interaksi. Rasakan perbezaan dengan respons haptik yang meningkatkan pengalaman mudah alih anda dan menjadikan navigasi intuitif.',
+        },
+        benefitsTitle: 'Mengapa Pilih Sihat TCM Mudah Alih?',
+        benefit1: 'Sokongan pelbagai bahasa (Bahasa Inggeris, Cina, Melayu)',
+        benefit2: 'Keupayaan diagnosis luar talian',
+        benefit3: 'Segerakan awan yang selamat merentas peranti',
+        benefit4: 'Wawasan berkuasa AI masa nyata',
+        benefit5: 'Pengurusan data kesihatan privasi-pertama',
+        benefit6: 'Kemaskini berkala dengan ciri-ciri baharu',
+        ctaTitle: 'Bersedia untuk Memulakan Perjalanan Kesihatan Anda?',
+        ctaDescription: 'Muat turun aplikasi mudah alih Sihat TCM hari ini dan alami masa depan pengurusan kesihatan TCM.',
     },
     constitutions: {
         balanced: 'Neutral (Ping He)',
