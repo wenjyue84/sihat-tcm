@@ -2,7 +2,7 @@
 
 import { ImageAnalysisLoader } from '../ImageAnalysisLoader'
 import { ObservationResult } from '../ObservationResult'
-import { CameraCapture } from '../CameraCapture'
+import { CameraCapture } from '@/components/diagnosis/camera-capture'
 
 interface AnalysisTag {
     title: string;

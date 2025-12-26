@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CameraCapture } from '@/components/diagnosis/CameraCapture';
+import { CameraCapture } from '@/components/diagnosis/camera-capture';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
