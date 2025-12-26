@@ -138,7 +138,7 @@ export function DailyTipCard({ constitutionType = '平和质' }: DailyTipCardPro
                             <div className="mt-2">
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white/50 backdrop-blur-sm rounded-full text-xs font-medium text-slate-700">
                                     <Sparkles className="w-3 h-3" />
-                                    {t.dailyTip?.badge || '今日养生小贴士'}
+                                    {t.patientDashboard?.dailyTip?.badge || '今日养生小贴士'}
                                 </span>
                             </div>
                         </div>
@@ -158,7 +158,7 @@ export function DailyTipCard({ constitutionType = '平和质' }: DailyTipCardPro
                                     {/* Details */}
                                     <div className="mb-4">
                                         <h4 className="text-sm font-semibold text-slate-700 mb-2">
-                                            {t.dailyTip?.detailsTitle || '详细说明'}
+                                            {t.patientDashboard?.dailyTip?.detailsTitle || '详细说明'}
                                         </h4>
                                         <p className="text-sm text-slate-600 leading-relaxed">
                                             {details}
@@ -169,7 +169,7 @@ export function DailyTipCard({ constitutionType = '平和质' }: DailyTipCardPro
                                     {ingredients && ingredients.length > 0 && (
                                         <div className="mb-4">
                                             <h4 className="text-sm font-semibold text-slate-700 mb-2">
-                                                {t.dailyTip?.ingredientsTitle || '食材'}
+                                                {t.patientDashboard?.dailyTip?.ingredientsTitle || '食材'}
                                             </h4>
                                             <ul className="space-y-1">
                                                 {ingredients.map((ingredient, i) => (
@@ -186,7 +186,7 @@ export function DailyTipCard({ constitutionType = '平和质' }: DailyTipCardPro
                                     {method && (
                                         <div>
                                             <h4 className="text-sm font-semibold text-slate-700 mb-2">
-                                                {t.dailyTip?.methodTitle || '做法'}
+                                                {t.patientDashboard?.dailyTip?.methodTitle || '做法'}
                                             </h4>
                                             <p className="text-sm text-slate-600 leading-relaxed">
                                                 {method}
