@@ -31,8 +31,11 @@ export function calculateFiveElementsScores(
 
     // Parse constitution and pattern data
     const constitution = (diagnosis.constitution?.toLowerCase() || '')
-    const pattern = (diagnosis.pattern_differentiation?.toLowerCase() || '')
-    const symptoms = (diagnosis.symptoms?.toLowerCase() || '')
+    const diagnosisData = diagnosis.full_report?.diagnosis
+    const pattern = (typeof diagnosisData === 'object' && diagnosisData !== null && 'pattern_differentiation' in diagnosisData 
+        ? (diagnosisData as any).pattern_differentiation?.toLowerCase() 
+        : '') || diagnosis.primary_diagnosis?.toLowerCase() || ''
+    const symptoms = (diagnosis.symptoms?.join(' ').toLowerCase() || '')
 
     // Adjust scores based on constitution type
     if (constitution.includes('qi') && constitution.includes('deficiency')) {

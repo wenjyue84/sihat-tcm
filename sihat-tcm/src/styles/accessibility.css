@@ -1,0 +1,584 @@
+/**
+ * Accessibility CSS - WCAG 2.1 AA Compliance Styles
+ * 
+ * This stylesheet provides:
+ * - High contrast mode styles
+ * - Reduced motion preferences
+ * - Focus indicator styles
+ * - Font size adjustments
+ * - Screen reader utilities
+ */
+
+/* Screen Reader Only Utility */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Skip Link Styles */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: #000;
+  color: #fff;
+  padding: 8px 12px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 9999;
+  font-weight: 600;
+  transition: top 0.3s ease;
+}
+
+.skip-link:focus {
+  top: 6px;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode */
+.accessibility-high-contrast {
+  --accessibility-bg-primary: #000000;
+  --accessibility-bg-secondary: #ffffff;
+  --accessibility-text-primary: #ffffff;
+  --accessibility-text-secondary: #000000;
+  --accessibility-border: #ffffff;
+  --accessibility-focus: #ffff00;
+  --accessibility-link: #00ffff;
+  --accessibility-visited: #ff00ff;
+}
+
+.accessibility-high-contrast * {
+  background-color: var(--accessibility-bg-primary) !important;
+  color: var(--accessibility-text-primary) !important;
+  border-color: var(--accessibility-border) !important;
+}
+
+.accessibility-high-contrast input,
+.accessibility-high-contrast select,
+.accessibility-high-contrast textarea,
+.accessibility-high-contrast button {
+  background-color: var(--accessibility-bg-secondary) !important;
+  color: var(--accessibility-text-secondary) !important;
+  border: 2px solid var(--accessibility-border) !important;
+}
+
+.accessibility-high-contrast a {
+  color: var(--accessibility-link) !important;
+  text-decoration: underline !important;
+}
+
+.accessibility-high-contrast a:visited {
+  color: var(--accessibility-visited) !important;
+}
+
+.accessibility-high-contrast img {
+  filter: contrast(150%) brightness(150%);
+}
+
+/* Reduced Motion */
+.accessibility-reduced-motion *,
+.accessibility-reduced-motion *::before,
+.accessibility-reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Font Size Adjustments */
+.accessibility-font-small {
+  font-size: 14px;
+}
+
+.accessibility-font-medium {
+  font-size: 16px;
+}
+
+.accessibility-font-large {
+  font-size: 18px;
+}
+
+.accessibility-font-extra-large {
+  font-size: 20px;
+}
+
+/* Focus Indicator Styles */
+.accessibility-focus-default *:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.accessibility-focus-high-contrast *:focus {
+  outline: 3px solid #ffff00;
+  outline-offset: 3px;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.accessibility-focus-thick *:focus {
+  outline: 4px solid #2563eb;
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.2);
+}
+
+/* Keyboard Navigation Indicators */
+[data-keyboard-navigation="true"] {
+  position: relative;
+}
+
+[data-keyboard-navigation="true"]:focus::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid #2563eb;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* Arrow Navigation Support */
+[data-arrow-navigation="true"] {
+  position: relative;
+}
+
+[data-arrow-navigation="true"]:focus {
+  z-index: 1;
+}
+
+/* Activatable Elements */
+[data-activatable="true"][role="button"] {
+  cursor: pointer;
+  user-select: none;
+}
+
+[data-activatable="true"][role="button"]:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-activatable="true"][role="button"]:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Closeable Containers */
+[data-closeable="true"] {
+  position: relative;
+}
+
+/* Enhanced Button Accessibility */
+button:focus,
+[role="button"]:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Enhanced Link Accessibility */
+a:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  text-decoration: underline;
+}
+
+a:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Enhanced Form Control Accessibility */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-color: #2563eb;
+}
+
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: #dc2626;
+  outline-color: #dc2626;
+}
+
+/* Progress Indicators */
+[role="progressbar"] {
+  position: relative;
+}
+
+[role="progressbar"]::after {
+  content: attr(aria-valuenow) '% complete';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  pointer-events: none;
+}
+
+/* Status and Alert Regions */
+[role="status"],
+[role="alert"] {
+  padding: 12px;
+  border-radius: 6px;
+  margin: 8px 0;
+}
+
+[role="status"] {
+  background-color: #dbeafe;
+  border: 1px solid #3b82f6;
+  color: #1e40af;
+}
+
+[role="alert"] {
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+  color: #dc2626;
+}
+
+/* Navigation Landmarks */
+nav[role="navigation"] {
+  position: relative;
+}
+
+nav[role="navigation"]::before {
+  content: attr(aria-label);
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  font-size: 0;
+  opacity: 0;
+}
+
+/* Table Accessibility */
+table {
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+}
+
+th[scope="col"] {
+  border-bottom: 2px solid #e5e7eb;
+}
+
+th[scope="row"] {
+  border-right: 2px solid #e5e7eb;
+}
+
+/* Dialog/Modal Accessibility */
+[role="dialog"] {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+[role="dialog"]::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Tooltip Accessibility */
+[role="tooltip"] {
+  position: absolute;
+  z-index: 1001;
+  background: #1f2937;
+  color: white;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+[role="tooltip"]::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #1f2937 transparent transparent transparent;
+}
+
+/* Menu Accessibility */
+[role="menu"] {
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  padding: 4px 0;
+  min-width: 160px;
+}
+
+[role="menuitem"] {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+[role="menuitem"]:hover,
+[role="menuitem"]:focus {
+  background-color: #f3f4f6;
+  outline: none;
+}
+
+[role="menuitem"][aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Tab Accessibility */
+[role="tablist"] {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+[role="tab"] {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+[role="tab"]:hover {
+  background-color: #f9fafb;
+}
+
+[role="tab"][aria-selected="true"] {
+  border-bottom-color: #2563eb;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+[role="tabpanel"] {
+  padding: 16px 0;
+}
+
+[role="tabpanel"]:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Listbox Accessibility */
+[role="listbox"] {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+[role="option"] {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+[role="option"]:hover,
+[role="option"]:focus {
+  background-color: #f3f4f6;
+  outline: none;
+}
+
+[role="option"][aria-selected="true"] {
+  background-color: #2563eb;
+  color: white;
+}
+
+/* Combobox Accessibility */
+[role="combobox"] {
+  position: relative;
+}
+
+[role="combobox"] input {
+  width: 100%;
+  padding-right: 32px;
+}
+
+[role="combobox"]::after {
+  content: '▼';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #6b7280;
+}
+
+/* Switch Accessibility */
+[role="switch"] {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  background-color: #d1d5db;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+[role="switch"]::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+[role="switch"][aria-checked="true"] {
+  background-color: #2563eb;
+}
+
+[role="switch"][aria-checked="true"]::after {
+  transform: translateX(20px);
+}
+
+/* Slider Accessibility */
+[role="slider"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #d1d5db;
+  outline: none;
+}
+
+[role="slider"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #2563eb;
+  cursor: pointer;
+}
+
+[role="slider"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #2563eb;
+  cursor: pointer;
+  border: none;
+}
+
+[role="slider"]:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Responsive Accessibility */
+@media (max-width: 768px) {
+  .accessibility-font-small { font-size: 16px; }
+  .accessibility-font-medium { font-size: 18px; }
+  .accessibility-font-large { font-size: 20px; }
+  .accessibility-font-extra-large { font-size: 22px; }
+  
+  /* Larger touch targets on mobile */
+  button,
+  [role="button"],
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Print Accessibility */
+@media print {
+  .skip-link,
+  [aria-hidden="true"] {
+    display: none !important;
+  }
+  
+  a::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+  
+  a[href^="#"]::after,
+  a[href^="javascript:"]::after {
+    content: "";
+  }
+}
+
+/* Prefers Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Prefers High Contrast */
+@media (prefers-contrast: high) {
+  * {
+    border-color: currentColor;
+  }
+  
+  button,
+  [role="button"] {
+    border: 2px solid currentColor;
+  }
+  
+  input,
+  select,
+  textarea {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Focus Visible Support */
+@supports selector(:focus-visible) {
+  *:focus {
+    outline: none;
+  }
+  
+  *:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+}

@@ -1,0 +1,399 @@
+/**
+ * Platform Adaptive CSS Utilities
+ * 
+ * CSS utilities that work with the PlatformOptimizer to provide
+ * platform-specific styling and responsive behavior.
+ */
+
+/* Platform-specific base styles */
+.platform-ios {
+  /* iOS-specific styling */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.platform-android {
+  /* Android-specific styling */
+  font-feature-settings: "liga" 1, "kern" 1;
+}
+
+.platform-web {
+  /* Web-specific styling */
+  scroll-behavior: smooth;
+}
+
+/* Device type styles */
+.device-mobile {
+  /* Mobile-specific optimizations */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.device-tablet {
+  /* Tablet-specific optimizations */
+  touch-action: manipulation;
+}
+
+.device-desktop {
+  /* Desktop-specific optimizations */
+  cursor: default;
+}
+
+/* Browser-specific fixes */
+.browser-safari {
+  /* Safari-specific fixes */
+  -webkit-appearance: none;
+}
+
+.browser-chrome {
+  /* Chrome-specific optimizations */
+  font-display: swap;
+}
+
+.browser-firefox {
+  /* Firefox-specific fixes */
+  -moz-appearance: none;
+}
+
+/* Capability-based styles */
+.has-touch {
+  /* Touch-enabled device styles */
+  --touch-target-min: 48px;
+}
+
+.has-touch button,
+.has-touch [role="button"],
+.has-touch input[type="button"],
+.has-touch input[type="submit"] {
+  min-height: var(--touch-target-min, 48px);
+  min-width: var(--touch-target-min, 48px);
+}
+
+.webgl-supported {
+  /* WebGL-enabled optimizations */
+  transform-style: preserve-3d;
+}
+
+/* Orientation styles */
+.orientation-portrait {
+  /* Portrait-specific layouts */
+}
+
+.orientation-landscape {
+  /* Landscape-specific layouts */
+}
+
+/* High DPI optimizations */
+.high-dpi {
+  /* High DPI display optimizations */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+.ultra-high-dpi {
+  /* Ultra high DPI (3x+) optimizations */
+  image-rendering: pixelated;
+}
+
+/* Standalone app (PWA) styles */
+.standalone {
+  /* PWA-specific styling */
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
+  --safe-area-inset-right: env(safe-area-inset-right);
+  
+  padding-top: var(--safe-area-inset-top);
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
+}
+
+/* Adaptive spacing utilities */
+.spacing-compact {
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.25rem;
+}
+
+.spacing-normal {
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+}
+
+.spacing-comfortable {
+  --spacing-xs: 0.75rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+}
+
+/* Adaptive font sizes */
+.font-size-small {
+  --font-xs: 0.625rem;
+  --font-sm: 0.75rem;
+  --font-base: 0.875rem;
+  --font-lg: 1rem;
+  --font-xl: 1.125rem;
+}
+
+.font-size-medium {
+  --font-xs: 0.75rem;
+  --font-sm: 0.875rem;
+  --font-base: 1rem;
+  --font-lg: 1.125rem;
+  --font-xl: 1.25rem;
+}
+
+.font-size-large {
+  --font-xs: 0.875rem;
+  --font-sm: 1rem;
+  --font-base: 1.125rem;
+  --font-lg: 1.25rem;
+  --font-xl: 1.5rem;
+}
+
+/* Performance optimizations */
+.slow-connection {
+  /* Styles for slow connections */
+  animation-duration: 0s !important;
+  transition-duration: 0s !important;
+}
+
+.slow-connection img {
+  /* Reduce image quality for slow connections */
+  image-rendering: pixelated;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+  .adaptive-card {
+    border-width: 2px;
+    border-color: currentColor;
+  }
+  
+  button,
+  [role="button"] {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .platform-ios {
+    /* iOS dark mode optimizations */
+    color-scheme: dark;
+  }
+  
+  .platform-android {
+    /* Android dark mode optimizations */
+    color-scheme: dark;
+  }
+}
+
+/* Adaptive layout utilities */
+.adaptive-layout {
+  /* Base adaptive layout */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.adaptive-container {
+  /* Responsive container */
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.adaptive-main {
+  /* Main content area */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.adaptive-grid {
+  /* Adaptive grid system */
+  display: grid;
+  gap: var(--spacing-md, 1rem);
+}
+
+.adaptive-card {
+  /* Base card styling */
+  background: var(--card-background, white);
+  border-radius: var(--border-radius, 0.5rem);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Touch-specific interactions */
+.has-touch .adaptive-card:active {
+  transform: scale(0.98);
+}
+
+.has-touch button:active,
+.has-touch [role="button"]:active {
+  transform: scale(0.95);
+}
+
+/* Navigation adaptations */
+.adaptive-navigation {
+  /* Base navigation styling */
+  background: var(--navigation-background, white);
+  border: var(--navigation-border, 1px solid #e5e7eb);
+}
+
+.device-mobile .adaptive-navigation {
+  /* Mobile navigation optimizations */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* iOS-specific safe area handling */
+.platform-ios.standalone .adaptive-navigation {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.platform-ios.standalone .adaptive-header {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Android-specific navigation bar handling */
+.platform-android .adaptive-navigation {
+  /* Account for Android navigation bar */
+  margin-bottom: env(keyboard-inset-height, 0);
+}
+
+/* Responsive breakpoint utilities */
+@media (max-width: 639px) {
+  .adaptive-container {
+    padding-left: var(--spacing-sm, 0.75rem);
+    padding-right: var(--spacing-sm, 0.75rem);
+  }
+}
+
+@media (min-width: 640px) {
+  .adaptive-container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .adaptive-container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .adaptive-container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .adaptive-container {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .adaptive-container {
+    max-width: 1536px;
+  }
+}
+
+/* Print optimizations */
+@media print {
+  .adaptive-navigation,
+  .adaptive-header,
+  .adaptive-footer {
+    display: none !important;
+  }
+  
+  .adaptive-main {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .adaptive-card {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+    break-inside: avoid;
+  }
+}
+
+/* Accessibility enhancements */
+@media (prefers-reduced-transparency) {
+  .adaptive-navigation {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--navigation-background-solid, white);
+  }
+}
+
+/* Focus management for keyboard navigation */
+.adaptive-layout:focus-within {
+  /* Enhanced focus visibility */
+}
+
+button:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--focus-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* Loading states */
+.adaptive-loading {
+  /* Loading state styling */
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: wait;
+}
+
+.adaptive-loading * {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Error states */
+.adaptive-error {
+  /* Error state styling */
+  border-color: var(--error-color, #ef4444);
+  background-color: var(--error-background, #fef2f2);
+}
+
+/* Success states */
+.adaptive-success {
+  /* Success state styling */
+  border-color: var(--success-color, #10b981);
+  background-color: var(--success-background, #f0fdf4);
+}

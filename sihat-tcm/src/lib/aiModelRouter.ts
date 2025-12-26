@@ -332,11 +332,11 @@ export class AIModelRouter {
      */
     getRouterStats(): {
         totalRequests: number;
-        modelPerformance: Record<string, ReturnType<typeof this.getModelPerformance>>;
+        modelPerformance: Record<string, { averageResponseTime: number; successRate: number; totalRequests: number; recentPerformance: any[] }>;
         complexityDistribution: Record<string, number>;
     } {
         const allModels = Array.from(this.performanceHistory.keys());
-        const modelPerformance: Record<string, ReturnType<typeof this.getModelPerformance>> = {};
+        const modelPerformance: Record<string, { averageResponseTime: number; successRate: number; totalRequests: number; recentPerformance: any[] }> = {};
         const complexityDistribution: Record<string, number> = {};
 
         let totalRequests = 0;

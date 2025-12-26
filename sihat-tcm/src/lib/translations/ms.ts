@@ -1416,6 +1416,79 @@ export const ms: TranslationKeys = {
             recentActivity: 'Aktiviti Keluarga Terkini'
         }
     },
+    // Five Elements Radar
+    fiveElementsRadar: {
+        title: 'Radar Kesihatan Lima Unsur',
+        subtitle: 'Penilaian kesihatan organ berdasarkan teori Lima Unsur dalam Perubatan Tradisional Cina',
+        needsAttention: 'Perlu Perhatian',
+        currentStatus: 'Status Semasa',
+        recommendations: 'Cadangan',
+        historicalTrend: 'Trend Sejarah',
+        legend: {
+            title: 'Teori Lima Unsur (五行)',
+        },
+        organs: {
+            liver: 'Hati (Kayu)',
+            heart: 'Jantung (Api)',
+            spleen: 'Limpa (Tanah)',
+            lung: 'Paru-paru (Logam)',
+            kidney: 'Buah Pinggang (Air)',
+        },
+        descriptions: {
+            liver: 'Hati (unsur Kayu) mengawal aliran Qi dan darah yang lancar, menyimpan darah, dan mengawal tendon. Ia dikaitkan dengan kesejahteraan emosi dan perancangan.',
+            heart: 'Jantung (unsur Api) mengawal peredaran darah dan menempatkan Shen (roh/fikiran). Ia mengawal kesedaran, ingatan, dan tidur.',
+            spleen: 'Limpa (unsur Tanah) mengawal pencernaan, transformasi, dan pengangkutan nutrien. Ia menghasilkan Qi dan darah serta mengawal otot.',
+            lung: 'Paru-paru (unsur Logam) mengawal Qi dan pernafasan, mengawal kulit dan bulu badan, serta mengawal laluan air.',
+            kidney: 'Buah Pinggang (unsur Air) menyimpan Essence (Jing), mengawal kelahiran, pertumbuhan, pembiakan, dan perkembangan. Ia mengawal tulang, sumsum, dan otak.',
+        },
+        tips: {
+            liver: {
+                weak1: 'Makan lebih banyak sayuran hijau (bayam, brokoli, saderi)',
+                weak2: 'Amalkan regangan lembut dan Tai Chi',
+                weak3: 'Urus tekanan dan elakkan kemarahan',
+                weak4: 'Dapatkan tidur yang mencukupi (11pm-3am adalah masa meridian Hati)',
+                normal1: 'Terus makan sayuran hijau secara berkala',
+                normal2: 'Kekalkan keseimbangan emosi',
+                normal3: 'Kekalkan jadual tidur yang tetap',
+            },
+            heart: {
+                weak1: 'Makan makanan merah (kacang merah, goji berry, kurma merah)',
+                weak2: 'Amalkan meditasi dan pernafasan dalam',
+                weak3: 'Elakkan kegembiraan atau tekanan yang berlebihan',
+                weak4: 'Pastikan kualiti tidur yang baik',
+                normal1: 'Kekalkan aktiviti yang menggembirakan',
+                normal2: 'Terus amalkan amalan kesedaran',
+                normal3: 'Tetap berhubung secara sosial',
+            },
+            spleen: {
+                weak1: 'Makan makanan hangat dan masak (elakkan mentah dan sejuk)',
+                weak2: 'Masukkan makanan kuning (ubi keledek, labu)',
+                weak3: 'Makan pada waktu yang konsisten',
+                weak4: 'Elakkan terlalu banyak berfikir dan kebimbangan',
+                normal1: 'Terus jadual makan yang tetap',
+                normal2: 'Kekalkan sistem pencernaan yang sihat',
+                normal3: 'Kekalkan pemikiran positif',
+            },
+            lung: {
+                weak1: 'Makan makanan putih (pir, akar teratai, kulat putih)',
+                weak2: 'Amalkan senaman pernafasan dalam',
+                weak3: 'Kekalkan kualiti udara dalaman yang baik',
+                weak4: 'Elakkan sejuk dan kekal hangat pada musim luruh/musim sejuk',
+                normal1: 'Terus amalan kesihatan pernafasan',
+                normal2: 'Kekalkan postur yang baik',
+                normal3: 'Pendedahan udara segar setiap hari',
+            },
+            kidney: {
+                weak1: 'Makan makanan hitam (bijan hitam, kacang hitam, walnut)',
+                weak2: 'Elakkan kerja berlebihan dan aktiviti seksual yang berlebihan',
+                weak3: 'Kekalkan bahagian bawah belakang dan kaki hangat',
+                weak4: 'Dapatkan rehat dan tidur yang mencukupi',
+                normal1: 'Kekalkan keseimbangan kerja-hidup',
+                normal2: 'Terus gaya hidup sihat',
+                normal3: 'Senaman lembut secara berkala',
+            },
+        },
+    },
     // Solar Terms (24节气)
     solarTerms: {
         currentTerm: 'Penggal Solar Semasa',

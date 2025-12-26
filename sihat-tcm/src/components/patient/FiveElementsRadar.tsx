@@ -344,13 +344,13 @@ export function FiveElementsRadar({
                                             <div
                                                 className="h-full rounded-full transition-all"
                                                 style={{
-                                                    width: `${scores[selectedElement as keyof FiveElementsScore]}%`,
+                                                    width: `${scores[selectedElement as keyof FiveElementsScore] ?? 0}%`,
                                                     backgroundColor: chartData.find(d => d.elementKey === selectedElement)?.color
                                                 }}
                                             />
                                         </div>
                                         <span className="text-sm font-bold text-slate-700">
-                                            {scores[selectedElement as keyof FiveElementsScore]}%
+                                            {scores[selectedElement as keyof FiveElementsScore] ?? 0}%
                                         </span>
                                     </div>
                                 </div>
@@ -360,12 +360,17 @@ export function FiveElementsRadar({
                                         {t.fiveElementsRadar?.recommendations || 'Recommendations'}
                                     </p>
                                     <ul className="space-y-1 text-sm text-slate-700">
-                                        {getElementRecommendations(selectedElement, scores[selectedElement as keyof FiveElementsScore], t).map((rec, idx) => (
-                                            <li key={idx} className="flex items-start gap-2">
-                                                <span className="text-amber-600 mt-0.5">•</span>
-                                                <span>{rec}</span>
-                                            </li>
-                                        ))}
+                                        {selectedElement && (() => {
+                                            const elementKey = selectedElement as keyof FiveElementsScore;
+                                            const scoreValue = scores[elementKey];
+                                            const score: number = (typeof scoreValue === 'number' ? scoreValue : 0);
+                                            return getElementRecommendations(selectedElement, score, t).map((rec, idx) => (
+                                                <li key={idx} className="flex items-start gap-2">
+                                                    <span className="text-amber-600 mt-0.5">•</span>
+                                                    <span>{rec}</span>
+                                                </li>
+                                            ));
+                                        })()}
                                     </ul>
                                 </div>
                             </div>

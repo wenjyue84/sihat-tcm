@@ -9,7 +9,9 @@
     "build": "next build",
     "build:tina": "tinacms build && next build",
     "start": "next start -p 3100",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest",
+    "test:run": "vitest --run"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.1",
