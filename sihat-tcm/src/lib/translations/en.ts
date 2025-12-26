@@ -11,6 +11,7 @@ export const en = {
         save: 'Save',
         cancel: 'Cancel',
         submit: 'Submit',
+        noMedicinesFound: 'No medicines recorded',
         next: 'Next',
         previous: 'Previous',
         back: 'Back',
@@ -40,7 +41,6 @@ export const en = {
         filled: 'Filled!',
         clear: 'Clear',
         cleared: 'Cleared!',
-        noMedicinesFound: 'No medicines recorded',
     },
     celebration: {
         basics: { title: 'Profile Complete!', subtitle: 'Great start! Moving to inquiry...' },
@@ -225,9 +225,9 @@ export const en = {
         selectHistoryDesc: 'Choose a previous diagnosis to import symptoms.',
         importButton: 'Import Selected',
         noHistoryFound: 'No previous diagnosis history found.',
+        medicineSkipWarning: "You haven't added any medicines. Are you currently taking any prescription drugs or supplements?",
         detailedSymptoms: 'detailedSymptoms', // Keeping for backward compat if needed or just remove references later
         detailedSymptomsPlaceholder: 'Please describe your main complaints, feelings, and any other relevant details...',
-        medicineSkipWarning: "You haven't added any medicines. Are you currently taking any prescription drugs or supplements?",
         chooseTcmDoctor: 'Choose Your TCM Doctor',
         startDiagnosis: 'Start Diagnosis',
         // Wizard step translations
@@ -873,17 +873,43 @@ export const en = {
         welcomeBack: 'Welcome back',
         newDiagnosis: 'New Diagnosis',
 
+        // Constitution Card
+        constitutionCard: {
+            title: 'My Constitution',
+            learnMore: 'Learn More',
+            hideDetails: 'Hide Details',
+            noDiagnosisTitle: 'Discover Your TCM Constitution',
+            noDiagnosisDesc: 'Start your TCM diagnosis journey to understand your unique body constitution and receive personalized health recommendations.',
+            startAssessment: 'Start Constitution Assessment',
+            dietaryAdvice: 'Dietary Advice',
+            foodsToEat: 'Foods to Eat',
+            foodsToAvoid: 'Foods to Avoid',
+            lifestyleAdvice: 'Lifestyle Recommendations',
+            lastAssessed: 'Last assessed',
+            getNewAssessment: 'Get New Assessment',
+        },
+
+        // Daily Health Tip
+        dailyTip: {
+            badge: 'Daily Health Tip',
+            detailsTitle: 'Details',
+            ingredientsTitle: 'Ingredients',
+            methodTitle: 'Method',
+        },
+
         // Navigation tabs
         tabs: {
             healthJourney: 'Health Journey',
-            mealPlanner: 'AI Meal Planner',
-            snoreAnalysis: 'Snore Analysis',
-            vitalityRhythm: 'Vitality Rhythm',
-            community: 'Circle of Health',
+            mealPlanner: 'Dietary Therapy', // 食疗方案 (formerly Meal Planner)
+            snoreAnalysis: 'Sleep Cultivation', // 睡眠养生 (formerly Snore Analysis)
+            vitalityRhythm: 'Meridian Clock', // 子午流注 (formerly Vitality Rhythm)
+            community: 'Apricot Grove', // 杏林圈 (formerly Community/Circle of Health)
+            qiDose: 'Guided Exercise', // 导引功法 (formerly Qi Dose)
             family: 'Family Care',
             profile: 'Profile',
             documents: 'Documents',
             settings: 'Settings',
+            fiveElements: 'Circle of Health', // 整体评估 (Five Elements Radar)
         },
 
         // Health Journey section
@@ -969,9 +995,9 @@ export const en = {
             stepDiagnosisSummary: 'Diagnostic Summary',
         },
 
-        // Meal Planner
+        // Meal Planner / Dietary Therapy (食疗方案)
         mealPlanner: {
-            title: 'AI Meal Planner',
+            title: 'Dietary Therapy', // 食疗方案
             subtitle: 'Personalized 7-day meal plans based on your TCM constitution',
             yourMealPlan: 'Your 7-Day TCM Meal Plan',
             constitution: 'Constitution',
@@ -1065,9 +1091,9 @@ export const en = {
             },
         },
 
-        // Snore Analysis section
+        // Snore Analysis / Sleep Cultivation (睡眠养生)
         snoreAnalysis: {
-            title: 'Snore Analysis',
+            title: 'Sleep Cultivation', // 睡眠养生 (formerly Snore Analysis)
             subtitle: 'Record your sleep sounds for AI-powered snoring analysis',
             description: 'Detect snoring patterns, assess severity, and receive personalized recommendations.',
             // Recording
@@ -1156,6 +1182,21 @@ export const en = {
             dashboard: 'Dashboard',
             patientAccount: 'Patient Account',
             logout: 'Logout',
+            // Section Headers with TCM Quotes
+            sectionDiet: 'Diet & Nutrition',
+            sectionRoutine: 'Daily Life & Rest',
+            sectionEmotions: 'Emotions & Community',
+            // TCM Classic Quotes
+            quoteDiet: 'Moderation in diet, harmony in flavors',
+            quoteRoutine: 'Regular routine, balanced exertion',
+            quoteEmotions: 'Spirit guarded within, illness cannot arise',
+            // All quotes source
+            quoteSource: 'Huangdi Neijing · Suwen',
+            // Group Headers
+            groupAssessment: 'Assessment',
+            groupTreatment: 'Treatment Plan',
+            groupCultivation: 'Daily Wellness',
+            groupAccount: 'Account',
         },
 
         // Legacy keys for backwards compatibility
@@ -1168,9 +1209,9 @@ export const en = {
         recentDiagnosis: 'Recent Diagnosis',
         viewReport: 'View Report',
 
-        // Vitality Rhythm
+        // Vitality Rhythm / Meridian Clock (子午流注)
         vitalityRhythm: {
-            title: 'Vitality Rhythm',
+            title: 'Meridian Clock', // 子午流注 (formerly Vitality Rhythm)
             subtitle: 'Harmonizing Your Body with Natural Cycles',
             meridianClock: 'Meridian Organ Clock',
             meridianClockDesc: 'TCM organ focus based on the theoretical 24-hour cycle.',
@@ -1189,6 +1230,13 @@ export const en = {
             latest: 'Latest',
             element: 'Element',
             hour: 'Hour',
+        },
+
+        // Qi Dose / Guided Exercise (导引功法)
+        qiDose: {
+            title: 'Guided Exercise', // 导引功法 (formerly Qi Dose)
+            subtitle: 'TCM-guided movement practices for your constitution',
+            description: 'Based on your constitution, practice these micro-movements to regulate inner energy',
         },
     },
 
@@ -1598,7 +1646,7 @@ export const en = {
         description: 'Your Digital Twin visualizes energy flows based on your TCM reports. Red areas indicate active heat or stagnation being addressed.',
     },
     circleOfHealth: {
-        title: 'Circle of Health',
+        title: 'Apricot Grove', // formerly Circle of Health
         subtitle: 'Support groups based on your TCM constitution',
         myCircles: 'My Circles',
         anonymousMember: 'Anonymous Member',
@@ -1657,6 +1705,91 @@ export const en = {
             uploadTongue: 'Upload Tongue Photo',
             recentActivity: 'Recent Family Activity'
         }
+    },
+    // Five Elements Radar
+    fiveElementsRadar: {
+        title: 'Five Elements Health Radar',
+        subtitle: 'Traditional Chinese Medicine organ health assessment based on the Five Elements theory',
+        needsAttention: 'Need Attention',
+        currentStatus: 'Current Status',
+        recommendations: 'Recommendations',
+        historicalTrend: 'Historical Trend',
+        legend: {
+            title: 'Five Elements (五行) Theory',
+        },
+        organs: {
+            liver: 'Liver (Wood)',
+            heart: 'Heart (Fire)',
+            spleen: 'Spleen (Earth)',
+            lung: 'Lung (Metal)',
+            kidney: 'Kidney (Water)',
+        },
+        descriptions: {
+            liver: 'The Liver (Wood element) governs the smooth flow of Qi and blood, stores blood, and controls the tendons. It is associated with emotional well-being and planning.',
+            heart: 'The Heart (Fire element) governs blood circulation and houses the Shen (spirit/mind). It controls consciousness, memory, and sleep.',
+            spleen: 'The Spleen (Earth element) governs digestion, transformation, and transportation of nutrients. It produces Qi and blood and controls the muscles.',
+            lung: 'The Lung (Metal element) governs Qi and respiration, controls the skin and body hair, and regulates water passages.',
+            kidney: 'The Kidney (Water element) stores Essence (Jing), governs birth, growth, reproduction, and development. It controls bones, marrow, and the brain.',
+        },
+        tips: {
+            liver: {
+                weak1: 'Eat more green vegetables (spinach, broccoli, celery)',
+                weak2: 'Practice gentle stretching and Tai Chi',
+                weak3: 'Manage stress and avoid anger',
+                weak4: 'Get adequate sleep (11pm-3am is Liver meridian time)',
+                normal1: 'Continue eating green vegetables regularly',
+                normal2: 'Maintain emotional balance',
+                normal3: 'Keep regular sleep schedule',
+            },
+            heart: {
+                weak1: 'Eat red foods (red beans, goji berries, red dates)',
+                weak2: 'Practice meditation and deep breathing',
+                weak3: 'Avoid excessive excitement or stress',
+                weak4: 'Ensure good quality sleep',
+                normal1: 'Maintain joyful activities',
+                normal2: 'Continue mindfulness practices',
+                normal3: 'Stay socially connected',
+            },
+            spleen: {
+                weak1: 'Eat warm, cooked foods (avoid raw and cold)',
+                weak2: 'Include yellow foods (sweet potato, pumpkin)',
+                weak3: 'Eat regular meals at consistent times',
+                weak4: 'Avoid overthinking and excessive worry',
+                normal1: 'Continue regular meal schedule',
+                normal2: 'Keep digestive system healthy',
+                normal3: 'Maintain positive thinking',
+            },
+            lung: {
+                weak1: 'Eat white foods (pear, lotus root, white fungus)',
+                weak2: 'Practice deep breathing exercises',
+                weak3: 'Keep indoor air quality good',
+                weak4: 'Avoid cold and stay warm in autumn/winter',
+                normal1: 'Continue respiratory health practices',
+                normal2: 'Maintain good posture',
+                normal3: 'Fresh air exposure daily',
+            },
+            kidney: {
+                weak1: 'Eat black foods (black sesame, black beans, walnuts)',
+                weak2: 'Avoid overwork and excessive sexual activity',
+                weak3: 'Keep lower back and feet warm',
+                weak4: 'Get adequate rest and sleep',
+                normal1: 'Maintain work-life balance',
+                normal2: 'Continue healthy lifestyle',
+                normal3: 'Regular gentle exercise',
+            },
+        },
+    },
+    // Solar Terms (24节气)
+    solarTerms: {
+        currentTerm: 'Current Solar Term',
+        viewCalendar: 'View Calendar',
+        healthFocus: 'Health Focus',
+        recommendedFoods: 'Recommended Foods',
+        lifestyleAdvice: 'Lifestyle Advice',
+        focus: 'Focus',
+        current: 'Current',
+        fullCalendarTitle: '24 Solar Terms Calendar',
+        year: 'Year',
     },
     // TCM E-Commerce / Herb Shop
     herbShop: {

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useRef, useState, useEffect, useCallback } from 'react'
-import { Camera, Upload, RotateCcw, Check, SkipForward, SwitchCamera } from 'lucide-react'
+import { Camera, Upload, RotateCcw, Check, SkipForward, SwitchCamera, Eye, EyeOff } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import {
     Dialog,
@@ -14,6 +14,8 @@ import {
 
 import { useDiagnosisProgress } from '@/contexts/DiagnosisProgressContext'
 import { ScientificResearchModal } from './ScientificResearchModal'
+import { getImageQualityValidator, ImageQualityResult } from '@/lib/imageQualityValidator'
+import { ImageQualityOverlay, CompositionGuideOverlay, AccessibilityFeedback } from './ImageQualityOverlay'
 
 interface CameraCaptureProps {
     onComplete: (data: any) => void;
@@ -67,6 +69,13 @@ export function CameraCapture({
     const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user')
     const [showError, setShowError] = useState(false)
     const [isSkipPromptOpen, setIsSkipPromptOpen] = useState(false)
+
+    // Image quality enhancement states
+    const [qualityResult, setQualityResult] = useState<ImageQualityResult | null>(null)
+    const [showQualityOverlay, setShowQualityOverlay] = useState(true)
+    const [showCompositionGuide, setShowCompositionGuide] = useState(false)
+    const [accessibilityMode, setAccessibilityMode] = useState(false)
+    const qualityCheckIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
     // Use provided title/instruction or fall back to defaults from translations
     const displayTitle = title || t.camera.takePhoto
@@ -237,6 +246,9 @@ export function CameraCapture({
 
             // Force a repaint to fix the Chrome rendering bug
             forceRepaint(video)
+
+            // Start quality assessment when video is ready
+            startQualityAssessment(video)
         }
 
         // Function to attach stream to a single video element
@@ -403,10 +415,43 @@ export function CameraCapture({
             isStartingRef.current = false
             setVideoPlaying(false)
             setHasStarted(false)
+            stopQualityAssessment()
         }
     }, [facingMode])
 
-    const captureImage = useCallback(() => {
+    // Quality assessment functions
+    const startQualityAssessment = useCallback((video: HTMLVideoElement) => {
+        if (qualityCheckIntervalRef.current) {
+            clearInterval(qualityCheckIntervalRef.current)
+        }
+
+        const assessQuality = async () => {
+            try {
+                const validator = getImageQualityValidator()
+                const result = await validator.assessVideoFrame(video, mode)
+                setQualityResult(result)
+            } catch (error) {
+                console.warn('[Quality] Assessment failed:', error)
+            }
+        }
+
+        // Initial assessment
+        assessQuality()
+
+        // Periodic assessment every 2 seconds
+        qualityCheckIntervalRef.current = setInterval(assessQuality, 2000)
+    }, [mode])
+
+    const stopQualityAssessment = useCallback(() => {
+        if (qualityCheckIntervalRef.current) {
+            clearInterval(qualityCheckIntervalRef.current)
+            qualityCheckIntervalRef.current = null
+        }
+        setQualityResult(null)
+    }, [])
+
+    // Enhanced capture with quality validation
+    const captureImageWithQuality = useCallback(async () => {
         const video = getActiveVideo()
         if (video && canvasRef.current) {
             const canvas = canvasRef.current
@@ -416,11 +461,45 @@ export function CameraCapture({
             if (context) {
                 context.drawImage(video, 0, 0, canvas.width, canvas.height)
                 const imageData = canvas.toDataURL('image/jpeg', 0.9)
-                stopCamera()
-                onCompleteRef.current({ image: imageData })
+                
+                // Perform final quality check on captured image
+                try {
+                    const validator = getImageQualityValidator()
+                    const finalQuality = await validator.analyzeImage(imageData, mode)
+                    
+                    stopCamera()
+                    stopQualityAssessment()
+                    
+                    onCompleteRef.current({ 
+                        image: imageData,
+                        quality: finalQuality
+                    })
+                } catch (error) {
+                    console.warn('[Quality] Final assessment failed:', error)
+                    stopCamera()
+                    stopQualityAssessment()
+                    onCompleteRef.current({ image: imageData })
+                }
             }
         }
-    }, [stopCamera, getActiveVideo])
+    }, [stopCamera, getActiveVideo, mode])
+
+    // Toggle functions for UI controls
+    const toggleQualityOverlay = useCallback(() => {
+        setShowQualityOverlay(prev => !prev)
+    }, [])
+
+    const toggleCompositionGuide = useCallback(() => {
+        setShowCompositionGuide(prev => !prev)
+    }, [])
+
+    const toggleAccessibilityMode = useCallback(() => {
+        setAccessibilityMode(prev => !prev)
+    }, [])
+
+    const captureImage = useCallback(() => {
+        captureImageWithQuality()
+    }, [captureImageWithQuality])
 
     const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -567,15 +646,62 @@ export function CameraCapture({
                                     muted
                                     className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1] z-[1]"
                                 />
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    size="icon"
-                                    className="absolute top-2 right-2 z-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-none h-10 w-10"
-                                    onClick={toggleCamera}
-                                >
-                                    <SwitchCamera className="w-5 h-5" />
-                                </Button>
+                                
+                                {/* Enhanced Control Panel */}
+                                <div className="absolute top-2 right-2 z-10 flex flex-col gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        size="icon"
+                                        className="rounded-full bg-black/50 hover:bg-black/70 text-white border-none h-10 w-10"
+                                        onClick={toggleCamera}
+                                        title="Switch Camera"
+                                    >
+                                        <SwitchCamera className="w-5 h-5" />
+                                    </Button>
+                                    
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        size="icon"
+                                        className="rounded-full bg-black/50 hover:bg-black/70 text-white border-none h-10 w-10"
+                                        onClick={toggleQualityOverlay}
+                                        title="Toggle Quality Feedback"
+                                    >
+                                        {showQualityOverlay ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                                    </Button>
+                                    
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        size="icon"
+                                        className="rounded-full bg-black/50 hover:bg-black/70 text-white border-none h-10 w-10"
+                                        onClick={toggleCompositionGuide}
+                                        title="Toggle Composition Guide"
+                                    >
+                                        <Camera className="w-5 h-5" />
+                                    </Button>
+                                </div>
+
+                                {/* Image Quality Overlay */}
+                                <ImageQualityOverlay
+                                    qualityResult={qualityResult}
+                                    isVisible={showQualityOverlay && videoPlaying}
+                                    mode={mode}
+                                />
+
+                                {/* Composition Guide Overlay */}
+                                <CompositionGuideOverlay
+                                    isVisible={showCompositionGuide && videoPlaying}
+                                    mode={mode}
+                                />
+
+                                {/* Accessibility Feedback */}
+                                <AccessibilityFeedback
+                                    qualityResult={qualityResult}
+                                    isEnabled={accessibilityMode}
+                                />
+
                                 <canvas ref={canvasRef} className="hidden" />
                                 {/* Only show loading overlay when camera is initializing - COMPLETELY REMOVE when playing */}
                                 {!videoPlaying && (
@@ -625,7 +751,7 @@ export function CameraCapture({
                                 className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-6 py-4 shadow-lg"
                             >
                                 <Camera className="w-5 h-5 mr-2" />
-                                Top to Start Camera
+                                Tap to Start Camera
                             </Button>
                         </div>
                     ) : (
@@ -637,15 +763,69 @@ export function CameraCapture({
                                 muted
                                 className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1] z-[1]"
                             />
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                size="icon"
-                                className="absolute top-2 right-2 z-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-none h-10 w-10"
-                                onClick={toggleCamera}
-                            >
-                                <SwitchCamera className="w-5 h-5" />
-                            </Button>
+                            
+                            {/* Enhanced Mobile Controls */}
+                            <div className="absolute top-2 right-2 z-10 flex gap-2">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="icon"
+                                    className="rounded-full bg-black/50 hover:bg-black/70 text-white border-none h-8 w-8"
+                                    onClick={toggleCamera}
+                                    title="Switch Camera"
+                                >
+                                    <SwitchCamera className="w-4 h-4" />
+                                </Button>
+                                
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="icon"
+                                    className="rounded-full bg-black/50 hover:bg-black/70 text-white border-none h-8 w-8"
+                                    onClick={toggleQualityOverlay}
+                                    title="Toggle Quality Feedback"
+                                >
+                                    {showQualityOverlay ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                                </Button>
+                            </div>
+
+                            {/* Accessibility Toggle - Mobile */}
+                            <div className="absolute top-2 left-2 z-10">
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="icon"
+                                    className={`rounded-full border-none h-8 w-8 ${
+                                        accessibilityMode 
+                                            ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
+                                            : 'bg-black/50 hover:bg-black/70 text-white'
+                                    }`}
+                                    onClick={toggleAccessibilityMode}
+                                    title="Toggle Accessibility Mode"
+                                >
+                                    <span className="text-xs font-bold">A</span>
+                                </Button>
+                            </div>
+
+                            {/* Image Quality Overlay - Mobile */}
+                            <ImageQualityOverlay
+                                qualityResult={qualityResult}
+                                isVisible={showQualityOverlay && videoPlaying}
+                                mode={mode}
+                            />
+
+                            {/* Composition Guide Overlay - Mobile */}
+                            <CompositionGuideOverlay
+                                isVisible={showCompositionGuide && videoPlaying}
+                                mode={mode}
+                            />
+
+                            {/* Accessibility Feedback - Mobile */}
+                            <AccessibilityFeedback
+                                qualityResult={qualityResult}
+                                isEnabled={accessibilityMode}
+                            />
+
                             <canvas ref={canvasRef} className="hidden" />
                             {/* Only show overlay when video not yet playing - COMPLETELY REMOVE when playing */}
                             {!videoPlaying && (
@@ -738,10 +918,15 @@ export function CameraCapture({
                                 cameraInputRef.current?.click()
                             }
                         }}
-                        className="flex-1 h-12 text-base bg-emerald-600 hover:bg-emerald-700"
+                        disabled={qualityResult?.overall === 'poor'}
+                        className={`flex-1 h-12 text-base ${
+                            qualityResult?.overall === 'poor' 
+                                ? 'bg-gray-400 cursor-not-allowed' 
+                                : 'bg-emerald-600 hover:bg-emerald-700'
+                        }`}
                     >
                         <Camera className="w-5 h-5 mr-2" />
-                        {t.camera.capturePhoto}
+                        {qualityResult?.overall === 'poor' ? 'Improve Quality First' : t.camera.capturePhoto}
                     </Button>
                     <Button
                         variant="outline"
@@ -752,6 +937,26 @@ export function CameraCapture({
                         {t.camera.uploadPhoto}
                     </Button>
                 </div>
+                
+                {/* Quality Status Bar - Mobile */}
+                {qualityResult && showQualityOverlay && (
+                    <div className="mt-2 text-center">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs bg-white/80 backdrop-blur-sm border">
+                            <div className={`w-2 h-2 rounded-full ${
+                                qualityResult.overall === 'excellent' ? 'bg-green-500' :
+                                qualityResult.overall === 'good' ? 'bg-emerald-500' :
+                                qualityResult.overall === 'fair' ? 'bg-yellow-500' : 'bg-red-500'
+                            }`} />
+                            <span className="font-medium">
+                                {qualityResult.overall === 'excellent' && 'Excellent'}
+                                {qualityResult.overall === 'good' && 'Good'}
+                                {qualityResult.overall === 'fair' && 'Fair'}
+                                {qualityResult.overall === 'poor' && 'Poor'}
+                            </span>
+                            <span className="text-gray-500">({qualityResult.score}%)</span>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Hidden file input for mobile - Upload (no capture = file picker) */}
@@ -774,39 +979,71 @@ export function CameraCapture({
             />
 
             {/* Footer Buttons - Desktop only */}
-            <div className="hidden md:flex justify-end mt-4 gap-3">
-                <>
-                    <div className="flex gap-2">
-                        <Button
-                            onClick={captureImage}
-                            disabled={!stream}
-                            className="flex-1 h-14 text-base bg-emerald-600 hover:bg-emerald-700"
-                        >
-                            <Camera className="w-5 h-5 mr-2" />
-                            {t.camera.capturePhoto}
-                        </Button>
+            <div className="hidden md:flex justify-between items-center mt-4 gap-3">
+                {/* Quality Controls */}
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleCompositionGuide}
+                        className={`${showCompositionGuide ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : ''}`}
+                    >
+                        Guide
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleAccessibilityMode}
+                        className={`${accessibilityMode ? 'bg-blue-50 border-blue-200 text-blue-700' : ''}`}
+                    >
+                        Accessibility
+                    </Button>
+                    {qualityResult && (
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-gray-50 border">
+                            <div className={`w-2 h-2 rounded-full ${
+                                qualityResult.overall === 'excellent' ? 'bg-green-500' :
+                                qualityResult.overall === 'good' ? 'bg-emerald-500' :
+                                qualityResult.overall === 'fair' ? 'bg-yellow-500' : 'bg-red-500'
+                            }`} />
+                            <span className="font-medium">
+                                Quality: {qualityResult.overall} ({qualityResult.score}%)
+                            </span>
+                        </div>
+                    )}
+                </div>
 
-                        {/* Hidden file input for desktop */}
-                        <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleFileUpload}
-                        />
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                    <Button
+                        onClick={captureImage}
+                        disabled={!stream || qualityResult?.overall === 'poor'}
+                        className={`h-14 text-base ${
+                            qualityResult?.overall === 'poor' 
+                                ? 'bg-gray-400 cursor-not-allowed' 
+                                : 'bg-emerald-600 hover:bg-emerald-700'
+                        }`}
+                    >
+                        <Camera className="w-5 h-5 mr-2" />
+                        {qualityResult?.overall === 'poor' ? 'Improve Quality First' : t.camera.capturePhoto}
+                    </Button>
 
-                        <Button
-                            variant="outline"
-                            className="flex-1 h-14 text-base border-stone-300 text-stone-600 hover:bg-stone-50"
-                            onClick={() => fileInputRef.current?.click()}
-                        >
-                            <Upload className="w-5 h-5 mr-2" />
-                            {t.camera.uploadPhoto}
-                        </Button>
-                    </div>
+                    {/* Hidden file input for desktop */}
+                    <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                    />
 
-                    {/* Skip button */}
-
-                </>
+                    <Button
+                        variant="outline"
+                        className="h-14 text-base border-stone-300 text-stone-600 hover:bg-stone-50"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <Upload className="w-5 h-5 mr-2" />
+                        {t.camera.uploadPhoto}
+                    </Button>
+                </div>
             </div>
             <Dialog open={isSkipPromptOpen} onOpenChange={setIsSkipPromptOpen}>
                 <DialogContent>

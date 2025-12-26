@@ -158,7 +158,7 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
    GEMINI_API_KEY=your_gemini_api_key
 
    # Application
-   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   NEXT_PUBLIC_APP_URL=http://localhost:3100
    ```
 
 4. **Database Setup**
@@ -234,7 +234,7 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
    npm run dev
    ```
 
-   The application will be available at `http://localhost:3000`
+   The application will be available at `http://localhost:3100`
 
 6. **Blog Management (Tina CMS)**
    
@@ -242,7 +242,7 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
    ```bash
    npm run dev:tina
    ```
-   The editor will be available at `http://localhost:3000/tina-admin/index.html`
+   The editor will be available at `http://localhost:3100/tina-admin/index.html`
 
 ### Mobile App Setup
 
@@ -260,7 +260,7 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
    
    Update `lib/apiConfig.js` with your web application URL:
    ```javascript
-   export const API_BASE_URL = 'http://localhost:3000';
+   export const API_BASE_URL = 'http://localhost:3100';
    ```
 
 4. **Run the mobile app**

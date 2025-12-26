@@ -186,9 +186,9 @@ export const ms: TranslationKeys = {
         selectHistoryDesc: 'Pilih diagnosis terdahulu untuk mengimport gejala.',
         importButton: 'Import Terpilih',
         noHistoryFound: 'Tiada sejarah diagnosis terdahulu dijumpai.',
+        medicineSkipWarning: "Anda belum menambah sebarang ubat. Adakah anda sedang mengambil sebarang ubat preskripsi atau suplemen?",
         detailedSymptoms: 'Simptom Terperinci / Kebimbangan',
         detailedSymptomsPlaceholder: 'Sila terangkan aduan utama, perasaan, dan butiran lain yang berkaitan...',
-        medicineSkipWarning: "Anda belum menambah sebarang ubat. Adakah anda sedang mengambil sebarang ubat preskripsi atau makanan tambahan?",
         chooseTcmDoctor: 'Pilih Doktor TCM Anda',
         startDiagnosis: 'Mulakan Diagnosis',
         // Terjemahan langkah wizard
@@ -657,18 +657,46 @@ export const ms: TranslationKeys = {
         welcomeBack: 'Selamat kembali',
         newDiagnosis: 'Diagnosis Baru',
 
+        // Constitution Card
+        constitutionCard: {
+            title: 'Konstitusi Saya',
+            learnMore: 'Ketahui Lebih Lanjut',
+            hideDetails: 'Sembunyikan Butiran',
+            noDiagnosisTitle: 'Temui Konstitusi TCM Anda',
+            noDiagnosisDesc: 'Mulakan perjalanan diagnosis TCM anda untuk memahami jenis konstitusi badan unik anda dan menerima cadangan kesihatan yang diperibadikan.',
+            startAssessment: 'Mulakan Penilaian Konstitusi',
+            dietaryAdvice: 'Nasihat Pemakanan',
+            foodsToEat: 'Makanan Disyorkan',
+            foodsToAvoid: 'Makanan Dielakkan',
+            lifestyleAdvice: 'Cadangan Gaya Hidup',
+            lastAssessed: 'Dinilai terakhir',
+            getNewAssessment: 'Dapatkan Penilaian Baru',
+        },
+
+        // Daily Tip
+        dailyTip: {
+            badge: 'Petua Kesihatan Harian',
+            detailsTitle: 'Butiran',
+            ingredientsTitle: 'Bahan-bahan',
+            methodTitle: 'Cara Penyediaan',
+        },
+
         // Navigation tabs
         tabs: {
             healthJourney: 'Perjalanan Kesihatan',
-            mealPlanner: 'Perancang Pemakanan AI',
-            snoreAnalysis: 'Analisis Dengkuran',
-            vitalityRhythm: 'Ritma Vitaliti',
-            community: 'Bulatan Kesihatan',
+            mealPlanner: 'Terapi Pemakanan', // Dietary Therapy (formerly Perancang Pemakanan AI)
+            snoreAnalysis: 'Penjagaan Tidur', // Sleep Cultivation (formerly Analisis Dengkuran)
+            vitalityRhythm: 'Jam Meridian', // Meridian Clock (formerly Ritma Vitaliti)
+            community: 'Komuniti TCM', // TCM Community (formerly Bulatan Kesihatan)
+            qiDose: 'Senaman Qi', // Guided Exercise (formerly Qi Dose)
             family: 'Penjagaan Keluarga',
             profile: 'Profil',
             documents: 'Dokumen',
             settings: 'Tetapan',
+            fiveElements: 'Bulatan Kesihatan', // Circle of Health
         },
+
+
 
 
         // Health Journey section
@@ -754,9 +782,9 @@ export const ms: TranslationKeys = {
             stepDiagnosisSummary: 'Ringkasan Diagnostik',
         },
 
-        // Meal Planner
+        // Meal Planner / Terapi Pemakanan
         mealPlanner: {
-            title: 'Perancang Pemakanan AI',
+            title: 'Terapi Pemakanan', // Dietary Therapy
             subtitle: 'Pelan hidangan 7 hari berdasarkan perlembagaan TCM anda',
             yourMealPlan: 'Pelan Hidangan TCM 7 Hari Anda',
             constitution: 'Perlembagaan',
@@ -850,9 +878,9 @@ export const ms: TranslationKeys = {
             },
         },
 
-        // Snore Analysis section
+        // Snore Analysis / Penjagaan Tidur
         snoreAnalysis: {
-            title: 'Analisis Dengkuran',
+            title: 'Penjagaan Tidur', // Sleep Cultivation (formerly Analisis Dengkuran)
             subtitle: 'Rakam bunyi tidur anda untuk analisis dengkuran berkuasa AI',
             description: 'Kesan corak dengkuran, nilai keterukan, dan terima cadangan peribadi.',
             startRecording: 'Mula Merakam',
@@ -932,6 +960,21 @@ export const ms: TranslationKeys = {
             dashboard: 'Papan Pemuka',
             patientAccount: 'Akaun Pesakit',
             logout: 'Log Keluar',
+            // Section Headers with TCM Quotes
+            sectionDiet: 'Pemakanan & Diet',
+            sectionRoutine: 'Kehidupan Harian & Rehat',
+            sectionEmotions: 'Emosi & Komuniti',
+            // TCM Classic Quotes
+            quoteDiet: 'Kesederhanaan dalam diet, keharmonian dalam rasa',
+            quoteRoutine: 'Rutin tetap, usaha seimbang',
+            quoteEmotions: 'Semangat dijaga dalaman, penyakit tidak mendekat',
+            // All quotes source
+            quoteSource: 'Huangdi Neijing · Suwen',
+            // Group Headers
+            groupAssessment: 'Penilaian Diagnosis',
+            groupTreatment: 'Pelan Rawatan',
+            groupCultivation: 'Kesejahteraan Harian',
+            groupAccount: 'Pengurusan Akaun',
         },
 
         // Legacy keys for backwards compatibility
@@ -944,9 +987,9 @@ export const ms: TranslationKeys = {
         recentDiagnosis: 'Diagnosis Terkini',
         viewReport: 'Lihat Laporan',
 
-        // Vitality Rhythm
+        // Vitality Rhythm / Jam Meridian
         vitalityRhythm: {
-            title: 'Ritma Vitaliti',
+            title: 'Jam Meridian', // Meridian Clock (formerly Ritma Vitaliti)
             subtitle: 'Mengharmonikan Badan Anda dengan Kitaran Semulajadi',
             meridianClock: 'Jam Organ Meridian',
             meridianClockDesc: 'Fokus organ TCM berdasarkan kitaran 24 jam teori.',
@@ -965,6 +1008,13 @@ export const ms: TranslationKeys = {
             latest: 'Terbaru',
             element: 'Elemen',
             hour: 'Jam',
+        },
+
+        // Qi Dose / Senaman Qi
+        qiDose: {
+            title: 'Senaman Qi', // Guided Exercise (formerly Qi Dose)
+            subtitle: 'Amalan pergerakan berpandu TCM untuk konstitusi anda',
+            description: 'Berdasarkan konstitusi anda, amalkan pergerakan mikro ini untuk mengatur tenaga dalaman',
         },
     },
     doctorDashboard: {
@@ -1306,7 +1356,7 @@ export const ms: TranslationKeys = {
         description: 'Kembar Digital anda menggambarkan aliran tenaga berdasarkan laporan TCM anda. Bahagian merah menunjukkan haba aktif atau genangan yang sedang dirawat.',
     },
     circleOfHealth: {
-        title: 'Bulatan Kesihatan',
+        title: 'Komuniti TCM', // formerly Circle of Health
         subtitle: 'Kumpulan sokongan berdasarkan konstitusi TCM anda',
         myCircles: 'Bulatan Saya',
         anonymousMember: 'Ahli Tanpa Nama',
@@ -1365,6 +1415,18 @@ export const ms: TranslationKeys = {
             uploadTongue: 'Muat Naik Foto Lidah',
             recentActivity: 'Aktiviti Keluarga Terkini'
         }
+    },
+    // Solar Terms (24节气)
+    solarTerms: {
+        currentTerm: 'Penggal Solar Semasa',
+        viewCalendar: 'Lihat Kalendar',
+        healthFocus: 'Fokus Kesihatan',
+        recommendedFoods: 'Makanan Disyorkan',
+        lifestyleAdvice: 'Nasihat Gaya Hidup',
+        focus: 'Fokus',
+        current: 'Semasa',
+        fullCalendarTitle: 'Kalendar 24 Penggal Solar',
+        year: 'Tahun',
     },
     // TCM E-Commerce / Herb Shop
     herbShop: {

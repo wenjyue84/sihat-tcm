@@ -130,6 +130,15 @@
   .h-safe-bottom {
     height: env(safe-area-inset-bottom);
   }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Shimmer animation for progress bars and loading states */

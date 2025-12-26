@@ -133,6 +133,8 @@ export interface DiagnosisSession {
   clinical_notes?: string | null
   treatment_plan?: string | null
   follow_up_date?: string | null
+  // Family care link
+  family_member_id?: string | null
   created_at: string
   updated_at: string
 }
@@ -204,5 +206,49 @@ export interface ActionResult<T = unknown> {
   data?: T
   error?: string
   total?: number
+}
+
+// ============================================================================
+// Family Members (family_members table)
+// ============================================================================
+
+export type FamilyRelationship = 'self' | 'mother' | 'father' | 'spouse' | 'child' | 'sibling' | 'other'
+
+export interface FamilyMember {
+  id: string
+  user_id: string
+  name: string
+  relationship: FamilyRelationship
+  gender: 'male' | 'female' | 'other' | null
+  date_of_birth: string | null
+  height: number | null
+  weight: number | null
+  medical_history: string | null
+  avatar_url: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface FamilyMemberWithDiagnosis extends FamilyMember {
+  lastDiagnosis?: {
+    date: string
+    diagnosis: string
+    score?: number
+  } | null
+}
+
+export interface SaveFamilyMemberInput {
+  name: string
+  relationship: FamilyRelationship
+  gender?: 'male' | 'female' | 'other'
+  date_of_birth?: string
+  height?: number
+  weight?: number
+  medical_history?: string
+  avatar_url?: string
+}
+
+export interface UpdateFamilyMemberInput extends Partial<SaveFamilyMemberInput> {
+  id: string
 }
 

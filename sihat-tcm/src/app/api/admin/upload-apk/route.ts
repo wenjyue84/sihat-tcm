@@ -4,6 +4,11 @@ import { writeFile, unlink } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 
+// Configure route for file uploads
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 300; // 5 minutes for large file uploads
+
 export async function POST(req: NextRequest) {
     try {
         const supabase = await createClient();
@@ -26,7 +31,24 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
         }
 
-        const formData = await req.formData();
+        // Log request details for debugging
+        const contentType = req.headers.get('content-type');
+        const contentLength = req.headers.get('content-length');
+        console.log('Upload request - Content-Type:', contentType, 'Content-Length:', contentLength);
+
+        let formData;
+        try {
+            formData = await req.formData();
+        } catch (parseError: any) {
+            console.error('FormData parse error:', parseError);
+            console.error('Error stack:', parseError.stack);
+            return NextResponse.json({ 
+                error: 'Failed to parse body as FormData', 
+                details: parseError.message || String(parseError),
+                contentType: contentType || 'not set',
+                contentLength: contentLength || 'not set'
+            }, { status: 400 });
+        }
         const file = formData.get('file') as File | null;
 
         if (!file) {

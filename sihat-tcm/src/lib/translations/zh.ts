@@ -185,10 +185,10 @@ export const zh: TranslationKeys = {
         selectHistoryDesc: '选择以前的诊断以导入症状。',
         importButton: '导入所选',
         noHistoryFound: '未找到以前的诊断历史。',
+        medicineSkipWarning: "您尚未添加任何药物。您目前是否正在服用任何处方药或补充剂？",
         otherSymptomsPlaceholder: '您感受到的其他症状...',
         detailedSymptoms: '详细症状描述',
         detailedSymptomsPlaceholder: '请详细描述您的主要症状、感受以及其他相关情况...',
-        medicineSkipWarning: "您还没有添加任何药物。您目前是否正在服用任何处方药或补充剂？",
         chooseTcmDoctor: '选择您的中医医师',
         startDiagnosis: '开始诊断',
         // 向导步骤翻译
@@ -657,17 +657,43 @@ export const zh: TranslationKeys = {
         welcomeBack: '欢迎回来',
         newDiagnosis: '新诊断',
 
+        // Constitution Card
+        constitutionCard: {
+            title: '我的体质',
+            learnMore: '了解更多',
+            hideDetails: '收起详情',
+            noDiagnosisTitle: '开始体质辨识',
+            noDiagnosisDesc: '开始您的中医诊断之旅，了解您独特的体质类型，并获得个性化的健康建议。',
+            startAssessment: '开始体质辨识',
+            dietaryAdvice: '饮食调理',
+            foodsToEat: '宜食',
+            foodsToAvoid: '忌食',
+            lifestyleAdvice: '生活建议',
+            lastAssessed: '上次评估',
+            getNewAssessment: '获取新评估',
+        },
+
+        // 今日养生小贴士
+        dailyTip: {
+            badge: '今日养生小贴士',
+            detailsTitle: '详细说明',
+            ingredientsTitle: '食材',
+            methodTitle: '做法',
+        },
+
         // Navigation tabs
         tabs: {
             healthJourney: '健康历程',
-            mealPlanner: 'AI膳食规划',
-            snoreAnalysis: '鼾声分析',
-            vitalityRhythm: '生命节律',
-            community: '社区',
+            mealPlanner: '食疗方案', // Dietary Therapy (formerly AI膳食规划)
+            snoreAnalysis: '睡眠养生', // Sleep Cultivation (formerly 鼾声分析)
+            vitalityRhythm: '子午流注', // Meridian Clock (formerly 生命节律)
+            community: '杏林圈', // Apricot Grove (formerly 社区)
+            qiDose: '导引功法', // Guided Exercise (formerly 气行八段)
             family: '家人健康',
             profile: '个人资料',
             documents: '文档',
             settings: '设置',
+            fiveElements: '整体评估', // Circle of Health (Five Elements Radar)
         },
 
 
@@ -754,9 +780,9 @@ export const zh: TranslationKeys = {
             stepDiagnosisSummary: '诊断总结',
         },
 
-        // Meal Planner
+        // Meal Planner / 食疗方案
         mealPlanner: {
-            title: 'AI膳食规划',
+            title: '食疗方案', // Dietary Therapy
             subtitle: '基于您的中医体质定制7天膳食计划',
             yourMealPlan: '您的7天中医膳食计划',
             constitution: '体质',
@@ -850,9 +876,9 @@ export const zh: TranslationKeys = {
             },
         },
 
-        // Snore Analysis section
+        // Snore Analysis / 睡眠养生
         snoreAnalysis: {
-            title: '鼾声分析',
+            title: '睡眠养生', // Sleep Cultivation (formerly 鼾声分析)
             subtitle: '录制您的睡眠声音，获取AI驱动的鼾声分析',
             description: '检测鼾声模式，评估严重程度，并获得个性化建议。',
             startRecording: '开始录音',
@@ -932,6 +958,21 @@ export const zh: TranslationKeys = {
             dashboard: '控制面板',
             patientAccount: '患者账户',
             logout: '退出登录',
+            // Section Headers with TCM Quotes
+            sectionDiet: '饮食调养',
+            sectionRoutine: '起居劳逸',
+            sectionEmotions: '情志与社群',
+            // TCM Classic Quotes
+            quoteDiet: '食饮有节，五味调和',
+            quoteRoutine: '起居有常，不妄作劳',
+            quoteEmotions: '精神内守，病安从来',
+            // All quotes source
+            quoteSource: '《黄帝内经·素问》',
+            // Group Headers
+            groupAssessment: '诊断评估',
+            groupTreatment: '调理方案',
+            groupCultivation: '日常养生',
+            groupAccount: '账户管理',
         },
 
         // Legacy keys for backwards compatibility
@@ -944,9 +985,9 @@ export const zh: TranslationKeys = {
         recentDiagnosis: '最近诊断',
         viewReport: '查看报告',
 
-        // Vitality Rhythm
+        // Vitality Rhythm / 子午流注
         vitalityRhythm: {
-            title: '生命节律',
+            title: '子午流注', // Meridian Clock (formerly 生命节律)
             subtitle: '使您的身体与自然周期保持和谐',
             meridianClock: '子午流注图',
             meridianClockDesc: '基于24小时周期的TCM器官脏腑功能重点。',
@@ -965,6 +1006,13 @@ export const zh: TranslationKeys = {
             latest: '最新',
             element: '五行',
             hour: '小时',
+        },
+
+        // Qi Dose / 导引功法
+        qiDose: {
+            title: '导引功法', // Guided Exercise (formerly 气行八段)
+            subtitle: '基于您的体质的中医引导运动练习',
+            description: '基于您的体质，练习这些微动作来调节内在能量',
         },
     },
     doctorDashboard: {
@@ -1305,7 +1353,7 @@ export const zh: TranslationKeys = {
         description: '您的数字孪生基于中医报告可视化能量流动。红色区域表示正在处理的热证或气滞。',
     },
     circleOfHealth: {
-        title: '健康圈',
+        title: '杏林圈', // formerly Circle of Health
         subtitle: '基于您的中医体质的互助小组',
         myCircles: '我的圈子',
         anonymousMember: '匿名成员',
@@ -1364,6 +1412,91 @@ export const zh: TranslationKeys = {
             uploadTongue: '上传舌象照片',
             recentActivity: '最近家庭动态'
         }
+    },
+    // Five Elements Radar - 五行雷达图
+    fiveElementsRadar: {
+        title: '五行健康雷达',
+        subtitle: '基于中医五行理论的脏腑健康评估',
+        needsAttention: '需要关注',
+        currentStatus: '当前状态',
+        recommendations: '调养建议',
+        historicalTrend: '历史趋势',
+        legend: {
+            title: '五行理论',
+        },
+        organs: {
+            liver: '肝（木）',
+            heart: '心（火）',
+            spleen: '脾（土）',
+            lung: '肺（金）',
+            kidney: '肾（水）',
+        },
+        descriptions: {
+            liver: '肝（木）主疏泄，藏血，主筋。与情志和规划能力相关。',
+            heart: '心（火）主血脉，藏神。主宰意识、记忆和睡眠。',
+            spleen: '脾（土）主运化、升清，生气血，主肌肉。',
+            lung: '肺（金）主气、司呼吸，主皮毛，通调水道。',
+            kidney: '肾（水）藏精，主生长发育生殖，主骨生髓。',
+        },
+        tips: {
+            liver: {
+                weak1: '多吃绿色蔬菜（菠菜、西兰花、芹菜）',
+                weak2: '练习柔和的伸展运动和太极',
+                weak3: '调整情绪，避免生气',
+                weak4: '保证充足睡眠（晚11点-凌晨3点是肝经时辰）',
+                normal1: '继续定期食用绿色蔬菜',
+                normal2: '保持情绪平衡',
+                normal3: '保持规律作息',
+            },
+            heart: {
+                weak1: '多吃红色食物（红豆、枸杞、红枣）',
+                weak2: '练习冥想和深呼吸',
+                weak3: '避免过度兴奋或焦虑',
+                weak4: '确保睡眠质量',
+                normal1: '保持愉快的活动',
+                normal2: '继续正念练习',
+                normal3: '保持社交联系',
+            },
+            spleen: {
+                weak1: '多吃温热熟食（避免生冷）',
+                weak2: '食用黄色食物（红薯、南瓜）',
+                weak3: '定时定量进餐',
+                weak4: '避免思虑过度和忧心',
+                normal1: '继续规律的进餐时间',
+                normal2: '保持消化系统健康',
+                normal3: '保持积极思维',
+            },
+            lung: {
+                weak1: '多吃白色食物（梨、莲藕、银耳）',
+                weak2: '练习深呼吸',
+                weak3: '保持室内空气质量',
+                weak4: '秋冬季节注意保暖',
+                normal1: '继续呼吸系统保健',
+                normal2: '保持良好姿态',
+                normal3: '每天呼吸新鲜空气',
+            },
+            kidney: {
+                weak1: '多吃黑色食物（黑芝麻、黑豆、核桃）',
+                weak2: '避免过度劳累和房事',
+                weak3: '保持腰部和脚部温暖',
+                weak4: '充分休息和睡眠',
+                normal1: '保持工作生活平衡',
+                normal2: '继续健康生活方式',
+                normal3: '适度温和运动',
+            },
+        },
+    },
+    // Solar Terms (24节气)
+    solarTerms: {
+        currentTerm: '当前节气',
+        viewCalendar: '查看节气日历',
+        healthFocus: '养生重点',
+        recommendedFoods: '推荐食物',
+        lifestyleAdvice: '起居建议',
+        focus: '重点',
+        current: '当前',
+        fullCalendarTitle: '二十四节气日历',
+        year: '年',
     },
     // TCM E-Commerce / Herb Shop
     herbShop: {

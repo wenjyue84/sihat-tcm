@@ -348,10 +348,15 @@ export default function AdminDashboard() {
 
         try {
             const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) {
+                throw new Error('No authentication token available');
+            }
+
+            // Don't set Content-Type header - browser will set it automatically with boundary
             const response = await fetch('/api/admin/upload-apk', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${session?.access_token}`
+                    'Authorization': `Bearer ${session.access_token}`
                 },
                 body: formData
             });

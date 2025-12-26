@@ -43,7 +43,9 @@ import {
     Menu,
     X,
     Pill,
-    AlertCircle
+    AlertCircle,
+
+    Leaf
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -78,6 +80,12 @@ import { DocumentViewerModal } from './DocumentViewerModal'
 import { CircleOfHealth } from './CircleOfHealth'
 import { FamilyManagement } from './FamilyManagement'
 import { PatientSettings } from './PatientSettings'
+import { DashboardGrid } from './DashboardWidgets'
+import { SolarTermsTimeline } from './SolarTermsTimeline'
+import { DailyTipCard } from './DailyTipCard'
+import { ConstitutionCard } from './ConstitutionCard'
+import { FiveElementsRadar } from './FiveElementsRadar'
+import { Search } from 'lucide-react'
 
 export function UnifiedDashboard() {
     const { user, profile, updatePreferences, signOut, refreshProfile } = useAuth()
@@ -124,7 +132,7 @@ export function UnifiedDashboard() {
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Active Section
-    const [activeSection, setActiveSectionState] = useState<'journey' | 'profile' | 'documents' | 'meals' | 'snore' | 'qi-dose' | 'vitality' | 'community' | 'family' | 'settings'>('journey')
+    const [activeSection, setActiveSectionState] = useState<'journey' | 'profile' | 'documents' | 'meals' | 'snore' | 'qi-dose' | 'vitality' | 'community' | 'family' | 'settings' | 'five-elements'>('journey')
     const [mealSubSection, setMealSubSection] = useState<'plan' | 'checker'>('plan')
 
     // Settings State
@@ -157,7 +165,7 @@ export function UnifiedDashboard() {
         updatePreferences({ sortDirection: dir })
     }
 
-    const setActiveSection = (section: 'journey' | 'profile' | 'documents' | 'meals' | 'snore' | 'qi-dose' | 'vitality' | 'community' | 'family' | 'settings') => {
+    const setActiveSection = (section: 'journey' | 'profile' | 'documents' | 'meals' | 'snore' | 'qi-dose' | 'vitality' | 'community' | 'family' | 'settings' | 'five-elements') => {
         setActiveSectionState(section)
         updatePreferences({ activeSection: section })
     }
@@ -427,9 +435,10 @@ export function UnifiedDashboard() {
     const getSectionTitle = () => {
         switch (activeSection) {
             case 'journey': return t.patientDashboard.tabs.healthJourney
+            case 'five-elements': return t.patientDashboard.tabs.fiveElements || 'Circle of Health'
             case 'meals': return t.patientDashboard.tabs.mealPlanner
-            case 'snore': return t.patientDashboard.snoreAnalysis.title
-            case 'qi-dose': return t.qiDose?.title || 'Qi Dose'
+            case 'snore': return t.patientDashboard.tabs.snoreAnalysis
+            case 'qi-dose': return t.patientDashboard.tabs.qiDose
             case 'vitality': return t.patientDashboard.tabs.vitalityRhythm
             case 'community': return t.patientDashboard.tabs.community
             case 'family': return t.familyManagement?.title || t.patientDashboard.tabs.family || 'Family Care'
@@ -474,83 +483,126 @@ export function UnifiedDashboard() {
 
                 {/* Navigation */}
                 <div className="p-4 flex-1 overflow-y-auto">
-                    <div className="space-y-1">
-                        <p className="px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Health</p>
-                        <button
-                            onClick={() => { setActiveSection('journey'); setIsMobileMenuOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'journey' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-                        >
-                            <Activity className="w-4 h-4" />
-                            {t.patientDashboard.tabs.healthJourney}
-                        </button>
-                        <button
-                            onClick={() => { setActiveSection('meals'); setIsMobileMenuOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'meals' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-                        >
-                            <UtensilsCrossed className="w-4 h-4" />
-                            {t.patientDashboard.tabs.mealPlanner}
-                        </button>
-                        <button
-                            onClick={() => { setActiveSection('snore'); setIsMobileMenuOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'snore' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-                        >
-                            <Moon className="w-4 h-4" />
-                            {t.patientDashboard.snoreAnalysis.title}
-                        </button>
-                        <button
-                            onClick={() => { setActiveSection('vitality'); setIsMobileMenuOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'vitality' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-                        >
-                            <TrendingUp className="w-4 h-4" />
-                            {t.patientDashboard.tabs.vitalityRhythm}
-                        </button>
-                        <button
-                            onClick={() => { setActiveSection('qi-dose'); setIsMobileMenuOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'qi-dose' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-                        >
-                            <Wind className="w-4 h-4" />
-                            {t.qiDose?.title || 'Qi Dose'}
-                        </button>
-                        <button
-                            onClick={() => { setActiveSection('community'); setIsMobileMenuOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'community' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-                        >
-                            <Users className="w-4 h-4" />
-                            {t.patientDashboard.tabs.community}
-                        </button>
-                        <button
-                            onClick={() => { setActiveSection('family'); setIsMobileMenuOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'family' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-                        >
-                            <Heart className="w-4 h-4" />
-                            {t.familyManagement?.title || t.patientDashboard.tabs.family || 'Family Care'}
-                        </button>
+                    <div className="space-y-6">
+                        {/* Group 1: Diagnosis Assessment */}
+                        <div>
+                            <div className="flex items-center gap-2 px-4 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                <Search className="w-3.5 h-3.5 text-blue-500" />
+                                {t.patientDashboard?.navigation?.groupAssessment || 'Assessment'}
+                            </div>
+                            <div className="space-y-1">
+                                <button
+                                    onClick={() => { setActiveSection('journey'); setIsMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'journey' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <Activity className="w-4 h-4" />
+                                    {t.patientDashboard.tabs.healthJourney}
+                                </button>
+                                <button
+                                    onClick={() => { setActiveSection('five-elements'); setIsMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'five-elements' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <Grid3X3 className="w-4 h-4" />
+                                    {t.patientDashboard.tabs.fiveElements || 'Circle of Health'}
+                                </button>
+                                <button
+                                    onClick={() => { setActiveSection('profile'); setIsMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'profile' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <User className="w-4 h-4" />
+                                    {t.patientDashboard.tabs.profile}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Group 2: Treatment Plan */}
+                        <div>
+                            <div className="flex items-center gap-2 px-4 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                <Pill className="w-3.5 h-3.5 text-amber-500" />
+                                {t.patientDashboard?.navigation?.groupTreatment || 'Treatment'}
+                            </div>
+                            <div className="space-y-1">
+                                <button
+                                    onClick={() => { setActiveSection('meals'); setIsMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'meals' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <UtensilsCrossed className="w-4 h-4" />
+                                    {t.patientDashboard.tabs.mealPlanner}
+                                </button>
+                                <button
+                                    onClick={() => { setActiveSection('snore'); setIsMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'snore' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <Moon className="w-4 h-4" />
+                                    {t.patientDashboard.tabs.snoreAnalysis}
+                                </button>
+                                <button
+                                    onClick={() => { setActiveSection('qi-dose'); setIsMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'qi-dose' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <Wind className="w-4 h-4" />
+                                    {t.patientDashboard.tabs.qiDose}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Group 3: Daily Wellness */}
+                        <div>
+                            <div className="flex items-center gap-2 px-4 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                <Leaf className="w-3.5 h-3.5 text-emerald-500" />
+                                {t.patientDashboard?.navigation?.groupCultivation || 'Cultivation'}
+                            </div>
+
+                            <div className="space-y-1">
+                                <button
+                                    onClick={() => { setActiveSection('vitality'); setIsMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'vitality' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <Activity className="w-4 h-4" />
+                                    {t.patientDashboard.tabs.vitalityRhythm}
+                                </button>
+                                <button
+                                    onClick={() => { setActiveSection('community'); setIsMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'community' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <Users className="w-4 h-4" />
+                                    {t.patientDashboard.tabs.community}
+                                </button>
+                                <button
+                                    onClick={() => { setActiveSection('family'); setIsMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'family' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <Heart className="w-4 h-4" />
+                                    {t.patientDashboard.tabs.family}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Group 4: Account */}
+                        <div>
+                            <div className="flex items-center gap-2 px-4 mb-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <User className="w-3.5 h-3.5 text-slate-500" />
+                                {t.patientDashboard?.navigation?.groupAccount || 'Account'}
+                            </div>
+                            <div className="space-y-1">
+                                <button
+                                    onClick={() => { setActiveSection('documents'); setIsMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'documents' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <FileText className="w-4 h-4" />
+                                    {t.patientDashboard.tabs.documents}
+                                </button>
+                                <button
+                                    onClick={() => { setActiveSection('settings'); setIsMobileMenuOpen(false); }}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'settings' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                                >
+                                    <Settings className="w-4 h-4" />
+                                    {t.patientDashboard.tabs.settings}
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="mt-6 space-y-1">
-                        <p className="px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Account</p>
-                        <button
-                            onClick={() => { setActiveSection('profile'); setIsMobileMenuOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'profile' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-                        >
-                            <User className="w-4 h-4" />
-                            {t.patientDashboard.tabs.profile}
-                        </button>
-                        <button
-                            onClick={() => { setActiveSection('documents'); setIsMobileMenuOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'documents' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-                        >
-                            <FileText className="w-4 h-4" />
-                            {t.patientDashboard.tabs.documents}
-                        </button>
-                        <button
-                            onClick={() => { setActiveSection('settings'); setIsMobileMenuOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === 'settings' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-                        >
-                            <Settings className="w-4 h-4" />
-                            {t.patientDashboard.tabs.settings}
-                        </button>
-                    </div>
                 </div>
 
                 {/* Logout Button */}
@@ -619,11 +671,45 @@ export function UnifiedDashboard() {
                         {/* Health Journey Section */}
                         {activeSection === 'journey' && (
                             <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+                                {/* Solar Terms Timeline */}
+                                <SolarTermsTimeline />
+
+                                {/* Constitution Card */}
+                                <ConstitutionCard
+                                    latestConstitution={sessions.length > 0 ? sessions[0].constitution : null}
+                                    latestConstitutionData={sessions.length > 0 ? {
+                                        primary_diagnosis: sessions[0].primary_diagnosis,
+                                        recommendations: {
+                                            lifestyle: sessions[0].full_report?.recommendations?.lifestyle,
+                                            dietary_advice: {
+                                                foods_to_eat: sessions[0].full_report?.recommendations?.food || sessions[0].full_report?.recommendations?.food_therapy?.beneficial,
+                                                foods_to_avoid: sessions[0].full_report?.recommendations?.avoid
+                                            }
+                                        },
+                                        created_at: sessions[0].created_at
+                                    } : undefined}
+                                />
+
+                                {/* Daily Health Tip */}
+                                <DailyTipCard
+                                    constitutionType={
+                                        sessions.length > 0 && sessions[0].constitution
+                                            ? extractConstitutionType(sessions[0].constitution)
+                                            : '平和质'
+                                    }
+                                />
+
                                 {/* Trend Widget */}
                                 <TrendWidget
                                     trendData={trendData}
                                     sessions={sessions}
                                     loading={loadingSessions && !trendData}
+                                />
+
+                                {/* Summary Widgets */}
+                                <DashboardGrid
+                                    onNavigate={setActiveSection}
+                                    familyMembersCount={3} // TODO: Connect to real family count if available in profile/context
                                 />
 
                                 {/* Qi Dose Promotion Card */}
@@ -977,6 +1063,16 @@ export function UnifiedDashboard() {
                                         </div>
                                     )}
                                 </div>
+                            </div>
+                        )}
+
+                        {/* Five Elements Section */}
+                        {activeSection === 'five-elements' && (
+                            <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+                                <FiveElementsRadar
+                                    constitutionType={sessions.length > 0 && sessions[0].constitution ? extractConstitutionType(sessions[0].constitution) : undefined}
+                                    diagnosisData={sessions.length > 0 ? sessions[0] : undefined}
+                                />
                             </div>
                         )}
 

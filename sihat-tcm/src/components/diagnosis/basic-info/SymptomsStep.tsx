@@ -12,6 +12,7 @@ import { getLastSymptoms, getPatientHistory } from '@/lib/actions'
 import { DiagnosisSession } from '@/types/database'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { useAuth } from '@/contexts/AuthContext'
 import {
     Dialog,
     DialogContent,
@@ -41,11 +42,11 @@ export function SymptomsStep({
     setSelectedSymptoms
 }: SymptomsStepProps) {
     const { t } = useLanguage()
+    const { user } = useAuth()
 
     const [categoryMode, setCategoryMode] = useState<CategoryMode>('simple')
     const [activeCategory, setActiveCategory] = useState<string>('common')
     const [isInputFocused, setIsInputFocused] = useState(false)
-    const [isImporting, setIsImporting] = useState(false)
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
     const [historySessions, setHistorySessions] = useState<DiagnosisSession[]>([])
     const [isLoadingHistory, setIsLoadingHistory] = useState(false)
@@ -340,22 +341,26 @@ export function SymptomsStep({
                             </div>
                         </div>
                     </Label>
-
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        type="button"
-                        onClick={handleImportPrevious}
-                        disabled={isImporting}
-                        className="h-8 text-[11px] gap-1.5 text-primary hover:text-primary hover:bg-primary/5 rounded-full px-3 border border-primary/20"
-                    >
-                        {isImporting ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : (
-                            <History className="w-3 h-3" />
-                        )}
-                        {t.basicInfo.importPrevious || "Import Previous"}
-                    </Button>
+                    {/* Import Previous Symptoms Button - Only for logged in users */}
+                    {user && (
+                        <div className="flex justify-end pt-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={handleImportPrevious}
+                                disabled={isLoadingHistory}
+                                className="flex items-center gap-2 text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+                            >
+                                {isLoadingHistory ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                    <History className="w-3.5 h-3.5" />
+                                )}
+                                {isLoadingHistory ? (t.common?.loading || "Importing...") : (t.basicInfo.importPrevious || "Import Previous")}
+                            </Button>
+                        </div>
+                    )}
                 </div>
                 <Input
                     id="mainComplaint"
