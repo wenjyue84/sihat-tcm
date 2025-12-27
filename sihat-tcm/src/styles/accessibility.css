@@ -135,7 +135,7 @@
 }
 
 [data-keyboard-navigation="true"]:focus::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -2px;
   left: -2px;
@@ -220,7 +220,7 @@ textarea[aria-invalid="true"] {
 }
 
 [role="progressbar"]::after {
-  content: attr(aria-valuenow) '% complete';
+  content: attr(aria-valuenow) "% complete";
   position: absolute;
   left: 50%;
   top: 50%;
@@ -317,7 +317,7 @@ th[scope="row"] {
 }
 
 [role="tooltip"]::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 100%;
   left: 50%;
@@ -426,7 +426,7 @@ th[scope="row"] {
 }
 
 [role="combobox"]::after {
-  content: '▼';
+  content: "▼";
   position: absolute;
   right: 8px;
   top: 50%;
@@ -449,7 +449,7 @@ th[scope="row"] {
 }
 
 [role="switch"]::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 2px;
   left: 2px;
@@ -505,11 +505,19 @@ th[scope="row"] {
 
 /* Responsive Accessibility */
 @media (max-width: 768px) {
-  .accessibility-font-small { font-size: 16px; }
-  .accessibility-font-medium { font-size: 18px; }
-  .accessibility-font-large { font-size: 20px; }
-  .accessibility-font-extra-large { font-size: 22px; }
-  
+  .accessibility-font-small {
+    font-size: 16px;
+  }
+  .accessibility-font-medium {
+    font-size: 18px;
+  }
+  .accessibility-font-large {
+    font-size: 20px;
+  }
+  .accessibility-font-extra-large {
+    font-size: 22px;
+  }
+
   /* Larger touch targets on mobile */
   button,
   [role="button"],
@@ -528,13 +536,13 @@ th[scope="row"] {
   [aria-hidden="true"] {
     display: none !important;
   }
-  
+
   a::after {
     content: " (" attr(href) ")";
     font-size: 0.8em;
     color: #666;
   }
-  
+
   a[href^="#"]::after,
   a[href^="javascript:"]::after {
     content: "";
@@ -558,12 +566,12 @@ th[scope="row"] {
   * {
     border-color: currentColor;
   }
-  
+
   button,
   [role="button"] {
     border: 2px solid currentColor;
   }
-  
+
   input,
   select,
   textarea {
@@ -576,7 +584,7 @@ th[scope="row"] {
   *:focus {
     outline: none;
   }
-  
+
   *:focus-visible {
     outline: 2px solid #2563eb;
     outline-offset: 2px;

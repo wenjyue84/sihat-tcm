@@ -7,6 +7,7 @@
 You need to create the new `diagnosis_sessions` table in your Supabase database.
 
 **Option A: Using Supabase Dashboard**
+
 1. Go to your Supabase project dashboard
 2. Navigate to **SQL Editor**
 3. Copy the contents of `supabase/migrations/20251224_diagnosis_sessions.sql`
@@ -14,12 +15,14 @@ You need to create the new `diagnosis_sessions` table in your Supabase database.
 5. Verify the table appears in **Table Editor**
 
 **Option B: Using Supabase CLI**
+
 ```bash
 cd sihat-tcm
 supabase db push
 ```
 
 **Option C: Using psql**
+
 ```bash
 psql $DATABASE_URL < supabase/migrations/20251224_diagnosis_sessions.sql
 ```
@@ -27,14 +30,16 @@ psql $DATABASE_URL < supabase/migrations/20251224_diagnosis_sessions.sql
 ### Step 2: Verify Installation
 
 1. **Check the table exists:**
+
    ```sql
    SELECT * FROM diagnosis_sessions LIMIT 1;
    ```
 
 2. **Verify RLS is enabled:**
+
    ```sql
-   SELECT tablename, rowsecurity 
-   FROM pg_tables 
+   SELECT tablename, rowsecurity
+   FROM pg_tables
    WHERE tablename = 'diagnosis_sessions';
    -- rowsecurity should be 't' (true)
    ```
@@ -44,15 +49,17 @@ psql $DATABASE_URL < supabase/migrations/20251224_diagnosis_sessions.sql
    - Complete a diagnosis
    - Check if data appears in the table:
    ```sql
-   SELECT id, primary_diagnosis, overall_score, created_at 
-   FROM diagnosis_sessions 
+   SELECT id, primary_diagnosis, overall_score, created_at
+   FROM diagnosis_sessions
    WHERE user_id = 'YOUR_TEST_USER_ID';
    ```
 
 ### Step 3: Test the Feature
 
 #### For Developers:
+
 1. **Start the dev server:**
+
    ```bash
    npm run dev
    ```
@@ -80,6 +87,7 @@ psql $DATABASE_URL < supabase/migrations/20251224_diagnosis_sessions.sql
 ### Step 4: Configure (Optional)
 
 #### Adjust Score Calculation
+
 Edit `src/hooks/useDiagnosisWizard.ts` function `calculateOverallScore()` to tune the scoring algorithm:
 
 ```typescript
@@ -93,22 +101,27 @@ Edit `src/hooks/useDiagnosisWizard.ts` function `calculateOverallScore()` to tun
 ```
 
 #### Customize Trend Period
+
 In `src/app/patient/dashboard/page.tsx`:
+
 ```typescript
 // Change from 30 days to 60 days:
-getHealthTrends(60)  // Currently: 30
+getHealthTrends(60); // Currently: 30
 ```
 
 #### Pagination Size
+
 In `src/app/patient/dashboard/page.tsx`:
+
 ```typescript
 // Change from 50 to 100 sessions:
-getPatientHistory(100, 0)  // Currently: 50
+getPatientHistory(100, 0); // Currently: 50
 ```
 
 ## 🧪 Testing Checklist
 
 ### Database Tests
+
 - [ ] Table created successfully
 - [ ] RLS policies active
 - [ ] Users can only see own sessions
@@ -116,6 +129,7 @@ getPatientHistory(100, 0)  // Currently: 50
 - [ ] Triggers work (updated_at auto-updates)
 
 ### Backend Tests
+
 - [ ] `saveDiagnosis()` saves correctly
 - [ ] `getPatientHistory()` returns user's sessions only
 - [ ] `getSessionById()` respects RLS
@@ -124,6 +138,7 @@ getPatientHistory(100, 0)  // Currently: 50
 - [ ] `getHealthTrends()` calculates correctly
 
 ### Frontend Tests
+
 - [ ] Dashboard redirects if not logged in
 - [ ] Empty state shows for new users
 - [ ] History cards display correctly
@@ -135,6 +150,7 @@ getPatientHistory(100, 0)  // Currently: 50
 - [ ] Banner shows success for logged-in users
 
 ### Integration Tests
+
 - [ ] Diagnosis auto-saves after completion
 - [ ] Score calculation reasonable (0-100)
 - [ ] Full report data preserved
@@ -145,29 +161,37 @@ getPatientHistory(100, 0)  // Currently: 50
 ## 🐛 Common Issues
 
 ### Issue: "Table does not exist"
+
 **Solution:** Run the migration SQL script in your database.
 
 ### Issue: "Permission denied for table diagnosis_sessions"
+
 **Solution:** Check that RLS is enabled and policies are created. Re-run the migration.
 
 ### Issue: "Cannot read properties of null (reading 'id')"
+
 **Solution:** User not authenticated. Check `useAuth()` hook is working.
 
 ### Issue: Sessions not appearing in dashboard
+
 **Solution:**
+
 1. Check browser console for errors
 2. Verify session saved: `SELECT * FROM diagnosis_sessions WHERE user_id = 'USER_ID'`
 3. Check RLS policies allow SELECT
 
 ### Issue: "saveDiagnosis is not a function"
+
 **Solution:** Ensure `src/lib/actions.ts` has `'use server'` at the top and exports are correct.
 
 ### Issue: Score always showing 70
+
 **Solution:** The `calculateOverallScore()` function might not be parsing diagnosis data correctly. Check the AI response structure.
 
 ## 📊 Monitoring
 
 ### Check Usage
+
 ```sql
 -- Total sessions
 SELECT COUNT(*) FROM diagnosis_sessions;
@@ -194,16 +218,18 @@ LIMIT 10;
 ```
 
 ### Performance Check
+
 ```sql
 -- Ensure indexes exist
-SELECT indexname, indexdef 
-FROM pg_indexes 
+SELECT indexname, indexdef
+FROM pg_indexes
 WHERE tablename = 'diagnosis_sessions';
 ```
 
 ## 🚢 Deployment
 
 ### Pre-Deployment Checklist
+
 - [ ] Migration file committed to repo
 - [ ] Environment variables set (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)
 - [ ] Build passes: `npm run build`
@@ -211,6 +237,7 @@ WHERE tablename = 'diagnosis_sessions';
 - [ ] RLS policies tested in production DB (staging first!)
 
 ### Post-Deployment Verification
+
 1. Test guest user flow on production
 2. Test logged-in user flow on production
 3. Verify data saving correctly
@@ -235,5 +262,3 @@ WHERE tablename = 'diagnosis_sessions';
 ---
 
 **Happy coding!** 🎉
-
-

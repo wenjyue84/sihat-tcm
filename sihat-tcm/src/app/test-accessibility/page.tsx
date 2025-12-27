@@ -1,11 +1,11 @@
 /**
  * Accessibility Testing Page
- * 
+ *
  * This page provides a comprehensive testing environment for all accessibility features.
  * Use this page to manually test WCAG compliance, keyboard navigation, screen reader support, etc.
  */
 
-import { AccessibilityDemo } from '@/components/examples/AccessibilityDemo'
+import { AccessibilityDemo } from "@/components/examples/AccessibilityDemo";
 
 export default function AccessibilityTestPage() {
   return (
@@ -16,8 +16,9 @@ export default function AccessibilityTestPage() {
             🔍 Accessibility Testing Environment
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-            This page demonstrates and allows you to test all accessibility features implemented in the Sihat TCM platform. 
-            Use keyboard navigation, screen readers, and browser accessibility tools to verify WCAG 2.1 AA compliance.
+            This page demonstrates and allows you to test all accessibility features implemented in
+            the Sihat TCM platform. Use keyboard navigation, screen readers, and browser
+            accessibility tools to verify WCAG 2.1 AA compliance.
           </p>
         </div>
 
@@ -30,11 +31,31 @@ export default function AccessibilityTestPage() {
             <div>
               <h3 className="font-semibold mb-2">Keyboard Navigation</h3>
               <ul className="space-y-1 text-gray-700 dark:text-gray-300">
-                <li>• Press <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Tab</kbd> to navigate between elements</li>
-                <li>• Use <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Arrow Keys</kbd> within focus groups</li>
-                <li>• Press <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Enter</kbd> or <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Space</kbd> to activate</li>
-                <li>• Press <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Escape</kbd> to close modals</li>
-                <li>• Use <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Home</kbd>/<kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">End</kbd> to jump to first/last</li>
+                <li>
+                  • Press <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Tab</kbd>{" "}
+                  to navigate between elements
+                </li>
+                <li>
+                  • Use{" "}
+                  <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Arrow Keys</kbd>{" "}
+                  within focus groups
+                </li>
+                <li>
+                  • Press{" "}
+                  <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Enter</kbd> or{" "}
+                  <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Space</kbd> to
+                  activate
+                </li>
+                <li>
+                  • Press{" "}
+                  <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Escape</kbd> to
+                  close modals
+                </li>
+                <li>
+                  • Use <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">Home</kbd>/
+                  <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded">End</kbd> to jump
+                  to first/last
+                </li>
               </ul>
             </div>
             <div>
@@ -161,5 +182,5 @@ export default function AccessibilityTestPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

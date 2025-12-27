@@ -5,28 +5,29 @@ Welcome to the **Sihat TCM** project! This guide will help you download the code
 ## 1. Get Access & Download Code
 
 1.  **Accept the Invitation**:
-    *   Click this link: [https://github.com/wenjyue84/sihat-tcm/invitations](https://github.com/wenjyue84/sihat-tcm/invitations)
-    *   Accept the invitation to join the repository.
+    - Click this link: [https://github.com/wenjyue84/sihat-tcm/invitations](https://github.com/wenjyue84/sihat-tcm/invitations)
+    - Accept the invitation to join the repository.
 
 2.  **Clone the Repository**:
-    *   Open your terminal (Command Prompt, PowerShell, or Terminal in VS Code).
-    *   Navigate to the folder where you want to keep your projects (e.g., `cd Desktop/Projects`).
-    *   Run the following command to download the code:
-        ```bash
-        git clone https://github.com/wenjyue84/sihat-tcm.git
-        ```
-    *   Enter the project folder:
-        ```bash
-        cd sihat-tcm
-        ```
+    - Open your terminal (Command Prompt, PowerShell, or Terminal in VS Code).
+    - Navigate to the folder where you want to keep your projects (e.g., `cd Desktop/Projects`).
+    - Run the following command to download the code:
+      ```bash
+      git clone https://github.com/wenjyue84/sihat-tcm.git
+      ```
+    - Enter the project folder:
+      ```bash
+      cd sihat-tcm
+      ```
 
 ## 2. Install Dependencies
 
 Before running the app, you need to install the software libraries it relies on.
-*   Run the following command in your terminal:
-    ```bash
-    npm install
-    ```
+
+- Run the following command in your terminal:
+  ```bash
+  npm install
+  ```
 
 ## 3. Configure Environment Variables
 
@@ -58,19 +59,20 @@ Now you are ready to start the system!
 To get comfortable, let's try making a small change.
 
 1.  **Open the Project in VS Code**:
-    *   If you haven't already, run `code .` in your terminal or open the folder via "File > Open Folder".
+    - If you haven't already, run `code .` in your terminal or open the folder via "File > Open Folder".
 
 2.  **Find the Footer**:
-    *   Navigate to the file: `src/components/Footer.tsx`.
+    - Navigate to the file: `src/components/Footer.tsx`.
 
 3.  **Make a Change**:
-    *   Look for the text that says "Sihat TCM".
-    *   Change it to something else, like "Sihat TCM (Dev Mode)".
-    *   Save the file (`Ctrl + S`).
+    - Look for the text that says "Sihat TCM".
+    - Change it to something else, like "Sihat TCM (Dev Mode)".
+    - Save the file (`Ctrl + S`).
 
 4.  **See the Result**:
-    *   Go back to your browser. The page should automatically update to show your change!
+    - Go back to your browser. The page should automatically update to show your change!
 
 ---
+
 **Need Help?**
 If you get stuck, check the `DEVELOPER_MANUAL.md` or ask the team. Happy coding!

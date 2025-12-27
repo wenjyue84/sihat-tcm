@@ -8,20 +8,20 @@
  *   logger.error('MyComponent', 'Failed to fetch data', error);
  */
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface LoggerOptions {
   /** Force logging even in production (use sparingly) */
   force?: boolean;
 }
 
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === "development";
 
 const LOG_COLORS = {
-  debug: '#6B7280', // gray
-  info: '#3B82F6',  // blue
-  warn: '#F59E0B',  // amber
-  error: '#EF4444', // red
+  debug: "#6B7280", // gray
+  info: "#3B82F6", // blue
+  warn: "#F59E0B", // amber
+  error: "#EF4444", // red
 } as const;
 
 function formatMessage(level: LogLevel, category: string, message: string): string {
@@ -30,7 +30,7 @@ function formatMessage(level: LogLevel, category: string, message: string): stri
 
 function shouldLog(level: LogLevel, options?: LoggerOptions): boolean {
   if (options?.force) return true;
-  if (!isDev) return level === 'error'; // Only log errors in production
+  if (!isDev) return level === "error"; // Only log errors in production
   return true;
 }
 
@@ -47,9 +47,9 @@ function logWithStyle(
   const color = LOG_COLORS[level];
   const style = `color: ${color}; font-weight: bold;`;
 
-  const consoleMethod = level === 'debug' ? 'log' : level;
+  const consoleMethod = level === "debug" ? "log" : level;
 
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     // Browser environment - use styled console
     if (data !== undefined) {
       console[consoleMethod](`%c${formattedMessage}`, style, data);
@@ -71,28 +71,28 @@ export const logger = {
    * Debug level - for detailed debugging info, only in development
    */
   debug(category: string, message: string, data?: unknown, options?: LoggerOptions): void {
-    logWithStyle('debug', category, message, data, options);
+    logWithStyle("debug", category, message, data, options);
   },
 
   /**
    * Info level - for general information, only in development
    */
   info(category: string, message: string, data?: unknown, options?: LoggerOptions): void {
-    logWithStyle('info', category, message, data, options);
+    logWithStyle("info", category, message, data, options);
   },
 
   /**
    * Warn level - for warnings, only in development
    */
   warn(category: string, message: string, data?: unknown, options?: LoggerOptions): void {
-    logWithStyle('warn', category, message, data, options);
+    logWithStyle("warn", category, message, data, options);
   },
 
   /**
    * Error level - for errors, logged in all environments
    */
   error(category: string, message: string, data?: unknown, options?: LoggerOptions): void {
-    logWithStyle('error', category, message, data, options);
+    logWithStyle("error", category, message, data, options);
   },
 
   /**

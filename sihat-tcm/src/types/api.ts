@@ -1,6 +1,6 @@
 /**
  * API Response Types
- * 
+ *
  * Type definitions for API endpoint responses
  * Used for type-safe API calls throughout the application
  */
@@ -10,34 +10,34 @@
 // ============================================================================
 
 export interface ImageAnalysisTag {
-  title?: string
-  description?: string
-  confidence?: number
+  title?: string;
+  description?: string;
+  confidence?: number;
 }
 
 export interface TCMIndicator {
-  pattern?: string
-  description?: string
-  severity?: string
+  pattern?: string;
+  description?: string;
+  severity?: string;
 }
 
 export interface PatternSuggestion {
-  name?: string
-  confidence?: number
-  reasoning?: string
+  name?: string;
+  confidence?: number;
+  reasoning?: string;
 }
 
 export interface AnalyzeImageResponse {
-  observation: string
-  potential_issues?: string[]
-  modelUsed?: number
-  status?: string
-  confidence?: number
-  image_description?: string
-  analysis_tags?: ImageAnalysisTag[]
-  tcm_indicators?: TCMIndicator[]
-  pattern_suggestions?: PatternSuggestion[]
-  notes?: string
+  observation: string;
+  potential_issues?: string[];
+  modelUsed?: number;
+  status?: string;
+  confidence?: number;
+  image_description?: string;
+  analysis_tags?: ImageAnalysisTag[];
+  tcm_indicators?: TCMIndicator[];
+  pattern_suggestions?: PatternSuggestion[];
+  notes?: string;
 }
 
 // ============================================================================
@@ -45,15 +45,15 @@ export interface AnalyzeImageResponse {
 // ============================================================================
 
 export interface AnalyzeAudioResponse {
-  observation: string
-  potential_issues?: string[]
-  confidence?: number
-  audio_characteristics?: string[]
+  observation: string;
+  potential_issues?: string[];
+  confidence?: number;
+  audio_characteristics?: string[];
   tcm_analysis?: {
-    pattern?: string
-    explanation?: string
-    meridians_affected?: string[]
-  }
+    pattern?: string;
+    explanation?: string;
+    meridians_affected?: string[];
+  };
 }
 
 // ============================================================================
@@ -61,25 +61,25 @@ export interface AnalyzeAudioResponse {
 // ============================================================================
 
 export interface SnoreAnalysisResponse {
-  snoring_detected: boolean
-  severity: 'none' | 'mild' | 'moderate' | 'severe'
-  frequency: number
-  average_duration_ms: number
-  characteristics: string[]
-  apnea_risk_indicators: string[]
+  snoring_detected: boolean;
+  severity: "none" | "mild" | "moderate" | "severe";
+  frequency: number;
+  average_duration_ms: number;
+  characteristics: string[];
+  apnea_risk_indicators: string[];
   tcm_analysis: {
-    pattern: string
-    explanation: string
-    meridians_affected: string[]
-    fatigue_correlation: string
-  }
+    pattern: string;
+    explanation: string;
+    meridians_affected: string[];
+    fatigue_correlation: string;
+  };
   tcm_recommendations: Array<{
-    type: 'acupressure' | 'dietary' | 'lifestyle' | 'herbal'
-    suggestion: string
-    benefit: string
-  }>
-  confidence: number
-  raw_observations: string
+    type: "acupressure" | "dietary" | "lifestyle" | "herbal";
+    suggestion: string;
+    benefit: string;
+  }>;
+  confidence: number;
+  raw_observations: string;
 }
 
 // ============================================================================
@@ -87,14 +87,14 @@ export interface SnoreAnalysisResponse {
 // ============================================================================
 
 export interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant' | 'system'
-  content: string
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
 }
 
 export interface ChatResponse {
-  messages?: ChatMessage[]
-  error?: string
+  messages?: ChatMessage[];
+  error?: string;
 }
 
 // ============================================================================
@@ -102,8 +102,8 @@ export interface ChatResponse {
 // ============================================================================
 
 export interface ReportChatResponse {
-  response: string
-  error?: string
+  response: string;
+  error?: string;
 }
 
 // ============================================================================
@@ -119,17 +119,15 @@ export interface ReportChatResponse {
 // ============================================================================
 
 export interface APIErrorResponse {
-  error: string
-  error_code?: string
-  details?: string
+  error: string;
+  error_code?: string;
+  details?: string;
 }
 
 // ============================================================================
 // Generic API Response Wrapper
 // ============================================================================
 
-export type APIResponse<T> = 
+export type APIResponse<T> =
   | { success: true; data: T }
-  | { success: false; error: string; error_code?: string }
-
-
+  | { success: false; error: string; error_code?: string };

@@ -30,12 +30,12 @@ graph TB
         MOBILE[Mobile App - Expo/React Native]
         PWA[Progressive Web App]
     end
-    
+
     subgraph "API Gateway"
         GATEWAY[Next.js API Routes]
         MIDDLEWARE[Authentication & Rate Limiting]
     end
-    
+
     subgraph "Core Services"
         DIAGNOSTIC[Enhanced AI Diagnostic Engine]
         ROUTER[AI Model Router]
@@ -43,45 +43,45 @@ graph TB
         PERSONAL[Personalization Engine]
         SYNC[Cross-Platform Sync Manager]
     end
-    
+
     subgraph "AI Services"
         GEMINI[Google Gemini Models]
         FALLBACK[Fallback Models]
         VISION[Vision Analysis]
     end
-    
+
     subgraph "Data Layer"
         SUPABASE[Supabase PostgreSQL]
         REALTIME[Realtime Subscriptions]
         STORAGE[File Storage]
         CACHE[Redis Cache]
     end
-    
+
     subgraph "External Integrations"
         IOT[IoT Devices]
         HEALTH[Health Apps]
         NOTIFICATIONS[Push Notifications]
     end
-    
+
     WEB --> GATEWAY
     MOBILE --> GATEWAY
     PWA --> GATEWAY
-    
+
     GATEWAY --> MIDDLEWARE
     MIDDLEWARE --> DIAGNOSTIC
-    
+
     DIAGNOSTIC --> ROUTER
     DIAGNOSTIC --> SAFETY
     DIAGNOSTIC --> PERSONAL
-    
+
     ROUTER --> GEMINI
     ROUTER --> FALLBACK
     ROUTER --> VISION
-    
+
     DIAGNOSTIC --> SUPABASE
     SYNC --> REALTIME
     PERSONAL --> CACHE
-    
+
     MOBILE --> IOT
     MOBILE --> HEALTH
     GATEWAY --> NOTIFICATIONS
@@ -90,12 +90,14 @@ graph TB
 ### Technology Stack
 
 #### Frontend
+
 - **Web**: Next.js 16 with App Router, React 19.2.1, TypeScript
 - **Mobile**: Expo SDK 52, React Native, TypeScript
 - **Styling**: Tailwind CSS v4, Radix UI, Framer Motion
 - **State Management**: React Context API, Zustand for complex state
 
 #### Backend
+
 - **Runtime**: Node.js with Next.js API Routes
 - **Database**: Supabase (PostgreSQL) with Row Level Security
 - **Authentication**: Supabase Auth with JWT tokens
@@ -103,12 +105,14 @@ graph TB
 - **Real-time**: Supabase Realtime subscriptions
 
 #### AI & ML
+
 - **Primary Models**: Google Gemini (2.0-flash, 2.5-pro, 3-pro-preview)
 - **SDK**: Vercel AI SDK for model integration
 - **Fallback**: Multiple model support with automatic routing
 - **Vision**: Gemini Vision for image analysis
 
 #### Development Tools
+
 - **Language**: TypeScript 5.x
 - **Testing**: Vitest, React Testing Library, Jest-DOM
 - **Linting**: ESLint with Next.js config
@@ -134,12 +138,14 @@ Xcode (for iOS development, macOS only)
 ### Initial Setup
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/your-org/sihat-tcm.git
 cd sihat-tcm
 ```
 
 2. **Install dependencies**
+
 ```bash
 # Web application
 npm install
@@ -151,6 +157,7 @@ cd ..
 ```
 
 3. **Environment configuration**
+
 ```bash
 # Copy environment templates
 cp .env.production.example .env.local
@@ -161,6 +168,7 @@ cp sihat-tcm-mobile/.env.example sihat-tcm-mobile/.env.local
 ```
 
 4. **Database setup**
+
 ```bash
 # Install Supabase CLI
 npm install -g @supabase/cli
@@ -176,6 +184,7 @@ supabase db reset
 ```
 
 5. **Start development servers**
+
 ```bash
 # Web application (port 3100)
 npm run dev
@@ -228,23 +237,24 @@ The central orchestrator for AI-powered TCM diagnosis.
 ```typescript
 // Location: src/lib/enhancedAIDiagnosticEngine.ts
 
-import { EnhancedAIDiagnosticEngine } from '@/lib/enhancedAIDiagnosticEngine';
+import { EnhancedAIDiagnosticEngine } from "@/lib/enhancedAIDiagnosticEngine";
 
 // Initialize engine
-const engine = new EnhancedAIDiagnosticEngine('MyApp');
+const engine = new EnhancedAIDiagnosticEngine("MyApp");
 
 // Process diagnosis
 const result = await engine.processEnhancedDiagnosis({
-  userId: 'user123',
-  doctorLevel: 'expert',
+  userId: "user123",
+  doctorLevel: "expert",
   messages: chatHistory,
   images: medicalImages,
   requiresPersonalization: true,
-  requiresSafetyValidation: true
+  requiresSafetyValidation: true,
 });
 ```
 
 **Key Features:**
+
 - Intelligent AI model routing
 - Personalized recommendations
 - Medical safety validation
@@ -278,6 +288,7 @@ const result = await router.generateWithRouting(
 ```
 
 **Complexity Levels:**
+
 - **Simple (0-24)**: Basic text processing
 - **Moderate (25-49)**: Some complexity factors
 - **Complex (50-74)**: Multiple factors
@@ -290,28 +301,29 @@ Comprehensive safety validation for all recommendations.
 ```typescript
 // Location: src/lib/medicalSafetyValidator.ts
 
-import { MedicalSafetyValidator } from '@/lib/medicalSafetyValidator';
+import { MedicalSafetyValidator } from "@/lib/medicalSafetyValidator";
 
 // Initialize validator
-const validator = new MedicalSafetyValidator('MyApp');
+const validator = new MedicalSafetyValidator("MyApp");
 
 // Validate recommendations
 const safetyResult = await validator.validateRecommendations(
   {
-    dietary: ['ginger tea', 'goji berries'],
-    herbal: ['Four Gentlemen Decoction']
+    dietary: ["ginger tea", "goji berries"],
+    herbal: ["Four Gentlemen Decoction"],
   },
   {
     medical_history: {
-      current_medications: ['warfarin'],
-      allergies: ['shellfish'],
-      pregnancy_status: 'none'
-    }
+      current_medications: ["warfarin"],
+      allergies: ["shellfish"],
+      pregnancy_status: "none",
+    },
   }
 );
 ```
 
 **Safety Checks:**
+
 - Allergy cross-referencing
 - Drug-herb interactions
 - Contraindications
@@ -326,22 +338,23 @@ AI-powered personalized recommendations.
 ```typescript
 // Location: src/lib/personalizationEngine.ts
 
-import { PersonalizationEngine } from '@/lib/personalizationEngine';
+import { PersonalizationEngine } from "@/lib/personalizationEngine";
 
 // Initialize engine
-const personalizer = new PersonalizationEngine('MyApp');
+const personalizer = new PersonalizationEngine("MyApp");
 
 // Get personalization factors
-const factors = await personalizer.getPersonalizationFactors('user123');
+const factors = await personalizer.getPersonalizationFactors("user123");
 
 // Personalize recommendations
 const personalizedDietary = await personalizer.personalizeDietaryRecommendations(
-  ['ginger', 'green tea', 'warm foods'],
+  ["ginger", "green tea", "warm foods"],
   factors
 );
 ```
 
 **Personalization Factors:**
+
 - Cultural background
 - Dietary preferences
 - Lifestyle constraints
@@ -357,7 +370,7 @@ All API requests require authentication using Supabase JWT tokens:
 
 ```typescript
 // Client-side authentication
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -365,17 +378,19 @@ const supabase = createClient(
 );
 
 // Get session token
-const { data: { session } } = await supabase.auth.getSession();
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 const token = session?.access_token;
 
 // Make authenticated request
-const response = await fetch('/api/v2/enhanced-diagnosis', {
-  method: 'POST',
+const response = await fetch("/api/v2/enhanced-diagnosis", {
+  method: "POST",
   headers: {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
   },
-  body: JSON.stringify(requestData)
+  body: JSON.stringify(requestData),
 });
 ```
 
@@ -396,16 +411,16 @@ interface APIResponse<T> {
 
 // Error handling example
 try {
-  const response = await fetch('/api/v2/enhanced-diagnosis', options);
+  const response = await fetch("/api/v2/enhanced-diagnosis", options);
   const result: APIResponse<DiagnosisResult> = await response.json();
-  
+
   if (!result.success) {
-    throw new Error(result.error?.message || 'API request failed');
+    throw new Error(result.error?.message || "API request failed");
   }
-  
+
   return result.data;
 } catch (error) {
-  console.error('API Error:', error);
+  console.error("API Error:", error);
   // Handle error appropriately
 }
 ```
@@ -426,7 +441,7 @@ API endpoints have rate limits to ensure fair usage:
 if (response.status === 429) {
   const resetTime = response.headers.get('X-RateLimit-Reset');
   const waitTime = parseInt(resetTime!) * 1000 - Date.now();
-  
+
   // Wait and retry
   await new Promise(resolve => setTimeout(resolve, waitTime));
   return retryRequest();
@@ -438,6 +453,7 @@ if (response.status === 429) {
 ### Core Tables
 
 #### Users and Profiles
+
 ```sql
 -- Users table (extends auth.users)
 CREATE TABLE public.users (
@@ -467,6 +483,7 @@ CREATE TABLE public.patients (
 ```
 
 #### Diagnosis and Reports
+
 ```sql
 -- Diagnosis sessions
 CREATE TABLE public.diagnosis_sessions (
@@ -498,6 +515,7 @@ CREATE TABLE public.medical_reports (
 ```
 
 #### Health Tracking
+
 ```sql
 -- Health time series data
 CREATE TABLE public.health_time_series (
@@ -570,38 +588,38 @@ CREATE POLICY "Users can access their own diagnosis sessions" ON public.diagnosi
 ```typescript
 // Example test file: src/lib/__tests__/aiModelRouter.test.ts
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { AIModelRouter } from '../aiModelRouter';
+import { describe, it, expect, beforeEach } from "vitest";
+import { AIModelRouter } from "../aiModelRouter";
 
-describe('AIModelRouter', () => {
+describe("AIModelRouter", () => {
   let router: AIModelRouter;
 
   beforeEach(() => {
-    router = new AIModelRouter('test');
+    router = new AIModelRouter("test");
   });
 
-  it('should analyze request complexity correctly', () => {
+  it("should analyze request complexity correctly", () => {
     const complexity = router.analyzeComplexity({
-      messages: new Array(15).fill({ role: 'user', content: 'test' }),
-      images: [{ type: 'tongue', data: 'base64...' }],
-      requiresAnalysis: true
+      messages: new Array(15).fill({ role: "user", content: "test" }),
+      images: [{ type: "tongue", data: "base64..." }],
+      requiresAnalysis: true,
     });
 
-    expect(complexity.type).toBe('complex');
+    expect(complexity.type).toBe("complex");
     expect(complexity.score).toBeGreaterThan(50);
     expect(complexity.factors.hasImages).toBe(true);
     expect(complexity.factors.hasLongHistory).toBe(true);
   });
 
-  it('should select appropriate model for complex requests', () => {
-    const complexity = { type: 'complex' as const, score: 65, factors: {} };
+  it("should select appropriate model for complex requests", () => {
+    const complexity = { type: "complex" as const, score: 65, factors: {} };
     const selection = router.selectModel({
       complexity,
-      doctorLevel: 'expert',
-      requiresVision: true
+      doctorLevel: "expert",
+      requiresVision: true,
     });
 
-    expect(selection.primaryModel).toContain('gemini');
+    expect(selection.primaryModel).toContain("gemini");
     expect(selection.fallbackModels).toHaveLength.greaterThan(0);
   });
 });
@@ -612,37 +630,40 @@ describe('AIModelRouter', () => {
 ```typescript
 // Example property test: src/lib/__tests__/correctnessProperties.test.ts
 
-import { describe, it } from 'vitest';
-import fc from 'fast-check';
-import { MedicalSafetyValidator } from '../medicalSafetyValidator';
+import { describe, it } from "vitest";
+import fc from "fast-check";
+import { MedicalSafetyValidator } from "../medicalSafetyValidator";
 
-describe('Medical Safety Validator Properties', () => {
-  const validator = new MedicalSafetyValidator('test');
+describe("Medical Safety Validator Properties", () => {
+  const validator = new MedicalSafetyValidator("test");
 
-  it('Property 1: Safety validation should always return a result', async () => {
-    await fc.assert(fc.asyncProperty(
-      fc.array(fc.string(), { minLength: 1, maxLength: 10 }), // recommendations
-      fc.array(fc.string(), { minLength: 0, maxLength: 5 }),  // medications
-      fc.array(fc.string(), { minLength: 0, maxLength: 3 }),  // allergies
-      async (recommendations, medications, allergies) => {
-        const result = await validator.validateRecommendations(
-          { dietary: recommendations },
-          {
-            medical_history: {
-              current_medications: medications,
-              allergies: allergies,
-              medical_conditions: []
+  it("Property 1: Safety validation should always return a result", async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        fc.array(fc.string(), { minLength: 1, maxLength: 10 }), // recommendations
+        fc.array(fc.string(), { minLength: 0, maxLength: 5 }), // medications
+        fc.array(fc.string(), { minLength: 0, maxLength: 3 }), // allergies
+        async (recommendations, medications, allergies) => {
+          const result = await validator.validateRecommendations(
+            { dietary: recommendations },
+            {
+              medical_history: {
+                current_medications: medications,
+                allergies: allergies,
+                medical_conditions: [],
+              },
             }
-          }
-        );
+          );
 
-        // Property: Result should always have required fields
-        expect(result).toHaveProperty('is_safe');
-        expect(result).toHaveProperty('risk_level');
-        expect(result).toHaveProperty('concerns');
-        expect(['low', 'medium', 'high', 'critical']).toContain(result.risk_level);
-      }
-    ), { numRuns: 100 });
+          // Property: Result should always have required fields
+          expect(result).toHaveProperty("is_safe");
+          expect(result).toHaveProperty("risk_level");
+          expect(result).toHaveProperty("concerns");
+          expect(["low", "medium", "high", "critical"]).toContain(result.risk_level);
+        }
+      ),
+      { numRuns: 100 }
+    );
   });
 });
 ```
@@ -652,29 +673,27 @@ describe('Medical Safety Validator Properties', () => {
 ```typescript
 // Example integration test: src/app/api/__tests__/enhanced-diagnosis.test.ts
 
-import { describe, it, expect } from 'vitest';
-import { POST } from '../v2/enhanced-diagnosis/route';
-import { createMockRequest } from '@/test-utils';
+import { describe, it, expect } from "vitest";
+import { POST } from "../v2/enhanced-diagnosis/route";
+import { createMockRequest } from "@/test-utils";
 
-describe('/api/v2/enhanced-diagnosis', () => {
-  it('should process enhanced diagnosis request', async () => {
+describe("/api/v2/enhanced-diagnosis", () => {
+  it("should process enhanced diagnosis request", async () => {
     const request = createMockRequest({
-      method: 'POST',
+      method: "POST",
       body: {
-        userId: 'test-user',
-        doctorLevel: 'expert',
-        messages: [
-          { role: 'user', content: 'I have been feeling tired lately' }
-        ],
+        userId: "test-user",
+        doctorLevel: "expert",
+        messages: [{ role: "user", content: "I have been feeling tired lately" }],
         basicInfo: {
           age: 35,
-          gender: 'male',
+          gender: "male",
           height: 175,
-          weight: 70
+          weight: 70,
         },
         requiresPersonalization: true,
-        requiresSafetyValidation: true
-      }
+        requiresSafetyValidation: true,
+      },
     });
 
     const response = await POST(request);
@@ -682,9 +701,9 @@ describe('/api/v2/enhanced-diagnosis', () => {
 
     expect(response.status).toBe(200);
     expect(result.success).toBe(true);
-    expect(result.data).toHaveProperty('diagnosis');
-    expect(result.data).toHaveProperty('modelUsed');
-    expect(result.data).toHaveProperty('confidenceScore');
+    expect(result.data).toHaveProperty("diagnosis");
+    expect(result.data).toHaveProperty("modelUsed");
+    expect(result.data).toHaveProperty("confidenceScore");
   });
 });
 ```
@@ -715,6 +734,7 @@ npm run test:integration
 #### Vercel Deployment (Recommended)
 
 1. **Connect repository to Vercel**
+
 ```bash
 # Install Vercel CLI
 npm install -g vercel
@@ -725,6 +745,7 @@ vercel link
 ```
 
 2. **Configure environment variables**
+
 ```bash
 # Set production environment variables
 vercel env add NEXT_PUBLIC_SUPABASE_URL production
@@ -734,6 +755,7 @@ vercel env add GOOGLE_GENERATIVE_AI_API_KEY production
 ```
 
 3. **Deploy**
+
 ```bash
 # Deploy to production
 vercel --prod
@@ -885,11 +907,11 @@ npm run build -- --analyze
 
 ```sql
 -- Use appropriate indexes
-CREATE INDEX CONCURRENTLY idx_diagnosis_sessions_patient_created 
+CREATE INDEX CONCURRENTLY idx_diagnosis_sessions_patient_created
 ON diagnosis_sessions(patient_id, created_at DESC);
 
 -- Optimize complex queries
-EXPLAIN ANALYZE SELECT 
+EXPLAIN ANALYZE SELECT
   ds.id,
   ds.data,
   p.name,
@@ -906,7 +928,7 @@ LIMIT 10;
 
 ```typescript
 // Redis caching for expensive operations
-import Redis from 'ioredis';
+import Redis from "ioredis";
 
 const redis = new Redis(process.env.REDIS_URL);
 
@@ -915,7 +937,7 @@ async function getCachedDiagnosis(key: string) {
   if (cached) {
     return JSON.parse(cached);
   }
-  
+
   const result = await generateDiagnosis();
   await redis.setex(key, 3600, JSON.stringify(result)); // Cache for 1 hour
   return result;
@@ -926,20 +948,20 @@ async function getCachedDiagnosis(key: string) {
 
 ```typescript
 // Compress responses
-import compression from 'compression';
+import compression from "compression";
 
 // Use in API routes
 export async function GET(request: Request) {
   const data = await fetchLargeDataset();
-  
+
   // Compress large responses
   const compressed = await compress(JSON.stringify(data));
-  
+
   return new Response(compressed, {
     headers: {
-      'Content-Type': 'application/json',
-      'Content-Encoding': 'gzip'
-    }
+      "Content-Type": "application/json",
+      "Content-Encoding": "gzip",
+    },
   });
 }
 ```
@@ -953,15 +975,18 @@ export async function GET(request: Request) {
 class OptimizedModelRouter extends AIModelRouter {
   selectOptimalModel(criteria: ModelSelectionCriteria): string {
     const performanceData = this.getModelPerformance();
-    
+
     // Select based on response time and success rate
     const candidates = this.getCandidateModels(criteria);
     return candidates.reduce((best, current) => {
       const currentPerf = performanceData[current];
       const bestPerf = performanceData[best];
-      
-      if (!bestPerf || (currentPerf.successRate > bestPerf.successRate && 
-          currentPerf.averageResponseTime < bestPerf.averageResponseTime)) {
+
+      if (
+        !bestPerf ||
+        (currentPerf.successRate > bestPerf.successRate &&
+          currentPerf.averageResponseTime < bestPerf.averageResponseTime)
+      ) {
         return current;
       }
       return best;
@@ -978,15 +1003,15 @@ class OptimizedModelRouter extends AIModelRouter {
 
 ```typescript
 // Validate JWT tokens in API routes
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient } from "@supabase/ssr";
 
 export async function validateAuth(request: Request) {
-  const token = request.headers.get('Authorization')?.replace('Bearer ', '');
-  
+  const token = request.headers.get("Authorization")?.replace("Bearer ", "");
+
   if (!token) {
-    throw new Error('No authentication token provided');
+    throw new Error("No authentication token provided");
   }
-  
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -994,17 +1019,20 @@ export async function validateAuth(request: Request) {
       cookies: {
         get: () => undefined,
         set: () => {},
-        remove: () => {}
-      }
+        remove: () => {},
+      },
     }
   );
-  
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
+
   if (error || !user) {
-    throw new Error('Invalid authentication token');
+    throw new Error("Invalid authentication token");
   }
-  
+
   return user;
 }
 ```
@@ -1014,14 +1042,10 @@ export async function validateAuth(request: Request) {
 ```typescript
 // Check user roles and permissions
 export async function checkPermissions(userId: string, requiredRole: string) {
-  const { data: user } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', userId)
-    .single();
-    
+  const { data: user } = await supabase.from("users").select("role").eq("id", userId).single();
+
   if (!user || user.role !== requiredRole) {
-    throw new Error('Insufficient permissions');
+    throw new Error("Insufficient permissions");
   }
 }
 ```
@@ -1032,32 +1056,34 @@ export async function checkPermissions(userId: string, requiredRole: string) {
 
 ```typescript
 // Validate and sanitize user inputs
-import { z } from 'zod';
-import DOMPurify from 'dompurify';
+import { z } from "zod";
+import DOMPurify from "dompurify";
 
 const DiagnosisRequestSchema = z.object({
   userId: z.string().uuid(),
-  messages: z.array(z.object({
-    role: z.enum(['user', 'assistant']),
-    content: z.string().max(10000)
-  })),
+  messages: z.array(
+    z.object({
+      role: z.enum(["user", "assistant"]),
+      content: z.string().max(10000),
+    })
+  ),
   basicInfo: z.object({
     age: z.number().min(0).max(150),
-    gender: z.enum(['male', 'female', 'other']),
+    gender: z.enum(["male", "female", "other"]),
     height: z.number().min(50).max(300),
-    weight: z.number().min(10).max(500)
-  })
+    weight: z.number().min(10).max(500),
+  }),
 });
 
 export function validateDiagnosisRequest(data: unknown) {
   const validated = DiagnosisRequestSchema.parse(data);
-  
+
   // Sanitize text content
-  validated.messages = validated.messages.map(msg => ({
+  validated.messages = validated.messages.map((msg) => ({
     ...msg,
-    content: DOMPurify.sanitize(msg.content)
+    content: DOMPurify.sanitize(msg.content),
   }));
-  
+
   return validated;
 }
 ```
@@ -1068,8 +1094,9 @@ export function validateDiagnosisRequest(data: unknown) {
 // Use parameterized queries
 export async function getUserDiagnoses(userId: string, limit: number = 10) {
   const { data, error } = await supabase
-    .from('diagnosis_sessions')
-    .select(`
+    .from("diagnosis_sessions")
+    .select(
+      `
       id,
       created_at,
       status,
@@ -1078,15 +1105,16 @@ export async function getUserDiagnoses(userId: string, limit: number = 10) {
         id,
         content
       )
-    `)
-    .eq('patient_id', userId)
-    .order('created_at', { ascending: false })
+    `
+    )
+    .eq("patient_id", userId)
+    .order("created_at", { ascending: false })
     .limit(limit);
-    
+
   if (error) {
-    throw new Error('Database query failed');
+    throw new Error("Database query failed");
   }
-  
+
   return data;
 }
 ```
@@ -1097,21 +1125,21 @@ export async function getUserDiagnoses(userId: string, limit: number = 10) {
 
 ```typescript
 // Implement rate limiting
-import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(100, '1 h'), // 100 requests per hour
+  limiter: Ratelimit.slidingWindow(100, "1 h"), // 100 requests per hour
 });
 
 export async function checkRateLimit(identifier: string) {
   const { success, limit, reset, remaining } = await ratelimit.limit(identifier);
-  
+
   if (!success) {
-    throw new Error('Rate limit exceeded');
+    throw new Error("Rate limit exceeded");
   }
-  
+
   return { limit, reset, remaining };
 }
 ```
@@ -1121,22 +1149,22 @@ export async function checkRateLimit(identifier: string) {
 ```typescript
 // Configure CORS properly
 export async function handleCORS(request: Request) {
-  const origin = request.headers.get('origin');
+  const origin = request.headers.get("origin");
   const allowedOrigins = [
-    'https://sihat-tcm.com',
-    'https://app.sihat-tcm.com',
-    process.env.NODE_ENV === 'development' ? 'http://localhost:3100' : null
+    "https://sihat-tcm.com",
+    "https://app.sihat-tcm.com",
+    process.env.NODE_ENV === "development" ? "http://localhost:3100" : null,
   ].filter(Boolean);
-  
+
   if (origin && allowedOrigins.includes(origin)) {
     return {
-      'Access-Control-Allow-Origin': origin,
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Max-Age': '86400'
+      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Max-Age": "86400",
     };
   }
-  
+
   return {};
 }
 ```
@@ -1149,7 +1177,7 @@ export async function handleCORS(request: Request) {
 
 ```typescript
 // Configure Sentry for error tracking
-import * as Sentry from '@sentry/nextjs';
+import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -1162,15 +1190,15 @@ Sentry.init({
       delete event.request.data.personalInfo;
     }
     return event;
-  }
+  },
 });
 
 // Custom performance monitoring
 export function trackPerformance(operation: string, duration: number) {
   Sentry.addBreadcrumb({
     message: `${operation} completed`,
-    level: 'info',
-    data: { duration }
+    level: "info",
+    data: { duration },
   });
 }
 ```
@@ -1183,23 +1211,21 @@ export async function GET() {
   const checks = await Promise.allSettled([
     checkDatabase(),
     checkAIServices(),
-    checkExternalAPIs()
+    checkExternalAPIs(),
   ]);
-  
+
   const results = checks.map((check, index) => ({
-    service: ['database', 'ai_services', 'external_apis'][index],
-    status: check.status === 'fulfilled' ? 'healthy' : 'unhealthy',
-    details: check.status === 'fulfilled' ? check.value : check.reason
+    service: ["database", "ai_services", "external_apis"][index],
+    status: check.status === "fulfilled" ? "healthy" : "unhealthy",
+    details: check.status === "fulfilled" ? check.value : check.reason,
   }));
-  
-  const overallStatus = results.every(r => r.status === 'healthy') 
-    ? 'healthy' 
-    : 'degraded';
-  
+
+  const overallStatus = results.every((r) => r.status === "healthy") ? "healthy" : "degraded";
+
   return Response.json({
     status: overallStatus,
     timestamp: new Date().toISOString(),
-    checks: results
+    checks: results,
   });
 }
 ```
@@ -1210,10 +1236,10 @@ export async function GET() {
 
 ```typescript
 // Structured logging utility
-import winston from 'winston';
+import winston from "winston";
 
 const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || "info",
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
@@ -1221,26 +1247,26 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' })
-  ]
+    new winston.transports.File({ filename: "logs/error.log", level: "error" }),
+    new winston.transports.File({ filename: "logs/combined.log" }),
+  ],
 });
 
 export function logDiagnosisRequest(userId: string, requestData: any) {
-  logger.info('Diagnosis request initiated', {
+  logger.info("Diagnosis request initiated", {
     userId,
     requestType: requestData.type,
     complexity: requestData.complexity,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }
 
 export function logAIModelUsage(modelId: string, responseTime: number, success: boolean) {
-  logger.info('AI model usage', {
+  logger.info("AI model usage", {
     modelId,
     responseTime,
     success,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }
 ```
@@ -1254,22 +1280,22 @@ export function logAIModelUsage(modelId: string, responseTime: number, success: 
 export class AnalyticsTracker {
   static trackDiagnosisCompletion(userId: string, duration: number, satisfaction: number) {
     // Send to analytics service
-    this.sendEvent('diagnosis_completed', {
+    this.sendEvent("diagnosis_completed", {
       userId,
       duration,
       satisfaction,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
-  
+
   static trackAIModelPerformance(modelId: string, metrics: ModelPerformanceMetrics) {
-    this.sendEvent('ai_model_performance', {
+    this.sendEvent("ai_model_performance", {
       modelId,
       ...metrics,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
-  
+
   private static sendEvent(eventName: string, data: any) {
     // Implementation depends on analytics provider
     // Could be Google Analytics, Mixpanel, custom solution, etc.
@@ -1337,19 +1363,19 @@ export function DiagnosisWizard({ userId, onComplete, onError }: DiagnosisWizard
   // Use hooks for state management
   const [currentStep, setCurrentStep] = useState(0);
   const [diagnosisData, setDiagnosisData] = useState<DiagnosisData>({});
-  
+
   // Memoize expensive calculations
   const complexCalculation = useMemo(() => {
     return performExpensiveCalculation(diagnosisData);
   }, [diagnosisData]);
-  
+
   // Handle side effects properly
   useEffect(() => {
     // Cleanup function for subscriptions
     const subscription = subscribeToUpdates(userId);
     return () => subscription.unsubscribe();
   }, [userId]);
-  
+
   return (
     <div className="diagnosis-wizard">
       {/* Component JSX */}
@@ -1391,6 +1417,7 @@ refactor(engine): improve diagnostic pipeline performance
 #### Pull Request Process
 
 1. **Create feature branch from main**
+
 ```bash
 git checkout main
 git pull origin main
@@ -1398,18 +1425,21 @@ git checkout -b feature/your-feature-name
 ```
 
 2. **Make changes and commit**
+
 ```bash
 git add .
 git commit -m "feat(scope): description of changes"
 ```
 
 3. **Push and create PR**
+
 ```bash
 git push origin feature/your-feature-name
 # Create PR through GitHub interface
 ```
 
 4. **PR Requirements**
+
 - [ ] All tests pass
 - [ ] Code coverage maintained
 - [ ] Documentation updated
@@ -1421,24 +1451,28 @@ git push origin feature/your-feature-name
 #### Review Checklist
 
 **Functionality**
+
 - [ ] Code works as intended
 - [ ] Edge cases are handled
 - [ ] Error handling is appropriate
 - [ ] Performance is acceptable
 
 **Security**
+
 - [ ] Input validation is present
 - [ ] No sensitive data exposure
 - [ ] Authentication/authorization correct
 - [ ] SQL injection prevention
 
 **Code Quality**
+
 - [ ] Code is readable and maintainable
 - [ ] TypeScript types are correct
 - [ ] No code duplication
 - [ ] Follows project conventions
 
 **Testing**
+
 - [ ] Unit tests cover new functionality
 - [ ] Integration tests pass
 - [ ] Property-based tests for complex logic
@@ -1451,6 +1485,7 @@ git push origin feature/your-feature-name
 #### Environment Setup Issues
 
 **Problem**: Supabase connection fails
+
 ```bash
 # Check environment variables
 echo $NEXT_PUBLIC_SUPABASE_URL
@@ -1465,6 +1500,7 @@ supabase start
 ```
 
 **Problem**: AI API key issues
+
 ```bash
 # Verify API key format
 echo $GOOGLE_GENERATIVE_AI_API_KEY | wc -c  # Should be ~40 characters
@@ -1477,6 +1513,7 @@ curl -H "Authorization: Bearer $GOOGLE_GENERATIVE_AI_API_KEY" \
 #### Build and Runtime Issues
 
 **Problem**: Next.js build fails
+
 ```bash
 # Clear Next.js cache
 rm -rf .next
@@ -1490,6 +1527,7 @@ npm run analyze
 ```
 
 **Problem**: Mobile app won't start
+
 ```bash
 # Clear Expo cache
 npx expo start --clear
@@ -1507,19 +1545,21 @@ npm install
 #### Slow API Responses
 
 1. **Check AI model performance**
+
 ```typescript
 // Monitor model response times
 const router = new AIModelRouter();
 const stats = router.getRouterStats();
-console.log('Model performance:', stats.modelPerformance);
+console.log("Model performance:", stats.modelPerformance);
 ```
 
 2. **Database query optimization**
+
 ```sql
 -- Check slow queries
-SELECT query, mean_time, calls 
-FROM pg_stat_statements 
-ORDER BY mean_time DESC 
+SELECT query, mean_time, calls
+FROM pg_stat_statements
+ORDER BY mean_time DESC
 LIMIT 10;
 
 -- Analyze specific query
@@ -1527,6 +1567,7 @@ EXPLAIN ANALYZE SELECT * FROM diagnosis_sessions WHERE patient_id = $1;
 ```
 
 3. **Enable caching**
+
 ```typescript
 // Add Redis caching for expensive operations
 const cached = await redis.get(`diagnosis:${userId}`);
@@ -1536,6 +1577,7 @@ if (cached) return JSON.parse(cached);
 #### Memory Issues
 
 1. **Monitor memory usage**
+
 ```bash
 # Check Node.js memory usage
 node --inspect app.js
@@ -1546,6 +1588,7 @@ pm2 monit
 ```
 
 2. **Optimize large data processing**
+
 ```typescript
 // Stream large datasets instead of loading all at once
 async function* processLargeDataset(data: any[]) {
@@ -1560,6 +1603,7 @@ async function* processLargeDataset(data: any[]) {
 #### Deployment Problems
 
 **Problem**: Vercel deployment fails
+
 ```bash
 # Check build logs
 vercel logs
@@ -1573,6 +1617,7 @@ npm start
 ```
 
 **Problem**: Database migration issues
+
 ```bash
 # Check migration status
 supabase migration list --db-url $DATABASE_URL
@@ -1584,20 +1629,21 @@ supabase migration up --db-url $DATABASE_URL
 #### Monitoring and Alerts
 
 **Set up alerts for critical issues**
+
 ```typescript
 // Configure Sentry alerts
-Sentry.configureScope(scope => {
-  scope.setTag('component', 'ai-diagnostic-engine');
-  scope.setLevel('error');
+Sentry.configureScope((scope) => {
+  scope.setTag("component", "ai-diagnostic-engine");
+  scope.setLevel("error");
 });
 
 // Custom health check alerts
-if (healthCheck.status === 'unhealthy') {
+if (healthCheck.status === "unhealthy") {
   await sendAlert({
-    type: 'system_health',
-    severity: 'critical',
-    message: 'System health check failed',
-    details: healthCheck.results
+    type: "system_health",
+    severity: "critical",
+    message: "System health check failed",
+    details: healthCheck.results,
   });
 }
 ```
@@ -1605,17 +1651,20 @@ if (healthCheck.status === 'unhealthy') {
 ### Getting Help
 
 #### Internal Resources
+
 - **Documentation**: `/docs` directory
 - **API Reference**: `/docs/API_DOCUMENTATION.md`
 - **Architecture**: `/docs/SYSTEM_ARCHITECTURE.md`
 
 #### External Resources
+
 - **Next.js Documentation**: https://nextjs.org/docs
 - **Supabase Documentation**: https://supabase.com/docs
 - **React Native Documentation**: https://reactnative.dev/docs
 - **Vercel AI SDK**: https://sdk.vercel.ai/docs
 
 #### Support Channels
+
 - **GitHub Issues**: For bugs and feature requests
 - **Team Slack**: For development discussions
 - **Code Reviews**: For architectural decisions

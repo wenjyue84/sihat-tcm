@@ -1,11 +1,11 @@
 /**
  * Property-Based Testing Framework for Sihat TCM
- * 
+ *
  * This framework provides utilities for property-based testing using fast-check,
  * specifically tailored for medical and TCM-related scenarios.
  */
 
-import * as fc from 'fast-check'
+import * as fc from "fast-check";
 
 // Configuration for property-based tests
 export const PBT_CONFIG = {
@@ -16,8 +16,8 @@ export const PBT_CONFIG = {
   // Seed for reproducible tests (can be overridden)
   seed: 42,
   // Verbose output for debugging
-  verbose: false
-} as const
+  verbose: false,
+} as const;
 
 /**
  * Property test runner with standardized configuration
@@ -26,8 +26,8 @@ export function runPropertyTest<T>(
   property: fc.Property<T>,
   config: Partial<typeof PBT_CONFIG> = {}
 ): void {
-  const testConfig = { ...PBT_CONFIG, ...config }
-  fc.assert(property, testConfig)
+  const testConfig = { ...PBT_CONFIG, ...config };
+  fc.assert(property, testConfig);
 }
 
 /**
@@ -38,28 +38,28 @@ export function createPropertyTest<T>(
   arbitrary: fc.Arbitrary<T>,
   predicate: (value: T) => boolean | void,
   metadata: {
-    featureName: string
-    propertyNumber: number
-    propertyDescription: string
-    validatesRequirements: string[]
+    featureName: string;
+    propertyNumber: number;
+    propertyDescription: string;
+    validatesRequirements: string[];
   }
 ): fc.Property<T> {
-  const property = fc.property(arbitrary, predicate)
-  
+  const property = fc.property(arbitrary, predicate);
+
   // Add metadata as comments for traceability
   const comment = `
     **Feature: ${metadata.featureName}, Property ${metadata.propertyNumber}: ${metadata.propertyDescription}**
-    Validates: Requirements ${metadata.validatesRequirements.join(', ')}
-  `
-  
+    Validates: Requirements ${metadata.validatesRequirements.join(", ")}
+  `;
+
   // Store metadata for reporting
-  ;(property as any).__metadata = {
+  (property as any).__metadata = {
     name,
     comment,
-    ...metadata
-  }
-  
-  return property
+    ...metadata,
+  };
+
+  return property;
 }
 
 /**
@@ -67,17 +67,17 @@ export function createPropertyTest<T>(
  */
 export class PropertyTestReporter {
   private results: Array<{
-    name: string
-    status: 'passed' | 'failed'
-    metadata?: any
-    error?: Error
-    counterexample?: any
-    timestamp: Date
-  }> = []
+    name: string;
+    status: "passed" | "failed";
+    metadata?: any;
+    error?: Error;
+    counterexample?: any;
+    timestamp: Date;
+  }> = [];
 
   recordResult(
     name: string,
-    status: 'passed' | 'failed',
+    status: "passed" | "failed",
     metadata?: any,
     error?: Error,
     counterexample?: any
@@ -88,14 +88,14 @@ export class PropertyTestReporter {
       metadata,
       error,
       counterexample,
-      timestamp: new Date()
-    })
+      timestamp: new Date(),
+    });
   }
 
   generateReport(): string {
-    const passed = this.results.filter(r => r.status === 'passed').length
-    const failed = this.results.filter(r => r.status === 'failed').length
-    const total = this.results.length
+    const passed = this.results.filter((r) => r.status === "passed").length;
+    const failed = this.results.filter((r) => r.status === "failed").length;
+    const total = this.results.length;
 
     let report = `
 Property-Based Test Report
@@ -105,42 +105,42 @@ Passed: ${passed}
 Failed: ${failed}
 Success Rate: ${total > 0 ? ((passed / total) * 100).toFixed(2) : 0}%
 
-`
+`;
 
     if (failed > 0) {
-      report += 'Failed Tests:\n'
+      report += "Failed Tests:\n";
       this.results
-        .filter(r => r.status === 'failed')
-        .forEach(result => {
+        .filter((r) => r.status === "failed")
+        .forEach((result) => {
           report += `
 - ${result.name}
-  Error: ${result.error?.message || 'Unknown error'}
+  Error: ${result.error?.message || "Unknown error"}
   Counterexample: ${JSON.stringify(result.counterexample, null, 2)}
   Metadata: ${JSON.stringify(result.metadata, null, 2)}
-`
-        })
+`;
+        });
     }
 
-    return report
+    return report;
   }
 
   getFailedTests(): Array<{ name: string; error?: Error; counterexample?: any }> {
     return this.results
-      .filter(r => r.status === 'failed')
-      .map(r => ({
+      .filter((r) => r.status === "failed")
+      .map((r) => ({
         name: r.name,
         error: r.error,
-        counterexample: r.counterexample
-      }))
+        counterexample: r.counterexample,
+      }));
   }
 
   clear(): void {
-    this.results = []
+    this.results = [];
   }
 }
 
 // Global reporter instance
-export const globalReporter = new PropertyTestReporter()
+export const globalReporter = new PropertyTestReporter();
 
 /**
  * Enhanced property test runner with reporting
@@ -150,23 +150,24 @@ export function runPropertyTestWithReporting<T>(
   property: fc.Property<T>,
   config: Partial<typeof PBT_CONFIG> = {}
 ): void {
-  const testConfig = { ...PBT_CONFIG, ...config }
-  
+  const testConfig = { ...PBT_CONFIG, ...config };
+
   try {
-    fc.assert(property, testConfig)
-    globalReporter.recordResult(name, 'passed', (property as any).__metadata)
+    fc.assert(property, testConfig);
+    globalReporter.recordResult(name, "passed", (property as any).__metadata);
   } catch (error) {
-    const counterexample = error instanceof Error && 'counterexample' in error 
-      ? (error as any).counterexample 
-      : undefined
-    
+    const counterexample =
+      error instanceof Error && "counterexample" in error
+        ? (error as any).counterexample
+        : undefined;
+
     globalReporter.recordResult(
-      name, 
-      'failed', 
-      (property as any).__metadata, 
-      error as Error, 
+      name,
+      "failed",
+      (property as any).__metadata,
+      error as Error,
       counterexample
-    )
-    throw error
+    );
+    throw error;
   }
 }

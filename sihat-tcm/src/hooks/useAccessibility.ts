@@ -1,6 +1,6 @@
 /**
  * useAccessibility Hook - React integration for AccessibilityManager
- * 
+ *
  * This hook provides:
  * - Easy access to accessibility manager
  * - React-friendly API for accessibility features
@@ -8,177 +8,184 @@
  * - State management for accessibility preferences
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react'
-import { 
-  AccessibilityManager, 
-  AccessibilityPreferences, 
-  getAccessibilityManager 
-} from '@/lib/accessibilityManager'
+import { useEffect, useRef, useState, useCallback } from "react";
+import {
+  AccessibilityManager,
+  AccessibilityPreferences,
+  getAccessibilityManager,
+} from "@/lib/accessibilityManager";
 
 export interface UseAccessibilityOptions {
-  focusGroup?: string
-  autoRegisterFocusables?: boolean
-  announceChanges?: boolean
+  focusGroup?: string;
+  autoRegisterFocusables?: boolean;
+  announceChanges?: boolean;
 }
 
 export interface UseAccessibilityReturn {
-  manager: AccessibilityManager
-  preferences: AccessibilityPreferences
-  updatePreferences: (prefs: Partial<AccessibilityPreferences>) => void
-  registerFocusGroup: (elements: HTMLElement[], priorities?: number[]) => void
-  setFocusGroup: (groupId: string) => void
-  focusNext: () => boolean
-  focusPrevious: () => boolean
-  focusFirst: () => boolean
-  focusLast: () => boolean
-  announce: (message: string, priority?: 'polite' | 'assertive', delay?: number) => void
-  addAriaAttributes: (element: HTMLElement, attributes: Record<string, string>) => void
+  manager: AccessibilityManager;
+  preferences: AccessibilityPreferences;
+  updatePreferences: (prefs: Partial<AccessibilityPreferences>) => void;
+  registerFocusGroup: (elements: HTMLElement[], priorities?: number[]) => void;
+  setFocusGroup: (groupId: string) => void;
+  focusNext: () => boolean;
+  focusPrevious: () => boolean;
+  focusFirst: () => boolean;
+  focusLast: () => boolean;
+  announce: (message: string, priority?: "polite" | "assertive", delay?: number) => void;
+  addAriaAttributes: (element: HTMLElement, attributes: Record<string, string>) => void;
   validateWCAGCompliance: (element: HTMLElement) => {
-    isCompliant: boolean
-    issues: string[]
-    suggestions: string[]
-  }
+    isCompliant: boolean;
+    issues: string[];
+    suggestions: string[];
+  };
 }
 
 /**
  * Hook for using accessibility features in React components
  */
 export function useAccessibility(options: UseAccessibilityOptions = {}): UseAccessibilityReturn {
-  const { focusGroup, autoRegisterFocusables = true, announceChanges = true } = options
-  
-  const managerRef = useRef<AccessibilityManager | null>(null)
+  const { focusGroup, autoRegisterFocusables = true, announceChanges = true } = options;
+
+  const managerRef = useRef<AccessibilityManager | null>(null);
   const [preferences, setPreferences] = useState<AccessibilityPreferences>({
     highContrast: false,
     reducedMotion: false,
     screenReaderEnabled: false,
     keyboardNavigation: true,
-    fontSize: 'medium',
-    focusIndicatorStyle: 'default',
-    announcements: true
-  })
+    fontSize: "medium",
+    focusIndicatorStyle: "default",
+    announcements: true,
+  });
 
   // Initialize accessibility manager
   useEffect(() => {
     if (!managerRef.current) {
-      managerRef.current = getAccessibilityManager()
-      setPreferences(managerRef.current.getPreferences())
+      managerRef.current = getAccessibilityManager();
+      setPreferences(managerRef.current.getPreferences());
     }
-  }, [])
+  }, []);
 
   // Set focus group if provided
   useEffect(() => {
     if (focusGroup && managerRef.current) {
-      managerRef.current.setFocusGroup(focusGroup)
+      managerRef.current.setFocusGroup(focusGroup);
     }
-  }, [focusGroup])
+  }, [focusGroup]);
 
   // Auto-register focusable elements in the component
   useEffect(() => {
-    if (!autoRegisterFocusables || !focusGroup || !managerRef.current) return
+    if (!autoRegisterFocusables || !focusGroup || !managerRef.current) return;
 
     const registerFocusables = () => {
       const focusableElements = document.querySelectorAll(
         `[data-focus-group="${focusGroup}"] button, ` +
-        `[data-focus-group="${focusGroup}"] [href], ` +
-        `[data-focus-group="${focusGroup}"] input, ` +
-        `[data-focus-group="${focusGroup}"] select, ` +
-        `[data-focus-group="${focusGroup}"] textarea, ` +
-        `[data-focus-group="${focusGroup}"] [tabindex]:not([tabindex="-1"])`
-      ) as NodeListOf<HTMLElement>
+          `[data-focus-group="${focusGroup}"] [href], ` +
+          `[data-focus-group="${focusGroup}"] input, ` +
+          `[data-focus-group="${focusGroup}"] select, ` +
+          `[data-focus-group="${focusGroup}"] textarea, ` +
+          `[data-focus-group="${focusGroup}"] [tabindex]:not([tabindex="-1"])`
+      ) as NodeListOf<HTMLElement>;
 
       if (focusableElements.length > 0 && managerRef.current) {
-        managerRef.current.registerFocusGroup(focusGroup, Array.from(focusableElements))
+        managerRef.current.registerFocusGroup(focusGroup, Array.from(focusableElements));
       }
-    }
+    };
 
     // Register immediately
-    registerFocusables()
+    registerFocusables();
 
     // Re-register when DOM changes
-    const observer = new MutationObserver(registerFocusables)
+    const observer = new MutationObserver(registerFocusables);
     observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['data-focus-group']
-    })
+      attributeFilter: ["data-focus-group"],
+    });
 
-    return () => observer.disconnect()
-  }, [focusGroup, autoRegisterFocusables])
+    return () => observer.disconnect();
+  }, [focusGroup, autoRegisterFocusables]);
 
   // Update preferences callback
-  const updatePreferences = useCallback((newPreferences: Partial<AccessibilityPreferences>) => {
-    if (managerRef.current) {
-      managerRef.current.updatePreferences(newPreferences)
-      setPreferences(managerRef.current.getPreferences())
-      
-      if (announceChanges) {
-        const changes = Object.keys(newPreferences).join(', ')
-        managerRef.current.announce(`Accessibility settings updated: ${changes}`)
+  const updatePreferences = useCallback(
+    (newPreferences: Partial<AccessibilityPreferences>) => {
+      if (managerRef.current) {
+        managerRef.current.updatePreferences(newPreferences);
+        setPreferences(managerRef.current.getPreferences());
+
+        if (announceChanges) {
+          const changes = Object.keys(newPreferences).join(", ");
+          managerRef.current.announce(`Accessibility settings updated: ${changes}`);
+        }
       }
-    }
-  }, [announceChanges])
+    },
+    [announceChanges]
+  );
 
   // Register focus group callback
-  const registerFocusGroup = useCallback((elements: HTMLElement[], priorities?: number[]) => {
-    if (focusGroup && managerRef.current) {
-      managerRef.current.registerFocusGroup(focusGroup, elements, priorities)
-    }
-  }, [focusGroup])
+  const registerFocusGroup = useCallback(
+    (elements: HTMLElement[], priorities?: number[]) => {
+      if (focusGroup && managerRef.current) {
+        managerRef.current.registerFocusGroup(focusGroup, elements, priorities);
+      }
+    },
+    [focusGroup]
+  );
 
   // Set focus group callback
   const setFocusGroup = useCallback((groupId: string) => {
     if (managerRef.current) {
-      managerRef.current.setFocusGroup(groupId)
+      managerRef.current.setFocusGroup(groupId);
     }
-  }, [])
+  }, []);
 
   // Focus navigation callbacks
   const focusNext = useCallback(() => {
-    return managerRef.current?.focusNext() ?? false
-  }, [])
+    return managerRef.current?.focusNext() ?? false;
+  }, []);
 
   const focusPrevious = useCallback(() => {
-    return managerRef.current?.focusPrevious() ?? false
-  }, [])
+    return managerRef.current?.focusPrevious() ?? false;
+  }, []);
 
   const focusFirst = useCallback(() => {
-    return managerRef.current?.focusFirst() ?? false
-  }, [])
+    return managerRef.current?.focusFirst() ?? false;
+  }, []);
 
   const focusLast = useCallback(() => {
-    return managerRef.current?.focusLast() ?? false
-  }, [])
+    return managerRef.current?.focusLast() ?? false;
+  }, []);
 
   // Announce callback
-  const announce = useCallback((
-    message: string, 
-    priority: 'polite' | 'assertive' = 'polite', 
-    delay: number = 0
-  ) => {
-    if (managerRef.current) {
-      managerRef.current.announce(message, priority, delay)
-    }
-  }, [])
+  const announce = useCallback(
+    (message: string, priority: "polite" | "assertive" = "polite", delay: number = 0) => {
+      if (managerRef.current) {
+        managerRef.current.announce(message, priority, delay);
+      }
+    },
+    []
+  );
 
   // Add ARIA attributes callback
-  const addAriaAttributes = useCallback((
-    element: HTMLElement, 
-    attributes: Record<string, string>
-  ) => {
-    if (managerRef.current) {
-      managerRef.current.addAriaAttributes(element, attributes)
-    }
-  }, [])
+  const addAriaAttributes = useCallback(
+    (element: HTMLElement, attributes: Record<string, string>) => {
+      if (managerRef.current) {
+        managerRef.current.addAriaAttributes(element, attributes);
+      }
+    },
+    []
+  );
 
   // WCAG compliance validation callback
   const validateWCAGCompliance = useCallback((element: HTMLElement) => {
-    return managerRef.current?.validateWCAGCompliance(element) ?? {
-      isCompliant: false,
-      issues: ['Accessibility manager not initialized'],
-      suggestions: []
-    }
-  }, [])
+    return (
+      managerRef.current?.validateWCAGCompliance(element) ?? {
+        isCompliant: false,
+        issues: ["Accessibility manager not initialized"],
+        suggestions: [],
+      }
+    );
+  }, []);
 
   return {
     manager: managerRef.current!,
@@ -192,8 +199,8 @@ export function useAccessibility(options: UseAccessibilityOptions = {}): UseAcce
     focusLast,
     announce,
     addAriaAttributes,
-    validateWCAGCompliance
-  }
+    validateWCAGCompliance,
+  };
 }
 
 /**
@@ -202,83 +209,98 @@ export function useAccessibility(options: UseAccessibilityOptions = {}): UseAcce
 export function useKeyboardNavigation(
   containerRef: React.RefObject<HTMLElement | null>,
   options: {
-    groupId?: string
-    enableArrowKeys?: boolean
-    enableHomeEnd?: boolean
-    circular?: boolean
+    groupId?: string;
+    enableArrowKeys?: boolean;
+    enableHomeEnd?: boolean;
+    circular?: boolean;
   } = {}
 ) {
-  const { groupId = 'keyboard-nav', enableArrowKeys = true, enableHomeEnd = true, circular = true } = options
-  const { manager, focusNext, focusPrevious, focusFirst, focusLast } = useAccessibility({ focusGroup: groupId })
+  const {
+    groupId = "keyboard-nav",
+    enableArrowKeys = true,
+    enableHomeEnd = true,
+    circular = true,
+  } = options;
+  const { manager, focusNext, focusPrevious, focusFirst, focusLast } = useAccessibility({
+    focusGroup: groupId,
+  });
 
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
+    const container = containerRef.current;
+    if (!container) return;
 
     // Add keyboard navigation attributes
-    container.setAttribute('data-arrow-navigation', 'true')
-    container.setAttribute('data-keyboard-navigation', 'true')
+    container.setAttribute("data-arrow-navigation", "true");
+    container.setAttribute("data-keyboard-navigation", "true");
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (!enableArrowKeys && !enableHomeEnd) return
+      if (!enableArrowKeys && !enableHomeEnd) return;
 
-      let handled = false
+      let handled = false;
 
       switch (event.key) {
-        case 'ArrowUp':
+        case "ArrowUp":
           if (enableArrowKeys) {
-            handled = focusPrevious()
+            handled = focusPrevious();
           }
-          break
-        case 'ArrowDown':
+          break;
+        case "ArrowDown":
           if (enableArrowKeys) {
-            handled = focusNext()
+            handled = focusNext();
           }
-          break
-        case 'ArrowLeft':
+          break;
+        case "ArrowLeft":
           if (enableArrowKeys) {
-            handled = document.dir === 'rtl' ? focusNext() : focusPrevious()
+            handled = document.dir === "rtl" ? focusNext() : focusPrevious();
           }
-          break
-        case 'ArrowRight':
+          break;
+        case "ArrowRight":
           if (enableArrowKeys) {
-            handled = document.dir === 'rtl' ? focusPrevious() : focusNext()
+            handled = document.dir === "rtl" ? focusPrevious() : focusNext();
           }
-          break
-        case 'Home':
+          break;
+        case "Home":
           if (enableHomeEnd) {
-            handled = focusFirst()
+            handled = focusFirst();
           }
-          break
-        case 'End':
+          break;
+        case "End":
           if (enableHomeEnd) {
-            handled = focusLast()
+            handled = focusLast();
           }
-          break
+          break;
       }
 
       if (handled) {
-        event.preventDefault()
-        event.stopPropagation()
+        event.preventDefault();
+        event.stopPropagation();
       }
-    }
+    };
 
-    container.addEventListener('keydown', handleKeyDown)
+    container.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      container.removeEventListener('keydown', handleKeyDown)
-      container.removeAttribute('data-arrow-navigation')
-      container.removeAttribute('data-keyboard-navigation')
-    }
-  }, [containerRef, enableArrowKeys, enableHomeEnd, focusNext, focusPrevious, focusFirst, focusLast])
+      container.removeEventListener("keydown", handleKeyDown);
+      container.removeAttribute("data-arrow-navigation");
+      container.removeAttribute("data-keyboard-navigation");
+    };
+  }, [
+    containerRef,
+    enableArrowKeys,
+    enableHomeEnd,
+    focusNext,
+    focusPrevious,
+    focusFirst,
+    focusLast,
+  ]);
 
   return {
     manager,
     focusNext,
     focusPrevious,
     focusFirst,
-    focusLast
-  }
+    focusLast,
+  };
 }
 
 /**
@@ -288,105 +310,104 @@ export function useFocusTrap(
   containerRef: React.RefObject<HTMLElement | null>,
   isActive: boolean = true
 ) {
-  const { manager } = useAccessibility()
+  const { manager } = useAccessibility();
 
   useEffect(() => {
-    if (!isActive || !containerRef.current) return
+    if (!isActive || !containerRef.current) return;
 
-    const container = containerRef.current
+    const container = containerRef.current;
     const focusableElements = container.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    ) as NodeListOf<HTMLElement>
+    ) as NodeListOf<HTMLElement>;
 
-    if (focusableElements.length === 0) return
+    if (focusableElements.length === 0) return;
 
-    const firstElement = focusableElements[0]
-    const lastElement = focusableElements[focusableElements.length - 1]
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
 
     // Focus first element
-    firstElement.focus()
+    firstElement.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Tab') return
+      if (event.key !== "Tab") return;
 
       if (event.shiftKey) {
         // Shift + Tab
         if (document.activeElement === firstElement) {
-          event.preventDefault()
-          lastElement.focus()
+          event.preventDefault();
+          lastElement.focus();
         }
       } else {
         // Tab
         if (document.activeElement === lastElement) {
-          event.preventDefault()
-          firstElement.focus()
+          event.preventDefault();
+          firstElement.focus();
         }
       }
-    }
+    };
 
-    container.addEventListener('keydown', handleKeyDown)
+    container.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      container.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [isActive, containerRef])
+      container.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isActive, containerRef]);
 
-  return { manager }
+  return { manager };
 }
 
 /**
  * Hook for announcing live region updates
  */
-export function useLiveRegion(initialMessage: string = '') {
-  const { announce } = useAccessibility()
-  const [message, setMessage] = useState(initialMessage)
+export function useLiveRegion(initialMessage: string = "") {
+  const { announce } = useAccessibility();
+  const [message, setMessage] = useState(initialMessage);
 
-  const announceMessage = useCallback((
-    newMessage: string, 
-    priority: 'polite' | 'assertive' = 'polite',
-    delay: number = 0
-  ) => {
-    setMessage(newMessage)
-    announce(newMessage, priority, delay)
-  }, [announce])
+  const announceMessage = useCallback(
+    (newMessage: string, priority: "polite" | "assertive" = "polite", delay: number = 0) => {
+      setMessage(newMessage);
+      announce(newMessage, priority, delay);
+    },
+    [announce]
+  );
 
   const clearMessage = useCallback(() => {
-    setMessage('')
-  }, [])
+    setMessage("");
+  }, []);
 
   return {
     message,
     announceMessage,
-    clearMessage
-  }
+    clearMessage,
+  };
 }
 
 /**
  * Hook for WCAG compliance checking
  */
 export function useWCAGCompliance(elementRef: React.RefObject<HTMLElement | null>) {
-  const { validateWCAGCompliance } = useAccessibility()
+  const { validateWCAGCompliance } = useAccessibility();
   const [compliance, setCompliance] = useState<{
-    isCompliant: boolean
-    issues: string[]
-    suggestions: string[]
-  } | null>(null)
+    isCompliant: boolean;
+    issues: string[];
+    suggestions: string[];
+  } | null>(null);
 
   const checkCompliance = useCallback(() => {
     if (elementRef.current) {
-      const result = validateWCAGCompliance(elementRef.current)
-      setCompliance(result)
-      return result
+      const result = validateWCAGCompliance(elementRef.current);
+      setCompliance(result);
+      return result;
     }
-    return null
-  }, [elementRef, validateWCAGCompliance])
+    return null;
+  }, [elementRef, validateWCAGCompliance]);
 
   useEffect(() => {
-    checkCompliance()
-  }, [checkCompliance])
+    checkCompliance();
+  }, [checkCompliance]);
 
   return {
     compliance,
-    checkCompliance
-  }
+    checkCompliance,
+  };
 }

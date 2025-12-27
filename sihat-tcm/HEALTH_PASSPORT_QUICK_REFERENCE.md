@@ -3,6 +3,7 @@
 ## 📦 What Was Delivered
 
 A complete **patient history system** with:
+
 - ✅ Database table + RLS policies
 - ✅ Server actions for CRUD operations
 - ✅ Patient dashboard with trends
@@ -42,27 +43,27 @@ A complete **patient history system** with:
 
 ## 🎯 Key Routes
 
-| Route | Purpose | Auth Required |
-|-------|---------|---------------|
-| `/patient/dashboard` | Main dashboard with history | ✅ Yes |
-| `/patient/history/[id]` | View single session | ✅ Yes |
-| `/` | Diagnosis wizard (auto-saves if logged in) | ❌ No |
+| Route                   | Purpose                                    | Auth Required |
+| ----------------------- | ------------------------------------------ | ------------- |
+| `/patient/dashboard`    | Main dashboard with history                | ✅ Yes        |
+| `/patient/history/[id]` | View single session                        | ✅ Yes        |
+| `/`                     | Diagnosis wizard (auto-saves if logged in) | ❌ No         |
 
 ## 🗄️ Database Table
 
 **Table**: `diagnosis_sessions`
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | uuid | Primary key |
-| `user_id` | uuid | FK to auth.users |
-| `primary_diagnosis` | text | Main TCM diagnosis |
-| `constitution` | text | Constitution type |
-| `overall_score` | int | Vitality score (0-100) |
-| `full_report` | jsonb | Complete AI report |
-| `notes` | text | User's observations |
-| `created_at` | timestamptz | Session date |
-| `updated_at` | timestamptz | Last modified |
+| Column              | Type        | Description            |
+| ------------------- | ----------- | ---------------------- |
+| `id`                | uuid        | Primary key            |
+| `user_id`           | uuid        | FK to auth.users       |
+| `primary_diagnosis` | text        | Main TCM diagnosis     |
+| `constitution`      | text        | Constitution type      |
+| `overall_score`     | int         | Vitality score (0-100) |
+| `full_report`       | jsonb       | Complete AI report     |
+| `notes`             | text        | User's observations    |
+| `created_at`        | timestamptz | Session date           |
+| `updated_at`        | timestamptz | Last modified          |
 
 **Indexes**: `user_id`, `created_at`, `primary_diagnosis`
 
@@ -71,26 +72,28 @@ A complete **patient history system** with:
 ```typescript
 // Save a new diagnosis session
 await saveDiagnosis({
-  primary_diagnosis: 'Yin Deficiency',
-  constitution: 'Deficient Type',
+  primary_diagnosis: "Yin Deficiency",
+  constitution: "Deficient Type",
   overall_score: 65,
-  full_report: { /* JSONB */ }
-})
+  full_report: {
+    /* JSONB */
+  },
+});
 
 // Get user's history (paginated)
-await getPatientHistory(limit, offset)
+await getPatientHistory(limit, offset);
 
 // Get single session
-await getSessionById(sessionId)
+await getSessionById(sessionId);
 
 // Update notes
-await updateSessionNotes(sessionId, 'Feeling better today!')
+await updateSessionNotes(sessionId, "Feeling better today!");
 
 // Delete session
-await deleteSession(sessionId)
+await deleteSession(sessionId);
 
 // Get trend statistics
-await getHealthTrends(30) // last 30 days
+await getHealthTrends(30); // last 30 days
 ```
 
 All actions return: `{ success: boolean, data?: any, error?: string }`
@@ -98,6 +101,7 @@ All actions return: `{ success: boolean, data?: any, error?: string }`
 ## 🎨 Component Quick Reference
 
 ### HistoryCard
+
 ```tsx
 <HistoryCard
   session={sessionData}
@@ -107,6 +111,7 @@ All actions return: `{ success: boolean, data?: any, error?: string }`
 ```
 
 ### TrendWidget
+
 ```tsx
 <TrendWidget
   trendData={{
@@ -121,11 +126,12 @@ All actions return: `{ success: boolean, data?: any, error?: string }`
 ```
 
 ### SaveToDashboardBanner
+
 ```tsx
 <SaveToDashboardBanner
   isGuest={!user}
   isSaved={hasSaved}
-  onViewDashboard={() => router.push('/patient/dashboard')}
+  onViewDashboard={() => router.push("/patient/dashboard")}
 />
 ```
 
@@ -138,7 +144,7 @@ All actions return: `{ success: boolean, data?: any, error?: string }`
 // Balanced: +15 | Deficient: -10
 // Range: 0-100
 
-calculateOverallScore(reportData) // → int
+calculateOverallScore(reportData); // → int
 ```
 
 ## 🔐 Security Checklist
@@ -168,13 +174,13 @@ psql $DATABASE_URL -c "SELECT id, primary_diagnosis, overall_score FROM diagnosi
 
 ## 🐛 Common Fixes
 
-| Issue | Solution |
-|-------|----------|
-| Table not found | Run migration SQL |
-| Permission denied | Check RLS policies |
-| Not redirecting | Verify `useAuth()` working |
-| Score always 70 | Check AI response structure |
-| Banner not showing | Clear browser cache |
+| Issue              | Solution                    |
+| ------------------ | --------------------------- |
+| Table not found    | Run migration SQL           |
+| Permission denied  | Check RLS policies          |
+| Not redirecting    | Verify `useAuth()` working  |
+| Score always 70    | Check AI response structure |
+| Banner not showing | Clear browser cache         |
 
 ## 📈 Monitoring Queries
 
@@ -183,13 +189,13 @@ psql $DATABASE_URL -c "SELECT id, primary_diagnosis, overall_score FROM diagnosi
 SELECT COUNT(*) FROM diagnosis_sessions;
 
 -- Sessions per user
-SELECT user_id, COUNT(*) 
-FROM diagnosis_sessions 
+SELECT user_id, COUNT(*)
+FROM diagnosis_sessions
 GROUP BY user_id;
 
 -- Average scores
 SELECT AVG(overall_score) as avg_score
-FROM diagnosis_sessions 
+FROM diagnosis_sessions
 WHERE overall_score IS NOT NULL;
 
 -- Top diagnoses
@@ -252,6 +258,7 @@ Diagnosis → Auto-save → Banner ("Saved!") → Dashboard
 ## 🎉 Feature Highlights
 
 **What makes this special:**
+
 1. 📊 **Trend tracking** - Users see progress over time
 2. 🎨 **Beautiful design** - Glassmorphism + animations
 3. 🔒 **Secure** - RLS at database level
@@ -267,6 +274,4 @@ Diagnosis → Auto-save → Banner ("Saved!") → Dashboard
 
 **Status**: ✅ **PRODUCTION READY**
 
-*Need help? Check the full docs or console logs.* 🛠️
-
-
+_Need help? Check the full docs or console logs._ 🛠️

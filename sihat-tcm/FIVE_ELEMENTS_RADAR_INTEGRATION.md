@@ -1,9 +1,11 @@
 # Five Elements Radar Integration Guide
 
 ## Overview
+
 This document explains how to integrate the Five Elements Radar component with real diagnosis data from the Digital Twin system.
 
 ## Component Location
+
 - **Component**: `src/components/patient/FiveElementsRadar.tsx`
 - **Integrated in**: `src/components/patient/CircleOfHealth.tsx`
 - **Translations**: Added to `src/lib/translations/en.ts`, `src/lib/translations/zh.ts`
@@ -11,6 +13,7 @@ This document explains how to integrate the Five Elements Radar component with r
 ## Features Implemented
 
 ### 1. Interactive Radar Chart
+
 - Pentagon-shaped radar chart with 5 vertices representing the Five Elements
 - Liver (Wood) - Green 🌿
 - Heart (Fire) - Red 🔥
@@ -19,19 +22,24 @@ This document explains how to integrate the Five Elements Radar component with r
 - Kidney (Water) - Blue 💧
 
 ### 2. Health Scoring (0-100)
+
 Each organ is scored based on:
+
 - Constitution type inference
 - Recent diagnosis data (when available)
 - Symptoms and patterns
 
 ### 3. Visual Feedback
+
 - Scores < 60: Highlighted with warning icon ⚠️
 - Color-coded for each element
 - Interactive tooltips
 - Smooth animations
 
 ### 4. Detailed Recommendations
+
 Click on any organ to see:
+
 - Current health status
 - TCM description of the organ
 - Personalized dietary recommendations
@@ -39,6 +47,7 @@ Click on any organ to see:
 - Exercise recommendations
 
 ### 5. Historical Trends
+
 - Time slider to view historical data
 - Progress visualization
 - Timeline navigation
@@ -46,6 +55,7 @@ Click on any organ to see:
 ## Data Integration
 
 ### Option 1: Using Constitution Type (Current Implementation)
+
 ```typescript
 <FiveElementsRadar
   constitutionType="qi-deficiency"
@@ -53,6 +63,7 @@ Click on any organ to see:
 ```
 
 The component will automatically infer organ scores based on the constitution type:
+
 - Qi Deficiency → Lower scores for Spleen and Lung
 - Yang Deficiency → Lower scores for Kidney and Spleen
 - Yin Deficiency → Lower scores for Kidney and Liver
@@ -60,6 +71,7 @@ The component will automatically infer organ scores based on the constitution ty
 - Blood Stasis → Lower scores for Liver and Heart
 
 ### Option 2: Using Direct Scores
+
 ```typescript
 <FiveElementsRadar
   currentScores={{
@@ -73,6 +85,7 @@ The component will automatically infer organ scores based on the constitution ty
 ```
 
 ### Option 3: With Historical Data
+
 ```typescript
 <FiveElementsRadar
   currentScores={{
@@ -118,20 +131,18 @@ The component will automatically infer organ scores based on the constitution ty
 Create `src/lib/fiveElementsScoreCalculator.ts`:
 
 ```typescript
-import { DiagnosisSession } from '@/types/database'
+import { DiagnosisSession } from "@/types/database";
 
 export interface FiveElementsScore {
-  liver: number
-  heart: number
-  spleen: number
-  lung: number
-  kidney: number
-  timestamp?: string
+  liver: number;
+  heart: number;
+  spleen: number;
+  lung: number;
+  kidney: number;
+  timestamp?: string;
 }
 
-export function calculateFiveElementsScores(
-  diagnosis: DiagnosisSession
-): FiveElementsScore {
+export function calculateFiveElementsScores(diagnosis: DiagnosisSession): FiveElementsScore {
   // Initialize base scores
   const scores: FiveElementsScore = {
     liver: 70,
@@ -139,67 +150,67 @@ export function calculateFiveElementsScores(
     spleen: 70,
     lung: 70,
     kidney: 70,
-    timestamp: diagnosis.created_at
-  }
+    timestamp: diagnosis.created_at,
+  };
 
   // Parse constitution and pattern data
-  const constitution = diagnosis.constitution?.toLowerCase() || ''
-  const pattern = diagnosis.pattern_differentiation?.toLowerCase() || ''
-  
+  const constitution = diagnosis.constitution?.toLowerCase() || "";
+  const pattern = diagnosis.pattern_differentiation?.toLowerCase() || "";
+
   // Adjust scores based on constitution
-  if (constitution.includes('qi') && constitution.includes('deficiency')) {
-    scores.spleen -= 15
-    scores.lung -= 10
+  if (constitution.includes("qi") && constitution.includes("deficiency")) {
+    scores.spleen -= 15;
+    scores.lung -= 10;
   }
-  if (constitution.includes('yang') && constitution.includes('deficiency')) {
-    scores.kidney -= 15
-    scores.spleen -= 10
+  if (constitution.includes("yang") && constitution.includes("deficiency")) {
+    scores.kidney -= 15;
+    scores.spleen -= 10;
   }
-  if (constitution.includes('yin') && constitution.includes('deficiency')) {
-    scores.kidney -= 15
-    scores.liver -= 10
+  if (constitution.includes("yin") && constitution.includes("deficiency")) {
+    scores.kidney -= 15;
+    scores.liver -= 10;
   }
-  if (constitution.includes('damp') || constitution.includes('phlegm')) {
-    scores.spleen -= 15
-    scores.lung -= 12
+  if (constitution.includes("damp") || constitution.includes("phlegm")) {
+    scores.spleen -= 15;
+    scores.lung -= 12;
   }
-  if (constitution.includes('heat') || constitution.includes('fire')) {
-    scores.heart -= 15
-    scores.liver -= 12
+  if (constitution.includes("heat") || constitution.includes("fire")) {
+    scores.heart -= 15;
+    scores.liver -= 12;
   }
-  if (constitution.includes('blood') && constitution.includes('stasis')) {
-    scores.liver -= 15
-    scores.heart -= 12
+  if (constitution.includes("blood") && constitution.includes("stasis")) {
+    scores.liver -= 15;
+    scores.heart -= 12;
   }
-  
+
   // Adjust based on pattern differentiation
-  if (pattern.includes('liver qi stagnation')) {
-    scores.liver -= 10
+  if (pattern.includes("liver qi stagnation")) {
+    scores.liver -= 10;
   }
-  if (pattern.includes('heart fire')) {
-    scores.heart -= 10
+  if (pattern.includes("heart fire")) {
+    scores.heart -= 10;
   }
-  if (pattern.includes('spleen qi deficiency')) {
-    scores.spleen -= 10
+  if (pattern.includes("spleen qi deficiency")) {
+    scores.spleen -= 10;
   }
-  if (pattern.includes('lung yin deficiency')) {
-    scores.lung -= 10
+  if (pattern.includes("lung yin deficiency")) {
+    scores.lung -= 10;
   }
-  if (pattern.includes('kidney yang deficiency')) {
-    scores.kidney -= 10
+  if (pattern.includes("kidney yang deficiency")) {
+    scores.kidney -= 10;
   }
-  
+
   // Clamp scores between 0 and 100
-  Object.keys(scores).forEach(key => {
-    if (key !== 'timestamp') {
-      scores[key as keyof Omit<FiveElementsScore, 'timestamp'>] = Math.max(
+  Object.keys(scores).forEach((key) => {
+    if (key !== "timestamp") {
+      scores[key as keyof Omit<FiveElementsScore, "timestamp">] = Math.max(
         0,
-        Math.min(100, scores[key as keyof Omit<FiveElementsScore, 'timestamp'>])
-      )
+        Math.min(100, scores[key as keyof Omit<FiveElementsScore, "timestamp">])
+      );
     }
-  })
-  
-  return scores
+  });
+
+  return scores;
 }
 
 export function calculateHistoricalScores(
@@ -207,7 +218,7 @@ export function calculateHistoricalScores(
 ): FiveElementsScore[] {
   return diagnosisHistory
     .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-    .map(diagnosis => calculateFiveElementsScores(diagnosis))
+    .map((diagnosis) => calculateFiveElementsScores(diagnosis));
 }
 ```
 
@@ -224,7 +235,7 @@ import { getDiagnosisHistory } from '@/lib/actions'
 export function CircleOfHealth({ userConstitution = 'dampHeat' }: CircleOfHealthProps) {
   const [currentScores, setCurrentScores] = useState<FiveElementsScore | undefined>()
   const [historicalScores, setHistoricalScores] = useState<FiveElementsScore[]>([])
-  
+
   useEffect(() => {
     async function loadDiagnosisData() {
       const history = await getDiagnosisHistory()
@@ -235,20 +246,20 @@ export function CircleOfHealth({ userConstitution = 'dampHeat' }: CircleOfHealth
         setHistoricalScores(calculateHistoricalScores(history.slice(0, 10)))
       }
     }
-    
+
     loadDiagnosisData()
   }, [])
-  
+
   return (
     <div className="space-y-8">
       {/* ... other components ... */}
-      
+
       <FiveElementsRadar
         currentScores={currentScores}
         historicalScores={historicalScores}
         constitutionType={userConstitution}
       />
-      
+
       {/* ... other components ... */}
     </div>
   )
@@ -262,8 +273,8 @@ For more accurate scoring, you can integrate with the AI diagnostic engine:
 ```typescript
 // In your API route or server action
 export async function generateFiveElementsScores(diagnosisId: string) {
-  const diagnosis = await getDiagnosisById(diagnosisId)
-  
+  const diagnosis = await getDiagnosisById(diagnosisId);
+
   // Use AI to analyze and score each organ
   const prompt = `
 Based on the following TCM diagnosis data, provide health scores (0-100) for each of the five organs:
@@ -282,52 +293,58 @@ Provide scores for:
 - Kidney (water)
 
 Return as JSON: { "liver": 75, "heart": 80, "spleen": 65, "lung": 70, "kidney": 60 }
-`
+`;
 
   const result = await generateObject({
-    model: google('gemini-2.0-flash'),
+    model: google("gemini-2.0-flash"),
     prompt,
     schema: z.object({
       liver: z.number().min(0).max(100),
       heart: z.number().min(0).max(100),
       spleen: z.number().min(0).max(100),
       lung: z.number().min(0).max(100),
-      kidney: z.number().min(0).max(100)
-    })
-  })
-  
-  return result.object
+      kidney: z.number().min(0).max(100),
+    }),
+  });
+
+  return result.object;
 }
 ```
 
 ## Customization
 
 ### Colors
+
 Update `ELEMENT_COLORS` in `FiveElementsRadar.tsx`:
+
 ```typescript
 const ELEMENT_COLORS = {
-  liver: '#10b981',   // Green
-  heart: '#ef4444',   // Red
-  spleen: '#eab308',  // Yellow
-  lung: '#e5e7eb',    // Gray
-  kidney: '#3b82f6'   // Blue
-}
+  liver: "#10b981", // Green
+  heart: "#ef4444", // Red
+  spleen: "#eab308", // Yellow
+  lung: "#e5e7eb", // Gray
+  kidney: "#3b82f6", // Blue
+};
 ```
 
 ### Recommendations
+
 Modify the recommendation logic in `getElementRecommendations()` function.
 
 ### Thresholds
+
 Change the warning threshold (currently 60):
+
 ```typescript
-const weakElements = chartData.filter(item => item.score < 60) // Change 60 to your threshold
+const weakElements = chartData.filter((item) => item.score < 60); // Change 60 to your threshold
 ```
 
 ## Multilingual Support
 
 The component fully supports:
+
 - English ✓
-- Chinese (中文) ✓  
+- Chinese (中文) ✓
 - Malay (add translations to `src/lib/translations/ms.ts`)
 
 ## Next Steps
@@ -341,6 +358,7 @@ The component fully supports:
 ## Testing
 
 To test the component:
+
 1. Navigate to Patient Portal → Health Journey
 2. The Five Elements Radar will appear after the welcome banner
 3. Click on any organ to see details
@@ -349,6 +367,7 @@ To test the component:
 ## Support
 
 For questions or issues, refer to:
+
 - Component code: `src/components/patient/FiveElementsRadar.tsx`
 - Integration example: `src/components/patient/CircleOfHealth.tsx`
 - Translations: `src/lib/translations/`

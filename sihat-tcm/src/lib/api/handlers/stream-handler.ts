@@ -1,16 +1,16 @@
 /**
  * AI Streaming Response Handler
- * 
+ *
  * Provides consistent handling for AI streaming responses
  * with fallback support and proper error handling.
  */
 
-import { streamText } from 'ai';
-import { getGoogleProvider } from '@/lib/googleProvider';
-import { getGeminiApiKeyAsync } from '@/lib/settings';
-import { devLog } from '@/lib/systemLogger';
-import { streamTextWithFallback } from '@/lib/modelFallback';
-import { getCorsHeaders } from '@/lib/cors';
+import { streamText } from "ai";
+import { getGoogleProvider } from "@/lib/googleProvider";
+import { getGeminiApiKeyAsync } from "@/lib/settings";
+import { devLog } from "@/lib/systemLogger";
+import { streamTextWithFallback } from "@/lib/modelFallback";
+import { getCorsHeaders } from "@/lib/cors";
 
 export interface StreamOptions {
   model: string;
@@ -33,8 +33,8 @@ export async function createStreamResponse(
     model,
     systemPrompt,
     messages,
-    fallbackModels = ['gemini-1.5-flash'],
-    context = 'API',
+    fallbackModels = ["gemini-1.5-flash"],
+    context = "API",
     onFinish,
     onError,
   } = options;
@@ -56,11 +56,11 @@ export async function createStreamResponse(
           system: systemPrompt,
           messages,
           onFinish: (completion) => {
-            devLog('info', context, `Stream finished. Text length: ${completion.text.length}`);
+            devLog("info", context, `Stream finished. Text length: ${completion.text.length}`);
             onFinish?.(completion);
           },
           onError: (error) => {
-            devLog('error', context, 'Stream error', { error: error.message });
+            devLog("error", context, "Stream error", { error: error.message });
             onError?.(error);
           },
         }
@@ -73,11 +73,11 @@ export async function createStreamResponse(
       system: systemPrompt,
       messages,
       onFinish: (completion) => {
-        devLog('info', context, `Stream finished. Text length: ${completion.text.length}`);
+        devLog("info", context, `Stream finished. Text length: ${completion.text.length}`);
         onFinish?.(completion);
       },
       onError: (error) => {
-        devLog('error', context, 'Stream error', { error });
+        devLog("error", context, "Stream error", { error });
         onError?.(error);
       },
     });
@@ -85,17 +85,17 @@ export async function createStreamResponse(
     return result.toTextStreamResponse({
       headers: {
         ...getCorsHeaders(req),
-        'X-Model-Used': model,
+        "X-Model-Used": model,
       },
     });
   } catch (primaryError: unknown) {
-    devLog('error', context, `Primary model ${model} failed`, { error: primaryError });
+    devLog("error", context, `Primary model ${model} failed`, { error: primaryError });
 
     // Fallback to first fallback model
     if (fallbackModels.length > 0) {
       const fallbackModel = fallbackModels[0];
-      devLog('info', context, `Falling back to ${fallbackModel}`);
-      
+      devLog("info", context, `Falling back to ${fallbackModel}`);
+
       try {
         const apiKey = await getGeminiApiKeyAsync();
         const googleFallback = getGoogleProvider(apiKey);
@@ -104,11 +104,15 @@ export async function createStreamResponse(
           system: systemPrompt,
           messages,
           onFinish: (completion) => {
-            devLog('info', context, `Fallback stream finished. Text length: ${completion.text.length}`);
+            devLog(
+              "info",
+              context,
+              `Fallback stream finished. Text length: ${completion.text.length}`
+            );
             onFinish?.(completion);
           },
           onError: (error) => {
-            devLog('error', context, 'Stream error (fallback)', { error });
+            devLog("error", context, "Stream error (fallback)", { error });
             onError?.(error);
           },
         });
@@ -116,11 +120,11 @@ export async function createStreamResponse(
         return fallbackResult.toTextStreamResponse({
           headers: {
             ...getCorsHeaders(req),
-            'X-Model-Used': `${fallbackModel}-fallback`,
+            "X-Model-Used": `${fallbackModel}-fallback`,
           },
         });
       } catch (fallbackError) {
-        devLog('error', context, 'Fallback also failed', { error: fallbackError });
+        devLog("error", context, "Fallback also failed", { error: fallbackError });
         throw fallbackError;
       }
     }
@@ -128,4 +132,3 @@ export async function createStreamResponse(
     throw primaryError;
   }
 }
-

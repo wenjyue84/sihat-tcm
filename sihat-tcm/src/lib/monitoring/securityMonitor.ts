@@ -1,34 +1,34 @@
 /**
  * @fileoverview Security Monitoring System
- * 
+ *
  * Comprehensive security monitoring for Sihat TCM platform.
  * Tracks authentication attempts, suspicious activities, and security events.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 3.0
  */
 
-import { devLog } from '@/lib/systemLogger';
-import { alertManager } from './alertManager';
+import { devLog } from "@/lib/systemLogger";
+import { alertManager } from "./alertManager";
 
 /**
  * Security event types
  */
-export type SecurityEventType = 
-  | 'login_attempt'
-  | 'login_success'
-  | 'login_failure'
-  | 'password_reset'
-  | 'account_lockout'
-  | 'suspicious_activity'
-  | 'data_access'
-  | 'privilege_escalation'
-  | 'api_abuse'
-  | 'injection_attempt'
-  | 'xss_attempt'
-  | 'csrf_attempt'
-  | 'rate_limit_exceeded'
-  | 'unauthorized_access';
+export type SecurityEventType =
+  | "login_attempt"
+  | "login_success"
+  | "login_failure"
+  | "password_reset"
+  | "account_lockout"
+  | "suspicious_activity"
+  | "data_access"
+  | "privilege_escalation"
+  | "api_abuse"
+  | "injection_attempt"
+  | "xss_attempt"
+  | "csrf_attempt"
+  | "rate_limit_exceeded"
+  | "unauthorized_access";
 
 /**
  * Security event interface
@@ -36,7 +36,7 @@ export type SecurityEventType =
 export interface SecurityEvent {
   id: string;
   type: SecurityEventType;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   userId?: string;
   ipAddress: string;
@@ -93,7 +93,7 @@ interface SecurityRule {
   condition: (event: SecurityEvent, context: SecurityContext) => boolean;
   action: (event: SecurityEvent, context: SecurityContext) => Promise<void>;
   enabled: boolean;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
 }
 
 /**
@@ -119,8 +119,8 @@ export class SecurityMonitor {
   private cleanupInterval: number = 3600000; // 1 hour
 
   private constructor() {
-    this.isEnabled = process.env.ENABLE_SECURITY_MONITORING === 'true';
-    
+    this.isEnabled = process.env.ENABLE_SECURITY_MONITORING === "true";
+
     if (this.isEnabled) {
       this.initializeSecurityRules();
       this.startPeriodicCleanup();
@@ -143,173 +143,171 @@ export class SecurityMonitor {
   private initializeSecurityRules(): void {
     const rules: SecurityRule[] = [
       {
-        id: 'multiple_failed_logins',
-        name: 'Multiple Failed Login Attempts',
-        description: 'Detect multiple failed login attempts from same IP',
-        type: 'login_failure',
+        id: "multiple_failed_logins",
+        name: "Multiple Failed Login Attempts",
+        description: "Detect multiple failed login attempts from same IP",
+        type: "login_failure",
         condition: (event, context) => {
           const ipInfo = context.ipTracking.get(event.ipAddress);
           return ipInfo ? ipInfo.failedLogins >= 5 : false;
         },
         action: async (event, context) => {
           await this.blockIP(event.ipAddress, 3600000); // Block for 1 hour
-          await this.sendSecurityAlert('Multiple failed login attempts detected', event);
+          await this.sendSecurityAlert("Multiple failed login attempts detected", event);
         },
         enabled: true,
-        severity: 'high'
+        severity: "high",
       },
       {
-        id: 'suspicious_login_location',
-        name: 'Suspicious Login Location',
-        description: 'Detect login from unusual location',
-        type: 'login_success',
+        id: "suspicious_login_location",
+        name: "Suspicious Login Location",
+        description: "Detect login from unusual location",
+        type: "login_success",
         condition: (event, context) => {
-          const userProfile = context.userProfiles.get(event.userId || '');
+          const userProfile = context.userProfiles.get(event.userId || "");
           if (!userProfile || !event.ipAddress) return false;
-          
+
           return !userProfile.knownIPs.includes(event.ipAddress);
         },
         action: async (event, context) => {
-          await this.sendSecurityAlert('Login from new location detected', event);
+          await this.sendSecurityAlert("Login from new location detected", event);
         },
         enabled: true,
-        severity: 'medium'
+        severity: "medium",
       },
       {
-        id: 'rapid_requests',
-        name: 'Rapid API Requests',
-        description: 'Detect rapid API requests indicating potential abuse',
-        type: 'api_abuse',
+        id: "rapid_requests",
+        name: "Rapid API Requests",
+        description: "Detect rapid API requests indicating potential abuse",
+        type: "api_abuse",
         condition: (event, context) => {
-          const recentEvents = context.recentEvents.filter(e => 
-            e.ipAddress === event.ipAddress && 
-            e.timestamp > Date.now() - 60000 // Last minute
+          const recentEvents = context.recentEvents.filter(
+            (e) => e.ipAddress === event.ipAddress && e.timestamp > Date.now() - 60000 // Last minute
           );
           return recentEvents.length > 100; // More than 100 requests per minute
         },
         action: async (event, context) => {
           await this.blockIP(event.ipAddress, 1800000); // Block for 30 minutes
-          await this.sendSecurityAlert('API abuse detected - rapid requests', event);
+          await this.sendSecurityAlert("API abuse detected - rapid requests", event);
         },
         enabled: true,
-        severity: 'high'
+        severity: "high",
       },
       {
-        id: 'sql_injection_attempt',
-        name: 'SQL Injection Attempt',
-        description: 'Detect potential SQL injection in request payload',
-        type: 'injection_attempt',
+        id: "sql_injection_attempt",
+        name: "SQL Injection Attempt",
+        description: "Detect potential SQL injection in request payload",
+        type: "injection_attempt",
         condition: (event, context) => {
           if (!event.payload) return false;
-          
+
           const payload = JSON.stringify(event.payload).toLowerCase();
           const sqlPatterns = [
-            'union select',
-            'drop table',
-            'insert into',
-            'delete from',
-            'update set',
-            '-- ',
-            '; --',
-            'xp_cmdshell',
-            'sp_executesql'
+            "union select",
+            "drop table",
+            "insert into",
+            "delete from",
+            "update set",
+            "-- ",
+            "; --",
+            "xp_cmdshell",
+            "sp_executesql",
           ];
-          
-          return sqlPatterns.some(pattern => payload.includes(pattern));
+
+          return sqlPatterns.some((pattern) => payload.includes(pattern));
         },
         action: async (event, context) => {
           await this.blockIP(event.ipAddress, 7200000); // Block for 2 hours
-          await this.sendSecurityAlert('SQL injection attempt detected', event);
+          await this.sendSecurityAlert("SQL injection attempt detected", event);
         },
         enabled: true,
-        severity: 'critical'
+        severity: "critical",
       },
       {
-        id: 'xss_attempt',
-        name: 'XSS Attempt',
-        description: 'Detect potential XSS in request payload',
-        type: 'xss_attempt',
+        id: "xss_attempt",
+        name: "XSS Attempt",
+        description: "Detect potential XSS in request payload",
+        type: "xss_attempt",
         condition: (event, context) => {
           if (!event.payload) return false;
-          
+
           const payload = JSON.stringify(event.payload).toLowerCase();
           const xssPatterns = [
-            '<script',
-            'javascript:',
-            'onload=',
-            'onerror=',
-            'onclick=',
-            'eval(',
-            'alert(',
-            'document.cookie'
+            "<script",
+            "javascript:",
+            "onload=",
+            "onerror=",
+            "onclick=",
+            "eval(",
+            "alert(",
+            "document.cookie",
           ];
-          
-          return xssPatterns.some(pattern => payload.includes(pattern));
+
+          return xssPatterns.some((pattern) => payload.includes(pattern));
         },
         action: async (event, context) => {
           await this.blockIP(event.ipAddress, 3600000); // Block for 1 hour
-          await this.sendSecurityAlert('XSS attempt detected', event);
+          await this.sendSecurityAlert("XSS attempt detected", event);
         },
         enabled: true,
-        severity: 'high'
+        severity: "high",
       },
       {
-        id: 'privilege_escalation',
-        name: 'Privilege Escalation Attempt',
-        description: 'Detect attempts to access admin endpoints without proper authorization',
-        type: 'privilege_escalation',
+        id: "privilege_escalation",
+        name: "Privilege Escalation Attempt",
+        description: "Detect attempts to access admin endpoints without proper authorization",
+        type: "privilege_escalation",
         condition: (event, context) => {
-          return event.endpoint?.startsWith('/api/admin') && 
-                 event.metadata?.userRole !== 'admin';
+          return event.endpoint?.startsWith("/api/admin") && event.metadata?.userRole !== "admin";
         },
         action: async (event, context) => {
-          await this.sendSecurityAlert('Privilege escalation attempt detected', event);
+          await this.sendSecurityAlert("Privilege escalation attempt detected", event);
         },
         enabled: true,
-        severity: 'high'
-      }
+        severity: "high",
+      },
     ];
 
-    rules.forEach(rule => {
+    rules.forEach((rule) => {
       this.securityRules.set(rule.id, rule);
     });
 
-    devLog('info', 'SecurityMonitor', `Initialized ${rules.length} security rules`);
+    devLog("info", "SecurityMonitor", `Initialized ${rules.length} security rules`);
   }
 
   /**
    * Record security event
    */
-  public recordEvent(event: Omit<SecurityEvent, 'id' | 'timestamp'>): void {
+  public recordEvent(event: Omit<SecurityEvent, "id" | "timestamp">): void {
     if (!this.isEnabled) return;
 
     const securityEvent: SecurityEvent = {
       ...event,
       id: `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     this.events.push(securityEvent);
-    
+
     // Update IP tracking
     this.updateIPTracking(securityEvent);
-    
+
     // Update user profile
     if (securityEvent.userId) {
       this.updateUserProfile(securityEvent);
     }
-    
+
     // Check security rules
     this.checkSecurityRules(securityEvent);
-    
+
     // Log security event
-    devLog('info', 'SecurityMonitor', `Security event recorded: ${event.type}`, {
+    devLog("info", "SecurityMonitor", `Security event recorded: ${event.type}`, {
       eventId: securityEvent.id,
       severity: event.severity,
       ipAddress: event.ipAddress,
-      userId: event.userId
+      userId: event.userId,
     });
-    
+
     // Cleanup old events if needed
     if (this.events.length > this.maxEventsInMemory) {
       this.events = this.events.slice(-this.maxEventsInMemory);
@@ -321,7 +319,7 @@ export class SecurityMonitor {
    */
   private updateIPTracking(event: SecurityEvent): void {
     let ipInfo = this.ipTracking.get(event.ipAddress);
-    
+
     if (!ipInfo) {
       ipInfo = {
         ipAddress: event.ipAddress,
@@ -331,26 +329,26 @@ export class SecurityMonitor {
         failedLogins: 0,
         successfulLogins: 0,
         suspiciousActivities: 0,
-        isBlocked: false
+        isBlocked: false,
       };
       this.ipTracking.set(event.ipAddress, ipInfo);
     }
-    
+
     ipInfo.lastSeen = event.timestamp;
     ipInfo.requestCount++;
-    
+
     switch (event.type) {
-      case 'login_failure':
+      case "login_failure":
         ipInfo.failedLogins++;
         break;
-      case 'login_success':
+      case "login_success":
         ipInfo.successfulLogins++;
         ipInfo.failedLogins = 0; // Reset failed attempts on success
         break;
-      case 'suspicious_activity':
-      case 'injection_attempt':
-      case 'xss_attempt':
-      case 'api_abuse':
+      case "suspicious_activity":
+      case "injection_attempt":
+      case "xss_attempt":
+      case "api_abuse":
         ipInfo.suspiciousActivities++;
         break;
     }
@@ -361,9 +359,9 @@ export class SecurityMonitor {
    */
   private updateUserProfile(event: SecurityEvent): void {
     if (!event.userId) return;
-    
+
     let profile = this.userProfiles.get(event.userId);
-    
+
     if (!profile) {
       profile = {
         userId: event.userId,
@@ -372,13 +370,13 @@ export class SecurityMonitor {
         isLocked: false,
         suspiciousActivities: 0,
         knownIPs: [],
-        mfaEnabled: false
+        mfaEnabled: false,
       };
       this.userProfiles.set(event.userId, profile);
     }
-    
+
     switch (event.type) {
-      case 'login_success':
+      case "login_success":
         profile.lastLogin = event.timestamp;
         profile.failedLoginAttempts = 0;
         if (!profile.knownIPs.includes(event.ipAddress)) {
@@ -389,19 +387,19 @@ export class SecurityMonitor {
           }
         }
         break;
-      case 'login_failure':
+      case "login_failure":
         profile.failedLoginAttempts++;
         profile.lastFailedLogin = event.timestamp;
-        
+
         // Lock account after 5 failed attempts
         if (profile.failedLoginAttempts >= 5) {
           profile.isLocked = true;
           profile.lockedUntil = event.timestamp + 1800000; // Lock for 30 minutes
         }
         break;
-      case 'suspicious_activity':
-      case 'injection_attempt':
-      case 'xss_attempt':
+      case "suspicious_activity":
+      case "injection_attempt":
+      case "xss_attempt":
         profile.suspiciousActivities++;
         break;
     }
@@ -414,27 +412,32 @@ export class SecurityMonitor {
     const context: SecurityContext = {
       ipTracking: this.ipTracking,
       userProfiles: this.userProfiles,
-      recentEvents: this.events.slice(-1000) // Last 1000 events
+      recentEvents: this.events.slice(-1000), // Last 1000 events
     };
-    
+
     for (const rule of this.securityRules.values()) {
       if (!rule.enabled) continue;
-      
+
       try {
         if (rule.condition(event, context)) {
-          devLog('warn', 'SecurityMonitor', `Security rule triggered: ${rule.name}`, {
+          devLog("warn", "SecurityMonitor", `Security rule triggered: ${rule.name}`, {
             ruleId: rule.id,
             eventId: event.id,
-            severity: rule.severity
+            severity: rule.severity,
           });
-          
+
           // Execute rule action
-          rule.action(event, context).catch(error => {
-            devLog('error', 'SecurityMonitor', `Failed to execute security rule action: ${rule.id}`, { error });
+          rule.action(event, context).catch((error) => {
+            devLog(
+              "error",
+              "SecurityMonitor",
+              `Failed to execute security rule action: ${rule.id}`,
+              { error }
+            );
           });
         }
       } catch (error) {
-        devLog('error', 'SecurityMonitor', `Error checking security rule: ${rule.id}`, { error });
+        devLog("error", "SecurityMonitor", `Error checking security rule: ${rule.id}`, { error });
       }
     }
   }
@@ -448,25 +451,25 @@ export class SecurityMonitor {
       ipInfo.isBlocked = true;
       ipInfo.blockedUntil = Date.now() + duration;
     }
-    
-    devLog('warn', 'SecurityMonitor', `IP address blocked: ${ipAddress}`, {
+
+    devLog("warn", "SecurityMonitor", `IP address blocked: ${ipAddress}`, {
       duration: duration / 1000 / 60, // minutes
-      blockedUntil: new Date(Date.now() + duration).toISOString()
+      blockedUntil: new Date(Date.now() + duration).toISOString(),
     });
-    
+
     // Store in database for persistence across restarts
     try {
-      await fetch('/api/security/block-ip', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      await fetch("/api/security/block-ip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ipAddress,
           blockedUntil: Date.now() + duration,
-          reason: 'Automated security block'
-        })
+          reason: "Automated security block",
+        }),
       });
     } catch (error) {
-      devLog('error', 'SecurityMonitor', 'Failed to persist IP block', { error });
+      devLog("error", "SecurityMonitor", "Failed to persist IP block", { error });
     }
   }
 
@@ -475,70 +478,72 @@ export class SecurityMonitor {
    */
   private async sendSecurityAlert(message: string, event: SecurityEvent): Promise<void> {
     // Record alert metric
-    alertManager.recordMetric('security_alert', 1);
-    
+    alertManager.recordMetric("security_alert", 1);
+
     // Send to alert manager
-    alertManager.recordMetric('security_events', 1);
-    
+    alertManager.recordMetric("security_events", 1);
+
     // Send immediate notification for critical events
-    if (event.severity === 'critical') {
+    if (event.severity === "critical") {
       try {
         if (process.env.SECURITY_WEBHOOK) {
           await fetch(process.env.SECURITY_WEBHOOK, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              type: 'security_alert',
+              type: "security_alert",
               message,
               event,
               timestamp: Date.now(),
-              service: 'sihat-tcm'
-            })
+              service: "sihat-tcm",
+            }),
           });
         }
-        
+
         if (process.env.SLACK_WEBHOOK_URL) {
           await fetch(process.env.SLACK_WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              channel: '#security-alerts',
+              channel: "#security-alerts",
               text: `🚨 SECURITY ALERT: ${message}`,
-              attachments: [{
-                color: 'danger',
-                fields: [
-                  {
-                    title: 'Event Type',
-                    value: event.type,
-                    short: true
-                  },
-                  {
-                    title: 'Severity',
-                    value: event.severity.toUpperCase(),
-                    short: true
-                  },
-                  {
-                    title: 'IP Address',
-                    value: event.ipAddress,
-                    short: true
-                  },
-                  {
-                    title: 'User ID',
-                    value: event.userId || 'Anonymous',
-                    short: true
-                  },
-                  {
-                    title: 'Description',
-                    value: event.description,
-                    short: false
-                  }
-                ]
-              }]
-            })
+              attachments: [
+                {
+                  color: "danger",
+                  fields: [
+                    {
+                      title: "Event Type",
+                      value: event.type,
+                      short: true,
+                    },
+                    {
+                      title: "Severity",
+                      value: event.severity.toUpperCase(),
+                      short: true,
+                    },
+                    {
+                      title: "IP Address",
+                      value: event.ipAddress,
+                      short: true,
+                    },
+                    {
+                      title: "User ID",
+                      value: event.userId || "Anonymous",
+                      short: true,
+                    },
+                    {
+                      title: "Description",
+                      value: event.description,
+                      short: false,
+                    },
+                  ],
+                },
+              ],
+            }),
           });
         }
       } catch (error) {
-        devLog('error', 'SecurityMonitor', 'Failed to send security alert', { error });
+        devLog("error", "SecurityMonitor", "Failed to send security alert", { error });
       }
     }
   }
@@ -549,14 +554,14 @@ export class SecurityMonitor {
   public isIPBlocked(ipAddress: string): boolean {
     const ipInfo = this.ipTracking.get(ipAddress);
     if (!ipInfo || !ipInfo.isBlocked) return false;
-    
+
     // Check if block has expired
     if (ipInfo.blockedUntil && Date.now() > ipInfo.blockedUntil) {
       ipInfo.isBlocked = false;
       ipInfo.blockedUntil = undefined;
       return false;
     }
-    
+
     return true;
   }
 
@@ -566,7 +571,7 @@ export class SecurityMonitor {
   public isUserLocked(userId: string): boolean {
     const profile = this.userProfiles.get(userId);
     if (!profile || !profile.isLocked) return false;
-    
+
     // Check if lock has expired
     if (profile.lockedUntil && Date.now() > profile.lockedUntil) {
       profile.isLocked = false;
@@ -574,7 +579,7 @@ export class SecurityMonitor {
       profile.failedLoginAttempts = 0;
       return false;
     }
-    
+
     return true;
   }
 
@@ -589,21 +594,23 @@ export class SecurityMonitor {
     recentEvents: SecurityEvent[];
   } {
     const eventsByType = {} as Record<SecurityEventType, number>;
-    
-    this.events.forEach(event => {
+
+    this.events.forEach((event) => {
       eventsByType[event.type] = (eventsByType[event.type] || 0) + 1;
     });
-    
-    const blockedIPs = Array.from(this.ipTracking.values()).filter(ip => ip.isBlocked).length;
-    const lockedUsers = Array.from(this.userProfiles.values()).filter(user => user.isLocked).length;
+
+    const blockedIPs = Array.from(this.ipTracking.values()).filter((ip) => ip.isBlocked).length;
+    const lockedUsers = Array.from(this.userProfiles.values()).filter(
+      (user) => user.isLocked
+    ).length;
     const recentEvents = this.events.slice(-50); // Last 50 events
-    
+
     return {
       totalEvents: this.events.length,
       eventsByType,
       blockedIPs,
       lockedUsers,
-      recentEvents
+      recentEvents,
     };
   }
 
@@ -622,23 +629,23 @@ export class SecurityMonitor {
    */
   private cleanupExpiredBlocks(): void {
     const now = Date.now();
-    
+
     // Cleanup expired IP blocks
     for (const [ip, info] of this.ipTracking.entries()) {
       if (info.isBlocked && info.blockedUntil && now > info.blockedUntil) {
         info.isBlocked = false;
         info.blockedUntil = undefined;
-        devLog('info', 'SecurityMonitor', `IP block expired: ${ip}`);
+        devLog("info", "SecurityMonitor", `IP block expired: ${ip}`);
       }
     }
-    
+
     // Cleanup expired user locks
     for (const [userId, profile] of this.userProfiles.entries()) {
       if (profile.isLocked && profile.lockedUntil && now > profile.lockedUntil) {
         profile.isLocked = false;
         profile.lockedUntil = undefined;
         profile.failedLoginAttempts = 0;
-        devLog('info', 'SecurityMonitor', `User lock expired: ${userId}`);
+        devLog("info", "SecurityMonitor", `User lock expired: ${userId}`);
       }
     }
   }
@@ -647,14 +654,14 @@ export class SecurityMonitor {
    * Cleanup old events
    */
   private cleanupOldEvents(): void {
-    const cutoffTime = Date.now() - (24 * 60 * 60 * 1000); // 24 hours ago
+    const cutoffTime = Date.now() - 24 * 60 * 60 * 1000; // 24 hours ago
     const initialCount = this.events.length;
-    
-    this.events = this.events.filter(event => event.timestamp > cutoffTime);
-    
+
+    this.events = this.events.filter((event) => event.timestamp > cutoffTime);
+
     const removedCount = initialCount - this.events.length;
     if (removedCount > 0) {
-      devLog('info', 'SecurityMonitor', `Cleaned up ${removedCount} old security events`);
+      devLog("info", "SecurityMonitor", `Cleaned up ${removedCount} old security events`);
     }
   }
 
@@ -671,7 +678,7 @@ export class SecurityMonitor {
       events: this.events,
       ipTracking: Array.from(this.ipTracking.values()),
       userProfiles: Array.from(this.userProfiles.values()),
-      statistics: this.getSecurityStatistics()
+      statistics: this.getSecurityStatistics(),
     };
   }
 }
@@ -687,26 +694,26 @@ export const securityMonitor = SecurityMonitor.getInstance();
 export function createSecurityMiddleware() {
   return (req: any, res: any, next: any) => {
     const startTime = Date.now();
-    
+
     // Check if IP is blocked
-    const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+    const clientIP = req.ip || req.connection.remoteAddress || "unknown";
     if (securityMonitor.isIPBlocked(clientIP)) {
-      return res.status(403).json({ error: 'IP address is blocked' });
+      return res.status(403).json({ error: "IP address is blocked" });
     }
-    
+
     // Record request event
     securityMonitor.recordEvent({
-      type: 'data_access',
-      severity: 'low',
+      type: "data_access",
+      severity: "low",
       description: `API request to ${req.url}`,
       userId: req.user?.id,
       ipAddress: clientIP,
-      userAgent: req.headers['user-agent'],
+      userAgent: req.headers["user-agent"],
       endpoint: req.url,
       method: req.method,
-      payload: req.method === 'POST' ? req.body : undefined
+      payload: req.method === "POST" ? req.body : undefined,
     });
-    
+
     next();
   };
 }

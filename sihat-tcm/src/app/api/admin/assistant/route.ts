@@ -1,5 +1,5 @@
-import { google } from '@ai-sdk/google';
-import { streamText } from 'ai';
+import { google } from "@ai-sdk/google";
+import { streamText } from "ai";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -30,28 +30,25 @@ export async function POST(req: Request) {
   `;
 
   // Prepend system context to the conversation
-  const coreMessages = [
-    { role: 'system', content: systemContext },
-    ...messages
-  ];
+  const coreMessages = [{ role: "system", content: systemContext }, ...messages];
 
   try {
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     if (!apiKey) {
-      return new Response('Missing API Key', { status: 500 });
+      return new Response("Missing API Key", { status: 500 });
     }
 
     const result = streamText({
-      model: google('gemini-2.0-flash-thinking-exp-01-21'),
+      model: google("gemini-2.0-flash-thinking-exp-01-21"),
       messages: coreMessages as any,
     });
 
     return result.toTextStreamResponse();
   } catch (error) {
-    console.error('AI Stream Error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to generate response' }), {
+    console.error("AI Stream Error:", error);
+    return new Response(JSON.stringify({ error: "Failed to generate response" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     });
   }
 }

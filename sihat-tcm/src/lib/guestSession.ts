@@ -1,6 +1,6 @@
 /**
  * Guest Session Management
- * 
+ *
  * Utilities for managing guest diagnosis sessions
  * Guest sessions are stored in sessionStorage and can be migrated to authenticated users
  */
@@ -9,7 +9,7 @@
  * Generate a unique session token for guest users
  */
 export function generateGuestSessionToken(): string {
-    return crypto.randomUUID()
+  return crypto.randomUUID();
 }
 
 /**
@@ -17,9 +17,9 @@ export function generateGuestSessionToken(): string {
  * @param token - The session token to save
  */
 export function saveGuestSessionToken(token: string): void {
-    if (typeof window !== 'undefined') {
-        sessionStorage.setItem('guest_session_token', token)
-    }
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem("guest_session_token", token);
+  }
 }
 
 /**
@@ -27,19 +27,19 @@ export function saveGuestSessionToken(token: string): void {
  * @returns The session token or null if not found
  */
 export function getGuestSessionToken(): string | null {
-    if (typeof window !== 'undefined') {
-        return sessionStorage.getItem('guest_session_token')
-    }
-    return null
+  if (typeof window !== "undefined") {
+    return sessionStorage.getItem("guest_session_token");
+  }
+  return null;
 }
 
 /**
  * Clear guest session token from sessionStorage
  */
 export function clearGuestSessionToken(): void {
-    if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('guest_session_token')
-    }
+  if (typeof window !== "undefined") {
+    sessionStorage.removeItem("guest_session_token");
+  }
 }
 
 /**
@@ -47,6 +47,5 @@ export function clearGuestSessionToken(): void {
  * @returns True if a guest session token exists
  */
 export function hasGuestSessionToken(): boolean {
-    return getGuestSessionToken() !== null
+  return getGuestSessionToken() !== null;
 }
-

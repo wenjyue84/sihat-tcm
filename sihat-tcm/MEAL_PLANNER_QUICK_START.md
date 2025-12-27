@@ -3,17 +3,20 @@
 ## ⚡ Get Started in 3 Steps
 
 ### Step 1: Run Database Migration
+
 ```bash
 cd sihat-tcm
 npx supabase db push
 ```
 
 ### Step 2: Start Development Server
+
 ```bash
 npm run dev
 ```
 
 ### Step 3: Test the Feature
+
 1. Go to `http://localhost:3000`
 2. **Complete a TCM diagnosis** (or use an existing account with diagnosis history)
 3. Navigate to **Patient Dashboard** (`/patient`)
@@ -38,20 +41,22 @@ npm run dev
 ## 🎯 Key Features
 
 ### For Patients
+
 ✅ Personalized meal plans based on TCM diagnosis  
 ✅ Beautiful, mobile-responsive interface  
 ✅ Interactive shopping list with checkboxes  
 ✅ Full recipe details with TCM benefits  
 ✅ Progress tracking (X/7 days completed)  
-✅ One-click regeneration  
+✅ One-click regeneration
 
 ### For Developers
+
 ✅ Zod-validated AI output  
 ✅ Row Level Security (RLS) enabled  
 ✅ Server Actions for data fetching  
 ✅ Framer Motion animations  
 ✅ Clean, modular component structure  
-✅ TypeScript throughout  
+✅ TypeScript throughout
 
 ---
 
@@ -91,12 +96,15 @@ Database (meal_plans table):
 ## 🗂️ Files Created
 
 ### Database
+
 - `supabase/migrations/20251224_meal_plans_table.sql`
 
 ### Server Actions
+
 - `src/app/actions/meal-planner.ts`
 
 ### Components
+
 - `src/components/meal-planner/MealPlanWizard.tsx`
 - `src/components/meal-planner/WeeklyCalendarView.tsx`
 - `src/components/meal-planner/MealCard.tsx`
@@ -104,12 +112,15 @@ Database (meal_plans table):
 - `src/components/meal-planner/ShoppingListWidget.tsx`
 
 ### Prompts
+
 - `src/lib/systemPrompts.ts` (added `MEAL_PLANNER_PROMPT`)
 
 ### Integration
+
 - `src/components/patient/UnifiedDashboard.tsx` (added "Meal Planner" tab)
 
 ### Documentation
+
 - `MEAL_PLANNER_COMPLETE.md` (full implementation details)
 - `MEAL_PLANNER_QUICK_START.md` (this file)
 
@@ -137,6 +148,7 @@ npm run dev
 ## 🎨 UI Preview
 
 ### Generation Screen
+
 ```
 ┌──────────────────────────────────────────┐
 │   🍜 TCM AI Meal Planner                 │
@@ -150,6 +162,7 @@ npm run dev
 ```
 
 ### Weekly View
+
 ```
 ┌──────────────────────────────────────────┐
 │  Your 7-Day TCM Meal Plan               │
@@ -180,19 +193,23 @@ npm run dev
 ## 🚨 Troubleshooting
 
 ### "User not authenticated"
+
 - Make sure you're logged in
 - Check `useAuth()` context is working
 
 ### "Complete a TCM diagnosis first"
+
 - User needs at least one diagnosis session in `diagnosis_sessions` table
 - Go to `/` and complete a diagnosis
 
 ### "Failed to generate meal plan"
+
 - Check Gemini API key is set (`GOOGLE_GENERATIVE_AI_API_KEY`)
 - Check Supabase connection
 - Look at browser console and server logs
 
 ### Migration fails
+
 - Make sure `diagnosis_sessions` table exists first
 - Run previous migrations: `npx supabase db push`
 - Check Supabase project is running: `npx supabase status`
@@ -204,5 +221,3 @@ npm run dev
 The TCM AI Meal Planner is now live in your Patient Dashboard. Enjoy generating personalized, TCM-aligned meal plans! 🍜✨
 
 **Questions?** Check `MEAL_PLANNER_COMPLETE.md` for full technical details.
-
-

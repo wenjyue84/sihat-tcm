@@ -1,24 +1,46 @@
 /**
  * @fileoverview System Health Monitoring API
- * 
+ *
  * Comprehensive health check endpoint that monitors all system components
  * and provides detailed health status information.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 3.0
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { devLog } from '@/lib/systemLogger';
-import { createClient } from '@/lib/supabase/server';
-import { performanceMonitor } from '@/lib/monitoring/performanceMonitor';
-import { alertManager } from '@/lib/monitoring/alertManager';
-import { securityMonitor } from '@/lib/monitoring/securityMonitor';
+import { NextRequest, NextResponse } from "next/server";
+import { devLog } from "@/lib/systemLogger";
+import { createClient } from "@/lib/supabase/server";
+import { performanceMonitor } from "@/lib/monitoring/performanceMonitor";
+import { alertManager } from "@/lib/monitoring/alertManager";
+import { securityMonitor } from "@/lib/monitoring/securityMonitor";
 
 /**
  * Health check status levels
  */
-type HealthStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
+type HealthStatus = "healthy" | "degraded" | "unhealthy" | "unknown";
+
+/**
+ * Component health details
+ */
+interface ComponentHealthDetails {
+  connectionPool?: string;
+  queryCount?: number;
+  provider?: string;
+  modelsAvailable?: boolean;
+  totalChecks?: number;
+  failedChecks?: number;
+  successRate?: string;
+  performanceMonitoring?: boolean;
+  totalMetrics?: number;
+  activeAlerts?: number;
+  criticalAlerts?: number;
+  totalSecurityEvents?: number;
+  blockedIPs?: number;
+  lockedUsers?: number;
+  recentEventsCount?: number;
+  [key: string]: unknown; // Allow additional properties
+}
 
 /**
  * Component health information
@@ -27,7 +49,7 @@ interface ComponentHealth {
   status: HealthStatus;
   responseTime?: number;
   lastCheck: string;
-  details?: Record<string, any>;
+  details?: ComponentHealthDetails;
   error?: string;
 }
 
@@ -58,83 +80,85 @@ interface SystemHealthResponse {
 
 /**
  * GET /api/monitoring/health
- * 
+ *
  * Comprehensive system health check
  */
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const startTime = Date.now();
-  
+
   try {
-    devLog('info', 'HealthCheck', 'Starting comprehensive health check');
+    devLog("info", "HealthCheck", "Starting comprehensive health check");
 
     // Initialize response structure
     const healthResponse: SystemHealthResponse = {
-      status: 'healthy',
+      status: "healthy",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
-      version: process.env.npm_package_version || '3.0.0',
-      environment: process.env.NODE_ENV || 'development',
+      version: process.env.npm_package_version || "3.0.0",
+      environment: process.env.NODE_ENV || "development",
       components: {
         database: await checkDatabaseHealth(),
         ai_service: await checkAIServiceHealth(),
         external_apis: await checkExternalAPIsHealth(),
         monitoring: checkMonitoringHealth(),
-        security: checkSecurityHealth()
+        security: checkSecurityHealth(),
       },
       metrics: await getSystemMetrics(),
-      commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA
+      commit: process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA,
     };
 
     // Determine overall system status
-    const componentStatuses = Object.values(healthResponse.components).map(c => c.status);
-    
-    if (componentStatuses.includes('unhealthy')) {
-      healthResponse.status = 'unhealthy';
-    } else if (componentStatuses.includes('degraded')) {
-      healthResponse.status = 'degraded';
-    } else if (componentStatuses.includes('unknown')) {
-      healthResponse.status = 'degraded';
+    const componentStatuses = Object.values(healthResponse.components).map((c) => c.status);
+
+    if (componentStatuses.includes("unhealthy")) {
+      healthResponse.status = "unhealthy";
+    } else if (componentStatuses.includes("degraded")) {
+      healthResponse.status = "degraded";
+    } else if (componentStatuses.includes("unknown")) {
+      healthResponse.status = "degraded";
     }
 
     const responseTime = Date.now() - startTime;
-    
-    devLog('info', 'HealthCheck', `Health check completed in ${responseTime}ms`, {
+
+    devLog("info", "HealthCheck", `Health check completed in ${responseTime}ms`, {
       status: healthResponse.status,
-      responseTime
+      responseTime,
     });
 
     // Record health check metrics
     performanceMonitor.trackMetric({
-      name: 'health_check_response_time',
+      name: "health_check_response_time",
       value: responseTime,
-      unit: 'ms',
+      unit: "ms",
       timestamp: Date.now(),
       tags: {
         status: healthResponse.status,
-        environment: healthResponse.environment
-      }
+        environment: healthResponse.environment,
+      },
     });
 
     // Return appropriate HTTP status based on health
-    const httpStatus = healthResponse.status === 'healthy' ? 200 : 
-                      healthResponse.status === 'degraded' ? 200 : 503;
+    const httpStatus =
+      healthResponse.status === "healthy" ? 200 : healthResponse.status === "degraded" ? 200 : 503;
 
     return NextResponse.json(healthResponse, { status: httpStatus });
-
   } catch (error) {
     const responseTime = Date.now() - startTime;
-    
-    devLog('error', 'HealthCheck', 'Health check failed', { 
+
+    devLog("error", "HealthCheck", "Health check failed", {
       error: error instanceof Error ? error.message : String(error),
-      responseTime
+      responseTime,
     });
 
-    return NextResponse.json({
-      status: 'unhealthy',
-      timestamp: new Date().toISOString(),
-      error: 'Health check failed',
-      responseTime
-    }, { status: 503 });
+    return NextResponse.json(
+      {
+        status: "unhealthy",
+        timestamp: new Date().toISOString(),
+        error: "Health check failed",
+        responseTime,
+      },
+      { status: 503 }
+    );
   }
 }
 
@@ -143,33 +167,30 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
  */
 async function checkDatabaseHealth(): Promise<ComponentHealth> {
   const startTime = Date.now();
-  
+
   try {
-    const supabase = createClient();
-    
+    const supabase = await createClient();
+
     // Test basic connectivity
-    const { data, error } = await supabase
-      .from('users')
-      .select('count')
-      .limit(1);
+    const { data, error } = await supabase.from("users").select("count").limit(1);
 
     const responseTime = Date.now() - startTime;
 
     if (error) {
       return {
-        status: 'unhealthy',
+        status: "unhealthy",
         responseTime,
         lastCheck: new Date().toISOString(),
-        error: error.message
+        error: error.message,
       };
     }
 
     // Check response time thresholds
-    let status: HealthStatus = 'healthy';
+    let status: HealthStatus = "healthy";
     if (responseTime > 5000) {
-      status = 'unhealthy';
+      status = "unhealthy";
     } else if (responseTime > 2000) {
-      status = 'degraded';
+      status = "degraded";
     }
 
     return {
@@ -177,17 +198,16 @@ async function checkDatabaseHealth(): Promise<ComponentHealth> {
       responseTime,
       lastCheck: new Date().toISOString(),
       details: {
-        connectionPool: 'active',
-        queryCount: data?.length || 0
-      }
+        connectionPool: "active",
+        queryCount: data?.length || 0,
+      },
     };
-
   } catch (error) {
     return {
-      status: 'unhealthy',
+      status: "unhealthy",
       responseTime: Date.now() - startTime,
       lastCheck: new Date().toISOString(),
-      error: error instanceof Error ? error.message : 'Database connection failed'
+      error: error instanceof Error ? error.message : "Database connection failed",
     };
   }
 }
@@ -197,33 +217,33 @@ async function checkDatabaseHealth(): Promise<ComponentHealth> {
  */
 async function checkAIServiceHealth(): Promise<ComponentHealth> {
   const startTime = Date.now();
-  
+
   try {
     // Test Gemini API connectivity with a simple request
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models', {
-      method: 'GET',
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models", {
+      method: "GET",
       headers: {
-        'X-Goog-Api-Key': process.env.GEMINI_API_KEY || ''
-      }
+        "X-Goog-Api-Key": process.env.GEMINI_API_KEY || "",
+      },
     });
 
     const responseTime = Date.now() - startTime;
 
     if (!response.ok) {
       return {
-        status: 'unhealthy',
+        status: "unhealthy",
         responseTime,
         lastCheck: new Date().toISOString(),
-        error: `AI service returned ${response.status}: ${response.statusText}`
+        error: `AI service returned ${response.status}: ${response.statusText}`,
       };
     }
 
     // Check response time thresholds
-    let status: HealthStatus = 'healthy';
+    let status: HealthStatus = "healthy";
     if (responseTime > 10000) {
-      status = 'unhealthy';
+      status = "unhealthy";
     } else if (responseTime > 5000) {
-      status = 'degraded';
+      status = "degraded";
     }
 
     return {
@@ -231,17 +251,16 @@ async function checkAIServiceHealth(): Promise<ComponentHealth> {
       responseTime,
       lastCheck: new Date().toISOString(),
       details: {
-        provider: 'Google Gemini',
-        modelsAvailable: true
-      }
+        provider: "Google Gemini",
+        modelsAvailable: true,
+      },
     };
-
   } catch (error) {
     return {
-      status: 'unhealthy',
+      status: "unhealthy",
       responseTime: Date.now() - startTime,
       lastCheck: new Date().toISOString(),
-      error: error instanceof Error ? error.message : 'AI service connection failed'
+      error: error instanceof Error ? error.message : "AI service connection failed",
     };
   }
 }
@@ -251,31 +270,31 @@ async function checkAIServiceHealth(): Promise<ComponentHealth> {
  */
 async function checkExternalAPIsHealth(): Promise<ComponentHealth> {
   const startTime = Date.now();
-  
+
   try {
     const checks = await Promise.allSettled([
       // Check Vercel deployment status
-      fetch('https://api.vercel.com/v1/user', {
+      fetch("https://api.vercel.com/v1/user", {
         headers: {
-          'Authorization': `Bearer ${process.env.VERCEL_TOKEN || ''}`
-        }
+          Authorization: `Bearer ${process.env.VERCEL_TOKEN || ""}`,
+        },
       }).catch(() => ({ ok: false, status: 0 })),
-      
+
       // Check any other external services
       // Add more external service checks here
     ]);
 
     const responseTime = Date.now() - startTime;
-    const failedChecks = checks.filter(result => 
-      result.status === 'rejected' || 
-      (result.status === 'fulfilled' && !result.value.ok)
+    const failedChecks = checks.filter(
+      (result) =>
+        result.status === "rejected" || (result.status === "fulfilled" && !result.value.ok)
     ).length;
 
-    let status: HealthStatus = 'healthy';
+    let status: HealthStatus = "healthy";
     if (failedChecks === checks.length) {
-      status = 'unhealthy';
+      status = "unhealthy";
     } else if (failedChecks > 0) {
-      status = 'degraded';
+      status = "degraded";
     }
 
     return {
@@ -285,16 +304,15 @@ async function checkExternalAPIsHealth(): Promise<ComponentHealth> {
       details: {
         totalChecks: checks.length,
         failedChecks,
-        successRate: ((checks.length - failedChecks) / checks.length * 100).toFixed(1) + '%'
-      }
+        successRate: (((checks.length - failedChecks) / checks.length) * 100).toFixed(1) + "%",
+      },
     };
-
   } catch (error) {
     return {
-      status: 'unknown',
+      status: "unknown",
       responseTime: Date.now() - startTime,
       lastCheck: new Date().toISOString(),
-      error: error instanceof Error ? error.message : 'External API check failed'
+      error: error instanceof Error ? error.message : "External API check failed",
     };
   }
 }
@@ -307,16 +325,16 @@ function checkMonitoringHealth(): ComponentHealth {
     const performanceStats = performanceMonitor.getPerformanceSummary();
     const alertStats = alertManager.getAlertStatistics();
 
-    let status: HealthStatus = 'healthy';
-    
+    let status: HealthStatus = "healthy";
+
     // Check if monitoring is enabled and functioning
     if (!performanceStats.isEnabled) {
-      status = 'degraded';
+      status = "degraded";
     }
-    
+
     // Check for excessive critical alerts
     if (alertStats.criticalAlerts > 5) {
-      status = 'degraded';
+      status = "degraded";
     }
 
     return {
@@ -326,15 +344,14 @@ function checkMonitoringHealth(): ComponentHealth {
         performanceMonitoring: performanceStats.isEnabled,
         totalMetrics: performanceStats.totalMetrics,
         activeAlerts: alertStats.activeAlerts,
-        criticalAlerts: alertStats.criticalAlerts
-      }
+        criticalAlerts: alertStats.criticalAlerts,
+      },
     };
-
   } catch (error) {
     return {
-      status: 'unknown',
+      status: "unknown",
       lastCheck: new Date().toISOString(),
-      error: error instanceof Error ? error.message : 'Monitoring check failed'
+      error: error instanceof Error ? error.message : "Monitoring check failed",
     };
   }
 }
@@ -346,16 +363,16 @@ function checkSecurityHealth(): ComponentHealth {
   try {
     const securityStats = securityMonitor.getSecurityStatistics();
 
-    let status: HealthStatus = 'healthy';
-    
+    let status: HealthStatus = "healthy";
+
     // Check for excessive blocked IPs (might indicate attack)
     if (securityStats.blockedIPs > 100) {
-      status = 'degraded';
+      status = "degraded";
     }
-    
+
     // Check for excessive locked users
     if (securityStats.lockedUsers > 50) {
-      status = 'degraded';
+      status = "degraded";
     }
 
     return {
@@ -365,15 +382,14 @@ function checkSecurityHealth(): ComponentHealth {
         totalSecurityEvents: securityStats.totalEvents,
         blockedIPs: securityStats.blockedIPs,
         lockedUsers: securityStats.lockedUsers,
-        recentEventsCount: securityStats.recentEvents.length
-      }
+        recentEventsCount: securityStats.recentEvents.length,
+      },
     };
-
   } catch (error) {
     return {
-      status: 'unknown',
+      status: "unknown",
       lastCheck: new Date().toISOString(),
-      error: error instanceof Error ? error.message : 'Security check failed'
+      error: error instanceof Error ? error.message : "Security check failed",
     };
   }
 }
@@ -389,47 +405,47 @@ async function getSystemMetrics(): Promise<{
 }> {
   try {
     const alertStats = alertManager.getAlertStatistics();
-    
-    // Get recent metrics from database
-    const supabase = createClient();
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    
-    const { data: recentMetrics } = await supabase
-      .from('system_metrics')
-      .select('*')
-      .gte('timestamp', oneHourAgo)
-      .order('timestamp', { ascending: false });
 
-    const apiMetrics = recentMetrics?.filter(m => m.type === 'api') || [];
-    const errorMetrics = recentMetrics?.filter(m => m.type === 'errors') || [];
-    
+    // Get recent metrics from database
+    const supabase = await createClient();
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+
+    const { data: recentMetrics } = await supabase
+      .from("system_metrics")
+      .select("*")
+      .gte("timestamp", oneHourAgo)
+      .order("timestamp", { ascending: false });
+
+    const apiMetrics = recentMetrics?.filter((m) => m.type === "api") || [];
+    const errorMetrics = recentMetrics?.filter((m) => m.type === "errors") || [];
+
     const totalRequests = apiMetrics.length;
     const errorCount = errorMetrics.length;
     const errorRate = totalRequests > 0 ? (errorCount / totalRequests) * 100 : 0;
-    
+
     const responseTimes = apiMetrics
-      .filter(m => m.name === 'response_time')
-      .map(m => parseFloat(m.value) || 0);
-    
-    const avgResponseTime = responseTimes.length > 0 
-      ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length 
-      : 0;
+      .filter((m) => m.name === "response_time")
+      .map((m) => parseFloat(m.value) || 0);
+
+    const avgResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length
+        : 0;
 
     return {
       activeAlerts: alertStats.activeAlerts,
       errorRate: Math.round(errorRate * 100) / 100,
       avgResponseTime: Math.round(avgResponseTime),
-      totalRequests
+      totalRequests,
     };
-
   } catch (error) {
-    devLog('error', 'HealthCheck', 'Failed to get system metrics', { error });
-    
+    devLog("error", "HealthCheck", "Failed to get system metrics", { error });
+
     return {
       activeAlerts: 0,
       errorRate: 0,
       avgResponseTime: 0,
-      totalRequests: 0
+      totalRequests: 0,
     };
   }
 }

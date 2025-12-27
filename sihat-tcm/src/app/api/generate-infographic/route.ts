@@ -1,93 +1,99 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 60;
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-    try {
-        const { prompt, style, reportData, patientInfo } = await req.json();
+  try {
+    const { prompt, style, reportData, patientInfo } = await req.json();
 
-        // For demo purposes, we'll create a client-side generated infographic
-        // In production, you could integrate with image generation APIs like:
-        // - DALL-E 3
-        // - Midjourney API
-        // - Stable Diffusion
-        // - Adobe Firefly
+    // For demo purposes, we'll create a client-side generated infographic
+    // In production, you could integrate with image generation APIs like:
+    // - DALL-E 3
+    // - Midjourney API
+    // - Stable Diffusion
+    // - Adobe Firefly
 
-        // For now, we'll generate a styled HTML infographic and convert to image
-        const infographicHtml = generateInfographicHTML(reportData, patientInfo, style);
+    // For now, we'll generate a styled HTML infographic and convert to image
+    const infographicHtml = generateInfographicHTML(reportData, patientInfo, style);
 
-        // Return the HTML which can be rendered client-side
-        // In a production environment, you would use a service to render HTML to image
-        // Options include: Puppeteer, html2canvas, or cloud rendering services
+    // Return the HTML which can be rendered client-side
+    // In a production environment, you would use a service to render HTML to image
+    // Options include: Puppeteer, html2canvas, or cloud rendering services
 
-        return NextResponse.json({
-            success: true,
-            type: 'html',
-            html: infographicHtml,
-            // For demo, we'll use a placeholder image URL
-            // Replace with actual generated image URL in production
-            imageUrl: generatePlaceholderDataUrl(reportData, patientInfo, style)
-        });
-
-    } catch (error: any) {
-        console.error("[API /api/generate-infographic] Error:", error);
-        return NextResponse.json(
-            { error: error.message || 'Failed to generate infographic' },
-            { status: 500 }
-        );
-    }
+    return NextResponse.json({
+      success: true,
+      type: "html",
+      html: infographicHtml,
+      // For demo, we'll use a placeholder image URL
+      // Replace with actual generated image URL in production
+      imageUrl: generatePlaceholderDataUrl(reportData, patientInfo, style),
+    });
+  } catch (error: any) {
+    console.error("[API /api/generate-infographic] Error:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to generate infographic" },
+      { status: 500 }
+    );
+  }
 }
 
 function generateInfographicHTML(reportData: any, patientInfo: any, style: string): string {
-    const diagnosis = typeof reportData.diagnosis === 'string'
-        ? reportData.diagnosis
-        : reportData.diagnosis?.primary_pattern || 'TCM Health Summary';
+  const diagnosis =
+    typeof reportData.diagnosis === "string"
+      ? reportData.diagnosis
+      : reportData.diagnosis?.primary_pattern || "TCM Health Summary";
 
-    const constitution = typeof reportData.constitution === 'string'
-        ? reportData.constitution
-        : reportData.constitution?.type || '';
+  const constitution =
+    typeof reportData.constitution === "string"
+      ? reportData.constitution
+      : reportData.constitution?.type || "";
 
-    const foods = reportData.recommendations?.food_therapy?.beneficial?.slice(0, 6)
-        || reportData.recommendations?.food?.slice(0, 6)
-        || [];
+  const foods =
+    reportData.recommendations?.food_therapy?.beneficial?.slice(0, 6) ||
+    reportData.recommendations?.food?.slice(0, 6) ||
+    [];
 
-    const avoid = reportData.recommendations?.food_therapy?.avoid?.slice(0, 4)
-        || reportData.recommendations?.avoid?.slice(0, 4)
-        || [];
+  const avoid =
+    reportData.recommendations?.food_therapy?.avoid?.slice(0, 4) ||
+    reportData.recommendations?.avoid?.slice(0, 4) ||
+    [];
 
-    const lifestyle = reportData.recommendations?.lifestyle?.slice(0, 4) || [];
+  const lifestyle = reportData.recommendations?.lifestyle?.slice(0, 4) || [];
 
-    const styleConfig: Record<string, { bg: string; accent: string; text: string; gradient: string }> = {
-        modern: {
-            bg: '#f8fafc',
-            accent: '#10b981',
-            text: '#1e293b',
-            gradient: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)'
-        },
-        traditional: {
-            bg: '#fef3c7',
-            accent: '#dc2626',
-            text: '#1c1917',
-            gradient: 'linear-gradient(135deg, #dc2626 0%, #9333ea 100%)'
-        },
-        minimal: {
-            bg: '#ffffff',
-            accent: '#374151',
-            text: '#1f2937',
-            gradient: 'linear-gradient(135deg, #374151 0%, #6b7280 100%)'
-        },
-        colorful: {
-            bg: '#fdf4ff',
-            accent: '#8b5cf6',
-            text: '#18181b',
-            gradient: 'linear-gradient(135deg, #f43f5e 0%, #8b5cf6 50%, #06b6d4 100%)'
-        }
-    };
+  const styleConfig: Record<
+    string,
+    { bg: string; accent: string; text: string; gradient: string }
+  > = {
+    modern: {
+      bg: "#f8fafc",
+      accent: "#10b981",
+      text: "#1e293b",
+      gradient: "linear-gradient(135deg, #10b981 0%, #3b82f6 100%)",
+    },
+    traditional: {
+      bg: "#fef3c7",
+      accent: "#dc2626",
+      text: "#1c1917",
+      gradient: "linear-gradient(135deg, #dc2626 0%, #9333ea 100%)",
+    },
+    minimal: {
+      bg: "#ffffff",
+      accent: "#374151",
+      text: "#1f2937",
+      gradient: "linear-gradient(135deg, #374151 0%, #6b7280 100%)",
+    },
+    colorful: {
+      bg: "#fdf4ff",
+      accent: "#8b5cf6",
+      text: "#18181b",
+      gradient: "linear-gradient(135deg, #f43f5e 0%, #8b5cf6 50%, #06b6d4 100%)",
+    },
+  };
 
-    const config = styleConfig[style] || styleConfig.modern;
+  const config = styleConfig[style] || styleConfig.modern;
 
-    return `
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -163,48 +169,72 @@ function generateInfographicHTML(reportData: any, patientInfo: any, style: strin
             <div class="section-title">📋 Diagnosis</div>
             <div class="diagnosis-card">
                 <h3 style="font-size: 20px; margin-bottom: 8px; color: ${config.text};">${diagnosis}</h3>
-                ${constitution ? `<p style="color: #64748b;">Constitution: ${constitution}</p>` : ''}
+                ${constitution ? `<p style="color: #64748b;">Constitution: ${constitution}</p>` : ""}
             </div>
         </div>
 
-        ${foods.length > 0 ? `
+        ${
+          foods.length > 0
+            ? `
         <div class="section">
             <div class="section-title">🥗 Recommended Foods</div>
             <div class="grid">
-                ${foods.map((food: string) => `
+                ${foods
+                  .map(
+                    (food: string) => `
                     <div class="food-item">
                         <span class="food-icon">✅</span>
                         <span>${food}</span>
                     </div>
-                `).join('')}
+                `
+                  )
+                  .join("")}
             </div>
         </div>
-        ` : ''}
+        `
+            : ""
+        }
 
-        ${avoid.length > 0 ? `
+        ${
+          avoid.length > 0
+            ? `
         <div class="section">
             <div class="section-title">🚫 Foods to Avoid</div>
             <div class="grid">
-                ${avoid.map((food: string) => `
+                ${avoid
+                  .map(
+                    (food: string) => `
                     <div class="food-item avoid-item">
                         <span class="food-icon">❌</span>
                         <span>${food}</span>
                     </div>
-                `).join('')}
+                `
+                  )
+                  .join("")}
             </div>
         </div>
-        ` : ''}
+        `
+            : ""
+        }
 
-        ${lifestyle.length > 0 ? `
+        ${
+          lifestyle.length > 0
+            ? `
         <div class="section">
             <div class="section-title">🌿 Lifestyle Tips</div>
-            ${lifestyle.map((tip: string, idx: number) => `
+            ${lifestyle
+              .map(
+                (tip: string, idx: number) => `
                 <div class="lifestyle-item">
                     <strong>${idx + 1}.</strong> ${tip}
                 </div>
-            `).join('')}
+            `
+              )
+              .join("")}
         </div>
-        ` : ''}
+        `
+            : ""
+        }
 
         <div class="footer">
             <p>Generated by Sihat TCM AI Assistant | ${new Date().toLocaleDateString()}</p>
@@ -216,37 +246,42 @@ function generateInfographicHTML(reportData: any, patientInfo: any, style: strin
 }
 
 function generatePlaceholderDataUrl(reportData: any, patientInfo: any, style: string): string {
-    // Create a simple SVG infographic as a placeholder
-    const diagnosis = typeof reportData.diagnosis === 'string'
-        ? reportData.diagnosis
-        : reportData.diagnosis?.primary_pattern || 'TCM Diagnosis';
+  // Create a simple SVG infographic as a placeholder
+  const diagnosis =
+    typeof reportData.diagnosis === "string"
+      ? reportData.diagnosis
+      : reportData.diagnosis?.primary_pattern || "TCM Diagnosis";
 
-    const constitution = typeof reportData.constitution === 'string'
-        ? reportData.constitution
-        : reportData.constitution?.type || 'Not specified';
+  const constitution =
+    typeof reportData.constitution === "string"
+      ? reportData.constitution
+      : reportData.constitution?.type || "Not specified";
 
-    const foods = reportData.recommendations?.food_therapy?.beneficial?.slice(0, 3)
-        || reportData.recommendations?.food?.slice(0, 3)
-        || ['Balanced diet recommended'];
+  const foods = reportData.recommendations?.food_therapy?.beneficial?.slice(0, 3) ||
+    reportData.recommendations?.food?.slice(0, 3) || ["Balanced diet recommended"];
 
-    const styleColors: Record<string, { primary: string; secondary: string; bg: string; text: string }> = {
-        modern: { primary: '#10b981', secondary: '#3b82f6', bg: '#f8fafc', text: '#1e293b' },
-        traditional: { primary: '#dc2626', secondary: '#9333ea', bg: '#fef3c7', text: '#1c1917' },
-        minimal: { primary: '#374151', secondary: '#6b7280', bg: '#ffffff', text: '#1f2937' },
-        colorful: { primary: '#8b5cf6', secondary: '#f43f5e', bg: '#fdf4ff', text: '#18181b' }
-    };
+  const styleColors: Record<
+    string,
+    { primary: string; secondary: string; bg: string; text: string }
+  > = {
+    modern: { primary: "#10b981", secondary: "#3b82f6", bg: "#f8fafc", text: "#1e293b" },
+    traditional: { primary: "#dc2626", secondary: "#9333ea", bg: "#fef3c7", text: "#1c1917" },
+    minimal: { primary: "#374151", secondary: "#6b7280", bg: "#ffffff", text: "#1f2937" },
+    colorful: { primary: "#8b5cf6", secondary: "#f43f5e", bg: "#fdf4ff", text: "#18181b" },
+  };
 
-    const colors = styleColors[style] || styleColors.modern;
+  const colors = styleColors[style] || styleColors.modern;
 
-    // Escape special characters for SVG
-    const escapeXml = (str: string) => str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
+  // Escape special characters for SVG
+  const escapeXml = (str: string) =>
+    str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
 
-    const svg = `
+  const svg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
     <defs>
         <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -270,16 +305,20 @@ function generatePlaceholderDataUrl(reportData: any, patientInfo: any, style: st
     <rect x="40" y="210" width="720" height="130" rx="15" fill="white" filter="url(#shadow)"/>
     <rect x="40" y="210" width="6" height="130" fill="${colors.primary}"/>
     <text x="70" y="250" fill="${colors.primary}" font-size="14" font-weight="600" font-family="system-ui">📋 DIAGNOSIS</text>
-    <text x="70" y="285" fill="${colors.text}" font-size="22" font-weight="bold" font-family="system-ui">${escapeXml(diagnosis.substring(0, 50))}${diagnosis.length > 50 ? '...' : ''}</text>
+    <text x="70" y="285" fill="${colors.text}" font-size="22" font-weight="bold" font-family="system-ui">${escapeXml(diagnosis.substring(0, 50))}${diagnosis.length > 50 ? "..." : ""}</text>
     <text x="70" y="315" fill="#64748b" font-size="14" font-family="system-ui">Constitution: ${escapeXml(constitution)}</text>
     
     <!-- Foods Section -->
     <text x="60" y="390" fill="${colors.primary}" font-size="16" font-weight="600" font-family="system-ui">🥗 Recommended Foods</text>
-    ${foods.map((food: string, idx: number) => `
+    ${foods
+      .map(
+        (food: string, idx: number) => `
         <rect x="40" y="${410 + idx * 60}" width="340" height="50" rx="10" fill="white" filter="url(#shadow)"/>
         <text x="60" y="${443 + idx * 60}" fill="#22c55e" font-size="18" font-family="system-ui">✅</text>
         <text x="90" y="${443 + idx * 60}" fill="${colors.text}" font-size="14" font-family="system-ui">${escapeXml(String(food).substring(0, 35))}</text>
-    `).join('')}
+    `
+      )
+      .join("")}
     
     <!-- Yin Yang Symbol -->
     <circle cx="600" cy="500" r="80" fill="white" filter="url(#shadow)"/>
@@ -294,7 +333,7 @@ function generatePlaceholderDataUrl(reportData: any, patientInfo: any, style: st
     <text x="400" y="970" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="system-ui">Consult a licensed TCM practitioner for personalized advice</text>
 </svg>`;
 
-    // Convert SVG to data URL
-    const base64 = Buffer.from(svg).toString('base64');
-    return `data:image/svg+xml;base64,${base64}`;
+  // Convert SVG to data URL
+  const base64 = Buffer.from(svg).toString("base64");
+  return `data:image/svg+xml;base64,${base64}`;
 }

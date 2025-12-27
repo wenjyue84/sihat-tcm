@@ -1,6 +1,7 @@
 # 🔧 Fix: "Could not find table 'guest_diagnosis_sessions'" Error
 
 ## Problem
+
 The error occurs because the database migration hasn't been run yet. The `guest_diagnosis_sessions` table doesn't exist.
 
 ## ✅ Solution: Run the Migration
@@ -42,8 +43,8 @@ Run this in Supabase SQL Editor:
 ```sql
 -- Should return: true
 SELECT EXISTS (
-  SELECT FROM information_schema.tables 
-  WHERE table_schema = 'public' 
+  SELECT FROM information_schema.tables
+  WHERE table_schema = 'public'
   AND table_name = 'guest_diagnosis_sessions'
 );
 ```
@@ -74,6 +75,7 @@ If you can't run the migration right now, I can add a temporary fallback that sa
 ## 📋 What Gets Created
 
 The migration creates:
+
 - ✅ `guest_diagnosis_sessions` table
 - ✅ 12 new columns in `diagnosis_sessions` table
 - ✅ Indexes for performance
@@ -88,4 +90,3 @@ The migration creates:
 1. Restart your dev server
 2. Try completing a diagnosis again
 3. Error should be gone ✅
-

@@ -1,28 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Footer } from "@/components/Footer";
 import { BottomNavigation } from "@/components/ui/BottomNavigation";
 import { Providers } from "./providers";
-import { Toaster } from 'sonner'
+import { Toaster } from "sonner";
 import { getAdminSettings } from "@/lib/settings";
 import { BackgroundMusic } from "@/components/BackgroundMusic";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Inter as fallback (closest to SF Pro) - system fonts are used first via CSS
+const inter = Inter({
+  variable: "--font-inter-fallback",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
+  fallback: ["-apple-system", "BlinkMacSystemFont", "system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://sihat-tcm.vercel.app'),
+  metadataBase: new URL("https://sihat-tcm.vercel.app"),
   alternates: {
-    canonical: './',
+    canonical: "./",
   },
   title: {
     default: "Sihat TCM - AI-Powered Traditional Chinese Medicine",
@@ -83,9 +82,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   formatDetection: {
@@ -96,10 +95,10 @@ export const metadata: Metadata = {
     // google: 'your-verification-code',
   },
   other: {
-    'geo.region': 'MY-01', // Johor, Malaysia
-    'geo.placename': 'Skudai, Johor',
-    'geo.position': '1.5355;103.6591',
-    'ICBM': '1.5355, 103.6591',
+    "geo.region": "MY-01", // Johor, Malaysia
+    "geo.placename": "Skudai, Johor",
+    "geo.position": "1.5355;103.6591",
+    ICBM: "1.5355, 103.6591",
   },
 };
 
@@ -121,12 +120,14 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
+        className={`${inter.variable} antialiased flex flex-col min-h-screen`}
         suppressHydrationWarning
       >
         <JsonLd />
         <Providers>
-          <main className="flex-grow mb-16 md:mb-0">{children}</main>
+          <ErrorBoundary category="App">
+            <main className="flex-grow mb-16 md:mb-0">{children}</main>
+          </ErrorBoundary>
           <Footer />
           <BottomNavigation />
           <BackgroundMusic

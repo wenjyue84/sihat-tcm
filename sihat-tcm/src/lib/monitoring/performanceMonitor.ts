@@ -1,14 +1,14 @@
 /**
  * @fileoverview Application Performance Monitoring
- * 
+ *
  * Comprehensive performance monitoring system for Sihat TCM platform.
  * Tracks API response times, user interactions, error rates, and system health.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 3.0
  */
 
-import { devLog } from '@/lib/systemLogger';
+import { devLog } from "@/lib/systemLogger";
 
 /**
  * Performance metric types
@@ -16,7 +16,7 @@ import { devLog } from '@/lib/systemLogger';
 export interface PerformanceMetric {
   name: string;
   value: number;
-  unit: 'ms' | 'bytes' | 'count' | 'percentage';
+  unit: "ms" | "bytes" | "count" | "percentage";
   timestamp: number;
   tags?: Record<string, string>;
 }
@@ -59,7 +59,7 @@ export interface ErrorMetric {
   userId?: string;
   url?: string;
   userAgent?: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   timestamp: number;
 }
 
@@ -90,8 +90,8 @@ export class PerformanceMonitor {
   private flushTimer?: NodeJS.Timeout;
 
   private constructor() {
-    this.isEnabled = process.env.ENABLE_PERFORMANCE_MONITORING === 'true';
-    
+    this.isEnabled = process.env.ENABLE_PERFORMANCE_MONITORING === "true";
+
     if (this.isEnabled) {
       this.startPeriodicFlush();
       this.setupErrorHandlers();
@@ -115,13 +115,13 @@ export class PerformanceMonitor {
     if (!this.isEnabled) return;
 
     this.apiMetrics.push(metric);
-    
+
     // Log slow API calls
     if (metric.responseTime > 5000) {
-      devLog('warn', 'PerformanceMonitor', 'Slow API call detected', {
+      devLog("warn", "PerformanceMonitor", "Slow API call detected", {
         endpoint: metric.endpoint,
         responseTime: metric.responseTime,
-        statusCode: metric.statusCode
+        statusCode: metric.statusCode,
       });
     }
 
@@ -141,10 +141,10 @@ export class PerformanceMonitor {
 
     // Log failed interactions
     if (!metric.success) {
-      devLog('warn', 'PerformanceMonitor', 'User interaction failed', {
+      devLog("warn", "PerformanceMonitor", "User interaction failed", {
         action: metric.action,
         component: metric.component,
-        userId: metric.userId
+        userId: metric.userId,
       });
     }
 
@@ -163,13 +163,13 @@ export class PerformanceMonitor {
     this.errorMetrics.push(metric);
 
     // Log critical errors immediately
-    if (metric.severity === 'critical') {
-      devLog('error', 'PerformanceMonitor', 'Critical error tracked', {
+    if (metric.severity === "critical") {
+      devLog("error", "PerformanceMonitor", "Critical error tracked", {
         message: metric.message,
         component: metric.component,
-        userId: metric.userId
+        userId: metric.userId,
       });
-      
+
       // Send immediate alert for critical errors
       this.sendCriticalAlert(metric);
     }
@@ -199,14 +199,14 @@ export class PerformanceMonitor {
    */
   public trackPageLoad(pageName: string, loadTime: number, userId?: string): void {
     this.trackMetric({
-      name: 'page_load_time',
+      name: "page_load_time",
       value: loadTime,
-      unit: 'ms',
+      unit: "ms",
       timestamp: Date.now(),
       tags: {
         page: pageName,
-        userId: userId || 'anonymous'
-      }
+        userId: userId || "anonymous",
+      },
     });
   }
 
@@ -221,28 +221,28 @@ export class PerformanceMonitor {
   ): void {
     // Track total diagnosis time
     this.trackMetric({
-      name: 'diagnosis_completion_time',
+      name: "diagnosis_completion_time",
       value: totalTime,
-      unit: 'ms',
+      unit: "ms",
       timestamp: Date.now(),
       tags: {
         diagnosisId,
-        userId: userId || 'anonymous'
-      }
+        userId: userId || "anonymous",
+      },
     });
 
     // Track individual step times
     Object.entries(stepTimes).forEach(([step, time]) => {
       this.trackMetric({
-        name: 'diagnosis_step_time',
+        name: "diagnosis_step_time",
         value: time,
-        unit: 'ms',
+        unit: "ms",
         timestamp: Date.now(),
         tags: {
           step,
           diagnosisId,
-          userId: userId || 'anonymous'
-        }
+          userId: userId || "anonymous",
+        },
       });
     });
   }
@@ -258,27 +258,27 @@ export class PerformanceMonitor {
     tokensUsed?: number
   ): void {
     this.trackMetric({
-      name: 'ai_model_response_time',
+      name: "ai_model_response_time",
       value: responseTime,
-      unit: 'ms',
+      unit: "ms",
       timestamp: Date.now(),
       tags: {
         model,
         operation,
-        success: success.toString()
-      }
+        success: success.toString(),
+      },
     });
 
     if (tokensUsed) {
       this.trackMetric({
-        name: 'ai_model_tokens_used',
+        name: "ai_model_tokens_used",
         value: tokensUsed,
-        unit: 'count',
+        unit: "count",
         timestamp: Date.now(),
         tags: {
           model,
-          operation
-        }
+          operation,
+        },
       });
     }
   }
@@ -287,23 +287,23 @@ export class PerformanceMonitor {
    * Setup error handlers
    */
   private setupErrorHandlers(): void {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       // Client-side error handling
-      window.addEventListener('error', (event) => {
+      window.addEventListener("error", (event) => {
         this.trackError({
           message: event.message,
           stack: event.error?.stack,
           url: event.filename,
-          severity: 'medium',
-          timestamp: Date.now()
+          severity: "medium",
+          timestamp: Date.now(),
         });
       });
 
-      window.addEventListener('unhandledrejection', (event) => {
+      window.addEventListener("unhandledrejection", (event) => {
         this.trackError({
           message: `Unhandled Promise Rejection: ${event.reason}`,
-          severity: 'high',
-          timestamp: Date.now()
+          severity: "high",
+          timestamp: Date.now(),
         });
       });
     }
@@ -337,7 +337,7 @@ export class PerformanceMonitor {
     const metricsToFlush = [...this.metrics];
     this.metrics = [];
 
-    this.sendMetricsToCollector('performance', metricsToFlush);
+    this.sendMetricsToCollector("performance", metricsToFlush);
   }
 
   /**
@@ -349,7 +349,7 @@ export class PerformanceMonitor {
     const metricsToFlush = [...this.apiMetrics];
     this.apiMetrics = [];
 
-    this.sendMetricsToCollector('api', metricsToFlush);
+    this.sendMetricsToCollector("api", metricsToFlush);
   }
 
   /**
@@ -361,7 +361,7 @@ export class PerformanceMonitor {
     const metricsToFlush = [...this.userMetrics];
     this.userMetrics = [];
 
-    this.sendMetricsToCollector('user_interactions', metricsToFlush);
+    this.sendMetricsToCollector("user_interactions", metricsToFlush);
   }
 
   /**
@@ -373,7 +373,7 @@ export class PerformanceMonitor {
     const metricsToFlush = [...this.errorMetrics];
     this.errorMetrics = [];
 
-    this.sendMetricsToCollector('errors', metricsToFlush);
+    this.sendMetricsToCollector("errors", metricsToFlush);
   }
 
   /**
@@ -382,23 +382,22 @@ export class PerformanceMonitor {
   private async sendMetricsToCollector(type: string, metrics: any[]): Promise<void> {
     try {
       // Send to internal logging endpoint
-      await fetch('/api/monitoring/metrics', {
-        method: 'POST',
+      await fetch("/api/monitoring/metrics", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           type,
           metrics,
-          timestamp: Date.now()
-        })
+          timestamp: Date.now(),
+        }),
       });
 
       // Send to external monitoring services if configured
       await this.sendToExternalServices(type, metrics);
-
     } catch (error) {
-      devLog('error', 'PerformanceMonitor', 'Failed to send metrics', { error });
+      devLog("error", "PerformanceMonitor", "Failed to send metrics", { error });
     }
   }
 
@@ -431,22 +430,22 @@ export class PerformanceMonitor {
    */
   private async sendToDataDog(type: string, metrics: any[]): Promise<void> {
     try {
-      const datadogMetrics = metrics.map(metric => ({
-        metric: `sihat_tcm.${type}.${metric.name || 'count'}`,
+      const datadogMetrics = metrics.map((metric) => ({
+        metric: `sihat_tcm.${type}.${metric.name || "count"}`,
         points: [[Math.floor(Date.now() / 1000), metric.value || 1]],
-        tags: metric.tags ? Object.entries(metric.tags).map(([k, v]) => `${k}:${v}`) : []
+        tags: metric.tags ? Object.entries(metric.tags).map(([k, v]) => `${k}:${v}`) : [],
       }));
 
-      await fetch('https://api.datadoghq.com/api/v1/series', {
-        method: 'POST',
+      await fetch("https://api.datadoghq.com/api/v1/series", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'DD-API-KEY': process.env.DATADOG_API_KEY!
+          "Content-Type": "application/json",
+          "DD-API-KEY": process.env.DATADOG_API_KEY!,
         },
-        body: JSON.stringify({ series: datadogMetrics })
+        body: JSON.stringify({ series: datadogMetrics }),
       });
     } catch (error) {
-      devLog('error', 'PerformanceMonitor', 'Failed to send to DataDog', { error });
+      devLog("error", "PerformanceMonitor", "Failed to send to DataDog", { error });
     }
   }
 
@@ -455,23 +454,23 @@ export class PerformanceMonitor {
    */
   private async sendToNewRelic(type: string, metrics: any[]): Promise<void> {
     try {
-      const newRelicEvents = metrics.map(metric => ({
+      const newRelicEvents = metrics.map((metric) => ({
         eventType: `SihatTCM${type.charAt(0).toUpperCase() + type.slice(1)}`,
         ...metric,
-        appName: 'sihat-tcm',
-        environment: process.env.NODE_ENV
+        appName: "sihat-tcm",
+        environment: process.env.NODE_ENV,
       }));
 
-      await fetch('https://insights-collector.newrelic.com/v1/accounts/YOUR_ACCOUNT_ID/events', {
-        method: 'POST',
+      await fetch("https://insights-collector.newrelic.com/v1/accounts/YOUR_ACCOUNT_ID/events", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'X-Insert-Key': process.env.NEW_RELIC_LICENSE_KEY!
+          "Content-Type": "application/json",
+          "X-Insert-Key": process.env.NEW_RELIC_LICENSE_KEY!,
         },
-        body: JSON.stringify(newRelicEvents)
+        body: JSON.stringify(newRelicEvents),
       });
     } catch (error) {
-      devLog('error', 'PerformanceMonitor', 'Failed to send to New Relic', { error });
+      devLog("error", "PerformanceMonitor", "Failed to send to New Relic", { error });
     }
   }
 
@@ -481,20 +480,20 @@ export class PerformanceMonitor {
   private async sendToWebhook(type: string, metrics: any[]): Promise<void> {
     try {
       await fetch(process.env.MONITORING_WEBHOOK!, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          service: 'sihat-tcm',
+          service: "sihat-tcm",
           type,
           metrics,
           timestamp: Date.now(),
-          environment: process.env.NODE_ENV
-        })
+          environment: process.env.NODE_ENV,
+        }),
       });
     } catch (error) {
-      devLog('error', 'PerformanceMonitor', 'Failed to send to webhook', { error });
+      devLog("error", "PerformanceMonitor", "Failed to send to webhook", { error });
     }
   }
 
@@ -506,62 +505,64 @@ export class PerformanceMonitor {
       // Send to Slack
       if (process.env.SLACK_WEBHOOK_URL) {
         await fetch(process.env.SLACK_WEBHOOK_URL, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            text: '🚨 CRITICAL ERROR DETECTED',
-            attachments: [{
-              color: 'danger',
-              fields: [
-                {
-                  title: 'Error Message',
-                  value: error.message,
-                  short: false
-                },
-                {
-                  title: 'Component',
-                  value: error.component || 'Unknown',
-                  short: true
-                },
-                {
-                  title: 'User ID',
-                  value: error.userId || 'Anonymous',
-                  short: true
-                },
-                {
-                  title: 'Environment',
-                  value: process.env.NODE_ENV || 'Unknown',
-                  short: true
-                },
-                {
-                  title: 'Timestamp',
-                  value: new Date(error.timestamp).toISOString(),
-                  short: true
-                }
-              ]
-            }]
-          })
+            text: "🚨 CRITICAL ERROR DETECTED",
+            attachments: [
+              {
+                color: "danger",
+                fields: [
+                  {
+                    title: "Error Message",
+                    value: error.message,
+                    short: false,
+                  },
+                  {
+                    title: "Component",
+                    value: error.component || "Unknown",
+                    short: true,
+                  },
+                  {
+                    title: "User ID",
+                    value: error.userId || "Anonymous",
+                    short: true,
+                  },
+                  {
+                    title: "Environment",
+                    value: process.env.NODE_ENV || "Unknown",
+                    short: true,
+                  },
+                  {
+                    title: "Timestamp",
+                    value: new Date(error.timestamp).toISOString(),
+                    short: true,
+                  },
+                ],
+              },
+            ],
+          }),
         });
       }
 
       // Send email alert if configured
       if (process.env.ALERT_EMAIL) {
-        await fetch('/api/monitoring/alert', {
-          method: 'POST',
+        await fetch("/api/monitoring/alert", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            type: 'critical_error',
+            type: "critical_error",
             error,
-            recipients: [process.env.ALERT_EMAIL]
-          })
+            recipients: [process.env.ALERT_EMAIL],
+          }),
         });
       }
     } catch (alertError) {
-      devLog('error', 'PerformanceMonitor', 'Failed to send critical alert', { alertError });
+      devLog("error", "PerformanceMonitor", "Failed to send critical alert", { alertError });
     }
   }
 
@@ -580,7 +581,7 @@ export class PerformanceMonitor {
       apiMetrics: this.apiMetrics.length,
       userMetrics: this.userMetrics.length,
       errorMetrics: this.errorMetrics.length,
-      isEnabled: this.isEnabled
+      isEnabled: this.isEnabled,
     };
   }
 
@@ -591,7 +592,7 @@ export class PerformanceMonitor {
     if (this.flushTimer) {
       clearInterval(this.flushTimer);
     }
-    
+
     // Flush remaining metrics
     this.flushAll();
   }
@@ -615,18 +616,18 @@ export function trackExecutionTime<T>(
   tags?: Record<string, string>
 ): Promise<T> {
   const startTime = performance.now();
-  
+
   const result = Promise.resolve(fn());
-  
+
   return result.then(
     (value) => {
       const endTime = performance.now();
       performanceMonitor.trackMetric({
         name,
         value: endTime - startTime,
-        unit: 'ms',
+        unit: "ms",
         timestamp: Date.now(),
-        tags
+        tags,
       });
       return value;
     },
@@ -635,9 +636,9 @@ export function trackExecutionTime<T>(
       performanceMonitor.trackMetric({
         name,
         value: endTime - startTime,
-        unit: 'ms',
+        unit: "ms",
         timestamp: Date.now(),
-        tags: { ...tags, error: 'true' }
+        tags: { ...tags, error: "true" },
       });
       throw error;
     }
@@ -650,22 +651,24 @@ export function trackExecutionTime<T>(
 export function createAPITrackingMiddleware() {
   return (req: any, res: any, next: any) => {
     const startTime = Date.now();
-    
-    res.on('finish', () => {
+
+    res.on("finish", () => {
       const endTime = Date.now();
-      
+
       performanceMonitor.trackAPI({
         endpoint: req.url,
         method: req.method,
         statusCode: res.statusCode,
         responseTime: endTime - startTime,
-        requestSize: req.headers['content-length'] ? parseInt(req.headers['content-length']) : undefined,
+        requestSize: req.headers["content-length"]
+          ? parseInt(req.headers["content-length"])
+          : undefined,
         userId: req.user?.id,
-        userAgent: req.headers['user-agent'],
-        timestamp: startTime
+        userAgent: req.headers["user-agent"],
+        timestamp: startTime,
       });
     });
-    
+
     next();
   };
 }

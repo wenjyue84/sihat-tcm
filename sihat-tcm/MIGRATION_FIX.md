@@ -1,6 +1,7 @@
 # Fix: Missing guest_diagnosis_sessions Table
 
 ## 🚨 Error
+
 ```
 Could not find the table 'public.guest_diagnosis_sessions' in the schema cache
 ```
@@ -68,24 +69,25 @@ Run this query in Supabase SQL Editor:
 ```sql
 -- Check if guest_diagnosis_sessions table exists
 SELECT EXISTS (
-  SELECT FROM information_schema.tables 
-  WHERE table_schema = 'public' 
+  SELECT FROM information_schema.tables
+  WHERE table_schema = 'public'
   AND table_name = 'guest_diagnosis_sessions'
 );
 
 -- Check if new columns exist in diagnosis_sessions
-SELECT column_name 
-FROM information_schema.columns 
-WHERE table_name = 'diagnosis_sessions' 
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'diagnosis_sessions'
 AND column_name IN (
-  'inquiry_summary', 
-  'tongue_analysis', 
-  'pulse_data', 
+  'inquiry_summary',
+  'tongue_analysis',
+  'pulse_data',
   'is_guest_session'
 );
 ```
 
 **Expected Results:**
+
 - First query should return `true`
 - Second query should return 4 rows (one for each column)
 
@@ -94,6 +96,7 @@ AND column_name IN (
 ## 🔄 After Running Migration
 
 1. **Restart your dev server** (if running):
+
    ```bash
    # Stop the server (Ctrl+C)
    npm run dev
@@ -125,10 +128,12 @@ The migration file (`20250102000001_add_diagnosis_input_data.sql`) will:
 If the migration fails:
 
 1. **Check for existing columns:**
+
    ```sql
-   SELECT column_name FROM information_schema.columns 
+   SELECT column_name FROM information_schema.columns
    WHERE table_name = 'diagnosis_sessions';
    ```
+
    - If some columns already exist, that's okay - the migration uses `IF NOT EXISTS`
 
 2. **Check Supabase logs:**
@@ -147,9 +152,8 @@ If the migration fails:
 # Check if table exists (should return true after migration)
 # Run in Supabase SQL Editor:
 SELECT EXISTS (
-  SELECT FROM information_schema.tables 
-  WHERE table_schema = 'public' 
+  SELECT FROM information_schema.tables
+  WHERE table_schema = 'public'
   AND table_name = 'guest_diagnosis_sessions'
 );
 ```
-

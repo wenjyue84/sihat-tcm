@@ -16,16 +16,18 @@ npm run test:run -- src/lib/__tests__/diagnosis-schema.test.ts src/types/__tests
 ### 2. Run Database Migration (2 minutes)
 
 **Using Supabase Dashboard:**
+
 1. Go to Supabase Dashboard → SQL Editor
 2. Open `supabase/migrations/20250102000001_add_diagnosis_input_data.sql`
 3. Copy and paste into SQL Editor
 4. Click **Run**
 
 **Verify:**
+
 ```sql
 -- Check new columns exist
-SELECT column_name FROM information_schema.columns 
-WHERE table_name = 'diagnosis_sessions' 
+SELECT column_name FROM information_schema.columns
+WHERE table_name = 'diagnosis_sessions'
 AND column_name IN ('inquiry_summary', 'tongue_analysis', 'pulse_data');
 
 -- Check guest table exists
@@ -39,6 +41,7 @@ SELECT * FROM guest_diagnosis_sessions LIMIT 1;
 #### Test Authenticated User Flow:
 
 1. **Start dev server:**
+
    ```bash
    npm run dev
    ```
@@ -73,9 +76,10 @@ SELECT * FROM guest_diagnosis_sessions LIMIT 1;
    - ✅ `guest_session_token` exists
 4. **Check database:**
    ```sql
-   SELECT * FROM guest_diagnosis_sessions 
+   SELECT * FROM guest_diagnosis_sessions
    ORDER BY created_at DESC LIMIT 1;
    ```
+
    - ✅ Guest session is saved
 
 ---
@@ -83,17 +87,20 @@ SELECT * FROM guest_diagnosis_sessions LIMIT 1;
 ## ✅ Verification Checklist
 
 ### Database ✅
+
 - [ ] Migration runs successfully
 - [ ] New columns exist in `diagnosis_sessions`
 - [ ] `guest_diagnosis_sessions` table exists
 
 ### Data Collection ✅
+
 - [ ] All input data is collected during diagnosis
 - [ ] Data is saved to database (authenticated)
 - [ ] Guest sessions are created (unauthenticated)
 - [ ] Session tokens are stored
 
 ### Patient Portal ✅
+
 - [ ] History cards show input data indicators
 - [ ] Input data viewer displays all sections
 - [ ] Images load correctly
@@ -106,14 +113,17 @@ SELECT * FROM guest_diagnosis_sessions LIMIT 1;
 ## 🐛 Common Issues
 
 **Issue:** "Column does not exist"
+
 - **Fix:** Run the migration SQL file
 
 **Issue:** Input data not showing
+
 - **Fix:** Check browser console for errors
 - **Fix:** Verify data exists in database
 - **Fix:** Make sure sections are expanded (click to open)
 
 **Issue:** Guest session not saving
+
 - **Fix:** Check RLS policies allow inserts
 - **Fix:** Verify `guest_diagnosis_sessions` table exists
 
@@ -143,7 +153,6 @@ npm run test:run -- src/components/patient/__tests__/DiagnosisInputDataViewer.te
 ✅ Database migration completes  
 ✅ Authenticated users can see all input data  
 ✅ Guest users can complete diagnosis  
-✅ Patient Portal displays all data correctly  
+✅ Patient Portal displays all data correctly
 
 **If all above pass, the implementation is working correctly!** 🎉
-

@@ -1,14 +1,14 @@
-import { streamText } from 'ai';
-import { getGoogleProvider } from '@/lib/googleProvider';
-import { getGeminiApiKeyAsync } from '@/lib/settings';
+import { streamText } from "ai";
+import { getGoogleProvider } from "@/lib/googleProvider";
+import { getGeminiApiKeyAsync } from "@/lib/settings";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-    const { messages } = await req.json();
+  const { messages } = await req.json();
 
-    const systemContext = `
+  const systemContext = `
 You are the 'Developer Assistant' for the Sihat TCM platform. You help developers debug, troubleshoot, and understand the codebase.
 
 Current System Context:
@@ -68,35 +68,35 @@ When providing code, use TypeScript for web and JavaScript for mobile.
 Format code blocks with proper syntax highlighting.
 `;
 
+  try {
+    let apiKey = "";
     try {
-        let apiKey = '';
-        try {
-            apiKey = await getGeminiApiKeyAsync();
-        } catch (e) {
-            console.error('Error fetching API key:', e);
-        }
-
-        if (!apiKey) {
-            apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
-        }
-
-        if (!apiKey) {
-            return new Response('Missing API Key', { status: 500 });
-        }
-
-        const google = getGoogleProvider(apiKey);
-        const result = streamText({
-            model: google('gemini-2.0-flash'),
-            system: systemContext,
-            messages: messages,
-        });
-
-        return result.toTextStreamResponse();
-    } catch (error) {
-        console.error('Developer AI Stream Error:', error);
-        return new Response(JSON.stringify({ error: 'Failed to generate response' }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-        });
+      apiKey = await getGeminiApiKeyAsync();
+    } catch (e) {
+      console.error("Error fetching API key:", e);
     }
+
+    if (!apiKey) {
+      apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
+    }
+
+    if (!apiKey) {
+      return new Response("Missing API Key", { status: 500 });
+    }
+
+    const google = getGoogleProvider(apiKey);
+    const result = streamText({
+      model: google("gemini-2.0-flash"),
+      system: systemContext,
+      messages: messages,
+    });
+
+    return result.toTextStreamResponse();
+  } catch (error) {
+    console.error("Developer AI Stream Error:", error);
+    return new Response(JSON.stringify({ error: "Failed to generate response" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }

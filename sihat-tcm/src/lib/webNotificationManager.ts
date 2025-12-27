@@ -4,51 +4,51 @@
  */
 
 interface NotificationPreferences {
-  enabled: boolean
-  healthReminders: boolean
-  medicationAlerts: boolean
-  appointmentReminders: boolean
-  exerciseReminders: boolean
-  sleepReminders: boolean
+  enabled: boolean;
+  healthReminders: boolean;
+  medicationAlerts: boolean;
+  appointmentReminders: boolean;
+  exerciseReminders: boolean;
+  sleepReminders: boolean;
   quietHours: {
-    enabled: boolean
-    start: string
-    end: string
-  }
+    enabled: boolean;
+    start: string;
+    end: string;
+  };
   frequency: {
-    daily: boolean
-    weekly: boolean
-    monthly: boolean
-  }
+    daily: boolean;
+    weekly: boolean;
+    monthly: boolean;
+  };
   categories: {
-    health: boolean
-    medication: boolean
-    exercise: boolean
-    diet: boolean
-    sleep: boolean
-    appointments: boolean
-  }
+    health: boolean;
+    medication: boolean;
+    exercise: boolean;
+    diet: boolean;
+    sleep: boolean;
+    appointments: boolean;
+  };
 }
 
 interface ScheduledNotification {
-  id: string
-  type: string
-  title: string
-  body: string
-  data: Record<string, any>
-  scheduledFor: Date
-  category: string
-  priority: 'low' | 'normal' | 'high' | 'urgent'
-  repeatPattern?: string
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  data: Record<string, any>;
+  scheduledFor: Date;
+  category: string;
+  priority: "low" | "normal" | "high" | "urgent";
+  repeatPattern?: string;
 }
 
 class WebNotificationManager {
-  private isInitialized = false
-  private permission: NotificationPermission = 'default'
-  private serviceWorkerRegistration: ServiceWorkerRegistration | null = null
-  private preferences: NotificationPreferences
-  private scheduledNotifications: Map<string, ScheduledNotification> = new Map()
-  private notificationHistory: any[] = []
+  private isInitialized = false;
+  private permission: NotificationPermission = "default";
+  private serviceWorkerRegistration: ServiceWorkerRegistration | null = null;
+  private preferences: NotificationPreferences;
+  private scheduledNotifications: Map<string, ScheduledNotification> = new Map();
+  private notificationHistory: any[] = [];
 
   constructor() {
     this.preferences = {
@@ -60,8 +60,8 @@ class WebNotificationManager {
       sleepReminders: true,
       quietHours: {
         enabled: true,
-        start: '22:00',
-        end: '07:00',
+        start: "22:00",
+        end: "07:00",
       },
       frequency: {
         daily: true,
@@ -76,7 +76,7 @@ class WebNotificationManager {
         sleep: true,
         appointments: true,
       },
-    }
+    };
   }
 
   /**
@@ -84,37 +84,37 @@ class WebNotificationManager {
    */
   async initialize(): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('[WebNotificationManager] Initializing...')
+      console.log("[WebNotificationManager] Initializing...");
 
       // Check browser support
-      if (!('Notification' in window)) {
-        console.warn('[WebNotificationManager] Browser does not support notifications')
-        return { success: false, error: 'Browser does not support notifications' }
+      if (!("Notification" in window)) {
+        console.warn("[WebNotificationManager] Browser does not support notifications");
+        return { success: false, error: "Browser does not support notifications" };
       }
 
       // Request permission
-      const permissionResult = await this.requestPermission()
+      const permissionResult = await this.requestPermission();
       if (!permissionResult.granted) {
-        console.warn('[WebNotificationManager] Notification permissions not granted')
-        return { success: false, error: 'Permissions not granted' }
+        console.warn("[WebNotificationManager] Notification permissions not granted");
+        return { success: false, error: "Permissions not granted" };
       }
 
       // Register service worker for background notifications
-      await this.registerServiceWorker()
+      await this.registerServiceWorker();
 
       // Load preferences
-      await this.loadPreferences()
+      await this.loadPreferences();
 
       // Setup notification listeners
-      this.setupNotificationListeners()
+      this.setupNotificationListeners();
 
-      this.isInitialized = true
-      console.log('[WebNotificationManager] Initialization complete')
+      this.isInitialized = true;
+      console.log("[WebNotificationManager] Initialization complete");
 
-      return { success: true }
+      return { success: true };
     } catch (error) {
-      console.error('[WebNotificationManager] Initialization failed:', error)
-      return { success: false, error: (error as Error).message }
+      console.error("[WebNotificationManager] Initialization failed:", error);
+      return { success: false, error: (error as Error).message };
     }
   }
 
@@ -123,20 +123,20 @@ class WebNotificationManager {
    */
   async requestPermission(): Promise<{ granted: boolean; permission: NotificationPermission }> {
     try {
-      if (this.permission === 'granted') {
-        return { granted: true, permission: this.permission }
+      if (this.permission === "granted") {
+        return { granted: true, permission: this.permission };
       }
 
-      const permission = await Notification.requestPermission()
-      this.permission = permission
+      const permission = await Notification.requestPermission();
+      this.permission = permission;
 
       return {
-        granted: permission === 'granted',
+        granted: permission === "granted",
         permission,
-      }
+      };
     } catch (error) {
-      console.error('[WebNotificationManager] Permission request failed:', error)
-      return { granted: false, permission: 'denied' }
+      console.error("[WebNotificationManager] Permission request failed:", error);
+      return { granted: false, permission: "denied" };
     }
   }
 
@@ -145,13 +145,13 @@ class WebNotificationManager {
    */
   async registerServiceWorker(): Promise<void> {
     try {
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.register('/sw.js')
-        this.serviceWorkerRegistration = registration
-        console.log('[WebNotificationManager] Service worker registered')
+      if ("serviceWorker" in navigator) {
+        const registration = await navigator.serviceWorker.register("/sw.js");
+        this.serviceWorkerRegistration = registration;
+        console.log("[WebNotificationManager] Service worker registered");
       }
     } catch (error) {
-      console.error('[WebNotificationManager] Service worker registration failed:', error)
+      console.error("[WebNotificationManager] Service worker registration failed:", error);
     }
   }
 
@@ -160,51 +160,51 @@ class WebNotificationManager {
    */
   setupNotificationListeners(): void {
     // Listen for notification clicks
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'NOTIFICATION_CLICK') {
-          this.handleNotificationClick(event.data.notification)
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", (event) => {
+        if (event.data && event.data.type === "NOTIFICATION_CLICK") {
+          this.handleNotificationClick(event.data.notification);
         }
-      })
+      });
     }
 
     // Listen for visibility changes to sync when app becomes active
-    document.addEventListener('visibilitychange', () => {
+    document.addEventListener("visibilitychange", () => {
       if (!document.hidden && this.isInitialized) {
-        this.syncWithServer()
+        this.syncWithServer();
       }
-    })
+    });
   }
 
   /**
    * Handle notification click
    */
   handleNotificationClick(notificationData: any): void {
-    console.log('[WebNotificationManager] Notification clicked:', notificationData)
+    console.log("[WebNotificationManager] Notification clicked:", notificationData);
 
     // Add to history
     this.notificationHistory.unshift({
       ...notificationData,
       clicked: true,
       clickedAt: Date.now(),
-    })
+    });
 
     // Handle different notification types
     switch (notificationData.type) {
-      case 'medication':
-        this.handleMedicationNotification(notificationData)
-        break
-      case 'appointment':
-        this.handleAppointmentNotification(notificationData)
-        break
-      case 'exercise':
-        this.handleExerciseNotification(notificationData)
-        break
-      case 'health_alert':
-        this.handleHealthAlertNotification(notificationData)
-        break
+      case "medication":
+        this.handleMedicationNotification(notificationData);
+        break;
+      case "appointment":
+        this.handleAppointmentNotification(notificationData);
+        break;
+      case "exercise":
+        this.handleExerciseNotification(notificationData);
+        break;
+      case "health_alert":
+        this.handleHealthAlertNotification(notificationData);
+        break;
       default:
-        console.log('[WebNotificationManager] Unknown notification type')
+        console.log("[WebNotificationManager] Unknown notification type");
     }
   }
 
@@ -212,34 +212,34 @@ class WebNotificationManager {
    * Show immediate notification
    */
   async showNotification(options: {
-    title: string
-    body: string
-    icon?: string
-    badge?: string
-    data?: Record<string, any>
-    tag?: string
-    requireInteraction?: boolean
+    title: string;
+    body: string;
+    icon?: string;
+    badge?: string;
+    data?: Record<string, any>;
+    tag?: string;
+    requireInteraction?: boolean;
   }): Promise<void> {
     try {
-      if (!this.preferences.enabled || this.permission !== 'granted') {
-        console.log('[WebNotificationManager] Notifications disabled or no permission')
-        return
+      if (!this.preferences.enabled || this.permission !== "granted") {
+        console.log("[WebNotificationManager] Notifications disabled or no permission");
+        return;
       }
 
       // Check quiet hours
       if (this.isInQuietHours()) {
-        console.log('[WebNotificationManager] In quiet hours, skipping notification')
-        return
+        console.log("[WebNotificationManager] In quiet hours, skipping notification");
+        return;
       }
 
       const notification = new Notification(options.title, {
         body: options.body,
-        icon: options.icon || '/logo.png',
-        badge: options.badge || '/logo.png',
+        icon: options.icon || "/logo.png",
+        badge: options.badge || "/logo.png",
         data: options.data || {},
         tag: options.tag,
         requireInteraction: options.requireInteraction || false,
-      })
+      });
 
       // Add to history
       this.notificationHistory.unshift({
@@ -248,18 +248,18 @@ class WebNotificationManager {
         data: options.data,
         sentAt: Date.now(),
         clicked: false,
-      })
+      });
 
       // Auto-close after 5 seconds unless requireInteraction is true
       if (!options.requireInteraction) {
         setTimeout(() => {
-          notification.close()
-        }, 5000)
+          notification.close();
+        }, 5000);
       }
 
-      console.log('[WebNotificationManager] Notification shown:', options.title)
+      console.log("[WebNotificationManager] Notification shown:", options.title);
     } catch (error) {
-      console.error('[WebNotificationManager] Failed to show notification:', error)
+      console.error("[WebNotificationManager] Failed to show notification:", error);
     }
   }
 
@@ -267,17 +267,17 @@ class WebNotificationManager {
    * Schedule notification
    */
   async scheduleNotification(options: {
-    id?: string
-    title: string
-    body: string
-    scheduledFor: Date
-    category: string
-    priority?: 'low' | 'normal' | 'high' | 'urgent'
-    repeatPattern?: string
-    data?: Record<string, any>
+    id?: string;
+    title: string;
+    body: string;
+    scheduledFor: Date;
+    category: string;
+    priority?: "low" | "normal" | "high" | "urgent";
+    repeatPattern?: string;
+    data?: Record<string, any>;
   }): Promise<string | null> {
     try {
-      const id = options.id || this.generateNotificationId()
+      const id = options.id || this.generateNotificationId();
       const scheduledNotification: ScheduledNotification = {
         id,
         type: options.category,
@@ -286,11 +286,11 @@ class WebNotificationManager {
         data: options.data || {},
         scheduledFor: options.scheduledFor,
         category: options.category,
-        priority: options.priority || 'normal',
+        priority: options.priority || "normal",
         repeatPattern: options.repeatPattern,
-      }
+      };
 
-      this.scheduledNotifications.set(id, scheduledNotification)
+      this.scheduledNotifications.set(id, scheduledNotification);
 
       // Schedule with browser API or service worker
       if (this.serviceWorkerRegistration) {
@@ -298,10 +298,10 @@ class WebNotificationManager {
           body: options.body,
           data: { ...options.data, scheduledId: id },
           tag: id,
-        })
+        });
       } else {
         // Fallback to setTimeout for immediate scheduling
-        const delay = options.scheduledFor.getTime() - Date.now()
+        const delay = options.scheduledFor.getTime() - Date.now();
         if (delay > 0) {
           setTimeout(() => {
             this.showNotification({
@@ -309,19 +309,19 @@ class WebNotificationManager {
               body: options.body,
               data: { ...options.data, scheduledId: id },
               tag: id,
-            })
-          }, delay)
+            });
+          }, delay);
         }
       }
 
       // Sync with server
-      await this.syncScheduledNotificationWithServer(scheduledNotification)
+      await this.syncScheduledNotificationWithServer(scheduledNotification);
 
-      console.log('[WebNotificationManager] Notification scheduled:', id)
-      return id
+      console.log("[WebNotificationManager] Notification scheduled:", id);
+      return id;
     } catch (error) {
-      console.error('[WebNotificationManager] Failed to schedule notification:', error)
-      return null
+      console.error("[WebNotificationManager] Failed to schedule notification:", error);
+      return null;
     }
   }
 
@@ -330,24 +330,24 @@ class WebNotificationManager {
    */
   async cancelNotification(notificationId: string): Promise<boolean> {
     try {
-      this.scheduledNotifications.delete(notificationId)
+      this.scheduledNotifications.delete(notificationId);
 
       // Cancel with service worker
       if (this.serviceWorkerRegistration) {
         const notifications = await this.serviceWorkerRegistration.getNotifications({
           tag: notificationId,
-        })
-        notifications.forEach((notification) => notification.close())
+        });
+        notifications.forEach((notification) => notification.close());
       }
 
       // Cancel on server
-      await this.cancelServerNotification(notificationId)
+      await this.cancelServerNotification(notificationId);
 
-      console.log('[WebNotificationManager] Notification cancelled:', notificationId)
-      return true
+      console.log("[WebNotificationManager] Notification cancelled:", notificationId);
+      return true;
     } catch (error) {
-      console.error('[WebNotificationManager] Failed to cancel notification:', error)
-      return false
+      console.error("[WebNotificationManager] Failed to cancel notification:", error);
+      return false;
     }
   }
 
@@ -359,19 +359,19 @@ class WebNotificationManager {
       this.preferences = {
         ...this.preferences,
         ...newPreferences,
-      }
+      };
 
       // Save to localStorage
-      localStorage.setItem('webNotificationPreferences', JSON.stringify(this.preferences))
+      localStorage.setItem("webNotificationPreferences", JSON.stringify(this.preferences));
 
       // Sync with server
-      await this.syncPreferencesWithServer()
+      await this.syncPreferencesWithServer();
 
-      console.log('[WebNotificationManager] Preferences updated')
-      return true
+      console.log("[WebNotificationManager] Preferences updated");
+      return true;
     } catch (error) {
-      console.error('[WebNotificationManager] Failed to update preferences:', error)
-      return false
+      console.error("[WebNotificationManager] Failed to update preferences:", error);
+      return false;
     }
   }
 
@@ -380,18 +380,18 @@ class WebNotificationManager {
    */
   async loadPreferences(): Promise<void> {
     try {
-      const stored = localStorage.getItem('webNotificationPreferences')
+      const stored = localStorage.getItem("webNotificationPreferences");
       if (stored) {
         this.preferences = {
           ...this.preferences,
           ...JSON.parse(stored),
-        }
+        };
       }
 
       // Also load from server
-      await this.loadPreferencesFromServer()
+      await this.loadPreferencesFromServer();
     } catch (error) {
-      console.error('[WebNotificationManager] Failed to load preferences:', error)
+      console.error("[WebNotificationManager] Failed to load preferences:", error);
     }
   }
 
@@ -400,29 +400,29 @@ class WebNotificationManager {
    */
   async syncWithServer(): Promise<{ success: boolean; error?: string }> {
     try {
-      const response = await fetch('/api/notifications/sync', {
-        method: 'GET',
+      const response = await fetch("/api/notifications/sync", {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`Sync failed: ${response.status}`)
+        throw new Error(`Sync failed: ${response.status}`);
       }
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (result.success && result.syncData) {
-        await this.applySyncData(result.syncData)
-        console.log('[WebNotificationManager] Sync completed successfully')
-        return { success: true }
+        await this.applySyncData(result.syncData);
+        console.log("[WebNotificationManager] Sync completed successfully");
+        return { success: true };
       } else {
-        throw new Error('Invalid sync response')
+        throw new Error("Invalid sync response");
       }
     } catch (error) {
-      console.error('[WebNotificationManager] Sync failed:', error)
-      return { success: false, error: (error as Error).message }
+      console.error("[WebNotificationManager] Sync failed:", error);
+      return { success: false, error: (error as Error).message };
     }
   }
 
@@ -433,9 +433,9 @@ class WebNotificationManager {
     try {
       // Update preferences
       if (syncData.preferences) {
-        const serverPrefs = this.convertServerPreferences(syncData.preferences)
-        this.preferences = serverPrefs
-        localStorage.setItem('webNotificationPreferences', JSON.stringify(this.preferences))
+        const serverPrefs = this.convertServerPreferences(syncData.preferences);
+        this.preferences = serverPrefs;
+        localStorage.setItem("webNotificationPreferences", JSON.stringify(this.preferences));
       }
 
       // Process pending notifications
@@ -449,14 +449,14 @@ class WebNotificationManager {
               serverId: notification.id,
               type: notification.notification_type,
             },
-          })
+          });
         }
       }
 
       // Sync scheduled notifications
       if (syncData.scheduledNotifications && Array.isArray(syncData.scheduledNotifications)) {
         for (const serverNotification of syncData.scheduledNotifications) {
-          const scheduledFor = new Date(serverNotification.scheduled_for)
+          const scheduledFor = new Date(serverNotification.scheduled_for);
           if (scheduledFor > new Date()) {
             await this.scheduleNotification({
               id: serverNotification.id,
@@ -467,12 +467,12 @@ class WebNotificationManager {
               priority: serverNotification.priority,
               repeatPattern: serverNotification.repeat_pattern,
               data: serverNotification.data,
-            })
+            });
           }
         }
       }
     } catch (error) {
-      console.error('[WebNotificationManager] Failed to apply sync data:', error)
+      console.error("[WebNotificationManager] Failed to apply sync data:", error);
     }
   }
 
@@ -480,28 +480,28 @@ class WebNotificationManager {
    * Helper methods
    */
   private generateNotificationId(): string {
-    return `web_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return `web_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   private isInQuietHours(): boolean {
-    if (!this.preferences.quietHours.enabled) return false
+    if (!this.preferences.quietHours.enabled) return false;
 
-    const now = new Date()
-    const currentTime = now.getHours() * 60 + now.getMinutes()
-    const startTime = this.parseTime(this.preferences.quietHours.start)
-    const endTime = this.parseTime(this.preferences.quietHours.end)
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    const startTime = this.parseTime(this.preferences.quietHours.start);
+    const endTime = this.parseTime(this.preferences.quietHours.end);
 
     if (startTime > endTime) {
       // Quiet hours span midnight
-      return currentTime >= startTime || currentTime < endTime
+      return currentTime >= startTime || currentTime < endTime;
     } else {
-      return currentTime >= startTime && currentTime < endTime
+      return currentTime >= startTime && currentTime < endTime;
     }
   }
 
   private parseTime(timeString: string): number {
-    const [hours, minutes] = timeString.split(':').map(Number)
-    return hours * 60 + minutes
+    const [hours, minutes] = timeString.split(":").map(Number);
+    return hours * 60 + minutes;
   }
 
   private convertServerPreferences(serverPrefs: any): NotificationPreferences {
@@ -514,8 +514,8 @@ class WebNotificationManager {
       sleepReminders: serverPrefs.sleep_reminders,
       quietHours: {
         enabled: serverPrefs.quiet_hours_enabled,
-        start: serverPrefs.quiet_hours_start?.substring(0, 5) || '22:00',
-        end: serverPrefs.quiet_hours_end?.substring(0, 5) || '07:00',
+        start: serverPrefs.quiet_hours_start?.substring(0, 5) || "22:00",
+        end: serverPrefs.quiet_hours_end?.substring(0, 5) || "07:00",
       },
       frequency: {
         daily: serverPrefs.frequency_daily,
@@ -530,7 +530,7 @@ class WebNotificationManager {
         sleep: true,
         appointments: true,
       },
-    }
+    };
   }
 
   private async syncPreferencesWithServer(): Promise<void> {
@@ -543,48 +543,50 @@ class WebNotificationManager {
         exercise_reminders: this.preferences.exerciseReminders,
         sleep_reminders: this.preferences.sleepReminders,
         quiet_hours_enabled: this.preferences.quietHours.enabled,
-        quiet_hours_start: this.preferences.quietHours.start + ':00',
-        quiet_hours_end: this.preferences.quietHours.end + ':00',
+        quiet_hours_start: this.preferences.quietHours.start + ":00",
+        quiet_hours_end: this.preferences.quietHours.end + ":00",
         frequency_daily: this.preferences.frequency.daily,
         frequency_weekly: this.preferences.frequency.weekly,
         frequency_monthly: this.preferences.frequency.monthly,
         categories: this.preferences.categories,
-      }
+      };
 
-      await fetch('/api/notifications/preferences', {
-        method: 'POST',
+      await fetch("/api/notifications/preferences", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(serverPrefs),
-      })
+      });
     } catch (error) {
-      console.error('[WebNotificationManager] Failed to sync preferences with server:', error)
+      console.error("[WebNotificationManager] Failed to sync preferences with server:", error);
     }
   }
 
   private async loadPreferencesFromServer(): Promise<void> {
     try {
-      const response = await fetch('/api/notifications/preferences')
+      const response = await fetch("/api/notifications/preferences");
       if (response.ok) {
-        const result = await response.json()
+        const result = await response.json();
         if (result.success && result.preferences) {
-          const serverPrefs = this.convertServerPreferences(result.preferences)
-          this.preferences = serverPrefs
-          localStorage.setItem('webNotificationPreferences', JSON.stringify(this.preferences))
+          const serverPrefs = this.convertServerPreferences(result.preferences);
+          this.preferences = serverPrefs;
+          localStorage.setItem("webNotificationPreferences", JSON.stringify(this.preferences));
         }
       }
     } catch (error) {
-      console.error('[WebNotificationManager] Failed to load preferences from server:', error)
+      console.error("[WebNotificationManager] Failed to load preferences from server:", error);
     }
   }
 
-  private async syncScheduledNotificationWithServer(notification: ScheduledNotification): Promise<void> {
+  private async syncScheduledNotificationWithServer(
+    notification: ScheduledNotification
+  ): Promise<void> {
     try {
-      await fetch('/api/notifications/schedule', {
-        method: 'POST',
+      await fetch("/api/notifications/schedule", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           notification_type: notification.type,
@@ -596,40 +598,43 @@ class WebNotificationManager {
           category: notification.category,
           priority: notification.priority,
         }),
-      })
+      });
     } catch (error) {
-      console.error('[WebNotificationManager] Failed to sync scheduled notification with server:', error)
+      console.error(
+        "[WebNotificationManager] Failed to sync scheduled notification with server:",
+        error
+      );
     }
   }
 
   private async cancelServerNotification(notificationId: string): Promise<void> {
     try {
       await fetch(`/api/notifications/schedule?id=${notificationId}`, {
-        method: 'DELETE',
-      })
+        method: "DELETE",
+      });
     } catch (error) {
-      console.error('[WebNotificationManager] Failed to cancel server notification:', error)
+      console.error("[WebNotificationManager] Failed to cancel server notification:", error);
     }
   }
 
   private handleMedicationNotification(data: any): void {
     // Navigate to medication tracking
-    console.log('[WebNotificationManager] Handling medication notification:', data)
+    console.log("[WebNotificationManager] Handling medication notification:", data);
   }
 
   private handleAppointmentNotification(data: any): void {
     // Navigate to appointment details
-    console.log('[WebNotificationManager] Handling appointment notification:', data)
+    console.log("[WebNotificationManager] Handling appointment notification:", data);
   }
 
   private handleExerciseNotification(data: any): void {
     // Navigate to exercise screen
-    console.log('[WebNotificationManager] Handling exercise notification:', data)
+    console.log("[WebNotificationManager] Handling exercise notification:", data);
   }
 
   private handleHealthAlertNotification(data: any): void {
     // Navigate to health alerts
-    console.log('[WebNotificationManager] Handling health alert notification:', data)
+    console.log("[WebNotificationManager] Handling health alert notification:", data);
   }
 
   /**
@@ -642,21 +647,21 @@ class WebNotificationManager {
       preferences: this.preferences,
       permission: this.permission,
       isInitialized: this.isInitialized,
-    }
+    };
   }
 
   /**
    * Cleanup
    */
   cleanup(): void {
-    this.scheduledNotifications.clear()
-    this.isInitialized = false
-    console.log('[WebNotificationManager] Cleanup complete')
+    this.scheduledNotifications.clear();
+    this.isInitialized = false;
+    console.log("[WebNotificationManager] Cleanup complete");
   }
 }
 
 // Export singleton instance
-export default new WebNotificationManager()
+export default new WebNotificationManager();
 
 // Also export the class for testing
-export { WebNotificationManager }
+export { WebNotificationManager };

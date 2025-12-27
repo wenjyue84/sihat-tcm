@@ -1,7 +1,9 @@
 # My Health Passport - Implementation Summary
 
 ## Overview
+
 "My Health Passport" is a premium dashboard feature that allows logged-in patients to:
+
 - **Auto-save** every diagnosis session
 - **View** their complete TCM medical history
 - **Track** health trends over time (vitality scores, diagnosis patterns)
@@ -13,9 +15,11 @@
 ### 1. Database Layer
 
 #### New Table: `diagnosis_sessions`
+
 Located: `supabase/migrations/20251224_diagnosis_sessions.sql`
 
 **Schema:**
+
 ```sql
 - id (uuid, PK)
 - user_id (uuid, FK to auth.users)
@@ -28,6 +32,7 @@ Located: `supabase/migrations/20251224_diagnosis_sessions.sql`
 ```
 
 **Security:**
+
 - RLS enabled
 - Users can only view/modify their own sessions
 - Doctors can view all sessions (for clinical oversight)
@@ -38,6 +43,7 @@ Located: `supabase/migrations/20251224_diagnosis_sessions.sql`
 Located: `src/lib/actions.ts`
 
 **Functions:**
+
 - `saveDiagnosis(reportData)` - Save new session
 - `getPatientHistory(limit?, offset?)` - Fetch paginated history
 - `getSessionById(sessionId)` - Get single session
@@ -46,6 +52,7 @@ Located: `src/lib/actions.ts`
 - `getHealthTrends(days?)` - Calculate trend statistics
 
 All actions:
+
 - ✅ Authenticate user via Supabase auth
 - ✅ Return success/error objects
 - ✅ Respect RLS policies
@@ -54,9 +61,11 @@ All actions:
 ### 3. Frontend Components
 
 #### Dashboard (`/patient/dashboard`)
+
 **Location:** `src/app/patient/dashboard/page.tsx`
 
 **Features:**
+
 - Trend widget showing vitality stats
 - Grid of history cards (with glassmorphism)
 - Empty state for new users
@@ -64,13 +73,16 @@ All actions:
 - Redirect to login if not authenticated
 
 **Components Used:**
+
 - `TrendWidget` - Health statistics visualization
 - `HistoryCard` - Individual session card
 
 #### History Viewer (`/patient/history/[id]`)
+
 **Location:** `src/app/patient/history/[id]/page.tsx`
 
 **Features:**
+
 - Full read-only diagnosis report
 - Editable personal notes section
 - Delete session with confirmation modal
@@ -80,6 +92,7 @@ All actions:
 #### UI Components
 
 **`HistoryCard`** (`src/components/patient/HistoryCard.tsx`)
+
 - Displays diagnosis summary
 - Shows vitality score with color coding
 - Emoji icons for diagnosis types
@@ -87,6 +100,7 @@ All actions:
 - Preview of user notes
 
 **`TrendWidget`** (`src/components/patient/TrendWidget.tsx`)
+
 - Total sessions count
 - Average vitality score
 - Progress indicator (improvement over time)
@@ -94,6 +108,7 @@ All actions:
 - Glassmorphism design
 
 **`SaveToDashboardBanner`** (`src/components/patient/SaveToDashboardBanner.tsx`)
+
 - Guest users: CTA to sign in and save
 - Logged-in users: Success message + dashboard link
 - Dismissible
@@ -102,9 +117,11 @@ All actions:
 ### 4. Integration Points
 
 #### Automatic Saving
+
 **Location:** `src/hooks/useDiagnosisWizard.ts` (lines 266-310)
 
 When a diagnosis completes:
+
 1. Save to legacy `inquiries` table (backward compatibility)
 2. Save to new `diagnosis_sessions` table via `saveDiagnosis()` action
 3. Calculate `overall_score` using heuristic algorithm
@@ -112,6 +129,7 @@ When a diagnosis completes:
 5. Store complete report as `full_report` JSONB
 
 **Score Calculation:**
+
 - Base score: 70
 - Adjusted by severity keywords
 - Reduced by number of affected organs
@@ -119,9 +137,11 @@ When a diagnosis completes:
 - Clamped to 0-100 range
 
 #### Report Display
+
 **Location:** `src/components/diagnosis/DiagnosisReport.tsx`
 
 Added `SaveToDashboardBanner` component that:
+
 - Shows sign-in CTA for guests (with blurred trend preview concept)
 - Shows "Saved!" confirmation for logged-in users
 - Provides direct link to dashboard
@@ -129,6 +149,7 @@ Added `SaveToDashboardBanner` component that:
 ## User Flow
 
 ### Guest User Flow
+
 1. Complete diagnosis wizard
 2. See blurred "Health Trend" preview banner
 3. Click "Sign In to Save This Report"
@@ -136,6 +157,7 @@ Added `SaveToDashboardBanner` component that:
 5. Report appears in history
 
 ### Logged-In User Flow
+
 1. Complete diagnosis wizard
 2. Report auto-saves in background
 3. See "Report Saved!" banner with dashboard link
@@ -146,18 +168,21 @@ Added `SaveToDashboardBanner` component that:
 ## Design Patterns
 
 ### Glassmorphism Theme
+
 - Semi-transparent cards with backdrop blur
 - Gradient overlays (emerald → teal → cyan)
 - Subtle shadows and borders
 - Smooth hover transitions
 
 ### Animations
+
 - Framer Motion for entrance/exit
-- Staggered card animations (index * 0.05 delay)
+- Staggered card animations (index \* 0.05 delay)
 - Smooth page transitions
 - Loading spinners with backdrop blur
 
 ### Accessibility
+
 - Semantic HTML
 - Color-coded scores with text labels
 - Keyboard navigation support
@@ -166,18 +191,21 @@ Added `SaveToDashboardBanner` component that:
 ## Testing Checklist
 
 ### Database
+
 - ✅ RLS policies prevent cross-user access
 - ✅ Doctors can view all sessions
 - ✅ Cascade delete when user deleted
 - ✅ Timestamps auto-update
 
 ### API Actions
+
 - ✅ Authenticated user required
 - ✅ Error handling for missing sessions
 - ✅ Pagination works correctly
 - ✅ Notes update persists
 
 ### Frontend
+
 - ✅ Redirect to login if not authenticated
 - ✅ Loading states display correctly
 - ✅ Empty state shows for new users
@@ -186,6 +214,7 @@ Added `SaveToDashboardBanner` component that:
 - ✅ Banner dismissible and doesn't re-appear
 
 ### Auto-Save
+
 - ✅ Saves on diagnosis completion
 - ✅ Works for all doctor tiers
 - ✅ Score calculation reasonable
@@ -195,6 +224,7 @@ Added `SaveToDashboardBanner` component that:
 ## Future Enhancements
 
 ### Phase 2 Ideas
+
 1. **Advanced Visualizations:**
    - Line chart of vitality scores over time
    - Diagnosis pattern distribution pie chart
@@ -223,12 +253,15 @@ Added `SaveToDashboardBanner` component that:
 ## Migration Guide
 
 ### For Existing Users
+
 The system maintains backward compatibility:
+
 - Old `inquiries` table still saves data
 - New users automatically use both tables
 - Gradual migration can be scripted later
 
 ### Running the Migration
+
 ```bash
 # Apply the migration
 psql $DATABASE_URL < supabase/migrations/20251224_diagnosis_sessions.sql
@@ -263,16 +296,19 @@ supabase db push
 ## Troubleshooting
 
 ### "Session not found" error
+
 - Check RLS policies applied correctly
 - Verify user is authenticated
 - Ensure session ID is valid UUID
 
 ### Auto-save not working
+
 - Check console for errors in `useDiagnosisWizard.ts`
 - Verify `saveDiagnosis` import successful
 - Check user is logged in during diagnosis
 
 ### Trend widget shows no data
+
 - Ensure at least 1 session exists
 - Check `overall_score` is not null
 - Verify date range includes sessions
@@ -280,28 +316,33 @@ supabase db push
 ## Related Files
 
 **Database:**
+
 - `supabase/migrations/20251224_diagnosis_sessions.sql`
 
 **Backend:**
+
 - `src/lib/actions.ts`
 
 **Frontend Pages:**
+
 - `src/app/patient/dashboard/page.tsx`
 - `src/app/patient/history/[id]/page.tsx`
 
 **Components:**
+
 - `src/components/patient/HistoryCard.tsx`
 - `src/components/patient/TrendWidget.tsx`
 - `src/components/patient/SaveToDashboardBanner.tsx`
 
 **Integration:**
+
 - `src/hooks/useDiagnosisWizard.ts` (auto-save logic)
 - `src/components/diagnosis/DiagnosisReport.tsx` (banner)
 
 ## Credits
+
 Implemented following the project spec: "My Health Passport (Patient History)"
+
 - Claude 3.5 Sonnet (AI Assistant)
 - Sihat TCM Development Team
 - Date: December 24, 2024
-
-

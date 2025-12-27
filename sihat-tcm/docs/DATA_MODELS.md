@@ -17,11 +17,12 @@
 ## Core Entities
 
 ### User Profile
+
 ```typescript
 interface User {
   id: string; // UUID
   email: string;
-  role: 'patient' | 'doctor' | 'admin';
+  role: "patient" | "doctor" | "admin";
   createdAt: string; // ISO timestamp
   updatedAt: string; // ISO timestamp
   lastLoginAt?: string;
@@ -30,20 +31,21 @@ interface User {
 }
 
 interface UserPreferences {
-  language: 'en' | 'zh' | 'ms';
-  theme: 'light' | 'dark' | 'auto';
+  language: "en" | "zh" | "ms";
+  theme: "light" | "dark" | "auto";
   notifications: NotificationPreferences;
   accessibility: AccessibilitySettings;
 }
 ```
 
 ### Patient Profile
+
 ```typescript
 interface Patient {
   id: string; // References User.id
   name: string;
   dateOfBirth: string; // ISO date
-  gender: 'male' | 'female' | 'other';
+  gender: "male" | "female" | "other";
   height: number; // cm
   weight: number; // kg
   medicalHistory?: string;
@@ -64,13 +66,14 @@ interface EmergencyContact {
 ```
 
 ### Practitioner Profile
+
 ```typescript
 interface Practitioner {
   id: string; // References User.id
   name: string;
   licenseNumber: string;
   specialization: string[];
-  level: 'physician' | 'expert' | 'master';
+  level: "physician" | "expert" | "master";
   yearsOfExperience: number;
   qualifications: string[];
   languages: string[];
@@ -83,6 +86,7 @@ interface Practitioner {
 ## User Management
 
 ### Authentication
+
 ```typescript
 interface AuthSession {
   userId: string;
@@ -93,7 +97,7 @@ interface AuthSession {
 }
 
 interface DeviceInfo {
-  platform: 'web' | 'ios' | 'android';
+  platform: "web" | "ios" | "android";
   deviceId: string;
   userAgent?: string;
   ipAddress: string;
@@ -101,14 +105,15 @@ interface DeviceInfo {
 ```
 
 ### Family Management
+
 ```typescript
 interface FamilyMember {
   id: string;
   primaryUserId: string; // The account holder
   name: string;
   age: number;
-  gender: 'male' | 'female' | 'other';
-  relationship: 'spouse' | 'child' | 'parent' | 'sibling' | 'other';
+  gender: "male" | "female" | "other";
+  relationship: "spouse" | "child" | "parent" | "sibling" | "other";
   medicalHistory?: string;
   isActive: boolean;
   createdAt: string;
@@ -119,13 +124,14 @@ interface FamilyMember {
 ## Diagnosis Models
 
 ### Diagnosis Session
+
 ```typescript
 interface DiagnosisSession {
   id: string;
   patientId: string;
   practitionerId?: string;
   familyMemberId?: string; // If diagnosis is for family member
-  status: 'in_progress' | 'completed' | 'cancelled' | 'expired';
+  status: "in_progress" | "completed" | "cancelled" | "expired";
   data: DiagnosisData;
   overallScore?: number; // 0-100
   confidence?: number; // 0-1
@@ -149,11 +155,12 @@ interface DiagnosisData {
 ```
 
 ### Patient Basic Info
+
 ```typescript
 interface PatientBasicInfo {
   name: string;
   age: number;
-  gender: 'male' | 'female' | 'other';
+  gender: "male" | "female" | "other";
   height: number; // cm
   weight: number; // kg
   bmi?: number; // Calculated
@@ -167,18 +174,19 @@ interface PatientBasicInfo {
 ```
 
 ### Inquiry Data
+
 ```typescript
 interface InquiryData {
   chatHistory: ChatMessage[];
   summary: string;
   keyFindings: string[];
-  completionStatus: 'incomplete' | 'complete';
+  completionStatus: "incomplete" | "complete";
   duration: number; // seconds
 }
 
 interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: string;
   metadata?: {
@@ -190,6 +198,7 @@ interface ChatMessage {
 ```
 
 ### Image Analysis
+
 ```typescript
 interface ImageAnalysisResult {
   imageUrl: string;
@@ -207,65 +216,67 @@ interface ImageMetadata {
   height: number;
   fileSize: number;
   format: string;
-  quality: 'poor' | 'fair' | 'good' | 'excellent';
-  lighting: 'poor' | 'fair' | 'good' | 'excellent';
+  quality: "poor" | "fair" | "good" | "excellent";
+  lighting: "poor" | "fair" | "good" | "excellent";
 }
 
 interface TongueAnalysis {
   tongueBody: {
-    color: 'pale' | 'red' | 'dark_red' | 'purple' | 'blue';
-    shape: 'thin' | 'normal' | 'swollen' | 'stiff';
-    size: 'small' | 'normal' | 'enlarged';
-    moisture: 'dry' | 'normal' | 'wet';
+    color: "pale" | "red" | "dark_red" | "purple" | "blue";
+    shape: "thin" | "normal" | "swollen" | "stiff";
+    size: "small" | "normal" | "enlarged";
+    moisture: "dry" | "normal" | "wet";
     cracks: boolean;
     teethMarks: boolean;
   };
   tongueCoating: {
-    color: 'white' | 'yellow' | 'gray' | 'black' | 'none';
-    thickness: 'none' | 'thin' | 'thick';
-    distribution: 'even' | 'uneven' | 'patchy' | 'peeled';
-    texture: 'smooth' | 'rough' | 'greasy' | 'dry';
+    color: "white" | "yellow" | "gray" | "black" | "none";
+    thickness: "none" | "thin" | "thick";
+    distribution: "even" | "uneven" | "patchy" | "peeled";
+    texture: "smooth" | "rough" | "greasy" | "dry";
   };
 }
 ```
+
 interface FaceAnalysis {
-  complexion: {
-    color: 'pale' | 'red' | 'yellow' | 'dark' | 'normal';
-    luster: 'dull' | 'normal' | 'bright';
-    texture: 'rough' | 'smooth' | 'oily' | 'dry';
-  };
-  facialZones: {
-    forehead: ZoneAnalysis; // Heart
-    leftCheek: ZoneAnalysis; // Liver
-    rightCheek: ZoneAnalysis; // Lung
-    nose: ZoneAnalysis; // Spleen
-    chin: ZoneAnalysis; // Kidney
-  };
-  eyes: {
-    color: string;
-    brightness: 'dull' | 'normal' | 'bright';
-    puffiness: boolean;
-    darkCircles: boolean;
-  };
-  lips: {
-    color: 'pale' | 'red' | 'dark' | 'purple';
-    moisture: 'dry' | 'normal' | 'moist';
-  };
+complexion: {
+color: 'pale' | 'red' | 'yellow' | 'dark' | 'normal';
+luster: 'dull' | 'normal' | 'bright';
+texture: 'rough' | 'smooth' | 'oily' | 'dry';
+};
+facialZones: {
+forehead: ZoneAnalysis; // Heart
+leftCheek: ZoneAnalysis; // Liver
+rightCheek: ZoneAnalysis; // Lung
+nose: ZoneAnalysis; // Spleen
+chin: ZoneAnalysis; // Kidney
+};
+eyes: {
+color: string;
+brightness: 'dull' | 'normal' | 'bright';
+puffiness: boolean;
+darkCircles: boolean;
+};
+lips: {
+color: 'pale' | 'red' | 'dark' | 'purple';
+moisture: 'dry' | 'normal' | 'moist';
+};
 }
 
 interface ZoneAnalysis {
-  color: string;
-  condition: 'poor' | 'fair' | 'good';
-  issues: string[];
+color: string;
+condition: 'poor' | 'fair' | 'good';
+issues: string[];
 }
 
 interface BodyAnalysis {
-  bodyPart: string;
-  condition: string;
-  abnormalities: string[];
-  tcmCorrelation: string;
+bodyPart: string;
+condition: string;
+abnormalities: string[];
+tcmCorrelation: string;
 }
-```
+
+````
 
 ### Audio Analysis
 ```typescript
@@ -296,36 +307,38 @@ interface VoiceAnalysis {
   clarity: 'unclear' | 'fair' | 'clear';
   emotionalTone: 'sad' | 'neutral' | 'happy' | 'anxious';
 }
-```
+````
 
 ### Pulse Data
+
 ```typescript
 interface PulseData {
   bpm: number;
-  method: 'tap' | 'manual' | 'camera' | 'device';
+  method: "tap" | "manual" | "camera" | "device";
   quality?: PulseQuality;
-  rhythm: 'regular' | 'irregular';
-  strength: 'weak' | 'normal' | 'strong';
+  rhythm: "regular" | "irregular";
+  strength: "weak" | "normal" | "strong";
   measurementDuration: number; // seconds
   confidence: number;
   timestamp: string;
 }
 
-type PulseQuality = 
-  | 'floating' // 浮
-  | 'deep' // 沉
-  | 'slow' // 迟
-  | 'rapid' // 数
-  | 'slippery' // 滑
-  | 'rough' // 涩
-  | 'wiry' // 弦
-  | 'tight' // 紧
-  | 'thready' // 细
-  | 'weak' // 弱
-  | 'normal'; // 平
+type PulseQuality =
+  | "floating" // 浮
+  | "deep" // 沉
+  | "slow" // 迟
+  | "rapid" // 数
+  | "slippery" // 滑
+  | "rough" // 涩
+  | "wiry" // 弦
+  | "tight" // 紧
+  | "thready" // 细
+  | "weak" // 弱
+  | "normal"; // 平
 ```
 
 ### Health Metrics (Smart Connect)
+
 ```typescript
 interface HealthMetrics {
   steps?: number;
@@ -336,7 +349,7 @@ interface HealthMetrics {
   };
   sleepData?: {
     duration: number; // hours
-    quality: 'poor' | 'fair' | 'good' | 'excellent';
+    quality: "poor" | "fair" | "good" | "excellent";
     deepSleep: number; // hours
     remSleep: number; // hours
   };
@@ -356,6 +369,7 @@ interface HealthMetrics {
 ## Medical Records
 
 ### Medical Report
+
 ```typescript
 interface MedicalReport {
   id: string;
@@ -365,7 +379,7 @@ interface MedicalReport {
   content: ReportContent;
   pdfUrl?: string;
   infographicUrl?: string;
-  status: 'draft' | 'final' | 'reviewed';
+  status: "draft" | "final" | "reviewed";
   version: number;
   createdAt: string;
   updatedAt: string;
@@ -402,45 +416,47 @@ interface VitalSigns {
 ```
 
 ### TCM Diagnosis
+
 ```typescript
 interface TCMDiagnosis {
   primaryPattern: string;
   constitutionType: ConstitutionType;
   secondaryPatterns: string[];
   affectedOrgans: OrganSystem[];
-  severity: 'mild' | 'moderate' | 'severe';
-  prognosis: 'excellent' | 'good' | 'fair' | 'guarded';
+  severity: "mild" | "moderate" | "severe";
+  prognosis: "excellent" | "good" | "fair" | "guarded";
   confidence: number; // 0-1
   differentialDiagnosis?: string[];
 }
 
-type ConstitutionType = 
-  | 'balanced' // 平和质
-  | 'qi_deficiency' // 气虚质
-  | 'yang_deficiency' // 阳虚质
-  | 'yin_deficiency' // 阴虚质
-  | 'phlegm_dampness' // 痰湿质
-  | 'damp_heat' // 湿热质
-  | 'blood_stasis' // 血瘀质
-  | 'qi_stagnation' // 气郁质
-  | 'special_diathesis'; // 特禀质
+type ConstitutionType =
+  | "balanced" // 平和质
+  | "qi_deficiency" // 气虚质
+  | "yang_deficiency" // 阳虚质
+  | "yin_deficiency" // 阴虚质
+  | "phlegm_dampness" // 痰湿质
+  | "damp_heat" // 湿热质
+  | "blood_stasis" // 血瘀质
+  | "qi_stagnation" // 气郁质
+  | "special_diathesis"; // 特禀质
 
-type OrganSystem = 
-  | 'heart' // 心
-  | 'liver' // 肝
-  | 'spleen' // 脾
-  | 'lung' // 肺
-  | 'kidney' // 肾
-  | 'gallbladder' // 胆
-  | 'stomach' // 胃
-  | 'small_intestine' // 小肠
-  | 'large_intestine' // 大肠
-  | 'bladder' // 膀胱
-  | 'triple_burner' // 三焦
-  | 'pericardium'; // 心包
+type OrganSystem =
+  | "heart" // 心
+  | "liver" // 肝
+  | "spleen" // 脾
+  | "lung" // 肺
+  | "kidney" // 肾
+  | "gallbladder" // 胆
+  | "stomach" // 胃
+  | "small_intestine" // 小肠
+  | "large_intestine" // 大肠
+  | "bladder" // 膀胱
+  | "triple_burner" // 三焦
+  | "pericardium"; // 心包
 ```
 
 ### Treatment Recommendations
+
 ```typescript
 interface TreatmentRecommendations {
   dietary: DietaryRecommendations;
@@ -463,13 +479,13 @@ interface DietaryRecommendations {
 interface FoodRecommendation {
   name: string;
   tcmProperties: {
-    thermalNature: 'hot' | 'warm' | 'neutral' | 'cool' | 'cold';
-    flavors: ('sweet' | 'sour' | 'bitter' | 'pungent' | 'salty')[];
+    thermalNature: "hot" | "warm" | "neutral" | "cool" | "cold";
+    flavors: ("sweet" | "sour" | "bitter" | "pungent" | "salty")[];
     organAffinity: OrganSystem[];
   };
   benefits: string[];
   preparation?: string[];
-  frequency: 'daily' | 'weekly' | 'occasionally' | 'avoid';
+  frequency: "daily" | "weekly" | "occasionally" | "avoid";
 }
 
 interface HerbalFormula {
@@ -483,14 +499,14 @@ interface HerbalFormula {
   sideEffects?: string[];
   interactions?: string[];
   cost?: number;
-  availability: 'common' | 'specialty' | 'rare';
+  availability: "common" | "specialty" | "rare";
 }
 
 interface HerbIngredient {
   name: string;
   chineseName?: string;
   amount: string;
-  role: 'chief' | 'deputy' | 'assistant' | 'envoy';
+  role: "chief" | "deputy" | "assistant" | "envoy";
   properties: {
     nature: string;
     flavor: string;
@@ -502,6 +518,7 @@ interface HerbIngredient {
 ## AI Analysis Models
 
 ### Snore Analysis
+
 ```typescript
 interface SnoreAnalysis {
   id: string;
@@ -517,9 +534,9 @@ interface SnoreAnalysisResult {
   duration: number; // total recording duration in seconds
   snoreDetected: boolean;
   snoreFrequency: number; // snores per hour
-  severity: 'none' | 'mild' | 'moderate' | 'severe';
+  severity: "none" | "mild" | "moderate" | "severe";
   patterns: SnorePattern[];
-  sleepApneaRisk: 'low' | 'medium' | 'high';
+  sleepApneaRisk: "low" | "medium" | "high";
   oxygenDesaturationEvents: number;
   averageSnoreDuration: number; // seconds
   loudestSnoreDecibel: number;
@@ -528,7 +545,7 @@ interface SnoreAnalysisResult {
 interface SnorePattern {
   startTime: number; // seconds from start
   duration: number; // seconds
-  intensity: 'light' | 'moderate' | 'heavy';
+  intensity: "light" | "moderate" | "heavy";
   frequency: number; // Hz
 }
 
@@ -537,11 +554,12 @@ interface SnoreTCMCorrelation {
   patterns: string[];
   organInvolvement: OrganSystem[];
   pathomechanism: string;
-  severity: 'mild' | 'moderate' | 'severe';
+  severity: "mild" | "moderate" | "severe";
 }
 ```
 
 ### Meal Planning
+
 ```typescript
 interface MealPlan {
   id: string;
@@ -550,7 +568,7 @@ interface MealPlan {
   weeklyPlan: WeeklyMealPlan;
   shoppingList: ShoppingList;
   preferences: DietaryPreferences;
-  status: 'active' | 'archived' | 'draft';
+  status: "active" | "archived" | "draft";
   createdAt: string;
   updatedAt: string;
 }
@@ -585,7 +603,7 @@ interface MealItem {
 
 interface DietaryPreferences {
   allergies: string[];
-  dietaryType: 'omnivore' | 'vegetarian' | 'vegan' | 'pescatarian' | 'halal' | 'kosher';
+  dietaryType: "omnivore" | "vegetarian" | "vegan" | "pescatarian" | "halal" | "kosher";
   dislikedFoods: string[];
   servingSize: number; // number of people
   calorieTarget?: number;
@@ -596,6 +614,7 @@ interface DietaryPreferences {
 ## Patient Portal Models
 
 ### Gamification (Qi Garden)
+
 ```typescript
 interface QiGarden {
   userId: string;
@@ -613,9 +632,9 @@ interface QiGarden {
 
 interface VirtualHerb {
   id: string;
-  type: 'ginseng' | 'reishi' | 'goji_berry' | 'chrysanthemum' | 'ginger';
+  type: "ginseng" | "reishi" | "goji_berry" | "chrysanthemum" | "ginger";
   name: string;
-  stage: 'seed' | 'sprout' | 'growing' | 'mature' | 'flowering';
+  stage: "seed" | "sprout" | "growing" | "mature" | "flowering";
   health: number; // 0-100
   waterLevel: number; // 0-100
   lastWatered: string;
@@ -625,11 +644,11 @@ interface VirtualHerb {
 
 interface Achievement {
   id: string;
-  type: 'streak' | 'exercise' | 'meal_log' | 'diagnosis' | 'special';
+  type: "streak" | "exercise" | "meal_log" | "diagnosis" | "special";
   name: string;
   description: string;
   icon: string;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  rarity: "common" | "rare" | "epic" | "legendary";
   unlockedAt: string;
   progress?: number; // for progressive achievements
   maxProgress?: number;
@@ -637,12 +656,13 @@ interface Achievement {
 ```
 
 ### Community (Circle of Health)
+
 ```typescript
 interface CommunityPost {
   id: string;
   circleId: string;
   authorId: string; // Anonymous hash
-  type: 'text' | 'image' | 'recipe' | 'progress' | 'question';
+  type: "text" | "image" | "recipe" | "progress" | "question";
   content: string;
   images?: string[];
   tags: string[];
@@ -678,6 +698,7 @@ interface HealthCircle {
 ```
 
 ### Vitality Rhythm
+
 ```typescript
 interface VitalityRhythm {
   userId: string;
@@ -709,7 +730,7 @@ interface SolarTerm {
   chineseName: string;
   startDate: string;
   endDate: string;
-  season: 'spring' | 'summer' | 'autumn' | 'winter';
+  season: "spring" | "summer" | "autumn" | "winter";
   characteristics: string[];
   healthFocus: string[];
 }
@@ -718,6 +739,7 @@ interface SolarTerm {
 ## System Models
 
 ### Notifications
+
 ```typescript
 interface NotificationPreferences {
   reminders: boolean;
@@ -738,12 +760,12 @@ interface NotificationPreferences {
 interface Notification {
   id: string;
   userId: string;
-  type: 'reminder' | 'health_tip' | 'community' | 'system' | 'marketing';
+  type: "reminder" | "health_tip" | "community" | "system" | "marketing";
   title: string;
   message: string;
   data?: object; // Additional payload
-  channels: ('push' | 'email' | 'sms')[];
-  status: 'pending' | 'sent' | 'delivered' | 'failed';
+  channels: ("push" | "email" | "sms")[];
+  status: "pending" | "sent" | "delivered" | "failed";
   scheduledFor?: string;
   sentAt?: string;
   readAt?: string;
@@ -752,10 +774,11 @@ interface Notification {
 ```
 
 ### System Logs
+
 ```typescript
 interface SystemLog {
   id: string;
-  level: 'error' | 'warn' | 'info' | 'debug';
+  level: "error" | "warn" | "info" | "debug";
   message: string;
   context: {
     userId?: string;
@@ -772,7 +795,7 @@ interface APIUsage {
   id: string;
   userId?: string;
   endpoint: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: "GET" | "POST" | "PUT" | "DELETE";
   statusCode: number;
   responseTime: number; // milliseconds
   requestSize: number; // bytes
@@ -784,6 +807,7 @@ interface APIUsage {
 ```
 
 ### Admin Settings
+
 ```typescript
 interface AdminSettings {
   id: string;
@@ -860,7 +884,7 @@ CREATE TABLE public.diagnosis_sessions (
   patient_id UUID REFERENCES public.patients,
   practitioner_id UUID REFERENCES public.practitioners,
   family_member_id UUID,
-  status TEXT NOT NULL DEFAULT 'in_progress' 
+  status TEXT NOT NULL DEFAULT 'in_progress'
     CHECK (status IN ('in_progress', 'completed', 'cancelled', 'expired')),
   data JSONB NOT NULL DEFAULT '{}',
   overall_score DECIMAL(5,2),

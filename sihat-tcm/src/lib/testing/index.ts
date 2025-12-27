@@ -1,6 +1,6 @@
 /**
  * Property-Based Testing Framework - Main Export
- * 
+ *
  * This module exports all the property-based testing utilities
  * for the Sihat TCM system.
  */
@@ -12,8 +12,8 @@ export {
   createPropertyTest,
   PropertyTestReporter,
   globalReporter,
-  runPropertyTestWithReporting
-} from './propertyTestFramework'
+  runPropertyTestWithReporting,
+} from "./propertyTestFramework";
 
 // Medical data generators
 export {
@@ -25,17 +25,11 @@ export {
   healthTimeSeriesArbitrary,
   validationContextArbitrary,
   imageQualityDataArbitrary,
-  syncDataArbitrary
-} from './medicalDataGenerators'
+  syncDataArbitrary,
+} from "./medicalDataGenerators";
 
 // Test helpers and patterns
-export {
-  testProperty,
-  assertions,
-  patterns,
-  validators,
-  cleanup
-} from './propertyTestHelpers'
+export { testProperty, assertions, patterns, validators, cleanup } from "./propertyTestHelpers";
 
 // Re-export fast-check for convenience
-export * as fc from 'fast-check'
+export * as fc from "fast-check";

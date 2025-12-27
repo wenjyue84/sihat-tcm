@@ -23,18 +23,22 @@ Use this to verify everything is working correctly.
 ## 📁 Files Created
 
 ### Backend
+
 - [ ] `src/lib/actions.ts` - Server actions (6 functions)
 
 ### Pages
+
 - [ ] `src/app/patient/dashboard/page.tsx` - Main dashboard
 - [ ] `src/app/patient/history/[id]/page.tsx` - History viewer
 
 ### Components
+
 - [ ] `src/components/patient/HistoryCard.tsx`
 - [ ] `src/components/patient/TrendWidget.tsx`
 - [ ] `src/components/patient/SaveToDashboardBanner.tsx`
 
 ### Documentation
+
 - [ ] `HEALTH_PASSPORT_IMPLEMENTATION.md`
 - [ ] `HEALTH_PASSPORT_SETUP.md`
 - [ ] `HEALTH_PASSPORT_SUMMARY.md`
@@ -49,6 +53,7 @@ Use this to verify everything is working correctly.
 ## 🧪 Functional Testing
 
 ### Guest User Flow
+
 - [ ] Complete a diagnosis without logging in
 - [ ] See "Sign In to Save This Report" banner
 - [ ] Banner is dismissible
@@ -56,6 +61,7 @@ Use this to verify everything is working correctly.
 - [ ] After login, redirected appropriately
 
 ### Logged-In User - Auto-Save
+
 - [ ] Log in first
 - [ ] Complete a diagnosis
 - [ ] Report auto-saves (check console for success log)
@@ -63,6 +69,7 @@ Use this to verify everything is working correctly.
 - [ ] Clicking "View Dashboard" navigates to `/patient/dashboard`
 
 ### Dashboard Page
+
 - [ ] Navigate to `/patient/dashboard`
 - [ ] If not logged in, redirects to `/login?redirect=/patient/dashboard`
 - [ ] Loading state shows spinner
@@ -85,6 +92,7 @@ Use this to verify everything is working correctly.
 - [ ] "New Diagnosis" button navigates to home
 
 ### History Viewer Page
+
 - [ ] Navigate to `/patient/history/[id]`
 - [ ] If not logged in, redirects to login
 - [ ] Loading state shows spinner
@@ -111,6 +119,7 @@ Use this to verify everything is working correctly.
   - [ ] Loading state during delete
 
 ### Save Banner Integration
+
 - [ ] Banner appears in DiagnosisReport component
 - [ ] For guests: Shows sign-in CTA
 - [ ] For logged-in: Shows success message
@@ -120,6 +129,7 @@ Use this to verify everything is working correctly.
 ## 🔒 Security Testing
 
 ### RLS Policies
+
 - [ ] User A cannot see User B's sessions
 - [ ] User can insert their own session
 - [ ] User can update their own notes
@@ -128,6 +138,7 @@ Use this to verify everything is working correctly.
 - [ ] Unauthenticated user cannot access any data
 
 ### Server Actions
+
 - [ ] `saveDiagnosis()` requires authentication
 - [ ] `getPatientHistory()` requires authentication
 - [ ] `getSessionById()` requires authentication
@@ -137,6 +148,7 @@ Use this to verify everything is working correctly.
 - [ ] Actions return proper error messages for auth failures
 
 ### Client-Side
+
 - [ ] Pages redirect to login if not authenticated
 - [ ] No sensitive data exposed in client logs
 - [ ] API calls use server actions (not direct fetch)
@@ -144,6 +156,7 @@ Use this to verify everything is working correctly.
 ## 📊 Data Validation
 
 ### Score Calculation
+
 - [ ] Score is integer between 0-100
 - [ ] Severe conditions reduce score
 - [ ] Mild conditions increase score
@@ -152,6 +165,7 @@ Use this to verify everything is working correctly.
 - [ ] Edge cases handled (null, undefined)
 
 ### Data Persistence
+
 - [ ] Full report JSONB saved correctly
 - [ ] Primary diagnosis extracted from AI response
 - [ ] Constitution extracted from AI response
@@ -160,6 +174,7 @@ Use this to verify everything is working correctly.
 - [ ] `updated_at` changes on note updates
 
 ### Trend Calculations
+
 - [ ] Session count accurate
 - [ ] Average score calculated correctly
 - [ ] Improvement calculation correct (last - first score)
@@ -169,6 +184,7 @@ Use this to verify everything is working correctly.
 ## 🎨 UI/UX Testing
 
 ### Visual Design
+
 - [ ] Glassmorphism effects render correctly
 - [ ] Gradients smooth (emerald → teal → cyan)
 - [ ] Cards have proper shadows
@@ -178,6 +194,7 @@ Use this to verify everything is working correctly.
 - [ ] Colors accessible (sufficient contrast)
 
 ### Responsive Design
+
 - [ ] Dashboard mobile-friendly
 - [ ] History viewer mobile-friendly
 - [ ] Cards stack properly on small screens
@@ -185,12 +202,14 @@ Use this to verify everything is working correctly.
 - [ ] Text readable on all screen sizes
 
 ### Loading & Error States
+
 - [ ] Loading spinners show appropriately
 - [ ] Error messages clear and helpful
 - [ ] Empty states encouraging
 - [ ] Network errors handled gracefully
 
 ### Accessibility
+
 - [ ] Keyboard navigation works
 - [ ] Focus indicators visible
 - [ ] ARIA labels present (where needed)
@@ -200,12 +219,14 @@ Use this to verify everything is working correctly.
 ## 🚀 Performance Testing
 
 ### Database
+
 - [ ] Queries use indexes
 - [ ] No N+1 query issues
 - [ ] JSONB queries efficient
 - [ ] Pagination limits large results
 
 ### Client
+
 - [ ] Page load time < 3s
 - [ ] No console errors
 - [ ] No memory leaks
@@ -222,11 +243,11 @@ Use this to verify everything is working correctly.
 
 ## 🐛 Known Issues
 
-*Document any issues discovered:*
+_Document any issues discovered:_
 
-- [ ] Issue 1: ___________________
-- [ ] Issue 2: ___________________
-- [ ] Issue 3: ___________________
+- [ ] Issue 1: ********\_\_\_********
+- [ ] Issue 2: ********\_\_\_********
+- [ ] Issue 3: ********\_\_\_********
 
 ## ✨ Optional Enhancements (Future)
 
@@ -248,12 +269,10 @@ Use this to verify everything is working correctly.
 - [ ] Ready for staging deployment
 - [ ] Ready for production deployment
 
-**Completed by:** ________________  
-**Date:** ________________  
-**Notes:** ________________
+**Completed by:** ******\_\_\_\_******  
+**Date:** ******\_\_\_\_******  
+**Notes:** ******\_\_\_\_******
 
 ---
 
 **Status**: Use this checklist before marking the feature as "production ready". 🚀
-
-

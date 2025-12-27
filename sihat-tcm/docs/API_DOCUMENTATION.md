@@ -66,6 +66,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "userId": "string",
@@ -100,6 +101,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -164,6 +166,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "requestType": "diagnosis|chat|analysis",
@@ -180,6 +183,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -206,6 +210,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "userId": "string",
@@ -231,6 +236,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -257,6 +263,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Query Parameters**:
+
 - `userId`: string (required)
 - `dataType`: string (optional, filter by data type)
 - `startDate`: ISO date string
@@ -265,6 +272,7 @@ Authorization: Bearer <jwt_token>
 - `includeTCMAnalysis`: boolean
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -315,6 +323,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "userId": "string",
@@ -335,6 +344,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -364,10 +374,12 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Query Parameters**:
+
 - `userId`: string (required)
 - `deviceId`: string (optional, specific device)
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -402,9 +414,11 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Query Parameters**:
+
 - `userId`: string (required)
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -442,6 +456,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "userId": "string",
@@ -463,6 +478,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -484,6 +500,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "recommendations": {
@@ -505,6 +522,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -550,6 +568,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "herb": "string",
@@ -563,6 +582,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -591,6 +611,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "sessionId": "string",
@@ -606,6 +627,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -632,9 +654,11 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Query Parameters**:
+
 - `userId`: string (required)
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -663,9 +687,11 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Query Parameters**:
+
 - `userId`: string (required)
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -719,6 +745,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "userId": "string",
@@ -732,6 +759,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -762,10 +790,12 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Query Parameters**:
+
 - `userId`: string (required)
 - `constitution`: string (optional, filter by constitution)
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -794,6 +824,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "circleId": "string",
@@ -807,6 +838,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -829,6 +861,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: Public
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -874,10 +907,12 @@ Authorization: Bearer <jwt_token>
 **Authentication**: Admin
 
 **Query Parameters**:
+
 - `timeRange`: 1h|6h|24h|7d|30d
 - `metrics`: cpu|memory|requests|errors|ai_usage
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -931,6 +966,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "patientInfo": {
@@ -959,7 +995,7 @@ Authorization: Bearer <jwt_token>
     "tags": ["string"]
   },
   "faceAnalysis": {
-    "imageUrl": "string", 
+    "imageUrl": "string",
     "analysis": "object",
     "tags": ["string"]
   },
@@ -989,6 +1025,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1047,6 +1084,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: Public
 
 **Request Body**:
+
 ```json
 {
   "messages": [
@@ -1066,6 +1104,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1087,6 +1126,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: Public
 
 **Request Body**:
+
 ```json
 {
   "image": "string (base64)",
@@ -1100,6 +1140,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1132,6 +1173,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: Public
 
 **Request Body**:
+
 ```json
 {
   "audio": "string (base64)",
@@ -1144,6 +1186,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1167,6 +1210,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "audio": "string (base64)",
@@ -1182,6 +1226,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1209,12 +1254,13 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "reportId": "string",
   "messages": [
     {
-      "role": "user|assistant", 
+      "role": "user|assistant",
       "content": "string"
     }
   ],
@@ -1223,6 +1269,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1241,6 +1288,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "tcmDiagnosis": "object",
@@ -1255,6 +1303,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1275,6 +1324,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "constitution": "string",
@@ -1286,6 +1336,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1309,6 +1360,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "reportId": "string",
@@ -1318,6 +1370,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1335,6 +1388,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "image": "string (base64)",
@@ -1344,6 +1398,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1365,6 +1420,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "herbs": ["string"],
@@ -1379,6 +1435,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1403,6 +1460,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: Admin
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1422,6 +1480,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: Admin
 
 **Request Body**:
+
 ```json
 {
   "defaultModel": "string",
@@ -1438,6 +1497,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: Admin
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1457,6 +1517,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: Admin
 
 **Request Body**:
+
 ```json
 {
   "apiKey": "string"
@@ -1464,6 +1525,7 @@ Authorization: Bearer <jwt_token>
 ```
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1484,6 +1546,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "deviceToken": "string",
@@ -1503,6 +1566,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "type": "medication|exercise|meal|checkup",
@@ -1541,6 +1605,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: Public
 
 **Response**:
+
 ```json
 {
   "success": true,
@@ -1560,6 +1625,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: Public
 
 **Request Body**:
+
 ```json
 {
   "chatHistory": [
@@ -1580,6 +1646,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: User
 
 **Request Body**:
+
 ```json
 {
   "documents": [
@@ -1600,6 +1667,7 @@ Authorization: Bearer <jwt_token>
 **Authentication**: Admin
 
 **Query Parameters**:
+
 - `level`: error|warn|info|debug
 - `limit`: number (default: 100)
 - `offset`: number (default: 0)
@@ -1642,6 +1710,7 @@ API endpoints are rate-limited to ensure fair usage:
 - **Admin endpoints**: 500 requests per hour per admin
 
 Rate limit headers are included in responses:
+
 ```http
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 95
@@ -1651,12 +1720,13 @@ X-RateLimit-Reset: 1640995200
 ## Data Models
 
 ### Patient Profile
+
 ```typescript
 interface PatientProfile {
   id: string;
   name: string;
   age: number;
-  gender: 'male' | 'female' | 'other';
+  gender: "male" | "female" | "other";
   height: number; // cm
   weight: number; // kg
   medicalHistory?: string;
@@ -1673,12 +1743,13 @@ interface PatientProfile {
 ```
 
 ### Diagnosis Session
+
 ```typescript
 interface DiagnosisSession {
   id: string;
   patientId: string;
   practitionerId?: string;
-  status: 'in_progress' | 'completed' | 'cancelled';
+  status: "in_progress" | "completed" | "cancelled";
   data: {
     patientInfo: PatientInfo;
     inquiryData?: InquiryData;
@@ -1696,6 +1767,7 @@ interface DiagnosisSession {
 ```
 
 ### TCM Diagnosis
+
 ```typescript
 interface TCMDiagnosis {
   primaryPattern: string;
@@ -1706,33 +1778,34 @@ interface TCMDiagnosis {
   confidence: number;
 }
 
-type ConstitutionType = 
-  | 'balanced'
-  | 'qi_deficiency'
-  | 'yang_deficiency' 
-  | 'yin_deficiency'
-  | 'phlegm_dampness'
-  | 'damp_heat'
-  | 'blood_stasis'
-  | 'qi_stagnation'
-  | 'special_diathesis';
+type ConstitutionType =
+  | "balanced"
+  | "qi_deficiency"
+  | "yang_deficiency"
+  | "yin_deficiency"
+  | "phlegm_dampness"
+  | "damp_heat"
+  | "blood_stasis"
+  | "qi_stagnation"
+  | "special_diathesis";
 
-type OrganSystem = 
-  | 'heart'
-  | 'liver'
-  | 'spleen'
-  | 'lung'
-  | 'kidney'
-  | 'gallbladder'
-  | 'stomach'
-  | 'small_intestine'
-  | 'large_intestine'
-  | 'bladder'
-  | 'triple_burner'
-  | 'pericardium';
+type OrganSystem =
+  | "heart"
+  | "liver"
+  | "spleen"
+  | "lung"
+  | "kidney"
+  | "gallbladder"
+  | "stomach"
+  | "small_intestine"
+  | "large_intestine"
+  | "bladder"
+  | "triple_burner"
+  | "pericardium";
 ```
 
 ### Medical Report
+
 ```typescript
 interface MedicalReport {
   id: string;
@@ -1751,6 +1824,7 @@ interface MedicalReport {
 ```
 
 ### Treatment Recommendations
+
 ```typescript
 interface TreatmentRecommendations {
   dietary: {
@@ -1779,19 +1853,19 @@ interface TreatmentRecommendations {
 ```typescript
 // Initialize client
 const client = new SihatTCMClient({
-  baseUrl: 'https://your-domain.com/api',
-  apiKey: 'your-api-key' // if required
+  baseUrl: "https://your-domain.com/api",
+  apiKey: "your-api-key", // if required
 });
 
 // Start diagnosis
 const diagnosis = await client.consult({
   patientInfo: {
-    name: 'John Doe',
+    name: "John Doe",
     age: 35,
-    gender: 'male',
+    gender: "male",
     height: 175,
     weight: 70,
-    mainConcern: 'Fatigue and digestive issues'
+    mainConcern: "Fatigue and digestive issues",
   },
   // ... other diagnostic data
 });
@@ -1799,16 +1873,14 @@ const diagnosis = await client.consult({
 // Analyze image
 const tongueAnalysis = await client.analyzeImage({
   image: base64Image,
-  type: 'tongue',
-  patientInfo: { age: 35, gender: 'male' }
+  type: "tongue",
+  patientInfo: { age: 35, gender: "male" },
 });
 
 // Chat with report
 const chatResponse = await client.reportChat({
-  reportId: 'report-123',
-  messages: [
-    { role: 'user', content: 'What does my diagnosis mean?' }
-  ]
+  reportId: "report-123",
+  messages: [{ role: "user", content: "What does my diagnosis mean?" }],
 });
 ```
 
@@ -1823,7 +1895,7 @@ class SihatTCMClient:
         self.headers = {'Content-Type': 'application/json'}
         if api_key:
             self.headers['Authorization'] = f'Bearer {api_key}'
-    
+
     def consult(self, data):
         response = requests.post(
             f'{self.base_url}/consult',
@@ -1831,7 +1903,7 @@ class SihatTCMClient:
             headers=self.headers
         )
         return response.json()
-    
+
     def analyze_image(self, image_data):
         response = requests.post(
             f'{self.base_url}/analyze-image',

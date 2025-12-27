@@ -1,25 +1,25 @@
 /**
  * @fileoverview Main TCM consultation API endpoint
- * 
+ *
  * This endpoint processes comprehensive TCM diagnostic data collected through
  * the four classical examination methods (望闻问切) and generates a complete
  * TCM diagnosis report using Google Gemini AI models.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 3.0
  * @since 1.0
  */
 
-import { google } from '@ai-sdk/google';
-import { streamText } from 'ai';
-import { devLog } from '@/lib/systemLogger';
-import { getSystemPrompt } from '@/lib/promptLoader';
+import { google } from "@ai-sdk/google";
+import { streamText } from "ai";
+import { devLog } from "@/lib/systemLogger";
+import { getSystemPrompt } from "@/lib/promptLoader";
 import {
   prependLanguageInstruction,
   getLanguageInstruction,
   normalizeLanguage,
-} from '@/lib/translations/languageInstructions';
-import { streamTextWithFallback, parseApiError } from '@/lib/modelFallback';
+} from "@/lib/translations/languageInstructions";
+import { streamTextWithFallback, parseApiError } from "@/lib/modelFallback";
 
 /**
  * Maximum execution duration for the consultation endpoint (60 seconds)
@@ -29,19 +29,19 @@ export const maxDuration = 60;
 
 /**
  * TCM Consultation API Endpoint
- * 
+ *
  * Processes comprehensive Traditional Chinese Medicine diagnostic data and generates
  * a complete diagnosis report using AI analysis. This endpoint implements the four
  * classical TCM examination methods:
- * 
+ *
  * - 望 (Wang) - Visual observation (tongue, face, body)
  * - 闻 (Wen) - Listening and smelling (voice, breathing)
  * - 问 (Wen) - Inquiry (symptoms, medical history, lifestyle)
  * - 切 (Qie) - Palpation (pulse examination)
- * 
+ *
  * @route POST /api/consult
  * @access Public (no authentication required for basic diagnosis)
- * 
+ *
  * @param {Request} req - HTTP request containing diagnostic data
  * @param {Object} req.body - Request body with diagnostic information
  * @param {Object} req.body.data - Complete diagnostic data from all examination steps
@@ -85,7 +85,7 @@ export const maxDuration = 60;
  * @param {string} [req.body.prompt] - Custom prompt (rarely used)
  * @param {string} [req.body.model='gemini-1.5-pro'] - AI model to use
  * @param {string} [req.body.language='en'] - Response language (en|zh|ms)
- * 
+ *
  * @returns {Response} Streaming text response with TCM diagnosis report
  * @returns {Object} response.body - JSON structured diagnosis report
  * @returns {Object} response.body.patient_summary - Patient information summary
@@ -112,11 +112,11 @@ export const maxDuration = 60;
  * @returns {Object} [response.body.precautions] - Safety precautions and warnings
  * @returns {Object} [response.body.follow_up] - Follow-up guidance
  * @returns {string} response.body.disclaimer - Medical disclaimer
- * 
+ *
  * @throws {Error} When AI model fails or request is malformed
  * @throws {Error} When required diagnostic data is missing
  * @throws {Error} When system prompts cannot be loaded
- * 
+ *
  * @example
  * // Basic consultation request
  * const response = await fetch('/api/consult', {
@@ -153,7 +153,7 @@ export const maxDuration = 60;
  *     language: 'en'
  *   })
  * });
- * 
+ *
  * @example
  * // Response structure
  * {
@@ -184,32 +184,32 @@ export const maxDuration = 60;
  *     }]
  *   }
  * }
- * 
+ *
  * @see {@link https://docs.sihat-tcm.com/api/consult} API Documentation
  * @see {@link /lib/systemPrompts.ts} System prompts for AI models
  * @see {@link /lib/translations/languageInstructions.ts} Language handling
  */
 export async function POST(req: Request) {
   const startTime = Date.now();
-  devLog('info', 'API/consult', 'Request started');
+  devLog("info", "API/consult", "Request started");
 
   try {
     const body = await req.json();
-    const { data, prompt, model = 'gemini-1.5-pro', language: rawLanguage = 'en' } = body;
+    const { data, prompt, model = "gemini-1.5-pro", language: rawLanguage = "en" } = body;
     const language = normalizeLanguage(rawLanguage);
 
-    devLog('info', 'API/consult', 'Request params', {
+    devLog("info", "API/consult", "Request params", {
       promptPreview: prompt?.substring(0, 50),
       patientName: data?.basic_info?.name,
       model,
-      language
+      language,
     });
 
     // Fetch system prompt using centralized loader
-    let systemPrompt = await getSystemPrompt('doctor_final');
+    let systemPrompt = await getSystemPrompt("doctor_final");
 
     // Add language instructions using centralized utility
-    systemPrompt = prependLanguageInstruction(systemPrompt, 'strict', language);
+    systemPrompt = prependLanguageInstruction(systemPrompt, "strict", language);
 
     // Build a comprehensive text summary of all the data
     const { basic_info } = data;
@@ -225,14 +225,14 @@ export async function POST(req: Request) {
       diagnosisInfo += `${data.verified_summaries.basic_info}\n`;
     } else {
       diagnosisInfo += `
-Name: ${basic_info?.name || 'Unknown'}
-Age: ${basic_info?.age || 'Unknown'}
-Gender: ${basic_info?.gender || 'Unknown'}
-Weight: ${basic_info?.weight || 'Unknown'} kg
-Height: ${basic_info?.height || 'Unknown'} cm
-${basic_info?.height && basic_info?.weight ? `BMI: ${(basic_info.weight / ((basic_info.height / 100) ** 2)).toFixed(1)}` : ''}
-Reported Symptoms: ${basic_info?.symptoms || 'None'}
-Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
+Name: ${basic_info?.name || "Unknown"}
+Age: ${basic_info?.age || "Unknown"}
+Gender: ${basic_info?.gender || "Unknown"}
+Weight: ${basic_info?.weight || "Unknown"} kg
+Height: ${basic_info?.height || "Unknown"} cm
+${basic_info?.height && basic_info?.weight ? `BMI: ${(basic_info.weight / (basic_info.height / 100) ** 2).toFixed(1)}` : ""}
+Reported Symptoms: ${basic_info?.symptoms || "None"}
+Symptom Duration: ${basic_info?.symptomDuration || "Not specified"}
 `;
     }
 
@@ -257,7 +257,9 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
         }
 
         if (data.wen_chat?.chat && Array.isArray(data.wen_chat.chat)) {
-          const chatHistory = data.wen_chat.chat.map((m: any) => `${m.role}: ${m.content}`).join('\n');
+          const chatHistory = data.wen_chat.chat
+            .map((m: any) => `${m.role}: ${m.content}`)
+            .join("\n");
           diagnosisInfo += `\nChat History (问诊记录):\n${chatHistory}\n`;
         } else {
           diagnosisInfo += `Chat History: No chat recorded\n`;
@@ -273,7 +275,7 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
     if (data.verified_summaries?.qie) {
       diagnosisInfo += `${data.verified_summaries.qie}\n`;
     } else {
-      diagnosisInfo += data.qie ? `Pulse BPM: ${data.qie.bpm}` : 'Pulse not measured';
+      diagnosisInfo += data.qie ? `Pulse BPM: ${data.qie.bpm}` : "Pulse not measured";
     }
 
     diagnosisInfo += `
@@ -289,10 +291,10 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
     } else if (data.wang_tongue?.observation) {
       diagnosisInfo += `\n舌诊 Tongue Observation:\n${data.wang_tongue.observation}\n`;
       if (data.wang_tongue.potential_issues?.length) {
-        diagnosisInfo += `Tongue Indications: ${data.wang_tongue.potential_issues.join(', ')}\n`;
+        diagnosisInfo += `Tongue Indications: ${data.wang_tongue.potential_issues.join(", ")}\n`;
       }
     } else {
-      diagnosisInfo += 'Tongue: No observation recorded\n';
+      diagnosisInfo += "Tongue: No observation recorded\n";
     }
 
     // Face
@@ -301,10 +303,10 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
     } else if (data.wang_face?.observation) {
       diagnosisInfo += `\n面诊 Face Observation:\n${data.wang_face.observation}\n`;
       if (data.wang_face.potential_issues?.length) {
-        diagnosisInfo += `Face Indications: ${data.wang_face.potential_issues.join(', ')}\n`;
+        diagnosisInfo += `Face Indications: ${data.wang_face.potential_issues.join(", ")}\n`;
       }
     } else {
-      diagnosisInfo += 'Face: No observation recorded\n';
+      diagnosisInfo += "Face: No observation recorded\n";
     }
 
     // Body Part
@@ -313,7 +315,7 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
     } else if (data.wang_part?.observation) {
       diagnosisInfo += `\n体部诊 Body Part Observation:\n${data.wang_part.observation}\n`;
       if (data.wang_part.potential_issues?.length) {
-        diagnosisInfo += `Body Part Indications: ${data.wang_part.potential_issues.join(', ')}\n`;
+        diagnosisInfo += `Body Part Indications: ${data.wang_part.potential_issues.join(", ")}\n`;
       }
     }
 
@@ -334,7 +336,7 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
         if (data.wen_audio.analysis) {
           const analysis = data.wen_audio.analysis;
           diagnosisInfo += `\n--- AUDIO ANALYSIS RESULTS ---\n`;
-          diagnosisInfo += `Overall Observation: ${analysis.overall_observation || 'N/A'}\n`;
+          diagnosisInfo += `Overall Observation: ${analysis.overall_observation || "N/A"}\n`;
 
           if (analysis.voice_quality_analysis) {
             diagnosisInfo += `Voice Quality: ${analysis.voice_quality_analysis.observation} (Severity: ${analysis.voice_quality_analysis.severity})\n`;
@@ -353,7 +355,7 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
           }
 
           if (analysis.pattern_suggestions && analysis.pattern_suggestions.length > 0) {
-            diagnosisInfo += `Audio-suggested Patterns: ${analysis.pattern_suggestions.join(', ')}\n`;
+            diagnosisInfo += `Audio-suggested Patterns: ${analysis.pattern_suggestions.join(", ")}\n`;
           }
         } else if (data.wen_audio.observation) {
           // Fallback for legacy format
@@ -394,12 +396,18 @@ Symptom Duration: ${basic_info?.symptomDuration || 'Not specified'}
 ═══════════════════════════════════════════════════════════════════════════════
 
 Data Availability Status:\n`;
-    diagnosisInfo += data.wang_tongue?.image ? '✓ Tongue image provided\n' : '✗ No tongue image\n';
-    diagnosisInfo += data.wang_face?.image ? '✓ Face image provided\n' : '✗ No face image\n';
-    diagnosisInfo += data.wang_part?.image ? '✓ Body area image provided\n' : '✗ No body area image\n';
-    diagnosisInfo += data.wen_audio?.audio ? '✓ Voice recording provided\n' : '✗ No voice recording\n';
-    diagnosisInfo += data.qie?.bpm ? '✓ Pulse measurement taken\n' : '✗ No pulse measurement\n';
-    diagnosisInfo += data.smart_connect ? '✓ Smart health device data connected\n' : '✗ No smart device data\n';
+    diagnosisInfo += data.wang_tongue?.image ? "✓ Tongue image provided\n" : "✗ No tongue image\n";
+    diagnosisInfo += data.wang_face?.image ? "✓ Face image provided\n" : "✗ No face image\n";
+    diagnosisInfo += data.wang_part?.image
+      ? "✓ Body area image provided\n"
+      : "✗ No body area image\n";
+    diagnosisInfo += data.wen_audio?.audio
+      ? "✓ Voice recording provided\n"
+      : "✗ No voice recording\n";
+    diagnosisInfo += data.qie?.bpm ? "✓ Pulse measurement taken\n" : "✗ No pulse measurement\n";
+    diagnosisInfo += data.smart_connect
+      ? "✓ Smart health device data connected\n"
+      : "✗ No smart device data\n";
 
     // Add Report Options - Comprehensive dynamic prompt based on user selections
     if (data.report_options) {
@@ -414,18 +422,26 @@ IMPORTANT: Generate the report following EXACTLY these user-selected options.
 `;
       // Patient Information
       diagnosisInfo += `\n【Patient Information Section】\n`;
-      diagnosisInfo += opts.includePatientName ? `✓ Include patient name\n` : `✗ OMIT patient name\n`;
+      diagnosisInfo += opts.includePatientName
+        ? `✓ Include patient name\n`
+        : `✗ OMIT patient name\n`;
       diagnosisInfo += opts.includePatientAge ? `✓ Include patient age\n` : `✗ OMIT patient age\n`;
-      diagnosisInfo += opts.includePatientGender ? `✓ Include patient gender\n` : `✗ OMIT patient gender\n`;
+      diagnosisInfo += opts.includePatientGender
+        ? `✓ Include patient gender\n`
+        : `✗ OMIT patient gender\n`;
       diagnosisInfo += opts.includePatientContact ? `✓ Include contact information\n` : ``;
       diagnosisInfo += opts.includePatientAddress ? `✓ Include patient address\n` : ``;
       diagnosisInfo += opts.includeEmergencyContact ? `✓ Include emergency contact\n` : ``;
 
       // Vital Signs & Measurements
       diagnosisInfo += `\n【Vital Signs & Measurements Section】\n`;
-      diagnosisInfo += opts.includeVitalSigns ? `✓ Include vital signs (BP, HR, Temperature)\n` : `✗ OMIT vital signs\n`;
+      diagnosisInfo += opts.includeVitalSigns
+        ? `✓ Include vital signs (BP, HR, Temperature)\n`
+        : `✗ OMIT vital signs\n`;
       diagnosisInfo += opts.includeBMI ? `✓ Include BMI & body measurements\n` : `✗ OMIT BMI\n`;
-      diagnosisInfo += opts.includeSmartConnectData ? `✓ Include smart device health data\n` : `✗ OMIT smart device data\n`;
+      diagnosisInfo += opts.includeSmartConnectData
+        ? `✓ Include smart device health data\n`
+        : `✗ OMIT smart device data\n`;
 
       // Medical History
       diagnosisInfo += `\n【Medical History Section】\n`;
@@ -437,37 +453,62 @@ IMPORTANT: Generate the report following EXACTLY these user-selected options.
 
       // TCM Recommendations
       diagnosisInfo += `\n【TCM Recommendations Section】REQUIRED\n`;
-      diagnosisInfo += opts.suggestMedicine ? `✓ MUST suggest herbal medicine formulas with detailed prescriptions\n` : `✗ DO NOT suggest specific herbal medicines\n`;
-      diagnosisInfo += opts.suggestDoctor ? `✓ MUST recommend consulting a nearby TCM doctor\n` : `✗ DO NOT suggest consulting doctors\n`;
-      diagnosisInfo += opts.includeDietary ? `✓ MUST include comprehensive dietary advice (食疗) with specific foods and recipes\n` : `✗ OMIT dietary advice\n`;
-      diagnosisInfo += opts.includeLifestyle ? `✓ MUST include lifestyle recommendations (养生)\n` : `✗ OMIT lifestyle advice\n`;
-      diagnosisInfo += opts.includeAcupuncture ? `✓ MUST include acupuncture points (穴位) with locations and self-massage techniques\n` : `✗ OMIT acupuncture points\n`;
-      diagnosisInfo += opts.includeExercise ? `✓ MUST include exercise recommendations (运动建议)\n` : `✗ OMIT exercise advice\n`;
-      diagnosisInfo += opts.includeSleepAdvice ? `✓ MUST include sleep and rest guidance\n` : `✗ OMIT sleep advice\n`;
-      diagnosisInfo += opts.includeEmotionalWellness ? `✓ MUST include emotional wellness guidance (情志调养)\n` : `✗ OMIT emotional wellness\n`;
+      diagnosisInfo += opts.suggestMedicine
+        ? `✓ MUST suggest herbal medicine formulas with detailed prescriptions\n`
+        : `✗ DO NOT suggest specific herbal medicines\n`;
+      diagnosisInfo += opts.suggestDoctor
+        ? `✓ MUST recommend consulting a nearby TCM doctor\n`
+        : `✗ DO NOT suggest consulting doctors\n`;
+      diagnosisInfo += opts.includeDietary
+        ? `✓ MUST include comprehensive dietary advice (食疗) with specific foods and recipes\n`
+        : `✗ OMIT dietary advice\n`;
+      diagnosisInfo += opts.includeLifestyle
+        ? `✓ MUST include lifestyle recommendations (养生)\n`
+        : `✗ OMIT lifestyle advice\n`;
+      diagnosisInfo += opts.includeAcupuncture
+        ? `✓ MUST include acupuncture points (穴位) with locations and self-massage techniques\n`
+        : `✗ OMIT acupuncture points\n`;
+      diagnosisInfo += opts.includeExercise
+        ? `✓ MUST include exercise recommendations (运动建议)\n`
+        : `✗ OMIT exercise advice\n`;
+      diagnosisInfo += opts.includeSleepAdvice
+        ? `✓ MUST include sleep and rest guidance\n`
+        : `✗ OMIT sleep advice\n`;
+      diagnosisInfo += opts.includeEmotionalWellness
+        ? `✓ MUST include emotional wellness guidance (情志调养)\n`
+        : `✗ OMIT emotional wellness\n`;
 
       // Report Extras
       diagnosisInfo += `\n【Report Format & Extras】\n`;
-      diagnosisInfo += opts.includePrecautions ? `✓ MUST include precautions and warning signs\n` : `✗ OMIT precautions\n`;
-      diagnosisInfo += opts.includeFollowUp ? `✓ MUST include follow-up guidance with timeline\n` : `✗ OMIT follow-up guidance\n`;
+      diagnosisInfo += opts.includePrecautions
+        ? `✓ MUST include precautions and warning signs\n`
+        : `✗ OMIT precautions\n`;
+      diagnosisInfo += opts.includeFollowUp
+        ? `✓ MUST include follow-up guidance with timeline\n`
+        : `✗ OMIT follow-up guidance\n`;
       diagnosisInfo += opts.includeTimestamp ? `✓ Include report timestamp\n` : ``;
       diagnosisInfo += opts.includeQRCode ? `✓ Include QR code reference\n` : ``;
-      diagnosisInfo += opts.includeDoctorSignature ? `✓ Include doctor signature placeholder\n` : ``;
+      diagnosisInfo += opts.includeDoctorSignature
+        ? `✓ Include doctor signature placeholder\n`
+        : ``;
 
       diagnosisInfo += `
 === JSON STRUCTURE REQUIREMENTS ===
 Your response MUST include these fields based on the above options:
 {
   "patient_summary": {
-    "name": "${opts.includePatientName ? 'string' : 'null'}",
-    "age": "${opts.includePatientAge ? 'number' : 'null'}",
-    "gender": "${opts.includePatientGender ? 'string' : 'null'}"${opts.includeVitalSigns || opts.includeBMI ? `,
+    "name": "${opts.includePatientName ? "string" : "null"}",
+    "age": "${opts.includePatientAge ? "number" : "null"}",
+    "gender": "${opts.includePatientGender ? "string" : "null"}"${opts.includeVitalSigns || opts.includeBMI
+          ? `,
     "vital_signs": {
       "bmi": "number or null",
       "blood_pressure": "string or null",
       "heart_rate": "number or null",
       "temperature": "number or null"
-    }` : ''}
+    }`
+          : ""
+        }
   },
   "diagnosis": {
     "primary_pattern": "Primary TCM syndrome (辨证)",
@@ -485,42 +526,73 @@ Your response MUST include these fields based on the above options:
       "from_inquiry": "findings from conversation",
       "from_visual": "findings from tongue/face",
       "from_pulse": "findings from pulse if available"
+    },
+    "five_elements": {
+      "scores": {
+        "liver": "number 0-100",
+        "heart": "number 0-100",
+        "spleen": "number 0-100",
+        "lung": "number 0-100",
+        "kidney": "number 0-100"
+      },
+      "justifications": {
+        "liver": "Justification for liver score",
+        "heart": "Justification for heart score",
+        "spleen": "Justification for spleen score",
+        "lung": "Justification for lung score",
+        "kidney": "Justification for kidney score"
+      }
     }
   },
   "recommendations": {
-    ${opts.includeDietary ? `"food_therapy": {
+    ${opts.includeDietary
+          ? `"food_therapy": {
       "beneficial": ["5+ foods with specific reasons"],
       "recipes": ["2+ therapeutic recipes with preparation"],
       "avoid": ["3+ foods to avoid with reasons"]
-    },` : ''}
-    ${opts.includeLifestyle ? `"lifestyle": ["4+ specific lifestyle recommendations"],` : ''}
-    ${opts.includeAcupuncture ? `"acupoints": ["3+ acupoints with locations and techniques"],` : ''}
-    ${opts.includeExercise ? `"exercise": ["2+ exercise types with frequency/duration"],` : ''}
-    ${opts.includeSleepAdvice ? `"sleep_guidance": "Specific sleep recommendations",` : ''}
-    ${opts.includeEmotionalWellness ? `"emotional_care": "Emotional wellness guidance",` : ''}
-    ${opts.suggestMedicine ? `"herbal_formulas": [
+    },`
+          : ""
+        }
+    ${opts.includeLifestyle ? `"lifestyle": ["4+ specific lifestyle recommendations"],` : ""}
+    ${opts.includeAcupuncture ? `"acupoints": ["3+ acupoints with locations and techniques"],` : ""}
+    ${opts.includeExercise ? `"exercise": ["2+ exercise types with frequency/duration"],` : ""}
+    ${opts.includeSleepAdvice ? `"sleep_guidance": "Specific sleep recommendations",` : ""}
+    ${opts.includeEmotionalWellness ? `"emotional_care": "Emotional wellness guidance",` : ""}
+    ${opts.suggestMedicine
+          ? `"herbal_formulas": [
       {
         "name": "Formula name (Chinese & English)",
         "ingredients": ["list of herbs"],
         "dosage": "dosage instructions",
         "purpose": "what it treats"
       }
-    ],` : ''}
-    ${opts.suggestDoctor ? `"doctor_consultation": "Recommendation to see a TCM practitioner",` : ''}
+    ],`
+          : ""
+        }
+    ${opts.suggestDoctor ? `"doctor_consultation": "Recommendation to see a TCM practitioner",` : ""}
     "general": ["any additional recommendations"]
-  }${opts.includePrecautions ? `,
+  }${opts.includePrecautions
+          ? `,
   "precautions": {
     "warning_signs": ["symptoms requiring immediate attention"],
     "contraindications": ["things to avoid"],
     "special_notes": "important notes"
-  }` : ''}${opts.includeFollowUp ? `,
+  }`
+          : ""
+        }${opts.includeFollowUp
+          ? `,
   "follow_up": {
     "timeline": "when to reassess",
     "expected_improvement": "what to expect",
     "next_steps": "recommended next steps"
-  }` : '},'}
-  "disclaimer": "Standard medical disclaimer"${opts.includeTimestamp ? `,
-  "timestamp": "${new Date().toISOString()}"` : ''}
+  }`
+          : "},"
+        }
+  "disclaimer": "Standard medical disclaimer"${opts.includeTimestamp
+          ? `,
+  "timestamp": "${new Date().toISOString()}"`
+          : ""
+        }
 }
 `;
     } else {
@@ -533,6 +605,14 @@ Include a comprehensive TCM diagnosis with:
 - Patient information summary
 - Primary diagnosis and constitution assessment
 - Detailed analysis with key findings
+- **Five Elements Health Radar Analysis**:
+  - Score (0-100) for each element: Liver (Wood), Heart (Fire), Spleen (Earth), Lung (Metal), Kidney (Water).
+  - A specific 1-sentence justification for EACH score based on the patient's symptoms/signs.
+  - Scoring guide: 
+    - 90-100: Excellent/Strong
+    - 75-89: Good/Balanced
+    - 60-74: Fair/Minor imbalance
+    - <60: Poor/Pathological changes (e.g., if liver fire is high, Liver score should be low)
 - Dietary recommendations (foods to eat and avoid)
 - Lifestyle suggestions
 - Herbal medicine formulas (中药方剂)
@@ -542,50 +622,57 @@ Include a comprehensive TCM diagnosis with:
     }
 
     // Add language-specific final instruction using centralized utility
-    diagnosisInfo += getLanguageInstruction('final', language);
+    diagnosisInfo += getLanguageInstruction("final", language);
 
-    devLog('info', 'API/consult', `Calling streamTextWithFallback with model: ${model}`);
+    devLog("info", "API/consult", `Calling streamTextWithFallback with model: ${model}`);
 
     return await streamTextWithFallback(
       {
         primaryModel: model,
-        fallbackModels: ['gemini-1.5-flash', 'gemini-2.0-flash'],
-        context: 'API/consult',
-        useAsyncApiKey: true
+        fallbackModels: ["gemini-1.5-flash", "gemini-2.0-flash"],
+        context: "API/consult",
+        useAsyncApiKey: true,
       },
       {
         system: systemPrompt,
-        messages: [{ role: 'user', content: diagnosisInfo }],
+        messages: [{ role: "user", content: diagnosisInfo }],
         onFinish: (completion) => {
           const duration = Date.now() - startTime;
-          devLog('info', 'API/consult', `Stream finished after ${duration}ms. Text length: ${completion.text.length}`);
+          devLog(
+            "info",
+            "API/consult",
+            `Stream finished after ${duration}ms. Text length: ${completion.text.length}`
+          );
         },
         onError: (error) => {
-          devLog('error', 'API/consult', 'Stream error encountered', { error: error.message });
+          devLog("error", "API/consult", "Stream error encountered", { error: error.message });
         },
       }
     );
   } catch (error: unknown) {
     const duration = Date.now() - startTime;
     const errorMessage = error instanceof Error ? error.message : String(error);
-    devLog('error', 'API/consult', `FAILED after ${duration}ms`, { error: errorMessage });
+    devLog("error", "API/consult", `FAILED after ${duration}ms`, { error: errorMessage });
 
     // Return a proper error response (500) so the client knows it failed
     const { userFriendlyError, errorCode } = parseApiError(errorMessage);
 
-    return new Response(JSON.stringify({
-      error: userFriendlyError,
-      code: errorCode,
-      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-      diagnosis: "Analysis Error",
-      recommendations: {
-        food: ["Please retry the analysis"],
-        avoid: ["N/A"],
-        lifestyle: ["Please try again with the diagnosis"]
+    return new Response(
+      JSON.stringify({
+        error: userFriendlyError,
+        code: errorCode,
+        details: process.env.NODE_ENV === "development" ? errorMessage : undefined,
+        diagnosis: "Analysis Error",
+        recommendations: {
+          food: ["Please retry the analysis"],
+          avoid: ["N/A"],
+          lifestyle: ["Please try again with the diagnosis"],
+        },
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
       }
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    );
   }
 }

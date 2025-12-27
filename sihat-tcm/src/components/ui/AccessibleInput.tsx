@@ -1,6 +1,6 @@
 /**
  * AccessibleInput - WCAG 2.1 AA compliant input component
- * 
+ *
  * Features:
  * - Proper labeling and descriptions
  * - Error state management
@@ -9,80 +9,83 @@
  * - Validation feedback
  */
 
-'use client'
+"use client";
 
-import React, { forwardRef, useId } from 'react'
-import { cn } from '@/lib/utils'
-import { useAccessibilityContext } from '@/stores/useAppStore'
-import { AlertCircle, CheckCircle } from 'lucide-react'
+import React, { forwardRef, useId } from "react";
+import { cn } from "@/lib/utils";
+import { useAccessibilityContext } from "@/stores/useAppStore";
+import { AlertCircle, CheckCircle } from "lucide-react";
 
 export interface AccessibleInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string
-  description?: string
-  error?: string
-  success?: string
-  showValidation?: boolean
-  focusGroup?: string
-  announceChanges?: boolean
+  label?: string;
+  description?: string;
+  error?: string;
+  success?: string;
+  showValidation?: boolean;
+  focusGroup?: string;
+  announceChanges?: boolean;
 }
 
 export const AccessibleInput = forwardRef<HTMLInputElement, AccessibleInputProps>(
-  ({
-    className,
-    type = 'text',
-    label,
-    description,
-    error,
-    success,
-    showValidation = true,
-    focusGroup,
-    announceChanges = false,
-    id,
-    onChange,
-    onFocus,
-    onBlur,
-    ...props
-  }, ref) => {
-    const { announce } = useAccessibilityContext()
-    const generatedId = useId()
-    const inputId = id || generatedId
-    const descriptionId = description ? `${inputId}-description` : undefined
-    const errorId = error ? `${inputId}-error` : undefined
-    const successId = success ? `${inputId}-success` : undefined
+  (
+    {
+      className,
+      type = "text",
+      label,
+      description,
+      error,
+      success,
+      showValidation = true,
+      focusGroup,
+      announceChanges = false,
+      id,
+      onChange,
+      onFocus,
+      onBlur,
+      ...props
+    },
+    ref
+  ) => {
+    const { announce } = useAccessibilityContext();
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const descriptionId = description ? `${inputId}-description` : undefined;
+    const errorId = error ? `${inputId}-error` : undefined;
+    const successId = success ? `${inputId}-success` : undefined;
 
-    const hasError = Boolean(error)
-    const hasSuccess = Boolean(success) && !hasError
-    const isInvalid = hasError
+    const hasError = Boolean(error);
+    const hasSuccess = Boolean(success) && !hasError;
+    const isInvalid = hasError;
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       if (announceChanges) {
-        const value = event.target.value
-        announce(`Input value changed to: ${value}`, 'polite')
+        const value = event.target.value;
+        announce(`Input value changed to: ${value}`, "polite");
       }
 
-      onChange?.(event)
-    }
+      onChange?.(event);
+    };
 
     const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
       if (description) {
-        announce(description, 'polite')
+        announce(description, "polite");
       }
 
-      onFocus?.(event)
-    }
+      onFocus?.(event);
+    };
 
     const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
       if (error && showValidation) {
-        announce(`Error: ${error}`, 'assertive')
+        announce(`Error: ${error}`, "assertive");
       } else if (success && showValidation) {
-        announce(`Success: ${success}`, 'polite')
+        announce(`Success: ${success}`, "polite");
       }
 
-      onBlur?.(event)
-    }
+      onBlur?.(event);
+    };
 
     // Build aria-describedby
-    const describedBy = [descriptionId, errorId, successId].filter(Boolean).join(' ') || undefined
+    const describedBy = [descriptionId, errorId, successId].filter(Boolean).join(" ") || undefined;
 
     return (
       <div className="space-y-2">
@@ -103,10 +106,7 @@ export const AccessibleInput = forwardRef<HTMLInputElement, AccessibleInputProps
 
         {/* Description */}
         {description && (
-          <p
-            id={descriptionId}
-            className="text-sm text-gray-600 dark:text-gray-400"
-          >
+          <p id={descriptionId} className="text-sm text-gray-600 dark:text-gray-400">
             {description}
           </p>
         )}
@@ -118,14 +118,14 @@ export const AccessibleInput = forwardRef<HTMLInputElement, AccessibleInputProps
             type={type}
             id={inputId}
             className={cn(
-              "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+              "flex h-11 w-full rounded-[10px] border border-input bg-input px-3 py-2 text-sm min-h-[44px] shadow-depth-1",
               "ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium",
-              "placeholder:text-muted-foreground",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              "placeholder:text-muted-foreground transition-apple-fast",
+              "focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/10 focus-visible:ring-offset-0 focus-visible:bg-background",
               "disabled:cursor-not-allowed disabled:opacity-50",
               "aria-invalid:border-destructive aria-invalid:ring-destructive/20",
-              hasError && "border-red-500 focus-visible:ring-red-500",
-              hasSuccess && "border-green-500 focus-visible:ring-green-500",
+              hasError && "border-red-500 focus-visible:ring-red-500/10",
+              hasSuccess && "border-green-500 focus-visible:ring-green-500/10",
               className
             )}
             aria-invalid={isInvalid}
@@ -140,18 +140,8 @@ export const AccessibleInput = forwardRef<HTMLInputElement, AccessibleInputProps
           {/* Validation Icons */}
           {showValidation && (hasError || hasSuccess) && (
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              {hasError && (
-                <AlertCircle
-                  className="h-5 w-5 text-red-500"
-                  aria-hidden="true"
-                />
-              )}
-              {hasSuccess && (
-                <CheckCircle
-                  className="h-5 w-5 text-green-500"
-                  aria-hidden="true"
-                />
-              )}
+              {hasError && <AlertCircle className="h-5 w-5 text-red-500" aria-hidden="true" />}
+              {hasSuccess && <CheckCircle className="h-5 w-5 text-green-500" aria-hidden="true" />}
             </div>
           )}
         </div>
@@ -182,8 +172,8 @@ export const AccessibleInput = forwardRef<HTMLInputElement, AccessibleInputProps
           </p>
         )}
       </div>
-    )
+    );
   }
-)
+);
 
-AccessibleInput.displayName = 'AccessibleInput'
+AccessibleInput.displayName = "AccessibleInput";

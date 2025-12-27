@@ -1,60 +1,71 @@
-'use client'
+"use client";
 
-import DiagnosisWizard from '@/components/diagnosis/DiagnosisWizard'
-import { useState, useRef, useEffect } from 'react'
-import { FlaskConical, Check, Eraser } from 'lucide-react'
-import Link from 'next/link'
-import { useAuth } from '@/stores/useAppStore'
-import { useLanguage } from '@/stores/useAppStore'
-import { LanguageSelector } from '@/components/ui/LanguageSelector'
-import { SystemManual } from '@/components/ui/SystemManual'
-import { useDiagnosisProgressOptional } from '@/stores/useAppStore'
-import Image from 'next/image'
-import { AppDownloadSection } from '@/components/landing/AppDownloadSection'
+import dynamic from "next/dynamic";
+import { useState, useRef, useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { FlaskConical, Check, Eraser } from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "@/stores/useAppStore";
+import { useLanguage } from "@/stores/useAppStore";
+import { LanguageSelector } from "@/components/ui/LanguageSelector";
+import { SystemManual } from "@/components/ui/SystemManual";
+import { useDiagnosisProgressOptional } from "@/stores/useAppStore";
+import Image from "next/image";
+import { AppDownloadSection } from "@/components/landing/AppDownloadSection";
+
+// Lazy load DiagnosisWizard to reduce initial bundle size
+const DiagnosisWizard = dynamic(() => import("@/components/diagnosis/DiagnosisWizard"), {
+  loading: () => (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+        <p className="text-stone-600 text-sm">Loading diagnosis wizard...</p>
+      </div>
+    </div>
+  ),
+  ssr: false, // Already a client component
+});
 
 export default function Home() {
-
   /**
    * ============================================================================
    * TEST/CLEAR BUTTON STATE MACHINE
    * ============================================================================
    * This state controls the visual feedback when the Test/Clear button is clicked.
-   * 
+   *
    * States:
    * - 'test': Initial state, shows Test button (amber)
    * - 'filling': Transitional state after clicking Test, shows "Filled!" (emerald)
    * - 'clear': Shows Clear button (rose/red)
    * - 'clearing': Transitional state after clicking Clear, shows "Cleared!" (emerald)
-   * 
+   *
    * Flow: test → filling → clear → clearing → test (cycle repeats)
-   * 
+   *
    * DO NOT REMOVE: This is an intentional UX feature requested by the user.
    * ============================================================================
    */
-  type ButtonState = 'test' | 'filling' | 'clear' | 'clearing'
-  const [buttonState, setButtonState] = useState<ButtonState>('test')
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  type ButtonState = "test" | "filling" | "clear" | "clearing";
+  const [buttonState, setButtonState] = useState<ButtonState>("test");
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup timeout on unmount to prevent memory leaks
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
+        clearTimeout(timeoutRef.current);
       }
-    }
-  }, [])
+    };
+  }, []);
 
-  const { user, profile, loading } = useAuth()
-  const { t } = useLanguage()
-  const diagnosisProgress = useDiagnosisProgressOptional()
-  const progress = diagnosisProgress?.progress ?? 0
+  const { user, profile, loading } = useAuth();
+  const { t } = useLanguage();
+  const diagnosisProgress = useDiagnosisProgressOptional();
+  const progress = diagnosisProgress?.progress ?? 0;
 
   // Hide the promotional footer on mobile during step 2/7 and beyond (wen_inquiry starts at 15%)
   // because it requires lots of data entry and we don't want to confuse users with extra content
   // Progress 15% = Step 2 starts, so we hide footer for all steps after basic info (step 1)
-  const isStep2OrBeyondMobile = progress >= 15
-
-
+  const isStep2OrBeyondMobile = progress >= 15;
 
   /**
    * Handle Test/Clear button click with visual feedback
@@ -65,25 +76,25 @@ export default function Home() {
    */
   const handleButtonClick = () => {
     // Prevent clicks during transition states
-    if (buttonState === 'filling' || buttonState === 'clearing') return
+    if (buttonState === "filling" || buttonState === "clearing") return;
 
     // Clear any existing timeout to prevent state corruption
     if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
+      clearTimeout(timeoutRef.current);
     }
 
-    if (buttonState === 'test') {
+    if (buttonState === "test") {
       // Test → Filling → Clear
-      setButtonState('filling')
-      window.dispatchEvent(new CustomEvent('fill-test-data'))
-      timeoutRef.current = setTimeout(() => setButtonState('clear'), 1500)
-    } else if (buttonState === 'clear') {
+      setButtonState("filling");
+      window.dispatchEvent(new CustomEvent("fill-test-data"));
+      timeoutRef.current = setTimeout(() => setButtonState("clear"), 1500);
+    } else if (buttonState === "clear") {
       // Clear → Clearing → Test
-      setButtonState('clearing')
-      window.dispatchEvent(new CustomEvent('clear-test-data'))
-      timeoutRef.current = setTimeout(() => setButtonState('test'), 1500)
+      setButtonState("clearing");
+      window.dispatchEvent(new CustomEvent("clear-test-data"));
+      timeoutRef.current = setTimeout(() => setButtonState("test"), 1500);
     }
-  }
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-stone-50 to-emerald-50/30 text-stone-800 font-sans selection:bg-emerald-100">
@@ -91,7 +102,10 @@ export default function Home() {
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
 
         {/* Left side: Logo and Title */}
-        <Link href="/credentials" className="relative z-10 flex items-center gap-2 sm:gap-3 hover:opacity-90 transition-opacity cursor-pointer group shrink-0">
+        <Link
+          href="/credentials"
+          className="relative z-10 flex items-center gap-2 sm:gap-3 hover:opacity-90 transition-opacity cursor-pointer group shrink-0"
+        >
           <div className="bg-white/10 p-1.5 rounded-full backdrop-blur-sm border border-white/10 group-hover:bg-white/20 transition-colors">
             <Image
               src="/logo.png"
@@ -103,12 +117,15 @@ export default function Home() {
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-lg sm:text-xl font-bold leading-none tracking-tight text-white group-hover:text-emerald-50 transition-colors whitespace-nowrap">Sihat TCM</span>
+            <span className="text-lg sm:text-xl font-bold leading-none tracking-tight text-white group-hover:text-emerald-50 transition-colors whitespace-nowrap">
+              Sihat TCM
+            </span>
             {/* Tagline hidden on mobile/tablet to save space */}
-            <p className="text-xs text-emerald-200 font-medium tracking-wide hidden lg:block">AI-Powered Traditional Chinese Medicine</p>
+            <p className="text-xs text-emerald-200 font-medium tracking-wide hidden lg:block">
+              AI-Powered Traditional Chinese Medicine
+            </p>
           </div>
         </Link>
-
 
         {/* Top right buttons */}
         <div className="relative z-50 flex items-center gap-2 shrink-0">
@@ -136,36 +153,40 @@ export default function Home() {
             */}
           <button
             onClick={handleButtonClick}
-            disabled={buttonState === 'filling' || buttonState === 'clearing'}
+            disabled={buttonState === "filling" || buttonState === "clearing"}
             className={`flex items-center gap-2 p-2 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl
-              ${buttonState === 'test'
-                ? 'bg-amber-500 hover:bg-amber-400 text-amber-950 hover:scale-105'
-                : buttonState === 'filling' || buttonState === 'clearing'
-                  ? 'bg-emerald-500 text-white scale-95 ring-4 ring-emerald-300/50'
-                  : 'bg-rose-500 hover:bg-rose-400 text-white hover:scale-105'
+              ${
+                buttonState === "test"
+                  ? "bg-amber-500 hover:bg-amber-400 text-amber-950 hover:scale-105"
+                  : buttonState === "filling" || buttonState === "clearing"
+                    ? "bg-emerald-500 text-white scale-95 ring-4 ring-emerald-300/50"
+                    : "bg-rose-500 hover:bg-rose-400 text-white hover:scale-105"
               }
-              ${(buttonState === 'filling' || buttonState === 'clearing') ? 'cursor-not-allowed' : 'cursor-pointer'}
+              ${buttonState === "filling" || buttonState === "clearing" ? "cursor-not-allowed" : "cursor-pointer"}
             `}
-            title={buttonState === 'test' || buttonState === 'filling' ? t.nav.test : t.common.clear}
+            title={
+              buttonState === "test" || buttonState === "filling" ? t.nav.test : t.common.clear
+            }
           >
             {/* Icon based on state */}
-            {buttonState === 'test' ? (
+            {buttonState === "test" ? (
               <FlaskConical className="w-4 h-4" />
-            ) : buttonState === 'filling' || buttonState === 'clearing' ? (
+            ) : buttonState === "filling" || buttonState === "clearing" ? (
               <Check className="w-4 h-4 animate-bounce" />
             ) : (
               <Eraser className="w-4 h-4" />
             )}
             {/* Text: Always show during transitions, hide on mobile for idle states */}
-            <span className={`${buttonState === 'filling' || buttonState === 'clearing' ? 'inline' : 'hidden lg:inline'}`}>
-              {buttonState === 'test'
+            <span
+              className={`${buttonState === "filling" || buttonState === "clearing" ? "inline" : "hidden lg:inline"}`}
+            >
+              {buttonState === "test"
                 ? t.nav.test
-                : buttonState === 'filling'
+                : buttonState === "filling"
                   ? t.common.filled
-                  : buttonState === 'clearing'
+                  : buttonState === "clearing"
                     ? t.common.cleared
-                    : t.common.clear
-              }
+                    : t.common.clear}
             </span>
           </button>
 
@@ -178,23 +199,20 @@ export default function Home() {
               {t.nav.login}
             </Link>
           )}
-
         </div>
       </header>
 
-      <section className="container mx-auto py-6 md:py-12 px-4 relative z-20">
-        <div className="bg-white rounded-2xl shadow-xl border border-stone-100 overflow-hidden">
+      <section className="container mx-auto py-8 md:py-16 px-5 md:px-10 relative z-20">
+        <div className="bg-white rounded-[18px] shadow-depth-2 border border-border overflow-hidden">
           <DiagnosisWizard />
         </div>
       </section>
 
       {/* Promotional footer - hidden on mobile during step 2/7 and beyond to reduce confusion during data entry */}
       {/* Promotional footer / App Download Section - hidden on mobile during step 2/7 and beyond */}
-      <div className={isStep2OrBeyondMobile ? 'hidden md:block' : ''}>
+      <div className={isStep2OrBeyondMobile ? "hidden md:block" : ""}>
         <AppDownloadSection />
       </div>
-
-
     </main>
-  )
+  );
 }

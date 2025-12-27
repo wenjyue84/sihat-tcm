@@ -9,17 +9,19 @@ This document outlines how to record **all diagnosis input data** (symptoms, inq
 ## Current State Analysis
 
 ### ✅ What's Currently Saved
+
 - Primary diagnosis
 - Constitution
 - Overall score
 - Full report (JSON)
-- Symptoms (array) - *partially*
-- Medicines (array) - *partially*
+- Symptoms (array) - _partially_
+- Medicines (array) - _partially_
 - Vital signs (if extracted from report)
 - Treatment plan (if extracted from report)
 - User notes
 
 ### ❌ What's Currently NOT Saved
+
 1. **Inquiry Data:**
    - Inquiry summary/text (`wen_inquiry.inquiryText`)
    - Full chat history (`wen_inquiry.chatHistory` or `wen_chat.chat`)
@@ -65,18 +67,18 @@ alter table public.diagnosis_sessions
   add column if not exists inquiry_chat_history jsonb,
   add column if not exists inquiry_report_files jsonb, -- Array of file metadata
   add column if not exists inquiry_medicine_files jsonb, -- Array of file metadata
-  
+
   -- Visual analysis data
   add column if not exists tongue_analysis jsonb, -- {image_url, observation, analysis_tags, tcm_indicators, pattern_suggestions}
   add column if not exists face_analysis jsonb, -- {image_url, observation, analysis_tags, tcm_indicators}
   add column if not exists body_analysis jsonb, -- {image_url, observation, analysis_tags}
-  
+
   -- Audio analysis
   add column if not exists audio_analysis jsonb, -- {audio_url, observation, potential_issues}
-  
+
   -- Pulse data (enhanced)
   add column if not exists pulse_data jsonb, -- {bpm, quality, rhythm, strength, notes}
-  
+
   -- Guest user support
   add column if not exists is_guest_session boolean default false,
   add column if not exists guest_email text, -- For follow-up signup prompts
@@ -117,14 +119,14 @@ create table if not exists public.guest_diagnosis_sessions (
   session_token text unique not null, -- Temporary token for guest access
   guest_email text,
   guest_name text,
-  
+
   -- Same fields as diagnosis_sessions
   primary_diagnosis text not null,
   constitution text,
   overall_score integer check (overall_score >= 0 and overall_score <= 100),
   full_report jsonb not null,
   notes text,
-  
+
   -- Input data fields (same as above)
   inquiry_summary text,
   inquiry_chat_history jsonb,
@@ -141,11 +143,11 @@ create table if not exists public.guest_diagnosis_sessions (
   clinical_notes text,
   treatment_plan text,
   follow_up_date date,
-  
+
   -- Timestamps
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  
+
   -- Migration fields (when guest signs up)
   migrated_to_user_id uuid references auth.users(id) on delete set null,
   migrated_at timestamp with time zone
@@ -191,120 +193,120 @@ Add new fields to `DiagnosisSession` and `SaveDiagnosisInput`:
 
 ```typescript
 export interface DiagnosisSession {
-  id: string
-  user_id: string
-  primary_diagnosis: string
-  constitution?: string | null
-  overall_score?: number | null
-  full_report: DiagnosisReport
-  notes?: string | null
-  
+  id: string;
+  user_id: string;
+  primary_diagnosis: string;
+  constitution?: string | null;
+  overall_score?: number | null;
+  full_report: DiagnosisReport;
+  notes?: string | null;
+
   // Existing doctor record fields
-  symptoms?: string[] | null
-  medicines?: string[] | null
-  vital_signs?: VitalSigns | null
-  clinical_notes?: string | null
-  treatment_plan?: string | null
-  follow_up_date?: string | null
-  family_member_id?: string | null
-  
+  symptoms?: string[] | null;
+  medicines?: string[] | null;
+  vital_signs?: VitalSigns | null;
+  clinical_notes?: string | null;
+  treatment_plan?: string | null;
+  follow_up_date?: string | null;
+  family_member_id?: string | null;
+
   // NEW: Input data fields
-  inquiry_summary?: string | null
-  inquiry_chat_history?: ChatMessage[] | null
-  inquiry_report_files?: FileMetadata[] | null
-  inquiry_medicine_files?: FileMetadata[] | null
-  tongue_analysis?: TongueAnalysisData | null
-  face_analysis?: FaceAnalysisData | null
-  body_analysis?: BodyAnalysisData | null
-  audio_analysis?: AudioAnalysisData | null
-  pulse_data?: PulseData | null
-  
+  inquiry_summary?: string | null;
+  inquiry_chat_history?: ChatMessage[] | null;
+  inquiry_report_files?: FileMetadata[] | null;
+  inquiry_medicine_files?: FileMetadata[] | null;
+  tongue_analysis?: TongueAnalysisData | null;
+  face_analysis?: FaceAnalysisData | null;
+  body_analysis?: BodyAnalysisData | null;
+  audio_analysis?: AudioAnalysisData | null;
+  pulse_data?: PulseData | null;
+
   // Guest session fields
-  is_guest_session?: boolean
-  guest_email?: string | null
-  guest_name?: string | null
-  
-  created_at: string
-  updated_at: string
+  is_guest_session?: boolean;
+  guest_email?: string | null;
+  guest_name?: string | null;
+
+  created_at: string;
+  updated_at: string;
 }
 
 export interface SaveDiagnosisInput {
-  primary_diagnosis: string
-  constitution?: string
-  overall_score?: number
-  full_report: DiagnosisReport
-  notes?: string
-  
+  primary_diagnosis: string;
+  constitution?: string;
+  overall_score?: number;
+  full_report: DiagnosisReport;
+  notes?: string;
+
   // Existing fields
-  symptoms?: string[]
-  medicines?: string[]
-  vital_signs?: VitalSigns
-  clinical_notes?: string
-  treatment_plan?: string
-  follow_up_date?: string
-  
+  symptoms?: string[];
+  medicines?: string[];
+  vital_signs?: VitalSigns;
+  clinical_notes?: string;
+  treatment_plan?: string;
+  follow_up_date?: string;
+
   // NEW: Input data fields
-  inquiry_summary?: string
-  inquiry_chat_history?: ChatMessage[]
-  inquiry_report_files?: FileMetadata[]
-  inquiry_medicine_files?: FileMetadata[]
-  tongue_analysis?: TongueAnalysisData
-  face_analysis?: FaceAnalysisData
-  body_analysis?: BodyAnalysisData
-  audio_analysis?: AudioAnalysisData
-  pulse_data?: PulseData
-  
+  inquiry_summary?: string;
+  inquiry_chat_history?: ChatMessage[];
+  inquiry_report_files?: FileMetadata[];
+  inquiry_medicine_files?: FileMetadata[];
+  tongue_analysis?: TongueAnalysisData;
+  face_analysis?: FaceAnalysisData;
+  body_analysis?: BodyAnalysisData;
+  audio_analysis?: AudioAnalysisData;
+  pulse_data?: PulseData;
+
   // Guest session fields
-  is_guest_session?: boolean
-  guest_email?: string
-  guest_name?: string
+  is_guest_session?: boolean;
+  guest_email?: string;
+  guest_name?: string;
 }
 
 // New supporting types
 export interface FileMetadata {
-  name: string
-  url: string
-  type: string
-  size?: number
-  extracted_text?: string
+  name: string;
+  url: string;
+  type: string;
+  size?: number;
+  extracted_text?: string;
 }
 
 export interface TongueAnalysisData {
-  image_url?: string
-  observation?: string
-  analysis_tags?: string[]
-  tcm_indicators?: string[]
-  pattern_suggestions?: string[]
-  potential_issues?: string[]
+  image_url?: string;
+  observation?: string;
+  analysis_tags?: string[];
+  tcm_indicators?: string[];
+  pattern_suggestions?: string[];
+  potential_issues?: string[];
 }
 
 export interface FaceAnalysisData {
-  image_url?: string
-  observation?: string
-  analysis_tags?: string[]
-  tcm_indicators?: string[]
-  potential_issues?: string[]
+  image_url?: string;
+  observation?: string;
+  analysis_tags?: string[];
+  tcm_indicators?: string[];
+  potential_issues?: string[];
 }
 
 export interface BodyAnalysisData {
-  image_url?: string
-  observation?: string
-  analysis_tags?: string[]
-  potential_issues?: string[]
+  image_url?: string;
+  observation?: string;
+  analysis_tags?: string[];
+  potential_issues?: string[];
 }
 
 export interface AudioAnalysisData {
-  audio_url?: string
-  observation?: string
-  potential_issues?: string[]
+  audio_url?: string;
+  observation?: string;
+  potential_issues?: string[];
 }
 
 export interface PulseData {
-  bpm?: number
-  quality?: string
-  rhythm?: string
-  strength?: string
-  notes?: string
+  bpm?: number;
+  quality?: string;
+  rhythm?: string;
+  strength?: string;
+  notes?: string;
 }
 ```
 
@@ -324,61 +326,73 @@ const inputData = {
   // Inquiry data
   inquiry_summary: data.wen_inquiry?.inquiryText || data.wen_inquiry?.summary,
   inquiry_chat_history: data.wen_inquiry?.chatHistory || data.wen_chat?.chat || [],
-  inquiry_report_files: data.wen_inquiry?.reportFiles?.map((f: any) => ({
-    name: f.name,
-    url: f.url || f.publicUrl,
-    type: f.type,
-    size: f.size,
-    extracted_text: f.extractedText
-  })) || [],
-  inquiry_medicine_files: data.wen_inquiry?.medicineFiles?.map((f: any) => ({
-    name: f.name,
-    url: f.url || f.publicUrl,
-    type: f.type,
-    size: f.size,
-    extracted_text: f.extractedText
-  })) || [],
-  
+  inquiry_report_files:
+    data.wen_inquiry?.reportFiles?.map((f: any) => ({
+      name: f.name,
+      url: f.url || f.publicUrl,
+      type: f.type,
+      size: f.size,
+      extracted_text: f.extractedText,
+    })) || [],
+  inquiry_medicine_files:
+    data.wen_inquiry?.medicineFiles?.map((f: any) => ({
+      name: f.name,
+      url: f.url || f.publicUrl,
+      type: f.type,
+      size: f.size,
+      extracted_text: f.extractedText,
+    })) || [],
+
   // Visual analysis
-  tongue_analysis: data.wang_tongue ? {
-    image_url: data.wang_tongue.image,
-    observation: data.wang_tongue.observation,
-    analysis_tags: data.wang_tongue.analysis_tags,
-    tcm_indicators: data.wang_tongue.tcm_indicators,
-    pattern_suggestions: data.wang_tongue.pattern_suggestions,
-    potential_issues: data.wang_tongue.potential_issues
-  } : null,
-  
-  face_analysis: data.wang_face ? {
-    image_url: data.wang_face.image,
-    observation: data.wang_face.observation,
-    analysis_tags: data.wang_face.analysis_tags,
-    tcm_indicators: data.wang_face.tcm_indicators,
-    potential_issues: data.wang_face.potential_issues
-  } : null,
-  
-  body_analysis: data.wang_part ? {
-    image_url: data.wang_part.image,
-    observation: data.wang_part.observation,
-    analysis_tags: data.wang_part.analysis_tags,
-    potential_issues: data.wang_part.potential_issues
-  } : null,
-  
+  tongue_analysis: data.wang_tongue
+    ? {
+        image_url: data.wang_tongue.image,
+        observation: data.wang_tongue.observation,
+        analysis_tags: data.wang_tongue.analysis_tags,
+        tcm_indicators: data.wang_tongue.tcm_indicators,
+        pattern_suggestions: data.wang_tongue.pattern_suggestions,
+        potential_issues: data.wang_tongue.potential_issues,
+      }
+    : null,
+
+  face_analysis: data.wang_face
+    ? {
+        image_url: data.wang_face.image,
+        observation: data.wang_face.observation,
+        analysis_tags: data.wang_face.analysis_tags,
+        tcm_indicators: data.wang_face.tcm_indicators,
+        potential_issues: data.wang_face.potential_issues,
+      }
+    : null,
+
+  body_analysis: data.wang_part
+    ? {
+        image_url: data.wang_part.image,
+        observation: data.wang_part.observation,
+        analysis_tags: data.wang_part.analysis_tags,
+        potential_issues: data.wang_part.potential_issues,
+      }
+    : null,
+
   // Audio analysis
-  audio_analysis: data.wen_audio ? {
-    audio_url: data.wen_audio.audio,
-    observation: data.wen_audio.observation,
-    potential_issues: data.wen_audio.potential_issues
-  } : null,
-  
+  audio_analysis: data.wen_audio
+    ? {
+        audio_url: data.wen_audio.audio,
+        observation: data.wen_audio.observation,
+        potential_issues: data.wen_audio.potential_issues,
+      }
+    : null,
+
   // Pulse data
-  pulse_data: data.qie ? {
-    bpm: data.qie.bpm,
-    quality: data.qie.quality,
-    rhythm: data.qie.rhythm,
-    strength: data.qie.strength,
-    notes: data.qie.notes
-  } : null
+  pulse_data: data.qie
+    ? {
+        bpm: data.qie.bpm,
+        quality: data.qie.quality,
+        rhythm: data.qie.rhythm,
+        strength: data.qie.strength,
+        notes: data.qie.notes,
+      }
+    : null,
 };
 
 // Determine if this is a guest session
@@ -399,7 +413,7 @@ const saveResult = await saveDiagnosis({
   // Guest session fields
   is_guest_session: isGuest,
   guest_email: guestEmail,
-  guest_name: guestName
+  guest_name: guestName,
 });
 ```
 
@@ -408,113 +422,118 @@ const saveResult = await saveDiagnosis({
 Modify `saveDiagnosis` to handle all new fields and guest sessions:
 
 ```typescript
-export async function saveDiagnosis(reportData: SaveDiagnosisInput): Promise<ActionResult<DiagnosisSession>> {
-    try {
-        const supabase = await createClient()
-        
-        // Get current user (may be null for guests)
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-        
-        // For guest sessions, use guest_diagnosis_sessions table
-        if (reportData.is_guest_session || (!user && !authError)) {
-            // Generate a session token for guest
-            const sessionToken = crypto.randomUUID();
-            
-            const { data, error } = await supabase
-                .from('guest_diagnosis_sessions')
-                .insert({
-                    session_token: sessionToken,
-                    guest_email: reportData.guest_email,
-                    guest_name: reportData.guest_name,
-                    primary_diagnosis: reportData.primary_diagnosis,
-                    constitution: reportData.constitution,
-                    overall_score: reportData.overall_score,
-                    full_report: reportData.full_report,
-                    notes: reportData.notes,
-                    symptoms: reportData.symptoms,
-                    medicines: reportData.medicines,
-                    vital_signs: reportData.vital_signs,
-                    clinical_notes: reportData.clinical_notes,
-                    treatment_plan: reportData.treatment_plan,
-                    follow_up_date: reportData.follow_up_date,
-                    // Input data fields
-                    inquiry_summary: reportData.inquiry_summary,
-                    inquiry_chat_history: reportData.inquiry_chat_history,
-                    inquiry_report_files: reportData.inquiry_report_files,
-                    inquiry_medicine_files: reportData.inquiry_medicine_files,
-                    tongue_analysis: reportData.tongue_analysis,
-                    face_analysis: reportData.face_analysis,
-                    body_analysis: reportData.body_analysis,
-                    audio_analysis: reportData.audio_analysis,
-                    pulse_data: reportData.pulse_data
-                })
-                .select()
-                .single()
-            
-            if (error) {
-                return { success: false, error: error.message }
-            }
-            
-            // Return with session token for guest access
-            return {
-                success: true,
-                data: { ...data, session_token: sessionToken } as any
-            }
-        }
-        
-        // For authenticated users, use diagnosis_sessions table
-        if (authError || !user) {
-            return {
-                success: false,
-                error: 'Not authenticated. Please log in to save your diagnosis.'
-            }
-        }
-        
-        // Insert diagnosis session with all input data
-        const { data, error } = await supabase
-            .from('diagnosis_sessions')
-            .insert({
-                user_id: user.id,
-                primary_diagnosis: reportData.primary_diagnosis,
-                constitution: reportData.constitution,
-                overall_score: reportData.overall_score,
-                full_report: reportData.full_report,
-                notes: reportData.notes,
-                symptoms: reportData.symptoms,
-                medicines: reportData.medicines,
-                vital_signs: reportData.vital_signs,
-                clinical_notes: reportData.clinical_notes,
-                treatment_plan: reportData.treatment_plan,
-                follow_up_date: reportData.follow_up_date,
-                // NEW: Input data fields
-                inquiry_summary: reportData.inquiry_summary,
-                inquiry_chat_history: reportData.inquiry_chat_history,
-                inquiry_report_files: reportData.inquiry_report_files,
-                inquiry_medicine_files: reportData.inquiry_medicine_files,
-                tongue_analysis: reportData.tongue_analysis,
-                face_analysis: reportData.face_analysis,
-                body_analysis: reportData.body_analysis,
-                audio_analysis: reportData.audio_analysis,
-                pulse_data: reportData.pulse_data
-            })
-            .select()
-            .single()
-        
-        if (error) {
-            return { success: false, error: error.message }
-        }
-        
-        return {
-            success: true,
-            data: data as DiagnosisSession
-        }
-    } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to save diagnosis'
-        return {
-            success: false,
-            error: errorMessage
-        }
+export async function saveDiagnosis(
+  reportData: SaveDiagnosisInput
+): Promise<ActionResult<DiagnosisSession>> {
+  try {
+    const supabase = await createClient();
+
+    // Get current user (may be null for guests)
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    // For guest sessions, use guest_diagnosis_sessions table
+    if (reportData.is_guest_session || (!user && !authError)) {
+      // Generate a session token for guest
+      const sessionToken = crypto.randomUUID();
+
+      const { data, error } = await supabase
+        .from("guest_diagnosis_sessions")
+        .insert({
+          session_token: sessionToken,
+          guest_email: reportData.guest_email,
+          guest_name: reportData.guest_name,
+          primary_diagnosis: reportData.primary_diagnosis,
+          constitution: reportData.constitution,
+          overall_score: reportData.overall_score,
+          full_report: reportData.full_report,
+          notes: reportData.notes,
+          symptoms: reportData.symptoms,
+          medicines: reportData.medicines,
+          vital_signs: reportData.vital_signs,
+          clinical_notes: reportData.clinical_notes,
+          treatment_plan: reportData.treatment_plan,
+          follow_up_date: reportData.follow_up_date,
+          // Input data fields
+          inquiry_summary: reportData.inquiry_summary,
+          inquiry_chat_history: reportData.inquiry_chat_history,
+          inquiry_report_files: reportData.inquiry_report_files,
+          inquiry_medicine_files: reportData.inquiry_medicine_files,
+          tongue_analysis: reportData.tongue_analysis,
+          face_analysis: reportData.face_analysis,
+          body_analysis: reportData.body_analysis,
+          audio_analysis: reportData.audio_analysis,
+          pulse_data: reportData.pulse_data,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      // Return with session token for guest access
+      return {
+        success: true,
+        data: { ...data, session_token: sessionToken } as any,
+      };
     }
+
+    // For authenticated users, use diagnosis_sessions table
+    if (authError || !user) {
+      return {
+        success: false,
+        error: "Not authenticated. Please log in to save your diagnosis.",
+      };
+    }
+
+    // Insert diagnosis session with all input data
+    const { data, error } = await supabase
+      .from("diagnosis_sessions")
+      .insert({
+        user_id: user.id,
+        primary_diagnosis: reportData.primary_diagnosis,
+        constitution: reportData.constitution,
+        overall_score: reportData.overall_score,
+        full_report: reportData.full_report,
+        notes: reportData.notes,
+        symptoms: reportData.symptoms,
+        medicines: reportData.medicines,
+        vital_signs: reportData.vital_signs,
+        clinical_notes: reportData.clinical_notes,
+        treatment_plan: reportData.treatment_plan,
+        follow_up_date: reportData.follow_up_date,
+        // NEW: Input data fields
+        inquiry_summary: reportData.inquiry_summary,
+        inquiry_chat_history: reportData.inquiry_chat_history,
+        inquiry_report_files: reportData.inquiry_report_files,
+        inquiry_medicine_files: reportData.inquiry_medicine_files,
+        tongue_analysis: reportData.tongue_analysis,
+        face_analysis: reportData.face_analysis,
+        body_analysis: reportData.body_analysis,
+        audio_analysis: reportData.audio_analysis,
+        pulse_data: reportData.pulse_data,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return {
+      success: true,
+      data: data as DiagnosisSession,
+    };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Failed to save diagnosis";
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
 }
 ```
 
@@ -534,12 +553,12 @@ This component displays all input data in an organized, collapsible format:
 import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { 
-  MessageSquare, 
-  Camera, 
-  Mic, 
-  Heart, 
-  FileText, 
+import {
+  MessageSquare,
+  Camera,
+  Mic,
+  Heart,
+  FileText,
   ChevronDown,
   ChevronRight,
   Image as ImageIcon
@@ -586,7 +605,7 @@ export function DiagnosisInputDataViewer({ session }: DiagnosisInputDataViewerPr
                   </p>
                 </div>
               )}
-              
+
               {session.inquiry_chat_history && session.inquiry_chat_history.length > 0 && (
                 <div>
                   <h4 className="font-medium mb-2">Chat History</h4>
@@ -604,7 +623,7 @@ export function DiagnosisInputDataViewer({ session }: DiagnosisInputDataViewerPr
                   </div>
                 </div>
               )}
-              
+
               {session.inquiry_report_files && session.inquiry_report_files.length > 0 && (
                 <div>
                   <h4 className="font-medium mb-2">Medical Reports</h4>
@@ -642,9 +661,9 @@ export function DiagnosisInputDataViewer({ session }: DiagnosisInputDataViewerPr
             <CollapsibleContent className="mt-4 space-y-4">
               {session.tongue_analysis.image_url && (
                 <div>
-                  <img 
-                    src={session.tongue_analysis.image_url} 
-                    alt="Tongue image" 
+                  <img
+                    src={session.tongue_analysis.image_url}
+                    alt="Tongue image"
                     className="max-w-full h-auto rounded-lg border"
                   />
                 </div>
@@ -686,9 +705,9 @@ export function DiagnosisInputDataViewer({ session }: DiagnosisInputDataViewerPr
             <CollapsibleContent className="mt-4 space-y-4">
               {session.face_analysis.image_url && (
                 <div>
-                  <img 
-                    src={session.face_analysis.image_url} 
-                    alt="Face image" 
+                  <img
+                    src={session.face_analysis.image_url}
+                    alt="Face image"
                     className="max-w-full h-auto rounded-lg border"
                   />
                 </div>
@@ -809,25 +828,25 @@ Add a section in the history view to show input data summary in the table/card v
 
 ```typescript
 export function generateGuestSessionToken(): string {
-  return crypto.randomUUID()
+  return crypto.randomUUID();
 }
 
 export function saveGuestSessionToken(token: string) {
-  if (typeof window !== 'undefined') {
-    sessionStorage.setItem('guest_session_token', token)
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem("guest_session_token", token);
   }
 }
 
 export function getGuestSessionToken(): string | null {
-  if (typeof window !== 'undefined') {
-    return sessionStorage.getItem('guest_session_token')
+  if (typeof window !== "undefined") {
+    return sessionStorage.getItem("guest_session_token");
   }
-  return null
+  return null;
 }
 
 export function clearGuestSessionToken() {
-  if (typeof window !== 'undefined') {
-    sessionStorage.removeItem('guest_session_token')
+  if (typeof window !== "undefined") {
+    sessionStorage.removeItem("guest_session_token");
   }
 }
 ```
@@ -943,4 +962,3 @@ export async function migrateGuestSessionToUser(
 2. **Token Storage:** Should guest tokens be stored in localStorage (persistent) or sessionStorage (temporary)?
 3. **Migration Prompt:** When should we prompt guests to sign up? (Immediately after diagnosis? After viewing report?)
 4. **Data Export:** Should users be able to export their complete diagnosis data?
-

@@ -30,7 +30,9 @@
 5. **Explore Features**: If you created an account, explore the Patient Portal
 
 ### Account Benefits
+
 Creating an account unlocks:
+
 - ✅ Save diagnosis history
 - ✅ AI Meal Planner with 7-day plans
 - ✅ Snore Analysis for sleep health
@@ -44,18 +46,23 @@ Creating an account unlocks:
 ### The Complete TCM Examination Process
 
 #### Step 1: Basic Information (2 minutes)
+
 **What to prepare**:
+
 - Your current height and weight
 - Main health concern description
 - List of current symptoms
 
 **Tips for accuracy**:
+
 - Be specific about your main concern (e.g., "Chronic fatigue for 3 months" vs "Tired")
 - Use the symptom chips for common issues
 - Mention symptom duration and severity
 
 #### Step 2: Inquiry Chat (5-10 minutes)
+
 **What the AI will ask about**:
+
 - Detailed symptom patterns
 - Sleep quality and patterns
 - Appetite and digestion
@@ -64,42 +71,51 @@ Creating an account unlocks:
 - Medical history
 
 **How to give good answers**:
+
 - Be honest and thorough
 - Describe how symptoms affect your daily life
 - Mention any patterns you've noticed
 - Include current medications or treatments
 
 **Example good responses**:
+
 - ❌ "I sleep badly"
 - ✅ "I fall asleep easily but wake up at 3 AM every night and can't get back to sleep. This has been happening for 2 months."
 
 #### Step 3: Tongue Examination (2 minutes)
+
 **Best practices for tongue photos**:
 
 **Lighting**:
+
 - Use natural daylight when possible
 - Avoid yellow indoor lighting
 - Face a window or go outside
 
 **Positioning**:
+
 - Stick tongue out naturally (don't force it)
 - Keep tongue flat and relaxed
 - Ensure entire tongue is visible
 - Keep mouth wide open
 
 **Preparation**:
+
 - Don't eat colored foods 30 minutes before
 - Don't brush your tongue beforehand
 - Avoid coffee, tea, or colored drinks
 
 **Common mistakes to avoid**:
+
 - ❌ Taking photo in dim lighting
 - ❌ Tongue too tense or curled
 - ❌ Only showing tip of tongue
 - ❌ Recent consumption of colored foods
 
 #### Step 4: Face Examination (1 minute)
+
 **Photo requirements**:
+
 - Front-facing, direct view
 - Even lighting on face
 - Remove glasses if possible
@@ -107,13 +123,16 @@ Creating an account unlocks:
 - Clean face (no makeup if possible)
 
 **What the AI analyzes**:
+
 - Overall complexion and color
 - Facial zones (forehead=heart, cheeks=liver/lung, etc.)
 - Eye brightness and condition
 - Lip color and moisture
 
 #### Step 5: Audio Recording (Optional, 1 minute)
+
 **How to record effectively**:
+
 - Find a quiet environment
 - Hold phone 6-12 inches from mouth
 - Say "Ahhh" for 5-10 seconds
@@ -121,12 +140,14 @@ Creating an account unlocks:
 - Mention any breathing difficulties
 
 **What to include in your recording**:
+
 - Voice strength demonstration
 - Any cough patterns
 - Breathing sounds
 - Normal speech patterns
 
 #### Step 6: Pulse Measurement (2 minutes)
+
 **Three methods available**:
 
 1. **Tap Method** (Recommended for beginners):
@@ -145,6 +166,7 @@ Creating an account unlocks:
    - Works best in dim lighting
 
 **Pulse quality guide** (for advanced users):
+
 - **Floating (浮)**: Easy to feel with light pressure
 - **Deep (沉)**: Requires firm pressure to feel
 - **Rapid (数)**: Faster than normal (>90 BPM)
@@ -153,7 +175,9 @@ Creating an account unlocks:
 - **Wiry (弦)**: Tight, like a guitar string
 
 #### Step 7: Smart Connect (Optional, 3 minutes)
+
 **Supported devices and apps**:
+
 - Apple Health (iPhone)
 - Google Fit (Android)
 - Samsung Health
@@ -162,6 +186,7 @@ Creating an account unlocks:
 - Manual entry
 
 **Useful data to connect**:
+
 - Daily step count
 - Sleep duration and quality
 - Average heart rate
@@ -169,7 +194,9 @@ Creating an account unlocks:
 - Weight measurements
 
 #### Step 8: Review & Generate Report (1 minute)
+
 **Before generating**:
+
 - Review all entered information for accuracy
 - Customize report options:
   - Include/exclude demographics
@@ -184,18 +211,21 @@ Creating an account unlocks:
 ### Health Journey Dashboard
 
 **Overview section**:
+
 - Total consultations completed
 - Average health score trend
 - Most common constitution type
 - Recent activity summary
 
 **History management**:
+
 - View all past diagnoses
 - Sort by date, score, or diagnosis type
 - Quick access to full reports
 - Download PDFs for any consultation
 
 **Digital Twin visualization**:
+
 - Visual representation of organ health
 - Color-coded status indicators
 - Active treatment areas highlighted
@@ -203,6 +233,7 @@ Creating an account unlocks:
 ### AI Meal Planner
 
 **Getting started**:
+
 1. Complete at least one TCM diagnosis
 2. Set dietary preferences:
    - Allergies (nuts, shellfish, dairy, etc.)
@@ -212,6 +243,7 @@ Creating an account unlocks:
 3. Generate your first 7-day plan
 
 **Using the meal planner**:
+
 - **View weekly calendar**: See all meals organized by day
 - **Swap meals**: Don't like a suggestion? Swap it for alternatives
 - **Shopping list**: Auto-generated grocery list by category
@@ -219,6 +251,7 @@ Creating an account unlocks:
 - **TCM properties**: Understand why foods are recommended
 
 **TCM Food Checker**:
+
 - Type any food name or take a photo
 - Get instant suitability assessment
 - Learn TCM properties (thermal nature, flavors)
@@ -227,18 +260,21 @@ Creating an account unlocks:
 ### Snore Analysis
 
 **Recording setup**:
+
 1. Place phone within 3 feet of your bed
 2. Ensure phone has sufficient battery (6+ hours)
 3. Record in a quiet room
 4. Start recording before sleep
 
 **Analysis features**:
+
 - Snoring frequency and intensity
 - Sleep apnea risk assessment
 - TCM constitution correlation
 - Personalized improvement recommendations
 
 **Understanding results**:
+
 - **Severity levels**: None, Mild, Moderate, Severe
 - **TCM patterns**: How snoring relates to Qi deficiency, phlegm-dampness, etc.
 - **Recommendations**: Specific TCM treatments for your pattern
@@ -246,18 +282,21 @@ Creating an account unlocks:
 ### Vitality Rhythm
 
 **Meridian Organ Clock**:
+
 - Shows which organ is most active now
 - 24-hour cycle with 2-hour periods per organ
 - Health tips based on current time
 - Optimal activities for each time period
 
 **24 Solar Terms**:
+
 - Current seasonal period in TCM calendar
 - Seasonal health guidance
 - Dietary adjustments for the season
 - Exercise recommendations
 
 **Constitution tracking**:
+
 - Historical view of your constitution changes
 - Seasonal variations in health patterns
 - Long-term health trend analysis
@@ -265,12 +304,14 @@ Creating an account unlocks:
 ### Qi Dose & Qi Garden
 
 **Qi Dose exercises**:
+
 - **8-Minute Brocade**: Traditional Baduanjin exercises
 - **Desk-Friendly Circuits**: Office-appropriate movements
 - **Meridian Slap**: Energizing patting techniques
 - **Eye Exercises**: Digital detox for screen fatigue
 
 **Qi Garden gamification**:
+
 - **Virtual herbs**: Grow ginseng, reishi, goji berries
 - **Essence & Water**: Earn through healthy activities
 - **Dan Tian filling**: Track your energy reservoir
@@ -278,6 +319,7 @@ Creating an account unlocks:
 - **Herb Shop coupons**: Earn discounts through activities
 
 **Daily activities that earn points**:
+
 - Complete Qi Dose exercises
 - Log meals in meal planner
 - Daily check-in
@@ -287,17 +329,20 @@ Creating an account unlocks:
 ### Circle of Health Community
 
 **Joining circles**:
+
 - Automatically matched to constitution-based groups
 - Anonymous participation protects privacy
 - Multiple circles available for different conditions
 
 **Community features**:
+
 - Share success stories and progress
 - Post TCM-friendly meal photos
 - Ask questions and get peer support
 - Share traditional remedies and tips
 
 **Privacy protection**:
+
 - All posts are anonymous
 - No personal information shared
 - Moderated for safety and appropriateness
@@ -306,6 +351,7 @@ Creating an account unlocks:
 ### Family Care
 
 **Adding family members**:
+
 1. Click "Add Member" in Family Care section
 2. Fill in basic information:
    - Name, age, gender
@@ -314,12 +360,14 @@ Creating an account unlocks:
 3. Create profile
 
 **Managing family health**:
+
 - Start diagnoses on behalf of family members
 - Track each person's health journey separately
 - View family health dashboard
 - Manage multiple profiles from one account
 
 **Use cases**:
+
 - Elderly parent health monitoring
 - Children's wellness tracking
 - Spouse health management
@@ -328,6 +376,7 @@ Creating an account unlocks:
 ### One-Click Remedy (Herb Shop)
 
 **How it works**:
+
 1. Complete TCM diagnosis
 2. View herbal formula recommendations in report
 3. Click "One-Click Remedy" or "Buy Now"
@@ -336,12 +385,14 @@ Creating an account unlocks:
 6. Licensed pharmacy fulfills order
 
 **Product types available**:
+
 - Traditional herbal formulas
 - Tea bags for convenience
 - Granules for easy preparation
 - Capsules for modern lifestyle
 
 **Important notes**:
+
 - Products are for reference only
 - Consult licensed TCM practitioner before use
 - Orders fulfilled by licensed pharmacy partners
@@ -352,10 +403,12 @@ Creating an account unlocks:
 ### Installation and Setup
 
 **Download the app**:
+
 - iOS: Search "Sihat TCM" in App Store
 - Android: Download APK from website or Google Play
 
 **First-time setup**:
+
 1. Open app and select language
 2. Allow necessary permissions:
    - Camera (for image analysis)
@@ -367,24 +420,28 @@ Creating an account unlocks:
 ### Mobile-Specific Features
 
 **Enhanced camera capture**:
+
 - Real-time image quality feedback
 - Guided capture with visual overlays
 - Auto-focus and exposure optimization
 - Multiple photo angles for better analysis
 
 **Voice commands**:
+
 - "Start diagnosis" - Begin new consultation
 - "Take photo" - Capture image during examination
 - "Record audio" - Start voice recording
 - "Next step" - Proceed to next examination
 
 **Offline capabilities**:
+
 - Save diagnosis progress locally
 - Continue consultation without internet
 - Sync when connection restored
 - Cached content for faster loading
 
 **Mobile notifications**:
+
 - Health reminders and tips
 - Meal planning notifications
 - Exercise reminders
@@ -393,6 +450,7 @@ Creating an account unlocks:
 ### Mobile vs Web Differences
 
 **Mobile advantages**:
+
 - Better camera integration
 - Push notifications
 - Offline functionality
@@ -400,6 +458,7 @@ Creating an account unlocks:
 - Voice commands
 
 **Web advantages**:
+
 - Larger screen for detailed reports
 - Better typing experience for chat
 - Full keyboard shortcuts
@@ -411,6 +470,7 @@ Creating an account unlocks:
 ### Account Setup and Verification
 
 **Upgrading to practitioner account**:
+
 1. Contact system administrator
 2. Provide license verification documents
 3. Complete practitioner profile:
@@ -421,6 +481,7 @@ Creating an account unlocks:
 4. Await verification approval
 
 **Practitioner dashboard access**:
+
 - Patient management interface
 - AI oversight tools
 - Diagnosis review capabilities
@@ -429,18 +490,21 @@ Creating an account unlocks:
 ### Patient Management
 
 **Viewing patient reports**:
+
 - Access assigned patient consultations
 - Review AI-generated diagnoses
 - Add practitioner notes and modifications
 - Approve or modify treatment recommendations
 
 **Collaboration with AI**:
+
 - Review AI confidence scores
 - Understand diagnostic reasoning
 - Override AI recommendations when necessary
 - Provide feedback for AI improvement
 
 **Patient communication**:
+
 - Annotate reports with professional insights
 - Communicate with patients through platform
 - Schedule follow-up consultations
@@ -449,6 +513,7 @@ Creating an account unlocks:
 ### AI Oversight Tools
 
 **Diagnostic review process**:
+
 1. Review patient data collection quality
 2. Analyze AI diagnostic reasoning
 3. Verify treatment recommendations
@@ -456,6 +521,7 @@ Creating an account unlocks:
 5. Approve final report
 
 **Quality assurance**:
+
 - Flag unusual or concerning diagnoses
 - Report AI errors or inconsistencies
 - Contribute to AI training datasets
@@ -466,11 +532,13 @@ Creating an account unlocks:
 ### System Configuration
 
 **Accessing admin panel**:
+
 - Login with admin credentials
 - Navigate to Admin Dashboard
 - Access system settings and monitoring
 
 **Key configuration areas**:
+
 - AI model selection and settings
 - System prompts and templates
 - Feature flags and toggles
@@ -480,12 +548,14 @@ Creating an account unlocks:
 ### User Management
 
 **Managing user accounts**:
+
 - View all registered users
 - Modify user roles and permissions
 - Handle account verification requests
 - Manage practitioner approvals
 
 **System monitoring**:
+
 - Monitor system performance metrics
 - Review error logs and issues
 - Track API usage and limits
@@ -494,12 +564,14 @@ Creating an account unlocks:
 ### Content Management
 
 **System prompts**:
+
 - Update AI conversation templates
 - Modify diagnostic reasoning prompts
 - Customize report generation templates
 - Manage multilingual content
 
 **Feature management**:
+
 - Enable/disable platform features
 - Configure A/B testing parameters
 - Manage system maintenance modes
@@ -513,6 +585,7 @@ Creating an account unlocks:
 
 **Problem**: Can't log in to account
 **Solutions**:
+
 1. Check email and password spelling
 2. Use "Forgot Password" to reset
 3. Check email spam folder for verification
@@ -521,6 +594,7 @@ Creating an account unlocks:
 
 **Problem**: Email verification not received
 **Solutions**:
+
 1. Check spam/junk folder
 2. Add platform domain to email whitelist
 3. Request new verification email
@@ -530,6 +604,7 @@ Creating an account unlocks:
 
 **Problem**: Camera not working during examination
 **Solutions**:
+
 1. Allow camera permissions in browser
 2. Check if other apps are using camera
 3. Try different browser (Chrome recommended)
@@ -538,6 +613,7 @@ Creating an account unlocks:
 
 **Problem**: Audio recording fails
 **Solutions**:
+
 1. Allow microphone permissions
 2. Check microphone is connected and working
 3. Test microphone in other applications
@@ -546,6 +622,7 @@ Creating an account unlocks:
 
 **Problem**: Report generation takes too long or fails
 **Solutions**:
+
 1. Check internet connection stability
 2. Don't refresh page during generation
 3. Wait up to 3 minutes for completion
@@ -556,6 +633,7 @@ Creating an account unlocks:
 
 **Problem**: App crashes or won't start
 **Solutions**:
+
 1. Force close and restart app
 2. Restart device
 3. Update app to latest version
@@ -564,6 +642,7 @@ Creating an account unlocks:
 
 **Problem**: Sync issues between devices
 **Solutions**:
+
 1. Check internet connection on both devices
 2. Log out and log back in
 3. Force sync in settings
@@ -574,6 +653,7 @@ Creating an account unlocks:
 
 **Problem**: Meal Planner won't generate plans
 **Solutions**:
+
 1. Ensure you have completed at least one diagnosis
 2. Check dietary preferences are set correctly
 3. Try clearing preferences and setting again
@@ -582,6 +662,7 @@ Creating an account unlocks:
 
 **Problem**: Snore Analysis not working
 **Solutions**:
+
 1. Check audio file format is supported
 2. Ensure recording is at least 30 minutes
 3. Check file size isn't too large
@@ -591,18 +672,21 @@ Creating an account unlocks:
 ### Getting Help
 
 **Self-service options**:
+
 1. Check this troubleshooting guide
 2. Review FAQ section below
 3. Check system status page
 4. Try suggested solutions step by step
 
 **Contact support**:
+
 - Email: support@sihat-tcm.com
 - In-app support chat
 - Help center knowledge base
 - Community forums
 
 **When contacting support, include**:
+
 - Description of the problem
 - Steps you've already tried
 - Device and browser information

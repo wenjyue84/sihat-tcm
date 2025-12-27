@@ -1,19 +1,19 @@
 /**
  * Test Report Generation API
- * 
+ *
  * Generates comprehensive test reports in various formats (HTML, JSON, PDF)
  * using the property-based testing framework analysis tools.
  */
 
-import { NextRequest, NextResponse } from 'next/server'
-import { PropertyTestAnalyzer } from '@/lib/testing/testResultAnalysis'
+import { NextRequest, NextResponse } from "next/server";
+import { PropertyTestAnalyzer } from "@/lib/testing/testResultAnalysis";
 
 export async function POST(request: NextRequest) {
   try {
-    const { results, format = 'html' } = await request.json()
+    const { results, format = "html" } = await request.json();
 
     // Create analyzer instance
-    const analyzer = new PropertyTestAnalyzer()
+    const analyzer = new PropertyTestAnalyzer();
 
     // Mock the results into the global reporter for analysis
     // In a real implementation, this would be properly integrated
@@ -21,101 +21,97 @@ export async function POST(request: NextRequest) {
       // Convert results to the format expected by the analyzer
       const mockResults = Object.entries(results).map(([testId, result]: [string, any]) => ({
         name: testId,
-        status: result.status === 'passed' ? 'passed' : 'failed',
+        status: result.status === "passed" ? "passed" : "failed",
         metadata: {
           testId,
           timestamp: result.timestamp,
           duration: result.duration,
-          coverage: result.coverage
+          coverage: result.coverage,
         },
         error: result.error ? new Error(result.error) : undefined,
-        counterexample: result.propertyFailures || undefined
-      }))
+        counterexample: result.propertyFailures || undefined,
+      }));
 
       // Inject results into analyzer (this is a simplified approach)
-      ;(analyzer as any).mockResults = mockResults
+      (analyzer as any).mockResults = mockResults;
     }
 
-    let reportContent: string
+    let reportContent: string;
 
     switch (format) {
-      case 'html':
-        reportContent = generateHTMLReport(results)
+      case "html":
+        reportContent = generateHTMLReport(results);
         return new Response(reportContent, {
           headers: {
-            'Content-Type': 'text/html',
-            'Content-Disposition': `attachment; filename="test-report-${new Date().toISOString().split('T')[0]}.html"`
-          }
-        })
+            "Content-Type": "text/html",
+            "Content-Disposition": `attachment; filename="test-report-${new Date().toISOString().split("T")[0]}.html"`,
+          },
+        });
 
-      case 'json':
-        reportContent = generateJSONReport(results)
+      case "json":
+        reportContent = generateJSONReport(results);
         return NextResponse.json(JSON.parse(reportContent), {
           headers: {
-            'Content-Disposition': `attachment; filename="test-report-${new Date().toISOString().split('T')[0]}.json"`
-          }
-        })
+            "Content-Disposition": `attachment; filename="test-report-${new Date().toISOString().split("T")[0]}.json"`,
+          },
+        });
 
       default:
         return NextResponse.json(
-          { error: 'Unsupported format. Use html or json.' },
+          { error: "Unsupported format. Use html or json." },
           { status: 400 }
-        )
+        );
     }
-
   } catch (error) {
-    console.error('Test report generation error:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate test report' },
-      { status: 500 }
-    )
+    console.error("Test report generation error:", error);
+    return NextResponse.json({ error: "Failed to generate test report" }, { status: 500 });
   }
 }
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const format = searchParams.get('format') || 'html'
+  const { searchParams } = new URL(request.url);
+  const format = searchParams.get("format") || "html";
 
   // Generate a sample report for demonstration
   const sampleResults = {
     propertyTests: {
-      status: 'passed',
+      status: "passed",
       passed: 28,
       failed: 7,
       total: 35,
-      duration: '2.93s',
-      coverage: '85%',
-      timestamp: new Date().toISOString()
+      duration: "2.93s",
+      coverage: "85%",
+      timestamp: new Date().toISOString(),
     },
     accessibility: {
-      status: 'passed',
+      status: "passed",
       passed: 15,
       failed: 0,
       total: 15,
-      duration: '1.2s',
-      coverage: '92%',
-      timestamp: new Date().toISOString()
-    }
-  }
+      duration: "1.2s",
+      coverage: "92%",
+      timestamp: new Date().toISOString(),
+    },
+  };
 
-  if (format === 'json') {
+  if (format === "json") {
     return NextResponse.json({
       timestamp: new Date().toISOString(),
       summary: generateTestSummary(sampleResults),
       results: sampleResults,
-      analysis: generateAnalysis(sampleResults)
-    })
+      analysis: generateAnalysis(sampleResults),
+    });
   }
 
-  const htmlReport = generateHTMLReport(sampleResults)
+  const htmlReport = generateHTMLReport(sampleResults);
   return new Response(htmlReport, {
-    headers: { 'Content-Type': 'text/html' }
-  })
+    headers: { "Content-Type": "text/html" },
+  });
 }
 
 function generateHTMLReport(results: any): string {
-  const timestamp = new Date().toLocaleString()
-  const summary = generateTestSummary(results)
+  const timestamp = new Date().toLocaleString();
+  const summary = generateTestSummary(results);
 
   return `
 <!DOCTYPE html>
@@ -285,7 +281,7 @@ function generateHTMLReport(results: any): string {
             <div class="stat-value">${summary.totalTests}</div>
             <div class="stat-label">Total Tests</div>
         </div>
-        <div class="stat-card ${summary.successRate >= 80 ? 'success' : summary.successRate >= 60 ? 'warning' : 'error'}">
+        <div class="stat-card ${summary.successRate >= 80 ? "success" : summary.successRate >= 60 ? "warning" : "error"}">
             <div class="stat-value">${summary.successRate}%</div>
             <div class="stat-label">Success Rate</div>
         </div>
@@ -293,22 +289,26 @@ function generateHTMLReport(results: any): string {
 
     <div class="test-results">
         <h2>📊 Test Suite Results</h2>
-        ${Object.entries(results).map(([testId, result]: [string, any]) => `
+        ${Object.entries(results)
+          .map(
+            ([testId, result]: [string, any]) => `
             <div class="test-item">
                 <div style="flex: 1;">
-                    <div class="test-name">${testId.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</div>
+                    <div class="test-name">${testId.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}</div>
                     <div class="test-stats">
                         <span>✅ ${result.passed || 0} passed</span>
                         <span>❌ ${result.failed || 0} failed</span>
-                        <span>⏱️ ${result.duration || 'N/A'}</span>
-                        <span>📊 ${result.coverage || 'N/A'} coverage</span>
+                        <span>⏱️ ${result.duration || "N/A"}</span>
+                        <span>📊 ${result.coverage || "N/A"} coverage</span>
                     </div>
                 </div>
                 <div>
                     <span class="status-badge status-${result.status}">${result.status}</span>
                 </div>
             </div>
-        `).join('')}
+        `
+          )
+          .join("")}
     </div>
 
     <div class="property-section">
@@ -334,69 +334,83 @@ function generateHTMLReport(results: any): string {
     </div>
 </body>
 </html>
-  `
+  `;
 }
 
 function generateJSONReport(results: any): string {
-  return JSON.stringify({
-    timestamp: new Date().toISOString(),
-    summary: generateTestSummary(results),
-    results,
-    analysis: generateAnalysis(results),
-    framework: {
-      name: 'Sihat TCM Property-Based Testing Framework',
-      version: '1.0.0',
-      features: [
-        '100+ iterations per property test',
-        'Automatic counterexample shrinking',
-        'Medical scenario data generators',
-        'Comprehensive failure analysis',
-        'Requirements traceability'
-      ]
-    }
-  }, null, 2)
+  return JSON.stringify(
+    {
+      timestamp: new Date().toISOString(),
+      summary: generateTestSummary(results),
+      results,
+      analysis: generateAnalysis(results),
+      framework: {
+        name: "Sihat TCM Property-Based Testing Framework",
+        version: "1.0.0",
+        features: [
+          "100+ iterations per property test",
+          "Automatic counterexample shrinking",
+          "Medical scenario data generators",
+          "Comprehensive failure analysis",
+          "Requirements traceability",
+        ],
+      },
+    },
+    null,
+    2
+  );
 }
 
 function generateTestSummary(results: any) {
-  const totalPassed = Object.values(results).reduce((sum: number, result: any) => sum + (result.passed || 0), 0)
-  const totalFailed = Object.values(results).reduce((sum: number, result: any) => sum + (result.failed || 0), 0)
-  const totalTests = totalPassed + totalFailed
-  const successRate = totalTests > 0 ? Math.round((totalPassed / totalTests) * 100) : 0
+  const totalPassed = Object.values(results).reduce(
+    (sum: number, result: any) => sum + (result.passed || 0),
+    0
+  );
+  const totalFailed = Object.values(results).reduce(
+    (sum: number, result: any) => sum + (result.failed || 0),
+    0
+  );
+  const totalTests = totalPassed + totalFailed;
+  const successRate = totalTests > 0 ? Math.round((totalPassed / totalTests) * 100) : 0;
 
   return {
     totalPassed,
     totalFailed,
     totalTests,
     successRate,
-    testSuites: Object.keys(results).length
-  }
+    testSuites: Object.keys(results).length,
+  };
 }
 
 function generateAnalysis(results: any) {
-  const summary = generateTestSummary(results)
-  const recommendations = []
+  const summary = generateTestSummary(results);
+  const recommendations = [];
 
   if (summary.successRate < 50) {
-    recommendations.push('🚨 Low success rate detected. Review test logic and implementation.')
+    recommendations.push("🚨 Low success rate detected. Review test logic and implementation.");
   } else if (summary.successRate < 80) {
-    recommendations.push('⚠️ Moderate success rate. Some areas need attention.')
+    recommendations.push("⚠️ Moderate success rate. Some areas need attention.");
   } else if (summary.successRate >= 95) {
-    recommendations.push('✅ Excellent success rate! Consider adding more edge cases.')
+    recommendations.push("✅ Excellent success rate! Consider adding more edge cases.");
   }
 
-  const failedSuites = Object.entries(results).filter(([_, result]: [string, any]) => result.status === 'failed')
+  const failedSuites = Object.entries(results).filter(
+    ([_, result]: [string, any]) => result.status === "failed"
+  );
   if (failedSuites.length > 0) {
-    recommendations.push(`🔍 ${failedSuites.length} test suite(s) failing: ${failedSuites.map(([name]) => name).join(', ')}`)
+    recommendations.push(
+      `🔍 ${failedSuites.length} test suite(s) failing: ${failedSuites.map(([name]) => name).join(", ")}`
+    );
   }
 
   return {
     summary,
     recommendations,
     insights: [
-      'Property-based testing provides comprehensive validation across input ranges',
-      'Medical safety validation is critical for healthcare applications',
-      'Cross-platform consistency ensures reliable user experience',
-      'Accessibility compliance supports inclusive design principles'
-    ]
-  }
+      "Property-based testing provides comprehensive validation across input ranges",
+      "Medical safety validation is critical for healthcare applications",
+      "Cross-platform consistency ensures reliable user experience",
+      "Accessibility compliance supports inclusive design principles",
+    ],
+  };
 }

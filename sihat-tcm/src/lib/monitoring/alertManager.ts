@@ -1,31 +1,31 @@
 /**
  * @fileoverview Alert Management System
- * 
+ *
  * Comprehensive alerting system for Sihat TCM platform.
  * Handles incident detection, escalation, and notification management.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 3.0
  */
 
-import { devLog } from '@/lib/systemLogger';
+import { devLog } from "@/lib/systemLogger";
 
 /**
  * Alert severity levels
  */
-export type AlertSeverity = 'info' | 'warning' | 'error' | 'critical';
+export type AlertSeverity = "info" | "warning" | "error" | "critical";
 
 /**
  * Alert categories
  */
-export type AlertCategory = 
-  | 'system_health'
-  | 'api_performance'
-  | 'database'
-  | 'ai_service'
-  | 'security'
-  | 'user_experience'
-  | 'business_metric';
+export type AlertCategory =
+  | "system_health"
+  | "api_performance"
+  | "database"
+  | "ai_service"
+  | "security"
+  | "user_experience"
+  | "business_metric";
 
 /**
  * Alert interface
@@ -67,7 +67,7 @@ export interface AlertRule {
  */
 export interface AlertCondition {
   metric: string;
-  operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte' | 'contains' | 'not_contains';
+  operator: "gt" | "lt" | "eq" | "gte" | "lte" | "contains" | "not_contains";
   threshold: number | string;
   timeWindow: number; // milliseconds
   consecutiveFailures?: number;
@@ -77,7 +77,7 @@ export interface AlertCondition {
  * Notification channel interface
  */
 export interface NotificationChannel {
-  type: 'slack' | 'email' | 'sms' | 'webhook' | 'pagerduty';
+  type: "slack" | "email" | "sms" | "webhook" | "pagerduty";
   config: Record<string, any>;
   enabled: boolean;
 }
@@ -90,7 +90,7 @@ export interface Incident {
   title: string;
   description: string;
   severity: AlertSeverity;
-  status: 'open' | 'investigating' | 'resolved' | 'closed';
+  status: "open" | "investigating" | "resolved" | "closed";
   alerts: Alert[];
   assignee?: string;
   createdAt: number;
@@ -123,8 +123,8 @@ export class AlertManager {
   private isEnabled: boolean;
 
   private constructor() {
-    this.isEnabled = process.env.ENABLE_ALERTING === 'true';
-    
+    this.isEnabled = process.env.ENABLE_ALERTING === "true";
+
     if (this.isEnabled) {
       this.initializeDefaultRules();
       this.startPeriodicChecks();
@@ -147,171 +147,171 @@ export class AlertManager {
   private initializeDefaultRules(): void {
     const defaultRules: AlertRule[] = [
       {
-        id: 'high_api_response_time',
-        name: 'High API Response Time',
-        description: 'API response time exceeds acceptable threshold',
-        category: 'api_performance',
-        severity: 'warning',
+        id: "high_api_response_time",
+        name: "High API Response Time",
+        description: "API response time exceeds acceptable threshold",
+        category: "api_performance",
+        severity: "warning",
         condition: {
-          metric: 'api_response_time',
-          operator: 'gt',
+          metric: "api_response_time",
+          operator: "gt",
           threshold: 5000,
           timeWindow: 300000, // 5 minutes
-          consecutiveFailures: 3
+          consecutiveFailures: 3,
         },
         enabled: true,
         cooldownPeriod: 600000, // 10 minutes
         escalationDelay: 1800000, // 30 minutes
         notificationChannels: [
           {
-            type: 'slack',
-            config: { channel: '#alerts' },
-            enabled: true
-          }
-        ]
+            type: "slack",
+            config: { channel: "#alerts" },
+            enabled: true,
+          },
+        ],
       },
       {
-        id: 'critical_api_response_time',
-        name: 'Critical API Response Time',
-        description: 'API response time is critically high',
-        category: 'api_performance',
-        severity: 'critical',
+        id: "critical_api_response_time",
+        name: "Critical API Response Time",
+        description: "API response time is critically high",
+        category: "api_performance",
+        severity: "critical",
         condition: {
-          metric: 'api_response_time',
-          operator: 'gt',
+          metric: "api_response_time",
+          operator: "gt",
           threshold: 15000,
           timeWindow: 180000, // 3 minutes
-          consecutiveFailures: 2
+          consecutiveFailures: 2,
         },
         enabled: true,
         cooldownPeriod: 300000, // 5 minutes
         escalationDelay: 900000, // 15 minutes
         notificationChannels: [
           {
-            type: 'slack',
-            config: { channel: '#critical-alerts' },
-            enabled: true
+            type: "slack",
+            config: { channel: "#critical-alerts" },
+            enabled: true,
           },
           {
-            type: 'email',
-            config: { recipients: ['oncall@sihat-tcm.com'] },
-            enabled: true
-          }
-        ]
+            type: "email",
+            config: { recipients: ["oncall@sihat-tcm.com"] },
+            enabled: true,
+          },
+        ],
       },
       {
-        id: 'high_error_rate',
-        name: 'High Error Rate',
-        description: 'API error rate exceeds acceptable threshold',
-        category: 'system_health',
-        severity: 'error',
+        id: "high_error_rate",
+        name: "High Error Rate",
+        description: "API error rate exceeds acceptable threshold",
+        category: "system_health",
+        severity: "error",
         condition: {
-          metric: 'error_rate',
-          operator: 'gt',
+          metric: "error_rate",
+          operator: "gt",
           threshold: 5, // 5%
           timeWindow: 300000, // 5 minutes
-          consecutiveFailures: 2
+          consecutiveFailures: 2,
         },
         enabled: true,
         cooldownPeriod: 600000, // 10 minutes
         escalationDelay: 1200000, // 20 minutes
         notificationChannels: [
           {
-            type: 'slack',
-            config: { channel: '#alerts' },
-            enabled: true
-          }
-        ]
+            type: "slack",
+            config: { channel: "#alerts" },
+            enabled: true,
+          },
+        ],
       },
       {
-        id: 'database_connection_failure',
-        name: 'Database Connection Failure',
-        description: 'Unable to connect to database',
-        category: 'database',
-        severity: 'critical',
+        id: "database_connection_failure",
+        name: "Database Connection Failure",
+        description: "Unable to connect to database",
+        category: "database",
+        severity: "critical",
         condition: {
-          metric: 'database_health',
-          operator: 'contains',
-          threshold: 'unhealthy',
+          metric: "database_health",
+          operator: "contains",
+          threshold: "unhealthy",
           timeWindow: 60000, // 1 minute
-          consecutiveFailures: 1
+          consecutiveFailures: 1,
         },
         enabled: true,
         cooldownPeriod: 180000, // 3 minutes
         escalationDelay: 300000, // 5 minutes
         notificationChannels: [
           {
-            type: 'slack',
-            config: { channel: '#critical-alerts' },
-            enabled: true
+            type: "slack",
+            config: { channel: "#critical-alerts" },
+            enabled: true,
           },
           {
-            type: 'email',
-            config: { recipients: ['oncall@sihat-tcm.com', 'dba@sihat-tcm.com'] },
-            enabled: true
-          }
-        ]
+            type: "email",
+            config: { recipients: ["oncall@sihat-tcm.com", "dba@sihat-tcm.com"] },
+            enabled: true,
+          },
+        ],
       },
       {
-        id: 'ai_service_failure',
-        name: 'AI Service Failure',
-        description: 'Gemini AI service is failing',
-        category: 'ai_service',
-        severity: 'error',
+        id: "ai_service_failure",
+        name: "AI Service Failure",
+        description: "Gemini AI service is failing",
+        category: "ai_service",
+        severity: "error",
         condition: {
-          metric: 'ai_success_rate',
-          operator: 'lt',
+          metric: "ai_success_rate",
+          operator: "lt",
           threshold: 90, // 90%
           timeWindow: 600000, // 10 minutes
-          consecutiveFailures: 2
+          consecutiveFailures: 2,
         },
         enabled: true,
         cooldownPeriod: 900000, // 15 minutes
         escalationDelay: 1800000, // 30 minutes
         notificationChannels: [
           {
-            type: 'slack',
-            config: { channel: '#ai-alerts' },
-            enabled: true
-          }
-        ]
+            type: "slack",
+            config: { channel: "#ai-alerts" },
+            enabled: true,
+          },
+        ],
       },
       {
-        id: 'security_breach_attempt',
-        name: 'Security Breach Attempt',
-        description: 'Potential security breach detected',
-        category: 'security',
-        severity: 'critical',
+        id: "security_breach_attempt",
+        name: "Security Breach Attempt",
+        description: "Potential security breach detected",
+        category: "security",
+        severity: "critical",
         condition: {
-          metric: 'failed_login_attempts',
-          operator: 'gt',
+          metric: "failed_login_attempts",
+          operator: "gt",
           threshold: 10,
           timeWindow: 300000, // 5 minutes
-          consecutiveFailures: 1
+          consecutiveFailures: 1,
         },
         enabled: true,
         cooldownPeriod: 600000, // 10 minutes
         escalationDelay: 300000, // 5 minutes
         notificationChannels: [
           {
-            type: 'slack',
-            config: { channel: '#security-alerts' },
-            enabled: true
+            type: "slack",
+            config: { channel: "#security-alerts" },
+            enabled: true,
           },
           {
-            type: 'email',
-            config: { recipients: ['security@sihat-tcm.com', 'oncall@sihat-tcm.com'] },
-            enabled: true
-          }
-        ]
-      }
+            type: "email",
+            config: { recipients: ["security@sihat-tcm.com", "oncall@sihat-tcm.com"] },
+            enabled: true,
+          },
+        ],
+      },
     ];
 
-    defaultRules.forEach(rule => {
+    defaultRules.forEach((rule) => {
       this.alertRules.set(rule.id, rule);
     });
 
-    devLog('info', 'AlertManager', `Initialized ${defaultRules.length} default alert rules`);
+    devLog("info", "AlertManager", `Initialized ${defaultRules.length} default alert rules`);
   }
 
   /**
@@ -321,19 +321,19 @@ export class AlertManager {
     if (!this.isEnabled) return;
 
     const timestamp = Date.now();
-    
+
     if (!this.metricHistory.has(metric)) {
       this.metricHistory.set(metric, []);
     }
-    
+
     const history = this.metricHistory.get(metric)!;
     history.push({ value, timestamp });
-    
+
     // Keep only last 1000 entries
     if (history.length > 1000) {
       history.splice(0, history.length - 1000);
     }
-    
+
     // Check alert rules for this metric
     this.checkAlertRules(metric, value, timestamp);
   }
@@ -346,13 +346,13 @@ export class AlertManager {
       if (!rule.enabled || rule.condition.metric !== metric) {
         continue;
       }
-      
+
       // Check cooldown period
       const lastAlert = this.lastAlertTime.get(rule.id);
-      if (lastAlert && (timestamp - lastAlert) < rule.cooldownPeriod) {
+      if (lastAlert && timestamp - lastAlert < rule.cooldownPeriod) {
         continue;
       }
-      
+
       if (this.evaluateCondition(rule.condition, metric, value, timestamp)) {
         this.triggerAlert(rule, value, timestamp);
       }
@@ -370,61 +370,69 @@ export class AlertManager {
   ): boolean {
     const history = this.metricHistory.get(metric);
     if (!history) return false;
-    
+
     // Get values within time window
     const windowStart = timestamp - condition.timeWindow;
-    const windowValues = history.filter(entry => entry.timestamp >= windowStart);
-    
+    const windowValues = history.filter((entry) => entry.timestamp >= windowStart);
+
     if (windowValues.length === 0) return false;
-    
+
     // Check if condition is met
     let conditionMet = false;
-    
+
     switch (condition.operator) {
-      case 'gt':
+      case "gt":
         conditionMet = value > (condition.threshold as number);
         break;
-      case 'lt':
+      case "lt":
         conditionMet = value < (condition.threshold as number);
         break;
-      case 'gte':
+      case "gte":
         conditionMet = value >= (condition.threshold as number);
         break;
-      case 'lte':
+      case "lte":
         conditionMet = value <= (condition.threshold as number);
         break;
-      case 'eq':
+      case "eq":
         conditionMet = value === (condition.threshold as number);
         break;
-      case 'contains':
+      case "contains":
         conditionMet = String(value).includes(String(condition.threshold));
         break;
-      case 'not_contains':
+      case "not_contains":
         conditionMet = !String(value).includes(String(condition.threshold));
         break;
     }
-    
+
     if (!conditionMet) return false;
-    
+
     // Check consecutive failures if specified
     if (condition.consecutiveFailures && condition.consecutiveFailures > 1) {
       const recentValues = windowValues.slice(-condition.consecutiveFailures);
       if (recentValues.length < condition.consecutiveFailures) return false;
-      
-      return recentValues.every(entry => {
+
+      return recentValues.every((entry) => {
         switch (condition.operator) {
-          case 'gt': return entry.value > (condition.threshold as number);
-          case 'lt': return entry.value < (condition.threshold as number);
-          case 'gte': return entry.value >= (condition.threshold as number);
-          case 'lte': return entry.value <= (condition.threshold as number);
-          case 'eq': return entry.value === (condition.threshold as number);
-          case 'contains': return String(entry.value).includes(String(condition.threshold));
-          case 'not_contains': return !String(entry.value).includes(String(condition.threshold));
-          default: return false;
+          case "gt":
+            return entry.value > (condition.threshold as number);
+          case "lt":
+            return entry.value < (condition.threshold as number);
+          case "gte":
+            return entry.value >= (condition.threshold as number);
+          case "lte":
+            return entry.value <= (condition.threshold as number);
+          case "eq":
+            return entry.value === (condition.threshold as number);
+          case "contains":
+            return String(entry.value).includes(String(condition.threshold));
+          case "not_contains":
+            return !String(entry.value).includes(String(condition.threshold));
+          default:
+            return false;
         }
       });
     }
-    
+
     return true;
   }
 
@@ -433,42 +441,42 @@ export class AlertManager {
    */
   private async triggerAlert(rule: AlertRule, value: number, timestamp: number): Promise<void> {
     const alertId = `${rule.id}_${timestamp}`;
-    
+
     const alert: Alert = {
       id: alertId,
       title: rule.name,
       description: `${rule.description}. Current value: ${value}, Threshold: ${rule.condition.threshold}`,
       severity: rule.severity,
       category: rule.category,
-      source: 'AlertManager',
+      source: "AlertManager",
       timestamp,
       metadata: {
         ruleId: rule.id,
         metric: rule.condition.metric,
         value,
         threshold: rule.condition.threshold,
-        operator: rule.condition.operator
-      }
+        operator: rule.condition.operator,
+      },
     };
-    
+
     this.alerts.set(alertId, alert);
     this.lastAlertTime.set(rule.id, timestamp);
-    
-    devLog('warn', 'AlertManager', `Alert triggered: ${rule.name}`, {
+
+    devLog("warn", "AlertManager", `Alert triggered: ${rule.name}`, {
       alertId,
       severity: rule.severity,
       value,
-      threshold: rule.condition.threshold
+      threshold: rule.condition.threshold,
     });
-    
+
     // Send notifications
     await this.sendNotifications(alert, rule.notificationChannels);
-    
+
     // Create or update incident if severity is error or critical
-    if (rule.severity === 'error' || rule.severity === 'critical') {
+    if (rule.severity === "error" || rule.severity === "critical") {
       await this.createOrUpdateIncident(alert);
     }
-    
+
     // Schedule escalation if configured
     if (rule.escalationDelay > 0) {
       setTimeout(() => {
@@ -482,9 +490,9 @@ export class AlertManager {
    */
   private async sendNotifications(alert: Alert, channels: NotificationChannel[]): Promise<void> {
     const promises = channels
-      .filter(channel => channel.enabled)
-      .map(channel => this.sendNotification(alert, channel));
-    
+      .filter((channel) => channel.enabled)
+      .map((channel) => this.sendNotification(alert, channel));
+
     await Promise.allSettled(promises);
   }
 
@@ -494,23 +502,23 @@ export class AlertManager {
   private async sendNotification(alert: Alert, channel: NotificationChannel): Promise<void> {
     try {
       switch (channel.type) {
-        case 'slack':
+        case "slack":
           await this.sendSlackNotification(alert, channel.config);
           break;
-        case 'email':
+        case "email":
           await this.sendEmailNotification(alert, channel.config);
           break;
-        case 'webhook':
+        case "webhook":
           await this.sendWebhookNotification(alert, channel.config);
           break;
-        case 'pagerduty':
+        case "pagerduty":
           await this.sendPagerDutyNotification(alert, channel.config);
           break;
         default:
-          devLog('warn', 'AlertManager', `Unsupported notification channel: ${channel.type}`);
+          devLog("warn", "AlertManager", `Unsupported notification channel: ${channel.type}`);
       }
     } catch (error) {
-      devLog('error', 'AlertManager', `Failed to send ${channel.type} notification`, { error });
+      devLog("error", "AlertManager", `Failed to send ${channel.type} notification`, { error });
     }
   }
 
@@ -519,47 +527,49 @@ export class AlertManager {
    */
   private async sendSlackNotification(alert: Alert, config: any): Promise<void> {
     if (!process.env.SLACK_WEBHOOK_URL) return;
-    
+
     const color = this.getSeverityColor(alert.severity);
     const emoji = this.getSeverityEmoji(alert.severity);
-    
+
     await fetch(process.env.SLACK_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        channel: config.channel || '#alerts',
+        channel: config.channel || "#alerts",
         text: `${emoji} Alert: ${alert.title}`,
-        attachments: [{
-          color,
-          fields: [
-            {
-              title: 'Severity',
-              value: alert.severity.toUpperCase(),
-              short: true
-            },
-            {
-              title: 'Category',
-              value: alert.category,
-              short: true
-            },
-            {
-              title: 'Description',
-              value: alert.description,
-              short: false
-            },
-            {
-              title: 'Timestamp',
-              value: new Date(alert.timestamp).toISOString(),
-              short: true
-            },
-            {
-              title: 'Alert ID',
-              value: alert.id,
-              short: true
-            }
-          ]
-        }]
-      })
+        attachments: [
+          {
+            color,
+            fields: [
+              {
+                title: "Severity",
+                value: alert.severity.toUpperCase(),
+                short: true,
+              },
+              {
+                title: "Category",
+                value: alert.category,
+                short: true,
+              },
+              {
+                title: "Description",
+                value: alert.description,
+                short: false,
+              },
+              {
+                title: "Timestamp",
+                value: new Date(alert.timestamp).toISOString(),
+                short: true,
+              },
+              {
+                title: "Alert ID",
+                value: alert.id,
+                short: true,
+              },
+            ],
+          },
+        ],
+      }),
     });
   }
 
@@ -567,14 +577,14 @@ export class AlertManager {
    * Send email notification
    */
   private async sendEmailNotification(alert: Alert, config: any): Promise<void> {
-    await fetch('/api/monitoring/send-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    await fetch("/api/monitoring/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         to: config.recipients,
         subject: `[${alert.severity.toUpperCase()}] ${alert.title}`,
-        html: this.generateEmailTemplate(alert)
-      })
+        html: this.generateEmailTemplate(alert),
+      }),
     });
   }
 
@@ -583,13 +593,13 @@ export class AlertManager {
    */
   private async sendWebhookNotification(alert: Alert, config: any): Promise<void> {
     await fetch(config.url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         alert,
         timestamp: Date.now(),
-        service: 'sihat-tcm'
-      })
+        service: "sihat-tcm",
+      }),
     });
   }
 
@@ -597,21 +607,21 @@ export class AlertManager {
    * Send PagerDuty notification
    */
   private async sendPagerDutyNotification(alert: Alert, config: any): Promise<void> {
-    await fetch('https://events.pagerduty.com/v2/enqueue', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    await fetch("https://events.pagerduty.com/v2/enqueue", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         routing_key: config.integrationKey,
-        event_action: 'trigger',
+        event_action: "trigger",
         dedup_key: alert.id,
         payload: {
           summary: alert.title,
           severity: alert.severity,
-          source: 'sihat-tcm',
+          source: "sihat-tcm",
           component: alert.category,
-          custom_details: alert.metadata
-        }
-      })
+          custom_details: alert.metadata,
+        },
+      }),
     });
   }
 
@@ -620,31 +630,32 @@ export class AlertManager {
    */
   private async createOrUpdateIncident(alert: Alert): Promise<void> {
     // Look for existing open incident with same category
-    const existingIncident = Array.from(this.incidents.values())
-      .find(incident => 
-        incident.status === 'open' && 
-        incident.alerts.some(a => a.category === alert.category)
-      );
-    
+    const existingIncident = Array.from(this.incidents.values()).find(
+      (incident) =>
+        incident.status === "open" && incident.alerts.some((a) => a.category === alert.category)
+    );
+
     if (existingIncident) {
       // Add alert to existing incident
       existingIncident.alerts.push(alert);
       existingIncident.updatedAt = Date.now();
       existingIncident.timeline.push({
         timestamp: Date.now(),
-        action: 'alert_added',
+        action: "alert_added",
         description: `Added alert: ${alert.title}`,
-        metadata: { alertId: alert.id }
+        metadata: { alertId: alert.id },
       });
-      
+
       // Escalate severity if needed
-      if (this.getSeverityLevel(alert.severity) > this.getSeverityLevel(existingIncident.severity)) {
+      if (
+        this.getSeverityLevel(alert.severity) > this.getSeverityLevel(existingIncident.severity)
+      ) {
         existingIncident.severity = alert.severity;
         existingIncident.timeline.push({
           timestamp: Date.now(),
-          action: 'severity_escalated',
+          action: "severity_escalated",
           description: `Incident severity escalated to ${alert.severity}`,
-          metadata: { previousSeverity: existingIncident.severity, newSeverity: alert.severity }
+          metadata: { previousSeverity: existingIncident.severity, newSeverity: alert.severity },
         });
       }
     } else {
@@ -655,23 +666,25 @@ export class AlertManager {
         title: `${alert.category} - ${alert.title}`,
         description: alert.description,
         severity: alert.severity,
-        status: 'open',
+        status: "open",
         alerts: [alert],
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        timeline: [{
-          timestamp: Date.now(),
-          action: 'incident_created',
-          description: `Incident created from alert: ${alert.title}`,
-          metadata: { alertId: alert.id }
-        }]
+        timeline: [
+          {
+            timestamp: Date.now(),
+            action: "incident_created",
+            description: `Incident created from alert: ${alert.title}`,
+            metadata: { alertId: alert.id },
+          },
+        ],
       };
-      
+
       this.incidents.set(incidentId, incident);
-      
-      devLog('warn', 'AlertManager', `New incident created: ${incidentId}`, {
+
+      devLog("warn", "AlertManager", `New incident created: ${incidentId}`, {
         severity: incident.severity,
-        category: alert.category
+        category: alert.category,
       });
     }
   }
@@ -682,22 +695,22 @@ export class AlertManager {
   private async escalateAlert(alertId: string): Promise<void> {
     const alert = this.alerts.get(alertId);
     if (!alert || alert.resolved || alert.escalated) return;
-    
+
     alert.escalated = true;
     alert.escalatedAt = Date.now();
-    
-    devLog('warn', 'AlertManager', `Alert escalated: ${alertId}`);
-    
+
+    devLog("warn", "AlertManager", `Alert escalated: ${alertId}`);
+
     // Send escalation notifications (e.g., to management)
     if (process.env.ESCALATION_WEBHOOK) {
       await fetch(process.env.ESCALATION_WEBHOOK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type: 'alert_escalation',
+          type: "alert_escalation",
           alert,
-          timestamp: Date.now()
-        })
+          timestamp: Date.now(),
+        }),
       });
     }
   }
@@ -708,13 +721,13 @@ export class AlertManager {
   public resolveAlert(alertId: string, resolvedBy?: string): boolean {
     const alert = this.alerts.get(alertId);
     if (!alert || alert.resolved) return false;
-    
+
     alert.resolved = true;
     alert.resolvedAt = Date.now();
     alert.resolvedBy = resolvedBy;
-    
-    devLog('info', 'AlertManager', `Alert resolved: ${alertId}`, { resolvedBy });
-    
+
+    devLog("info", "AlertManager", `Alert resolved: ${alertId}`, { resolvedBy });
+
     return true;
   }
 
@@ -723,11 +736,16 @@ export class AlertManager {
    */
   private getSeverityLevel(severity: AlertSeverity): number {
     switch (severity) {
-      case 'info': return 1;
-      case 'warning': return 2;
-      case 'error': return 3;
-      case 'critical': return 4;
-      default: return 0;
+      case "info":
+        return 1;
+      case "warning":
+        return 2;
+      case "error":
+        return 3;
+      case "critical":
+        return 4;
+      default:
+        return 0;
     }
   }
 
@@ -736,11 +754,16 @@ export class AlertManager {
    */
   private getSeverityColor(severity: AlertSeverity): string {
     switch (severity) {
-      case 'info': return '#36a64f';
-      case 'warning': return '#ffcc00';
-      case 'error': return '#ff6600';
-      case 'critical': return '#ff0000';
-      default: return '#cccccc';
+      case "info":
+        return "#36a64f";
+      case "warning":
+        return "#ffcc00";
+      case "error":
+        return "#ff6600";
+      case "critical":
+        return "#ff0000";
+      default:
+        return "#cccccc";
     }
   }
 
@@ -749,11 +772,16 @@ export class AlertManager {
    */
   private getSeverityEmoji(severity: AlertSeverity): string {
     switch (severity) {
-      case 'info': return 'ℹ️';
-      case 'warning': return '⚠️';
-      case 'error': return '❌';
-      case 'critical': return '🚨';
-      default: return '📢';
+      case "info":
+        return "ℹ️";
+      case "warning":
+        return "⚠️";
+      case "error":
+        return "❌";
+      case "critical":
+        return "🚨";
+      default:
+        return "📢";
     }
   }
 
@@ -768,7 +796,7 @@ export class AlertManager {
       <p><strong>Description:</strong> ${alert.description}</p>
       <p><strong>Timestamp:</strong> ${new Date(alert.timestamp).toISOString()}</p>
       <p><strong>Alert ID:</strong> ${alert.id}</p>
-      ${alert.metadata ? `<p><strong>Metadata:</strong> ${JSON.stringify(alert.metadata, null, 2)}</p>` : ''}
+      ${alert.metadata ? `<p><strong>Metadata:</strong> ${JSON.stringify(alert.metadata, null, 2)}</p>` : ""}
       <hr>
       <p><em>This alert was generated by Sihat TCM monitoring system.</em></p>
     `;
@@ -782,7 +810,7 @@ export class AlertManager {
     setInterval(() => {
       this.checkStaleAlerts();
     }, 300000);
-    
+
     // Health check every minute
     setInterval(() => {
       this.performHealthCheck();
@@ -795,12 +823,12 @@ export class AlertManager {
   private checkStaleAlerts(): void {
     const now = Date.now();
     const staleThreshold = 24 * 60 * 60 * 1000; // 24 hours
-    
+
     for (const [alertId, alert] of this.alerts.entries()) {
-      if (!alert.resolved && (now - alert.timestamp) > staleThreshold) {
-        devLog('warn', 'AlertManager', `Stale alert detected: ${alertId}`);
+      if (!alert.resolved && now - alert.timestamp > staleThreshold) {
+        devLog("warn", "AlertManager", `Stale alert detected: ${alertId}`);
         // Auto-resolve stale alerts
-        this.resolveAlert(alertId, 'system_auto_resolve');
+        this.resolveAlert(alertId, "system_auto_resolve");
       }
     }
   }
@@ -811,25 +839,24 @@ export class AlertManager {
   private async performHealthCheck(): Promise<void> {
     try {
       // Check API health
-      const healthResponse = await fetch('/api/health');
+      const healthResponse = await fetch("/api/health");
       const healthData = await healthResponse.json();
-      
-      if (healthData.database !== 'healthy') {
-        this.recordMetric('database_health', 0);
+
+      if (healthData.database !== "healthy") {
+        this.recordMetric("database_health", 0);
       } else {
-        this.recordMetric('database_health', 1);
+        this.recordMetric("database_health", 1);
       }
-      
+
       // Record API response time
       const startTime = Date.now();
-      await fetch('/api/health');
+      await fetch("/api/health");
       const responseTime = Date.now() - startTime;
-      this.recordMetric('api_response_time', responseTime);
-      
+      this.recordMetric("api_response_time", responseTime);
     } catch (error) {
-      devLog('error', 'AlertManager', 'Health check failed', { error });
-      this.recordMetric('api_response_time', 30000); // Timeout value
-      this.recordMetric('database_health', 0);
+      devLog("error", "AlertManager", "Health check failed", { error });
+      this.recordMetric("api_response_time", 30000); // Timeout value
+      this.recordMetric("database_health", 0);
     }
   }
 
@@ -837,14 +864,14 @@ export class AlertManager {
    * Get active alerts
    */
   public getActiveAlerts(): Alert[] {
-    return Array.from(this.alerts.values()).filter(alert => !alert.resolved);
+    return Array.from(this.alerts.values()).filter((alert) => !alert.resolved);
   }
 
   /**
    * Get open incidents
    */
   public getOpenIncidents(): Incident[] {
-    return Array.from(this.incidents.values()).filter(incident => incident.status === 'open');
+    return Array.from(this.incidents.values()).filter((incident) => incident.status === "open");
   }
 
   /**
@@ -858,17 +885,19 @@ export class AlertManager {
     openIncidents: number;
   } {
     const allAlerts = Array.from(this.alerts.values());
-    const activeAlerts = allAlerts.filter(alert => !alert.resolved);
-    const resolvedAlerts = allAlerts.filter(alert => alert.resolved);
-    const criticalAlerts = activeAlerts.filter(alert => alert.severity === 'critical');
-    const openIncidents = Array.from(this.incidents.values()).filter(incident => incident.status === 'open');
-    
+    const activeAlerts = allAlerts.filter((alert) => !alert.resolved);
+    const resolvedAlerts = allAlerts.filter((alert) => alert.resolved);
+    const criticalAlerts = activeAlerts.filter((alert) => alert.severity === "critical");
+    const openIncidents = Array.from(this.incidents.values()).filter(
+      (incident) => incident.status === "open"
+    );
+
     return {
       totalAlerts: allAlerts.length,
       activeAlerts: activeAlerts.length,
       resolvedAlerts: resolvedAlerts.length,
       criticalAlerts: criticalAlerts.length,
-      openIncidents: openIncidents.length
+      openIncidents: openIncidents.length,
     };
   }
 }

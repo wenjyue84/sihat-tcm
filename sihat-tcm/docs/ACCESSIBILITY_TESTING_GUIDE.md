@@ -5,19 +5,25 @@ This guide provides comprehensive instructions for testing the AccessibilityMana
 ## 🚀 Quick Start
 
 ### 1. Automated Testing
+
 Run all accessibility tests with a single command:
+
 ```bash
 npm test -- accessibilityManager.test.ts --run
 ```
 
 ### 2. Developer Dashboard
+
 Access the System Diagnostics panel:
+
 1. Navigate to `/developer` (requires developer role)
 2. Click on "System Diagnostics" tab
 3. Run individual test suites or "Run All Tests"
 
 ### 3. Manual Testing Page
+
 Visit the dedicated testing environment:
+
 ```
 http://localhost:3100/test-accessibility
 ```
@@ -29,47 +35,58 @@ http://localhost:3100/test-accessibility
 The automated test suite covers:
 
 **Initialization Tests (3 tests)**
+
 - Default preferences setup
 - Custom preferences initialization
 - Announcer element creation
 
 **Preferences Management (2 tests)**
+
 - Preference updates
 - Style application on changes
 
 **Focus Management (5 tests)**
+
 - Focus group registration
 - Next/previous element navigation
 - First/last element focusing
 
 **Announcements (2 tests)**
+
 - Screen reader message announcements
 - Announcement disable functionality
 
 **ARIA Attributes (1 test)**
+
 - Proper ARIA attribute assignment
 
 **WCAG Compliance Validation (3 tests)**
+
 - Image alt text validation
 - Form control label validation
 - Keyboard accessibility validation
 
 **Skip Links (1 test)**
+
 - Skip navigation link creation
 
 **System Preference Detection (2 tests)**
+
 - Reduced motion preference detection
 - High contrast preference detection
 
 **Singleton Pattern (1 test)**
+
 - Global instance management
 
 **Cleanup (1 test)**
+
 - Resource cleanup on destroy
 
 ### Manual Testing Scenarios
 
 #### Keyboard Navigation Testing
+
 1. **Tab Navigation**
    - Press `Tab` to move between focusable elements
    - Verify focus order is logical and predictable
@@ -86,19 +103,23 @@ The automated test suite covers:
    - Verify keyboard shortcuts work consistently
 
 #### Screen Reader Testing
+
 1. **NVDA (Windows)**
+
    ```bash
    # Download from: https://www.nvaccess.org/download/
    # Enable NVDA and navigate the test page
    ```
 
 2. **JAWS (Windows)**
+
    ```bash
    # Commercial screen reader
    # Test with demo version if available
    ```
 
 3. **VoiceOver (macOS)**
+
    ```bash
    # Press Cmd+F5 to enable VoiceOver
    # Navigate using VoiceOver commands
@@ -112,6 +133,7 @@ The automated test suite covers:
    - [ ] ARIA attributes provide correct context
 
 #### Visual Accessibility Testing
+
 1. **High Contrast Mode**
    - Enable system high contrast mode
    - Verify all content remains visible and usable
@@ -130,18 +152,21 @@ The automated test suite covers:
 #### Browser Testing Tools
 
 **Chrome DevTools**
+
 1. Open DevTools (F12)
 2. Go to Lighthouse tab
 3. Run Accessibility audit
 4. Check Elements → Accessibility pane
 
 **Firefox DevTools**
+
 1. Open DevTools (F12)
 2. Go to Accessibility tab
 3. Use accessibility inspector
 4. Test color contrast simulation
 
 **Browser Extensions**
+
 - **axe DevTools**: Comprehensive accessibility testing
 - **WAVE**: Web accessibility evaluation
 - **Accessibility Insights**: Microsoft's accessibility testing tool
@@ -149,6 +174,7 @@ The automated test suite covers:
 ## 🔧 System Preferences Testing
 
 ### Windows
+
 ```bash
 # High Contrast
 Settings → Ease of Access → High contrast → Turn on high contrast
@@ -161,6 +187,7 @@ Settings → Ease of Access → Narrator → Turn on Narrator
 ```
 
 ### macOS
+
 ```bash
 # High Contrast
 System Preferences → Accessibility → Display → Increase contrast
@@ -173,6 +200,7 @@ System Preferences → Accessibility → VoiceOver → Enable VoiceOver
 ```
 
 ### Linux
+
 ```bash
 # High Contrast (GNOME)
 Settings → Universal Access → High Contrast
@@ -188,6 +216,7 @@ orca --setup
 ## 📊 Test Results Analysis
 
 ### Automated Test Output
+
 ```bash
 ✓ AccessibilityManager (21)
   ✓ Initialization (3)
@@ -206,6 +235,7 @@ Tests  21 passed (21)
 ```
 
 ### Coverage Metrics
+
 - **Statements**: 95%+
 - **Branches**: 90%+
 - **Functions**: 100%
@@ -214,42 +244,51 @@ Tests  21 passed (21)
 ## 🚨 Common Issues & Solutions
 
 ### Issue: Tests Failing in CI/CD
+
 **Solution**: Ensure DOM environment is properly mocked
+
 ```javascript
 // In test setup
-Object.defineProperty(global, 'document', {
+Object.defineProperty(global, "document", {
   value: mockDocument,
-  writable: true
-})
+  writable: true,
+});
 ```
 
 ### Issue: Screen Reader Not Announcing
+
 **Solution**: Check ARIA live regions and announcer setup
+
 ```javascript
 // Verify announcer element exists
-const announcer = document.querySelector('[aria-live]')
-console.log('Announcer found:', !!announcer)
+const announcer = document.querySelector("[aria-live]");
+console.log("Announcer found:", !!announcer);
 ```
 
 ### Issue: Focus Management Not Working
+
 **Solution**: Verify focus group registration
+
 ```javascript
 // Check focus group registration
-const manager = getAccessibilityManager()
-manager.registerFocusGroup('test-group', elements)
+const manager = getAccessibilityManager();
+manager.registerFocusGroup("test-group", elements);
 ```
 
 ### Issue: High Contrast Mode Not Applied
+
 **Solution**: Check CSS class application
+
 ```javascript
 // Verify CSS classes are applied
-const root = document.documentElement
-console.log('High contrast active:', root.classList.contains('accessibility-high-contrast'))
+const root = document.documentElement;
+console.log("High contrast active:", root.classList.contains("accessibility-high-contrast"));
 ```
 
 ## 📋 Testing Checklist
 
 ### Pre-Release Testing
+
 - [ ] All automated tests pass
 - [ ] Manual keyboard navigation works
 - [ ] Screen reader testing completed
@@ -262,12 +301,14 @@ console.log('High contrast active:', root.classList.contains('accessibility-high
 - [ ] Form labels associated
 
 ### Browser Compatibility
+
 - [ ] Chrome/Chromium
 - [ ] Firefox
 - [ ] Safari (macOS)
 - [ ] Edge
 
 ### Assistive Technology Compatibility
+
 - [ ] NVDA (Windows)
 - [ ] JAWS (Windows)
 - [ ] VoiceOver (macOS)
@@ -276,15 +317,18 @@ console.log('High contrast active:', root.classList.contains('accessibility-high
 ## 🔗 Resources
 
 ### WCAG Guidelines
+
 - [WCAG 2.1 AA Guidelines](https://www.w3.org/WAI/WCAG21/quickref/?levels=aaa)
 - [WebAIM Accessibility Checklist](https://webaim.org/standards/wcag/checklist)
 
 ### Testing Tools
+
 - [axe-core](https://github.com/dequelabs/axe-core)
 - [WAVE Web Accessibility Evaluator](https://wave.webaim.org/)
 - [Accessibility Insights](https://accessibilityinsights.io/)
 
 ### Screen Readers
+
 - [NVDA Download](https://www.nvaccess.org/download/)
 - [VoiceOver User Guide](https://support.apple.com/guide/voiceover/)
 - [Orca Screen Reader](https://help.gnome.org/users/orca/stable/)
@@ -304,6 +348,7 @@ The AccessibilityManager feature is considered fully tested and compliant when:
 ## 📞 Support
 
 For accessibility testing questions or issues:
+
 1. Check the automated test output first
 2. Review this testing guide
 3. Use the developer dashboard diagnostics

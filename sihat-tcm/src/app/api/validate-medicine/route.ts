@@ -1,18 +1,18 @@
-import { generateText } from 'ai';
-import { getGoogleProvider } from '@/lib/googleProvider';
-import { devLog } from '@/lib/systemLogger';
+import { generateText } from "ai";
+import { getGoogleProvider } from "@/lib/googleProvider";
+import { devLog } from "@/lib/systemLogger";
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
-    try {
-        const { text, language = 'en' } = await req.json();
+  try {
+    const { text, language = "en" } = await req.json();
 
-        if (!text) {
-            return Response.json({ error: 'Text is required' }, { status: 400 });
-        }
+    if (!text) {
+      return Response.json({ error: "Text is required" }, { status: 400 });
+    }
 
-        const prompt = `
+    const prompt = `
         You are a medical assistant. Evaluate the following text: "${text}"
         
         Determine if this text represents:
@@ -34,19 +34,22 @@ export async function POST(req: Request) {
         5. Do not include markdown formatting like \`\`\`json. Just the raw JSON string.
         `;
 
-        const google = getGoogleProvider();
-        const { text: responseText } = await generateText({
-            model: google('gemini-1.5-pro'),
-            messages: [{ role: 'user', content: prompt }],
-        });
+    const google = getGoogleProvider();
+    const { text: responseText } = await generateText({
+      model: google("gemini-1.5-pro"),
+      messages: [{ role: "user", content: prompt }],
+    });
 
-        // Clean up the response in case it contains markdown
-        const cleanText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const result = JSON.parse(cleanText);
+    // Clean up the response in case it contains markdown
+    const cleanText = responseText
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+    const result = JSON.parse(cleanText);
 
-        return Response.json(result);
-    } catch (error: any) {
-        devLog('error', 'API/validate-medicine', 'Validation error', { error });
-        return Response.json({ error: error.message }, { status: 500 });
-    }
+    return Response.json(result);
+  } catch (error: any) {
+    devLog("error", "API/validate-medicine", "Validation error", { error });
+    return Response.json({ error: error.message }, { status: 500 });
+  }
 }

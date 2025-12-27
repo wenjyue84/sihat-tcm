@@ -1,2 +1,2 @@
-export { DeveloperAssistant } from './DeveloperAssistant';
-export { DeveloperAssistantWrapper } from './DeveloperAssistantWrapper';
+export { DeveloperAssistant } from "./DeveloperAssistant";
+export { DeveloperAssistantWrapper } from "./DeveloperAssistantWrapper";

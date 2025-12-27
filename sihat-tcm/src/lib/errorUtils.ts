@@ -1,6 +1,6 @@
 /**
  * Error Handling Utilities
- * 
+ *
  * Helper functions for type-safe error handling
  */
 
@@ -11,15 +11,15 @@
  */
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
-    return error.message
+    return error.message;
   }
-  if (typeof error === 'string') {
-    return error
+  if (typeof error === "string") {
+    return error;
   }
-  if (error && typeof error === 'object' && 'message' in error) {
-    return String(error.message)
+  if (error && typeof error === "object" && "message" in error) {
+    return String(error.message);
   }
-  return 'An unknown error occurred'
+  return "An unknown error occurred";
 }
 
 /**
@@ -28,7 +28,5 @@ export function getErrorMessage(error: unknown): string {
  * @returns True if error is an Error instance
  */
 export function isError(error: unknown): error is Error {
-  return error instanceof Error
+  return error instanceof Error;
 }
-
-

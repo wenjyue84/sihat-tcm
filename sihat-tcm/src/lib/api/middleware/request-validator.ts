@@ -1,13 +1,13 @@
 /**
  * Request Validation Middleware
- * 
+ *
  * Provides consistent request validation across API routes.
  */
 
-import { z } from 'zod';
-import { devLog } from '@/lib/systemLogger';
-import { validateRequest, validationErrorResponse } from '@/lib/validations';
-import { getCorsHeaders } from '@/lib/cors';
+import { z } from "zod";
+import { devLog } from "@/lib/systemLogger";
+import { validateRequest, validationErrorResponse } from "@/lib/validations";
+import { getCorsHeaders } from "@/lib/cors";
 
 /**
  * Validates request body against a schema
@@ -20,11 +20,11 @@ export async function validateRequestBody<T>(
 ): Promise<{ success: true; data: T } | { success: false; response: Response }> {
   try {
     const body = await req.json();
-    
+
     const validation = validateRequest(schema, body);
-    
+
     if (!validation.success) {
-      devLog('warn', context, 'Validation failed', { error: validation.error });
+      devLog("warn", context, "Validation failed", { error: validation.error });
       return {
         success: false,
         response: validationErrorResponse(validation.error, validation.details),
@@ -36,19 +36,19 @@ export async function validateRequestBody<T>(
       data: validation.data,
     };
   } catch (error) {
-    devLog('error', context, 'Failed to parse request body', { error });
+    devLog("error", context, "Failed to parse request body", { error });
     return {
       success: false,
       response: new Response(
         JSON.stringify({
-          error: 'Invalid request body',
-          code: 'INVALID_REQUEST',
+          error: "Invalid request body",
+          code: "INVALID_REQUEST",
         }),
         {
           status: 400,
           headers: {
             ...getCorsHeaders(req),
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       ),
@@ -66,7 +66,7 @@ export function withValidation<TBody, TArgs extends unknown[]>(
 ) {
   return async (req: Request, ...args: TArgs): Promise<Response> => {
     const validation = await validateRequestBody(req, schema, context);
-    
+
     if (!validation.success) {
       return validation.response;
     }
@@ -74,4 +74,3 @@ export function withValidation<TBody, TArgs extends unknown[]>(
     return handler(validation.data, ...args);
   };
 }
-

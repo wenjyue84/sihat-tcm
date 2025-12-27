@@ -17,6 +17,7 @@ This assessment evaluates the risks and implementation considerations for Phase 
 ## 1. Error Boundaries
 
 ### Current State ✅
+
 - **ErrorBoundary component exists:** `src/components/ui/ErrorBoundary.tsx`
 - **Already in use:** DiagnosisWizard imports and uses it (line 17)
 - **Features:** Class-based component with retry/back handlers, dev-mode error details
@@ -24,10 +25,12 @@ This assessment evaluates the risks and implementation considerations for Phase 
 ### Risks & Considerations
 
 #### 🟢 Low Risk
+
 - **Component exists and is functional** — no breaking changes expected
 - **Already integrated** in DiagnosisWizard, so wrapping other features is straightforward
 
 #### 🟡 Moderate Risk
+
 1. **Incomplete Coverage**
    - Only DiagnosisWizard is wrapped
    - Other major features (meal planner, patient dashboard, admin panels) lack error boundaries
@@ -71,6 +74,7 @@ componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
 ## 2. Lazy Loading
 
 ### Current State ⚠️
+
 - **DiagnosisWizard is NOT lazy loaded** — imported directly in `src/app/page.tsx` (line 3)
 - **Large component:** 644+ lines, includes many sub-components
 - **Impact:** Increases initial bundle size and Time to Interactive (TTI)
@@ -78,6 +82,7 @@ componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
 ### Risks & Considerations
 
 #### 🟡 Moderate Risk
+
 1. **Hydration Mismatches**
    - DiagnosisWizard uses client-side state extensively
    - Lazy loading with `ssr: false` is correct, but needs testing
@@ -103,6 +108,7 @@ componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
    - **Mitigation:** Ensure contexts are provided at layout level
 
 #### 🔴 High Risk
+
 1. **State Persistence**
    - DiagnosisWizard uses `useDiagnosisWizard` hook with complex state
    - If component unmounts during lazy load, state might be lost
@@ -132,6 +138,7 @@ const DiagnosisWizard = dynamic(
 ```
 
 **Additional Considerations:**
+
 - Create `DiagnosisWizardSkeleton` that matches the initial step layout
 - Test on slow 3G connections
 - Monitor bundle size reduction (should see ~200-300KB reduction)
@@ -143,6 +150,7 @@ const DiagnosisWizard = dynamic(
 ## 3. Health Checks
 
 ### Current State ⚠️
+
 - **Basic endpoint exists:** `src/app/api/health/route.ts`
 - **Current checks:** Only returns `status: 'ok'`, `timestamp`, `environment`
 - **Missing:** Database connectivity, AI API availability, memory usage, response times
@@ -150,12 +158,14 @@ const DiagnosisWizard = dynamic(
 ### Risks & Considerations
 
 #### 🟢 Low Risk
+
 1. **Endpoint Structure**
    - Route handler is properly set up
    - CORS headers are configured
    - **Impact:** None — good foundation
 
 #### 🟡 Moderate Risk
+
 1. **Database Check Implementation**
    - Need to test Supabase connection without blocking
    - Should use connection pooling or lightweight query
@@ -181,6 +191,7 @@ const DiagnosisWizard = dynamic(
    - **Mitigation:** Use `performance.now()` or `Date.now()` with proper timing
 
 #### 🔴 High Risk
+
 1. **Cascading Failures**
    - If health check itself fails (e.g., DB timeout), monitoring systems might mark entire app as down
    - **Impact:** False alarms, unnecessary alerts
@@ -207,13 +218,13 @@ const DiagnosisWizard = dynamic(
   environment: string,
   checks: {
     database: { status: 'ok' | 'slow' | 'down', responseTime: number },
-    aiApi: { 
+    aiApi: {
       gemini: { status: 'ok' | 'down', responseTime: number },
       claude: { status: 'ok' | 'down', responseTime: number }
     },
-    memory: { 
-      used: number, 
-      total: number, 
+    memory: {
+      used: number,
+      total: number,
       percentage: number,
       status: 'ok' | 'warning' | 'critical'
     }
@@ -229,6 +240,7 @@ const DiagnosisWizard = dynamic(
 ## 4. Structured Logging
 
 ### Current State ⚠️
+
 - **System logger exists:** `src/lib/systemLogger.ts` with structured logging
 - **Client logger exists:** `src/lib/clientLogger.ts` for browser-side
 - **Problem:** 323 `console.log/error/warn` calls across 102 files still exist
@@ -236,17 +248,19 @@ const DiagnosisWizard = dynamic(
 ### Risks & Considerations
 
 #### 🟢 Low Risk
+
 1. **Infrastructure Ready**
    - `systemLogger` has proper structure (log levels, categories, metadata)
    - Database table exists (`system_logs`)
    - **Impact:** None — good foundation
 
 #### 🟡 Moderate Risk
+
 1. **Migration Scope**
    - 323 console calls across 102 files
    - Need to identify which are debug-only vs. production-important
    - **Impact:** Time-consuming migration, risk of missing critical logs
-   - **Mitigation:** 
+   - **Mitigation:**
      - Prioritize API routes and error paths first
      - Use automated find/replace with careful review
      - Keep console.log for development-only debugging
@@ -255,7 +269,7 @@ const DiagnosisWizard = dynamic(
    - `systemLogger.log()` is async and writes to database
    - High-frequency logging could impact performance
    - **Impact:** Slower API responses if over-logging
-   - **Mitigation:** 
+   - **Mitigation:**
      - Use `devLog()` for development-only logs
      - Batch logs where possible
      - Rate-limit error logs
@@ -264,7 +278,7 @@ const DiagnosisWizard = dynamic(
    - Database could fill up quickly with verbose logging
    - Need retention policy
    - **Impact:** Storage costs, query performance degradation
-   - **Mitigation:** 
+   - **Mitigation:**
      - Implement log rotation/archival
      - Set up retention (e.g., 30 days for info, 90 days for errors)
      - Consider external logging service for production
@@ -272,17 +286,18 @@ const DiagnosisWizard = dynamic(
 4. **PII/Sensitive Data**
    - Medical data, user info, API keys might be logged
    - **Impact:** Compliance violations (HIPAA, GDPR), security risks
-   - **Mitigation:** 
+   - **Mitigation:**
      - Sanitize logs before writing
      - Never log full request bodies, passwords, tokens
      - Add log sanitization utility
 
 #### 🔴 High Risk
+
 1. **Breaking Changes**
    - Replacing `console.log` with async `systemLogger` changes execution flow
    - If not awaited, logs might be lost
    - **Impact:** Silent failures, missing critical error logs
-   - **Mitigation:** 
+   - **Mitigation:**
      - Use fire-and-forget pattern (already in systemLogger)
      - For critical logs, await and handle errors
      - Test logging in production-like environment
@@ -291,7 +306,7 @@ const DiagnosisWizard = dynamic(
    - If `systemLogger` fails (DB down, network issue), app shouldn't crash
    - Current implementation has try-catch, but need to verify all call sites
    - **Impact:** App crashes if logging fails
-   - **Mitigation:** 
+   - **Mitigation:**
      - SystemLogger already has fallback to console
      - Ensure all logging calls are wrapped in try-catch or use fire-and-forget
 
@@ -299,7 +314,7 @@ const DiagnosisWizard = dynamic(
    - `clientLogger` is console-based (can't write to DB from browser)
    - Need strategy for client-side error tracking
    - **Impact:** Client errors not captured in database
-   - **Mitigation:** 
+   - **Mitigation:**
      - Send critical client errors to API endpoint (`/api/logs`)
      - Use error boundary to capture and report
      - Consider Sentry or similar for production
@@ -307,6 +322,7 @@ const DiagnosisWizard = dynamic(
 ### Implementation Recommendations
 
 **Migration Strategy:**
+
 1. **Phase 1:** API routes (highest priority)
    - Replace all `console.error` in API routes with `logError()`
    - Replace `console.log` with `devLog()` for debug info
@@ -320,25 +336,24 @@ const DiagnosisWizard = dynamic(
    - Keep `console.log` for development-only debugging
 
 **New Logger Utility:**
+
 ```typescript
 // src/lib/logger.ts (unified interface)
-import { logInfo, logError, logWarn, logDebug, devLog } from './systemLogger'
-import { logger as clientLogger } from './clientLogger'
+import { logInfo, logError, logWarn, logDebug, devLog } from "./systemLogger";
+import { logger as clientLogger } from "./clientLogger";
 
 export const logger = {
   // Server-side (API routes, server components)
-  info: (category: string, message: string, meta?: object) => 
-    logInfo(category, message, meta),
+  info: (category: string, message: string, meta?: object) => logInfo(category, message, meta),
   error: (category: string, message: string, error?: Error, meta?: object) =>
     logError(category, message, { error, ...meta }),
-  warn: (category: string, message: string, meta?: object) =>
-    logWarn(category, message, meta),
+  warn: (category: string, message: string, meta?: object) => logWarn(category, message, meta),
   debug: (category: string, message: string, meta?: object) =>
-    process.env.NODE_ENV === 'development' && devLog('debug', category, message, meta),
+    process.env.NODE_ENV === "development" && devLog("debug", category, message, meta),
 
   // Client-side (browser components)
-  client: clientLogger
-}
+  client: clientLogger,
+};
 ```
 
 **Risk Score:** 7/10 (Moderate-High)
@@ -347,12 +362,12 @@ export const logger = {
 
 ## Overall Risk Matrix
 
-| Feature | Risk Level | Impact | Likelihood | Mitigation Complexity |
-|---------|-----------|--------|------------|----------------------|
-| Error Boundaries | 🟢 Low | Low | Low | Low |
-| Lazy Loading | 🟡 Moderate | Medium | Medium | Medium |
-| Health Checks | 🟡 Moderate | Medium | Low | Low |
-| Structured Logging | 🔴 High | High | Medium | High |
+| Feature            | Risk Level  | Impact | Likelihood | Mitigation Complexity |
+| ------------------ | ----------- | ------ | ---------- | --------------------- |
+| Error Boundaries   | 🟢 Low      | Low    | Low        | Low                   |
+| Lazy Loading       | 🟡 Moderate | Medium | Medium     | Medium                |
+| Health Checks      | 🟡 Moderate | Medium | Low        | Low                   |
+| Structured Logging | 🔴 High     | High   | Medium     | High                  |
 
 ---
 
@@ -410,4 +425,3 @@ export const logger = {
 3. Set up staging environment for testing
 4. Begin with Error Boundaries (lowest risk)
 5. Monitor and iterate based on production feedback
-

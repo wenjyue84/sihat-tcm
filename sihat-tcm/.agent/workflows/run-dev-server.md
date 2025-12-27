@@ -11,12 +11,14 @@ description: How to run the Sihat TCM development server
 ## Quick Start
 
 1. Navigate to the web app directory:
+
    ```bash
    cd "c:\Users\Jyue\Desktop\Projects\Sihat TCM\sihat-tcm"
    ```
 
 2. Start the development server:
    // turbo
+
    ```bash
    npm run dev
    ```
@@ -36,6 +38,7 @@ description: How to run the Sihat TCM development server
 ## Deployment Notes
 
 ### Production Deployment
+
 The port 3100 setting **only affects local development**. When deployed to production (Vercel, etc.):
 
 - The hosting platform assigns its own port automatically
@@ -43,13 +46,16 @@ The port 3100 setting **only affects local development**. When deployed to produ
 - Environment variable `NEXT_PUBLIC_APP_URL` should be set to your production domain, not localhost:3100
 
 ### Mobile App Configuration
+
 - **Development**: Point mobile app to `http://localhost:3100` or your local network IP
 - **Production**: Point mobile app to your production web app URL (e.g., `https://your-app.vercel.app`)
 
 ## Troubleshooting
 
 ### Port Already in Use
+
 If you see "EADDRINUSE" error:
+
 1. Find the process using port 3100:
    ```powershell
    Get-NetTCPConnection -LocalPort 3100 | Select-Object -Property LocalPort, OwningProcess

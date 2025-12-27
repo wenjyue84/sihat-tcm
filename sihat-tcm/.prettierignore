@@ -1,0 +1,36 @@
+# Dependencies
+node_modules
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Build outputs
+.next
+out
+build
+dist
+
+# Cache
+.cache
+.turbo
+.vercel
+
+# Env files
+.env
+.env.local
+.env.production
+.env.staging
+
+# Misc
+*.log
+*.tsbuildinfo
+coverage
+
+# Public assets
+public
+
+# Supabase
+supabase/.temp
+
+# TinaCMS
+tina/__generated__

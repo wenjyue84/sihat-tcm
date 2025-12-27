@@ -1,6 +1,7 @@
 # 🚨 Quick Fix: Missing 'medicines' Column Error
 
 ## Error You're Seeing
+
 ```
 Could not find the 'medicines' column of 'diagnosis_sessions' in the schema cache
 ```
@@ -8,10 +9,12 @@ Could not find the 'medicines' column of 'diagnosis_sessions' in the schema cach
 ## ✅ Quick Fix (2 minutes)
 
 ### Step 1: Open Supabase Dashboard
+
 1. Go to https://supabase.com/dashboard
 2. Select your project
 
 ### Step 2: Run SQL Migration
+
 1. Click **SQL Editor** (left sidebar)
 2. Click **New Query**
 3. Open this file: `sihat-tcm/fix_medicines_column.sql`
@@ -20,11 +23,14 @@ Could not find the 'medicines' column of 'diagnosis_sessions' in the schema cach
 6. Click **Run** (or Ctrl+Enter)
 
 ### Step 3: Verify
+
 You should see:
-- **"Success. No rows returned"** 
+
+- **"Success. No rows returned"**
 - A results table showing the columns that were added (medicines, symptoms, etc.)
 
 ### Step 4: Restart Server
+
 ```bash
 # Stop server (Ctrl+C if running)
 npm run dev
@@ -41,16 +47,20 @@ After migration, complete a diagnosis again. The error should be gone!
 ## 📁 Migration Files
 
 ### Quick Fix (Recommended)
+
 ```
 sihat-tcm/fix_medicines_column.sql
 ```
+
 - Adds only the missing `medicines` column and related doctor record fields
 - Safe to run - uses `IF NOT EXISTS` so it won't break existing data
 
 ### Full Migration (Alternative)
+
 ```
 sihat-tcm/supabase/migrations/20251226000001_add_doctor_record_fields.sql
 ```
+
 - Complete migration that adds all doctor record fields
 - Same content as quick fix, but part of the official migration history
 
@@ -59,6 +69,7 @@ sihat-tcm/supabase/migrations/20251226000001_add_doctor_record_fields.sql
 ## 🔍 What This Migration Does
 
 Adds the following columns to `diagnosis_sessions` table:
+
 - `medicines` (text[]) - Array of prescribed or current medications
 - `symptoms` (text[]) - Array of reported symptoms
 - `vital_signs` (jsonb) - Vital signs recorded during diagnosis
@@ -79,8 +90,8 @@ The `medicines` column was added in a later migration (`20251226000001_add_docto
 ## 🛡️ Safe to Run
 
 This migration uses `IF NOT EXISTS` clauses, so:
+
 - ✅ Won't break existing data
 - ✅ Won't duplicate columns if already exists
 - ✅ Can be run multiple times safely
 - ✅ Only adds missing columns
-

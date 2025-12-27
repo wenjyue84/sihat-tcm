@@ -3,6 +3,7 @@
 ## Installation Instructions
 
 ### For Windows (PowerShell):
+
 1. Open PowerShell as Administrator
 2. Navigate to your project:
    ```powershell
@@ -26,6 +27,7 @@
    ```
 
 ### For Mac/Linux:
+
 ```bash
 cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/sh
@@ -45,12 +47,15 @@ chmod +x .git/hooks/pre-commit
 ```
 
 ## What This Hook Does
+
 - ❌ Blocks commits containing `.env.local`
 - ❌ Blocks commits with hardcoded API keys (pattern: `AIzaSy`)
 - ✅ Allows safe commits to proceed
 
 ## Testing the Hook
+
 Try to commit `.env.local`:
+
 ```bash
 git add .env.local
 git commit -m "test"
@@ -58,8 +63,11 @@ git commit -m "test"
 ```
 
 ## Manual Security Check
+
 Before every commit, run:
+
 ```bash
 git status
 ```
+
 Verify that `.env.local` is NOT in the "Changes to be committed" section.

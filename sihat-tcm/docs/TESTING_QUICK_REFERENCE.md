@@ -18,17 +18,18 @@ npm run test:pbt-report
 
 ## 🧪 Test Categories
 
-| Category | Command | Description |
-|----------|---------|-------------|
-| **Property-Based** | `npm run test:pbt` | Correctness properties validation |
-| **Unit Tests** | `npm test -- --run` | Individual component testing |
-| **Integration** | `npm test -- --testPathPattern=integration` | End-to-end workflows |
-| **Performance** | `npm test -- --testPathPattern=performance` | Benchmarking tests |
-| **Accessibility** | `npm test -- accessibilityManager.test.ts` | WCAG compliance |
+| Category           | Command                                     | Description                       |
+| ------------------ | ------------------------------------------- | --------------------------------- |
+| **Property-Based** | `npm run test:pbt`                          | Correctness properties validation |
+| **Unit Tests**     | `npm test -- --run`                         | Individual component testing      |
+| **Integration**    | `npm test -- --testPathPattern=integration` | End-to-end workflows              |
+| **Performance**    | `npm test -- --testPathPattern=performance` | Benchmarking tests                |
+| **Accessibility**  | `npm test -- accessibilityManager.test.ts`  | WCAG compliance                   |
 
 ## 🎯 Property Test Framework
 
 ### Core Commands
+
 ```bash
 # Framework validation
 npm test -- propertyTestFramework.test.ts --run
@@ -41,6 +42,7 @@ npm run test:pbt -- --verbose
 ```
 
 ### Key Files
+
 - `src/lib/testing/propertyTestFramework.ts` - Core framework
 - `src/lib/testing/medicalDataGenerators.ts` - Data generators
 - `src/lib/testing/propertyTestHelpers.ts` - Utilities
@@ -49,11 +51,13 @@ npm run test:pbt -- --verbose
 ## 📊 Developer Portal
 
 ### Access
+
 1. Navigate to `/developer`
 2. Click "Testing Suite" tab
 3. Run tests with real-time monitoring
 
 ### Features
+
 - ✅ Run individual test suites
 - 📈 View real-time progress
 - 📋 Generate HTML/JSON reports
@@ -84,6 +88,7 @@ npm test -- accessibilityManager.test.ts --run
 ## 📈 Report Generation
 
 ### HTML Reports
+
 ```bash
 # Via script
 node scripts/run-property-tests.js --format html
@@ -93,6 +98,7 @@ curl "http://localhost:3100/api/developer/test-report?format=html"
 ```
 
 ### JSON Reports
+
 ```bash
 # Via script
 node scripts/run-property-tests.js --format json
@@ -104,40 +110,44 @@ curl "http://localhost:3100/api/developer/test-report?format=json"
 ## 🔧 Configuration
 
 ### Property Test Config
+
 ```typescript
 // src/lib/testing/propertyTestFramework.ts
 export const PBT_CONFIG = {
-  numRuns: 100,        // Test iterations
-  endOnFailure: true,  // Stop on first failure
-  seed: 42,           // Reproducible runs
-  verbose: false      // Debug output
-}
+  numRuns: 100, // Test iterations
+  endOnFailure: true, // Stop on first failure
+  seed: 42, // Reproducible runs
+  verbose: false, // Debug output
+};
 ```
 
 ### Vitest Config
+
 ```typescript
 // vitest.config.mts
 export default defineConfig({
   test: {
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
-    setupFiles: ['./src/setupTests.ts'],
+    setupFiles: ["./src/setupTests.ts"],
     testTimeout: 30000, // Increased for property tests
-  }
-})
+  },
+});
 ```
 
 ## 🚨 Troubleshooting
 
 ### Common Issues
-| Issue | Solution |
-|-------|----------|
-| Property test timeout | Reduce `numRuns` or optimize logic |
-| Generator errors | Use `fc.record()` for nested objects |
-| Memory issues | Reduce test data size |
-| Flaky tests | Check for race conditions |
+
+| Issue                 | Solution                             |
+| --------------------- | ------------------------------------ |
+| Property test timeout | Reduce `numRuns` or optimize logic   |
+| Generator errors      | Use `fc.record()` for nested objects |
+| Memory issues         | Reduce test data size                |
+| Flaky tests           | Check for race conditions            |
 
 ### Debug Commands
+
 ```bash
 # Run with verbose output
 npm test -- --verbose

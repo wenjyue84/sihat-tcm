@@ -1,6 +1,7 @@
 # TCM AI Meal Planner - Implementation Complete ✅
 
 ## Overview
+
 Successfully implemented a premium **TCM AI Meal Planner** feature that generates personalized 7-day meal plans based on patient TCM diagnosis.
 
 ---
@@ -8,9 +9,11 @@ Successfully implemented a premium **TCM AI Meal Planner** feature that generate
 ## 📦 What Was Built
 
 ### 1. Database Layer (`meal_plans` table)
+
 **File**: `sihat-tcm/supabase/migrations/20251224_meal_plans_table.sql`
 
 **Schema**:
+
 ```sql
 - id (UUID, primary key)
 - user_id (UUID, references auth.users)
@@ -24,6 +27,7 @@ Successfully implemented a premium **TCM AI Meal Planner** feature that generate
 ```
 
 **Features**:
+
 - Row Level Security (RLS) enabled
 - Automatic expiration after 30 days
 - Indexed for performance
@@ -31,28 +35,29 @@ Successfully implemented a premium **TCM AI Meal Planner** feature that generate
 - Doctor oversight policy included
 
 ### 2. Server Actions
+
 **File**: `sihat-tcm/src/app/actions/meal-planner.ts`
 
 **Functions**:
+
 1. **`generateMealPlan({ diagnosisReport, sessionId })`**
    - Uses Gemini 2.0 Flash to generate structured meal plans
    - Validates output with Zod schemas
    - Prevents duplicate active plans
    - Saves plan to database
-   
 2. **`getActiveMealPlan()`**
    - Fetches the user's current active meal plan
-   
 3. **`updateMealPlanProgress(planId, completedDays)`**
    - Tracks daily completion progress (0-7)
-   
 4. **`deactivateMealPlan(planId)`**
    - Deactivates current plan to allow regeneration
 
 ### 3. AI Prompt Engineering
+
 **File**: `sihat-tcm/src/lib/systemPrompts.ts`
 
 Added **`MEAL_PLANNER_PROMPT`** with:
+
 - COStar-style structured prompting
 - Constitution-specific guidance
 - Syndrome-specific adaptations
@@ -64,6 +69,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 ### 4. Frontend Components
 
 #### a) **MealPlanWizard** (`src/components/meal-planner/MealPlanWizard.tsx`)
+
 - Entry point component
 - Handles generation flow with animated loading states
 - Shows empty state vs. active plan
@@ -71,6 +77,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 - Premium feel with food emoji decorations
 
 #### b) **WeeklyCalendarView** (`src/components/meal-planner/WeeklyCalendarView.tsx`)
+
 - 7-day calendar navigation
 - Day completion tracking with visual checkmarks
 - TCM principles display
@@ -79,6 +86,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 - Progress indicator (X/7 days completed)
 
 #### c) **MealCard** (`src/components/meal-planner/MealCard.tsx`)
+
 - Displays individual meals (breakfast, lunch, dinner, snack)
 - Color-coded by meal type
 - Shows TCM benefit badges
@@ -88,6 +96,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 - Click to open recipe modal
 
 #### d) **RecipeModal** (`src/components/meal-planner/RecipeModal.tsx`)
+
 - Full-screen modal with recipe details
 - Step-by-step numbered instructions
 - Complete ingredient list (grid layout)
@@ -97,6 +106,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 - Animated entrance/exit
 
 #### e) **ShoppingListWidget** (`src/components/meal-planner/ShoppingListWidget.tsx`)
+
 - Categorized shopping list (Produce, Proteins, Spices, etc.)
 - Interactive checkboxes with progress tracking
 - Category emojis for visual navigation
@@ -105,9 +115,11 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 - Category completion counters
 
 ### 5. Integration into Unified Dashboard
+
 **File**: `sihat-tcm/src/components/patient/UnifiedDashboard.tsx`
 
 **Changes**:
+
 - Added new "Meal Planner" tab
 - Imported `MealPlanWizard` component
 - Connected to latest diagnosis session
@@ -119,6 +131,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 ## 🎨 Design & UX
 
 ### Visual Style
+
 - **Gradient palette**: Amber, Orange, Emerald, Teal
 - **Glassmorphism**: Frosted glass cards with backdrop blur
 - **Food emojis**: Decorative elements (🍜, 🥘, 🥗, 🍵)
@@ -126,6 +139,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 - **Temperature indicators**: 🔥 Warming, ⚖️ Neutral, ❄️ Cooling
 
 ### User Flow
+
 1. User completes TCM diagnosis
 2. Navigates to "Meal Planner" tab in dashboard
 3. Clicks "Generate My Meal Plan"
@@ -142,6 +156,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 ## 🧪 Testing Checklist
 
 ### Prerequisites
+
 - [ ] Run Supabase migration: `npx supabase db push`
 - [ ] User must be logged in
 - [ ] User must have at least one completed diagnosis session
@@ -149,12 +164,14 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 ### Test Cases
 
 #### 1. **Generation Flow**
+
 - [ ] Click "Generate My Meal Plan" shows loading animation
 - [ ] Loading messages rotate every 2.5 seconds
 - [ ] Plan generates successfully in ~10-15 seconds
 - [ ] Success state shows WeeklyCalendarView
 
 #### 2. **Calendar Navigation**
+
 - [ ] All 7 days are visible
 - [ ] Clicking a day changes the displayed meals
 - [ ] Arrow buttons work correctly
@@ -162,6 +179,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 - [ ] Completed days show checkmark badge
 
 #### 3. **Meal Cards**
+
 - [ ] All 4 meal types display (breakfast, lunch, dinner, snack)
 - [ ] TCM benefit badges are visible
 - [ ] Temperature indicators show (if present)
@@ -169,6 +187,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 - [ ] Hover effect works
 
 #### 4. **Recipe Modal**
+
 - [ ] Clicking meal card opens modal
 - [ ] Modal displays full recipe details
 - [ ] Instructions are numbered
@@ -177,6 +196,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 - [ ] Backdrop click closes modal
 
 #### 5. **Shopping List**
+
 - [ ] "Shopping List" button opens widget
 - [ ] All categories display with emojis
 - [ ] Checkboxes work
@@ -186,24 +206,28 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 - [ ] Close button works
 
 #### 6. **Day Completion**
+
 - [ ] "Mark Complete" button toggles state
 - [ ] Completed days show green checkmark
 - [ ] Progress counter updates (X/7)
 - [ ] Completion persists on refresh
 
 #### 7. **Regeneration**
+
 - [ ] "New Plan" button shows confirmation
 - [ ] Confirmation deactivates old plan
 - [ ] User returns to generation screen
 - [ ] Can generate new plan successfully
 
 #### 8. **Edge Cases**
+
 - [ ] No diagnosis sessions: Shows "Complete diagnosis first" message
 - [ ] Loading states work correctly
 - [ ] Error handling displays user-friendly messages
 - [ ] Mobile responsive design works
 
 #### 9. **Database**
+
 - [ ] Plan saves to `meal_plans` table
 - [ ] `is_active` flag works (only one active plan)
 - [ ] `completed_days` updates correctly
@@ -217,12 +241,14 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 ### For Developers
 
 1. **Run the migration**:
+
    ```bash
    cd sihat-tcm
    npx supabase db push
    ```
 
 2. **Start the development server**:
+
    ```bash
    npm run dev
    ```
@@ -249,6 +275,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 ## 📁 Files Modified/Created
 
 ### New Files
+
 1. `sihat-tcm/supabase/migrations/20251224_meal_plans_table.sql`
 2. `sihat-tcm/src/app/actions/meal-planner.ts`
 3. `sihat-tcm/src/components/meal-planner/MealPlanWizard.tsx`
@@ -259,6 +286,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 8. `sihat-tcm/MEAL_PLANNER_COMPLETE.md` (this file)
 
 ### Modified Files
+
 1. `sihat-tcm/src/lib/systemPrompts.ts` — Added `MEAL_PLANNER_PROMPT`
 2. `sihat-tcm/src/components/patient/UnifiedDashboard.tsx` — Integrated meal planner tab
 
@@ -271,7 +299,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 ✅ **Doctor oversight** — Doctors can view all plans for clinical review  
 ✅ **No PII logging** — Patient data stays in Supabase with RLS  
 ✅ **Authentication required** — All actions check user auth  
-✅ **Validation** — Zod schemas validate AI output structure  
+✅ **Validation** — Zod schemas validate AI output structure
 
 ---
 
@@ -295,6 +323,7 @@ Added **`MEAL_PLANNER_PROMPT`** with:
 The TCM AI Meal Planner is now **fully integrated** into the Sihat TCM platform! 🍜
 
 **Key Achievements**:
+
 - ✅ Database schema with RLS
 - ✅ AI-powered generation (Gemini 2.0 Flash)
 - ✅ 5 beautiful, responsive components
@@ -304,6 +333,7 @@ The TCM AI Meal Planner is now **fully integrated** into the Sihat TCM platform!
 - ✅ Premium UX with animations
 
 **Next Steps**:
+
 1. Run the database migration
 2. Test the complete flow
 3. Gather user feedback
@@ -312,5 +342,3 @@ The TCM AI Meal Planner is now **fully integrated** into the Sihat TCM platform!
 ---
 
 **Built with** ❤️ using Next.js 16, Gemini AI, Supabase, Framer Motion, and shadcn/ui.
-
-

@@ -3,17 +3,21 @@
 ## 📋 Pre-Testing Checklist
 
 ### 1. Database Setup
+
 - [ ] Run the migration SQL
 - [ ] Verify table exists
 - [ ] Check RLS policies
 
 ### 2. Dependencies
+
 - [ ] `@supabase/ssr` installed
 - [ ] No build errors
 - [ ] Dev server starts
 
 ### 3. Test Accounts
+
 You'll need:
+
 - [ ] A test patient account (or create one)
 - [ ] Access to Supabase dashboard (to verify data)
 
@@ -22,6 +26,7 @@ You'll need:
 ## 🎯 Test Plan Overview
 
 We'll test these user flows:
+
 1. **Guest User Flow** - Complete diagnosis without login
 2. **Sign-In CTA Flow** - Guest sees banner and signs in
 3. **Logged-In User Flow** - Auto-save and dashboard access
@@ -42,11 +47,13 @@ cd "Desktop/Projects/Sihat TCM/sihat-tcm"
 ```
 
 **Option A: Using psql (if you have it installed)**
+
 ```bash
 psql YOUR_DATABASE_URL < supabase/migrations/20251224_diagnosis_sessions.sql
 ```
 
 **Option B: Using Supabase Dashboard**
+
 1. Go to https://supabase.com/dashboard
 2. Select your project
 3. Go to **SQL Editor** (left sidebar)
@@ -57,15 +64,18 @@ psql YOUR_DATABASE_URL < supabase/migrations/20251224_diagnosis_sessions.sql
 8. Click **Run** (or press Ctrl/Cmd + Enter)
 
 **Expected Result:**
+
 - ✅ "Success. No rows returned" message
 - ✅ No errors
 
 **Verify the table was created:**
+
 ```sql
 SELECT * FROM diagnosis_sessions LIMIT 1;
 ```
 
 **Expected Result:**
+
 - ✅ Query runs (may return 0 rows - that's fine)
 - ❌ If error "relation does not exist" → migration didn't run
 
@@ -78,12 +88,14 @@ npm run dev
 ```
 
 **Expected Result:**
+
 ```
 ✓ Ready in 2.3s
 ○ Local:   http://localhost:3000
 ```
 
 **Open in browser:**
+
 ```
 http://localhost:3000
 ```
@@ -108,6 +120,7 @@ http://localhost:3000
 ### 2.2 Complete the Basic Info Step
 
 **Fill in the form:**
+
 - **Name:** Test Guest User
 - **Age:** 30
 - **Gender:** Male/Female (your choice)
@@ -127,21 +140,27 @@ http://localhost:3000
 For faster testing, you can skip optional steps:
 
 **Inquiry Step:**
+
 - Click "Skip" or just click "Next" if allowed
 
 **Tongue Analysis:**
+
 - Click "Skip" (or upload a test image if you want)
 
 **Face Analysis:**
+
 - Click "Skip"
 
 **Audio Recording:**
+
 - Click "Skip"
 
 **Pulse Check:**
+
 - Click "Skip"
 
 **Smart Connect:**
+
 - Click "Skip"
 
 **Goal:** Get to the Summary/Processing step as quickly as possible
@@ -162,16 +181,18 @@ For faster testing, you can skip optional steps:
 **Once the report loads, scroll to the top.**
 
 **You should see a banner with:**
+
 - 🎨 **Gradient background** (emerald → teal → cyan)
 - 📢 **Heading:** "Save Your Diagnosis & Track Your Recovery"
 - 📝 **Description:** "Create a free account to save this report..."
-- ✨ **Features listed:** 
+- ✨ **Features listed:**
   - Track Progress
   - Secure & Private
   - View Anytime
 - 🔘 **Button:** "Sign In to Save This Report"
 
 **Visual Check:**
+
 - [ ] Banner is visible
 - [ ] Colors are vibrant (gradient)
 - [ ] Text is readable
@@ -179,10 +200,12 @@ For faster testing, you can skip optional steps:
 - [ ] X button to dismiss is present
 
 **Try dismissing:**
+
 - Click the **X** button in the top-right
 - **Expected:** Banner disappears
 
 **Try clicking the button:**
+
 - Refresh the page to bring the banner back
 - Click **"Sign In to Save This Report"**
 - **Expected:** Redirects to `/login?redirect=/patient/dashboard`
@@ -194,10 +217,12 @@ For faster testing, you can skip optional steps:
 ### 3.1 Sign In or Create Account
 
 **If you have a test account:**
+
 1. Enter your email and password
 2. Click "Sign In"
 
 **If you need to create an account:**
+
 1. Look for "Sign Up" or "Create Account" link
 2. Fill in:
    - Email
@@ -208,6 +233,7 @@ For faster testing, you can skip optional steps:
 5. Verify your account
 
 **Expected After Sign-In:**
+
 - ✅ Redirected to a page (might be dashboard, home, or back to diagnosis)
 - ✅ You see your name or profile indicator in header
 
@@ -216,9 +242,11 @@ For faster testing, you can skip optional steps:
 ### 3.2 Navigate to Dashboard
 
 **Option A: If banner redirected you:**
+
 - You should already be at `/patient/dashboard`
 
 **Option B: Manual navigation:**
+
 1. Click on your profile/account menu
 2. Look for "Dashboard" or "My Health Passport"
 3. **Or directly visit:** `http://localhost:3000/patient/dashboard`
@@ -232,18 +260,21 @@ For faster testing, you can skip optional steps:
 ### 4.1 Check Empty State Display
 
 **Expected:**
+
 - 🏥 **Icon:** Large FileHeart icon in a circle
 - 📝 **Heading:** "Your journey to wellness begins here"
 - 📋 **Description:** "Complete your first TCM diagnosis to start tracking..."
 - 🔘 **Button:** "Start Your First Diagnosis"
 
 **Visual Check:**
+
 - [ ] Empty state is centered
 - [ ] Icon has gradient background
 - [ ] Text is encouraging (not error-like)
 - [ ] Button is prominent
 
 **Try the button:**
+
 - Click "Start Your First Diagnosis"
 - **Expected:** Redirects to home page (diagnosis wizard)
 
@@ -256,6 +287,7 @@ For faster testing, you can skip optional steps:
 ### 5.1 Complete Another Diagnosis
 
 **Since you're now logged in:**
+
 1. **Start a new diagnosis** (from home or dashboard button)
 2. **Fill in basic info** (you can use different data)
    - Name: Test User Session 2
@@ -271,6 +303,7 @@ For faster testing, you can skip optional steps:
 **Once the report loads:**
 
 **You should see a different banner:**
+
 - 🎨 **Light gradient** (emerald-50 to teal-50)
 - ✅ **Icon:** Green circle with FileHeart
 - 📢 **Heading:** "Report Saved to Your Health Passport!"
@@ -278,16 +311,19 @@ For faster testing, you can skip optional steps:
 - 🔘 **Button:** "View Dashboard"
 
 **Visual Check:**
+
 - [ ] Banner has lighter colors (not bold gradient)
 - [ ] Success checkmark or icon visible
 - [ ] Button says "View Dashboard"
 
 **Check the browser console:**
+
 ```
 Press F12 → Console tab
 ```
 
 **Look for:**
+
 ```
 [Wizard] Saved to Health Passport: <some-uuid>
 ```
@@ -313,6 +349,7 @@ Press F12 → Console tab
 **At the top of the page, you should see:**
 
 **Trend Widget:**
+
 - 📊 **Title:** "Your Health Vitality"
 - 📈 **Stats displayed:**
   - **Total Sessions:** 1 (or 2 if you did multiple)
@@ -321,6 +358,7 @@ Press F12 → Console tab
   - **Most Common Pattern:** The diagnosis type
 
 **Visual Check:**
+
 - [ ] Widget has glassmorphism effect
 - [ ] Numbers are large and readable
 - [ ] Icons match the stats (Calendar, Activity, etc.)
@@ -333,6 +371,7 @@ Press F12 → Console tab
 **Below the trend widget:**
 
 **You should see card(s) with:**
+
 - 🏷️ **Emoji icon** (☯️, 🌀, 💧, etc. based on diagnosis)
 - 📝 **Diagnosis name** (e.g., "Qi Deficiency")
 - 🧬 **Constitution** (if available)
@@ -342,12 +381,14 @@ Press F12 → Console tab
 - 🔘 **Button:** "View Full Report"
 
 **Visual Check:**
+
 - [ ] Cards have hover effect (lift up slightly)
 - [ ] Score badge has appropriate color
 - [ ] Date is readable
 - [ ] Cards are in grid layout (3 columns on desktop)
 
 **Try hovering:**
+
 - **Expected:** Card lifts, shows subtle animation
 - **Expected:** Bottom accent line appears (gradient)
 
@@ -357,7 +398,8 @@ Press F12 → Console tab
 
 **Click on a history card**
 
-**Expected:** 
+**Expected:**
+
 - Navigates to `/patient/history/[some-uuid]`
 - Page loads with full report
 
@@ -370,20 +412,24 @@ Press F12 → Console tab
 ### 7.1 Check Page Structure
 
 **Top Navigation Bar:**
+
 - [ ] "Back to Dashboard" button (left)
 - [ ] "Delete" button (right)
 
 **Session Info Card:**
+
 - [ ] Primary diagnosis displayed
 - [ ] Full date (e.g., "Monday, December 24, 2024")
 - [ ] Score badge (if available)
 
 **Notes Section:**
+
 - [ ] "Personal Notes" heading with edit icon
 - [ ] Current notes text (or placeholder)
 - [ ] "Edit" button
 
 **Full Report:**
+
 - [ ] Complete diagnosis report rendered below
 - [ ] All sections visible (diagnosis, analysis, recommendations)
 
@@ -394,10 +440,12 @@ Press F12 → Console tab
 **Click:** "Edit" button in notes section
 
 **Expected:**
+
 - Textarea appears
 - "Cancel" and "Save" buttons replace "Edit" button
 
 **Type some notes:**
+
 ```
 Feeling better today. Started the dietary recommendations.
 Will try the acupuncture points tomorrow.
@@ -406,12 +454,14 @@ Will try the acupuncture points tomorrow.
 **Click:** "Save" button
 
 **Expected:**
+
 - ⏳ Button shows "Saving..." with spinner
 - ✅ After 1-2 seconds, switches back to view mode
 - ✅ Your notes are now displayed
 - ✅ "Edit" button returns
 
 **Verify persistence:**
+
 1. Click "Back to Dashboard"
 2. Click the same session card again
 3. **Expected:** Your notes are still there!
@@ -423,6 +473,7 @@ Will try the acupuncture points tomorrow.
 **Click:** "Edit" button again
 
 **Change the text:**
+
 ```
 This text should be discarded
 ```
@@ -430,6 +481,7 @@ This text should be discarded
 **Click:** "Cancel" button
 
 **Expected:**
+
 - ✅ Textarea disappears
 - ✅ Original notes remain unchanged
 - ✅ No save occurred
@@ -441,6 +493,7 @@ This text should be discarded
 **Click:** "Delete" button in top bar
 
 **Expected:**
+
 - 🔴 Modal appears with warning
 - ⚠️ Red alert icon
 - 📝 Heading: "Delete This Session?"
@@ -448,6 +501,7 @@ This text should be discarded
 - 🔘 Two buttons: "Cancel" and "Delete"
 
 **Visual Check:**
+
 - [ ] Modal has backdrop blur
 - [ ] Modal is centered
 - [ ] Delete button is red
@@ -456,6 +510,7 @@ This text should be discarded
 **Click:** "Cancel"
 
 **Expected:**
+
 - Modal closes
 - Session remains
 
@@ -470,11 +525,13 @@ This text should be discarded
 **This time, click:** "Delete" in the modal
 
 **Expected:**
+
 - ⏳ Button shows "Deleting..." with spinner
 - ✅ After 1-2 seconds, redirects to dashboard
 - ✅ Session no longer appears in history grid
 
 **Verify in dashboard:**
+
 - [ ] The deleted session is gone
 - [ ] Session count decreased by 1
 - [ ] If you deleted all, empty state returns
@@ -488,6 +545,7 @@ This text should be discarded
 ### 8.1 Create Additional Sessions
 
 **For each session:**
+
 1. Click "New Diagnosis" button in dashboard
 2. Fill in different data:
    - **Session 2:** Age 40, Main Complaint: "Headaches"
@@ -497,6 +555,7 @@ This text should be discarded
 5. Return to dashboard
 
 **Expected:**
+
 - Each session appears as a new card
 - Newest sessions appear first (top/left)
 
@@ -507,12 +566,14 @@ This text should be discarded
 **After creating 2-3 sessions:**
 
 **Trend widget should show:**
+
 - **Session Count:** 2 or 3
 - **Average Score:** Updated average
 - **Progress:** Shows improvement/decline (compares first to last)
 - **Most Common Pattern:** Most frequent diagnosis
 
 **Try the math:**
+
 - If your scores were 65, 70, 75
 - Average should be: (65+70+75)/3 = 70
 - Progress should be: 75-65 = +10
@@ -526,18 +587,21 @@ This text should be discarded
 ### 9.1 Check Database Directly
 
 **Open Supabase Dashboard:**
+
 1. Go to **Table Editor** → `diagnosis_sessions`
 2. You should see your test sessions
 3. Note the `user_id` - it should match your user ID
 
 **Run a query:**
+
 ```sql
-SELECT id, primary_diagnosis, user_id 
-FROM diagnosis_sessions 
+SELECT id, primary_diagnosis, user_id
+FROM diagnosis_sessions
 ORDER BY created_at DESC;
 ```
 
 **Expected:**
+
 - All rows have YOUR user_id
 - Other users' data not visible (RLS enforced)
 
@@ -552,6 +616,7 @@ ORDER BY created_at DESC;
 3. **Navigate to** `/patient/dashboard`
 
 **Expected:**
+
 - ✅ Empty state (no sessions from first user)
 - ✅ Dashboard only shows second user's sessions
 
@@ -566,16 +631,19 @@ ORDER BY created_at DESC;
 **Resize your browser window:**
 
 **Desktop (1920px):**
+
 - [ ] Dashboard: 3 columns of cards
 - [ ] All text readable
 - [ ] No horizontal scroll
 
 **Tablet (768px):**
+
 - [ ] Dashboard: 2 columns of cards
 - [ ] Trend widget stacks stats vertically
 - [ ] Navigation still accessible
 
 **Mobile (375px):**
+
 - [ ] Dashboard: 1 column of cards
 - [ ] Trend widget fully responsive
 - [ ] Buttons remain tappable
@@ -588,15 +656,18 @@ ORDER BY created_at DESC;
 **Check these animations:**
 
 **Dashboard:**
+
 - [ ] Cards fade in with stagger (0.05s delay each)
 - [ ] Hover: Cards lift and show bottom accent line
 - [ ] Trend widget numbers animate in
 
 **Banner:**
+
 - [ ] Appears with slide-down animation
 - [ ] Dismisses with slide-up animation
 
 **Modals:**
+
 - [ ] Backdrop fades in
 - [ ] Modal scales up (0.95 → 1.0)
 - [ ] Closing reverses animation
@@ -606,11 +677,13 @@ ORDER BY created_at DESC;
 ### 10.3 Test Empty States
 
 **Empty Dashboard:**
+
 - [ ] Icon, heading, description all visible
 - [ ] Button prominent and clickable
 - [ ] Encouraging tone (not error-like)
 
 **No Notes:**
+
 - [ ] Placeholder text: "No notes added yet..."
 - [ ] Edit button still available
 
@@ -623,11 +696,13 @@ ORDER BY created_at DESC;
 **Sign out from your account**
 
 **Try to navigate to:**
+
 ```
 http://localhost:3000/patient/dashboard
 ```
 
 **Expected:**
+
 - ✅ Redirects to `/login?redirect=/patient/dashboard`
 - ✅ After login, returns to dashboard
 
@@ -636,11 +711,13 @@ http://localhost:3000/patient/dashboard
 ### 11.2 Test Invalid Session ID
 
 **Navigate to:**
+
 ```
 http://localhost:3000/patient/history/00000000-0000-0000-0000-000000000000
 ```
 
 **Expected:**
+
 - ✅ Shows error card: "Session Not Found"
 - ✅ Provides "Back to Dashboard" button
 - ✅ No crash or blank page
@@ -650,15 +727,18 @@ http://localhost:3000/patient/history/00000000-0000-0000-0000-000000000000
 ### 11.3 Test Network Errors (Advanced)
 
 **Open DevTools:**
+
 1. Press F12
 2. Go to **Network** tab
 3. Enable **Offline** mode (checkbox at top)
 
 **Try to:**
+
 - Navigate to dashboard
 - Edit notes
 
 **Expected:**
+
 - ✅ Error message appears
 - ✅ App doesn't crash
 - ✅ User can retry after reconnecting
@@ -668,6 +748,7 @@ http://localhost:3000/patient/history/00000000-0000-0000-0000-000000000000
 ## ✅ STEP 12: Final Verification Checklist
 
 ### Database
+
 - [ ] Sessions saved to `diagnosis_sessions` table
 - [ ] `user_id` correctly set
 - [ ] `primary_diagnosis` extracted from AI response
@@ -676,18 +757,21 @@ http://localhost:3000/patient/history/00000000-0000-0000-0000-000000000000
 - [ ] `created_at` and `updated_at` timestamps correct
 
 ### Guest Flow
+
 - [ ] Can complete diagnosis without login
 - [ ] See "Sign in to save" banner
 - [ ] Banner dismissible
 - [ ] Clicking banner redirects to login
 
 ### Logged-In Flow
+
 - [ ] Auto-save works after diagnosis
 - [ ] See "Report Saved!" banner
 - [ ] Banner links to dashboard
 - [ ] Console log confirms save
 
 ### Dashboard
+
 - [ ] Redirects if not logged in
 - [ ] Shows empty state for new users
 - [ ] Displays trend widget with accurate stats
@@ -696,6 +780,7 @@ http://localhost:3000/patient/history/00000000-0000-0000-0000-000000000000
 - [ ] "New Diagnosis" button works
 
 ### History Viewer
+
 - [ ] Full report displays correctly
 - [ ] Notes can be added/edited
 - [ ] Notes persist after save
@@ -704,18 +789,21 @@ http://localhost:3000/patient/history/00000000-0000-0000-0000-000000000000
 - [ ] Delete actually removes session
 
 ### Trends
+
 - [ ] Session count accurate
 - [ ] Average score calculated correctly
 - [ ] Progress indicator shows change
 - [ ] Most common diagnosis displayed
 
 ### Security
+
 - [ ] Users only see own sessions
 - [ ] RLS policies enforced
 - [ ] Auth required for all pages
 - [ ] Invalid session IDs handled gracefully
 
 ### UI/UX
+
 - [ ] Glassmorphism effects render
 - [ ] Gradients smooth
 - [ ] Animations smooth (60fps)
@@ -739,7 +827,7 @@ http://localhost:3000/patient/history/00000000-0000-0000-0000-000000000000
 ✅ RLS policies prevent unauthorized access  
 ✅ UI is beautiful and responsive  
 ✅ Animations are smooth  
-✅ No console errors  
+✅ No console errors
 
 ---
 
@@ -761,6 +849,7 @@ http://localhost:3000/patient/history/00000000-0000-0000-0000-000000000000
 ## 🚀 Next Steps After Testing
 
 **If all tests pass:**
+
 1. ✅ Mark feature as tested
 2. 📝 Document any issues found
 3. 🎨 Customize colors/styles if desired
@@ -768,5 +857,3 @@ http://localhost:3000/patient/history/00000000-0000-0000-0000-000000000000
 5. 🎉 Deploy to production!
 
 **Testing complete!** 🎊
-
-

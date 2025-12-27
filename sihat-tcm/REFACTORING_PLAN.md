@@ -5,6 +5,7 @@
 ## 📊 Current State Analysis
 
 ### Codebase Metrics
+
 - **API Routes**: 30+ routes with duplicated patterns
 - **Components**: 196 files (some duplication likely)
 - **Lib Files**: 68 files (needs better organization)
@@ -58,6 +59,7 @@
 #### 1.1 Create API Middleware Layer
 
 **New Structure:**
+
 ```
 src/lib/api/
 ├── middleware/
@@ -74,12 +76,14 @@ src/lib/api/
 ```
 
 **Benefits:**
+
 - Reduce code duplication by ~60%
 - Consistent error handling
 - Easier to add new routes
 - Better type safety
 
 **Migration Strategy:**
+
 1. Create middleware utilities (non-breaking)
 2. Update one route at a time (chat, consult, analyze-image)
 3. Test each route after migration
@@ -88,6 +92,7 @@ src/lib/api/
 #### 1.2 Create Route Base Classes/Utilities
 
 **Example Pattern:**
+
 ```typescript
 // src/lib/api/handlers/base-handler.ts
 export class BaseApiHandler {
@@ -103,7 +108,7 @@ export class BaseApiHandler {
       return this.handleError(error);
     }
   }
-  
+
   protected handleError(error: unknown): Response {
     // Centralized error handling
   }
@@ -113,6 +118,7 @@ export class BaseApiHandler {
 #### 1.3 Group Related Routes
 
 **New Structure:**
+
 ```
 src/app/api/
 ├── ai/              # AI-related routes
@@ -181,6 +187,7 @@ src/lib/
 #### 3.1 Current vs. Proposed Structure
 
 **Current:**
+
 ```
 components/
 ├── diagnosis/        # 98 files (too large)
@@ -190,6 +197,7 @@ components/
 ```
 
 **Proposed:**
+
 ```
 components/
 ├── features/         # Feature-based components
@@ -225,8 +233,8 @@ components/
 3. **Create Component Index Files**
    ```typescript
    // components/features/diagnosis/index.ts
-   export { DiagnosisWizard } from './wizard/DiagnosisWizard';
-   export { InquiryStep } from './steps/InquiryStep';
+   export { DiagnosisWizard } from "./wizard/DiagnosisWizard";
+   export { InquiryStep } from "./steps/InquiryStep";
    // ... etc
    ```
 
@@ -239,6 +247,7 @@ components/
 #### 4.1 Context Audit
 
 **Current Contexts:**
+
 - `AuthContext`
 - `DoctorContext`
 - `LanguageContext`
@@ -248,6 +257,7 @@ components/
 - `DeveloperContext`
 
 **Analysis:**
+
 - Some contexts may be combinable
 - Consider Zustand for complex state (already in dependencies)
 - Keep contexts that are truly global
@@ -269,11 +279,13 @@ src/contexts/
 #### 5.1 Remove Test Routes
 
 **Action:**
+
 - Move test pages to `/test` or `/dev` route group
 - Or remove if no longer needed
 - Keep only essential test utilities
 
 **Routes to Clean:**
+
 - `/test-chat`
 - `/test-gemini`
 - `/test-image`
@@ -284,6 +296,7 @@ src/contexts/
 #### 5.2 Establish Coding Standards
 
 **Create:**
+
 - `.eslintrc` rules (enhance existing)
 - TypeScript strict mode configuration
 - Component naming conventions
@@ -293,6 +306,7 @@ src/contexts/
 #### 5.3 Documentation
 
 **Update:**
+
 - `DEVELOPER_MANUAL.md` with new structure
 - API documentation
 - Component documentation
@@ -303,21 +317,25 @@ src/contexts/
 ## 🔄 Migration Strategy (Safe & Incremental)
 
 ### Step 1: Create New Structure (Non-Breaking)
+
 - Create new directories
 - Add new utilities alongside old ones
 - No changes to existing code
 
 ### Step 2: Migrate One Route/Module at a Time
+
 - Start with least-used routes
 - Test thoroughly after each migration
 - Keep old code until new code is verified
 
 ### Step 3: Update Imports Gradually
+
 - Use find/replace with caution
 - Update imports in batches
 - Test after each batch
 
 ### Step 4: Remove Old Code
+
 - Only after all imports updated
 - Only after thorough testing
 - Keep in git history for safety
@@ -327,18 +345,21 @@ src/contexts/
 ## 📊 Success Metrics
 
 ### Code Quality
+
 - [ ] Reduce API route code duplication by 60%+
 - [ ] Organize lib directory into <10 feature modules
 - [ ] Component structure follows feature boundaries
 - [ ] Zero breaking changes to existing functionality
 
 ### Maintainability
+
 - [ ] New routes can be added in <30 minutes
 - [ ] New features follow established patterns
 - [ ] Code review time reduced by 40%
 - [ ] Onboarding time for new developers reduced
 
 ### Developer Experience
+
 - [ ] Clear file organization
 - [ ] Comprehensive documentation
 - [ ] Consistent patterns across codebase
@@ -349,12 +370,14 @@ src/contexts/
 ## 🚨 Risk Mitigation
 
 ### Risks
+
 1. **Breaking Changes**: Mitigated by incremental migration
 2. **Import Errors**: Mitigated by careful find/replace
 3. **Lost Functionality**: Mitigated by thorough testing
 4. **Team Confusion**: Mitigated by documentation
 
 ### Safety Measures
+
 1. **Git Branches**: One branch per phase
 2. **Feature Flags**: Use flags for new patterns
 3. **Rollback Plan**: Keep old code until verified
@@ -365,13 +388,13 @@ src/contexts/
 
 ## 📅 Timeline
 
-| Phase | Duration | Priority | Risk Level |
-|-------|----------|----------|------------|
-| Phase 1: API Standardization | 2 weeks | High | Low |
-| Phase 2: Lib Reorganization | 1 week | High | Medium |
-| Phase 3: Component Organization | 1 week | Medium | Medium |
-| Phase 4: Context Consolidation | 1 week | Low | Low |
-| Phase 5: Cleanup & Standards | 1 week | Medium | Low |
+| Phase                           | Duration | Priority | Risk Level |
+| ------------------------------- | -------- | -------- | ---------- |
+| Phase 1: API Standardization    | 2 weeks  | High     | Low        |
+| Phase 2: Lib Reorganization     | 1 week   | High     | Medium     |
+| Phase 3: Component Organization | 1 week   | Medium   | Medium     |
+| Phase 4: Context Consolidation  | 1 week   | Low      | Low        |
+| Phase 5: Cleanup & Standards    | 1 week   | Medium   | Low        |
 
 **Total Estimated Time**: 6 weeks
 
@@ -424,4 +447,3 @@ These can be done immediately with minimal risk:
 **Last Updated**: 2025-01-XX
 **Status**: Planning Phase
 **Owner**: Development Team
-

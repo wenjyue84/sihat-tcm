@@ -29,6 +29,7 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 ### Key Features
 
 **Core Features:**
+
 - Patient onboarding and medical history collection
 - TCM diagnostic workflows (Four Examinations: pulse, tongue, face, body)
 - AI-powered diagnostic assistance using Gemini AI
@@ -38,6 +39,7 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 - Real-time chat with AI for medical inquiries
 
 **Patient Portal Features:**
+
 - **Health Journey Dashboard**: Unified patient portal with health trends and diagnostics
 - **AI Meal Planner**: Personalized 7-day TCM meal plans with shopping lists
 - **TCM Food Checker**: Evaluate food suitability based on diagnosis
@@ -59,6 +61,7 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 ### Technology Stack
 
 **Web Application:**
+
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4
@@ -71,6 +74,7 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 - **PDF Generation**: html2canvas, jspdf
 
 **Mobile Application:**
+
 - **Framework**: React Native with Expo
 - **Language**: JavaScript
 - **State Management**: React Context API
@@ -135,19 +139,22 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 ### Initial Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd "Sihat TCM/sihat-tcm"
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Environment Variables**
-   
+
    Create a `.env.local` file in the `sihat-tcm` directory:
+
    ```env
    # Supabase Configuration
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
@@ -162,74 +169,76 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
    ```
 
 4. **Database Setup**
-   
+
    The Supabase CLI can be used via `npx` without global installation:
-   
+
    ```bash
    # Login to Supabase
    npx supabase login
-   
+
    # Link to your remote project
    npx supabase link --project-ref <your-project-ref>
-   
+
    # Pull the remote schema (optional, to sync with existing project)
    npx supabase db pull
    ```
-   
+
    **Alternative: Manual SQL Execution**
-   
+
    If you prefer to run SQL files directly via Supabase Dashboard or psql:
+
    ```bash
    # 1. Main schema
    psql -h <supabase-host> -U postgres -d postgres -f schema.sql
-   
+
    # 2. Additional setup
    psql -h <supabase-host> -U postgres -d postgres -f practitioners_setup.sql
    psql -h <supabase-host> -U postgres -d postgres -f add_medical_history_column.sql
    psql -h <supabase-host> -U postgres -d postgres -f update_schema.sql
    ```
-   
+
    **Using Supabase CLI for Migrations**
-   
+
    ```bash
    # Initialize Supabase in your project (creates supabase/ directory)
    npx supabase init
-   
+
    # Start local Supabase (requires Docker)
    npx supabase start
-   
+
    # Create a new migration
    npx supabase migration new <migration-name>
-   
+
    # Apply migrations to local database
    npx supabase db reset
-   
+
    # Push migrations to remote database
    npx supabase db push
-   
+
    # Generate TypeScript types from your database
    npx supabase gen types typescript --local > src/types/supabase.ts
    ```
-   
+
    **Common Supabase CLI Commands**
-   
+
    ```bash
    # View help
    npx supabase --help
-   
+
    # Check CLI version
    npx supabase --version
-   
+
    # Stop local Supabase
    npx supabase stop
-   
+
    # View database status
    npx supabase status
    ```
-   
+
    **Note**: The first time you run any `npx supabase` command, it will download and cache the package. Subsequent runs will be faster.
 
 5. **Run the development server**
+
    ```bash
    npm run dev
    ```
@@ -237,37 +246,43 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
    The application will be available at `http://localhost:3100`
 
 6. **Blog Management (Tina CMS)**
-   
+
    To manage blog content, use the specialized Tina dev command:
+
    ```bash
    npm run dev:tina
    ```
+
    The editor will be available at `http://localhost:3100/tina-admin/index.html`
 
 7. **Troubleshooting Hot Reload Issues**
-   
+
    If you experience hot reload problems (changes not reflecting, slow updates), try these solutions in order:
-   
+
    **Quick Fix - Clear Next.js Cache:**
+
    ```bash
    npm run dev:clear
    # Or manually:
    rm -rf .next && npm run dev
    ```
-   
+
    **Full Reset - Clear node_modules (if cache clearing doesn't help):**
+
    ```bash
    rm -rf node_modules package-lock.json
    npm install
    npm run dev
    ```
-   
+
    **Test with Turbopack (experimental, faster bundler):**
+
    ```bash
    npm run dev:turbo
    ```
+
    Note: Turbopack is experimental and may have compatibility issues with some plugins. Test thoroughly before using in production.
-   
+
    **Increase Node.js Memory (if you see "out of memory" errors):**
    - Windows (PowerShell): `$env:NODE_OPTIONS="--max-old-space-size=8192"; npm run dev`
    - Windows (CMD): `set NODE_OPTIONS=--max-old-space-size=8192 && npm run dev`
@@ -276,20 +291,23 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 ### Mobile App Setup
 
 1. **Navigate to mobile directory**
+
    ```bash
    cd ../sihat-tcm-mobile
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Configure API endpoint**
-   
+
    Update `lib/apiConfig.js` with your web application URL:
+
    ```javascript
-   export const API_BASE_URL = 'http://localhost:3100';
+   export const API_BASE_URL = "http://localhost:3100";
    ```
 
 4. **Run the mobile app**
@@ -444,6 +462,7 @@ The authentication system uses Supabase Auth with role-based access control:
 **Location**: `src/components/patient/UnifiedDashboard.tsx`
 
 The core of the patient experience, integrating multiple health modules into a single "Health Journey" view:
+
 - **Health Trends**: Visualizes diagnostic scores over time
 - **Documents**: Manages medical reports with OCR capabilities
 - **Modules**: Pluggable architecture supports Vitality Rhythm, Qi Dose, and more
@@ -474,6 +493,7 @@ The system now employs specialized AI modules for different health aspects:
 **Location**: `src/components/qi-dose/`
 
 Encourages user engagement through gamification:
+
 - **Qi Garden**: Visual metaphor for health status (plants grow with healthy actions)
 - **Baduanjin**: Guided exercise routines with progress tracking
 
@@ -493,6 +513,7 @@ The diagnosis workflow has been expanded to include:
 8. **Report Generation** - Final medical report with comprehensive TCM insights
 
 **Key Components:**
+
 - `DiagnosisProgressContext` - Tracks progress through workflow
 - `useDiagnosisWizard` - Hook for navigation and state management
 - `useDiagnosisPersistence` - Saves progress to database
@@ -502,6 +523,7 @@ The diagnosis workflow has been expanded to include:
 **Location**: `src/lib/translations/`, `src/contexts/LanguageContext.tsx`
 
 Supported languages:
+
 - English (en)
 - Malay (ms)
 - Chinese (zh)
@@ -559,25 +581,30 @@ API routes are now dedicated to AI services and specialized computations:
 ## Database Schema
 
 ### Core Tables
+
 **users** - User accounts (extends Supabase auth.users)
+
 - `id` (UUID, primary key)
 - `email`
 - `role` (patient, doctor, admin)
 - `created_at`, `updated_at`
 
 **patients** - Patient-specific information
+
 - `id` (UUID, primary key, references users)
 - `name`, `date_of_birth`, `gender`
 - `medical_history` (JSONB)
 - `created_at`, `updated_at`
 
 **practitioners** - Doctor/practitioner information
+
 - `id` (UUID, primary key, references users)
 - `name`, `license_number`
 - `specialization`, `level`
 - `created_at`, `updated_at`
 
 **diagnosis_sessions** - Diagnosis sessions (formerly 'diagnoses')
+
 - `id` (UUID, primary key)
 - `patient_id` (references patients)
 - `practitioner_id` (references practitioners)
@@ -587,6 +614,7 @@ API routes are now dedicated to AI services and specialized computations:
 - `created_at`, `updated_at`, `completed_at`
 
 **medical_reports** - Generated medical reports
+
 - `id` (UUID, primary key)
 - `diagnosis_id` (references diagnosis_sessions)
 - `patient_id` (references patients)
@@ -596,6 +624,7 @@ API routes are now dedicated to AI services and specialized computations:
 - `created_at`, `updated_at`
 
 **meal_plans** - AI-generated meal plans
+
 - `id` (UUID, primary key)
 - `user_id` (references users)
 - `weekly_plan` (JSONB) - 7-day meal plan
@@ -604,6 +633,7 @@ API routes are now dedicated to AI services and specialized computations:
 - `created_at`, `updated_at`
 
 **dietary_preferences** - User dietary settings
+
 - `user_id` (references users, primary key)
 - `allergies` (text[])
 - `dietary_type` (text)
@@ -651,8 +681,8 @@ Supabase RLS policies enforce data access:
 
 ```typescript
 // Example route protection
-if (pathname.startsWith('/admin') && user.role !== 'admin') {
-  return NextResponse.redirect('/login');
+if (pathname.startsWith("/admin") && user.role !== "admin") {
+  return NextResponse.redirect("/login");
 }
 ```
 
@@ -747,18 +777,21 @@ npm run test
 #### Manual Deployment
 
 1. Build the application:
+
    ```bash
    npm run build
    ```
 
 2. Start production server:
+
 ```bash
    npm start
-   ```
+```
 
 ### Environment Variables for Production
 
 Ensure all environment variables are set:
+
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -771,20 +804,23 @@ Ensure all environment variables are set:
 
 1. Configure `app.json` and `eas.json`
 2. Build with EAS:
+
    ```bash
    eas build --platform android
    eas build --platform ios
    ```
 
 3. Submit to app stores:
+
 ```bash
    eas submit --platform android
    eas submit --platform ios
-   ```
+```
 
 ### Database Migrations
 
 Before deploying:
+
 1. Backup production database
 2. Test migrations on staging environment
 3. Apply migrations in order
@@ -801,6 +837,7 @@ Before deploying:
 **Problem**: Cannot connect to Supabase
 
 **Solutions**:
+
 - Verify environment variables are set correctly
 - Check Supabase project status
 - Verify network connectivity
@@ -811,6 +848,7 @@ Before deploying:
 **Problem**: AI features not working
 
 **Solutions**:
+
 - Verify `GEMINI_API_KEY` is set
 - Check API quota/limits
 - Review API error logs in `/api/gemini/` routes
@@ -821,6 +859,7 @@ Before deploying:
 **Problem**: Users cannot log in or access protected routes
 
 **Solutions**:
+
 - Check Supabase Auth configuration
 - Verify middleware is correctly protecting routes
 - Check user role assignments in database
@@ -831,6 +870,7 @@ Before deploying:
 **Problem**: Schema changes not applying
 
 **Solutions**:
+
 - Run migrations in correct order
 - Check for conflicting changes
 - Verify database user permissions
@@ -841,6 +881,7 @@ Before deploying:
 **Problem**: Application fails to build
 
 **Solutions**:
+
 - Clear `.next` directory: `rm -rf .next`
 - Clear node_modules: `rm -rf node_modules && npm install`
 - Check TypeScript errors: `npm run type-check`
@@ -851,6 +892,7 @@ Before deploying:
 **Problem**: Navigating to `/tina-admin` returns a 404 error.
 
 **Solutions**:
+
 - **Check Server Command**: Ensure you are running `npm run dev:tina` instead of `npm run dev`. Tina needs to build its admin assets and start a GraphQL backend.
 - **Check Output Directory**: Verify that `public/tina-admin` contains an `index.html` file. If not, the Tina build process hasn't run.
 - **Console Errors**: Check the terminal for "🦙 TinaCMS Dev Server" status. It should say "✅ TinaCMS Dev Server is active".
@@ -860,6 +902,7 @@ Before deploying:
 **Problem**: Expo app crashes or styles don't apply.
 
 **Gotchas & Solutions**:
+
 - **Inline Styles**: Avoid `style={{...}}` objects as they cause re-renders. Use `StyleSheet.create()`.
 - **Layouts**: Use `SafeAreaView` for all top-level screen containers.
 - **Lists**: Use `FlatList` or `ScrollView`, never `.map()` directly in render methods.

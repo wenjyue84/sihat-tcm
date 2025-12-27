@@ -5,9 +5,10 @@ This guide walks you through testing all three phases of the diagnosis data reco
 ## ✅ Quick Test Results
 
 **All Implementation Tests Pass:**
+
 ```
 ✓ Phase 1: Schema tests (35 tests)
-✓ Phase 2: Data collection tests (30 tests)  
+✓ Phase 2: Data collection tests (30 tests)
 ✓ Phase 3: UI component tests (11 tests)
 
 Total: 76 tests passed ✅
@@ -26,6 +27,7 @@ Total: 76 tests passed ✅
 ### 1.1 Run the Migration
 
 **Option A: Using Supabase Dashboard (Recommended)**
+
 1. Go to your Supabase project dashboard
 2. Navigate to **SQL Editor**
 3. Open `supabase/migrations/20250102000001_add_diagnosis_input_data.sql`
@@ -34,12 +36,14 @@ Total: 76 tests passed ✅
 6. Click **Run** (or press Ctrl/Cmd + Enter)
 
 **Option B: Using Supabase CLI**
+
 ```bash
 cd sihat-tcm
 npx supabase db push
 ```
 
 **Expected Result:**
+
 - ✅ "Success. No rows returned" message
 - ✅ No errors
 
@@ -49,25 +53,26 @@ Run these queries in Supabase SQL Editor:
 
 ```sql
 -- Check new columns in diagnosis_sessions
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'diagnosis_sessions' 
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'diagnosis_sessions'
 AND column_name IN (
-  'inquiry_summary', 'inquiry_chat_history', 'tongue_analysis', 
+  'inquiry_summary', 'inquiry_chat_history', 'tongue_analysis',
   'face_analysis', 'audio_analysis', 'pulse_data', 'is_guest_session'
 );
 
 -- Check guest_diagnosis_sessions table exists
-SELECT * FROM information_schema.tables 
+SELECT * FROM information_schema.tables
 WHERE table_name = 'guest_diagnosis_sessions';
 
 -- Check indexes
-SELECT indexname FROM pg_indexes 
+SELECT indexname FROM pg_indexes
 WHERE tablename IN ('diagnosis_sessions', 'guest_diagnosis_sessions')
 AND indexname LIKE '%diagnosis%' OR indexname LIKE '%guest%';
 ```
 
 **Expected Result:**
+
 - ✅ All new columns appear
 - ✅ `guest_diagnosis_sessions` table exists
 - ✅ Indexes are created
@@ -97,6 +102,7 @@ npm run test -- src/components/patient/__tests__/DiagnosisInputDataViewer.test.t
 ```
 
 **Expected Result:**
+
 ```
 ✓ All test files pass
 ✓ All tests pass (76 total tests across all phases)
@@ -132,9 +138,10 @@ The app should be available at `http://localhost:3100`
 ### 3.3 Verify Data is Saved
 
 **Check Database:**
+
 ```sql
 -- Get the latest diagnosis session
-SELECT 
+SELECT
   id,
   primary_diagnosis,
   inquiry_summary,
@@ -151,6 +158,7 @@ LIMIT 1;
 ```
 
 **Expected Result:**
+
 - ✅ All input data fields are populated
 - ✅ `inquiry_summary` contains text
 - ✅ `inquiry_chat_history` is a JSON array
@@ -187,9 +195,10 @@ LIMIT 1;
 ### 4.2 Verify Guest Session is Created
 
 **Check Database:**
+
 ```sql
 -- Get latest guest session
-SELECT 
+SELECT
   id,
   session_token,
   guest_email,
@@ -204,10 +213,12 @@ LIMIT 1;
 ```
 
 **Check Browser:**
+
 - Open Developer Tools → Application → Session Storage
 - ✅ Should see `guest_session_token` key with a UUID value
 
 **Expected Result:**
+
 - ✅ Guest session saved to `guest_diagnosis_sessions` table
 - ✅ Session token stored in sessionStorage
 - ✅ All input data is saved
@@ -287,6 +298,7 @@ LIMIT 1;
 ### Issue: Migration fails
 
 **Solution:**
+
 - Check if columns already exist (use `IF NOT EXISTS` in migration)
 - Verify database connection
 - Check Supabase logs for errors
@@ -294,6 +306,7 @@ LIMIT 1;
 ### Issue: Data not saving
 
 **Check:**
+
 1. Browser console for errors
 2. Network tab for failed API calls
 3. Supabase logs for database errors
@@ -302,6 +315,7 @@ LIMIT 1;
 ### Issue: Input data not displaying
 
 **Check:**
+
 1. Verify data exists in database
 2. Check browser console for errors
 3. Verify component is receiving session data
@@ -310,6 +324,7 @@ LIMIT 1;
 ### Issue: Guest session not created
 
 **Check:**
+
 1. Verify `guest_diagnosis_sessions` table exists
 2. Check RLS policies allow inserts
 3. Verify session token generation works
@@ -325,8 +340,16 @@ LIMIT 1;
 {
   "inquiry_summary": "Patient reported persistent headaches for 2 weeks, fatigue, and difficulty sleeping",
   "inquiry_chat_history": [
-    { "role": "user", "content": "I have been having headaches", "timestamp": "2025-01-02T10:00:00Z" },
-    { "role": "assistant", "content": "How long have you been experiencing this?", "timestamp": "2025-01-02T10:00:05Z" }
+    {
+      "role": "user",
+      "content": "I have been having headaches",
+      "timestamp": "2025-01-02T10:00:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "How long have you been experiencing this?",
+      "timestamp": "2025-01-02T10:00:05Z"
+    }
   ],
   "tongue_analysis": {
     "image_url": "https://example.com/tongue.jpg",
@@ -348,6 +371,7 @@ LIMIT 1;
 ## ✅ Success Criteria
 
 All tests pass when:
+
 1. ✅ Database migration completes successfully
 2. ✅ All automated tests pass (76 tests)
 3. ✅ Authenticated user can complete diagnosis and see all input data
@@ -361,6 +385,7 @@ All tests pass when:
 ## 🚀 Quick Test Command
 
 Run all tests at once:
+
 ```bash
 cd sihat-tcm
 npm run test:run
@@ -375,4 +400,3 @@ This will run all tests and exit (useful for CI/CD).
 - **Guest Sessions**: Guest sessions are stored in `sessionStorage`, so they persist only for the browser session
 - **Data Migration**: Guest sessions can be migrated to authenticated accounts when user signs up
 - **Performance**: Large chat histories or many files may affect load time - consider pagination for future improvements
-

@@ -7,12 +7,14 @@ This directory contains a comprehensive property-based testing framework specifi
 ## Framework Components
 
 ### Core Framework (`propertyTestFramework.ts`)
+
 - **PBT_CONFIG**: Standard configuration with 100 iterations minimum
 - **PropertyTestReporter**: Tracks test results and generates reports
 - **createPropertyTest**: Creates property tests with metadata for traceability
 - **runPropertyTestWithReporting**: Executes tests with comprehensive reporting
 
 ### Medical Data Generators (`medicalDataGenerators.ts`)
+
 - **Patient Profiles**: Realistic patient demographic and medical history data
 - **Diagnosis Sessions**: Multi-step diagnostic workflow data
 - **Treatment Recommendations**: TCM treatment and safety validation data
@@ -21,12 +23,14 @@ This directory contains a comprehensive property-based testing framework specifi
 - **Cross-Platform Sync**: Multi-device synchronization scenarios
 
 ### Test Helpers (`propertyTestHelpers.ts`)
+
 - **Assertions**: Common validation patterns for medical systems
 - **Patterns**: Property test patterns (round-trip, idempotent, monotonic, etc.)
 - **Validators**: Medical data validation utilities
 - **Cleanup**: Test data management utilities
 
 ### Test Analysis (`testResultAnalysis.ts`)
+
 - **PropertyTestAnalyzer**: Analyzes test results and identifies failure patterns
 - **Report Generation**: HTML, JSON, and console report formats
 - **Failure Pattern Recognition**: Categorizes and suggests fixes for common issues
@@ -35,61 +39,61 @@ This directory contains a comprehensive property-based testing framework specifi
 ## Usage Examples
 
 ### Basic Property Test
+
 ```typescript
-import { testProperty, arbitraries } from '@/lib/testing'
+import { testProperty, arbitraries } from "@/lib/testing";
 
 testProperty(
-  'Patient age consistency',
+  "Patient age consistency",
   patientProfileArbitrary,
   (profile) => profile.age === profile.medical_history.age,
   {
-    featureName: 'sihat-tcm-enhancement',
+    featureName: "sihat-tcm-enhancement",
     propertyNumber: 1,
-    propertyDescription: 'Patient age consistency across profile data',
-    validatesRequirements: ['1.3']
+    propertyDescription: "Patient age consistency across profile data",
+    validatesRequirements: ["1.3"],
   }
-)
+);
 ```
 
 ### Round-Trip Property
+
 ```typescript
-import { patterns } from '@/lib/testing'
+import { patterns } from "@/lib/testing";
 
-const roundTripProperty = patterns.roundTrip(
-  patientProfileArbitrary,
-  JSON.stringify,
-  JSON.parse
-)
+const roundTripProperty = patterns.roundTrip(patientProfileArbitrary, JSON.stringify, JSON.parse);
 
-fc.assert(roundTripProperty, { numRuns: 100 })
+fc.assert(roundTripProperty, { numRuns: 100 });
 ```
 
 ### Medical Safety Validation
+
 ```typescript
-import { assertions, validationContextArbitrary } from '@/lib/testing'
+import { assertions, validationContextArbitrary } from "@/lib/testing";
 
 testProperty(
-  'Treatment safety validation',
+  "Treatment safety validation",
   fc.record({
     recommendations: arbitraries.treatmentRecommendations,
-    context: validationContextArbitrary
+    context: validationContextArbitrary,
   }),
   ({ recommendations, context }) => {
-    return recommendations.dietary.every(item =>
+    return recommendations.dietary.every((item) =>
       assertions.isSafeMedicalRecommendation(
         item,
         context.medical_history.allergies,
         context.medical_history.current_medications
       )
-    )
-  },
+    );
+  }
   // ... metadata
-)
+);
 ```
 
 ## Running Tests
 
 ### Command Line
+
 ```bash
 # Run all property-based tests
 npm run test:pbt
@@ -105,14 +109,15 @@ node scripts/run-property-tests.js --format html --output reports/pbt-report.htm
 ```
 
 ### Programmatic
+
 ```typescript
-import { generateTestReport } from '@/lib/testing/testResultAnalysis'
+import { generateTestReport } from "@/lib/testing/testResultAnalysis";
 
 // Run tests and generate console report
-generateTestReport('console')
+generateTestReport("console");
 
 // Generate HTML report
-const htmlReport = generateTestReport('html')
+const htmlReport = generateTestReport("html");
 ```
 
 ## Correctness Properties Implemented
@@ -138,6 +143,7 @@ The framework implements property-based tests for all 13 correctness properties 
 The framework includes sophisticated analysis capabilities:
 
 ### Failure Pattern Recognition
+
 - **Property Assertion Failures**: Logic issues in property definitions
 - **Type/Null Reference Errors**: Data generator or validation issues
 - **Range/Boundary Errors**: Invalid data ranges or edge cases
@@ -145,12 +151,14 @@ The framework includes sophisticated analysis capabilities:
 - **Data Validation Errors**: Schema or constraint violations
 
 ### Automated Recommendations
+
 - Success rate analysis and improvement suggestions
 - Pattern-specific debugging guidance
 - Performance optimization recommendations
 - Test complexity adjustment suggestions
 
 ### Report Formats
+
 - **Console**: Quick feedback during development
 - **JSON**: Machine-readable results for CI/CD integration
 - **HTML**: Comprehensive visual reports for stakeholders
@@ -158,24 +166,26 @@ The framework includes sophisticated analysis capabilities:
 ## Configuration
 
 ### Test Configuration (`PBT_CONFIG`)
+
 ```typescript
 export const PBT_CONFIG = {
-  numRuns: 100,        // Minimum iterations per property
-  endOnFailure: true,  // Stop on first failure for debugging
-  seed: 42,           // Reproducible test runs
-  verbose: false      // Detailed output control
-}
+  numRuns: 100, // Minimum iterations per property
+  endOnFailure: true, // Stop on first failure for debugging
+  seed: 42, // Reproducible test runs
+  verbose: false, // Detailed output control
+};
 ```
 
 ### Custom Configuration
+
 ```typescript
 testProperty(
-  'Custom test',
+  "Custom test",
   arbitrary,
   predicate,
   metadata,
   { numRuns: 200, verbose: true } // Override defaults
-)
+);
 ```
 
 ## Integration with Existing Tests
@@ -190,6 +200,7 @@ The property-based testing framework integrates seamlessly with the existing Vit
 ## Best Practices
 
 ### Property Design
+
 1. **Focus on invariants** that should always hold
 2. **Use round-trip properties** for serialization/parsing
 3. **Test edge cases** with boundary value generators
@@ -197,12 +208,14 @@ The property-based testing framework integrates seamlessly with the existing Vit
 5. **Ensure temporal consistency** for time-series data
 
 ### Data Generation
+
 1. **Generate realistic data** that matches production scenarios
 2. **Include edge cases** in generators (empty arrays, null values, etc.)
 3. **Respect domain constraints** (valid age ranges, medical codes, etc.)
 4. **Use appropriate distributions** for realistic test scenarios
 
 ### Debugging Failures
+
 1. **Analyze counterexamples** to understand failure patterns
 2. **Use shrinking** to find minimal failing cases
 3. **Check property logic** before assuming code bugs
@@ -211,6 +224,7 @@ The property-based testing framework integrates seamlessly with the existing Vit
 ## Future Enhancements
 
 ### Planned Features
+
 - **Performance benchmarking** integration
 - **Mutation testing** for property validation
 - **Automated test generation** from API schemas
@@ -218,6 +232,7 @@ The property-based testing framework integrates seamlessly with the existing Vit
 - **Real-time monitoring** of production property violations
 
 ### Extension Points
+
 - **Custom generators** for specific medical scenarios
 - **Domain-specific assertions** for TCM concepts
 - **Integration adapters** for external healthcare systems
@@ -228,27 +243,35 @@ The property-based testing framework integrates seamlessly with the existing Vit
 ### Common Issues
 
 #### Generator Errors
+
 ```
 Error: Invalid parameter encountered at index X: expecting an Arbitrary
 ```
+
 **Solution**: Ensure nested objects use `fc.record()` wrapper
 
 #### Property Failures
+
 ```
 Property failed after N tests
 ```
+
 **Solution**: Analyze counterexample and verify property logic
 
 #### Timeout Issues
+
 ```
 Test timeout exceeded
 ```
+
 **Solution**: Reduce `numRuns` or optimize test logic
 
 ### Debug Mode
+
 Enable verbose logging for detailed failure analysis:
+
 ```typescript
-testProperty(name, arbitrary, predicate, metadata, { verbose: true })
+testProperty(name, arbitrary, predicate, metadata, { verbose: true });
 ```
 
 ## Contributing

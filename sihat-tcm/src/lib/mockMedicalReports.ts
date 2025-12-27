@@ -753,5 +753,5 @@ Phone: (555) 123-4567
 *This prescription history is a comprehensive record of all filled prescriptions at CarePoint Pharmacy Network locations. For complete medication history including prescriptions filled at other pharmacies, please request a comprehensive medication history from your healthcare provider.*
 
 **Confidentiality Notice:** This document contains protected health information. Handle according to HIPAA regulations.
-`
-}
+`,
+};

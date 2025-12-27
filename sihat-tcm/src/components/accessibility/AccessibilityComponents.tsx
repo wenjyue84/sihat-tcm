@@ -1,27 +1,27 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { useAccessibilityContext } from '@/stores/useAppStore'
-import type { AccessibilityPreferences } from '@/lib/accessibilityManager'
+import React from "react";
+import { useAccessibilityContext } from "@/stores/useAppStore";
+import type { AccessibilityPreferences } from "@/lib/accessibilityManager";
 
 /**
  * Component for accessibility settings panel
  */
 export function AccessibilitySettings() {
-  const { preferences, updatePreferences, announce } = useAccessibilityContext()
+  const { preferences, updatePreferences, announce } = useAccessibilityContext();
 
   const handleToggle = (key: keyof AccessibilityPreferences, value: boolean) => {
-    updatePreferences({ [key]: value })
-  }
+    updatePreferences({ [key]: value });
+  };
 
   const handleSelect = (key: keyof AccessibilityPreferences, value: string) => {
-    updatePreferences({ [key]: value })
-  }
+    updatePreferences({ [key]: value });
+  };
 
   return (
     <div className="accessibility-settings p-6 bg-white rounded-lg shadow-lg max-w-md">
       <h2 className="text-xl font-semibold mb-4">Accessibility Settings</h2>
-      
+
       <div className="space-y-4">
         {/* High Contrast */}
         <div className="flex items-center justify-between">
@@ -32,14 +32,14 @@ export function AccessibilitySettings() {
             id="high-contrast"
             role="switch"
             aria-checked={preferences.highContrast}
-            onClick={() => handleToggle('highContrast', !preferences.highContrast)}
+            onClick={() => handleToggle("highContrast", !preferences.highContrast)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              preferences.highContrast ? 'bg-blue-600' : 'bg-gray-200'
+              preferences.highContrast ? "bg-blue-600" : "bg-gray-200"
             }`}
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                preferences.highContrast ? 'translate-x-6' : 'translate-x-1'
+                preferences.highContrast ? "translate-x-6" : "translate-x-1"
               }`}
             />
           </button>
@@ -54,14 +54,14 @@ export function AccessibilitySettings() {
             id="reduced-motion"
             role="switch"
             aria-checked={preferences.reducedMotion}
-            onClick={() => handleToggle('reducedMotion', !preferences.reducedMotion)}
+            onClick={() => handleToggle("reducedMotion", !preferences.reducedMotion)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              preferences.reducedMotion ? 'bg-blue-600' : 'bg-gray-200'
+              preferences.reducedMotion ? "bg-blue-600" : "bg-gray-200"
             }`}
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                preferences.reducedMotion ? 'translate-x-6' : 'translate-x-1'
+                preferences.reducedMotion ? "translate-x-6" : "translate-x-1"
               }`}
             />
           </button>
@@ -75,7 +75,7 @@ export function AccessibilitySettings() {
           <select
             id="font-size"
             value={preferences.fontSize}
-            onChange={(e) => handleSelect('fontSize', e.target.value)}
+            onChange={(e) => handleSelect("fontSize", e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="small">Small</option>
@@ -93,7 +93,7 @@ export function AccessibilitySettings() {
           <select
             id="focus-style"
             value={preferences.focusIndicatorStyle}
-            onChange={(e) => handleSelect('focusIndicatorStyle', e.target.value)}
+            onChange={(e) => handleSelect("focusIndicatorStyle", e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="default">Default</option>
@@ -111,14 +111,14 @@ export function AccessibilitySettings() {
             id="keyboard-nav"
             role="switch"
             aria-checked={preferences.keyboardNavigation}
-            onClick={() => handleToggle('keyboardNavigation', !preferences.keyboardNavigation)}
+            onClick={() => handleToggle("keyboardNavigation", !preferences.keyboardNavigation)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              preferences.keyboardNavigation ? 'bg-blue-600' : 'bg-gray-200'
+              preferences.keyboardNavigation ? "bg-blue-600" : "bg-gray-200"
             }`}
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                preferences.keyboardNavigation ? 'translate-x-6' : 'translate-x-1'
+                preferences.keyboardNavigation ? "translate-x-6" : "translate-x-1"
               }`}
             />
           </button>
@@ -133,14 +133,14 @@ export function AccessibilitySettings() {
             id="announcements"
             role="switch"
             aria-checked={preferences.announcements}
-            onClick={() => handleToggle('announcements', !preferences.announcements)}
+            onClick={() => handleToggle("announcements", !preferences.announcements)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              preferences.announcements ? 'bg-blue-600' : 'bg-gray-200'
+              preferences.announcements ? "bg-blue-600" : "bg-gray-200"
             }`}
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                preferences.announcements ? 'translate-x-6' : 'translate-x-1'
+                preferences.announcements ? "translate-x-6" : "translate-x-1"
               }`}
             />
           </button>
@@ -148,13 +148,13 @@ export function AccessibilitySettings() {
       </div>
 
       <button
-        onClick={() => announce('Accessibility settings saved', 'assertive')}
+        onClick={() => announce("Accessibility settings saved", "assertive")}
         className="mt-6 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >
         Save Settings
       </button>
     </div>
-  )
+  );
 }
 
 /**
@@ -164,36 +164,27 @@ export function SkipNavigation({ links }: { links: Array<{ href: string; text: s
   return (
     <nav aria-label="Skip navigation" className="skip-navigation">
       {links.map((link, index) => (
-        <a
-          key={index}
-          href={link.href}
-          className="skip-link"
-        >
+        <a key={index} href={link.href} className="skip-link">
           {link.text}
         </a>
       ))}
     </nav>
-  )
+  );
 }
 
 /**
  * Live region component for announcements
  */
-export function LiveRegion({ 
-  message, 
-  priority = 'polite' 
-}: { 
-  message: string
-  priority?: 'polite' | 'assertive' 
+export function LiveRegion({
+  message,
+  priority = "polite",
+}: {
+  message: string;
+  priority?: "polite" | "assertive";
 }) {
   return (
-    <div
-      aria-live={priority}
-      aria-atomic="true"
-      className="sr-only"
-    >
+    <div aria-live={priority} aria-atomic="true" className="sr-only">
       {message}
     </div>
-  )
+  );
 }
-

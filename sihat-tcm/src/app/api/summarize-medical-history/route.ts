@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { generateText } from 'ai'
-import { getGoogleProvider } from '@/lib/googleProvider'
+import { NextRequest, NextResponse } from "next/server";
+import { generateText } from "ai";
+import { getGoogleProvider } from "@/lib/googleProvider";
+import { devLog } from "@/lib/systemLogger";
 
 // Default prompt if not configured in admin
 const DEFAULT_PROMPT = `You are a medical assistant helping patients summarize their medical history for doctor consultations.
@@ -21,68 +22,80 @@ Previous Diagnosis History:
 Medical Reports:
 {reports}
 
-Generate a concise medical history summary:`
+Generate a concise medical history summary:`;
 
 export async function POST(request: NextRequest) {
-    try {
-        const { inquiries, reports, customPrompt } = await request.json()
+  try {
+    const { inquiries, reports, customPrompt } = await request.json();
 
-        // Prepare inquiry summary
-        const inquirySummary = inquiries && inquiries.length > 0
-            ? inquiries.map((inq: any, index: number) => {
-                const date = new Date(inq.created_at).toLocaleDateString()
-                const symptoms = inq.symptoms || inq.diagnosis_report?.mainComplaint || 'General consultation'
-                const diagnosis = inq.diagnosis_report?.tcmDiagnosis || inq.diagnosis_report?.syndromePattern || 'Pending review'
+    // Prepare inquiry summary
+    const inquirySummary =
+      inquiries && inquiries.length > 0
+        ? inquiries
+            .map((inq: any, index: number) => {
+              const date = new Date(inq.created_at).toLocaleDateString();
+              const symptoms =
+                inq.symptoms || inq.diagnosis_report?.mainComplaint || "General consultation";
+              const diagnosis =
+                inq.diagnosis_report?.tcmDiagnosis ||
+                inq.diagnosis_report?.syndromePattern ||
+                "Pending review";
 
-                return `${index + 1}. Date: ${date}
+              return `${index + 1}. Date: ${date}
    Symptoms: ${symptoms}
-   TCM Diagnosis: ${diagnosis}`
-            }).join('\n\n')
-            : 'No previous diagnosis history available.'
+   TCM Diagnosis: ${diagnosis}`;
+            })
+            .join("\n\n")
+        : "No previous diagnosis history available.";
 
-        // Prepare medical reports summary
-        const reportsSummary = reports && reports.length > 0
-            ? reports.map((report: any, index: number) => {
-                return `${index + 1}. ${report.name} (${report.date})
-   ${report.extractedText ? 'Summary: ' + report.extractedText : 'Medical report document'}`
-            }).join('\n\n')
-            : 'No medical reports available.'
+    // Prepare medical reports summary
+    const reportsSummary =
+      reports && reports.length > 0
+        ? reports
+            .map((report: any, index: number) => {
+              return `${index + 1}. ${report.name} (${report.date})
+   ${report.extractedText ? "Summary: " + report.extractedText : "Medical report document"}`;
+            })
+            .join("\n\n")
+        : "No medical reports available.";
 
-        // Use custom prompt from admin or default
-        const promptTemplate = customPrompt || DEFAULT_PROMPT
+    // Use custom prompt from admin or default
+    const promptTemplate = customPrompt || DEFAULT_PROMPT;
 
-        // Replace placeholders
-        const finalPrompt = promptTemplate
-            .replace('{inquiries}', inquirySummary)
-            .replace('{reports}', reportsSummary)
+    // Replace placeholders
+    const finalPrompt = promptTemplate
+      .replace("{inquiries}", inquirySummary)
+      .replace("{reports}", reportsSummary);
 
-        console.log('[Summarize Medical History] Generating summary...')
-        console.log('[Summarize Medical History] Inquiries count:', inquiries?.length || 0)
-        console.log('[Summarize Medical History] Reports count:', reports?.length || 0)
+    devLog("info", "SummarizeMedicalHistory", "Generating summary", {
+      inquiriesCount: inquiries?.length || 0,
+      reportsCount: reports?.length || 0,
+    });
 
-        // Generate summary using ai-sdk
-        const google = getGoogleProvider()
-        const result = await generateText({
-            model: google('gemini-2.0-flash'),
-            prompt: finalPrompt,
-        })
-        const summary = result.text
+    // Generate summary using ai-sdk
+    const google = getGoogleProvider();
+    const result = await generateText({
+      model: google("gemini-2.0-flash"),
+      prompt: finalPrompt,
+    });
+    const summary = result.text;
 
-        console.log('[Summarize Medical History] Summary generated:', summary.substring(0, 100) + '...')
+    devLog("info", "SummarizeMedicalHistory", "Summary generated", {
+      preview: summary.substring(0, 100) + "...",
+    });
 
-        return NextResponse.json({
-            summary: summary.trim(),
-            success: true
-        })
-
-    } catch (error: any) {
-        console.error('[Summarize Medical History] Error:', error)
-        return NextResponse.json(
-            {
-                error: 'Failed to generate summary',
-                details: error.message
-            },
-            { status: 500 }
-        )
-    }
+    return NextResponse.json({
+      summary: summary.trim(),
+      success: true,
+    });
+  } catch (error: any) {
+    console.error("[Summarize Medical History] Error:", error);
+    return NextResponse.json(
+      {
+        error: "Failed to generate summary",
+        details: error.message,
+      },
+      { status: 500 }
+    );
+  }
 }

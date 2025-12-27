@@ -1,72 +1,82 @@
-import { generateText } from 'ai';
-import { getGoogleProvider } from '@/lib/googleProvider';
+import { generateText } from "ai";
+import { getGoogleProvider } from "@/lib/googleProvider";
+import { devLog } from "@/lib/systemLogger";
 
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
-    const startTime = Date.now();
-    console.log('[summarize-reports] Request started');
+  const startTime = Date.now();
+  devLog("info", "SummarizeReports", "Request started");
 
-    try {
-        const { reports, diagnosisHistory, language = 'en' } = await req.json();
-        console.log('[summarize-reports] Language:', language);
-        console.log('[summarize-reports] Reports count:', reports?.length || 0);
-        console.log('[summarize-reports] Diagnosis history count:', diagnosisHistory?.length || 0);
+  try {
+    const { reports, diagnosisHistory, language = "en" } = await req.json();
+    devLog("info", "SummarizeReports", "Processing request", {
+      language,
+      reportsCount: reports?.length || 0,
+      diagnosisHistoryCount: diagnosisHistory?.length || 0,
+    });
 
-        if ((!reports || reports.length === 0) && (!diagnosisHistory || diagnosisHistory.length === 0)) {
-            return new Response(JSON.stringify({
-                error: 'No data provided',
-                code: 'NO_DATA'
-            }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' }
-            });
+    if (
+      (!reports || reports.length === 0) &&
+      (!diagnosisHistory || diagnosisHistory.length === 0)
+    ) {
+      return new Response(
+        JSON.stringify({
+          error: "No data provided",
+          code: "NO_DATA",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
         }
+      );
+    }
 
-        // Build context from reports and diagnosis history
-        let contextText = '';
+    // Build context from reports and diagnosis history
+    let contextText = "";
 
-        if (reports && reports.length > 0) {
-            contextText += 'MEDICAL REPORTS:\n\n';
-            reports.forEach((report: any, index: number) => {
-                contextText += `Report ${index + 1}: ${report.name}\n`;
-                contextText += `Date: ${report.date}\n`;
-                contextText += `Content:\n${report.extractedText || 'No extracted text available'}\n\n`;
-            });
+    if (reports && reports.length > 0) {
+      contextText += "MEDICAL REPORTS:\n\n";
+      reports.forEach((report: any, index: number) => {
+        contextText += `Report ${index + 1}: ${report.name}\n`;
+        contextText += `Date: ${report.date}\n`;
+        contextText += `Content:\n${report.extractedText || "No extracted text available"}\n\n`;
+      });
+    }
+
+    if (diagnosisHistory && diagnosisHistory.length > 0) {
+      contextText += "\nPAST DIAGNOSIS HISTORY:\n\n";
+      diagnosisHistory.forEach((diagnosis: any, index: number) => {
+        const date = new Date(diagnosis.created_at).toLocaleDateString();
+        contextText += `Consultation ${index + 1} (${date}):\n`;
+        if (diagnosis.symptoms) {
+          contextText += `Symptoms: ${diagnosis.symptoms}\n`;
         }
-
-        if (diagnosisHistory && diagnosisHistory.length > 0) {
-            contextText += '\nPAST DIAGNOSIS HISTORY:\n\n';
-            diagnosisHistory.forEach((diagnosis: any, index: number) => {
-                const date = new Date(diagnosis.created_at).toLocaleDateString();
-                contextText += `Consultation ${index + 1} (${date}):\n`;
-                if (diagnosis.symptoms) {
-                    contextText += `Symptoms: ${diagnosis.symptoms}\n`;
-                }
-                if (diagnosis.diagnosis_report) {
-                    const report = diagnosis.diagnosis_report;
-                    if (report.mainComplaint) {
-                        contextText += `Main Complaint: ${report.mainComplaint}\n`;
-                    }
-                    if (report.tcmDiagnosis) {
-                        contextText += `TCM Diagnosis: ${report.tcmDiagnosis}\n`;
-                    }
-                    if (report.syndromePattern) {
-                        contextText += `Syndrome Pattern: ${report.syndromePattern}\n`;
-                    }
-                }
-                contextText += '\n';
-            });
+        if (diagnosis.diagnosis_report) {
+          const report = diagnosis.diagnosis_report;
+          if (report.mainComplaint) {
+            contextText += `Main Complaint: ${report.mainComplaint}\n`;
+          }
+          if (report.tcmDiagnosis) {
+            contextText += `TCM Diagnosis: ${report.tcmDiagnosis}\n`;
+          }
+          if (report.syndromePattern) {
+            contextText += `Syndrome Pattern: ${report.syndromePattern}\n`;
+          }
         }
+        contextText += "\n";
+      });
+    }
 
-        // Generate summary using AI
-        const languageInstruction = language === 'zh'
-            ? 'Respond in Simplified Chinese (中文).'
-            : language === 'ms'
-                ? 'Respond in Bahasa Malaysia.'
-                : 'Respond in English.';
+    // Generate summary using AI
+    const languageInstruction =
+      language === "zh"
+        ? "Respond in Simplified Chinese (中文)."
+        : language === "ms"
+          ? "Respond in Bahasa Malaysia."
+          : "Respond in English.";
 
-        const systemPrompt = `You are a medical assistant helping to summarize a patient's medical history for Traditional Chinese Medicine (TCM) practitioners.
+    const systemPrompt = `You are a medical assistant helping to summarize a patient's medical history for Traditional Chinese Medicine (TCM) practitioners.
 
 Your task is to create a concise medical history summary that will be helpful for TCM diagnosis.
 
@@ -80,7 +90,7 @@ Guidelines:
 
 ${languageInstruction}`;
 
-        const userPrompt = `Based on the following information, create a concise medical history summary:
+    const userPrompt = `Based on the following information, create a concise medical history summary:
 
 ${contextText}
 
@@ -92,63 +102,69 @@ Please provide:
 
 Format the response as a clear, paragraph-based summary suitable for medical records.`;
 
-        console.log('[summarize-reports] Calling Gemini API...');
-        const generateStartTime = Date.now();
+    devLog("info", "SummarizeReports", "Calling Gemini API");
+    const generateStartTime = Date.now();
 
-        let text;
-        try {
-            const google = getGoogleProvider();
-            const result = await generateText({
-                model: google('gemini-2.0-flash'),
-                system: systemPrompt,
-                prompt: userPrompt,
-            });
-            text = result.text;
-        } catch (primaryError: any) {
-            console.error('[summarize-reports] Primary model failed:', primaryError.message);
+    let text;
+    try {
+      const google = getGoogleProvider();
+      const result = await generateText({
+        model: google("gemini-2.0-flash"),
+        system: systemPrompt,
+        prompt: userPrompt,
+      });
+      text = result.text;
+    } catch (primaryError: any) {
+      console.error("[summarize-reports] Primary model failed:", primaryError.message);
 
-            // Fallback
-            try {
-                const googleFallback = getGoogleProvider();
-                const fallbackResult = await generateText({
-                    model: googleFallback('gemini-1.5-flash'),
-                    system: systemPrompt,
-                    prompt: userPrompt,
-                });
-                text = fallbackResult.text;
-                console.log('[summarize-reports] Fallback successful');
-            } catch (fallbackError: any) {
-                console.error('[summarize-reports] Fallback also failed:', fallbackError.message);
-                throw primaryError;
-            }
-        }
-
-        const generateDuration = Date.now() - generateStartTime;
-        console.log(`[summarize-reports] Gemini API responded in ${generateDuration}ms`);
-
-        const totalDuration = Date.now() - startTime;
-        console.log(`[summarize-reports] Total request completed in ${totalDuration}ms`);
-
-        return new Response(JSON.stringify({
-            summary: text,
-            timing: {
-                total: totalDuration,
-                generation: generateDuration
-            }
-        }), {
-            headers: { 'Content-Type': 'application/json' },
+      // Fallback
+      try {
+        const googleFallback = getGoogleProvider();
+        const fallbackResult = await generateText({
+          model: googleFallback("gemini-1.5-flash"),
+          system: systemPrompt,
+          prompt: userPrompt,
         });
-    } catch (error: any) {
-        const duration = Date.now() - startTime;
-        console.error(`[summarize-reports] FAILED after ${duration}ms:`, error.message);
-
-        return new Response(JSON.stringify({
-            error: error.message || 'Failed to generate summary',
-            code: 'GENERATION_FAILED',
-            duration: duration
-        }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-        });
+        text = fallbackResult.text;
+        devLog("info", "SummarizeReports", "Fallback successful");
+      } catch (fallbackError: any) {
+        console.error("[summarize-reports] Fallback also failed:", fallbackError.message);
+        throw primaryError;
+      }
     }
+
+    const generateDuration = Date.now() - generateStartTime;
+    devLog("info", "SummarizeReports", "Gemini API responded", { duration: generateDuration });
+
+    const totalDuration = Date.now() - startTime;
+    devLog("info", "SummarizeReports", "Total request completed", { duration: totalDuration });
+
+    return new Response(
+      JSON.stringify({
+        summary: text,
+        timing: {
+          total: totalDuration,
+          generation: generateDuration,
+        },
+      }),
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (error: any) {
+    const duration = Date.now() - startTime;
+    console.error(`[summarize-reports] FAILED after ${duration}ms:`, error.message);
+
+    return new Response(
+      JSON.stringify({
+        error: error.message || "Failed to generate summary",
+        code: "GENERATION_FAILED",
+        duration: duration,
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
 }

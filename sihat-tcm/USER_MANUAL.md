@@ -49,12 +49,12 @@ Version 3.0 | Last Updated: December 2024
 
 Sihat TCM digitizes the four classical TCM diagnostic methods:
 
-| Examination | Chinese | What It Analyzes |
-|-------------|---------|------------------|
-| **望 (Wàng)** | Observation | Tongue, face, and body appearance |
-| **闻 (Wén)** | Listening & Smelling | Voice quality and breathing patterns |
-| **问 (Wèn)** | Inquiry | Symptoms, medical history, lifestyle |
-| **切 (Qiè)** | Palpation | Pulse rate and quality |
+| Examination   | Chinese              | What It Analyzes                     |
+| ------------- | -------------------- | ------------------------------------ |
+| **望 (Wàng)** | Observation          | Tongue, face, and body appearance    |
+| **闻 (Wén)**  | Listening & Smelling | Voice quality and breathing patterns |
+| **问 (Wèn)**  | Inquiry              | Symptoms, medical history, lifestyle |
+| **切 (Qiè)**  | Palpation            | Pulse rate and quality               |
 
 ---
 
@@ -64,7 +64,7 @@ Sihat TCM digitizes the four classical TCM diagnostic methods:
 
 1. **Navigate to the Homepage**: Visit the Sihat TCM website
 2. **Click "Login"**: Located in the top-right corner
-3. **Sign Up**: 
+3. **Sign Up**:
    - Click "Sign Up" or "Create Account"
    - Enter your email address
    - Create a secure password
@@ -80,6 +80,7 @@ Sihat TCM digitizes the four classical TCM diagnostic methods:
 ### 2.2 Guest Mode
 
 You can use Sihat TCM without creating an account! Simply click "Start Consultation" on the homepage. However, creating an account gives you access to:
+
 - Save your diagnosis history
 - Access past reports
 - Pre-fill your information for faster consultations
@@ -101,6 +102,7 @@ You can use Sihat TCM without creating an account! Simply click "Start Consultat
 ### 2.4 First-Time Setup
 
 After creating your account:
+
 1. You'll be taken to the **Patient Dashboard**
 2. Complete your profile information in the "Profile" section
 3. Click "Save Changes" to store your details
@@ -117,6 +119,7 @@ Sihat TCM supports three user roles, each with different access levels:
 **Who it's for**: Regular users seeking TCM consultations
 
 **What you can do**:
+
 - Start new diagnoses
 - View your diagnosis history (Health Journey)
 - Download PDF reports
@@ -139,6 +142,7 @@ Sihat TCM supports three user roles, each with different access levels:
 **Who it's for**: Licensed TCM practitioners
 
 **What you can do**:
+
 - View patient diagnosis reports
 - Verify AI-generated diagnoses
 - Provide professional oversight
@@ -151,6 +155,7 @@ Sihat TCM supports three user roles, each with different access levels:
 **Who it's for**: System administrators
 
 **What you can do**:
+
 - Manage system prompts
 - Configure AI settings (default model selection)
 - Monitor system usage
@@ -168,6 +173,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 ### 4.1 Step 1: Basic Information (基本信息)
 
 **What you'll provide**:
+
 - Name
 - Age
 - Gender
@@ -178,6 +184,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 - Duration of symptoms
 
 **Tips**:
+
 - If you're logged in, your profile information will be pre-filled
 - Be as accurate as possible with measurements
 - Describe your main complaint clearly and focus on ONE major issue
@@ -193,6 +200,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What this is**: An interactive chat with the AI doctor
 
 **What you'll do**:
+
 1. The AI will ask you questions about:
    - Your symptoms in detail
    - Medical history
@@ -205,6 +213,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 4. The conversation will continue until the AI has enough information
 
 **Tips**:
+
 - Answer all questions completely
 - Don't rush - take your time to think
 - Mention any medications you're currently taking
@@ -221,6 +230,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What this is**: AI analysis of your tongue appearance
 
 **How to capture**:
+
 1. **Using Camera** (Recommended):
    - Click "Start Camera"
    - Allow camera permissions when prompted
@@ -239,6 +249,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
    - Ensure the image is well-lit and in focus
 
 **What the AI analyzes**:
+
 - Tongue body color (red, pale, purple, etc.)
 - Coating color and thickness
 - Tongue shape and size
@@ -246,6 +257,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 - Any cracks or abnormalities
 
 **Tips**:
+
 - Take the photo in natural daylight if possible
 - Avoid eating or drinking colored foods/drinks 30 minutes before
 - Don't brush your tongue before taking the photo
@@ -260,6 +272,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What this is**: AI analysis of your facial complexion and features
 
 **How to capture**:
+
 1. **Using Camera**:
    - Click "Start Camera"
    - Position your face in the frame
@@ -276,12 +289,14 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
    - Ensure your entire face is visible
 
 **What the AI analyzes**:
+
 - Facial complexion (color, luster)
 - Specific facial zones (correlated to organs)
 - Skin condition
 - Overall vitality appearance
 
 **Optional - Body Part Analysis**:
+
 - If you have a specific skin condition or visible issue, you can upload a photo of that body part
 - Click "Upload Body Part" and select the relevant image
 
@@ -294,6 +309,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What this is**: AI analysis of your voice quality
 
 **How to record**:
+
 1. Click "Start Recording"
 2. Allow microphone permissions when prompted
 3. Say "Ahhh" for 5-10 seconds, then describe how you feel:
@@ -305,6 +321,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 6. Click "Record Again" or "Continue"
 
 **What the AI analyzes**:
+
 - Voice strength (weak, strong, hoarse)
 - Tone quality
 - Breathing patterns
@@ -312,6 +329,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 - Speech patterns
 
 **Tips**:
+
 - Speak in a quiet environment
 - Use a normal speaking volume
 - Don't whisper or shout
@@ -330,6 +348,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **How to measure**:
 
 **Method 1: Tap BPM (Recommended for beginners)**
+
 1. Find your pulse:
    - Place two fingers on your wrist (below the thumb)
    - Or on your neck (beside your Adam's apple)
@@ -339,15 +358,18 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 5. The system will calculate your BPM (beats per minute)
 
 **Method 2: Manual Entry**
+
 - If you know your heart rate (from a fitness tracker, etc.), you can enter it directly
 
 **Method 3: Camera Measurement** (Android Chrome only)
+
 - Use your phone's camera and flash to detect pulse through your fingertip
 - Place your finger over the camera lens and flash
 - Hold still for 10 seconds while the app detects your pulse
 
 **Pulse Quality Selection** (Optional - for TCM practitioners):
 After entering your BPM, you can identify your pulse quality:
+
 - **Slippery (滑)**: Feels smooth and flowing
 - **Wiry (弦)**: Feels tight, like a guitar string
 - **Thready (细)**: Feels thin and weak
@@ -358,6 +380,7 @@ After entering your BPM, you can identify your pulse quality:
 - **Normal (平)**: Normal and balanced
 
 **Tips**:
+
 - If you're unsure about pulse quality, select "Normal" or skip this section
 - The BPM measurement is more important than quality for beginners
 - You can use a fitness tracker or smartwatch to get your BPM
@@ -371,6 +394,7 @@ After entering your BPM, you can identify your pulse quality:
 **What this is**: Integration with wearable devices and health apps
 
 **Supported integrations**:
+
 - Samsung Health
 - Apple Health
 - Google Fit
@@ -378,6 +402,7 @@ After entering your BPM, you can identify your pulse quality:
 - Smartwatches
 
 **What data you can import**:
+
 - Steps count
 - Sleep data
 - Average Heart Rate
@@ -386,6 +411,7 @@ After entering your BPM, you can identify your pulse quality:
 - Blood Oxygen (SpO2)
 
 **How to connect**:
+
 1. Click "Custom Setup" or select a health app provider
 2. Follow the authorization prompts
 3. Select which data to import
@@ -400,6 +426,7 @@ After entering your BPM, you can identify your pulse quality:
 ### 4.8 Step 8: Summary & Analysis
 
 **What happens**:
+
 1. You'll see a comprehensive summary of all the information you've provided
 2. Review each section for accuracy:
    - Basic Information
@@ -414,13 +441,15 @@ After entering your BPM, you can identify your pulse quality:
 
 **Report Options**:
 You can customize what information to include:
+
 - Patient demographics
 - Vital signs & measurements
 - Medical history
 - TCM Recommendations (herbal medicine, dietary advice, acupuncture points, etc.)
 - Report formatting options
 
-**Processing time**: 
+**Processing time**:
+
 - Typically 30 seconds to 2 minutes depending on AI model
 - You'll see a progress indicator with TCM educational facts
 
@@ -431,6 +460,7 @@ You can customize what information to include:
 ### 4.9 Step 9: View Your Report
 
 **What you'll receive**:
+
 - **TCM Diagnosis**: Your syndrome pattern (e.g., "Spleen Qi Deficiency")
 - **Constitution Type**: Your body constitution (e.g., "Qi Deficiency", "Damp-Heat")
 - **Affected Organs**: Which organ systems are involved
@@ -441,6 +471,7 @@ You can customize what information to include:
 - **Acupressure Points**: Self-massage locations with guides
 
 **What you can do**:
+
 - **Read the full report**: Scroll through all sections
 - **Download PDF**: Click "Download PDF" to save a copy
 - **Generate Infographic**: Create a shareable visual summary
@@ -457,45 +488,53 @@ You can customize what information to include:
 Your diagnosis report contains several key sections:
 
 #### 5.1.1 Patient Summary
+
 - Your basic information
 - Main complaint
 - Date of consultation
 
 #### 5.1.2 TCM Diagnosis
+
 - **Primary Pattern**: Your main syndrome (e.g., "Liver Fire Uprising")
 - **Constitution Type**: Your body type (Qi Deficiency, Yang Deficiency, etc.)
 - **Secondary Patterns**: Additional contributing factors
 - **Affected Organs**: Which organ systems are involved (Heart, Liver, Spleen, Lung, Kidney)
 
 #### 5.1.3 Pathomechanism
+
 - Explanation of how your condition developed
 - Root cause analysis
 - Relationship between symptoms and underlying imbalance
 
 #### 5.1.4 Analysis Summary
+
 - Key findings from all four examinations
 - How each examination contributed to the diagnosis
 
 #### 5.1.5 Recommendations
 
 **Dietary Therapy (食疗)**:
+
 - **Foods to Eat**: Specific foods that help your condition
 - **Foods to Avoid**: Items that may worsen symptoms
 - **Cooking Methods**: Recommended preparation styles
 - **Meal Timing**: When and how often to eat
 
 **Herbal Formulas** (if applicable):
+
 - Classic TCM prescriptions
 - Formula names (e.g., "Gui Pi Tang")
 - **Note**: Consult a licensed TCM practitioner before taking herbs
 
 **Lifestyle (养生)**:
+
 - Sleep recommendations
 - Exercise suggestions (Qigong, Tai Chi, etc.)
 - Stress management
 - Daily routine adjustments
 
 **Acupressure (穴位)**:
+
 - Specific acupressure points
 - Location guides with diagrams
 - Massage techniques
@@ -505,17 +544,17 @@ Your diagnosis report contains several key sections:
 
 The Nine TCM Constitution Types:
 
-| Constitution | Chinese | Characteristics |
-|--------------|---------|-----------------|
-| **Balanced (Ping He)** | 平和质 | Energetic, adaptable, rarely ill |
-| **Qi Deficiency** | 气虚质 | Fatigue, weak voice, prone to colds |
-| **Yang Deficiency** | 阳虚质 | Cold intolerance, low energy, frequent urination |
-| **Yin Deficiency** | 阴虚质 | Night sweats, dry mouth, insomnia |
-| **Phlegm-Dampness** | 痰湿质 | Heavy feeling, bloating, oily skin |
-| **Damp-Heat** | 湿热质 | Feeling hot, bitter taste, acne-prone |
-| **Blood Stasis** | 血瘀质 | Dark complexion, fixed pain, bruises easily |
-| **Qi Stagnation** | 气郁质 | Depression, mood swings, sighing |
-| **Special Diathesis** | 特禀质 | Allergies, sensitive to medications |
+| Constitution           | Chinese | Characteristics                                  |
+| ---------------------- | ------- | ------------------------------------------------ |
+| **Balanced (Ping He)** | 平和质  | Energetic, adaptable, rarely ill                 |
+| **Qi Deficiency**      | 气虚质  | Fatigue, weak voice, prone to colds              |
+| **Yang Deficiency**    | 阳虚质  | Cold intolerance, low energy, frequent urination |
+| **Yin Deficiency**     | 阴虚质  | Night sweats, dry mouth, insomnia                |
+| **Phlegm-Dampness**    | 痰湿质  | Heavy feeling, bloating, oily skin               |
+| **Damp-Heat**          | 湿热质  | Feeling hot, bitter taste, acne-prone            |
+| **Blood Stasis**       | 血瘀质  | Dark complexion, fixed pain, bruises easily      |
+| **Qi Stagnation**      | 气郁质  | Depression, mood swings, sighing                 |
+| **Special Diathesis**  | 特禀质  | Allergies, sensitive to medications              |
 
 ### 5.3 Next Steps
 
@@ -537,6 +576,7 @@ The Nine TCM Constitution Types:
 **What it is**: Your central hub for tracking health over time
 
 **Features**:
+
 - **Total Sessions**: Number of diagnoses completed
 - **Average Score**: Your wellness score trend
 - **Most Common Pattern**: Recurring syndrome patterns
@@ -544,11 +584,13 @@ The Nine TCM Constitution Types:
 - **Digital Twin**: Visual representation of organ health
 
 **How to access**:
+
 1. Log in to your account
 2. Click "Dashboard" or navigate to Patient Portal
 3. The "Health Journey" tab is the default view
 
 **Viewing Past Reports**:
+
 - Each diagnosis card shows the date, diagnosis title, and constitution type
 - Click "View" to open the full report
 - Use sort options (Date, Score, Diagnosis) to organize your history
@@ -560,6 +602,7 @@ The Nine TCM Constitution Types:
 **What it is**: Personalized 7-day meal plans based on your TCM constitution
 
 **Features**:
+
 - **7-Day Meal Plans**: Breakfast, lunch, dinner, and snacks
 - **TCM Principles**: Meals aligned with your constitution needs
 - **Shopping List**: Auto-generated grocery list by category
@@ -568,6 +611,7 @@ The Nine TCM Constitution Types:
 - **TCM Food Checker**: Check if any food is suitable for your body type
 
 **How to use**:
+
 1. Go to "AI Meal Planner" in your Patient Dashboard
 2. Set your dietary preferences:
    - Allergies (Nuts, Shellfish, Dairy, Eggs, Gluten, Soy, Sesame)
@@ -579,6 +623,7 @@ The Nine TCM Constitution Types:
 5. Use the Shopping List for grocery preparation
 
 **TCM Food Checker**:
+
 1. In the Meal Planner section, find "TCM Food Checker"
 2. Type a food name (e.g., "Watermelon") or take a photo
 3. View the suitability assessment:
@@ -595,6 +640,7 @@ The Nine TCM Constitution Types:
 **What it is**: AI-powered sleep sound analysis for snoring detection
 
 **Features**:
+
 - **Sleep Recording**: Record your sleep sounds overnight
 - **Snoring Detection**: AI identifies snoring patterns
 - **Severity Assessment**: None, Mild, Moderate, Severe
@@ -603,6 +649,7 @@ The Nine TCM Constitution Types:
 - **Recommendations**: Personalized tips for better sleep
 
 **How to use**:
+
 1. Go to "Snore Analysis" in your Patient Dashboard
 2. Before bed, click "Start Recording"
 3. Place your phone near your bed
@@ -611,6 +658,7 @@ The Nine TCM Constitution Types:
 6. View your analysis results with TCM insights
 
 **Tips for Better Recording**:
+
 - Record in a quiet room
 - Ensure phone has enough battery
 - Keep phone within 3 feet of your head
@@ -625,38 +673,42 @@ The Nine TCM Constitution Types:
 **Features**:
 
 **Meridian Organ Clock (子午流注)**:
+
 - 24-hour cycle showing which organ is most active
 - Current active organ and what's coming next
 - Health tips based on the time of day
 - Each organ has a 2-hour peak period
 
-| Time | Organ | Focus |
-|------|-------|-------|
-| 11pm-1am | Gallbladder | Deep sleep, decision-making rest |
-| 1am-3am | Liver | Blood detoxification, deep sleep |
-| 3am-5am | Lung | Breathing, skin regeneration |
-| 5am-7am | Large Intestine | Elimination, wake up |
-| 7am-9am | Stomach | Breakfast, digestion |
-| 9am-11am | Spleen | Thinking, metabolism |
-| 11am-1pm | Heart | Joy, connection, lunch |
-| 1pm-3pm | Small Intestine | Sorting nutrients, light rest |
-| 3pm-5pm | Bladder | Energy storage, hydration |
-| 5pm-7pm | Kidney | Vitality peak, dinner |
-| 7pm-9pm | Pericardium | Relaxation, socialization |
-| 9pm-11pm | Triple Burner | Sleep preparation |
+| Time     | Organ           | Focus                            |
+| -------- | --------------- | -------------------------------- |
+| 11pm-1am | Gallbladder     | Deep sleep, decision-making rest |
+| 1am-3am  | Liver           | Blood detoxification, deep sleep |
+| 3am-5am  | Lung            | Breathing, skin regeneration     |
+| 5am-7am  | Large Intestine | Elimination, wake up             |
+| 7am-9am  | Stomach         | Breakfast, digestion             |
+| 9am-11am | Spleen          | Thinking, metabolism             |
+| 11am-1pm | Heart           | Joy, connection, lunch           |
+| 1pm-3pm  | Small Intestine | Sorting nutrients, light rest    |
+| 3pm-5pm  | Bladder         | Energy storage, hydration        |
+| 5pm-7pm  | Kidney          | Vitality peak, dinner            |
+| 7pm-9pm  | Pericardium     | Relaxation, socialization        |
+| 9pm-11pm | Triple Burner   | Sleep preparation                |
 
 **24 Solar Terms (二十四节气)**:
+
 - Current solar term in the TCM calendar
 - Seasonal health wisdom and guidance
 - Dietary adjustments for the season
 - Exercise recommendations
 
 **Constitution Tracker**:
+
 - Track how your constitution evolves over time
 - View historical constitution assessments
 - Understand seasonal changes in your health
 
 **How to access**:
+
 1. Go to "Vitality Rhythm" in your Patient Dashboard
 2. View the Meridian Clock for current organ focus
 3. Check Solar Terms for seasonal guidance
@@ -671,16 +723,19 @@ The Nine TCM Constitution Types:
 **Qi Dose Features**:
 
 **The 8-Minute Brocade (Baduanjin)**:
+
 - Bite-sized movements from traditional Baduanjin
 - 60-second Quick Fix exercises for specific ailments
 - Animated guides with Sifu voice guidance
 
 **Desk-Friendly Circuits**:
+
 - Exercises for office workers
 - Relieve back pain, eye strain, and stress
 - No equipment needed
 
 **Special Routines**:
+
 - **The Meridian Slap (Paida)**: Energize by patting along your limbs
 - **The Iron Ox Ploughs the Land**: Target belly stagnation with Five Animal Frolics
 - **Digital Detox Eyes**: Relieve screen fatigue with daily acupressure
@@ -690,6 +745,7 @@ The Nine TCM Constitution Types:
 **What it is**: A virtual garden where you nurture TCM herbs through healthy habits
 
 **Features**:
+
 - **Essence & Water Droplets**: Earn by completing activities
 - **Virtual Herbs**: Grow Ginseng, Reishi Mushroom, Goji Berry
 - **Dan Tian Filling**: Track your energy reservoir (streak system)
@@ -697,11 +753,13 @@ The Nine TCM Constitution Types:
 - **Coupons**: Unlock discounts for the Herb Shop
 
 **Daily Habits to Earn Points**:
+
 - Log a Meal
 - Complete Qi Dose Exercise
 - Daily Check-in
 
 **How to use**:
+
 1. Go to "Qi Dose" in your Patient Dashboard
 2. Switch between "Daily Practices" and "Qi Garden" tabs
 3. Start an exercise routine
@@ -715,6 +773,7 @@ The Nine TCM Constitution Types:
 **What it is**: Anonymous support groups based on TCM constitution
 
 **Features**:
+
 - **Constitution-Based Groups**: Connect with others who share your condition
 - **Anonymous Participation**: Share without revealing identity
 - **Success Stories**: Read and share healing journeys
@@ -722,6 +781,7 @@ The Nine TCM Constitution Types:
 - **Remedy Sharing**: Post tips and traditional remedies
 
 **Available Circles**:
+
 - Damp-Heat Detox Group
 - Qi Vitality Circle
 - Yang Warming Tribe
@@ -733,6 +793,7 @@ The Nine TCM Constitution Types:
 - Special Care Group
 
 **How to use**:
+
 1. Go to "Circle of Health" in your Patient Dashboard
 2. View circles matching your constitution
 3. Click "Join Circle" to participate
@@ -746,12 +807,14 @@ The Nine TCM Constitution Types:
 **What it is**: Manage health profiles for your family members
 
 **Features**:
+
 - **Sub-Profiles**: Create profiles for parents, spouse, children, siblings
 - **Diagnosis on Behalf**: Start diagnoses for family members
 - **Health History**: Track each family member's health journey
 - **Quick Actions**: Upload tongue photos, view recent activity
 
 **How to use**:
+
 1. Go to "Family Care" in your Patient Dashboard
 2. Click "Add Member" to create a new profile
 3. Fill in:
@@ -764,6 +827,7 @@ The Nine TCM Constitution Types:
 5. Start diagnoses for family members from their profile
 
 **Benefits**:
+
 - Track your mother's health easily
 - Manage children's wellness checkups
 - Keep elderly parents' health history organized
@@ -776,6 +840,7 @@ The Nine TCM Constitution Types:
 **What it is**: Purchase herbal remedies recommended in your diagnosis
 
 **Features**:
+
 - **Personalized Recommendations**: Products based on your diagnosis
 - **Product Types**: Tea Bags, Granules, Raw Herbs, Capsules
 - **Detailed Information**: Indications, ingredients, preparation time
@@ -783,6 +848,7 @@ The Nine TCM Constitution Types:
 - **Pharmacy Fulfillment**: Orders handled by licensed pharmacy partners
 
 **How to use**:
+
 1. After receiving a diagnosis, look for herbal formula recommendations
 2. Click "One-Click Remedy" or "Buy Now"
 3. View product details (indications, ingredients)
@@ -790,7 +856,7 @@ The Nine TCM Constitution Types:
 5. Confirm order via WhatsApp
 6. Your order is fulfilled by a licensed pharmacy partner
 
-**Important Disclaimer**: 
+**Important Disclaimer**:
 ⚠️ These products are for reference only. Please consult a licensed TCM practitioner before use.
 
 **Requirements**: Must be logged in to purchase.
@@ -802,12 +868,14 @@ The Nine TCM Constitution Types:
 **What it is**: Visual representation of your organ health based on TCM reports
 
 **Features**:
+
 - Body visualization with organ highlights
 - Color-coded health status (red = heat/stagnation, normal = healthy)
 - Active Focus areas based on current diagnosis
 - Restoring indicators for organs under treatment
 
 **What it shows**:
+
 - Heart status
 - Lungs status
 - Liver status
@@ -815,6 +883,7 @@ The Nine TCM Constitution Types:
 - Kidneys status
 
 **How to access**:
+
 - The Digital Twin appears in your Health Journey dashboard
 - It updates based on your latest diagnosis
 - Red areas indicate active heat or stagnation being addressed
@@ -826,12 +895,14 @@ The Nine TCM Constitution Types:
 ### 7.1 Download PDF Report
 
 **How to download**:
+
 1. After your report is generated, click "Download PDF"
 2. The PDF will be generated (may take 10-20 seconds)
 3. Your browser will download the file
 4. Save it to your device
 
 **What's included in the PDF**:
+
 - Complete diagnosis report
 - All recommendations
 - Acupressure point diagrams
@@ -843,11 +914,13 @@ The Nine TCM Constitution Types:
 **What it is**: A shareable visual summary of your diagnosis
 
 **How to generate**:
+
 1. Click "Generate Infographic" in your report
 2. Wait for the image to generate
 3. Download or share the infographic
 
 **What it shows**:
+
 - Your constitution type
 - Key diagnosis points
 - Essential recommendations
@@ -859,6 +932,7 @@ The Nine TCM Constitution Types:
 **What it is**: Ask questions about your diagnosis report
 
 **How to use**:
+
 1. After viewing your report, click the "Chat" button
 2. A chat window will open
 3. Type your questions, such as:
@@ -869,6 +943,7 @@ The Nine TCM Constitution Types:
 4. The AI will answer based on your specific diagnosis
 
 **Quick Question Suggestions**:
+
 - What does my diagnosis mean?
 - Why should I avoid these foods?
 - How long until I feel better?
@@ -879,10 +954,12 @@ The Nine TCM Constitution Types:
 **For logged-in users**:
 
 **Access your history**:
+
 1. Go to your Patient Dashboard
 2. The "Health Journey" tab shows all past consultations
 
 **What you can see**:
+
 - Date and time of each consultation
 - Main diagnosis
 - Constitution type
@@ -890,6 +967,7 @@ The Nine TCM Constitution Types:
 - Quick access to view full reports
 
 **Benefits**:
+
 - Track your health over time
 - Compare different consultations
 - See patterns in your health
@@ -910,12 +988,14 @@ Sihat TCM supports three languages:
 ### 8.2 How to Change Language
 
 **On Web**:
+
 1. Look for the language selector in the top-right corner
 2. Click the current language (e.g., "EN")
 3. Select your preferred language from the dropdown
 4. The entire interface will switch immediately
 
 **On Mobile App**:
+
 1. Tap the language icon in the header
 2. Select your language
 3. The app will update instantly
@@ -941,16 +1021,17 @@ Sihat TCM supports three languages:
 **Problem**: Camera doesn't start or shows black screen
 
 **Solutions**:
-1. **Check permissions**: 
+
+1. **Check permissions**:
    - Allow camera access when prompted
    - Check browser settings if permission was denied
-2. **Try different browser**: 
+2. **Try different browser**:
    - Chrome, Firefox, or Edge work best
    - Safari on Mac may require additional permissions
-3. **Use upload instead**: 
+3. **Use upload instead**:
    - Click "Upload Image" as an alternative
    - Take photo with your phone and upload it
-4. **Check camera**: 
+4. **Check camera**:
    - Make sure no other app is using the camera
    - Restart your browser
 
@@ -961,15 +1042,16 @@ Sihat TCM supports three languages:
 **Problem**: Can't record audio or microphone not detected
 
 **Solutions**:
-1. **Check permissions**: 
+
+1. **Check permissions**:
    - Allow microphone access when prompted
    - Check browser/system settings
-2. **Try different browser**: 
+2. **Try different browser**:
    - Some browsers have better audio support
-3. **Skip audio step**: 
+3. **Skip audio step**:
    - Audio analysis is optional
    - You can proceed without it
-4. **Check microphone**: 
+4. **Check microphone**:
    - Ensure microphone is connected and working
    - Test in another app first
 
@@ -980,16 +1062,17 @@ Sihat TCM supports three languages:
 **Problem**: Analysis step is stuck or taking too long
 
 **Solutions**:
-1. **Wait longer**: 
+
+1. **Wait longer**:
    - Analysis can take 1-3 minutes
    - Don't refresh the page
-2. **Check internet**: 
+2. **Check internet**:
    - Ensure stable internet connection
    - Try refreshing if connection was lost
-3. **Try again**: 
+3. **Try again**:
    - Go back one step and click "Generate Report" again
    - If problem persists, start a new consultation
-4. **Contact support**: 
+4. **Contact support**:
    - If issue continues, report it to support
 
 ---
@@ -999,16 +1082,17 @@ Sihat TCM supports three languages:
 **Problem**: Login fails or password not working
 
 **Solutions**:
-1. **Check credentials**: 
+
+1. **Check credentials**:
    - Verify email and password are correct
    - Check for typos
-2. **Reset password**: 
+2. **Reset password**:
    - Click "Forgot Password"
    - Check your email for reset link
-3. **Check email verification**: 
+3. **Check email verification**:
    - Make sure you verified your email when signing up
    - Check spam folder for verification email
-4. **Try guest mode**: 
+4. **Try guest mode**:
    - You can use the system without logging in
    - Create account later if needed
 
@@ -1019,15 +1103,16 @@ Sihat TCM supports three languages:
 **Problem**: PDF download button doesn't work
 
 **Solutions**:
-1. **Check pop-up blocker**: 
+
+1. **Check pop-up blocker**:
    - Allow pop-ups for this site
    - Check browser settings
-2. **Wait for generation**: 
+2. **Wait for generation**:
    - PDF generation takes 10-20 seconds
    - Don't click multiple times
-3. **Try different browser**: 
+3. **Try different browser**:
    - Some browsers handle PDFs differently
-4. **Check download folder**: 
+4. **Check download folder**:
    - PDF may have downloaded to default folder
    - Check browser download history
 
@@ -1038,13 +1123,14 @@ Sihat TCM supports three languages:
 **Problem**: Lost progress during diagnosis
 
 **Solutions**:
-1. **Check for resume prompt**: 
+
+1. **Check for resume prompt**:
    - When you return, look for "Resume" option
    - Saved progress is available for 7 days
-2. **Don't clear browser data**: 
+2. **Don't clear browser data**:
    - Progress is saved in browser storage
    - Clearing cookies will delete saved progress
-3. **Login to save**: 
+3. **Login to save**:
    - Logged-in users have progress saved to account
    - More reliable than guest mode
 
@@ -1055,13 +1141,14 @@ Sihat TCM supports three languages:
 **Problem**: Language selector doesn't work
 
 **Solutions**:
-1. **Refresh page**: 
+
+1. **Refresh page**:
    - After changing language, refresh the page
    - Some elements may need reload
-2. **Clear cache**: 
+2. **Clear cache**:
    - Clear browser cache and cookies
    - Try again
-3. **Check browser**: 
+3. **Check browser**:
    - Some older browsers may not support all features
    - Update your browser
 
@@ -1072,14 +1159,15 @@ Sihat TCM supports three languages:
 **Problem**: AI Meal Planner won't generate plans
 
 **Solutions**:
-1. **Complete a diagnosis first**: 
+
+1. **Complete a diagnosis first**:
    - The Meal Planner requires a completed TCM diagnosis
    - Your constitution type is needed for personalization
-2. **Check internet connection**: 
+2. **Check internet connection**:
    - AI generation requires stable internet
-3. **Set dietary preferences**: 
+3. **Set dietary preferences**:
    - Fill in your allergies and dietary type
-4. **Try regenerating**: 
+4. **Try regenerating**:
    - Click "New Plan" to generate a fresh meal plan
 
 ---
@@ -1174,12 +1262,14 @@ A: No. Sihat TCM requires an internet connection for AI processing and data stor
 ### 11.1 Data Collection
 
 **What we collect**:
+
 - Account information (email, profile data)
 - Diagnosis information (symptoms, images, audio)
 - Medical history (if provided)
 - Usage data (for system improvement)
 
 **What we don't collect**:
+
 - Payment information (handled by secure payment processors)
 - Unnecessary personal identifiers
 - Data from other apps or services (unless you explicitly connect them)
@@ -1194,12 +1284,14 @@ A: No. Sihat TCM requires an internet connection for AI processing and data stor
 ### 11.3 Data Usage
 
 **How we use your data**:
+
 - To generate your diagnosis
 - To improve the AI system (anonymized)
 - To provide you with your diagnosis history
 - To comply with legal requirements
 
 **We do NOT**:
+
 - Sell your data to third parties
 - Share your data without your consent
 - Use your data for advertising (without permission)
@@ -1222,6 +1314,7 @@ A: No. Sihat TCM requires an internet connection for AI processing and data stor
 ### 11.6 Contact for Privacy Concerns
 
 If you have privacy concerns or questions:
+
 - Check the Privacy Policy (link in footer)
 - Contact support through the website
 - Request data deletion through your account settings
@@ -1294,27 +1387,29 @@ If you have privacy concerns or questions:
 
 ## Appendix C: TCM Constitution Quick Guide
 
-| Constitution | Key Signs | Foods to Eat | Foods to Avoid |
-|--------------|-----------|--------------|----------------|
-| **Qi Deficiency** | Fatigue, weak voice, sweating | Ginseng, yam, beef, chicken | Cold/raw foods, excessive dairy |
-| **Yang Deficiency** | Cold hands/feet, pale face | Lamb, ginger, cinnamon, walnuts | Cold drinks, watermelon, pear |
-| **Yin Deficiency** | Night sweats, dry mouth | Duck, pear, lily bulb, honey | Spicy foods, alcohol, fried foods |
-| **Phlegm-Dampness** | Heavy body, oily skin | Barley, winter melon, lotus leaf | Fatty foods, sweets, dairy |
-| **Damp-Heat** | Bitter taste, acne | Mung bean, bitter melon, lotus root | Spicy foods, alcohol, greasy foods |
-| **Blood Stasis** | Dark complexion, pain | Hawthorn, brown sugar, turmeric | Cold drinks, fatty meat |
-| **Qi Stagnation** | Mood swings, sighing | Rose tea, orange peel, mint | Stimulants, heavy meals |
+| Constitution        | Key Signs                     | Foods to Eat                        | Foods to Avoid                     |
+| ------------------- | ----------------------------- | ----------------------------------- | ---------------------------------- |
+| **Qi Deficiency**   | Fatigue, weak voice, sweating | Ginseng, yam, beef, chicken         | Cold/raw foods, excessive dairy    |
+| **Yang Deficiency** | Cold hands/feet, pale face    | Lamb, ginger, cinnamon, walnuts     | Cold drinks, watermelon, pear      |
+| **Yin Deficiency**  | Night sweats, dry mouth       | Duck, pear, lily bulb, honey        | Spicy foods, alcohol, fried foods  |
+| **Phlegm-Dampness** | Heavy body, oily skin         | Barley, winter melon, lotus leaf    | Fatty foods, sweets, dairy         |
+| **Damp-Heat**       | Bitter taste, acne            | Mung bean, bitter melon, lotus root | Spicy foods, alcohol, greasy foods |
+| **Blood Stasis**    | Dark complexion, pain         | Hawthorn, brown sugar, turmeric     | Cold drinks, fatty meat            |
+| **Qi Stagnation**   | Mood swings, sighing          | Rose tea, orange peel, mint         | Stimulants, heavy meals            |
 
 ---
 
 ## Support & Contact
 
 **Need Help?**
+
 - Check this manual first
 - Review the Troubleshooting section
 - Contact support through the website
 - Check for system updates and announcements
 
 **Feedback?**
+
 - We welcome your feedback to improve Sihat TCM
 - Share your experience through the feedback form
 - Report bugs or issues to support
@@ -1323,10 +1418,9 @@ If you have privacy concerns or questions:
 
 **Thank you for using Sihat TCM!**
 
-*This manual is regularly updated. Check back for new features and improvements.*
+_This manual is regularly updated. Check back for new features and improvements._
 
 ---
 
-*Last Updated: December 2024*
-*Version: 3.0*
-
+_Last Updated: December 2024_
+_Version: 3.0_

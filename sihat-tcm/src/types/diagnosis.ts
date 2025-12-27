@@ -1,25 +1,25 @@
 /**
  * Diagnosis Wizard Types
- * 
+ *
  * Type definitions for the diagnosis wizard data structures
  */
 
-import type { DiagnosisReport } from './database'
-import type { AnalyzeImageResponse } from './api'
+import type { DiagnosisReport } from "./database";
+import type { AnalyzeImageResponse } from "./api";
 
 // ============================================================================
 // Basic Info
 // ============================================================================
 
 export interface BasicInfo {
-  name?: string
-  age?: number
-  gender?: string
-  height?: number
-  weight?: number
-  symptoms?: string
-  mainComplaint?: string
-  otherSymptoms?: string
+  name?: string;
+  age?: number;
+  gender?: string;
+  height?: number;
+  weight?: number;
+  symptoms?: string;
+  mainComplaint?: string;
+  otherSymptoms?: string;
 }
 
 // ============================================================================
@@ -27,18 +27,18 @@ export interface BasicInfo {
 // ============================================================================
 
 export interface InquiryData {
-  summary?: string
-  chat?: ChatMessage[]
-  notes?: string
-  inquiryText?: string      // The processed summary text
-  reportFiles?: any[]       // Medical reports uploaded during inquiry
-  medicineFiles?: any[]     // Medicines uploaded during inquiry
+  summary?: string;
+  chat?: ChatMessage[];
+  notes?: string;
+  inquiryText?: string; // The processed summary text
+  reportFiles?: any[]; // Medical reports uploaded during inquiry
+  medicineFiles?: any[]; // Medicines uploaded during inquiry
 }
 
 export interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant' | 'system'
-  content: string
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
 }
 
 // ============================================================================
@@ -46,13 +46,13 @@ export interface ChatMessage {
 // ============================================================================
 
 export interface VisualAnalysisData {
-  image?: string
-  observation?: string
-  potential_issues?: string[]
-  skipped?: boolean
-  analysis_tags?: AnalyzeImageResponse['analysis_tags']
-  tcm_indicators?: AnalyzeImageResponse['tcm_indicators']
-  pattern_suggestions?: AnalyzeImageResponse['pattern_suggestions']
+  image?: string;
+  observation?: string;
+  potential_issues?: string[];
+  skipped?: boolean;
+  analysis_tags?: AnalyzeImageResponse["analysis_tags"];
+  tcm_indicators?: AnalyzeImageResponse["tcm_indicators"];
+  pattern_suggestions?: AnalyzeImageResponse["pattern_suggestions"];
 }
 
 // ============================================================================
@@ -60,10 +60,10 @@ export interface VisualAnalysisData {
 // ============================================================================
 
 export interface AudioAnalysisData {
-  audio?: string
-  observation?: string
-  potential_issues?: string[]
-  skipped?: boolean
+  audio?: string;
+  observation?: string;
+  potential_issues?: string[];
+  skipped?: boolean;
 }
 
 // ============================================================================
@@ -71,11 +71,11 @@ export interface AudioAnalysisData {
 // ============================================================================
 
 export interface PulseData {
-  bpm?: number
-  quality?: string
-  rhythm?: string
-  strength?: string
-  notes?: string
+  bpm?: number;
+  quality?: string;
+  rhythm?: string;
+  strength?: string;
+  notes?: string;
 }
 
 // ============================================================================
@@ -83,9 +83,9 @@ export interface PulseData {
 // ============================================================================
 
 export interface SmartConnectData {
-  connected?: boolean
-  device_type?: string
-  data?: Record<string, unknown>
+  connected?: boolean;
+  device_type?: string;
+  data?: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -93,15 +93,15 @@ export interface SmartConnectData {
 // ============================================================================
 
 export interface DiagnosisWizardData {
-  basic_info: BasicInfo | null
-  wen_inquiry: InquiryData | null
-  wang_tongue: VisualAnalysisData | null
-  wang_face: VisualAnalysisData | null
-  wang_part: VisualAnalysisData | null
-  wen_audio: AudioAnalysisData | null
-  wen_chat: ChatMessage[]
-  qie: PulseData | null
-  smart_connect: SmartConnectData | null
+  basic_info: BasicInfo | null;
+  wen_inquiry: InquiryData | null;
+  wang_tongue: VisualAnalysisData | null;
+  wang_face: VisualAnalysisData | null;
+  wang_part: VisualAnalysisData | null;
+  wen_audio: AudioAnalysisData | null;
+  wen_chat: ChatMessage[];
+  qie: PulseData | null;
+  smart_connect: SmartConnectData | null;
 }
 
 // ============================================================================
@@ -109,16 +109,16 @@ export interface DiagnosisWizardData {
 // ============================================================================
 
 export interface AnalysisResult {
-  observation: string
-  potential_issues?: string[]
-  modelUsed?: number
-  status?: string
-  confidence?: number
-  image_description?: string
-  analysis_tags?: AnalyzeImageResponse['analysis_tags']
-  tcm_indicators?: AnalyzeImageResponse['tcm_indicators']
-  pattern_suggestions?: AnalyzeImageResponse['pattern_suggestions']
-  notes?: string
+  observation: string;
+  potential_issues?: string[];
+  modelUsed?: number;
+  status?: string;
+  confidence?: number;
+  image_description?: string;
+  analysis_tags?: AnalyzeImageResponse["analysis_tags"];
+  tcm_indicators?: AnalyzeImageResponse["tcm_indicators"];
+  pattern_suggestions?: AnalyzeImageResponse["pattern_suggestions"];
+  notes?: string;
 }
 
 // ============================================================================
@@ -126,9 +126,7 @@ export interface AnalysisResult {
 // ============================================================================
 
 export interface PendingResumeState {
-  step: string
-  data: DiagnosisWizardData
-  timestamp: string
+  step: string;
+  data: DiagnosisWizardData;
+  timestamp: string;
 }
-
-
