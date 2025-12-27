@@ -2,6 +2,9 @@
   "name": "sihat-tcm",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev -p 3100",
     "dev-https": "next dev -H 0.0.0.0 -p 3100 --experimental-https",
