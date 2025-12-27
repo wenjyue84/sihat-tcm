@@ -96,22 +96,22 @@ export function PortfolioSymptoms() {
                     </div>
                 ) : (
                     viewMode === 'simple' ? (
-                        <div className="rounded-md border border-slate-100 overflow-hidden">
-                            <Table>
+                        <div className="rounded-md border border-slate-100 overflow-x-auto -mx-2 sm:mx-0">
+                            <Table className="min-w-[400px] sm:min-w-0">
                                 <TableHeader className="bg-slate-50">
                                     <TableRow>
-                                        <TableHead className="w-[20%]">Date</TableHead>
-                                        <TableHead className="w-[25%]">Diagnosis</TableHead>
+                                        <TableHead className="w-[30%] sm:w-[20%]">Date</TableHead>
+                                        <TableHead className="w-[30%] sm:w-[25%]">Diagnosis</TableHead>
                                         <TableHead>Symptoms</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {sessions.map((session) => (
                                         <TableRow key={session.id} className="hover:bg-slate-50/50">
-                                            <TableCell className="font-medium text-slate-700 whitespace-nowrap">
+                                            <TableCell className="font-medium text-slate-700 whitespace-nowrap text-xs sm:text-sm">
                                                 {format(new Date(session.created_at), 'MMM d, yyyy')}
                                             </TableCell>
-                                            <TableCell className="text-slate-800 font-medium">
+                                            <TableCell className="text-slate-800 font-medium text-xs sm:text-sm">
                                                 {session.primary_diagnosis || '-'}
                                             </TableCell>
                                             <TableCell>
@@ -119,13 +119,13 @@ export function PortfolioSymptoms() {
                                                     {session.symptoms?.slice(0, 3).map((symptom, idx) => (
                                                         <span
                                                             key={idx}
-                                                            className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded-full"
+                                                            className="px-1.5 sm:px-2 py-0.5 bg-slate-100 text-slate-600 text-[9px] sm:text-[10px] rounded-full"
                                                         >
                                                             {symptom}
                                                         </span>
                                                     ))}
                                                     {session.symptoms && session.symptoms.length > 3 && (
-                                                        <span className="text-[10px] text-slate-400 self-center">
+                                                        <span className="text-[9px] sm:text-[10px] text-slate-400 self-center">
                                                             +{session.symptoms.length - 3} more
                                                         </span>
                                                     )}

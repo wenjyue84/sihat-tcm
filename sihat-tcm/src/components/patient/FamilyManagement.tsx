@@ -85,19 +85,6 @@ export function FamilyManagement() {
   const [selectedMember, setSelectedMember] = useState<FamilyMember | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch members on mount
-  useState(() => {
-    // Using useEffect-like logic inside useState lazy init or just use useEffect properly below
-  });
-
-  // Use standard useEffect
-  import("react").then(({ useEffect }) => { }); // Just a hack to ensure I assume useEffect is imported? No, useEffect isn't imported in line 1.
-  // Wait, line 3 has import { useState } from "react";
-  // I need to update line 3 to import useEffect as well.
-  // I'll handle that in Chunk 0 (updating React imports).
-  // Actually I didn't verify imports fully. Line 3: import { useState } from "react";
-  // I must add useEffect to line 3.
-
 
   // Form state for adding new member
   const [formData, setFormData] = useState({
