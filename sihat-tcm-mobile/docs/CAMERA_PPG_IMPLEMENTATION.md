@@ -147,3 +147,5 @@ For **best accuracy**, implement **Option 2** (native module) which gives:
 - [AVFoundation Camera](https://developer.apple.com/documentation/avfoundation/capture_setup)
 
 
+
+

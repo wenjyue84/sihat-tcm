@@ -79,7 +79,7 @@ function App() {
                     description: `Starts the Next.js development server on localhost:${port}`,
                     color: 'bg-emerald-600 hover:bg-emerald-700',
                     icon: Play,
-                    cwd: 'sihat-tcm',
+                    cwd: 'sihat-tcm-web',
                     needsPort: true
                 },
                 devTina: {
@@ -88,7 +88,7 @@ function App() {
                     description: `Starts Next.js with Tina CMS admin panel on port ${port}`,
                     color: 'bg-teal-600 hover:bg-teal-700',
                     icon: Play,
-                    cwd: 'sihat-tcm',
+                    cwd: 'sihat-tcm-web',
                     needsPort: true
                 },
                 build: {
@@ -97,7 +97,7 @@ function App() {
                     description: 'Builds the web app for production deployment',
                     color: 'bg-blue-600 hover:bg-blue-700',
                     icon: Package,
-                    cwd: 'sihat-tcm'
+                    cwd: 'sihat-tcm-web'
                 },
                 lint: {
                     label: 'Run Linting',
@@ -105,7 +105,7 @@ function App() {
                     description: 'Checks code for TypeScript and ESLint errors',
                     color: 'bg-purple-600 hover:bg-purple-700',
                     icon: Wrench,
-                    cwd: 'sihat-tcm'
+                    cwd: 'sihat-tcm-web'
                 }
             }
         },
@@ -169,7 +169,7 @@ function App() {
                     description: 'Installs all npm dependencies for the web app',
                     color: 'bg-gray-600 hover:bg-gray-700',
                     icon: Package,
-                    cwd: 'sihat-tcm'
+                    cwd: 'sihat-tcm-web'
                 },
                 clean: {
                     label: 'Clean Build',
@@ -177,7 +177,7 @@ function App() {
                     description: 'Removes .next folder and rebuilds the project',
                     color: 'bg-red-600 hover:bg-red-700',
                     icon: Wrench,
-                    cwd: 'sihat-tcm'
+                    cwd: 'sihat-tcm-web'
                 },
                 explorer: {
                     label: 'Open in Explorer',
