@@ -66,21 +66,21 @@ export async function getAdminSettings(): Promise<AdminSettings> {
  * Get the Gemini API key from Environment
  */
 export async function getGeminiApiKeyAsync(): Promise<string> {
-  return process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
+  return process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
 }
 
 /**
  * Sync helper for Env var only
  */
 export function getGeminiApiKeyEnv(): string {
-  return process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
+  return process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
 }
 
 /**
  * @deprecated Use getGeminiApiKeyAsync instead
  */
 export function getGeminiApiKey(): string {
-  return process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
+  return process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
 }
 
 /**

@@ -399,7 +399,21 @@ export function UnifiedDashboard() {
         }),
       });
 
-      const data = await response.json();
+      // Check if response is ok before parsing JSON
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("API error response:", text);
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      // Try to parse JSON, handle parsing errors
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error("Failed to parse JSON response:", parseError);
+        throw new Error("Server returned an invalid response");
+      }
 
       if (data.error) {
         throw new Error(data.error);
