@@ -1081,13 +1081,13 @@ export function TrendWidget({ trendData, loading, sessions, journeyDuration }: T
     <div className="w-full">
       <Card className="overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 border-emerald-100/50 flex flex-col">
         {/* Header */}
-        <div className="p-6 pb-4 border-b border-emerald-100/50 flex justify-between items-start">
-          <div>
-            <h3 className="text-xl font-bold text-emerald-900 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-emerald-600" />
-              {t.patientDashboard.healthJourney.vitalityTitle}
+        <div className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-emerald-100/50 flex justify-between items-start gap-2">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-base sm:text-xl font-bold text-emerald-900 flex items-center gap-2">
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600 shrink-0" />
+              <span className="truncate">{t.patientDashboard.healthJourney.vitalityTitle}</span>
             </h3>
-            <p className="text-sm text-emerald-700 mt-1">
+            <p className="text-xs sm:text-sm text-emerald-700 mt-0.5 sm:mt-1 line-clamp-2">
               {t.patientDashboard.healthJourney.subtitle}
             </p>
           </div>
@@ -1097,21 +1097,21 @@ export function TrendWidget({ trendData, loading, sessions, journeyDuration }: T
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowDigitalTwin(true)}
-            className="group relative cursor-pointer"
+            className="group relative cursor-pointer shrink-0"
           >
             <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
-            <div className="relative p-3 bg-white rounded-full shadow-md border border-emerald-100 flex items-center justify-center">
-              <UserCheck className="w-6 h-6 text-emerald-600" />
-              <div className="absolute top-0 right-0 h-3 w-3 bg-emerald-500 border-2 border-white rounded-full"></div>
+            <div className="relative p-2 sm:p-3 bg-white rounded-full shadow-md border border-emerald-100 flex items-center justify-center">
+              <UserCheck className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600" />
+              <div className="absolute top-0 right-0 h-2 w-2 sm:h-3 sm:w-3 bg-emerald-500 border-2 border-white rounded-full"></div>
             </div>
-            <p className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-emerald-700 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-tighter">
+            <p className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-emerald-700 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-tighter hidden sm:block">
               View Digital Twin
             </p>
           </motion.div>
         </div>
 
         {/* Stats Grid */}
-        <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-3 flex-1">
+        <div className="p-3 sm:p-4 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 flex-1">
           {/* Total Sessions - Clickable */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}

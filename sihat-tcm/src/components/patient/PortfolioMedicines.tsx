@@ -308,15 +308,15 @@ export function PortfolioMedicines() {
                         </Button>
                     </div>
                 ) : viewMode === 'simple' ? (
-                    <div className="rounded-md border border-slate-100 overflow-hidden">
-                        <Table>
+                    <div className="rounded-md border border-slate-100 overflow-x-auto -mx-2 sm:mx-0">
+                        <Table className="min-w-[400px] sm:min-w-0">
                             <TableHeader className="bg-slate-50">
                                 <TableRow>
-                                    <TableHead className="w-[30%]">{t.patientDashboard_v1.healthPortfolio.medicines.name}</TableHead>
-                                    <TableHead>{t.patientDashboard_v1.healthPortfolio.medicines.dosage}</TableHead>
+                                    <TableHead className="w-[35%] sm:w-[30%]">{t.patientDashboard_v1.healthPortfolio.medicines.name}</TableHead>
+                                    <TableHead className="hidden sm:table-cell">{t.patientDashboard_v1.healthPortfolio.medicines.dosage}</TableHead>
                                     <TableHead>{t.patientDashboard_v1.healthPortfolio.medicines.frequency}</TableHead>
                                     <TableHead>Status</TableHead>
-                                    <TableHead className="w-[50px]"></TableHead>
+                                    <TableHead className="w-[40px] sm:w-[50px]"></TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -324,28 +324,29 @@ export function PortfolioMedicines() {
                                     <TableRow key={med.id} className="hover:bg-slate-50/50">
                                         <TableCell className="font-medium">
                                             <div className="flex flex-col">
-                                                <span className="text-slate-700">{med.name}</span>
+                                                <span className="text-slate-700 text-xs sm:text-sm">{med.name}</span>
                                                 {med.chinese_name && (
-                                                    <span className="text-xs text-slate-400">{med.chinese_name}</span>
+                                                    <span className="text-[10px] sm:text-xs text-slate-400">{med.chinese_name}</span>
                                                 )}
+                                                <span className="sm:hidden text-[10px] text-slate-500">{med.dosage || ''}</span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-slate-600">{med.dosage || '-'}</TableCell>
-                                        <TableCell className="text-slate-600">{med.frequency || '-'}</TableCell>
+                                        <TableCell className="text-slate-600 text-xs sm:text-sm hidden sm:table-cell">{med.dosage || '-'}</TableCell>
+                                        <TableCell className="text-slate-600 text-xs sm:text-sm">{med.frequency || '-'}</TableCell>
                                         <TableCell>
-                                            <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider ${med.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
-                                                <div className={`w-1.5 h-1.5 rounded-full ${med.is_active ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-                                                {med.is_active ? 'Active' : 'Stopped'}
+                                            <div className={`inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-[10px] font-medium uppercase tracking-wider ${med.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+                                                <div className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${med.is_active ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                                                <span className="hidden sm:inline">{med.is_active ? 'Active' : 'Stopped'}</span>
                                             </div>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="p-1 sm:p-4">
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50"
+                                                className="h-6 w-6 sm:h-8 sm:w-8 text-slate-400 hover:text-red-500 hover:bg-red-50"
                                                 onClick={() => handleDelete(med.id)}
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                                             </Button>
                                         </TableCell>
                                     </TableRow>

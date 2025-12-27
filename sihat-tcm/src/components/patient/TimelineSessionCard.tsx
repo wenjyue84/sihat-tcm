@@ -146,15 +146,15 @@ export function TimelineSessionCard({
 
       {/* Card */}
       <Card
-        className="ml-8 group relative overflow-hidden bg-white hover:shadow-xl transition-all duration-300 border-slate-200/60 cursor-pointer"
+        className="ml-6 sm:ml-8 group relative overflow-hidden bg-white hover:shadow-xl transition-all duration-300 border-slate-200/60 cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Date and Actions */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-slate-400" />
-              <time className="text-2xl font-light text-slate-800 tracking-tight">
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0" />
+              <time className="text-base sm:text-2xl font-light text-slate-800 tracking-tight truncate">
                 {formatDate(session.created_at, language)}
               </time>
             </div>
@@ -194,16 +194,16 @@ export function TimelineSessionCard({
           </div>
 
           {/* Main content row */}
-          <div className="flex items-start justify-between gap-6 mb-4">
+          <div className="flex items-start justify-between gap-3 sm:gap-6 mb-3 sm:mb-4">
             <div className="flex-1 min-w-0">
               {/* Diagnosis title */}
-              <h3 className="text-xl font-semibold text-slate-900 mb-2 leading-tight group-hover:text-emerald-700 transition-colors">
+              <h3 className="text-base sm:text-xl font-semibold text-slate-900 mb-2 leading-tight group-hover:text-emerald-700 transition-colors line-clamp-2">
                 {diagnosisTitle}
               </h3>
 
               {/* Constitution badge */}
               {constitutionTitle && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                   {constitutionTitle}
                 </span>
               )}
@@ -212,7 +212,12 @@ export function TimelineSessionCard({
             {/* Score ring */}
             {score > 0 && (
               <div className="shrink-0">
-                <ScoreRing score={score} size={72} strokeWidth={6} />
+                <div className="hidden sm:block">
+                  <ScoreRing score={score} size={72} strokeWidth={6} />
+                </div>
+                <div className="sm:hidden">
+                  <ScoreRing score={score} size={56} strokeWidth={5} />
+                </div>
               </div>
             )}
           </div>

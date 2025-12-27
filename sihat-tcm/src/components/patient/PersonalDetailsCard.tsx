@@ -48,18 +48,18 @@ export function PersonalDetailsCard({
       transition={{ delay: 0.1, duration: 0.4 }}
     >
       <Card className="border-none shadow-sm bg-white hover:shadow-md transition-shadow duration-300">
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-slate-900">Personal Details</h2>
+          <div className="flex items-center justify-between mb-4 sm:mb-6 gap-2">
+            <h2 className="text-lg sm:text-2xl font-semibold text-slate-900">Personal Details</h2>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setEditing(!editing)}
-              className="text-slate-600 hover:text-emerald-700"
+              className="text-slate-600 hover:text-emerald-700 shrink-0"
             >
-              <Edit className="w-4 h-4 mr-2" />
-              {editing ? "Done" : "Edit"}
+              <Edit className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">{editing ? "Done" : "Edit"}</span>
             </Button>
           </div>
 
@@ -71,14 +71,14 @@ export function PersonalDetailsCard({
               onSave={(value) => handleSave("full_name", value)}
               disabled={!editing}
             />
-            
+
             {email && (
-              <div className="flex justify-between items-center py-2">
-                <span className="text-sm font-medium text-slate-600 flex items-center gap-2">
+              <div className="flex justify-between items-center py-2 gap-2">
+                <span className="text-sm font-medium text-slate-600 flex items-center gap-2 shrink-0">
                   <Mail className="w-4 h-4" />
-                  Email:
+                  <span className="hidden sm:inline">Email:</span>
                 </span>
-                <span className="text-lg font-semibold text-slate-900">{email}</span>
+                <span className="text-sm sm:text-lg font-semibold text-slate-900 truncate">{email}</span>
               </div>
             )}
 

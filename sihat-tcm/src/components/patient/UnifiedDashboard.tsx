@@ -100,7 +100,6 @@ import { MedicalHistoryTags } from "./MedicalHistoryTags";
 import { HeartCompanion } from "./HeartCompanion";
 import { PortfolioMedicines } from "./PortfolioMedicines";
 import { PortfolioSymptoms } from "./PortfolioSymptoms";
-import { TextReviewModal } from "../diagnosis/TextReviewModal";
 
 export function UnifiedDashboard() {
   const { user, profile, updatePreferences, signOut, refreshProfile } = useAuth();
@@ -146,9 +145,8 @@ export function UnifiedDashboard() {
   const [selectedReport, setSelectedReport] = useState<MedicalReport | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // AI Text Extraction Modal State
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [currentReviewFile, setCurrentReviewFile] = useState<File | null>(null);
+  // Background extraction state - track which reports are being processed
+  const [extractingReports, setExtractingReports] = useState<Set<string>>(new Set());
 
   // Active Section
   const [activeSection, setActiveSectionState] = useState<
@@ -377,8 +375,64 @@ export function UnifiedDashboard() {
     }
   };
 
-  // Handle document upload - opens AI text extraction modal
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Background AI text extraction
+  const extractTextInBackground = async (reportId: string, file: File) => {
+    try {
+      // Convert file to base64
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (error) => reject(error);
+      });
+
+      // Call extraction API
+      const response = await fetch("/api/extract-text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file: base64,
+          fileName: file.name,
+          fileType: file.type,
+          mode: "general",
+          language: language,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Update the report with extracted text
+      const { error } = await supabase
+        .from("medical_reports")
+        .update({ extracted_text: data.text || "" })
+        .eq("id", reportId);
+
+      if (error) throw error;
+
+      // Update local state
+      setReports((prev) =>
+        prev.map((r) =>
+          r.id === reportId ? { ...r, extracted_text: data.text || "" } : r
+        )
+      );
+    } catch (error) {
+      console.error("Background extraction error:", error);
+    } finally {
+      // Remove from extracting set
+      setExtractingReports((prev) => {
+        const next = new Set(prev);
+        next.delete(reportId);
+        return next;
+      });
+    }
+  };
+
+  // Handle document upload - immediate upload with background extraction
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
@@ -389,19 +443,8 @@ export function UnifiedDashboard() {
       return;
     }
 
-    // Open AI text extraction review modal
-    setCurrentReviewFile(file);
-    setIsReviewModalOpen(true);
-    e.target.value = "";
-  };
-
-  // Handle confirmed text after AI extraction and user review
-  const handleReviewConfirm = async (extractedText: string, file: File) => {
-    if (!user) return;
-
     try {
       setUploadingReport(true);
-      setIsReviewModalOpen(false);
 
       // Optional: Upload to Supabase Storage
       let file_url = undefined;
@@ -429,28 +472,36 @@ export function UnifiedDashboard() {
         console.warn("Storage error, falling back to metadata only:", storageErr);
       }
 
+      // Save report immediately without extracted text
       const newReport = {
         name: file.name,
         date: new Date().toISOString().split("T")[0],
         size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
         type: file.type,
         file_url,
-        extracted_text: extractedText, // Store AI-extracted text for future diagnosis prefill
+        extracted_text: "", // Will be filled in background
       };
 
       const result = await saveMedicalReport(newReport);
 
       if (result.success && result.data) {
-        setReports([result.data, ...reports]);
+        const savedReport = result.data;
+        setReports([savedReport, ...reports]);
+
+        // Mark as extracting
+        setExtractingReports((prev) => new Set(prev).add(savedReport.id));
+
+        // Start background extraction
+        extractTextInBackground(savedReport.id, file);
       } else if (!result.success) {
         alert("Failed to save report: " + result.error);
       }
     } catch (error) {
-      console.error("Error in handleReviewConfirm:", error);
+      console.error("Error uploading report:", error);
       alert("An error occurred while uploading the report.");
     } finally {
       setUploadingReport(false);
-      setCurrentReviewFile(null);
+      e.target.value = "";
     }
   };
 
@@ -828,16 +879,16 @@ export function UnifiedDashboard() {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/50">
         {/* Top Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <button
-              className="md:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-md"
+              className="md:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-md shrink-0"
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-xl font-bold text-slate-800 line-clamp-1">{getSectionTitle()}</h1>
-              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 hidden sm:flex">
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-xl font-bold text-slate-800 truncate">{getSectionTitle()}</h1>
+              <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 items-center gap-2 hidden sm:flex">
                 {t.patientDashboard.welcomeBack}, {profile?.full_name || user?.email || "Patient"}
                 {profile?.full_name === "Test Patient" && (
                   <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-[9px] font-black uppercase tracking-wider">
@@ -1010,13 +1061,12 @@ export function UnifiedDashboard() {
 
             {/* Health Portfolio Section */}
             {activeSection === "healthPortfolio" && (
-              <div className="space-y-8 max-w-5xl mx-auto pb-12 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
-                {/* Hero Section */}
+              <div className="space-y-6 sm:space-y-8 max-w-5xl mx-auto pb-12 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+                {/* Health Portfolio Content */}
 
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
                   {/* Left Column - Personal Info */}
-                  <div className="lg:col-span-4 space-y-6">
+                  <div className="lg:col-span-1 space-y-4 sm:space-y-6">
                     <PersonalDetailsCard
                       fullName={profileData.full_name || ""}
                       email={user?.email}
@@ -1042,7 +1092,7 @@ export function UnifiedDashboard() {
                   </div>
 
                   {/* Right Column - Health Data */}
-                  <div className="lg:col-span-8 space-y-8">
+                  <div className="lg:col-span-2 space-y-6 sm:space-y-8">
                     {/* Medicines Section */}
                     <PortfolioMedicines />
 
@@ -1117,51 +1167,68 @@ export function UnifiedDashboard() {
                           </div>
                         ) : (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pb-2">
-                            {reports.map((report) => (
-                              <div
-                                key={report.id}
-                                onClick={() => setSelectedReport(report)}
-                                className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 hover:shadow-sm transition-all border border-slate-200/50 cursor-pointer group"
-                              >
-                                <div className="flex items-center gap-3 flex-1 min-w-0">
-                                  <div className="p-2 rounded bg-blue-100 text-blue-600">
-                                    <FileText className="w-4 h-4 shrink-0" />
+                            {reports.map((report) => {
+                              const isExtracting = extractingReports.has(report.id);
+                              const hasExtractedText = !!report.extracted_text;
+
+                              return (
+                                <div
+                                  key={report.id}
+                                  onClick={() => setSelectedReport(report)}
+                                  className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 hover:shadow-sm transition-all border border-slate-200/50 cursor-pointer group relative"
+                                >
+                                  {/* Extraction Progress Indicator */}
+                                  {isExtracting && (
+                                    <div className="absolute top-2 right-2 flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5 text-[10px] font-medium text-amber-700">
+                                      <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                                      <span>Extracting...</span>
+                                    </div>
+                                  )}
+
+                                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <div className={`p-2 rounded ${isExtracting ? 'bg-amber-100 text-amber-600' : 'bg-blue-100 text-blue-600'}`}>
+                                      <FileText className="w-4 h-4 shrink-0" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-sm font-semibold text-slate-800 truncate">
+                                        {report.name}
+                                      </p>
+                                      <p className="text-[10px] text-slate-500 font-medium">
+                                        {report.date} • {report.size}
+                                        {hasExtractedText && !isExtracting && (
+                                          <span className="ml-2 text-emerald-600">✓ Text extracted</span>
+                                        )}
+                                      </p>
+                                    </div>
                                   </div>
-                                  <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-semibold text-slate-800 truncate">
-                                      {report.name}
-                                    </p>
-                                    <p className="text-[10px] text-slate-500 font-medium">
-                                      {report.date} • {report.size}
-                                    </p>
+                                  <div className="flex items-center shrink-0 ml-2">
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedReport(report);
+                                      }}
+                                      disabled={isExtracting}
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteReport(report.id);
+                                      }}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
                                   </div>
                                 </div>
-                                <div className="flex items-center shrink-0">
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSelectedReport(report);
-                                    }}
-                                  >
-                                    <Eye className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteReport(report.id);
-                                    }}
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                       </CardContent>
@@ -1345,18 +1412,6 @@ export function UnifiedDashboard() {
           </div>
         </motion.div>
       </div>
-
-      {/* AI Text Extraction Modal for Medical Reports */}
-      <TextReviewModal
-        isOpen={isReviewModalOpen}
-        onClose={() => {
-          setIsReviewModalOpen(false);
-          setCurrentReviewFile(null);
-        }}
-        onConfirm={handleReviewConfirm}
-        file={currentReviewFile}
-        mode="general"
-      />
     </div>
   );
 }
