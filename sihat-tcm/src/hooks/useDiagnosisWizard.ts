@@ -462,7 +462,7 @@ export function useDiagnosisWizard() {
         const inputData = {
           // Inquiry data
           inquiry_summary: data.wen_inquiry?.inquiryText || data.wen_inquiry?.summary,
-          inquiry_chat_history: data.wen_inquiry?.chatHistory || data.wen_chat || [],
+          inquiry_chat_history: data.wen_inquiry?.chat || data.wen_chat || [],
           inquiry_report_files:
             data.wen_inquiry?.reportFiles
               ?.map((f: any) => ({
@@ -489,9 +489,9 @@ export function useDiagnosisWizard() {
             ? {
                 image_url: data.wang_tongue.image,
                 observation: data.wang_tongue.observation,
-                analysis_tags: data.wang_tongue.analysis_tags,
-                tcm_indicators: data.wang_tongue.tcm_indicators,
-                pattern_suggestions: data.wang_tongue.pattern_suggestions,
+                analysis_tags: data.wang_tongue.analysis_tags?.map((tag) => tag.title || tag.description || "").filter(Boolean),
+                tcm_indicators: data.wang_tongue.tcm_indicators?.map((indicator) => indicator.pattern || indicator.description || "").filter(Boolean),
+                pattern_suggestions: data.wang_tongue.pattern_suggestions?.map((pattern) => pattern.name || pattern.reasoning || "").filter(Boolean),
                 potential_issues: data.wang_tongue.potential_issues,
               }
             : undefined,
@@ -500,8 +500,8 @@ export function useDiagnosisWizard() {
             ? {
                 image_url: data.wang_face.image,
                 observation: data.wang_face.observation,
-                analysis_tags: data.wang_face.analysis_tags,
-                tcm_indicators: data.wang_face.tcm_indicators,
+                analysis_tags: data.wang_face.analysis_tags?.map((tag) => tag.title || tag.description || "").filter(Boolean),
+                tcm_indicators: data.wang_face.tcm_indicators?.map((indicator) => indicator.pattern || indicator.description || "").filter(Boolean),
                 potential_issues: data.wang_face.potential_issues,
               }
             : undefined,
@@ -510,7 +510,7 @@ export function useDiagnosisWizard() {
             ? {
                 image_url: data.wang_part.image,
                 observation: data.wang_part.observation,
-                analysis_tags: data.wang_part.analysis_tags,
+                analysis_tags: data.wang_part.analysis_tags?.map((tag) => tag.title || tag.description || "").filter(Boolean),
                 potential_issues: data.wang_part.potential_issues,
               }
             : undefined,
@@ -557,7 +557,7 @@ export function useDiagnosisWizard() {
           ...inputData,
           // Guest session fields
           is_guest_session: isGuest,
-          guest_email: isGuest ? data.basic_info?.email : undefined,
+          guest_email: undefined, // Email not available in BasicInfo
           guest_name: isGuest ? data.basic_info?.name : undefined,
         });
 

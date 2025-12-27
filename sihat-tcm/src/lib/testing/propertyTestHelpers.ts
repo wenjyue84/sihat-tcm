@@ -194,7 +194,7 @@ export const patterns = {
     serialize: (value: T) => string,
     deserialize: (serialized: string) => T,
     equals: (a: T, b: T) => boolean = (a, b) => JSON.stringify(a) === JSON.stringify(b)
-  ): fc.Property<T> {
+  ) {
     return fc.property(arbitrary, (original) => {
       const serialized = serialize(original);
       const deserialized = deserialize(serialized);
@@ -209,7 +209,7 @@ export const patterns = {
     arbitrary: fc.Arbitrary<T>,
     operation: (value: T) => T,
     equals: (a: T, b: T) => boolean = (a, b) => JSON.stringify(a) === JSON.stringify(b)
-  ): fc.Property<T> {
+  ) {
     return fc.property(arbitrary, (value) => {
       const once = operation(value);
       const twice = operation(once);
@@ -225,7 +225,7 @@ export const patterns = {
     fn: (value: T) => U,
     compare: (a: T, b: T) => number,
     compareResult: (a: U, b: U) => number
-  ): fc.Property<[T, T]> {
+  ) {
     return fc.property(fc.tuple(arbitrary, arbitrary), ([a, b]) => {
       if (compare(a, b) <= 0) {
         const resultA = fn(a);
@@ -243,7 +243,7 @@ export const patterns = {
     arbitrary: fc.Arbitrary<T>,
     operation: (value: T) => T,
     condition: (value: T) => boolean
-  ): fc.Property<T> {
+  ) {
     return fc.property(arbitrary, (value) => {
       if (condition(value)) {
         const result = operation(value);
@@ -260,7 +260,7 @@ export const patterns = {
     arbitrary: fc.Arbitrary<T>,
     operation: (a: T, b: T) => T,
     equals: (a: T, b: T) => boolean = (a, b) => JSON.stringify(a) === JSON.stringify(b)
-  ): fc.Property<[T, T]> {
+  ) {
     return fc.property(fc.tuple(arbitrary, arbitrary), ([a, b]) => {
       const result1 = operation(a, b);
       const result2 = operation(b, a);
@@ -275,7 +275,7 @@ export const patterns = {
     arbitrary: fc.Arbitrary<T>,
     operation: (a: T, b: T) => T,
     equals: (a: T, b: T) => boolean = (a, b) => JSON.stringify(a) === JSON.stringify(b)
-  ): fc.Property<[T, T, T]> {
+  ) {
     return fc.property(fc.tuple(arbitrary, arbitrary, arbitrary), ([a, b, c]) => {
       const result1 = operation(operation(a, b), c);
       const result2 = operation(a, operation(b, c));

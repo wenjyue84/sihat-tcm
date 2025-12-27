@@ -27,7 +27,9 @@ export function createErrorResponse(
   const errorMessage = error instanceof Error ? error.message : String(error);
   devLog("error", context, "Request error", { error: errorMessage });
 
-  const { userFriendlyError, errorCode } = parseApiError(error);
+  const { userFriendlyError, errorCode } = parseApiError(
+    error instanceof Error ? error : errorMessage
+  );
 
   const response: ApiErrorResponse = {
     error: userFriendlyError,
@@ -73,7 +75,9 @@ export function createErrorResponseWithStatus(
   const errorMessage = error instanceof Error ? error.message : String(error);
   devLog("error", context, "Request error", { error: errorMessage, status });
 
-  const { userFriendlyError, errorCode } = parseApiError(error);
+  const { userFriendlyError, errorCode } = parseApiError(
+    error instanceof Error ? error : errorMessage
+  );
 
   const response: ApiErrorResponse = {
     error: userFriendlyError,

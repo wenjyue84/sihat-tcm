@@ -11,10 +11,6 @@
 
 import { getAccessibilityManager } from "../accessibilityManager";
 
-import { getAccessibilityManager } from "../accessibilityManager";
-
-import { getAccessibilityManager } from "../accessibilityManager";
-
 // Core accessibility manager
 export {
   AccessibilityManager,

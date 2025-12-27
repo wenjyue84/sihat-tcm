@@ -4,6 +4,8 @@ import "@testing-library/jest-dom";
 import { globalReporter } from "@/lib/testing/propertyTestFramework";
 
 // Clear property test results before each test suite
+import { beforeEach, afterAll } from "vitest";
+
 beforeEach(() => {
   globalReporter.clear();
 });

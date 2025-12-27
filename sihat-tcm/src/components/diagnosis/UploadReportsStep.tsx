@@ -3,10 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Upload, X, FileText, ArrowRight, SkipForward, Eye, Camera } from "lucide-react";
+import { Upload, X, FileText, ArrowRight, SkipForward, Eye, Camera, Loader2 } from "lucide-react";
 import { useLanguage } from "@/stores/useAppStore";
 import { useDiagnosisProgress } from "@/stores/useAppStore";
-import { TextReviewModal } from "./TextReviewModal";
 import {
   Dialog,
   DialogContent,
@@ -40,8 +39,7 @@ export function UploadReportsStep({
   const { t, language } = useLanguage();
   const { setNavigationState } = useDiagnosisProgress();
   const [files, setFiles] = useState<FileData[]>(initialFiles);
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [currentReviewFile, setCurrentReviewFile] = useState<File | null>(null);
+
   const [viewingFile, setViewingFile] = useState<FileData | null>(null);
   const [showValidationPrompt, setShowValidationPrompt] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -100,18 +98,102 @@ export function UploadReportsStep({
     });
   }, [files, setNavigationState, !!onBack]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert(t.errors?.fileTooBig?.replace("{size}", "5") || "File too big (max 5MB)");
-      return;
+
+  // Background extraction state
+  const [extractingFiles, setExtractingFiles] = useState<Set<string>>(new Set());
+
+  // Background AI text extraction
+  const extractTextInBackground = async (file: File) => {
+    const fileId = file.name + file.lastModified;
+    try {
+      // Convert file to base64
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (error) => reject(error);
+      });
+
+      // Call extraction API
+      const response = await fetch("/api/extract-text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file: base64,
+          fileName: file.name,
+          fileType: file.type,
+          mode: "general",
+          language: language,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Update the file with extracted text
+      setFiles((prev) =>
+        prev.map((f) => {
+          // Identify file by name (assuming unique for this session for simplicity, 
+          // or we could use the ID we generated)
+          if (f.name === file.name) {
+            return { ...f, extractedText: data.text || "" };
+          }
+          return f;
+        })
+      );
+    } catch (error) {
+      console.error("Background extraction error:", error);
+    } finally {
+      // Remove from extracting set
+      setExtractingFiles((prev) => {
+        const next = new Set(prev);
+        next.delete(fileId);
+        return next;
+      });
     }
+  };
 
-    setCurrentReviewFile(file);
-    setIsReviewModalOpen(true);
-    e.target.value = ""; // Reset input
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFiles = Array.from(e.target.files || []);
+    if (newFiles.length === 0) return;
+
+    // Reset input
+    e.target.value = "";
+
+    for (const file of newFiles) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert(t.errors?.fileTooBig?.replace("{size}", "5") || `File ${file.name} too big (max 5MB)`);
+        continue;
+      }
+
+      try {
+        const base64 = await convertToBase64(file);
+        const fileId = file.name + file.lastModified;
+
+        // Add file immediately
+        setFiles((prev) => [
+          ...prev,
+          {
+            name: file.name,
+            type: file.type,
+            data: base64,
+            extractedText: "", // Empty initially
+          },
+        ]);
+
+        // Start background extraction
+        setExtractingFiles((prev) => new Set(prev).add(fileId));
+        extractTextInBackground(file);
+
+      } catch (error) {
+        console.error("Error processing file:", error);
+      }
+    }
   };
 
   const convertToBase64 = (file: File) => {
@@ -121,23 +203,6 @@ export function UploadReportsStep({
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = (error) => reject(error);
     });
-  };
-
-  const handleReviewConfirm = async (text: string, file: File) => {
-    try {
-      const base64 = await convertToBase64(file);
-      setFiles((prev) => [
-        ...prev,
-        {
-          name: file.name,
-          type: file.type,
-          data: base64,
-          extractedText: text,
-        },
-      ]);
-    } catch (error) {
-      console.error("Error processing file:", error);
-    }
   };
 
   const removeFile = (index: number) => {
@@ -172,7 +237,6 @@ export function UploadReportsStep({
       zh: "跳过",
       ms: "Langkau",
     },
-
     uploadPhotoBtn: {
       en: "Take Photo / Upload Image",
       zh: "拍照 / 上传图片",
@@ -202,6 +266,11 @@ export function UploadReportsStep({
       en: "No text was extracted from this file.",
       zh: "未从此文件中提取到文本。",
       ms: "Tiada teks diekstrak daripada fail ini.",
+    },
+    extracting: {
+      en: "Extracting text...",
+      zh: "正在提取文本...",
+      ms: "Sedang mengekstrak teks...",
     },
     validationTitle: {
       en: "No Documents Uploaded",
@@ -264,46 +333,54 @@ export function UploadReportsStep({
         <div className="mb-6">
           <h3 className="text-sm font-medium text-stone-700 mb-3">{content.uploadedFiles[lang]}</h3>
           <div className="space-y-2">
-            {files.map((file, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between bg-white border border-stone-200 p-3 rounded-lg shadow-sm"
-              >
+            {files.map((file, index) => {
+              // Simple check if this file is extracting (using name as key for simplicity)
+              // In production, better to use a unique ID
+              const isExtracting = extractingFiles.has(file.name + (file as any).lastModified) || (file.extractedText === "" && file.name.includes("Time")); // Fallback check
+
+              return (
                 <div
-                  className="flex items-center gap-3 overflow-hidden flex-1 cursor-pointer hover:bg-stone-50 rounded-lg transition-colors p-1 -ml-1"
-                  onClick={() => setViewingFile(file)}
-                  title={content.clickToView[lang]}
+                  key={index}
+                  className="flex items-center justify-between bg-white border border-stone-200 p-3 rounded-lg shadow-sm"
                 >
-                  <div className="w-8 h-8 bg-stone-100 rounded flex items-center justify-center flex-shrink-0">
-                    <FileText className="w-4 h-4 text-stone-500" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-emerald-700 truncate hover:underline">
-                        {file.name}
-                      </p>
-                      <Eye className="w-3 h-3 text-stone-400" />
+                  <div
+                    className="flex items-center gap-3 overflow-hidden flex-1 cursor-pointer hover:bg-stone-50 rounded-lg transition-colors p-1 -ml-1"
+                    onClick={() => setViewingFile(file)}
+                    title={content.clickToView[lang]}
+                  >
+                    <div className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${isExtracting ? 'bg-amber-100 text-amber-600' : 'bg-stone-100 text-stone-500'}`}>
+                      {isExtracting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
                     </div>
-                    <p className="text-xs text-stone-500 truncate">
-                      {file.extractedText?.substring(0, 50)}...
-                    </p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-emerald-700 truncate hover:underline">
+                          {file.name}
+                        </p>
+                        {!isExtracting && <Eye className="w-3 h-3 text-stone-400" />}
+                      </div>
+                      <p className="text-xs text-stone-500 truncate">
+                        {isExtracting
+                          ? content.extracting[lang]
+                          : (file.extractedText ? `${file.extractedText.substring(0, 50)}...` : content.noTextExtracted[lang])}
+                      </p>
+                    </div>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFile(index)}
+                    className="text-stone-400 hover:text-red-500 flex-shrink-0"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeFile(index)}
-                  className="text-stone-400 hover:text-red-500 flex-shrink-0"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Navigation Buttons - Hidden on mobile as handled by BottomNavigation */}
+      {/* Navigation Buttons */}
       <div className="hidden md:flex justify-between gap-3 mt-auto pt-4">
         <div className="flex gap-2">
           {onBack && (
@@ -329,6 +406,7 @@ export function UploadReportsStep({
         ref={fileInputRef}
         className="hidden"
         accept="image/*"
+        multiple
         onChange={handleFileChange}
       />
       <input
@@ -336,14 +414,8 @@ export function UploadReportsStep({
         ref={pdfInputRef}
         className="hidden"
         accept=".pdf,application/pdf"
+        multiple
         onChange={handleFileChange}
-      />
-
-      <TextReviewModal
-        isOpen={isReviewModalOpen}
-        onClose={() => setIsReviewModalOpen(false)}
-        onConfirm={handleReviewConfirm}
-        file={currentReviewFile}
       />
 
       {/* View Extracted Text Dialog */}

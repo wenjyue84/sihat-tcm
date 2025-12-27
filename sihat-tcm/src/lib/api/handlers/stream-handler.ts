@@ -15,7 +15,7 @@ import { getCorsHeaders } from "@/lib/cors";
 export interface StreamOptions {
   model: string;
   systemPrompt: string;
-  messages: Array<{ role: string; content: string }>;
+  messages: Array<{ role: "user" | "assistant" | "system"; content: string }>;
   fallbackModels?: string[];
   context?: string;
   onFinish?: (completion: { text: string }) => void;
@@ -71,14 +71,14 @@ export async function createStreamResponse(
     const result = streamText({
       model: google(model),
       system: systemPrompt,
-      messages,
+      messages: messages as any,
       onFinish: (completion) => {
         devLog("info", context, `Stream finished. Text length: ${completion.text.length}`);
         onFinish?.(completion);
       },
       onError: (error) => {
         devLog("error", context, "Stream error", { error });
-        onError?.(error);
+        onError?.(error instanceof Error ? error : new Error(String(error)));
       },
     });
 
@@ -102,7 +102,7 @@ export async function createStreamResponse(
         const fallbackResult = streamText({
           model: googleFallback(fallbackModel),
           system: systemPrompt,
-          messages,
+          messages: messages as any,
           onFinish: (completion) => {
             devLog(
               "info",
@@ -113,7 +113,7 @@ export async function createStreamResponse(
           },
           onError: (error) => {
             devLog("error", context, "Stream error (fallback)", { error });
-            onError?.(error);
+            onError?.(error instanceof Error ? error : new Error(String(error)));
           },
         });
 

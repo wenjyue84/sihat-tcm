@@ -136,6 +136,8 @@ export const ms: TranslationKeys = {
         ascending: "Menaik",
         descending: "Menurun"
       },
+      cantFindData: "Tidak dapat mencari data anda?",
+      restoreMockData: "Pulihkan Data",
       card: {
         viewReport: "Lihat Laporan Penuh",
         inquiry: "Soal Jawab",

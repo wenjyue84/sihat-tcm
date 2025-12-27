@@ -258,7 +258,7 @@ export class SecurityMonitor {
         description: "Detect attempts to access admin endpoints without proper authorization",
         type: "privilege_escalation",
         condition: (event, context) => {
-          return event.endpoint?.startsWith("/api/admin") && event.metadata?.userRole !== "admin";
+          return !!(event.endpoint?.startsWith("/api/admin") && event.metadata?.userRole !== "admin");
         },
         action: async (event, context) => {
           await this.sendSecurityAlert("Privilege escalation attempt detected", event);

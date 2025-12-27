@@ -140,7 +140,9 @@ export const zh: TranslationKeys = {
         face: "面诊",
         voice: "闻诊",
         pulse: "脉诊"
-      }
+      },
+      cantFindData: "找不到您的数据？",
+      restoreMockData: "恢复数据"
     },
     historyTable: {
       good: "良好",

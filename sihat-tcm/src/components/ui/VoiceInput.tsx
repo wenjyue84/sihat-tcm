@@ -65,15 +65,22 @@ export const VoiceInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, Voi
     },
     ref
   ) => {
-    const { t } = useLanguage();
+    const { t, language: currentLanguage } = useLanguage();
     const { announce } = useAccessibilityContext();
     const [inputValue, setInputValue] = useState(value);
     const [isRecording, setIsRecording] = useState(false);
     const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
+    // Map language code to speech recognition format
+    const languageMap: Record<string, string> = {
+      en: "en-US",
+      zh: "zh-CN",
+      ms: "ms-MY",
+    };
+
     // Voice dictation hook
     const dictation = useVoiceDictation({
-      language: language || t.language,
+      language: language || languageMap[currentLanguage] || "en-US",
       enabled: !disabled,
       onResult: (text) => {
         const newValue = appendMode ? `${inputValue} ${text}`.trim() : text;
@@ -305,7 +312,7 @@ export function VoiceButton({
   disabled?: boolean;
   language?: string;
   className?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "default" | "sm" | "lg";
   variant?: "outline" | "ghost" | "default";
 }) {
   const { announce } = useAccessibilityContext();

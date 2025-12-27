@@ -23,7 +23,7 @@ export const PBT_CONFIG = {
  * Property test runner with standardized configuration
  */
 export function runPropertyTest<T>(
-  property: fc.Property<T>,
+  property: Parameters<typeof fc.assert<T>>[0],
   config: Partial<typeof PBT_CONFIG> = {}
 ): void {
   const testConfig = { ...PBT_CONFIG, ...config };
@@ -43,7 +43,7 @@ export function createPropertyTest<T>(
     propertyDescription: string;
     validatesRequirements: string[];
   }
-): fc.Property<T> {
+) {
   const property = fc.property(arbitrary, predicate);
 
   // Add metadata as comments for traceability
@@ -147,7 +147,7 @@ export const globalReporter = new PropertyTestReporter();
  */
 export function runPropertyTestWithReporting<T>(
   name: string,
-  property: fc.Property<T>,
+  property: Parameters<typeof fc.assert<T>>[0],
   config: Partial<typeof PBT_CONFIG> = {}
 ): void {
   const testConfig = { ...PBT_CONFIG, ...config };
