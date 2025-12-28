@@ -1,5 +1,3 @@
-"use server";
-
 /**
  * Shared Utilities for Server Actions
  *

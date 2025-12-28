@@ -1,46 +1,47 @@
 /**
- * Event System - Modular Architecture
+ * Event System - Main Export
  * 
- * This is the new modular approach to event system.
- * Use these exports for new code instead of the monolithic EventSystem.ts
+ * Centralized exports for the event system with clean architecture.
+ * Provides easy access to all event system components.
  */
 
-// Main event system
-export { EventSystem, defaultEventSystem } from './EventSystem';
-
 // Core interfaces
+export * from './interfaces/EventInterfaces';
+
+// Core implementations
+export * from './core/EventEmitter';
+export * from './core/EventHistory';
+
+// Main event system
+export * from './EventSystem';
+
+// Re-export commonly used types and functions
 export type {
   BaseEvent,
-  AppEvent,
+  EventEmitter,
+  EventHistoryManager,
   EventListener,
-  EventListenerEntry,
-  EventSystemStats,
-  AIModelSelectedEvent,
-  AIRequestStartedEvent,
-  AIRequestCompletedEvent,
-  AIPerformanceEvent,
-  NotificationScheduledEvent,
-  NotificationDeliveredEvent,
-  NotificationClickedEvent,
-  SystemErrorEvent,
-  SystemPerformanceEvent
+  EventEmissionResult,
+  EventStatistics,
+  DomainEvent,
 } from './interfaces/EventInterfaces';
 
-// Core components
-export { EventEmitter } from './core/EventEmitter';
-export { EventHistory } from './core/EventHistory';
-export { ScopedEmitter } from './utils/ScopedEmitter';
-
-// Convenience functions
 export {
-  getEventSystem,
+  createEventEmitter,
+  defaultEventEmitter,
+} from './core/EventEmitter';
+
+export {
+  createEventHistoryManager,
+  defaultEventHistoryManager,
+} from './core/EventHistory';
+
+export {
+  createEventSystem,
+  defaultEventSystem,
+  emit,
   on,
   once,
-  emit,
-  createEventEmitter
+  off,
+  createScopedEmitter,
 } from './EventSystem';
-
-// Convenience function for quick setup
-export function createEventSystem(): EventSystem {
-  return EventSystem.getInstance();
-}

@@ -1,5 +1,3 @@
-"use server";
-
 /**
  * Server Actions - Barrel Export
  *
@@ -20,7 +18,7 @@ export {
     deleteSession,
     hideSession,
     seedPatientHistory,
-} from "./actions/diagnosis";
+} from "./diagnosis";
 
 // ============================================================================
 // PATIENT HISTORY ACTIONS
@@ -30,7 +28,7 @@ export {
     getHealthTrends,
     getLastSymptoms,
     getLastMedicines,
-} from "./actions/patient-history";
+} from "./patient-history";
 
 // ============================================================================
 // MEDICAL REPORTS ACTIONS
@@ -40,7 +38,7 @@ export {
     saveMedicalReport,
     deleteMedicalReport,
     seedMedicalReports,
-} from "./actions/medical-reports";
+} from "./medical-reports";
 
 // ============================================================================
 // PATIENT MEDICINES ACTIONS
@@ -49,7 +47,7 @@ export {
     getPatientMedicines,
     savePatientMedicine,
     deletePatientMedicine,
-} from "./actions/patient-medicines";
+} from "./patient-medicines";
 
 // ============================================================================
 // FAMILY CARE ACTIONS
@@ -58,7 +56,7 @@ export {
     getFamilyMembers,
     addFamilyMember,
     deleteFamilyMember,
-} from "./actions/family";
+} from "./family";
 
 // ============================================================================
 // TRANSLATION ACTIONS
@@ -68,7 +66,7 @@ export {
     getPatientSessionIds,
     translateUserProfile,
     translateDiagnosisSession,
-} from "./actions/translation";
+} from "./translation";
 
 // ============================================================================
 // SHARED UTILITIES
@@ -77,4 +75,4 @@ export {
 export {
     getMockSymptomsForDiagnosis,
     getMockMedicinesForDiagnosis,
-} from "./actions/shared";
+} from "./shared";

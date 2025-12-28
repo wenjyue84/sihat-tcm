@@ -1,41 +1,70 @@
 /**
- * Command System - Modular Architecture
+ * Command System - Main Export
  * 
- * This is the new modular approach to command system.
- * Use these exports for new code instead of the monolithic CommandSystem.ts
+ * Centralized exports for the command system with clean architecture.
+ * Provides easy access to all command system components.
  */
 
-// Main command system
-export { CommandSystem, defaultCommandSystem } from './CommandSystem';
-
 // Core interfaces
+export * from './interfaces/CommandInterfaces';
+
+// Core implementations
+export * from './core/CommandExecutor';
+export * from './core/CommandQueue';
+export * from './core/CommandHistory';
+
+// Command implementations
+export * from './implementations/AIModelCommand';
+export * from './implementations/NotificationCommand';
+export * from './implementations/BatchCommand';
+
+// Main command system
+export * from './CommandSystem';
+
+// Re-export commonly used types and functions
 export type {
   Command,
   CommandResult,
-  ValidationResult,
   CommandContext,
-  CommandSystemStats
+  CommandExecutor,
+  CommandQueue,
+  CommandHistory,
+  BatchCommand,
 } from './interfaces/CommandInterfaces';
 
-// Core components
-export { CommandExecutor } from './core/CommandExecutor';
-export { CommandQueue } from './core/CommandQueue';
-export { CommandHistory } from './core/CommandHistory';
-
-// Command implementations
-export { SelectAIModelCommand } from './implementations/AIModelCommand';
-export { ScheduleNotificationCommand } from './implementations/NotificationCommand';
-export { BatchCommand } from './implementations/BatchCommand';
-
-// Convenience functions
 export {
-  executeCommand,
-  queueCommand,
-  undoCommand,
-  redoCommand
-} from './CommandSystem';
+  createCommandExecutor,
+  defaultCommandExecutor,
+} from './core/CommandExecutor';
 
-// Convenience function for quick setup
-export function createCommandSystem(): CommandSystem {
-  return CommandSystem.getInstance();
-}
+export {
+  createCommandQueue,
+  defaultCommandQueue,
+} from './core/CommandQueue';
+
+export {
+  createCommandHistory,
+  defaultCommandHistory,
+} from './core/CommandHistory';
+
+export {
+  createBatchCommand,
+} from './implementations/BatchCommand';
+
+export {
+  AIModelCommandFactory,
+} from './implementations/AIModelCommand';
+
+export {
+  NotificationCommandFactory,
+} from './implementations/NotificationCommand';
+
+export {
+  createCommandSystem,
+  defaultCommandSystem,
+  executeCommand,
+  executeCommandAsync,
+  executeBatch,
+  undoCommand,
+  redoCommand,
+} from './CommandSystem';

@@ -1,41 +1,72 @@
 /**
- * Testing Framework - Modular Architecture
+ * Testing Framework - Main Export
  * 
- * This is the new modular approach to testing framework.
- * Use these exports for new code instead of the monolithic TestFramework.ts
+ * Centralized exports for the testing framework with clean architecture.
+ * Provides easy access to all testing components.
  */
 
-// Main framework
-export { TestFramework, defaultTestFramework } from './TestFramework';
-
 // Core interfaces
+export * from './interfaces/TestInterfaces';
+
+// Data generators
+export * from './generators/TestDataGenerators';
+
+// Test runners
+export * from './runners/PropertyTestRunner';
+export * from './runners/TestSuiteRunner';
+
+// Test factories
+export * from './factories/TestFactory';
+
+// Main testing framework
+export * from './TestFramework';
+
+// Re-export commonly used types and functions
 export type {
-  TestCase,
+  BaseTest,
   PropertyTest,
   UnitTest,
   IntegrationTest,
-  TestResult,
-  TestCoverage,
+  PerformanceTest,
   TestSuite,
-  TestReport,
-  TestCategory,
-  TestPriority
+  TestResult,
+  TestExecutionReport,
+  TestRunner,
+  PropertyTestRunner,
+  TestFactory,
 } from './interfaces/TestInterfaces';
 
-// Specialized components
-export { TestDataGenerators } from './generators/TestDataGenerators';
-export { PropertyTestRunner } from './runners/PropertyTestRunner';
-export { TestSuiteRunner } from './runners/TestSuiteRunner';
-export { TestFactory } from './factories/TestFactory';
-
-// Convenience functions
 export {
+  PrimitiveGenerators,
+  CollectionGenerators,
+  CombinatorialGenerators,
+  TCMGenerators,
+  GeneratorUtils,
+  TestDataGenerators,
+} from './generators/TestDataGenerators';
+
+export {
+  createPropertyTestRunner,
+  defaultPropertyTestRunner,
+} from './runners/PropertyTestRunner';
+
+export {
+  createTestSuiteRunner,
+  defaultTestSuiteRunner,
+} from './runners/TestSuiteRunner';
+
+export {
+  createTestFactory,
+  defaultTestFactory,
+  TestFactoryHelpers,
+} from './factories/TestFactory';
+
+export {
+  createTestFramework,
+  defaultTestFramework,
+  runTest,
+  runTestSuite,
+  runPropertyTest,
   createPropertyTest,
   createUnitTest,
-  createIntegrationTest
 } from './TestFramework';
-
-// Convenience function for quick setup
-export function createTestFramework(): TestFramework {
-  return new TestFramework();
-}
