@@ -45,6 +45,7 @@ import {
   Pill,
   AlertCircle,
   Leaf,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -61,14 +62,13 @@ import {
 import {
   getPatientHistory,
   getHealthTrends,
-  DiagnosisSession,
   seedPatientHistory,
   getMedicalReports,
   saveMedicalReport,
   deleteMedicalReport,
   seedMedicalReports,
-  MedicalReport,
 } from "@/lib/actions";
+import { DiagnosisSession, MedicalReport } from "@/types/database";
 import { supabase } from "@/lib/supabase/client";
 import { TrendWidget } from "./TrendWidget";
 import { HistoryCard } from "./HistoryCard";
@@ -77,6 +77,7 @@ import { SnoreAnalysisTab } from "./snore-analysis/SnoreAnalysisTab";
 import { VitalityRhythmTab } from "./VitalityRhythmTab";
 import { useLanguage } from "@/stores/useAppStore";
 import { useLanguageSync } from "@/hooks/useLanguageSync";
+import { formatDate } from "@/lib/utils/date-formatting";
 import { TCMFoodChecker } from "../meal-planner/TCMFoodChecker";
 import { QiDose } from "../qi-dose/QiDose";
 import { extractDiagnosisTitle, extractConstitutionType } from "@/lib/tcm-utils";
@@ -88,6 +89,7 @@ import { PatientSettings } from "./PatientSettings";
 import { DashboardGrid } from "./DashboardWidgets";
 import { SolarTermsTimeline } from "./SolarTermsTimeline";
 import { DailyTipCard } from "./DailyTipCard";
+import { PatientCommunication } from "./PatientCommunication";
 import { ConstitutionCard } from "./ConstitutionCard";
 import { FiveElementsRadar } from "./FiveElementsRadar";
 import { DigitalTwin } from "./DigitalTwin";
@@ -159,6 +161,7 @@ export function UnifiedDashboard() {
     | "settings"
     | "five-elements"
     | "heart-companion"
+    | "communication"
   >("journey");
   const [mealSubSection, setMealSubSection] = useState<"plan" | "checker">("plan");
 
@@ -209,6 +212,7 @@ export function UnifiedDashboard() {
       | "settings"
       | "five-elements"
       | "heart-companion"
+      | "communication"
   ) => {
     setActiveSectionState(section);
     updatePreferences({ activeSection: section });
@@ -515,20 +519,7 @@ export function UnifiedDashboard() {
     }
   };
 
-  // Helper functions for views
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    const localeMap: Record<string, string> = {
-      en: "en-US",
-      zh: "zh-CN",
-      ms: "ms-MY",
-    };
-    return new Intl.DateTimeFormat(localeMap[language] || "en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(date);
-  };
+  // formatDate is now imported from shared utility
 
   const getScoreBadge = (score?: number) => {
     if (score === undefined || score === null) return null;
@@ -598,6 +589,8 @@ export function UnifiedDashboard() {
         return t.patientDashboard?.tabs?.settings || "Settings";
       case "heart-companion":
         return t.patientDashboard?.tabs?.heartCompanion || t.heartCompanion?.title || "Heart Companion";
+      case "communication":
+        return "Communication";
       default:
         return t.patientDashboard?.tabs?.healthJourney || "Health Journey";
     }
@@ -792,6 +785,16 @@ export function UnifiedDashboard() {
                 </button>
                 <button
                   onClick={() => {
+                    setActiveSection("communication");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${activeSection === "communication" ? "bg-emerald-50 text-emerald-700" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Communication
+                </button>
+                <button
+                  onClick={() => {
                     setActiveSection("settings");
                     setIsMobileMenuOpen(false);
                   }}
@@ -917,8 +920,8 @@ export function UnifiedDashboard() {
                     <button
                       onClick={() => setMealSubSection("plan")}
                       className={`relative px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ease-out ${mealSubSection === "plan"
-                          ? "bg-white text-slate-900 shadow-sm"
-                          : "text-slate-600 hover:text-slate-900"
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-600 hover:text-slate-900"
                         }`}
                     >
                       <span className="relative z-10 flex items-center gap-2">
@@ -929,8 +932,8 @@ export function UnifiedDashboard() {
                     <button
                       onClick={() => setMealSubSection("checker")}
                       className={`relative px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ease-out ${mealSubSection === "checker"
-                          ? "bg-white text-slate-900 shadow-sm"
-                          : "text-slate-600 hover:text-slate-900"
+                        ? "bg-white text-slate-900 shadow-sm"
+                        : "text-slate-600 hover:text-slate-900"
                         }`}
                     >
                       <span className="relative z-10 flex items-center gap-2">
@@ -1017,7 +1020,7 @@ export function UnifiedDashboard() {
               </div>
             )}
 
-            {/* Health Portfolio Section - Two Column Layout */}
+            {/* Basic Profile Section - Two Column Layout */}
             {activeSection === "profile" && (
               <div className="space-y-6 max-w-7xl mx-auto">
                 {/* Hero Section */}
@@ -1059,10 +1062,10 @@ export function UnifiedDashboard() {
 
                   {/* Right Column */}
                   <div className="space-y-6">
-                    {/* Health Portfolio - Medicines */}
+                    {/* Basic Profile - Medicines */}
                     <PortfolioMedicines />
 
-                    {/* Health Portfolio - Symptoms History */}
+                    {/* Basic Profile - Symptoms History */}
                     <PortfolioSymptoms />
 
                     {/* Medical Reports Card */}
@@ -1298,6 +1301,13 @@ export function UnifiedDashboard() {
                   onClose={() => setSelectedReport(null)}
                   report={selectedReport}
                 />
+              </div>
+            )}
+
+            {/* Communication Section */}
+            {activeSection === "communication" && (
+              <div className="h-full animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+                <PatientCommunication />
               </div>
             )}
 

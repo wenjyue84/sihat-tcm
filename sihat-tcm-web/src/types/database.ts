@@ -195,7 +195,8 @@ export interface PulseData {
  */
 export interface DiagnosisSession {
   id: string;
-  user_id: string;
+  user_id?: string | null;
+  patient_id?: string | null;
   primary_diagnosis: string;
   constitution?: string | null;
   overall_score?: number | null;
@@ -225,6 +226,7 @@ export interface DiagnosisSession {
   guest_email?: string | null;
   guest_name?: string | null;
   is_hidden?: boolean | null;
+  flag?: PatientFlag | null;
   created_at: string;
   updated_at: string;
 }
@@ -259,6 +261,9 @@ export interface SaveDiagnosisInput {
   is_guest_session?: boolean;
   guest_email?: string;
   guest_name?: string;
+  // Link to specific patient record
+  patient_id?: string;
+  user_id?: string;
 }
 
 // ============================================================================
@@ -458,4 +463,72 @@ export interface SaveFamilyMemberInput {
 
 export interface UpdateFamilyMemberInput extends Partial<SaveFamilyMemberInput> {
   id: string;
+}
+
+// ============================================================================
+// Patients (patients table)
+// ============================================================================
+
+export type PatientStatus = 'active' | 'archived' | 'pending_invite';
+export type PatientType = 'managed' | 'registered' | 'guest';
+
+export interface Patient {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  first_name: string;
+  last_name?: string | null;
+  ic_no?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  birth_date?: string | null;
+  gender?: string | null;
+  status: PatientStatus;
+  type: PatientType;
+  user_id?: string | null;
+  created_by?: string | null;
+  clinical_summary?: {
+    summary: string;
+    generated_at: string;
+    last_diagnosis_id?: string;
+  } | null;
+  flag?: PatientFlag | null;
+}
+
+export type PatientFlag = 'Critical' | 'High Priority' | 'Watch' | 'Normal' | null;
+
+
+
+// ============================================================================
+// Appointments
+// ============================================================================
+
+export type AppointmentStatus = "scheduled" | "completed" | "cancelled" | "no_show";
+export type AppointmentType = "consultation" | "treatment" | "follow_up";
+
+export interface Appointment {
+  id: string;
+  doctor_id: string;
+  patient_id: string;
+  patient_name: string;
+  start_time: string;
+  end_time: string;
+  status: AppointmentStatus;
+  type: AppointmentType;
+  notes?: string;
+}
+
+// ============================================================================
+// Treatment Records
+// ============================================================================
+
+// Derived view for the Treatment Dashboard
+export interface TreatmentRecord {
+  id: string; // usually diagnosis_session_id
+  patient_name: string;
+  diagnosis: string;
+  treatment_plan: string;
+  date: string;
+  status: "active" | "completed" | "pending";
+  flag?: PatientFlag | null;
 }

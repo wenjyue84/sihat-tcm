@@ -8,7 +8,7 @@ import * as Haptics from 'expo-haptics';
 const getDoctorLevels = (t) => [
     {
         id: 'master',
-        name: t.chooseDoctor?.masterPhysician?.name || 'Master Physician',
+        name: t.chooseDoctor?.masterPhysician?.name || 'TCM Master',
         nameZh: t.chooseDoctor?.masterPhysician?.nameZh || '国医大师',
         description: t.chooseDoctor?.masterPhysician?.description || 'Expert consultation',
         model: 'gemini-1.5-pro', // Using known stable pro model
@@ -19,7 +19,7 @@ const getDoctorLevels = (t) => [
     },
     {
         id: 'expert',
-        name: t.chooseDoctor?.seniorPhysician?.name || 'Senior Physician',
+        name: t.chooseDoctor?.seniorPhysician?.name || 'Senior Doctor',
         nameZh: t.chooseDoctor?.seniorPhysician?.nameZh || '主任医师',
         description: t.chooseDoctor?.seniorPhysician?.description || 'Advanced analysis',
         model: 'gemini-2.0-flash', // Using 2.0 Flash as Expert
@@ -30,7 +30,7 @@ const getDoctorLevels = (t) => [
     },
     {
         id: 'physician',
-        name: t.chooseDoctor?.physician?.name || 'Physician',
+        name: t.chooseDoctor?.physician?.name || 'Doctor',
         nameZh: t.chooseDoctor?.physician?.nameZh || '医师',
         description: t.chooseDoctor?.physician?.description || 'Standard consultation',
         model: 'gemini-1.5-flash', // Fast fallback

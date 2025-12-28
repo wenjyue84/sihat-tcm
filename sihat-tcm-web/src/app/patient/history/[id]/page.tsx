@@ -306,7 +306,7 @@ export default function HistoryViewerPage() {
           data={reportData}
           patientInfo={patientInfo}
           reportOptions={{}}
-          smartConnectData={null}
+          smartConnectData={undefined}
           onRestart={handleBack}
           saved={true}
         />

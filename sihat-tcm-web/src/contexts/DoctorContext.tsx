@@ -10,7 +10,7 @@ import { DOCTOR_LEVELS, DoctorLevel } from "@/lib/doctorLevels";
 const ADMIN_LEVEL_MAPPING: Record<string, DoctorLevel> = {
   Master: "master",
   Expert: "expert",
-  Physician: "physician",
+  Doctor: "physician",
 };
 
 interface DoctorContextType {

@@ -1,9 +1,10 @@
 import { getGoogleProvider } from "@/lib/googleProvider";
 import { generateText } from "ai";
 import { INQUIRY_SUMMARY_PROMPT } from "@/lib/systemPrompts";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase/client";
 import { getGeminiApiKeyAsync } from "@/lib/settings";
 import { devLog } from "@/lib/systemLogger";
+import { createErrorResponseWithStatus } from "@/lib/api/middleware/error-handler";
 import {
   summarizeInquiryRequestSchema,
   validateRequest,
@@ -71,22 +72,20 @@ export async function POST(req: Request) {
 - Symptom Duration: ${basicInfo?.symptomDuration || "Not provided"}
 
 ## Uploaded Medical Reports:
-${
-  (reportFiles?.length || 0) > 0
-    ? (reportFiles || [])
-        .map((f: any) => `- ${f.name}:\n${f.extractedText || "No text extracted"}`)
-        .join("\n\n")
-    : "None uploaded"
-}
+${(reportFiles?.length || 0) > 0
+        ? (reportFiles || [])
+          .map((f: any) => `- ${f.name}:\n${f.extractedText || "No text extracted"}`)
+          .join("\n\n")
+        : "None uploaded"
+      }
 
 ## Current Medications (from uploaded images):
-${
-  (medicineFiles?.length || 0) > 0
-    ? (medicineFiles || [])
-        .map((f: any) => `- ${f.name}: ${f.extractedText || "No medication info extracted"}`)
-        .join("\n")
-    : "None uploaded"
-}
+${(medicineFiles?.length || 0) > 0
+        ? (medicineFiles || [])
+          .map((f: any) => `- ${f.name}: ${f.extractedText || "No medication info extracted"}`)
+          .join("\n")
+        : "None uploaded"
+      }
 
 ## Complete Chat History (问诊记录):
 ${chatHistory.map((m: any) => `[${m.role.toUpperCase()}]: ${m.content}`).join("\n\n")}
@@ -140,35 +139,25 @@ Follow the structured format specified in your system prompt.
         headers: { "Content-Type": "application/json" },
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     const duration = Date.now() - startTime;
-    devLog("error", "API/summarize-inquiry", `FAILED after ${duration}ms`, {
-      error: error.message,
-    });
+    const errorMessage = error instanceof Error ? error.message : String(error);
 
-    const { parseApiError } = await import("@/lib/modelFallback");
-    const { userFriendlyError, errorCode } = parseApiError(error);
-
-    // Map errorCode back to step for frontend compatibility
+    // Map error to step for frontend compatibility
     let step = "generation";
-    if (errorCode === "API_KEY_INVALID" || errorCode === "API_KEY_LEAKED") step = "api_key";
-    else if (errorCode === "API_QUOTA_EXCEEDED") step = "rate_limit";
-    else if (errorCode === "MODEL_NOT_FOUND") step = "model";
-    else if (error.message?.includes("fetch") || error.message?.includes("network"))
-      step = "connection";
-    else if (error.message?.includes("timeout")) step = "timeout";
+    if (errorMessage.includes("API_KEY") || errorMessage.includes("API key")) step = "api_key";
+    else if (errorMessage.includes("quota") || errorMessage.includes("rate limit")) step = "rate_limit";
+    else if (errorMessage.includes("model") || errorMessage.includes("MODEL")) step = "model";
+    else if (errorMessage.includes("fetch") || errorMessage.includes("network")) step = "connection";
+    else if (errorMessage.includes("timeout")) step = "timeout";
 
-    return new Response(
-      JSON.stringify({
-        error: userFriendlyError,
-        code: errorCode,
+    return createErrorResponseWithStatus(
+      error,
+      "API/summarize-inquiry",
+      500,
+      {
         step: step,
         duration: duration,
-        details: process.env.NODE_ENV === "development" ? error.message : undefined,
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
       }
     );
   }

@@ -5,7 +5,7 @@ export const DOCTOR_LEVELS = {
     id: "master",
     name: "Master",
     nameZh: "名医大师",
-    description: "Most experienced, renowned physician",
+    description: "Most experienced, renowned doctor",
     model: "gemini-1.5-pro", // Most advanced stable model for Master level
     icon: "👨‍⚕️",
     color: "from-amber-500 to-orange-600",
@@ -17,7 +17,7 @@ export const DOCTOR_LEVELS = {
     id: "expert",
     name: "Expert",
     nameZh: "专家医师",
-    description: "Experienced specialist physician",
+    description: "Experienced specialist doctor",
     model: "gemini-1.5-flash", // Fast and capable model for Expert level
     icon: "🩺",
     color: "from-emerald-500 to-teal-600",
@@ -27,10 +27,10 @@ export const DOCTOR_LEVELS = {
   },
   physician: {
     id: "physician",
-    name: "Physician",
+    name: "Doctor",
     nameZh: "医师",
     description: "Standard practitioner",
-    model: "gemini-2.0-flash", // Reliable and fast model for Physician level
+    model: "gemini-2.0-flash", // Reliable and fast model for Doctor level
     icon: "💊",
     color: "from-blue-500 to-indigo-600",
     bgColor: "bg-blue-50",

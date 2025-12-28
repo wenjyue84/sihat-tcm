@@ -147,16 +147,41 @@ export default function DoctorVerificationModal({
         setSending(true);
 
         try {
-            // Simulate API call - in production, this would POST to a verification endpoint
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // Create verification request in Supabase
+            const verificationData = {
+                symptoms: 'Request for Verification', // Marker for doctor portal
+                diagnosis_report: {
+                    type: 'verification_request',
+                    status: 'pending',
+                    messages: [],
+                    patient_profile: {
+                        name: patientData?.name || 'Anonymous',
+                        email: patientData?.email || null,
+                    },
+                    ai_diagnosis: reportData?.diagnosis || null,
+                    selected_doctor: selectedDoctor ? {
+                        id: selectedDoctor.id,
+                        name: selectedDoctor.name,
+                        clinic_name: selectedDoctor.clinic_name,
+                    } : null,
+                    requested_at: new Date().toISOString(),
+                },
+                notes: `Verification request from ${patientData?.name || 'guest'}`,
+            };
 
-            // Log the verification request (for debugging / future backend integration)
-            console.log('=== VERIFICATION REQUEST ===');
+            const { data, error } = await supabase
+                .from('inquiries')
+                .insert([verificationData])
+                .select();
+
+            if (error) throw error;
+
+            console.log('=== VERIFICATION REQUEST CREATED ===');
+            console.log('Request ID:', data?.[0]?.id);
             console.log('Practitioner:', selectedDoctor?.name || 'Any Available');
             console.log('Patient:', patientData?.name || 'Anonymous');
-            console.log('Diagnosis:', reportData?.diagnosis);
-            console.log('Timestamp:', new Date().toISOString());
-            console.log('===========================');
+            console.log('Status: Pending doctor response');
+            console.log('===================================');
 
             // Show success state
             setStep('success');

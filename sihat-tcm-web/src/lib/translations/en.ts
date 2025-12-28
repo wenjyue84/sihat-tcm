@@ -75,7 +75,7 @@ export const en = {
     login: "Login / Sign up",
     logout: "Logout",
     dashboard: "Dashboard",
-    profile: "Health Portfolio",
+    profile: "Basic Profile",
     settings: "Settings",
     test: "Test",
     loginShort: "Login",
@@ -95,7 +95,7 @@ export const en = {
       vitalityRhythm: "Vitality Rhythm",
       community: "Healing Garden",
       family: "Family Care",
-      profile: "Health Portfolio",
+      profile: "Basic Profile",
       documents: "Documents",
       settings: "Settings",
     },
@@ -162,7 +162,7 @@ export const en = {
       deleteConfirm: "Are you sure you want to delete this document?",
     },
     healthPortfolio: {
-      title: "Health Portfolio",
+      title: "Basic Profile",
       personalDetails: "Personal Details",
       healthMetrics: "Health Metrics",
       medicines: {
@@ -201,7 +201,7 @@ export const en = {
     chineseTitle: "思和中医",
     subtitle: "Select Your Role",
     chineseSubtitle: "选择登录身份",
-    quote: '"上工治未病" — The superior physician prevents illness',
+    quote: '"上工治未病" — The superior doctor prevents illness',
     devMode: "Development Mode",
     devModeZh: "开发模式",
     balance: "Balance",
@@ -215,7 +215,7 @@ export const en = {
         description: "Begin your healing journey",
       },
       doctor: {
-        title: "Physician",
+        title: "Doctor",
         titleZh: "医师",
         description: "Practice the ancient art",
       },
@@ -263,7 +263,7 @@ export const en = {
 
   // Basic Info Form
   basicInfo: {
-    title: "Health Portfolio",
+    title: "Basic Profile",
     subtitle: "Please provide your basic details to help us diagnose you accurately.",
     fullName: "Full Name",
     fullNamePlaceholder: "Enter your name",
@@ -439,19 +439,19 @@ export const en = {
   // Doctor levels
   doctorLevels: {
     physician: {
-      name: "Physician",
+      name: "Doctor",
       nameZh: "医师",
       description:
         "Standard consultation for common ailments. Fastest processing, uses the least credits.",
     },
     seniorPhysician: {
-      name: "Senior Physician",
+      name: "Senior Doctor",
       nameZh: "主任医师",
       description:
         "Advanced consultation for complex conditions. Provides detailed analysis, requires more processing time.",
     },
     masterPhysician: {
-      name: "Master Physician",
+      name: "Master Doctor",
       nameZh: "国医大师",
       description:
         "Expert-level consultation for rare, difficult, or chronic cases that are hard to treat. Uses more credits and requires longer processing time.",
@@ -474,7 +474,7 @@ export const en = {
   // Inquiry Step
   inquiry: {
     title: "TCM Inquiry (问诊)",
-    subtitle: "Our AI physician will ask you questions based on your symptoms.",
+    subtitle: "Our AI doctor will ask you questions based on your symptoms.",
     chatTitle: "Chat with TCM Doctor",
     chatDescription: "Answer the doctor's questions to help with your diagnosis.",
     inputPlaceholder: "Type your answer...",
@@ -909,17 +909,17 @@ export const en = {
 
     // Four pillars
     fourPillars: "Four Pillars of Diagnosis",
-    wang: "Looking (望)",
+    wang: "Looking",
     wangDesc: "Visual Observation",
-    wen: "Listening/Smelling (闻)",
+    wen: "Listening/Smelling",
     wenDesc: "Audio & Olfactory",
-    wen2: "Inquiry (问)",
+    wen2: "Inquiry",
     wen2Desc: "Questioning",
-    qie: "Palpation (切)",
+    qie: "Palpation",
     qieDesc: "Pulse Taking",
     analyzedBy: "Analyzed by",
     comprehensiveReport: "Comprehensive TCM Report",
-    basedOnFourPillars: "Based on Four Pillars Diagnosis (四诊合参)",
+    basedOnFourPillars: "Based on Four Pillars Diagnosis",
     affectedOrgans: "Affected Organs",
     secondaryPatterns: "Secondary Patterns",
     keyFindings: "Key Findings",
@@ -938,13 +938,13 @@ export const en = {
     practitionerDetails: "Practitioner Details",
     bookAppointment: "Book Appointment",
     experience: "Experience",
-    acupressurePoints: "Acupressure Points (穴位)",
+    acupressurePoints: "Acupressure Points",
     massageTip: "Massage each point for 1-2 minutes, 2-3 times daily",
-    exercise: "Exercise (运动)",
+    exercise: "Exercise",
     restAndWellness: "Rest & Wellness",
     sleepGuidance: "Sleep Guidance",
-    emotionalWellness: "Emotional Wellness (情志)",
-    herbalFormulas: "Herbal Formulas (中药方剂)",
+    emotionalWellness: "Emotional Wellness",
+    herbalFormulas: "Herbal Formulas",
     professionalConsultation: "Professional Consultation",
     precautionsAndWarnings: "Precautions & Warnings",
     warningSigns: "Warning Signs (Seek Medical Attention):",
@@ -955,7 +955,7 @@ export const en = {
     nextSteps: "Next Steps",
     ingredients: "Ingredients:",
     dosage: "Dosage:",
-    requestPhysicianApproval: "Request sent - pending physician approval",
+    requestPhysicianApproval: "Request sent - pending doctor approval",
     requestFormulaDetails: "Request Full Formula Details",
     showDetails: "Show details →",
     summary: "TCM Report Summary",
@@ -1151,22 +1151,24 @@ export const en = {
     // Navigation tabs
     tabs: {
       healthJourney: "Health Journey",
-      mealPlanner: "Dietary Therapy", // 食疗方案 (formerly Meal Planner)
-      snoreAnalysis: "Sleep Cultivation", // 睡眠养生 (formerly Snore Analysis)
-      vitalityRhythm: "Meridian Clock", // 子午流注 (formerly Vitality Rhythm)
-      community: "Healing Garden", // 康愈园 (formerly Apricot Grove/Community)
-      qiDose: "Guided Exercise", // 导引功法 (formerly Qi Dose)
-      soundscape: "Soundscape", // 五音疗法 (Five Elements Sound Therapy)
+      mealPlanner: "Dietary Therapy",
+      snoreAnalysis: "Sleep Cultivation",
+      vitalityRhythm: "Meridian Clock",
+      community: "Healing Garden",
+      qiDose: "Guided Exercise",
+      soundscape: "Soundscape",
       family: "Family Care",
-      profile: "Profile",
+      profile: "Basic Profile",
       documents: "Documents",
       settings: "Settings",
-      heartCompanion: "Heart Companion", // 心伴 (Emotional Wellness Chat)
+      fiveElements: "Circle of Health",
+      heartCompanion: "Heart Companion",
     },
 
     // Health Journey section
     healthJourney: {
-      title: "Your Health Journey",
+      title: "Health Journey",
+      heroTitle: "Your Health Journey",
       vitalityTitle: "Your Health Vitality",
       subtitle: "Track your wellness journey over time",
       totalSessions: "Total Sessions",
@@ -1181,13 +1183,43 @@ export const en = {
       sessionsRecorded: "sessions recorded",
       startJourneyToday: "Start your wellness journey today",
       noSessionsYet: "Your wellness journey starts here",
-      noSessionsDesc:
-        "Complete your first TCM diagnosis to track your health and wellness over time.",
+      noSessionsDesc: "Your health journey begins with your first diagnosis.",
       startFirstDiagnosis: "Start First Diagnosis",
-      restoreMockData: "Restore Mock Data",
-      restoring: "Restoring...",
-      cantFindData: "Can't find your previous test data?",
-      view: "View",
+      sessionsCount: "{count} {sessionText} • {duration}",
+      sessionSingular: "session",
+      sessionPlural: "sessions",
+      showingCount: "Showing {filtered} of {total} sessions",
+      emptyTitle: "Begin Your Journey",
+      emptyDesc: "Your health journey begins with your first diagnosis. Start tracking your wellness today.",
+      startButton: "Start First Diagnosis",
+      originMarker: "Your journey began here",
+      duration: {
+        zero: "0 months",
+        lessThanMonth: "Less than a month",
+        oneMonth: "1 month",
+        months: "{count} months"
+      },
+      filters: {
+        all: "All",
+        thisYear: "This Year",
+        thisMonth: "This Month",
+        sortBy: "Sort by",
+        date: "Date",
+        score: "Score",
+        diagnosis: "Diagnosis",
+        ascending: "Ascending",
+        descending: "Descending"
+      },
+      card: {
+        viewReport: "View Full Report",
+        inquiry: "Inquiry",
+        tongue: "Tongue",
+        face: "Face",
+        voice: "Voice",
+        pulse: "Pulse"
+      },
+      cantFindData: "Can't find your data?",
+      restoreMockData: "Restore Data"
     },
 
     // Profile section
@@ -2055,6 +2087,60 @@ export const en = {
     ctaTitle: "Ready to Start Your Health Journey?",
     ctaDescription:
       "Download the Sihat TCM mobile app today and experience the future of TCM health management.",
+    navigation: {
+      logout: "Logout",
+      home: "Home",
+      groupAssessment: "Assessment",
+      groupTreatment: "Treatment",
+      groupCultivation: "Care Hub",
+      groupAccount: "Account",
+    },
+    healthPortfolio: {
+      title: "Basic Profile",
+      personalDetails: "Personal Details",
+      healthMetrics: "Health Metrics",
+      medicines: {
+        title: "Medicines in Use",
+        subtitle: "Medicines and supplements you are currently taking.",
+        addMedicine: "Add Medicine",
+        name: "Medicine / Supplement Name",
+        dosage: "Dosage",
+        frequency: "Frequency",
+        notes: "Notes",
+        active: "Currently taking",
+        noMedicines: "No medicines recorded. Add your current medications to improve your next diagnosis.",
+        saveMedicine: "Save Medicine",
+        deleteConfirm: "Are you sure you want to remove this medicine?",
+      },
+      symptomsHistory: {
+        title: "Symptoms History",
+        subtitle: "A record of symptoms you've reported in past diagnoses.",
+        noHistory: "No symptom history yet.",
+        lastReported: "Last reported: {date}",
+      },
+      documents: {
+        title: "Medical Reports",
+        subtitle: "Your uploaded diagnostic reports and medical documents.",
+      },
+      useInDiagnosis: {
+        title: "Default for Diagnosis",
+        description: "These details will be used as default for your next diagnosis assessment.",
+      }
+    },
+    circleOfHealth: {
+      title: "Circle of Health",
+      subtitle: "Connect with others on similar healing journeys",
+      joinCommunity: "Join Community",
+      shareExperience: "Share Experience",
+    },
+    historyTable: {
+      good: "Good",
+      fair: "Fair",
+      needsAttention: "Needs Attention",
+      sortByDate: "Date",
+      sortByScore: "Score",
+      sortByDiagnosis: "Diagnosis",
+    },
   },
   constitutions: {
     balanced: "Neutral (Ping He)",

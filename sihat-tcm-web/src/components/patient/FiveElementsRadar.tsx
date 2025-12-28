@@ -45,7 +45,16 @@ interface FiveElementsRadarProps {
   // Constitution type to infer scores if not provided
   constitutionType?: string;
   // Diagnosis data to extract organ scores
-  diagnosisData?: any;
+  diagnosisData?: {
+    diagnosis?: {
+      primary_pattern?: string;
+      secondary_patterns?: string[];
+      affected_organs?: string[];
+    };
+    analysis?: {
+      organ_scores?: Record<string, number>;
+    };
+  };
 }
 
 // Icons for each element

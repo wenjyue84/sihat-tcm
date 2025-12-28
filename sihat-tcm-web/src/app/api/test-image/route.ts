@@ -1,6 +1,7 @@
 import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
 import { devLog } from "@/lib/systemLogger";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
 export const maxDuration = 60;
 
@@ -92,15 +93,16 @@ Return ONLY a JSON object:
         }
       );
     }
-  } catch (error: any) {
-    devLog("error", "API/test-image", "Error analyzing test image", { error });
+  } catch (error: unknown) {
+    const errorResponse = createErrorResponse(error, "API/test-image");
+    const errorBody = await errorResponse.json();
     return new Response(
       JSON.stringify({
-        error: error.message,
+        ...errorBody,
         observation: null,
       }),
       {
-        status: 500,
+        status: errorResponse.status,
         headers: { "Content-Type": "application/json" },
       }
     );

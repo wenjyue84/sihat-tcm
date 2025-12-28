@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { logger } from "@/lib/clientLogger";
-import type { DiagnosisStep } from "./useDiagnosisWizard";
+import type { DiagnosisStep } from "./diagnosis/diagnosisTypes";
 
 const STORAGE_KEY = "sihat-tcm-diagnosis-progress";
 

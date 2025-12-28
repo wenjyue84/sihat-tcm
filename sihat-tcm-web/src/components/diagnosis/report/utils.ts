@@ -1,5 +1,7 @@
 import { jsPDF } from "jspdf";
 import { addChineseFont } from "@/lib/chinese-font";
+import { extractString } from "@/lib/utils/data-extraction";
+import type { PDFGenerationData, PDFPatientInfo, PDFReportOptions } from "@/types/pdf";
 
 // Language translations for PDF content
 export const pdfTranslations = {
@@ -56,25 +58,8 @@ export const pdfTranslations = {
   },
 };
 
-// Helper function to safely extract string from various formats
-export function extractString(val: any, fallback: string = ""): string {
-  if (!val) return fallback;
-  if (typeof val === "string") return val;
-  if (typeof val === "object") {
-    // Try common field names
-    if (val.primary_pattern) return val.primary_pattern;
-    if (val.type) return val.type;
-    if (val.summary) return val.summary;
-    // Convert object to readable format
-    return Object.entries(val)
-      .map(
-        ([key, value]) =>
-          `${key.replace(/_/g, " ")}: ${typeof value === "string" ? value : JSON.stringify(value)}`
-      )
-      .join("\n");
-  }
-  return String(val);
-}
+// Re-export extractString from shared utility for backward compatibility
+export { extractString } from "@/lib/utils/data-extraction";
 
 export const calculateBMI = (height?: number, weight?: number) => {
   if (!height || !weight) return null;
@@ -84,9 +69,9 @@ export const calculateBMI = (height?: number, weight?: number) => {
 
 export const downloadPDF = async (
   language: "en" | "zh" | "ms",
-  data: any,
-  patientInfo: any,
-  reportOptions: any,
+  data: PDFGenerationData,
+  patientInfo: PDFPatientInfo | undefined,
+  reportOptions: PDFReportOptions,
   diagnosisText: string,
   constitutionText: string,
   analysisText: string,

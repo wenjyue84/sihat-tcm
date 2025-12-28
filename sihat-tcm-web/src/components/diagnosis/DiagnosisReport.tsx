@@ -25,14 +25,18 @@ import { SaveToDashboardBanner } from "@/components/patient/SaveToDashboardBanne
 
 type Language = "en" | "zh" | "ms";
 
-// Interfaces (kept same as before)
+import type { DiagnosisReport } from "@/types/database";
+import type { PDFPatientInfo, PDFReportOptions, PDFGenerationData } from "@/types/pdf";
+
+// Interfaces
 interface DiagnosisReportProps {
-  data: any;
-  patientInfo?: any;
-  reportOptions?: any;
-  smartConnectData?: any;
+  data: DiagnosisReport | PDFGenerationData;
+  patientInfo?: PDFPatientInfo;
+  reportOptions?: PDFReportOptions;
+  smartConnectData?: Record<string, unknown>;
   onRestart: () => void;
   saved?: boolean;
+  isDoctorView?: boolean;
 }
 
 // Translations (kept same as before)
@@ -99,6 +103,7 @@ export function DiagnosisReport({
   smartConnectData,
   onRestart,
   saved,
+  isDoctorView = false,
 }: DiagnosisReportProps) {
   const { getDoctorInfo } = useDoctorLevel();
   const doctorInfo = getDoctorInfo();
@@ -203,7 +208,7 @@ export function DiagnosisReport({
       doc.setFontSize(fontSize);
       try {
         doc.setFont(fontName, "normal");
-      } catch (e) {
+      } catch {
         doc.setFont("helvetica", isBold ? "bold" : "normal");
       }
       const lines = doc.splitTextToSize(text, contentWidth);
@@ -427,9 +432,11 @@ export function DiagnosisReport({
           </div>
         </motion.div>
 
-        <motion.div variants={item}>
-          <PractitionerList doctors={doctors} loading={loadingDoctors} variants={item} />
-        </motion.div>
+        {!isDoctorView && (
+          <motion.div variants={item}>
+            <PractitionerList doctors={doctors} loading={loadingDoctors} variants={item} />
+          </motion.div>
+        )}
 
         <ReportActions
           onChatOpen={() => setIsChatOpen(true)}
@@ -443,6 +450,7 @@ export function DiagnosisReport({
           hasSaved={hasSaved}
           language={language}
           variants={item}
+          isDoctorView={isDoctorView}
         />
       </motion.div>
 

@@ -3,6 +3,7 @@ import { getAdminSettings, DEFAULT_SETTINGS, AdminSettings } from "@/lib/setting
 import { saveSettingsWithFallback } from "@/lib/settingsStorage";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
 // Create a Supabase client for verifying user tokens
 const supabase = createClient(
@@ -153,11 +154,9 @@ export async function PUT(request: NextRequest) {
       success: true,
       settings: updatedSettings,
     });
-  } catch (error: any) {
-    console.error("[Admin Settings PUT] Error:", error);
-    return NextResponse.json(
-      { error: "Failed to update settings: " + error.message },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    const errorResponse = createErrorResponse(error, "API/admin/settings");
+    const errorBody = await errorResponse.json();
+    return NextResponse.json(errorBody, { status: errorResponse.status });
   }
 }

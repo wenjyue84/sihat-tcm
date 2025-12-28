@@ -14,6 +14,7 @@ import {
 import { fetchCustomPrompt } from "@/lib/promptLoader";
 import { ADVANCED_FALLBACK_MODELS, MODEL_STATUS_MESSAGES } from "@/lib/modelFallback";
 import { getCorsHeaders } from "@/lib/cors";
+import { createErrorResponseWithStatus } from "@/lib/api/middleware/error-handler";
 
 export const maxDuration = 120;
 
@@ -259,24 +260,19 @@ export async function POST(req: Request) {
         },
       }
     );
-  } catch (error: any) {
-    devLog("error", "API/analyze-image", "Critical error", { error });
-    // Log the error
-    logError("ImageProc", `Image analysis failed: ${error.message}`, { error: error.message });
-    return new Response(
-      JSON.stringify({
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logError("ImageProc", `Image analysis failed: ${errorMessage}`, { error: errorMessage });
+    return createErrorResponseWithStatus(
+      error,
+      "API/analyze-image",
+      200,
+      {
         observation: `Analysis encountered an issue. Please continue and we'll review the image later.`,
         potential_issues: [],
         modelUsed: 0,
         status: "error",
-        error: error.message,
-      }),
-      {
-        status: 200,
-        headers: {
-          ...getCorsHeaders(req),
-          "Content-Type": "application/json",
-        },
+        error: errorMessage,
       }
     );
   }

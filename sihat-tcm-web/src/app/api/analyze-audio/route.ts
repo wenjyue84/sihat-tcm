@@ -1,13 +1,14 @@
 import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
 import { LISTENING_ANALYSIS_PROMPT } from "@/lib/systemPrompts";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase/client";
 import {
   analyzeAudioRequestSchema,
   validateRequest,
   validationErrorResponse,
 } from "@/lib/validations";
 import { devLog } from "@/lib/systemLogger";
+import { createErrorResponseWithStatus } from "@/lib/api/middleware/error-handler";
 
 export const maxDuration = 120;
 
@@ -214,10 +215,13 @@ Provide your analysis in the specified JSON format with detailed observations fo
         headers: { "Content-Type": "application/json" },
       }
     );
-  } catch (error: any) {
-    devLog("error", "API/analyze-audio", "Critical error", { error });
-    return new Response(
-      JSON.stringify({
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return createErrorResponseWithStatus(
+      error,
+      "API/analyze-audio",
+      200,
+      {
         overall_observation:
           "Audio analysis encountered an issue. Your recording is saved for later review.",
         voice_quality_analysis: null,
@@ -225,11 +229,7 @@ Provide your analysis in the specified JSON format with detailed observations fo
         speech_patterns: null,
         cough_sounds: null,
         status: "error",
-        error: error.message,
-      }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
+        error: errorMessage,
       }
     );
   }

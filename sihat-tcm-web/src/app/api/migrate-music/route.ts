@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
 /**
  * Migration endpoint to add background music columns
@@ -80,14 +81,15 @@ ON CONFLICT (id) DO UPDATE SET
       message: "Background music migration completed successfully!",
       settings: verifyData,
     });
-  } catch (error: any) {
-    console.error("Migration failed:", error);
+  } catch (error: unknown) {
+    const errorResponse = createErrorResponse(error, "API/migrate-music");
+    const errorBody = await errorResponse.json();
     return NextResponse.json(
       {
         success: false,
-        error: error.message,
+        ...errorBody,
       },
-      { status: 500 }
+      { status: errorResponse.status }
     );
   }
 }

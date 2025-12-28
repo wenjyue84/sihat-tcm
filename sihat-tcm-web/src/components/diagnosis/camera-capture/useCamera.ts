@@ -11,7 +11,7 @@ interface UseCameraReturn {
   facingMode: "user" | "environment";
 }
 
-export function useCamera(): UseCameraReturn {
+export function useCamera(initialFacingMode: "user" | "environment" = "user"): UseCameraReturn {
   const { t } = useLanguage();
 
   // Use stable ref for translations
@@ -23,7 +23,7 @@ export function useCamera(): UseCameraReturn {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
+  const [facingMode, setFacingMode] = useState<"user" | "environment">(initialFacingMode);
 
   const streamRef = useRef<MediaStream | null>(null);
   const isStartingRef = useRef(false);

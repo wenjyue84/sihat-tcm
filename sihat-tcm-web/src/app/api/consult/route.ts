@@ -20,6 +20,7 @@ import {
   normalizeLanguage,
 } from "@/lib/translations/languageInstructions";
 import { streamTextWithFallback, parseApiError } from "@/lib/modelFallback";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
 /**
  * Maximum execution duration for the consultation endpoint (60 seconds)
@@ -651,28 +652,17 @@ Include a comprehensive TCM diagnosis with:
     );
   } catch (error: unknown) {
     const duration = Date.now() - startTime;
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    devLog("error", "API/consult", `FAILED after ${duration}ms`, { error: errorMessage });
+    devLog("error", "API/consult", `FAILED after ${duration}ms`, { error });
 
-    // Return a proper error response (500) so the client knows it failed
-    const { userFriendlyError, errorCode } = parseApiError(errorMessage);
-
-    return new Response(
-      JSON.stringify({
-        error: userFriendlyError,
-        code: errorCode,
-        details: process.env.NODE_ENV === "development" ? errorMessage : undefined,
-        diagnosis: "Analysis Error",
-        recommendations: {
-          food: ["Please retry the analysis"],
-          avoid: ["N/A"],
-          lifestyle: ["Please try again with the diagnosis"],
-        },
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    // Use centralized error handler with additional context
+    return createErrorResponse(error, "API/consult", {
+      duration,
+      diagnosis: "Analysis Error",
+      recommendations: {
+        food: ["Please retry the analysis"],
+        avoid: ["N/A"],
+        lifestyle: ["Please try again with the diagnosis"],
+      },
+    });
   }
 }

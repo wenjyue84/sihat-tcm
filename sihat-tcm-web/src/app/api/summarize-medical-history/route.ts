@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateText } from "ai";
 import { getGoogleProvider } from "@/lib/googleProvider";
 import { devLog } from "@/lib/systemLogger";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
 // Default prompt if not configured in admin
 const DEFAULT_PROMPT = `You are a medical assistant helping patients summarize their medical history for doctor consultations.
@@ -88,14 +89,9 @@ export async function POST(request: NextRequest) {
       summary: summary.trim(),
       success: true,
     });
-  } catch (error: any) {
-    console.error("[Summarize Medical History] Error:", error);
-    return NextResponse.json(
-      {
-        error: "Failed to generate summary",
-        details: error.message,
-      },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    const errorResponse = createErrorResponse(error, "API/summarize-medical-history");
+    const errorBody = await errorResponse.json();
+    return NextResponse.json(errorBody, { status: errorResponse.status });
   }
 }

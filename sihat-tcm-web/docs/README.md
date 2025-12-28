@@ -5,38 +5,34 @@ This directory contains comprehensive documentation for the Sihat TCM web applic
 ## 📁 Directory Structure
 
 ### Core Documentation
-- **`DEVELOPER_MANUAL.md`** - Complete developer guide with architecture, APIs, and workflows
+- **`DEVELOPER_GUIDE.md`** - Comprehensive developer guide (consolidated from DEVELOPER_MANUAL + DEVELOPER_DOCUMENTATION)
+- **`USER_GUIDE.md`** - Complete user documentation (consolidated from USER_MANUAL + USER_GUIDES)
 - **`SYSTEM_DESCRIPTION.md`** - System overview and product intent
-- **`USER_MANUAL.md`** - End-user documentation and guides
 - **`API_DOCUMENTATION.md`** - API endpoints and usage
 - **`DATA_MODELS.md`** - Database schema and data models
 - **`SYSTEM_ARCHITECTURE.md`** - System architecture and design patterns
-- **`DEVELOPER_DOCUMENTATION.md`** - Additional developer resources
 - **`INLINE_CODE_DOCUMENTATION_GUIDE.md`** - Code documentation standards
 
 ### Testing
 - **`COMPREHENSIVE_TESTING_GUIDE.md`** - Complete testing guide
-- **`TESTING_QUICK_REFERENCE.md`** - Quick testing reference
 - **`ACCESSIBILITY_TESTING_GUIDE.md`** - Accessibility testing guidelines
 - **`testing/`** - Feature-specific testing guides
-  - `QUICK_TEST_GUIDE.md`
-  - `USER_TESTING_GUIDE.md`
-  - `HEALTH_PASSPORT_TESTING_GUIDE.md`
+  - `TESTING_QUICK_REFERENCE.md` - Quick testing reference
+  - `USER_TESTING_GUIDE.md` - User testing procedures
+  - `HEALTH_PASSPORT_TESTING_GUIDE.md` - Health Passport testing
 
-### Implementation Phases
-- **`implementation/`** - Phase-by-phase implementation summaries
-  - `PHASE1_IMPLEMENTATION_SUMMARY.md` - Database Schema Enhancement
-  - `PHASE2_IMPLEMENTATION_SUMMARY.md`
-  - `PHASE3_IMPLEMENTATION_SUMMARY.md` + `PHASE3_RISK_ASSESSMENT.md`
-  - `PHASE5_IMPLEMENTATION_SUMMARY.md`
-  - `PHASE8_*` - Phase 8 implementation docs (Complete, Summary, Quick Start, Visual Guide)
+### Implementation
+- **`implementation/`** - Implementation guides
+  - `PHASE8_QUALITY_GATES.md` - Development workflow and quality gates (consolidated)
+  - Historical phase summaries (PHASE1, PHASE2, PHASE3, PHASE5)
 
 ### Features
 - **`features/`** - Feature-specific documentation
-  - **Health Passport**: `HEALTH_PASSPORT_*.md` (Implementation, Setup, Summary, Checklist, Quick Reference)
-  - **Meal Planner**: `MEAL_PLANNER_*.md` (Implementation Summary, Complete, Quick Start)
-  - **Dashboard**: `DASHBOARD_*.md` (Integration Analysis, Merge Complete)
-  - **Diagnosis**: `DIAGNOSIS_DATA_RECORDING_*.md` (Plan, Testing Guide)
+  - **`DOCTOR_PORTAL.md`** - Doctor Portal navigation and features (consolidated)
+  - **Health Passport**: `HEALTH_PASSPORT.md`
+  - **Meal Planner**: `MEAL_PLANNER.md`
+  - **Dashboard**: `DASHBOARD.md`
+  - **Diagnosis**: `DIAGNOSIS_DATA_RECORDING_PLAN.md`, `DIAGNOSIS_DATA_RECORDING_TESTING_GUIDE.md`
   - **Five Elements Radar**: `FIVE_ELEMENTS_RADAR_INTEGRATION.md`
   - **Soundscape**: `SOUNDSCAPE_AUDIO_FILES.md`
 
@@ -60,8 +56,7 @@ This directory contains comprehensive documentation for the Sihat TCM web applic
 
 ### Migrations
 - **`migrations/`** - Database migration guides
-  - `MIGRATION_INSTRUCTIONS_GUEST_SESSIONS.md`
-  - `RUN_MIGRATION_NOW.md`
+  - `MIGRATION_GUIDE.md` - Database migration instructions (consolidated)
 
 ### UI/UX
 - **`ui-ux/`** - Design and user experience documentation
@@ -76,35 +71,40 @@ This directory contains comprehensive documentation for the Sihat TCM web applic
   - `REDIS_CACHING_RISK_ASSESSMENT.md`
 
 ### Refactoring
-- **`refactoring/`** - Refactoring documentation
-  - `REFACTORING_PLAN.md`
-  - `REFACTORING_SUMMARY.md`
-  - `REFACTORING_EXAMPLE.md`
+- **`REFACTORING_GUIDE.md`** - Comprehensive refactoring guide (consolidated)
 
 ### Architecture Decision Records (ADR)
 - **`adr/`** - Architecture decision records
   - `0000-template.md` - ADR template
   - `0001-nextjs-app-router.md` - Next.js App Router decision
 
-### User Guides
-- **`USER_GUIDES.md`** - Consolidated user guides
-
 ### System Health
 - **`SYSTEM_HEALTH_MONITORING.md`** - System monitoring and health checks
 
 ## 🔍 Quick Navigation
 
-- **Getting Started**: See `SETUP_TUTORIAL.md` in `setup/`
-- **Development**: Start with `DEVELOPER_MANUAL.md`
+- **Getting Started**: See `setup/SETUP_TUTORIAL.md`
+- **Development**: Start with `DEVELOPER_GUIDE.md` for comprehensive developer documentation
+- **Users**: See `USER_GUIDE.md` for complete end-user documentation
 - **Testing**: See `COMPREHENSIVE_TESTING_GUIDE.md` or `testing/` folder
 - **Features**: Browse `features/` for specific feature documentation
 - **Troubleshooting**: Check `fixes/` for known issues and solutions
+- **Migrations**: See `migrations/MIGRATION_GUIDE.md` for database migrations
+- **Refactoring**: See `REFACTORING_GUIDE.md` for code refactoring plans
 - **Architecture**: See `SYSTEM_ARCHITECTURE.md` and `adr/` for design decisions
 
 ## 📝 Notes
 
 - `README.md` in the root of `sihat-tcm-web/` contains project overview and quick start
-- Some documentation may reference files that have been moved - update paths as needed
+- SQL files have been organized into `supabase/scripts/` and `supabase/scripts/seeds/`
+- Some documentation has been consolidated for easier navigation:
+  - Developer docs → `DEVELOPER_GUIDE.md` (consolidated from DEVELOPER_MANUAL + DEVELOPER_DOCUMENTATION)
+  - User docs → `USER_GUIDE.md` (consolidated from USER_MANUAL + USER_GUIDES)
+  - Doctor Portal Navigation files → `features/DOCTOR_PORTAL.md`
+  - Phase 8 files → `implementation/PHASE8_QUALITY_GATES.md`
+  - Refactoring files → `REFACTORING_GUIDE.md`
+  - Migration files → `migrations/MIGRATION_GUIDE.md`
+- Original files have been archived in `archive/` for reference
 - For mobile app documentation, see `../sihat-tcm-mobile/docs/`
 - For project-wide AI integration docs, see `../../docs/ai-integration/`
 

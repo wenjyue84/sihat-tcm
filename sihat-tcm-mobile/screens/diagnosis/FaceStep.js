@@ -18,35 +18,9 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { getGenAI, API_CONFIG } from '../../lib/googleAI';
+import { FACE_ANALYSIS_PROMPT } from '../../constants/SystemPrompts';
 
-// TCM Face Analysis Prompt
-const FACE_ANALYSIS_PROMPT = `You are an expert Traditional Chinese Medicine (TCM) practitioner specializing in facial diagnosis (望诊/面诊).
 
-Analyze this face image and provide a TCM-based assessment:
-
-1. **Complexion** (面色): Pale, Pink/Red, Yellow, Dark/Dull, Green-ish, Blue-ish
-2. **Skin Quality**: Lustrous, Dry, Oily, Blemishes, Puffy
-3. **Eyes**: Bright, Dull, Redness, Puffiness, Dark circles
-4. **Lips**: Color, Dryness, Cracks
-
-Based on these observations, provide:
-- **Overall Observation**: A brief TCM assessment in plain language
-- **Potential Patterns**: List 2-3 possible TCM patterns/syndromes this may indicate
-- **Confidence**: Your confidence level (0-100) in the analysis
-
-Respond in JSON format:
-{
-  "observation": "Brief TCM assessment...",
-  "complexion": "complexion description",
-  "skin_quality": "skin characteristics",
-  "eyes": "eye observations",
-  "lips": "lip observations",
-  "potential_issues": ["Pattern 1", "Pattern 2"],
-  "confidence": 85,
-  "is_valid_image": true
-}
-
-If the image is NOT a face, set is_valid_image to false.`;
 
 export default function FaceStep({ data, onUpdate, theme, isDark }) {
     const styles = useMemo(() => createStyles(theme, isDark), [theme, isDark]);

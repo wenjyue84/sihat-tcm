@@ -1,7 +1,7 @@
 // Mock medical report content in Markdown format
 
 export const mockMedicalReports: Record<string, string> = {
-  "Blood Test Result.pdf": `# Blood Test Result
+   "Blood Test Result.pdf": `# Blood Test Result
 
 **Patient Name:** [Patient Name]
 **Test Date:** November 15, 2023
@@ -75,7 +75,7 @@ All laboratory values are within normal reference ranges. No abnormalities detec
 
 - Continue maintaining healthy lifestyle
 - Repeat testing in 6-12 months for routine monitoring
-- Follow up with primary care physician for routine check-up
+- Follow up with primary care doctor for routine check-up
 
 ---
 
@@ -86,7 +86,7 @@ All laboratory values are within normal reference ranges. No abnormalities detec
 *This report is confidential and intended for medical use only.*
 `,
 
-  "X-Ray Report - Chest.pdf": `# Chest X-Ray Report
+   "X-Ray Report - Chest.pdf": `# Chest X-Ray Report
 
 **Patient Name:** [Patient Name]
 **Examination Date:** October 20, 2023
@@ -152,7 +152,7 @@ No prior studies available for comparison.
 *This report has been electronically signed and is legally binding.*
 `,
 
-  "Annual Health Checkup.pdf": `# Annual Health Checkup Report
+   "Annual Health Checkup.pdf": `# Annual Health Checkup Report
 
 **Patient Name:** [Patient Name]
 **Date of Examination:** August 12, 2023
@@ -338,13 +338,13 @@ Patient is in excellent health with all clinical parameters within normal limits
 
 ---
 
-## Physician Notes
+## Doctor Notes
 
 Patient demonstrates excellent health maintenance and preventive care practices. Encouraged to continue current lifestyle habits. No immediate concerns identified. Patient counseled on importance of continued preventive care and healthy lifestyle.
 
 ---
 
-**Examining Physician:** Dr. Emily Rodriguez, MD, FAAFP
+**Examining Doctor:** Dr. Emily Rodriguez, MD, FAAFP
 **Family Medicine Specialist**
 **Date:** August 12, 2023
 **Next Review:** August 2024
@@ -354,7 +354,7 @@ Patient demonstrates excellent health maintenance and preventive care practices.
 *This comprehensive health assessment is valid for one year from the examination date. Any significant health changes should prompt re-evaluation.*
 `,
 
-  "MRI Scan Report.pdf": `# MRI Scan Report - Lumbar Spine
+   "MRI Scan Report.pdf": `# MRI Scan Report - Lumbar Spine
 
 **Patient Name:** [Patient Name]
 **Examination Date:** June 5, 2023
@@ -518,7 +518,7 @@ The imaging findings show mild degenerative changes typical for the patient's ag
 - **Cauda equina:** Bundle of nerve roots at lower end of spinal cord
 `,
 
-  "Prescription History.pdf": `# Medication Prescription History
+   "Prescription History.pdf": `# Medication Prescription History
 
 **Patient Name:** [Patient Name]
 **Generated Date:** May 20, 2023
@@ -691,7 +691,7 @@ Current active medications (Vitamin D3 and Omega-3) have no known interactions.
 
 ## Prescriber Information
 
-### Primary Care Physician
+### Primary Care Doctor
 **Dr. Emily Rodriguez, MD, FAAFP**
 Family Medicine Specialist
 CarePoint Medical Group

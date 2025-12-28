@@ -125,7 +125,7 @@ export default async function RootLayout({
       >
         <JsonLd />
         <Providers>
-          <ErrorBoundary category="App">
+          <ErrorBoundary>
             <main className="flex-grow mb-16 md:mb-0">{children}</main>
           </ErrorBoundary>
           <Footer />

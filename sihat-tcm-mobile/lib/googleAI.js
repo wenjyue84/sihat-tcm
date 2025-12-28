@@ -21,8 +21,6 @@ import { getApiKeySync, API_CONFIG } from './apiConfig';
  */
 export function getGenAI() {
     const apiKey = getApiKeySync();
-    console.log('[googleAI] Creating GenAI instance with API key:',
-        apiKey ? `${apiKey.substring(0, 8)}...` : 'MISSING');
     return new GoogleGenerativeAI(apiKey);
 }
 

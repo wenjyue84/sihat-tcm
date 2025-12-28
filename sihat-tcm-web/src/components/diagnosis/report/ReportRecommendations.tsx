@@ -50,7 +50,7 @@ export function ReportRecommendations({
             getRecipes().length > 0) && (
             <motion.div variants={variants}>
               <CollapsibleSection
-                title={`${t.report.dietaryAdvice} (食疗)`}
+                title={t.report.dietaryAdvice}
                 icon={Utensils}
                 accentColor="orange"
               >
@@ -101,7 +101,7 @@ export function ReportRecommendations({
           data.recommendations?.lifestyle &&
           data.recommendations.lifestyle.length > 0 && (
             <motion.div variants={variants}>
-              <CollapsibleSection title={`${t.report.lifestyle} (养生)`} icon={Leaf} accentColor="emerald">
+              <CollapsibleSection title={t.report.lifestyle} icon={Leaf} accentColor="emerald">
                 <div className="w-full md:w-[90%] md:max-w-[680px] md:mx-auto">
                   <ul className="space-y-3">
                     {data.recommendations.lifestyle.map((tip: string, idx: number) => (

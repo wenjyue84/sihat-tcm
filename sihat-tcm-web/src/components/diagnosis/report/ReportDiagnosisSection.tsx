@@ -25,7 +25,7 @@ export function ReportDiagnosisSection({
       {/* Main Diagnosis Card - Collapsible */}
       <motion.div variants={variants}>
         <CollapsibleSection
-          title={`${t.report.tcmDiagnosis} (辨证)`}
+          title={t.report.tcmDiagnosis}
           icon={Stethoscope}
           accentColor="emerald"
           highlight={true}

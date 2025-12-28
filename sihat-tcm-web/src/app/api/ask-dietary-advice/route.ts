@@ -2,6 +2,7 @@ import { generateText } from "ai";
 import { NextRequest, NextResponse } from "next/server";
 import { getGoogleProvider } from "@/lib/googleProvider";
 import { devLog } from "@/lib/systemLogger";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 import path from "path";
 import fs from "fs";
 
@@ -65,11 +66,9 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ answer: text, prompt: filledPrompt }); // Return prompt for debug/transparency if needed
-  } catch (error: any) {
-    devLog("error", "API/ask-dietary-advice", "Error generating dietary advice", { error });
-    return NextResponse.json(
-      { error: error.message || "Failed to generate dietary advice" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    const errorResponse = createErrorResponse(error, "API/ask-dietary-advice");
+    const errorBody = await errorResponse.json();
+    return NextResponse.json(errorBody, { status: errorResponse.status });
   }
 }

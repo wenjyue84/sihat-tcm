@@ -9,9 +9,11 @@ export default function TestCameraPage() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState(0);
 
-  const handleCameraComplete = (data: { image: string }) => {
+  const handleCameraComplete = (data: { image?: string }) => {
     console.log("Camera capture complete:", data);
-    setCapturedImage(data.image);
+    if (data.image) {
+      setCapturedImage(data.image);
+    }
   };
 
   const handleReset = () => {

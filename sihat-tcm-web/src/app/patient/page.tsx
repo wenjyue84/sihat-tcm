@@ -39,11 +39,8 @@ export default function PatientDashboardPage() {
   // Render the unified dashboard with error boundary
   return (
     <ErrorBoundary
-      category="PatientDashboard"
-      userId={user.id}
-      fallbackTitle="Dashboard Error"
-      fallbackMessage="An error occurred while loading your dashboard. Please try refreshing the page."
-      onRetry={() => window.location.reload()}
+      showDetails={false}
+      onError={(error) => console.error("Patient Dashboard Error:", error)}
     >
       <UnifiedDashboard />
     </ErrorBoundary>

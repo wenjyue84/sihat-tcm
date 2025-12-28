@@ -64,6 +64,11 @@ export const CONTENT_OPTIONS = [
 ];
 
 // Helper to escape XML/SVG special characters
+/**
+ * Helper to escape XML/SVG special characters
+ * @param {string} str - The string to escape
+ * @returns {string} Escaped string safe for SVG
+ */
 const escapeXml = (str) => {
     if (!str) return '';
     return String(str)
@@ -75,10 +80,16 @@ const escapeXml = (str) => {
 };
 
 // Helper to truncate text
+/**
+ * Helper to truncate text
+ * @param {string} str - String to truncate
+ * @param {number} maxLength - Maximum length (default: 40)
+ * @returns {string} Truncated string
+ */
 const truncate = (str, maxLength = 40) => {
     if (!str) return '';
     const s = String(str);
-    return s.length > maxLength ? s.substring(0, maxLength) + '...' : s;
+    return s.length > maxLength ? s.slice(0, maxLength) + '...' : s;
 };
 
 // Extract string from various data formats

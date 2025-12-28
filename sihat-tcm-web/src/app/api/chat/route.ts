@@ -8,7 +8,7 @@ import {
   prependLanguageInstruction,
   normalizeLanguage,
 } from "@/lib/translations/languageInstructions";
-import { parseApiError } from "@/lib/modelFallback";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 import { getCorsHeaders } from "@/lib/cors";
 
 export const maxDuration = 30;
@@ -146,25 +146,8 @@ Symptom Duration: ${basicInfo.symptomDuration || "Not provided"}
         },
       });
     }
-  } catch (error: any) {
-    devLog("error", "API/chat", "Request error", { error });
-
-    const { userFriendlyError, errorCode } = parseApiError(error);
-
-    return new Response(
-      JSON.stringify({
-        error: userFriendlyError,
-        code: errorCode,
-        details: process.env.NODE_ENV === "development" ? error.message : undefined,
-      }),
-      {
-        status: 500,
-        headers: {
-          ...getCorsHeaders(req),
-          "Content-Type": "application/json",
-        },
-      }
-    );
+  } catch (error: unknown) {
+    return createErrorResponse(error, "API/chat");
   }
 }
 

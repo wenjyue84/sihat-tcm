@@ -16,11 +16,19 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export type IoTDeviceType = "pulse" | "bp" | "oxygen" | "temp" | "hrv" | "stress";
 
+interface IoTDeviceData {
+  value: number;
+  unit?: string;
+  timestamp?: string;
+  quality?: "good" | "fair" | "poor";
+  metadata?: Record<string, unknown>;
+}
+
 interface IoTConnectionWizardProps {
   isOpen: boolean;
   onClose: () => void;
   deviceType: IoTDeviceType;
-  onDataReceived: (value: any) => void;
+  onDataReceived: (value: IoTDeviceData) => void;
 }
 
 const deviceConfig = {

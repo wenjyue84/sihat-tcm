@@ -88,7 +88,7 @@ export const en = {
         quickAccess: 'Quick Access (Demo)',
         roles: {
             patient: 'Patient',
-            doctor: 'Physician',
+            doctor: 'Doctor',
             admin: 'Admin',
             developer: 'Developer',
         },
@@ -183,17 +183,17 @@ export const en = {
         title: 'Choose Your Doctor',
         subtitle: 'Select consultation level',
         physician: {
-            name: 'Physician',
+            name: 'Doctor',
             nameZh: '医师',
             description: 'Standard consultation',
         },
         seniorPhysician: {
-            name: 'Senior Physician',
+            name: 'Senior Doctor',
             nameZh: '主任医师',
             description: 'Advanced analysis',
         },
         masterPhysician: {
-            name: 'Master Physician',
+            name: 'TCM Master',
             nameZh: '国医大师',
             description: 'Expert consultation',
         },

@@ -7,8 +7,8 @@ import {
   prependLanguageInstruction,
   normalizeLanguage,
 } from "@/lib/translations/languageInstructions";
-import { parseApiError } from "@/lib/modelFallback";
 import { getCorsHeaders } from "@/lib/cors";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
@@ -130,25 +130,8 @@ ${profile.gender ? `Gender: ${profile.gender}` : ""}
         },
       });
     }
-  } catch (error: any) {
-    devLog("error", "API/heart-companion", "Request error", { error });
-
-    const { userFriendlyError, errorCode } = parseApiError(error);
-
-    return new Response(
-      JSON.stringify({
-        error: userFriendlyError,
-        code: errorCode,
-        details: process.env.NODE_ENV === "development" ? error.message : undefined,
-      }),
-      {
-        status: 500,
-        headers: {
-          ...getCorsHeaders(req),
-          "Content-Type": "application/json",
-        },
-      }
-    );
+  } catch (error: unknown) {
+    return createErrorResponse(error, "API/heart-companion");
   }
 }
 

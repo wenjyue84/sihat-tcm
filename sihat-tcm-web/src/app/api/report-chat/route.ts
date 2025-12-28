@@ -2,7 +2,8 @@ import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 import { devLog } from "@/lib/systemLogger";
 import { getLanguageInstruction, normalizeLanguage } from "@/lib/translations/languageInstructions";
-import { DEFAULT_FALLBACK_MODELS, parseApiError } from "@/lib/modelFallback";
+import { DEFAULT_FALLBACK_MODELS } from "@/lib/modelFallback";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 import {
   reportChatRequestSchema,
   validateRequest,
@@ -121,22 +122,8 @@ Remember: You're here to help them understand their existing report, not to cond
       // All models failed
       throw new Error(`All models failed. Primary error: ${primaryError.message}`);
     }
-  } catch (error: any) {
-    devLog("error", "API/report-chat", "Fatal Error", { error });
-
-    const { userFriendlyError, errorCode } = parseApiError(error);
-
-    return new Response(
-      JSON.stringify({
-        error: userFriendlyError,
-        code: errorCode,
-        details: process.env.NODE_ENV === "development" ? error.message : undefined,
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+  } catch (error: unknown) {
+    return createErrorResponse(error, "API/report-chat");
   }
 }
 

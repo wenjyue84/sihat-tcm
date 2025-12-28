@@ -90,11 +90,18 @@ export function BasicInfoForm({
   useEffect(() => {
     if (authLoading || !user || !profile || hasCheckedProfile) return;
 
+    // Only perform profile completeness check and auto-fill for patients
+    // Admins, Doctors, and Developers should start with a clean form and not be prompted
+    if (profile.role !== "patient") {
+      setHasCheckedProfile(true);
+      return;
+    }
+
     const isProfileComplete =
       profile.full_name && profile.age && profile.gender && profile.height && profile.weight;
 
     if (isProfileComplete) {
-      // Auto-fill form data from profile
+      // Auto-fill form data from profile for patients
       setFormData((prev) => ({
         ...prev,
         name: profile.full_name || prev.name,
@@ -110,13 +117,13 @@ export function BasicInfoForm({
         setCurrentStep(2);
       }
     } else {
-      // Profile incomplete - Prompt user
+      // Profile incomplete - Prompt patient to complete it
       // We use a small timeout to ensure UI is ready
       setTimeout(() => {
         if (
           confirm(
             t.basicInfo?.lockedProfile?.profileIncomplete ||
-              "Your profile is incomplete. Please complete your details in the Patient Portal first."
+            "Your profile is incomplete. Please complete your details in the Patient Portal first."
           )
         ) {
           router.push("/patient");
@@ -368,10 +375,10 @@ export function BasicInfoForm({
       onBack:
         currentStep > 1
           ? () => {
-              setStepError(null);
-              setDirection(-1);
-              setCurrentStep((prev) => prev - 1);
-            }
+            setStepError(null);
+            setDirection(-1);
+            setCurrentStep((prev) => prev - 1);
+          }
           : undefined,
       showNext: true,
       showBack: true,

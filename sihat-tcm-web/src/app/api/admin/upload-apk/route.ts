@@ -4,6 +4,7 @@ import { writeFile, unlink } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 import { devLog } from "@/lib/systemLogger";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
 // Configure route for file uploads
 export const runtime = "nodejs";
@@ -129,15 +130,18 @@ export async function POST(req: NextRequest) {
       path: "/sihat-tcm.apk",
       timestamp: new Date().toISOString(),
     });
-  } catch (error: any) {
-    console.error("Upload error:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    const errorResponse = createErrorResponse(error, "API/admin/upload-apk");
+    const errorBody = await errorResponse.json();
     return NextResponse.json(
       {
-        error: "Internal Server Error",
-        details: error.message || String(error),
-        stack: error.stack,
+        ...errorBody,
+        details: errorMessage,
+        ...(process.env.NODE_ENV === "development" && { stack: errorStack }),
       },
-      { status: 500 }
+      { status: errorResponse.status }
     );
   }
 }

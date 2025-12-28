@@ -716,6 +716,52 @@ export class AlertManager {
   }
 
   /**
+   * Send a manual alert directly
+   */
+  public async sendAlert(alertData: {
+    type: string;
+    message: string;
+    severity: AlertSeverity;
+    metadata?: Record<string, any>;
+  }): Promise<void> {
+    const timestamp = Date.now();
+    const alertId = `manual_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+
+    const alert: Alert = {
+      id: alertId,
+      title: alertData.type.replace(/_/g, " ").toUpperCase(),
+      description: alertData.message,
+      severity: alertData.severity,
+      category: "system_health",
+      source: "Manual",
+      timestamp,
+      metadata: alertData.metadata,
+    };
+
+    this.alerts.set(alertId, alert);
+
+    devLog("warn", "AlertManager", `Manual alert triggered: ${alert.title}`, {
+      alertId,
+      severity: alert.severity,
+    });
+
+    // Default channels for manual alerts
+    const channels: NotificationChannel[] = [
+      {
+        type: "slack",
+        config: { channel: alert.severity === "critical" ? "#critical-alerts" : "#alerts" },
+        enabled: true,
+      }
+    ];
+
+    await this.sendNotifications(alert, channels);
+
+    if (alert.severity === "error" || alert.severity === "critical") {
+      await this.createOrUpdateIncident(alert);
+    }
+  }
+
+  /**
    * Resolve alert
    */
   public resolveAlert(alertId: string, resolvedBy?: string): boolean {

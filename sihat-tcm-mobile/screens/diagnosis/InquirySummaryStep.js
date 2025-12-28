@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { getGenAI, API_CONFIG } from '../../lib/googleAI';
+import { SUMMARY_PROMPT } from '../../constants/SystemPrompts';
 
 // Progress steps
 const PROGRESS_STEPS = [
@@ -22,30 +23,7 @@ const PROGRESS_STEPS = [
     { key: 'generating', label: 'Generating', icon: 'sparkles-outline' },
 ];
 
-// System prompt for summary generation
-const SUMMARY_PROMPT = `You are a TCM physician assistant. Summarize the patient consultation in a structured format.
 
-OUTPUT FORMAT:
-## Chief Complaint
-[Main symptom or reason for visit]
-
-## Symptoms Reported
-- [List each symptom mentioned]
-
-## Duration & Onset
-[When symptoms started, how long they've persisted]
-
-## Relevant Factors
-- [Diet, sleep, stress, lifestyle factors mentioned]
-
-## Current Medications
-[Any medications the patient mentioned]
-
-## Key Observations
-[Notable patterns or TCM-relevant observations from the conversation]
-
-Keep the summary concise but comprehensive. Use bullet points for clarity.
-Do not make diagnoses - only summarize what was discussed.`;
 
 export default function InquirySummaryStep({ data, onUpdate, onNext, theme, isDark }) {
     const styles = useMemo(() => createStyles(theme, isDark), [theme, isDark]);
@@ -93,7 +71,7 @@ export default function InquirySummaryStep({ data, onUpdate, onNext, theme, isDa
                 generateSummary();
             } else {
                 // Fix: Prevent hang if no history is available
-                console.log('No chat history found, skipping summary generation');
+                // console.log('No chat history found, skipping summary generation');
                 setSummary('No consultation details available to summarize.');
                 setIsLoading(false);
             }
@@ -166,9 +144,7 @@ Main Concern: ${data.mainConcern || 'Not specified'}
         }
     };
 
-    const handleRetry = () => {
-        generateSummary();
-    };
+    const handleRetry = () => generateSummary();
 
     const handleConfirm = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

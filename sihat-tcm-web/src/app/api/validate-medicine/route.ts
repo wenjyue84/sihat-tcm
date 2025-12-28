@@ -1,6 +1,7 @@
 import { generateText } from "ai";
 import { getGoogleProvider } from "@/lib/googleProvider";
 import { devLog } from "@/lib/systemLogger";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
 export const maxDuration = 60;
 
@@ -48,8 +49,9 @@ export async function POST(req: Request) {
     const result = JSON.parse(cleanText);
 
     return Response.json(result);
-  } catch (error: any) {
-    devLog("error", "API/validate-medicine", "Validation error", { error });
-    return Response.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    const errorResponse = createErrorResponse(error, "API/validate-medicine");
+    const errorBody = await errorResponse.json();
+    return Response.json(errorBody, { status: errorResponse.status });
   }
 }

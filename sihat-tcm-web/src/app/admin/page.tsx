@@ -74,7 +74,7 @@ import { ClipboardList } from "lucide-react";
 const DOCTOR_MODEL_MAPPING = {
   Master: { model: "gemini-3.0-preview", label: "Gemini 3.0 Preview (Master)" },
   Expert: { model: "gemini-2.5-pro", label: "Gemini 2.5 Pro (Expert)" },
-  Physician: { model: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
+  Doctor: { model: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
 } as const;
 
 // Prompt configuration
@@ -149,7 +149,7 @@ export default function AdminDashboard() {
     inquiry_summary: PROMPT_TYPES.inquiry_summary.defaultPrompt,
     final: PROMPT_TYPES.final.defaultPrompt,
   });
-  const [doctorLevel, setDoctorLevel] = useState<keyof typeof DOCTOR_MODEL_MAPPING>("Physician");
+  const [doctorLevel, setDoctorLevel] = useState<keyof typeof DOCTOR_MODEL_MAPPING>("Doctor");
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
   const [saving, setSaving] = useState<PromptType | "config" | "config_music" | null>(null);
@@ -212,7 +212,7 @@ export default function AdminDashboard() {
         setMusicEnabled(settings.backgroundMusicEnabled || false);
         setMusicUrl(
           settings.backgroundMusicUrl ||
-            "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3"
+          "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3"
         );
         setMusicVolume(settings.backgroundMusicVolume ?? 0.5);
       } else {
@@ -221,7 +221,7 @@ export default function AdminDashboard() {
           setMusicEnabled(data.background_music_enabled || false);
           setMusicUrl(
             data.background_music_url ||
-              "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3"
+            "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3"
           );
           setMusicVolume(data.background_music_volume ?? 0.5);
         }
@@ -266,7 +266,7 @@ export default function AdminDashboard() {
           else if (item.role === "doctor_final")
             newPrompts.final = text || PROMPT_TYPES.final.defaultPrompt;
           else if (item.role === "doctor" && item.config)
-            setDoctorLevel(item.config.default_level || "Physician");
+            setDoctorLevel(item.config.default_level || "Doctor");
         });
         setPrompts(newPrompts);
       }
@@ -496,11 +496,8 @@ export default function AdminDashboard() {
 
   return (
     <ErrorBoundary
-      category="AdminDashboard"
-      userId={userId}
-      fallbackTitle="Admin Console Error"
-      fallbackMessage="An error occurred in the admin console. Please refresh the page or contact support."
-      onRetry={() => window.location.reload()}
+      showDetails={true}
+      onError={(error) => console.error("Admin Dashboard Error:", error)}
     >
       <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
         {/* Mobile Overlay */}
@@ -513,9 +510,8 @@ export default function AdminDashboard() {
 
         {/* Sidebar Navigation */}
         <aside
-          className={`w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 z-40 shadow-sm transition-transform duration-300 ease-in-out fixed inset-y-0 left-0 md:relative md:translate-x-0 h-full ${
-            isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 z-40 shadow-sm transition-transform duration-300 ease-in-out fixed inset-y-0 left-0 md:relative md:translate-x-0 h-full ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
           <div className="h-16 flex items-center justify-between px-6 border-b border-slate-100">
             <div className="flex items-center gap-3">
@@ -709,7 +705,7 @@ export default function AdminDashboard() {
                             <SelectContent>
                               <SelectItem value="Physician">
                                 <div className="flex flex-col">
-                                  <span className="font-medium">💊 Physician (Standard)</span>
+                                  <span className="font-medium">💊 Doctor (Standard)</span>
                                   <span className="text-xs text-slate-500">
                                     gemini-2.0-flash • Fast response, general care
                                   </span>

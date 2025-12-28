@@ -172,7 +172,7 @@ export class ErrorBoundary extends Component<Props, State> {
    * Extract component name from error info
    */
   private getComponentName(errorInfo: ErrorInfo): string {
-    const componentStack = errorInfo.componentStack;
+    const componentStack = errorInfo.componentStack || "";
     const match = componentStack.match(/in (\w+)/);
     return match ? match[1] : "Unknown";
   }
@@ -253,7 +253,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 Something went wrong
               </CardTitle>
             </CardHeader>
-            
+
             <CardContent className="space-y-4">
               <p className="text-sm text-gray-600 text-center">
                 We've encountered an unexpected error. Our team has been notified and is working on a fix.
@@ -289,7 +289,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Try Again
                 </Button>
-                
+
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -298,7 +298,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   >
                     Reload Page
                   </Button>
-                  
+
                   <Button
                     variant="outline"
                     onClick={this.handleGoHome}

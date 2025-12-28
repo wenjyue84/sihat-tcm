@@ -96,7 +96,6 @@ export const storeCredentials = async (email, password) => {
         await SecureStore.setItemAsync(SECURE_KEYS.PASSWORD, password);
         await AsyncStorage.setItem(BIOMETRIC_ENABLED_KEY, 'true');
 
-        console.log('[BiometricAuth] Credentials stored securely');
         return true;
     } catch (error) {
         console.error('Error storing credentials:', error);
@@ -133,7 +132,6 @@ export const clearStoredCredentials = async () => {
         await SecureStore.deleteItemAsync(SECURE_KEYS.PASSWORD);
         await AsyncStorage.setItem(BIOMETRIC_ENABLED_KEY, 'false');
 
-        console.log('[BiometricAuth] Credentials cleared');
         return true;
     } catch (error) {
         console.error('Error clearing credentials:', error);

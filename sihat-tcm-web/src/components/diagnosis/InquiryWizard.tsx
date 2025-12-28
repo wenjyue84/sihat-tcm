@@ -18,12 +18,12 @@ interface InquiryWizardProps {
   initialData?: {
     reportFiles?: FileData[];
     medicineFiles?: FileData[];
-    chatHistory?: any[];
+    chatHistory?: ChatMessage[];
     summary?: string;
   };
   onComplete: (result: {
     inquiryText: string;
-    chatHistory: any[];
+    chatHistory: ChatMessage[];
     files: FileData[];
     reportFiles?: FileData[];
     medicineFiles?: FileData[];

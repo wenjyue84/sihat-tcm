@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
 export async function GET(request: NextRequest) {
   try {
@@ -77,13 +78,16 @@ export async function GET(request: NextRequest) {
       message: "Column medical_history added successfully",
       data,
     });
-  } catch (error: any) {
-    console.error("[Migration] Unexpected error:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("[Migration] Unexpected error:", errorMessage);
+    const errorResponse = createErrorResponse(error, "API/migrate-medical-history");
+    const errorBody = await errorResponse.json();
     return NextResponse.json(
       {
         success: false,
         error: "Migration failed",
-        message: error.message,
+        ...errorBody,
         sql: `ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS medical_history TEXT;`,
         instructions: [
           "1. Go to https://supabase.com/dashboard",

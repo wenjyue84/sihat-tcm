@@ -46,12 +46,22 @@ const extractOptions = (content: string) => {
   return { cleanContent: content, options: [] as string[] };
 };
 
+import type { DiagnosisReport } from "@/types/database";
+import type { PDFPatientInfo } from "@/types/pdf";
+
+interface WesternReport {
+  summary?: string;
+  recommendations?: string[];
+  notes?: string;
+  [key: string]: unknown;
+}
+
 interface WesternDoctorChatProps {
   isOpen: boolean;
   onClose: () => void;
-  tcmReportData: any;
-  patientInfo?: any;
-  onComplete?: (chatHistory: Message[], westernReport: any) => void;
+  tcmReportData: DiagnosisReport | Record<string, unknown>;
+  patientInfo?: PDFPatientInfo;
+  onComplete?: (chatHistory: Message[], westernReport: WesternReport) => void;
 }
 
 export function WesternDoctorChat({

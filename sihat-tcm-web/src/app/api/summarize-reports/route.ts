@@ -1,6 +1,7 @@
 import { generateText } from "ai";
 import { getGoogleProvider } from "@/lib/googleProvider";
 import { devLog } from "@/lib/systemLogger";
+import { createErrorResponseWithStatus } from "@/lib/api/middleware/error-handler";
 
 export const maxDuration = 60;
 
@@ -151,19 +152,15 @@ Format the response as a clear, paragraph-based summary suitable for medical rec
         headers: { "Content-Type": "application/json" },
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     const duration = Date.now() - startTime;
-    console.error(`[summarize-reports] FAILED after ${duration}ms:`, error.message);
-
-    return new Response(
-      JSON.stringify({
-        error: error.message || "Failed to generate summary",
+    return createErrorResponseWithStatus(
+      error,
+      "API/summarize-reports",
+      500,
+      {
         code: "GENERATION_FAILED",
         duration: duration,
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
       }
     );
   }

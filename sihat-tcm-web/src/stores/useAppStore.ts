@@ -45,6 +45,7 @@ export interface Profile {
   weight?: number;
   medical_history?: string;
   preferred_language?: "en" | "zh" | "ms";
+  constitution?: string;
   preferences?: UIPreferences;
 }
 
@@ -173,7 +174,7 @@ interface AppState {
 const ADMIN_LEVEL_MAPPING: Record<string, DoctorLevel> = {
   Master: "master",
   Expert: "expert",
-  Physician: "physician",
+  Doctor: "physician",
 };
 
 const STORAGE_KEYS = {
@@ -335,10 +336,10 @@ export const useAppStore = create<AppState>()(
         set({
           profile: profile
             ? {
-                ...profile,
-                preferences: updatedPrefs,
-                ...(newPrefs.language ? { preferred_language: newPrefs.language } : {}),
-              }
+              ...profile,
+              preferences: updatedPrefs,
+              ...(newPrefs.language ? { preferred_language: newPrefs.language } : {}),
+            }
             : null,
         });
       } catch (err) {

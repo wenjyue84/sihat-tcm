@@ -62,7 +62,6 @@ export default function DiagnosisWizard() {
     submitConsultation,
     STEPS,
     t,
-    language,
   } = useDiagnosisWizard();
 
   const { isDeveloperMode } = useDeveloper();
@@ -410,15 +409,8 @@ export default function DiagnosisWizard() {
         {step === "summary" && (
           <div key="summary">
             <ErrorBoundary
-              fallbackTitle={t.errors.componentError}
-              fallbackMessage={t.errors.componentErrorDesc}
-              onBack={() => prevStep("summary")}
-              onRetry={() => {
-                setStep("smart_connect");
-                setTimeout(() => setStep("summary"), 100);
-              }}
-              showBackButton={true}
-              showRetryButton={true}
+              showDetails={true}
+              onError={(error) => console.error("Diagnosis Wizard Error:", error)}
             >
               <DiagnosisSummary
                 data={data}

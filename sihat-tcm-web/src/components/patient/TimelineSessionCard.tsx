@@ -11,6 +11,7 @@ import { extractDiagnosisTitle, extractConstitutionType } from "@/lib/tcm-utils"
 import { ScoreRing } from "./ScoreRing";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/stores/useAppStore";
+import { formatDate } from "@/lib/utils/date-formatting";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,19 +37,6 @@ interface TimelineSessionCardProps {
   isLast?: boolean;
   onRefresh?: () => void;
 }
-
-const formatDate = (dateString: string, locale: string = "en-US"): string => {
-  const date = new Date(dateString);
-  try {
-    return new Intl.DateTimeFormat(locale === "zh" ? "zh-CN" : locale === "ms" ? "ms-MY" : "en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    }).format(date);
-  } catch (e) {
-    return date.toLocaleDateString();
-  }
-};
 
 export function TimelineSessionCard({
   session,
@@ -156,7 +144,7 @@ export function TimelineSessionCard({
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0" />
               <time className="text-base sm:text-2xl font-light text-slate-800 tracking-tight truncate">
-                {formatDate(session.created_at, language)}
+                {formatDate(session.created_at, { language: language as "en" | "zh" | "ms", format: "full" })}
               </time>
             </div>
 

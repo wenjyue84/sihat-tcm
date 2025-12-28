@@ -57,7 +57,7 @@ export function MobileWelcomeSheet({ onDismiss }: MobileWelcomeSheetProps) {
           : "AI Diagnostic Engine Active",
     title: language === "zh" ? "您的私人" : language === "ms" ? "Doktor TCM" : "Your Personal",
     titleHighlight:
-      language === "zh" ? "中医师" : language === "ms" ? "Peribadi Anda" : "TCM Physician",
+      language === "zh" ? "中医师" : language === "ms" ? "Peribadi Anda" : "TCM Doctor",
     subtitle:
       language === "zh"
         ? "完成问诊步骤，获取基于传统智慧与现代AI的综合健康分析。"

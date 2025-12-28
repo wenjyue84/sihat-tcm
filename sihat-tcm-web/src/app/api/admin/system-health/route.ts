@@ -172,8 +172,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         type: "critical_error",
         message: `Critical error logged: ${body.message}`,
         severity: "critical",
-        component: body.component,
         metadata: {
+          component: body.component,
           error_id: data.id,
           error_type: body.error_type,
           user_id: body.user_id,
@@ -234,14 +234,14 @@ async function getErrorStatistics(supabase: any): Promise<ErrorStatistics> {
 
   // Process the data
   const totalErrors = errorCounts?.length || 0;
-  const criticalErrors = errorCounts?.filter(e => e.severity === "critical").length || 0;
-  const highErrors = errorCounts?.filter(e => e.severity === "high").length || 0;
-  const mediumErrors = errorCounts?.filter(e => e.severity === "medium").length || 0;
-  const lowErrors = errorCounts?.filter(e => e.severity === "low").length || 0;
-  const resolvedErrors = errorCounts?.filter(e => e.resolved).length || 0;
+  const criticalErrors = errorCounts?.filter((e: any) => e.severity === "critical").length || 0;
+  const highErrors = errorCounts?.filter((e: any) => e.severity === "high").length || 0;
+  const mediumErrors = errorCounts?.filter((e: any) => e.severity === "medium").length || 0;
+  const lowErrors = errorCounts?.filter((e: any) => e.severity === "low").length || 0;
+  const resolvedErrors = errorCounts?.filter((e: any) => e.resolved).length || 0;
 
   // Calculate most common errors
-  const errorTypeCount = commonErrors?.reduce((acc: Record<string, number>, error) => {
+  const errorTypeCount = commonErrors?.reduce((acc: Record<string, number>, error: any) => {
     acc[error.error_type] = (acc[error.error_type] || 0) + 1;
     return acc;
   }, {}) || {};
@@ -256,7 +256,7 @@ async function getErrorStatistics(supabase: any): Promise<ErrorStatistics> {
     .slice(0, 5);
 
   // Calculate errors by component
-  const componentCount = componentErrors?.reduce((acc: Record<string, { total: number; critical: number }>, error) => {
+  const componentCount = componentErrors?.reduce((acc: Record<string, { total: number; critical: number }>, error: any) => {
     if (!acc[error.component]) {
       acc[error.component] = { total: 0, critical: 0 };
     }
@@ -268,7 +268,7 @@ async function getErrorStatistics(supabase: any): Promise<ErrorStatistics> {
   }, {}) || {};
 
   const errorsByComponent = Object.entries(componentCount)
-    .map(([component, counts]) => ({
+    .map(([component, counts]: [string, any]) => ({
       component,
       count: counts.total,
       critical_count: counts.critical,
@@ -277,10 +277,10 @@ async function getErrorStatistics(supabase: any): Promise<ErrorStatistics> {
     .slice(0, 10);
 
   // Process hourly trend data
-  const hourlyErrorTrend = hourlyTrend?.reduce((acc: Array<{hour: string; count: number; critical_count: number}>, error) => {
+  const hourlyErrorTrend = hourlyTrend?.reduce((acc: Array<{ hour: string; count: number; critical_count: number }>, error: { timestamp: string; severity: string }) => {
     const hour = new Date(error.timestamp).toISOString().slice(0, 13) + ":00:00Z";
     const existing = acc.find(item => item.hour === hour);
-    
+
     if (existing) {
       existing.count++;
       if (error.severity === "critical") {
@@ -293,7 +293,7 @@ async function getErrorStatistics(supabase: any): Promise<ErrorStatistics> {
         critical_count: error.severity === "critical" ? 1 : 0,
       });
     }
-    
+
     return acc;
   }, []) || [];
 

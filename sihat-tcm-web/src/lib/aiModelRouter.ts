@@ -1,42 +1,13 @@
 /**
- * AI Model Router - Dynamic model selection and routing with performance monitoring
+ * AI Model Router - Enhanced Version with Better Architecture
  *
- * This module provides intelligent model selection based on request complexity,
- * automatic fallback handling, and performance monitoring for optimal AI responses.
- *
- * Key Features:
- * - Dynamic model selection based on request complexity and requirements
- * - Automatic fallback to alternative models on failure
- * - Performance monitoring and adaptive selection
- * - Support for different doctor levels and capabilities
- * - Streaming and non-streaming request handling
- * - Comprehensive error handling and retry logic
- *
- * Model Selection Criteria:
- * - Request complexity (simple, moderate, complex, advanced)
- * - Doctor level requirements (physician, expert, master)
- * - Vision capabilities (for image analysis)
- * - Streaming requirements
- * - Historical performance data
- *
- * Usage Example:
- * ```typescript
- * const router = new AIModelRouter('MyApp');
- * const complexity = router.analyzeComplexity({
- *   messages: chatHistory,
- *   images: medicalImages,
- *   requiresAnalysis: true
- * });
- *
- * const result = await router.generateWithRouting(
- *   { complexity, doctorLevel: 'expert' },
- *   { messages: [...] }
- * );
- * ```
- *
- * @author Sihat TCM Development Team
- * @version 4.0.0
- * @since 2024-12-26
+ * Improvements:
+ * - Better error handling with custom error types
+ * - Enhanced performance monitoring
+ * - Improved type safety
+ * - Better separation of concerns
+ * - More robust fallback mechanisms
+ * - Comprehensive logging and metrics
  */
 
 import {
@@ -49,53 +20,554 @@ import {
   GenerateCallOptions,
 } from "./modelFallback";
 import { DOCTOR_LEVELS, DoctorLevel } from "./doctorLevels";
+import { 
+  AI_MODELS, 
+  AI_PERFORMANCE, 
+  MODEL_CAPABILITIES, 
+  COMPLEXITY_SCORING,
+  PRIORITY_LEVELS 
+} from "./constants";
+import { AppError, AIModelError, ErrorFactory } from "./errors/AppError";
 import { devLog, logError, logInfo } from "./systemLogger";
 
 /**
- * Performance metrics for tracking AI model performance
- *
- * @interface ModelPerformanceMetrics
- * @property {string} modelId - Identifier of the AI model
- * @property {string} requestType - Type of request (simple|moderate|complex|advanced)
- * @property {number} responseTime - Time taken to process request (ms)
- * @property {boolean} success - Whether the request was successful
- * @property {string} [errorType] - Type of error if request failed
- * @property {number} [confidenceScore] - Confidence score of the response (0-1)
- * @property {Date} timestamp - When the request was processed
+ * Enhanced performance metrics with more detailed tracking
  */
 export interface ModelPerformanceMetrics {
   modelId: string;
-  requestType: string;
+  requestType: RequestComplexityType;
   responseTime: number;
   success: boolean;
   errorType?: string;
   confidenceScore?: number;
   timestamp: Date;
+  tokenCount?: number;
+  costEstimate?: number;
+  retryCount?: number;
 }
 
 /**
- * Request complexity analysis result
- *
- * @interface RequestComplexity
- * @property {'simple'|'moderate'|'complex'|'advanced'} type - Overall complexity classification
- * @property {object} factors - Individual complexity factors
- * @property {boolean} factors.hasImages - Whether request includes images
- * @property {boolean} factors.hasMultipleFiles - Whether request has multiple files
- * @property {boolean} factors.hasLongHistory - Whether chat history is extensive
- * @property {boolean} factors.requiresAnalysis - Whether deep analysis is needed
- * @property {boolean} factors.requiresPersonalization - Whether personalization is needed
- * @property {number} score - Numerical complexity score (0-100)
+ * Enhanced request complexity analysis
  */
 export interface RequestComplexity {
-  type: "simple" | "moderate" | "complex" | "advanced";
-  factors: {
-    hasImages: boolean;
-    hasMultipleFiles: boolean;
-    hasLongHistory: boolean;
-    requiresAnalysis: boolean;
-    requiresPersonalization: boolean;
-  };
+  type: RequestComplexityType;
+  factors: ComplexityFactors;
   score: number;
+  reasoning: string[];
+  recommendedModel: string;
+  fallbackModels: string[];
+}
+
+export type RequestComplexityType = "simple" | "moderate" | "complex" | "advanced";
+
+interface ComplexityFactors {
+  hasImages: boolean;
+  hasMultipleFiles: boolean;
+  hasLongHistory: boolean;
+  requiresAnalysis: boolean;
+  requiresPersonalization: boolean;
+  messageCount: number;
+  imageCount: number;
+  fileSize: number;
+  medicalComplexity: "low" | "medium" | "high";
+  urgencyLevel: "low" | "normal" | "high" | "urgent";
+}
+
+/**
+ * Model selection criteria with enhanced options
+ */
+export interface ModelSelectionCriteria {
+  complexity: RequestComplexity;
+  doctorLevel?: DoctorLevel;
+  requiresVision?: boolean;
+  requiresStreaming?: boolean;
+  maxLatency?: number;
+  maxCost?: number;
+  preferredModels?: string[];
+  excludedModels?: string[];
+  language?: string;
+  medicalSpecialty?: string;
+}
+
+/**
+ * Model capabilities and characteristics
+ */
+interface ModelCapabilities {
+  id: string;
+  name: string;
+  maxTokens: number;
+  supportsVision: boolean;
+  supportsStreaming: boolean;
+  averageLatency: number;
+  costPerToken: number;
+  qualityScore: number;
+  medicalAccuracy: number;
+  supportedLanguages: string[];
+  complexityRating: RequestComplexityType[];
+}
+
+/**
+ * Enhanced AI Model Router with improved architecture
+ */
+export class AIModelRouter {
+  private performanceHistory: ModelPerformanceMetrics[] = [];
+  private modelCapabilities: Map<string, ModelCapabilities> = new Map();
+  private readonly maxHistorySize = 1000;
+  private readonly appName: string;
+
+  constructor(appName: string = "SihatTCM") {
+    this.appName = appName;
+    this.initializeModelCapabilities();
+  }
+
+  /**
+   * Initialize model capabilities database using constants
+   */
+  private initializeModelCapabilities(): void {
+    Object.entries(MODEL_CAPABILITIES).forEach(([modelId, capabilities]) => {
+      this.modelCapabilities.set(modelId, {
+        id: modelId,
+        name: this.getModelDisplayName(modelId),
+        ...capabilities,
+        supportedLanguages: ["en", "zh", "ms"], // From constants
+      });
+    });
+  }
+
+  /**
+   * Get display name for model
+   */
+  private getModelDisplayName(modelId: string): string {
+    const displayNames: Record<string, string> = {
+      [AI_MODELS.GEMINI_2_FLASH]: "Gemini 2.0 Flash",
+      [AI_MODELS.GEMINI_2_5_PRO]: "Gemini 2.5 Pro", 
+      [AI_MODELS.GEMINI_3_PRO_PREVIEW]: "Gemini 3.0 Pro Preview",
+    };
+    return displayNames[modelId] || modelId;
+  }
+
+  /**
+   * Enhanced complexity analysis with detailed reasoning
+   */
+  public analyzeComplexity(request: {
+    messages?: any[];
+    images?: any[];
+    files?: any[];
+    requiresAnalysis?: boolean;
+    requiresPersonalization?: boolean;
+    medicalHistory?: any;
+    urgency?: string;
+  }): RequestComplexity {
+    const factors: ComplexityFactors = {
+      hasImages: Boolean(request.images?.length),
+      hasMultipleFiles: Boolean(request.files && request.files.length > 1),
+      hasLongHistory: Boolean(request.messages && request.messages.length > 10),
+      requiresAnalysis: Boolean(request.requiresAnalysis),
+      requiresPersonalization: Boolean(request.requiresPersonalization),
+      messageCount: request.messages?.length || 0,
+      imageCount: request.images?.length || 0,
+      fileSize: this.calculateTotalFileSize(request.files),
+      medicalComplexity: this.assessMedicalComplexity(request),
+      urgencyLevel: (request.urgency as any) || "normal",
+    };
+
+    const score = this.calculateComplexityScore(factors);
+    const type = this.determineComplexityType(score);
+    const reasoning = this.generateComplexityReasoning(factors, score);
+    const { recommendedModel, fallbackModels } = this.getModelRecommendations(type, factors);
+
+    return {
+      type,
+      factors,
+      score,
+      reasoning,
+      recommendedModel,
+      fallbackModels,
+    };
+  }
+
+  /**
+   * Enhanced model selection with comprehensive criteria evaluation
+   */
+  public selectOptimalModel(criteria: ModelSelectionCriteria): {
+    primaryModel: string;
+    fallbackModels: string[];
+    reasoning: string[];
+  } {
+    try {
+      const { complexity, doctorLevel, requiresVision, requiresStreaming } = criteria;
+      
+      // Filter models based on requirements
+      const eligibleModels = Array.from(this.modelCapabilities.values()).filter(model => {
+        // Check vision requirement
+        if (requiresVision && !model.supportsVision) return false;
+        
+        // Check streaming requirement
+        if (requiresStreaming && !model.supportsStreaming) return false;
+        
+        // Check complexity compatibility
+        if (!model.complexityRating.includes(complexity.type)) return false;
+        
+        // Check excluded models
+        if (criteria.excludedModels?.includes(model.id)) return false;
+        
+        return true;
+      });
+
+      if (eligibleModels.length === 0) {
+        throw new AIModelError("No eligible models found for the given criteria");
+      }
+
+      // Score models based on criteria
+      const scoredModels = eligibleModels.map(model => ({
+        model,
+        score: this.scoreModel(model, criteria),
+      }));
+
+      // Sort by score (descending)
+      scoredModels.sort((a, b) => b.score - a.score);
+
+      const primaryModel = scoredModels[0].model.id;
+      const fallbackModels = scoredModels.slice(1, 4).map(sm => sm.model.id);
+      
+      const reasoning = [
+        `Selected ${scoredModels[0].model.name} as primary model`,
+        `Complexity: ${complexity.type} (score: ${complexity.score})`,
+        `Doctor level: ${doctorLevel || 'not specified'}`,
+        `Vision required: ${requiresVision ? 'yes' : 'no'}`,
+        `Streaming required: ${requiresStreaming ? 'yes' : 'no'}`,
+      ];
+
+      return {
+        primaryModel,
+        fallbackModels,
+        reasoning,
+      };
+    } catch (error) {
+      throw ErrorFactory.fromUnknownError(error, {
+        component: 'AIModelRouter',
+        action: 'selectOptimalModel',
+        metadata: { criteria },
+      });
+    }
+  }
+
+  /**
+   * Generate text with intelligent routing and comprehensive error handling
+   */
+  public async generateWithRouting(
+    criteria: ModelSelectionCriteria,
+    options: GenerateCallOptions
+  ): Promise<any> {
+    const startTime = Date.now();
+    let selectedModel: string | null = null;
+    let retryCount = 0;
+
+    try {
+      const { primaryModel, fallbackModels, reasoning } = this.selectOptimalModel(criteria);
+      selectedModel = primaryModel;
+
+      devLog(`[AIModelRouter] Using model: ${primaryModel}`, { reasoning });
+
+      // Prepare fallback options
+      const fallbackOptions: FallbackOptions = {
+        fallbackModels: [primaryModel, ...fallbackModels],
+        maxRetries: 3,
+        retryDelay: 1000,
+        onFallback: (model, error, attempt) => {
+          retryCount = attempt;
+          logError(`[AIModelRouter] Fallback to ${model} (attempt ${attempt})`, error);
+        },
+      };
+
+      const result = await generateTextWithFallback(options, fallbackOptions);
+
+      // Record successful metrics
+      this.recordMetrics({
+        modelId: selectedModel,
+        requestType: criteria.complexity.type,
+        responseTime: Date.now() - startTime,
+        success: true,
+        timestamp: new Date(),
+        retryCount,
+      });
+
+      return result;
+    } catch (error) {
+      // Record failure metrics
+      if (selectedModel) {
+        this.recordMetrics({
+          modelId: selectedModel,
+          requestType: criteria.complexity.type,
+          responseTime: Date.now() - startTime,
+          success: false,
+          errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+          timestamp: new Date(),
+          retryCount,
+        });
+      }
+
+      throw ErrorFactory.fromUnknownError(error, {
+        component: 'AIModelRouter',
+        action: 'generateWithRouting',
+        metadata: { criteria, selectedModel, retryCount },
+      });
+    }
+  }
+
+  /**
+   * Stream text with intelligent routing
+   */
+  public async streamWithRouting(
+    criteria: ModelSelectionCriteria,
+    options: StreamCallOptions
+  ): Promise<any> {
+    const startTime = Date.now();
+    let selectedModel: string | null = null;
+    let retryCount = 0;
+
+    try {
+      const { primaryModel, fallbackModels, reasoning } = this.selectOptimalModel(criteria);
+      selectedModel = primaryModel;
+
+      devLog(`[AIModelRouter] Streaming with model: ${primaryModel}`, { reasoning });
+
+      const fallbackOptions: FallbackOptions = {
+        fallbackModels: [primaryModel, ...fallbackModels],
+        maxRetries: 2, // Fewer retries for streaming
+        retryDelay: 500,
+        onFallback: (model, error, attempt) => {
+          retryCount = attempt;
+          logError(`[AIModelRouter] Stream fallback to ${model} (attempt ${attempt})`, error);
+        },
+      };
+
+      const result = await streamTextWithFallback(options, fallbackOptions);
+
+      // Record successful metrics
+      this.recordMetrics({
+        modelId: selectedModel,
+        requestType: criteria.complexity.type,
+        responseTime: Date.now() - startTime,
+        success: true,
+        timestamp: new Date(),
+        retryCount,
+      });
+
+      return result;
+    } catch (error) {
+      // Record failure metrics
+      if (selectedModel) {
+        this.recordMetrics({
+          modelId: selectedModel,
+          requestType: criteria.complexity.type,
+          responseTime: Date.now() - startTime,
+          success: false,
+          errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+          timestamp: new Date(),
+          retryCount,
+        });
+      }
+
+      throw ErrorFactory.fromUnknownError(error, {
+        component: 'AIModelRouter',
+        action: 'streamWithRouting',
+        metadata: { criteria, selectedModel, retryCount },
+      });
+    }
+  }
+
+  /**
+   * Get performance analytics
+   */
+  public getPerformanceAnalytics(): {
+    totalRequests: number;
+    successRate: number;
+    averageResponseTime: number;
+    modelPerformance: Record<string, {
+      requests: number;
+      successRate: number;
+      averageResponseTime: number;
+    }>;
+    recentErrors: ModelPerformanceMetrics[];
+  } {
+    const totalRequests = this.performanceHistory.length;
+    const successfulRequests = this.performanceHistory.filter(m => m.success).length;
+    const successRate = totalRequests > 0 ? successfulRequests / totalRequests : 0;
+    
+    const totalResponseTime = this.performanceHistory.reduce((sum, m) => sum + m.responseTime, 0);
+    const averageResponseTime = totalRequests > 0 ? totalResponseTime / totalRequests : 0;
+
+    // Model-specific performance
+    const modelPerformance: Record<string, any> = {};
+    for (const model of this.modelCapabilities.keys()) {
+      const modelMetrics = this.performanceHistory.filter(m => m.modelId === model);
+      const modelSuccessful = modelMetrics.filter(m => m.success).length;
+      
+      modelPerformance[model] = {
+        requests: modelMetrics.length,
+        successRate: modelMetrics.length > 0 ? modelSuccessful / modelMetrics.length : 0,
+        averageResponseTime: modelMetrics.length > 0 
+          ? modelMetrics.reduce((sum, m) => sum + m.responseTime, 0) / modelMetrics.length 
+          : 0,
+      };
+    }
+
+    // Recent errors (last 10)
+    const recentErrors = this.performanceHistory
+      .filter(m => !m.success)
+      .slice(-10);
+
+    return {
+      totalRequests,
+      successRate,
+      averageResponseTime,
+      modelPerformance,
+      recentErrors,
+    };
+  }
+
+  // Private helper methods
+
+  private calculateTotalFileSize(files?: any[]): number {
+    if (!files) return 0;
+    return files.reduce((total, file) => total + (file.size || 0), 0);
+  }
+
+  private assessMedicalComplexity(request: any): "low" | "medium" | "high" {
+    // Assess based on medical history, symptoms, etc.
+    if (request.medicalHistory?.conditions?.length > 3) return "high";
+    if (request.medicalHistory?.medications?.length > 2) return "medium";
+    return "low";
+  }
+
+  /**
+   * Calculate complexity score using constants
+   */
+  private calculateComplexityScore(factors: ComplexityFactors): number {
+    let score = 0;
+    
+    // Base scoring using constants
+    score += factors.messageCount * COMPLEXITY_SCORING.BASE_MESSAGE_WEIGHT;
+    score += factors.imageCount * COMPLEXITY_SCORING.IMAGE_WEIGHT;
+    score += Math.min(factors.fileSize / 1024 / 1024, 10) * COMPLEXITY_SCORING.FILE_SIZE_WEIGHT; // MB to score
+    
+    // Boolean factors using constants
+    if (factors.hasImages) score += COMPLEXITY_SCORING.IMAGE_BONUS;
+    if (factors.hasMultipleFiles) score += COMPLEXITY_SCORING.MULTIPLE_FILES_BONUS;
+    if (factors.hasLongHistory) score += COMPLEXITY_SCORING.LONG_HISTORY_BONUS;
+    if (factors.requiresAnalysis) score += COMPLEXITY_SCORING.ANALYSIS_BONUS;
+    if (factors.requiresPersonalization) score += COMPLEXITY_SCORING.PERSONALIZATION_BONUS;
+    
+    // Medical complexity using constants
+    score += COMPLEXITY_SCORING.MEDICAL_COMPLEXITY[factors.medicalComplexity.toUpperCase() as keyof typeof COMPLEXITY_SCORING.MEDICAL_COMPLEXITY] || 0;
+    
+    // Urgency using constants
+    score += COMPLEXITY_SCORING.URGENCY_LEVELS[factors.urgencyLevel.toUpperCase() as keyof typeof COMPLEXITY_SCORING.URGENCY_LEVELS] || 0;
+    
+    return Math.min(score, COMPLEXITY_SCORING.MAX_SCORE);
+  }
+
+  /**
+   * Determine complexity type using constants
+   */
+  private determineComplexityType(score: number): RequestComplexityType {
+    if (score >= COMPLEXITY_SCORING.THRESHOLDS.ADVANCED) return "advanced";
+    if (score >= COMPLEXITY_SCORING.THRESHOLDS.COMPLEX) return "complex";
+    if (score >= COMPLEXITY_SCORING.THRESHOLDS.MODERATE) return "moderate";
+    return "simple";
+  }
+
+  private generateComplexityReasoning(factors: ComplexityFactors, score: number): string[] {
+    const reasoning: string[] = [];
+    
+    reasoning.push(`Overall complexity score: ${score}/100`);
+    
+    if (factors.hasImages) reasoning.push("Contains images requiring vision analysis");
+    if (factors.hasMultipleFiles) reasoning.push("Multiple files need processing");
+    if (factors.hasLongHistory) reasoning.push("Long conversation history");
+    if (factors.requiresAnalysis) reasoning.push("Requires deep medical analysis");
+    if (factors.requiresPersonalization) reasoning.push("Needs personalized recommendations");
+    if (factors.medicalComplexity === "high") reasoning.push("High medical complexity detected");
+    if (factors.urgencyLevel === "urgent") reasoning.push("Urgent priority level");
+    
+    return reasoning;
+  }
+
+  private getModelRecommendations(type: RequestComplexityType, factors: ComplexityFactors): {
+    recommendedModel: string;
+    fallbackModels: string[];
+  } {
+    switch (type) {
+      case "advanced":
+        return {
+          recommendedModel: AI_MODELS.GEMINI_3_PRO_PREVIEW,
+          fallbackModels: [AI_MODELS.GEMINI_2_5_PRO, AI_MODELS.GEMINI_2_FLASH],
+        };
+      case "complex":
+        return {
+          recommendedModel: AI_MODELS.GEMINI_2_5_PRO,
+          fallbackModels: [AI_MODELS.GEMINI_3_PRO_PREVIEW, AI_MODELS.GEMINI_2_FLASH],
+        };
+      case "moderate":
+        return {
+          recommendedModel: factors.hasImages ? AI_MODELS.GEMINI_2_5_PRO : AI_MODELS.GEMINI_2_FLASH,
+          fallbackModels: [AI_MODELS.GEMINI_2_5_PRO, AI_MODELS.GEMINI_2_FLASH],
+        };
+      default: // simple
+        return {
+          recommendedModel: AI_MODELS.GEMINI_2_FLASH,
+          fallbackModels: [AI_MODELS.GEMINI_2_5_PRO],
+        };
+    }
+  }
+
+  private scoreModel(model: ModelCapabilities, criteria: ModelSelectionCriteria): number {
+    let score = 0;
+    
+    // Base quality score
+    score += model.qualityScore * 40;
+    
+    // Medical accuracy for medical applications
+    score += model.medicalAccuracy * 30;
+    
+    // Latency preference (lower is better)
+    const latencyScore = Math.max(0, 20 - (model.averageLatency / 100));
+    score += latencyScore;
+    
+    // Cost efficiency (lower cost is better)
+    const costScore = Math.max(0, 10 - (model.costPerToken * 1000000));
+    score += costScore;
+    
+    // Preferred models bonus
+    if (criteria.preferredModels?.includes(model.id)) {
+      score += 20;
+    }
+    
+    // Language support
+    if (criteria.language && model.supportedLanguages.includes(criteria.language)) {
+      score += 10;
+    }
+    
+    return score;
+  }
+
+  private recordMetrics(metrics: Omit<ModelPerformanceMetrics, 'timestamp'> & { timestamp: Date }): void {
+    this.performanceHistory.push(metrics);
+    
+    // Maintain history size limit
+    if (this.performanceHistory.length > this.maxHistorySize) {
+      this.performanceHistory = this.performanceHistory.slice(-this.maxHistorySize);
+    }
+    
+    // Log performance data
+    devLog(`[AIModelRouter] Performance recorded`, {
+      model: metrics.modelId,
+      success: metrics.success,
+      responseTime: metrics.responseTime,
+      retryCount: metrics.retryCount,
+    });
+  }
 }
 
 export interface ModelSelectionCriteria {

@@ -64,7 +64,7 @@ export function UploadMedicineStep({
     filesRef.current = files;
   }, [onComplete, onSkip, onBack, files]);
 
-  // Load from Health Portfolio on mount
+  // Load from Basic Profile on mount
   useEffect(() => {
     async function loadPortfolioMedicines() {
       if (files.length > 0) return; // Don't overwrite if already have files

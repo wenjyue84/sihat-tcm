@@ -30,6 +30,7 @@ interface ReportActionsProps {
   hasSaved: boolean;
   language: string;
   variants: any;
+  isDoctorView?: boolean;
 }
 
 // Translations for the guest dialog
@@ -82,6 +83,7 @@ export function ReportActions({
   hasSaved,
   language,
   variants,
+  isDoctorView = false,
 }: ReportActionsProps) {
   const { user } = useAuth();
   const router = useRouter();
@@ -171,8 +173,8 @@ export function ReportActions({
               onClick={onSave}
               disabled={isSaving || hasSaved}
               className={`px-5 py-2.5 rounded-full transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center ${hasSaved
-                  ? "bg-green-100 border border-green-200 text-green-700 cursor-default"
-                  : "bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600"
+                ? "bg-green-100 border border-green-200 text-green-700 cursor-default"
+                : "bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600"
                 }`}
             >
               {isSaving ? (
@@ -193,14 +195,16 @@ export function ReportActions({
               )}
             </button>
 
-            <button
-              onClick={onRequestVerification}
-              className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center"
-            >
-              <BadgeCheck className="h-4 w-4" />
-              <span className="hidden sm:inline">{t.report.requestDoctorVerification}</span>
-              <span className="sm:hidden">{t.report.requestDoctorVerification.slice(0, 10)}</span>
-            </button>
+            {!isDoctorView && (
+              <button
+                onClick={onRequestVerification}
+                className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center"
+              >
+                <BadgeCheck className="h-4 w-4" />
+                <span className="hidden sm:inline">{t.report.requestDoctorVerification}</span>
+                <span className="sm:hidden">{t.report.requestDoctorVerification.slice(0, 10)}</span>
+              </button>
+            )}
           </div>
 
           {/* Navigation Group */}

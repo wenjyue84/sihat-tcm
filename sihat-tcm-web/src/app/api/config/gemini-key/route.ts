@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getGeminiApiKey, hasCustomApiKey } from "@/lib/settings";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
 /**
  * API Endpoint: GET /api/config/gemini-key
@@ -31,14 +32,15 @@ export async function GET(request: NextRequest) {
       apiKey: apiKey,
       source: hasCustomApiKey() ? "admin_dashboard" : "environment_variable",
     });
-  } catch (error: any) {
-    console.error("[API /api/config/gemini-key] Error:", error);
+  } catch (error: unknown) {
+    const errorResponse = createErrorResponse(error, "API/config/gemini-key");
+    const errorBody = await errorResponse.json();
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to retrieve API key",
+        ...errorBody,
       },
-      { status: 500 }
+      { status: errorResponse.status }
     );
   }
 }

@@ -72,7 +72,7 @@ export const ms: TranslationKeys = {
     login: "Log Masuk / Daftar",
     logout: "Log Keluar",
     dashboard: "Papan Pemuka",
-    profile: "Portfolio Kesihatan",
+    profile: "Profil Asas",
     settings: "Tetapan",
     test: "Ujian",
     loginShort: "Log Masuk",
@@ -92,7 +92,7 @@ export const ms: TranslationKeys = {
       vitalityRhythm: "Ritma Vitaliti",
       community: "Taman Penawar",
       family: "Penjagaan Keluarga",
-      profile: "Portfolio Kesihatan",
+      profile: "Profil Asas",
       documents: "Dokumen",
       settings: "Tetapan",
     },
@@ -159,7 +159,7 @@ export const ms: TranslationKeys = {
       deleteConfirm: "Adakah anda pasti mahu memadam dokumen ini?",
     },
     healthPortfolio: {
-      title: "Portfolio Kesihatan",
+      title: "Profil Asas",
       personalDetails: "Butiran Peribadi",
       healthMetrics: "Metrik Kesihatan",
       medicines: {
@@ -248,7 +248,7 @@ export const ms: TranslationKeys = {
     },
   },
   basicInfo: {
-    title: "Portfolio Kesihatan",
+    title: "Profil Asas",
     subtitle: "Sila berikan maklumat asas anda untuk membantu kami mendiagnosis anda dengan tepat.",
     fullName: "Nama Penuh",
     fullNamePlaceholder: "Masukkan nama anda",

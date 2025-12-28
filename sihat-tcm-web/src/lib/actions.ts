@@ -10,13 +10,11 @@ import type {
   DiagnosisSession,
   SaveDiagnosisInput,
   GuestDiagnosisSession,
-  SaveGuestDiagnosisInput,
   MedicalReport,
   SaveMedicalReportInput,
   HealthTrends,
   ActionResult,
   DiagnosisReport,
-  VitalSigns,
   FamilyMember,
   FamilyMemberWithDiagnosis,
   SaveFamilyMemberInput,
@@ -27,77 +25,15 @@ import type {
 // Types are imported from @/types/database directly by consumers
 // export type { DiagnosisSession, SaveDiagnosisInput, MedicalReport, SaveMedicalReportInput };
 
-/**
- * Helper function to extract symptoms from diagnosis report
- */
-function extractSymptomsFromReport(report: DiagnosisReport): string[] | null {
-  const symptoms: string[] = [];
+// Import shared extraction utilities
+import {
+  extractSymptomsFromReport,
+  extractMedicinesFromReport,
+  extractVitalSignsFromReport,
+  extractTreatmentPlanFromReport,
+} from "./utils/report-extraction";
 
-  // Extract from analysis key_findings - parse common symptom keywords
-  if (report.analysis?.key_findings?.from_inquiry) {
-    const inquiryText = report.analysis.key_findings.from_inquiry.toLowerCase();
-
-    // Common symptom keywords to look for
-    const symptomKeywords: Record<string, string> = {
-      headache: "Headache",
-      fatigue: "Fatigue",
-      dizziness: "Dizziness",
-      nausea: "Nausea",
-      insomnia: "Insomnia",
-      "night sweats": "Night sweats",
-      "dry mouth": "Dry mouth",
-      "chest tightness": "Chest tightness",
-      bloating: "Bloating",
-      palpitations: "Palpitations",
-      "shortness of breath": "Shortness of breath",
-      "back pain": "Back pain",
-      "joint pain": "Joint pain",
-      "cold extremities": "Cold extremities",
-      "hot flashes": "Hot flashes",
-    };
-
-    // Check for each symptom keyword
-    for (const [keyword, symptom] of Object.entries(symptomKeywords)) {
-      if (inquiryText.includes(keyword) && !symptoms.includes(symptom)) {
-        symptoms.push(symptom);
-      }
-    }
-  }
-
-  return symptoms.length > 0 ? symptoms : null;
-}
-
-/**
- * Helper function to extract medicines from diagnosis report
- */
-function extractMedicinesFromReport(report: DiagnosisReport): string[] | null {
-  // Check input_data first (most reliable)
-  if (report.input_data?.medicines && report.input_data.medicines.length > 0) {
-    return report.input_data.medicines;
-  }
-
-  // Extract from herbal_formulas in recommendations
-  const medicines: string[] = [];
-  if (report.recommendations?.herbal_formulas) {
-    report.recommendations.herbal_formulas.forEach((formula) => {
-      if (formula.name) {
-        medicines.push(formula.name);
-      }
-    });
-  }
-
-  return medicines.length > 0 ? medicines : null;
-}
-
-/**
- * Helper function to extract vital signs from diagnosis report
- */
-function extractVitalSignsFromReport(report: DiagnosisReport): VitalSigns | null {
-  if (report.patient_summary?.vital_signs) {
-    return report.patient_summary.vital_signs;
-  }
-  return null;
-}
+// extractVitalSignsFromReport is now imported from shared utility
 
 /**
  * Helper function to get mock symptoms based on diagnosis type
@@ -153,36 +89,7 @@ function getMockMedicinesForDiagnosis(diagnosis: string): string[] {
   return ["General TCM Formula"];
 }
 
-/**
- * Helper function to extract treatment plan summary from diagnosis report
- */
-function extractTreatmentPlanFromReport(report: DiagnosisReport): string | null {
-  const planParts: string[] = [];
-
-  if (report.recommendations) {
-    const rec = report.recommendations;
-
-    // Dietary recommendations
-    if (rec.food_therapy?.beneficial && rec.food_therapy.beneficial.length > 0) {
-      planParts.push(`Diet: ${rec.food_therapy.beneficial.slice(0, 3).join(", ")}`);
-    } else if (rec.food && rec.food.length > 0) {
-      planParts.push(`Diet: ${rec.food.slice(0, 3).join(", ")}`);
-    }
-
-    // Lifestyle recommendations
-    if (rec.lifestyle && rec.lifestyle.length > 0) {
-      planParts.push(`Lifestyle: ${rec.lifestyle.slice(0, 2).join(", ")}`);
-    }
-
-    // Herbal formulas
-    if (rec.herbal_formulas && rec.herbal_formulas.length > 0) {
-      const formulaNames = rec.herbal_formulas.map((f) => f.name).join(", ");
-      planParts.push(`Herbs: ${formulaNames}`);
-    }
-  }
-
-  return planParts.length > 0 ? planParts.join(" | ") : null;
-}
+// extractTreatmentPlanFromReport is now imported from shared utility
 
 /**
  * Save a new diagnosis session to the database
@@ -300,7 +207,8 @@ export async function saveDiagnosis(
     const { data, error } = await supabase
       .from("diagnosis_sessions")
       .insert({
-        user_id: user.id,
+        user_id: reportData.user_id || user.id,
+        patient_id: reportData.patient_id,
         primary_diagnosis: reportData.primary_diagnosis,
         constitution: reportData.constitution,
         overall_score: reportData.overall_score,
@@ -515,7 +423,7 @@ export async function getPatientHistory(
       .from("diagnosis_sessions")
       .select("id, is_hidden", { count: "exact" })
       .eq("user_id", user.id);
-    
+
     devLog("info", "Actions", "[getPatientHistory] Debug check", {
       userId: user.id,
       totalRecords: allCount || 0,
@@ -549,7 +457,7 @@ export async function getPatientHistory(
 
     return {
       success: true,
-      data: data as DiagnosisSession[],
+      data: data as unknown as DiagnosisSession[],
       total: count || 0,
     };
   } catch (error: unknown) {
@@ -1494,7 +1402,7 @@ export async function getLastSymptoms(): Promise<ActionResult<string>> {
 
 /**
  * Get the medicines from the last diagnosis for the current user
- * UPDATED: Checks Health Portfolio (patient_medicines) first
+ * UPDATED: Checks Basic Profile (patient_medicines) first
  * @returns Array of medicine names or error
  */
 export async function getLastMedicines(): Promise<ActionResult<string[]>> {
@@ -1514,7 +1422,7 @@ export async function getLastMedicines(): Promise<ActionResult<string[]>> {
       };
     }
 
-    // 1. Try to get medicines from Health Portfolio (patient_medicines)
+    // 1. Try to get medicines from Basic Profile (patient_medicines)
     const { data: portfolioMedicines, error: portfolioError } = await supabase
       .from("patient_medicines")
       .select("name")
@@ -1560,7 +1468,7 @@ export async function getLastMedicines(): Promise<ActionResult<string[]>> {
 }
 
 /**
- * Get all medicines currently in use for the patient (Health Portfolio)
+ * Get all medicines currently in use for the patient (Basic Profile)
  */
 export async function getPatientMedicines(): Promise<ActionResult<PatientMedicine[]>> {
   try {
@@ -1955,7 +1863,7 @@ export async function getPatientSessionIds(userId: string): Promise<ActionResult
     if (error) throw error;
 
     return { success: true, data: data.map(s => s.id) };
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: "Failed to fetch session IDs" };
   }
 }
@@ -1977,7 +1885,7 @@ export async function translateUserProfile(userId: string, targetLanguage: strin
       await supabase.from("profiles").update({ medical_history: object.medical_history }).eq("id", userId);
     }
     return { success: true };
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: "Profile translation failed" };
   }
 }

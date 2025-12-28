@@ -5,7 +5,7 @@
  * the database with fallback to library defaults.
  */
 
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase/client";
 import { devLog, logError } from "@/lib/systemLogger";
 import {
   INTERACTIVE_CHAT_PROMPT,

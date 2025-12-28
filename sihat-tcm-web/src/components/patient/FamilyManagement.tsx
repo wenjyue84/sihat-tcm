@@ -40,6 +40,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useLanguage } from "@/stores/useAppStore";
+import { formatDate } from "@/lib/utils/date-formatting";
 import {
   getFamilyMembers,
   addFamilyMember,
@@ -195,13 +196,7 @@ export function FamilyManagement() {
     return { bg: "bg-red-100", text: "text-red-700" };
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
+  // formatDate is now imported from shared utility
 
   return (
     <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">

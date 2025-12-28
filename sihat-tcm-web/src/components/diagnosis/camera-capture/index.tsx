@@ -14,29 +14,48 @@ import { AccessibilityFeedback } from "./AccessibilityFeedback";
 import { CameraControls } from "./CameraControls";
 import { CameraPreview } from "./CameraPreview";
 
+interface CameraCaptureData {
+  image?: string;
+  quality?: {
+    score?: number;
+    issues?: string[];
+  };
+}
+
 interface CameraCaptureProps {
-  onComplete: (data: any) => void;
+  onComplete?: (data: CameraCaptureData) => void;
+  onCapture?: (data: { image?: string }) => void;
+  onSkip?: () => void;
   title?: string;
   instruction?: string;
   required?: boolean;
   mode?: "tongue" | "face" | "body";
+  type?: "tongue" | "face" | "body";
   onBack?: () => void;
+  initialFacingMode?: "user" | "environment";
 }
 
 export function CameraCapture({
   onComplete,
+  onCapture,
+  onSkip,
   title,
   instruction,
   required = false,
-  mode = "face",
+  mode,
+  type,
   onBack,
+  initialFacingMode = "user",
 }: CameraCaptureProps) {
   const { t } = useLanguage();
   const { setNavigationState } = useDiagnosisProgress();
 
+  // Support both mode and type props
+  const captureMode = mode || type || "face";
+
   // Custom Hooks
   const { stream, error, isLoading, startCamera, stopCamera, toggleCamera, facingMode } =
-    useCamera();
+    useCamera(initialFacingMode);
 
   // Local UI State
   const [qualityResult, setQualityResult] = useState<ImageQualityResult | null>(null);
@@ -50,12 +69,16 @@ export function CameraCapture({
 
   // Refs
   const onCompleteRef = useRef(onComplete);
+  const onCaptureRef = useRef(onCapture);
+  const onSkipRef = useRef(onSkip);
   const onBackRef = useRef(onBack);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
+    onCaptureRef.current = onCapture;
+    onSkipRef.current = onSkip;
     onBackRef.current = onBack;
-  }, [onComplete, onBack]);
+  }, [onComplete, onCapture, onSkip, onBack]);
 
   // Quality Assessment Logic
   const startQualityAssessment = useCallback(
@@ -67,7 +90,7 @@ export function CameraCapture({
       const assessQuality = async () => {
         try {
           const validator = getImageQualityValidator();
-          const result = await validator.assessVideoFrame(video, mode);
+          const result = await validator.assessVideoFrame(video, captureMode);
           setQualityResult(result);
         } catch (error) {
           console.warn("[Quality] Assessment failed:", error);
@@ -77,7 +100,7 @@ export function CameraCapture({
       assessQuality();
       qualityCheckIntervalRef.current = setInterval(assessQuality, 2000);
     },
-    [mode]
+    [captureMode]
   );
 
   const stopQualityAssessment = useCallback(() => {
@@ -104,23 +127,32 @@ export function CameraCapture({
 
       try {
         const validator = getImageQualityValidator();
-        const finalQuality = await validator.analyzeImage(imageData, mode);
+        const finalQuality = await validator.analyzeImage(imageData, captureMode);
 
         stopCamera();
         stopQualityAssessment();
 
-        onCompleteRef.current({
-          image: imageData,
-          quality: finalQuality,
-        });
+        // Support both onCapture (simplified) and onComplete (legacy)
+        if (onCaptureRef.current) {
+          onCaptureRef.current({ image: imageData });
+        } else if (onCompleteRef.current) {
+          onCompleteRef.current({
+            image: imageData,
+            quality: finalQuality,
+          });
+        }
       } catch (error) {
         console.warn("[Quality] Final assessment failed:", error);
         stopCamera();
         stopQualityAssessment();
-        onCompleteRef.current({ image: imageData });
+        if (onCaptureRef.current) {
+          onCaptureRef.current({ image: imageData });
+        } else if (onCompleteRef.current) {
+          onCompleteRef.current({ image: imageData });
+        }
       }
     }
-  }, [mode, stopCamera, stopQualityAssessment]);
+  }, [captureMode, stopCamera, stopQualityAssessment]);
 
   // Cleanup
   useEffect(() => {
@@ -131,18 +163,29 @@ export function CameraCapture({
   const handleNext = useCallback(() => {
     const canSkip = !required || process.env.NODE_ENV === "development";
     if (canSkip) {
-      onCompleteRef.current({ image: null });
+      if (onSkipRef.current) {
+        onSkipRef.current();
+      } else if (onCompleteRef.current) {
+        onCompleteRef.current({ image: undefined });
+      }
     } else {
-      alert(t.camera.cameraError); // Simple alert for now, can be sophisticated
+      alert(t.camera.cameraError);
     }
   }, [required, t]);
 
   useEffect(() => {
     const canSkip = !required || process.env.NODE_ENV === "development";
+    const handleSkipNav = () => {
+      if (onSkipRef.current) {
+        onSkipRef.current();
+      } else if (onCompleteRef.current) {
+        onCompleteRef.current({ image: undefined });
+      }
+    };
     setNavigationState({
       onNext: handleNext,
       onBack: onBackRef.current,
-      onSkip: canSkip ? () => onCompleteRef.current({ image: null }) : undefined,
+      onSkip: canSkip ? handleSkipNav : undefined,
       showNext: true,
       showBack: !!onBackRef.current,
       showSkip: canSkip,
@@ -202,7 +245,7 @@ export function CameraCapture({
 
             <ImageQualityOverlay qualityResult={qualityResult} isVisible={showQualityOverlay} />
 
-            <CompositionGuideOverlay isVisible={showCompositionGuide} mode={mode} />
+            <CompositionGuideOverlay isVisible={showCompositionGuide} mode={captureMode} />
 
             <AccessibilityFeedback qualityResult={qualityResult} isEnabled={accessibilityMode} />
 

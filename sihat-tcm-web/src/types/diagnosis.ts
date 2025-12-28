@@ -26,13 +26,21 @@ export interface BasicInfo {
 // Inquiry Data
 // ============================================================================
 
+export interface FileData {
+  name: string;
+  file?: File;
+  extractedText?: string;
+  url?: string;
+  [key: string]: unknown;
+}
+
 export interface InquiryData {
   summary?: string;
   chat?: ChatMessage[];
   notes?: string;
   inquiryText?: string; // The processed summary text
-  reportFiles?: any[]; // Medical reports uploaded during inquiry
-  medicineFiles?: any[]; // Medicines uploaded during inquiry
+  reportFiles?: FileData[]; // Medical reports uploaded during inquiry
+  medicineFiles?: FileData[]; // Medicines uploaded during inquiry
 }
 
 export interface ChatMessage {

@@ -1,6 +1,7 @@
 import { google } from "@ai-sdk/google";
 import { streamText, generateText } from "ai";
 import { devLog } from "@/lib/systemLogger";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
 export const maxDuration = 60;
 
@@ -32,14 +33,15 @@ export async function POST(req: Request) {
     });
 
     return result.toTextStreamResponse();
-  } catch (error: any) {
-    console.error(`[test-gemini] FAILED:`, error.message);
+  } catch (error: unknown) {
+    const errorResponse = createErrorResponse(error, "API/test-gemini");
+    const errorBody = await errorResponse.json();
     return Response.json(
       {
         success: false,
-        error: error.message || "API test failed",
+        ...errorBody,
       },
-      { status: 500 }
+      { status: errorResponse.status }
     );
   }
 }

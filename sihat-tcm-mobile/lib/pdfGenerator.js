@@ -133,7 +133,11 @@ const pdfTranslations = {
 };
 
 /**
- * Helper: Extract string from various data formats
+ * Helper: Extract string from various data formats.
+ * Handles strings, objects (with primary_pattern, type, or summary), and general objects by JSON stringifying values.
+ * @param {string|object} val - The value to extract.
+ * @param {string} fallback - Fallback string if val is falsy.
+ * @returns {string} The extracted string.
  */
 const extractString = (val, fallback = '') => {
     if (!val) return fallback;

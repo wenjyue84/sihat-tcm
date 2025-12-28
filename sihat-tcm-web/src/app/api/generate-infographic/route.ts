@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
@@ -29,12 +30,10 @@ export async function POST(req: NextRequest) {
       // Replace with actual generated image URL in production
       imageUrl: generatePlaceholderDataUrl(reportData, patientInfo, style),
     });
-  } catch (error: any) {
-    console.error("[API /api/generate-infographic] Error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to generate infographic" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    const errorResponse = createErrorResponse(error, "API/generate-infographic");
+    const errorBody = await errorResponse.json();
+    return NextResponse.json(errorBody, { status: errorResponse.status });
   }
 }
 
