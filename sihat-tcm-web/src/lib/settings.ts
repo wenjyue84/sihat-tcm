@@ -1,5 +1,5 @@
 import { supabaseAdmin } from "./supabaseAdmin";
-import { devLog } from "./systemLogger";
+import { devLog } from "./systemLogger.client";
 
 // Default settings
 export const DEFAULT_SETTINGS = {

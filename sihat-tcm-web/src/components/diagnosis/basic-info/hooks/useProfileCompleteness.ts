@@ -53,7 +53,7 @@ interface UseProfileCompletenessResult {
 /**
  * Checks if a profile has all required fields for basic info
  */
-export function isProfileComplete(profile: any): boolean {
+export function validateProfileCompleteness(profile: any): boolean {
   return !!(
     profile?.full_name &&
     profile?.age &&
@@ -66,7 +66,7 @@ export function isProfileComplete(profile: any): boolean {
 /**
  * Extracts basic info data from a profile
  */
-export function extractProfileData(profile: any): Partial<BasicInfoData> {
+export function extractProfileData(profile: Record<string, unknown> | null | undefined): Partial<BasicInfoData> {
   return {
     name: profile.full_name || "",
     age: profile.age?.toString() || "",
@@ -109,7 +109,7 @@ export function useProfileCompleteness(
       return;
     }
 
-    const complete = isProfileComplete(profile);
+    const complete = validateProfileCompleteness(profile);
 
     if (complete) {
       const extracted = extractProfileData(profile);
@@ -130,7 +130,7 @@ export function useProfileCompleteness(
         if (
           confirm(
             t.basicInfo?.lockedProfile?.profileIncomplete ||
-              "Your profile is incomplete. Please complete your details in the Patient Portal first."
+            "Your profile is incomplete. Please complete your details in the Patient Portal first."
           )
         ) {
           router.push("/patient");

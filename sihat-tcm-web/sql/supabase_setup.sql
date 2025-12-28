@@ -86,5 +86,38 @@ insert into public.system_prompts (role, prompt_text)
 values ('doctor', 'You are an experienced 老中医 (traditional Chinese medicine practitioner) with decades of clinical experience. Your goal is to conduct a thorough inquiry (问诊 Wèn Zhěn) to gather complete information for an accurate TCM diagnosis.')
 on conflict (role) do nothing;
 
--- 5. Create a trigger to automatically create a profile entry when a new user signs up via Supabase Auth
--- Note: This is optional but helpful. For now, we handle profile creation in the client code (signup).
+-- 5. Create system_errors table
+create table if not exists public.system_errors (
+  id uuid default gen_random_uuid() primary key,
+  timestamp timestamp with time zone default timezone('utc'::text, now()) not null,
+  error_type text not null,
+  message text not null,
+  stack_trace text,
+  component text,
+  user_id uuid references auth.users(id) on delete set null,
+  session_id text,
+  url text,
+  user_agent text,
+  severity text check (severity in ('low', 'medium', 'high', 'critical')) default 'medium',
+  resolved boolean default false,
+  resolved_at timestamp with time zone,
+  resolved_by uuid references auth.users(id) on delete set null,
+  metadata jsonb default '{}'::jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Enable RLS
+alter table public.system_errors enable row level security;
+
+-- Policies for system_errors
+create policy "Admin users can view all system errors" on public.system_errors
+  for select using (
+    exists (
+      select 1 from public.profiles
+      where profiles.id = auth.uid() and profiles.role = 'admin'
+    )
+  );
+
+create policy "System can insert errors" on public.system_errors
+  for insert with check (true);

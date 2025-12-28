@@ -23,6 +23,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "./",
   },
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/favicon.ico", type: "image/x-icon" },
+    ],
+    apple: [{ url: "/apple-icon.png", type: "image/png" }],
+  },
   title: {
     default: "Sihat TCM - AI-Powered Traditional Chinese Medicine",
     template: "%s | Sihat TCM",

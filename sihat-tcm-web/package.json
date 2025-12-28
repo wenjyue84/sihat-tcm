@@ -6,7 +6,7 @@
     "node": "22.x"
   },
   "scripts": {
-    "dev": "next dev -p 3100",
+    "dev": "next dev -p 3100 --turbopack",
     "dev-https": "next dev -H 0.0.0.0 -p 3100 --experimental-https",
     "dev:tina": "tinacms dev -c \"next dev -p 3100\"",
     "dev:turbo": "next dev -p 3100 --turbo",

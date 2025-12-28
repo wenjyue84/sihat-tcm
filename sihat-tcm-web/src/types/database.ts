@@ -532,3 +532,29 @@ export interface TreatmentRecord {
   status: "active" | "completed" | "pending";
   flag?: PatientFlag | null;
 }
+
+// ============================================================================
+// System Errors (system_errors table)
+// ============================================================================
+
+export type ErrorSeverity = "low" | "medium" | "high" | "critical";
+
+export interface SystemError {
+  id: string;
+  timestamp: string;
+  error_type: string;
+  message: string;
+  stack_trace?: string | null;
+  component?: string | null;
+  user_id?: string | null;
+  session_id?: string | null;
+  url?: string | null;
+  user_agent?: string | null;
+  severity: ErrorSeverity;
+  resolved: boolean;
+  resolved_at?: string | null;
+  resolved_by?: string | null;
+  metadata?: Record<string, any> | null;
+  created_at: string;
+  updated_at: string;
+}

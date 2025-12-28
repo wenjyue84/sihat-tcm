@@ -117,12 +117,37 @@ export class ErrorBoundary extends Component<Props, State> {
       if (response.ok) {
         const result = await response.json();
         this.setState({ errorId: result.error_id });
-        console.log("Error logged to system:", result.error_id);
+        if (result.fallback) {
+          console.log("Error logged to system (fallback mode):", result.error_id);
+        } else {
+          console.log("Error logged to system:", result.error_id);
+        }
       } else {
-        console.error("Failed to log error to system:", response.statusText);
+        // Try to read error details from response body
+        let errorDetails = response.statusText;
+        try {
+          const errorBody = await response.json();
+          errorDetails = errorBody.error || errorBody.message || response.statusText;
+        } catch {
+          // If response body is not JSON, use statusText
+          errorDetails = response.statusText;
+        }
+
+        // Use console.warn instead of console.error to avoid error loops
+        // This is a logging failure, not a critical application error
+        console.warn("Failed to log error to system:", {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorDetails,
+          originalError: error.message,
+        });
       }
     } catch (loggingError) {
-      console.error("Error while logging to monitoring system:", loggingError);
+      // Use console.warn to avoid error loops
+      console.warn("Error while logging to monitoring system:", {
+        error: loggingError instanceof Error ? loggingError.message : String(loggingError),
+        originalError: error.message,
+      });
     }
   }
 

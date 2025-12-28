@@ -131,6 +131,9 @@ export function useDiagnosisWizard() {
   });
 
   // Navigation Sync Effect
+  // Destructure stable callbacks to avoid infinite loop (navigationHook object changes every render)
+  const { nextStep, prevStep } = navigationHook;
+
   useEffect(() => {
     const customNavSteps = [
       "basic_info",
@@ -147,14 +150,14 @@ export function useDiagnosisWizard() {
     const showNext = step !== "processing" && step !== "report";
 
     setNavigationState({
-      onNext: () => navigationHook.nextStep(step),
-      onBack: () => navigationHook.prevStep(step),
+      onNext: () => nextStep(step),
+      onBack: () => prevStep(step),
       onSkip: undefined,
       showNext,
       showBack,
       showSkip: false,
     });
-  }, [step, setNavigationState, navigationHook]);
+  }, [step, setNavigationState, nextStep, prevStep]);
 
   // Return Interface
   return {
@@ -182,8 +185,8 @@ export function useDiagnosisWizard() {
     handleStartNew,
 
     // Actions
-    nextStep: navigationHook.nextStep,
-    prevStep: navigationHook.prevStep,
+    nextStep,
+    prevStep,
     analyzeImage: imageAnalysisHook.analyzeImage,
     handleSkipAnalysis: imageAnalysisHook.handleSkipAnalysis,
     submitConsultation: submissionHook.submitConsultation,

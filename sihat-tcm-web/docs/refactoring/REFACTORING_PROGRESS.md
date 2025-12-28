@@ -221,6 +221,112 @@ DiagnosisSummary.tsx (~350 lines - orchestrator)
 - ✅ Test data utilities are testable independently
 - ✅ Better separation of concerns
 
+### 5. Component: `PatientCommunication.tsx` ✅
+
+**Before**: 297 lines with embedded data fetching, state management, and UI rendering  
+**After**: ~60 lines (orchestrator only)
+
+**Changes**:
+
+#### Extracted Hook
+- **`communication/hooks/usePatientCommunication.ts`** (~150 lines)
+  - `usePatientCommunication()` - Manages all data fetching and state
+  - `fetchRequests()` - Fetches verification requests
+  - `createRequest()` - Creates new verification request
+  - `sendMessage()` - Sends message in a conversation
+  - Handles loading and error states
+
+#### Extracted Components
+- **`communication/components/RequestList.tsx`** (~70 lines)
+  - Displays list of verification requests
+  - Handles request selection
+  - Shows request status and creation date
+
+- **`communication/components/ChatArea.tsx`** (~120 lines)
+  - Displays chat messages
+  - Handles message input and sending
+  - Shows pending/active status
+  - Empty state when no request selected
+
+**Files Created**:
+- `src/components/patient/communication/hooks/usePatientCommunication.ts`
+- `src/components/patient/communication/components/RequestList.tsx`
+- `src/components/patient/communication/components/ChatArea.tsx`
+- `src/components/patient/communication/index.ts`
+
+**Files Modified**:
+- `src/components/patient/PatientCommunication.tsx`
+
+**Impact**:
+- ✅ **80% reduction** in main component (297 → ~60 lines)
+- ✅ Data layer is reusable and testable
+- ✅ UI components are focused and reusable
+- ✅ Better separation of concerns
+- ✅ Removed direct Supabase calls from component
+
+### 6. Component: `InquiryWizard.tsx` ✅
+
+**Before**: 194 lines with embedded state management and step rendering  
+**After**: ~70 lines using extracted modules
+
+**Changes**:
+
+#### Extracted Hook
+- **`inquiry/hooks/useInquiryWizardState.ts`** (~100 lines)
+  - `useInquiryWizardState()` - Manages wizard state and navigation
+  - Handles step transitions
+  - Manages data updates (reports, medicines, chat, summary)
+  - Syncs with initialData
+
+#### Extracted Component
+- **`inquiry/components/InquiryStepRenderer.tsx`** (~120 lines)
+  - Renders appropriate step component with animations
+  - Handles all step transitions
+  - Centralized animation logic
+
+**Files Created**:
+- `src/components/diagnosis/inquiry/hooks/useInquiryWizardState.ts`
+- `src/components/diagnosis/inquiry/components/InquiryStepRenderer.tsx`
+- `src/components/diagnosis/inquiry/index.ts`
+
+**Files Modified**:
+- `src/components/diagnosis/InquiryWizard.tsx`
+
+**Impact**:
+- ✅ **64% reduction** in main component (194 → ~70 lines)
+- ✅ State management is reusable
+- ✅ Step rendering is testable independently
+- ✅ Better separation of concerns
+
+### 7. Component: `AudioRecorder.tsx` 🔄
+
+**Before**: 1039+ lines - very large component  
+**After**: In Progress
+
+**Changes**:
+
+#### Extracted Hooks (Started)
+- **`audio/hooks/useAudioRecording.ts`** (~80 lines)
+  - Manages recording state
+  - Handles audio data and URLs
+  - Manages recording duration and playback progress
+  - Error handling for microphone access
+
+- **`audio/hooks/useAudioAnalysis.ts`** (~30 lines)
+  - Manages analysis state
+  - Handles analysis results
+
+**Files Created**:
+- `src/components/diagnosis/audio/hooks/useAudioRecording.ts`
+- `src/components/diagnosis/audio/hooks/useAudioAnalysis.ts`
+
+**Status**: Hooks created, component update pending
+
+**Expected Impact**:
+- ✅ **Significant reduction** expected (1039 → ~600-700 lines)
+- ✅ Recording logic is reusable
+- ✅ Analysis logic is testable independently
+
 ---
 
 ## Next Steps

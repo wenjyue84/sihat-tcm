@@ -189,3 +189,38 @@ cd sihat-tcm-mobile && npx expo start --clear
 4. **Image analysis**: Accepts base64 in request body for both platforms
 5. **Mobile is JS-only**: No TypeScript in `sihat-tcm-mobile`
 6. **Expo Connection Error**: If phone shows "Blue Screen" or "Site can't be reached", restart the TP-Link WiFi Adapter on PC (Disable/Enable).
+
+---
+
+## Supabase Gotchas
+
+> 📚 **Full documentation**: See `SUPABASE_SCHEMA.md` in project root for complete table definitions and query patterns.
+
+### ⚠️ Critical Rules
+
+1. **NO Direct Relationship Joins** - Supabase schema cache doesn't have `profiles!user_id` style relationships. Use manual client-side joins instead:
+   ```typescript
+   // ❌ WRONG - Will cause "Could not find relationship" error
+   .select("*, profiles!user_id(*)")
+   
+   // ✅ CORRECT - Manual join
+   const { data: sessions } = await supabase.from("diagnosis_sessions").select("*");
+   const userIds = sessions.map(s => s.user_id).filter(Boolean);
+   const { data: profiles } = await supabase.from("profiles").select("*").in("id", userIds);
+   ```
+
+2. **Handle Missing Columns (42703 Error)** - Columns like `flag`, `notes` may not exist. Always add fallback:
+   ```typescript
+   const { data, error } = await supabase.from("profiles").select("id, full_name, flag");
+   if (error?.code === "42703") {
+     // Retry without optional column
+     return supabase.from("profiles").select("id, full_name");
+   }
+   ```
+
+3. **User ID Sources**:
+   - `diagnosis_sessions.user_id` → Links to `profiles.id` (registered users)
+   - `diagnosis_sessions.patient_id` → Links to `patients.id` (doctor-managed patients)
+   - Always check BOTH when building patient displays
+
+4. **Types Location**: All database types are in `sihat-tcm-web/src/types/database.ts`

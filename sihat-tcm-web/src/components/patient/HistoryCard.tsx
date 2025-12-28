@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -69,7 +71,7 @@ const getScoreTrend = (score?: number) => {
   return { icon: TrendingDown, color: "text-red-500", label: "Needs Attention" };
 };
 
-export function HistoryCard({ session, onClick, index = 0 }: HistoryCardProps) {
+export const HistoryCard = React.memo(function HistoryCard({ session, onClick, index = 0 }: HistoryCardProps) {
   const diagnosisTitle = extractDiagnosisTitle(session.primary_diagnosis);
   const constitutionTitle = extractConstitutionType(session.constitution);
   const trend = getScoreTrend(session.overall_score ?? undefined);
@@ -204,4 +206,6 @@ export function HistoryCard({ session, onClick, index = 0 }: HistoryCardProps) {
       </Card>
     </motion.div>
   );
-}
+});
+
+HistoryCard.displayName = "HistoryCard";

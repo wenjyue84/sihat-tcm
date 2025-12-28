@@ -231,7 +231,7 @@ After refactoring, each file should:
 ---
 
 **Last Updated**: January 2025  
-**Status**: In Progress
+**Status**: Excellent Progress - 6 Files Refactored, 17 Modules Created
 
 ---
 
@@ -270,7 +270,31 @@ After refactoring, each file should:
    - ✅ Created `wizard/utils/testDataHelpers.ts` - Test data utilities
    - ⏳ Update main component to use extracted modules
 
+### ✅ Recently Completed
+
+5. **`PatientCommunication.tsx`** - Extracted data layer and split UI components
+   - ✅ Created `communication/hooks/usePatientCommunication.ts` - Data fetching and state management
+   - ✅ Created `communication/components/RequestList.tsx` - Request list UI
+   - ✅ Created `communication/components/ChatArea.tsx` - Chat interface UI
+   - ✅ Updated component to use extracted modules
+   - Reduced component from 297 lines to ~60 lines (80% reduction!)
+   - Improved separation of concerns
+
+### ✅ Recently Completed
+
+6. **`InquiryWizard.tsx`** - Extracted state management and step rendering
+   - ✅ Created `inquiry/hooks/useInquiryWizardState.ts` - State and navigation management
+   - ✅ Created `inquiry/components/InquiryStepRenderer.tsx` - Step rendering with animations
+   - ✅ Updated component to use extracted modules
+   - Reduced component from 194 lines to ~70 lines (64% reduction!)
+   - Improved separation of concerns
+
+7. **`AudioRecorder.tsx`** - Started extracting hooks
+   - ✅ Created `audio/hooks/useAudioRecording.ts` - Recording state management
+   - ✅ Created `audio/hooks/useAudioAnalysis.ts` - Analysis state management
+   - ⏳ Continue extracting more logic from this large component
+
 ### 📋 Remaining
 
-- Complete `DiagnosisWizard.tsx` refactoring
-- Refactor `PatientCommunication.tsx` - extract data layer into hook
+- Complete `DiagnosisWizard.tsx` refactoring (integration pending)
+- Continue `AudioRecorder.tsx` refactoring (hooks created, component update pending)

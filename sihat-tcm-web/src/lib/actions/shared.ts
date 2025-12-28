@@ -6,7 +6,7 @@
  * @module actions/shared
  */
 
-import { devLog } from "@/lib/systemLogger";
+import { devLog } from "@/lib/systemLogger.client";
 
 /**
  * Helper function to get mock symptoms based on diagnosis type

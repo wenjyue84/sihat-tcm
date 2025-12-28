@@ -60,7 +60,7 @@ export function DiagnosticsTab({ testSuites }: DiagnosticsTabProps) {
             variant="ghost"
             size="sm"
             className="text-gray-400 hover:text-white"
-            onClick={() => router.push("/test-accessibility")}
+            onClick={() => router.push("/(dev)/test-accessibility")}
           >
             <ExternalLink className="w-4 h-4 mr-2" />
             Manual Testing
