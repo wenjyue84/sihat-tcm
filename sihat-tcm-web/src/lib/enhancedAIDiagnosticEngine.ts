@@ -67,11 +67,13 @@ export interface EnhancedDiagnosticRequest {
   doctorLevel?: DoctorLevel;
   language?: "en" | "zh" | "ms";
 
+import type { AIRequest } from "@/types/ai-request";
+
   // Request data
-  messages?: any[];
-  images?: any[];
-  files?: any[];
-  basicInfo?: any;
+  messages?: AIRequest["messages"];
+  images?: AIRequest["images"];
+  files?: AIRequest["files"];
+  basicInfo?: Record<string, unknown>;
 
   // Analysis requirements
   requiresPersonalization?: boolean;

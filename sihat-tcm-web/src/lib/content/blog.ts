@@ -94,11 +94,22 @@ export function getPostBySlug(slug: string, fields: string[] = [], lang: string 
   const fileContents = fs.readFileSync(fullPath, "utf8");
   const { data, content } = matter(fileContents);
 
-  type Items = {
-    [key: string]: any;
+  // Properly typed blog post items
+  type BlogPostItem = {
+    slug?: string;
+    content?: string;
+    readingTime?: string;
+    title?: string;
+    date?: string;
+    author?: string;
+    coverImage?: string;
+    excerpt?: string;
+    category?: string;
+    tags?: string[];
+    [key: string]: unknown; // Allow other frontmatter fields
   };
 
-  const items: Items = {};
+  const items: BlogPostItem = {};
 
   // Ensure only the minimal needed data is exposed
   fields.forEach((field) => {
@@ -158,3 +169,4 @@ export function getPaginatedPosts(
     },
   };
 }
+

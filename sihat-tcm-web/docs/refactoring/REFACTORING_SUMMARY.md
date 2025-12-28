@@ -154,6 +154,7 @@
 
 **Created**:
 - `src/types/pdf.ts` - PDF generation types
+- `src/types/ai-request.ts` - AI request/response types
 
 **Types Created**:
 - `PDFPatientInfo` - Patient information for PDFs
@@ -163,6 +164,12 @@
 - `CameraCaptureData` - Camera capture data
 - `IoTDeviceData` - IoT device data
 - `WesternReport` - Western doctor report structure
+- `AIImageData` - Image data for AI analysis
+- `AIFileData` - File data for AI analysis
+- `MedicalHistory` - Medical history data structure
+- `AIRequest` - Main AI request interface
+- `AIResponse` - AI response interface
+- `AudioRecorderData` - Audio recorder data structure
 
 **Components Updated**:
 - `DiagnosisReport.tsx` - Improved all prop types
@@ -172,6 +179,16 @@
 - `InquiryWizard` - Replaced `any[]` with `ChatMessage[]`
 - `FiveElementsRadar` - Improved diagnosis data type
 - `WesternDoctorChat` - Added proper report types
+- `AudioRecorder` - Created `AudioRecorderData` interface
+- `DiagnosisSummary` - Improved callback types
+
+**AI Files Updated**:
+- `lib/ai/interfaces/AIModel.ts` - Updated to use new types
+- `lib/aiModelRouter.ts` - Improved method parameter types
+- `lib/ai/analysis/ComplexityAnalyzer.ts` - All methods properly typed
+- `lib/ai/utils/RouterUtils.ts` - Updated utility functions
+- `lib/ai/ModelRouter.ts` - Improved type safety
+- `lib/enhancedAIDiagnosticEngine.ts` - Updated request types
 
 **Benefits**:
 - ✅ Better type safety and IntelliSense
@@ -180,6 +197,40 @@
 - ✅ Self-documenting code
 
 **Files Modified**: 7 component files, 2 type files
+
+---
+
+### Phase 9: AI Request Type Safety ✅
+
+**Completed**: Created comprehensive types for AI model requests
+
+**Created**:
+- `src/types/ai-request.ts` - Complete AI request/response type definitions
+
+**Types Created**:
+- `AIImageData` - Image data structure
+- `AIFileData` - File data structure
+- `MedicalHistory` - Medical history structure
+- `AIRequest` - Main request interface
+- `AIResponse` - Response interface
+- `ModelSelectionCriteria` - Model selection types
+- `ComplexityFactors` - Complexity analysis types
+
+**Files Updated**:
+- `lib/ai/interfaces/AIModel.ts` - Updated to use new types
+- `lib/aiModelRouter.ts` - Improved method types
+- `lib/ai/analysis/ComplexityAnalyzer.ts` - All methods typed
+- `lib/ai/utils/RouterUtils.ts` - Utility functions typed
+- `lib/ai/ModelRouter.ts` - Router properly typed
+- `lib/enhancedAIDiagnosticEngine.ts` - Request types improved
+
+**Benefits**:
+- ✅ Type-safe AI requests across codebase
+- ✅ Better IntelliSense for AI-related code
+- ✅ Compile-time error detection
+- ✅ Self-documenting code
+
+**Files Modified**: 6 AI-related files, 1 new type file
 
 ---
 
@@ -229,8 +280,10 @@
   - ~60 lines: Report extraction duplication
 - **Type Safety**: 
   - 18 routes improved from `any` to `unknown`
-  - 7+ components with improved prop types
-  - 7 new type definitions created
+  - 9+ components with improved prop types
+  - 6 AI-related files with improved types
+  - 13 new type definitions created
+  - 20+ `any` types eliminated in AI code
 - **Component Organization**: 5 index files created
 - **Lib Organization**: 4 barrel export index files created
 - **Utility Functions**: 13 shared utilities created
@@ -281,6 +334,8 @@
 - [x] Report extraction utilities created and shared
 - [x] Type safety improved across components and utilities
 - [x] PDF generation properly typed
+- [x] AI request/response types created
+- [x] AI model router and analyzer properly typed
 - [x] No linter errors introduced
 - [x] All changes backward compatible
 

@@ -19,6 +19,7 @@ export interface PDFPatientInfo {
   contact?: string;
   address?: string;
   emergencyContact?: string;
+  symptoms?: string;
 }
 
 /**
@@ -39,6 +40,7 @@ export interface PDFReportOptions {
   includeAcupoints?: boolean;
   includePrecautions?: boolean;
   includeFollowUp?: boolean;
+  includeTimestamp?: boolean;
 }
 
 /**
@@ -51,5 +53,7 @@ export interface PDFGenerationData {
   recommendations?: DiagnosisReport["recommendations"];
   precautions?: DiagnosisReport["precautions"];
   follow_up?: DiagnosisReport["follow_up"];
+  timestamp?: string;
+  disclaimer?: string;
 }
 

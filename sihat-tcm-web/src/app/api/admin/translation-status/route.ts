@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { checkMissingTranslations } from "@/lib/blog";
+import { checkMissingTranslations } from "@/lib/content/blog";
 import { en as enTranslations } from "@/lib/translations/en";
 import { ms as msTranslations } from "@/lib/translations/ms";
 import { zh as zhTranslations } from "@/lib/translations/zh";

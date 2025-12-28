@@ -19,8 +19,8 @@ interface OptionsSectionProps {
   };
   onAdditionalInfoChange: (key: string, value: string) => void;
   expandedSections: Record<string, boolean>;
-  onToggleSection: (section: keyof typeof expandedSections) => void;
-  t: any;
+  onToggleSection: (section: string) => void;
+  t: Record<string, unknown>;
 }
 
 export function OptionsSection({

@@ -168,7 +168,7 @@ export function DiagnosisReport({
   };
 
   // Process Data
-  const diagnosisText = extractDiagnosisTitle(data.diagnosis || data.primary_pattern);
+  const diagnosisText = extractDiagnosisTitle(data.diagnosis);
   const constitutionText = extractConstitutionType(data.constitution);
   const analysisText =
     typeof data.analysis === "string" ? data.analysis : data.analysis?.summary || "";
@@ -394,7 +394,7 @@ export function DiagnosisReport({
           hasSaved={hasSaved}
           language={language}
           timestamp={data.timestamp}
-          includeTimestamp={opts.includeTimestamp}
+          includeTimestamp={opts.includeTimestamp ?? true}
           variants={item}
         />
 

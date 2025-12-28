@@ -16,10 +16,7 @@ import { CameraPreview } from "./CameraPreview";
 
 interface CameraCaptureData {
   image?: string;
-  quality?: {
-    score?: number;
-    issues?: string[];
-  };
+  quality?: ImageQualityResult;
 }
 
 interface CameraCaptureProps {

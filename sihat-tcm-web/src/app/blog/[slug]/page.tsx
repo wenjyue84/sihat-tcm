@@ -1,11 +1,11 @@
-import { getPostBySlug, getPostSlugs } from "@/lib/blog";
+import { getPostBySlug, getPostSlugs } from "@/lib/content/blog";
 import { BlogLanguageSwitcher } from "@/components/blog/BlogLanguageSwitcher";
 import { SocialShare } from "@/components/blog/SocialShare";
 import { Newsletter } from "@/components/blog/Newsletter";
 import { AuthorBio } from "@/components/blog/AuthorBio";
 import { FloatingShareButton } from "@/components/blog/FloatingShareButton";
 import { DiagnosisPromo } from "@/components/blog/DiagnosisPromo";
-import { getAuthor } from "@/lib/authors";
+import { getAuthor } from "@/lib/content/authors";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const searchParams = await props.searchParams;
   const lang = (searchParams.lang as string) || "en";
-  const post = getPostBySlug(params.slug, ["title", "excerpt", "coverImage"], lang);
+  const post = getPostBySlug(params.slug, ["title", "excerpt", "coverImage", "date", "author"], lang);
 
   // Build canonical URL based on current language
   const baseUrl = `/blog/${params.slug}`;
@@ -59,7 +59,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       ],
       type: "article",
       publishedTime: post.date,
-      authors: [post.author?.name || "Sihat TCM Team"],
+      authors: [post.author || "Sihat TCM Team"],
     },
     twitter: {
       card: "summary_large_image",

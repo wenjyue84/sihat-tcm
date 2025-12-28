@@ -254,8 +254,16 @@ After refactoring, each file should:
    - **Result**: Reduced main component from 699 lines to ~350 lines (50% reduction!)
    - Improved testability, maintainability, and single responsibility
 
+### ✅ Recently Completed
+
+3. **`BasicInfoForm.tsx`** - Extracted profile completeness and auto-fill logic
+   - ✅ Created `basic-info/hooks/useProfileCompleteness.ts` - Profile completeness check and auto-fill
+   - ✅ Created `basic-info/hooks/useAutoFillFormData.ts` - Form data management with auto-fill
+   - ✅ Updated component to use extracted hooks
+   - Reduced component complexity by ~80 lines
+   - Improved separation of concerns
+
 ### 📋 Remaining
 
-- Refactor `BasicInfoForm.tsx` - extract profile completeness check into hook
 - Refactor `DiagnosisWizard.tsx` - extract step rendering logic
 - Refactor `PatientCommunication.tsx` - extract data layer into hook

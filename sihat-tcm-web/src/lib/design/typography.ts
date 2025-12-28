@@ -126,4 +126,3 @@ export const appleTypographyClasses = {
   caption: 'text-[11px] leading-[1.18] font-normal tracking-[0]',
 } as const;
 
-

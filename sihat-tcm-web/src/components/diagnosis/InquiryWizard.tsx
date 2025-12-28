@@ -79,7 +79,7 @@ export function InquiryWizard({ basicInfo, initialData, onComplete, onBack }: In
     nextStep("chat");
   };
 
-  const handleChatComplete = (history: any[]) => {
+  const handleChatComplete = (history: ChatMessage[]) => {
     setData((prev) => ({ ...prev, chatHistory: history }));
 
     if (diagnosisMode === "simple") {

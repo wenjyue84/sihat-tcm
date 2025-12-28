@@ -11,7 +11,7 @@ import {
   getRecommendedProducts,
   formatPrice,
   getProductTypeLabel,
-} from "@/lib/herbShopData";
+} from "@/lib/data/herbShop";
 import {
   ShoppingCart,
   Package,

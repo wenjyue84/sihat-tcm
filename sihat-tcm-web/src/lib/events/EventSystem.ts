@@ -1,437 +1,474 @@
 /**
  * Event System - Observer Pattern Implementation
  * 
- * Provides a decoupled event system for cross-component communication
- * without tight coupling. Supports typed events and async handlers.
+ * Provides a decoupled event system for communication between components
+ * without tight coupling. Follows the Observer pattern for clean event handling.
  */
 
-export interface EventListener<T = any> {
-  (data: T): void | Promise<void>;
-}
+import { devLog, logError } from '../systemLogger';
+import { AppError, ErrorFactory } from '../errors/AppError';
 
-export interface EventSubscription {
-  unsubscribe(): void;
-}
-
-export interface EventEmitter {
-  emit<T>(eventName: string, data: T): Promise<void>;
-  on<T>(eventName: string, listener: EventListener<T>): EventSubscription;
-  off(eventName: string, listener: EventListener): void;
-  once<T>(eventName: string, listener: EventListener<T>): EventSubscription;
-  removeAllListeners(eventName?: string): void;
-  getListenerCount(eventName: string): number;
+/**
+ * Base event interface
+ */
+export interface BaseEvent {
+  type: string;
+  timestamp: Date;
+  source: string;
+  data?: Record<string, any>;
 }
 
 /**
- * Typed event definitions for the application
+ * AI-related events
  */
-export interface AppEvents {
-  // AI Model Events
-  'ai:model:selected': { modelId: string; complexity: string; reasoning: string[] };
-  'ai:model:fallback': { fromModel: string; toModel: string; reason: string };
-  'ai:request:started': { requestId: string; modelId: string; complexity: string };
-  'ai:request:completed': { requestId: string; modelId: string; responseTime: number; success: boolean };
-  'ai:performance:threshold': { modelId: string; metric: string; value: number; threshold: number };
+export interface AIModelSelectedEvent extends BaseEvent {
+  type: 'ai:model:selected';
+  data: {
+    modelId: string;
+    complexity: string;
+    reasoning: string[];
+  };
+}
 
-  // Notification Events
-  'notification:scheduled': { notificationId: string; category: string; scheduledFor: Date };
-  'notification:delivered': { notificationId: string; deliveredAt: Date };
-  'notification:clicked': { notificationId: string; clickedAt: Date; data: any };
-  'notification:preferences:updated': { preferences: any; updatedBy: string };
-  'notification:sync:started': { deviceId: string };
-  'notification:sync:completed': { deviceId: string; syncedCount: number };
+export interface AIRequestStartedEvent extends BaseEvent {
+  type: 'ai:request:started';
+  data: {
+    requestId: string;
+    modelId: string;
+    complexity: string;
+  };
+}
 
-  // Error Events
-  'error:occurred': { error: Error; component: string; action: string; metadata?: any };
-  'error:recovered': { error: Error; component: string; recoveryAction: string };
+export interface AIRequestCompletedEvent extends BaseEvent {
+  type: 'ai:request:completed';
+  data: {
+    requestId: string;
+    modelId: string;
+    responseTime: number;
+    success: boolean;
+    error?: string;
+  };
+}
 
-  // User Events
-  'user:login': { userId: string; timestamp: Date };
-  'user:logout': { userId: string; timestamp: Date };
-  'user:preferences:changed': { userId: string; preferences: any };
-
-  // Health Events
-  'health:data:received': { type: string; data: any; source: string };
-  'health:analysis:completed': { analysisId: string; results: any };
-  'health:alert:triggered': { alertType: string; severity: string; data: any };
-
-  // System Events
-  'system:startup': { version: string; timestamp: Date };
-  'system:shutdown': { timestamp: Date };
-  'system:performance:warning': { component: string; metric: string; value: number };
+export interface AIPerformanceEvent extends BaseEvent {
+  type: 'ai:performance:recorded';
+  data: {
+    modelId: string;
+    metrics: {
+      responseTime: number;
+      success: boolean;
+      requestType: string;
+    };
+  };
 }
 
 /**
- * Enhanced Event Emitter with type safety and async support
+ * Notification-related events
  */
-export class TypedEventEmitter implements EventEmitter {
-  private listeners = new Map<string, Set<EventListener>>();
-  private onceListeners = new Map<string, Set<EventListener>>();
-  private maxListeners = 100;
-  private context: string;
+export interface NotificationScheduledEvent extends BaseEvent {
+  type: 'notification:scheduled';
+  data: {
+    notificationId: string;
+    category: string;
+    priority: string;
+  };
+}
 
-  constructor(context: string = 'EventEmitter') {
-    this.context = context;
+export interface NotificationDeliveredEvent extends BaseEvent {
+  type: 'notification:delivered';
+  data: {
+    notificationId: string;
+    deliveredAt: Date;
+  };
+}
+
+export interface NotificationClickedEvent extends BaseEvent {
+  type: 'notification:clicked';
+  data: {
+    notificationId: string;
+    category: string;
+    clickedAt: Date;
+  };
+}
+
+/**
+ * System events
+ */
+export interface SystemErrorEvent extends BaseEvent {
+  type: 'system:error';
+  data: {
+    error: Error;
+    component: string;
+    action: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+  };
+}
+
+export interface SystemPerformanceEvent extends BaseEvent {
+  type: 'system:performance';
+  data: {
+    metric: string;
+    value: number;
+    threshold?: number;
+    status: 'normal' | 'warning' | 'critical';
+  };
+}
+
+/**
+ * Union type for all events
+ */
+export type AppEvent = 
+  | AIModelSelectedEvent
+  | AIRequestStartedEvent
+  | AIRequestCompletedEvent
+  | AIPerformanceEvent
+  | NotificationScheduledEvent
+  | NotificationDeliveredEvent
+  | NotificationClickedEvent
+  | SystemErrorEvent
+  | SystemPerformanceEvent;
+
+/**
+ * Event listener function type
+ */
+export type EventListener<T extends BaseEvent = AppEvent> = (event: T) => void | Promise<void>;
+
+/**
+ * Event listener with metadata
+ */
+interface EventListenerEntry {
+  listener: EventListener;
+  once: boolean;
+  priority: number;
+  source: string;
+}
+
+/**
+ * Event System Implementation
+ * 
+ * Provides a centralized event system for decoupled communication
+ * between components. Supports event filtering, priorities, and async handling.
+ */
+export class EventSystem {
+  private static instance: EventSystem;
+  private listeners = new Map<string, EventListenerEntry[]>();
+  private eventHistory: AppEvent[] = [];
+  private readonly maxHistorySize = 1000;
+  private readonly context = 'EventSystem';
+
+  private constructor() {}
+
+  /**
+   * Get singleton instance
+   */
+  public static getInstance(): EventSystem {
+    if (!EventSystem.instance) {
+      EventSystem.instance = new EventSystem();
+    }
+    return EventSystem.instance;
   }
 
   /**
-   * Emit an event to all registered listeners
+   * Subscribe to events of a specific type
    */
-  public async emit<T>(eventName: string, data: T): Promise<void> {
-    const regularListeners = this.listeners.get(eventName);
-    const onceListeners = this.onceListeners.get(eventName);
+  public on<T extends AppEvent>(
+    eventType: T['type'],
+    listener: EventListener<T>,
+    options: {
+      once?: boolean;
+      priority?: number;
+      source?: string;
+    } = {}
+  ): () => void {
+    const entry: EventListenerEntry = {
+      listener: listener as EventListener,
+      once: options.once || false,
+      priority: options.priority || 0,
+      source: options.source || 'unknown',
+    };
 
-    const allListeners: EventListener[] = [];
-    
-    if (regularListeners) {
-      allListeners.push(...Array.from(regularListeners));
-    }
-    
-    if (onceListeners) {
-      allListeners.push(...Array.from(onceListeners));
-      // Clear once listeners after collecting them
-      this.onceListeners.delete(eventName);
+    if (!this.listeners.has(eventType)) {
+      this.listeners.set(eventType, []);
     }
 
-    if (allListeners.length === 0) {
-      return;
-    }
+    const listeners = this.listeners.get(eventType)!;
+    listeners.push(entry);
 
-    // Execute all listeners, handling both sync and async
-    const promises = allListeners.map(async (listener) => {
-      try {
-        const result = listener(data);
-        if (result instanceof Promise) {
-          await result;
-        }
-      } catch (error) {
-        console.error(`[${this.context}] Error in event listener for '${eventName}':`, error);
-        // Emit error event if it's not already an error event to prevent loops
-        if (eventName !== 'error:occurred') {
-          this.emit('error:occurred', {
-            error: error as Error,
-            component: this.context,
-            action: `handling_event_${eventName}`,
-            metadata: { eventName, data },
-          });
-        }
-      }
+    // Sort by priority (higher priority first)
+    listeners.sort((a, b) => b.priority - a.priority);
+
+    devLog(`[${this.context}] Listener registered for ${eventType}`, {
+      priority: entry.priority,
+      source: entry.source,
+      once: entry.once,
     });
 
-    await Promise.allSettled(promises);
-  }
-
-  /**
-   * Register a persistent event listener
-   */
-  public on<T>(eventName: string, listener: EventListener<T>): EventSubscription {
-    if (!this.listeners.has(eventName)) {
-      this.listeners.set(eventName, new Set());
-    }
-
-    const listeners = this.listeners.get(eventName)!;
-    
-    if (listeners.size >= this.maxListeners) {
-      console.warn(`[${this.context}] Maximum listeners (${this.maxListeners}) exceeded for event '${eventName}'`);
-    }
-
-    listeners.add(listener);
-
-    return {
-      unsubscribe: () => this.off(eventName, listener),
+    // Return unsubscribe function
+    return () => {
+      const index = listeners.indexOf(entry);
+      if (index > -1) {
+        listeners.splice(index, 1);
+        devLog(`[${this.context}] Listener unregistered for ${eventType}`);
+      }
     };
   }
 
   /**
-   * Register a one-time event listener
+   * Subscribe to an event once
    */
-  public once<T>(eventName: string, listener: EventListener<T>): EventSubscription {
-    if (!this.onceListeners.has(eventName)) {
-      this.onceListeners.set(eventName, new Set());
-    }
+  public once<T extends AppEvent>(
+    eventType: T['type'],
+    listener: EventListener<T>,
+    options: {
+      priority?: number;
+      source?: string;
+    } = {}
+  ): () => void {
+    return this.on(eventType, listener, { ...options, once: true });
+  }
 
-    const listeners = this.onceListeners.get(eventName)!;
-    listeners.add(listener);
+  /**
+   * Emit an event to all listeners
+   */
+  public async emit<T extends AppEvent>(event: T): Promise<void> {
+    try {
+      // Add to history
+      this.addToHistory(event);
 
-    return {
-      unsubscribe: () => {
-        const onceListeners = this.onceListeners.get(eventName);
-        if (onceListeners) {
-          onceListeners.delete(listener);
-          if (onceListeners.size === 0) {
-            this.onceListeners.delete(eventName);
+      const listeners = this.listeners.get(event.type) || [];
+      
+      if (listeners.length === 0) {
+        devLog(`[${this.context}] No listeners for event: ${event.type}`);
+        return;
+      }
+
+      devLog(`[${this.context}] Emitting event: ${event.type}`, {
+        listenerCount: listeners.length,
+        source: event.source,
+      });
+
+      // Execute listeners in priority order
+      const promises: Promise<void>[] = [];
+      const listenersToRemove: EventListenerEntry[] = [];
+
+      for (const entry of listeners) {
+        try {
+          const result = entry.listener(event);
+          
+          // Handle async listeners
+          if (result instanceof Promise) {
+            promises.push(result);
+          }
+
+          // Mark for removal if it's a once listener
+          if (entry.once) {
+            listenersToRemove.push(entry);
+          }
+
+        } catch (error) {
+          logError(`[${this.context}] Listener error for ${event.type}`, error);
+          
+          // Emit error event (but don't create infinite loops)
+          if (event.type !== 'system:error') {
+            this.emit({
+              type: 'system:error',
+              timestamp: new Date(),
+              source: this.context,
+              data: {
+                error: error as Error,
+                component: 'EventSystem',
+                action: 'emit',
+                severity: 'medium' as const,
+              },
+            } as SystemErrorEvent);
           }
         }
+      }
+
+      // Wait for all async listeners to complete
+      if (promises.length > 0) {
+        await Promise.allSettled(promises);
+      }
+
+      // Remove once listeners
+      if (listenersToRemove.length > 0) {
+        const remainingListeners = listeners.filter(l => !listenersToRemove.includes(l));
+        this.listeners.set(event.type, remainingListeners);
+      }
+
+    } catch (error) {
+      logError(`[${this.context}] Failed to emit event: ${event.type}`, error);
+      throw ErrorFactory.fromUnknownError(error, {
+        component: this.context,
+        action: 'emit',
+        metadata: { eventType: event.type },
+      });
+    }
+  }
+
+  /**
+   * Remove all listeners for an event type
+   */
+  public off(eventType: string): void {
+    const removed = this.listeners.delete(eventType);
+    if (removed) {
+      devLog(`[${this.context}] All listeners removed for ${eventType}`);
+    }
+  }
+
+  /**
+   * Remove all listeners
+   */
+  public removeAllListeners(): void {
+    const eventTypes = Array.from(this.listeners.keys());
+    this.listeners.clear();
+    devLog(`[${this.context}] All listeners removed`, { eventTypes });
+  }
+
+  /**
+   * Get event history
+   */
+  public getEventHistory(
+    eventType?: string,
+    limit?: number
+  ): AppEvent[] {
+    let history = this.eventHistory;
+
+    if (eventType) {
+      history = history.filter(event => event.type === eventType);
+    }
+
+    if (limit) {
+      history = history.slice(-limit);
+    }
+
+    return [...history]; // Return copy
+  }
+
+  /**
+   * Clear event history
+   */
+  public clearHistory(): void {
+    this.eventHistory = [];
+    devLog(`[${this.context}] Event history cleared`);
+  }
+
+  /**
+   * Get listener statistics
+   */
+  public getStats(): {
+    totalListeners: number;
+    eventTypes: string[];
+    listenersByType: Record<string, number>;
+    historySize: number;
+  } {
+    const listenersByType: Record<string, number> = {};
+    let totalListeners = 0;
+
+    for (const [eventType, listeners] of this.listeners) {
+      listenersByType[eventType] = listeners.length;
+      totalListeners += listeners.length;
+    }
+
+    return {
+      totalListeners,
+      eventTypes: Array.from(this.listeners.keys()),
+      listenersByType,
+      historySize: this.eventHistory.length,
+    };
+  }
+
+  /**
+   * Create a scoped event emitter for a specific component
+   */
+  public createScopedEmitter(source: string) {
+    return {
+      emit: <T extends AppEvent>(event: Omit<T, 'source' | 'timestamp'>) => {
+        return this.emit({
+          ...event,
+          source,
+          timestamp: new Date(),
+        } as T);
+      },
+      
+      on: <T extends AppEvent>(
+        eventType: T['type'],
+        listener: EventListener<T>,
+        options?: { once?: boolean; priority?: number }
+      ) => {
+        return this.on(eventType, listener, { ...options, source });
+      },
+
+      once: <T extends AppEvent>(
+        eventType: T['type'],
+        listener: EventListener<T>,
+        options?: { priority?: number }
+      ) => {
+        return this.once(eventType, listener, { ...options, source });
       },
     };
   }
 
-  /**
-   * Remove a specific event listener
-   */
-  public off(eventName: string, listener: EventListener): void {
-    const regularListeners = this.listeners.get(eventName);
-    if (regularListeners) {
-      regularListeners.delete(listener);
-      if (regularListeners.size === 0) {
-        this.listeners.delete(eventName);
-      }
+  // Private helper methods
+
+  private addToHistory(event: AppEvent): void {
+    this.eventHistory.push(event);
+
+    // Maintain history size limit
+    if (this.eventHistory.length > this.maxHistorySize) {
+      this.eventHistory = this.eventHistory.slice(-this.maxHistorySize);
     }
-
-    const onceListeners = this.onceListeners.get(eventName);
-    if (onceListeners) {
-      onceListeners.delete(listener);
-      if (onceListeners.size === 0) {
-        this.onceListeners.delete(eventName);
-      }
-    }
-  }
-
-  /**
-   * Remove all listeners for an event or all events
-   */
-  public removeAllListeners(eventName?: string): void {
-    if (eventName) {
-      this.listeners.delete(eventName);
-      this.onceListeners.delete(eventName);
-    } else {
-      this.listeners.clear();
-      this.onceListeners.clear();
-    }
-  }
-
-  /**
-   * Get the number of listeners for an event
-   */
-  public getListenerCount(eventName: string): number {
-    const regularCount = this.listeners.get(eventName)?.size || 0;
-    const onceCount = this.onceListeners.get(eventName)?.size || 0;
-    return regularCount + onceCount;
-  }
-
-  /**
-   * Set maximum number of listeners per event
-   */
-  public setMaxListeners(max: number): void {
-    this.maxListeners = max;
-  }
-
-  /**
-   * Get all event names that have listeners
-   */
-  public getEventNames(): string[] {
-    const names = new Set<string>();
-    for (const name of this.listeners.keys()) {
-      names.add(name);
-    }
-    for (const name of this.onceListeners.keys()) {
-      names.add(name);
-    }
-    return Array.from(names);
-  }
-
-  /**
-   * Create a promise that resolves when a specific event is emitted
-   */
-  public waitFor<T>(eventName: string, timeout?: number): Promise<T> {
-    return new Promise((resolve, reject) => {
-      let timeoutId: NodeJS.Timeout | undefined;
-
-      const subscription = this.once<T>(eventName, (data) => {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        resolve(data);
-      });
-
-      if (timeout) {
-        timeoutId = setTimeout(() => {
-          subscription.unsubscribe();
-          reject(new Error(`Timeout waiting for event '${eventName}' after ${timeout}ms`));
-        }, timeout);
-      }
-    });
   }
 }
 
 /**
- * Global event emitter instance
+ * Convenience functions for global event system
  */
-export const globalEventEmitter = new TypedEventEmitter('GlobalEvents');
 
 /**
- * Typed event emitter for application events
+ * Get the global event system instance
  */
-export class AppEventEmitter extends TypedEventEmitter {
-  constructor() {
-    super('AppEvents');
-  }
-
-  // Type-safe event emission methods
-  public emitAIModelSelected(data: AppEvents['ai:model:selected']) {
-    return this.emit('ai:model:selected', data);
-  }
-
-  public emitAIModelFallback(data: AppEvents['ai:model:fallback']) {
-    return this.emit('ai:model:fallback', data);
-  }
-
-  public emitNotificationScheduled(data: AppEvents['notification:scheduled']) {
-    return this.emit('notification:scheduled', data);
-  }
-
-  public emitNotificationDelivered(data: AppEvents['notification:delivered']) {
-    return this.emit('notification:delivered', data);
-  }
-
-  public emitErrorOccurred(data: AppEvents['error:occurred']) {
-    return this.emit('error:occurred', data);
-  }
-
-  public emitHealthDataReceived(data: AppEvents['health:data:received']) {
-    return this.emit('health:data:received', data);
-  }
-
-  // Type-safe listener registration methods
-  public onAIModelSelected(listener: EventListener<AppEvents['ai:model:selected']>) {
-    return this.on('ai:model:selected', listener);
-  }
-
-  public onNotificationClicked(listener: EventListener<AppEvents['notification:clicked']>) {
-    return this.on('notification:clicked', listener);
-  }
-
-  public onErrorOccurred(listener: EventListener<AppEvents['error:occurred']>) {
-    return this.on('error:occurred', listener);
-  }
-
-  public onHealthDataReceived(listener: EventListener<AppEvents['health:data:received']>) {
-    return this.on('health:data:received', listener);
-  }
+export function getEventSystem(): EventSystem {
+  return EventSystem.getInstance();
 }
 
 /**
- * Global app event emitter instance
+ * Subscribe to events globally
  */
-export const appEvents = new AppEventEmitter();
-
-/**
- * Event middleware for logging and debugging
- */
-export class EventLogger {
-  private eventEmitter: EventEmitter;
-  private logLevel: 'debug' | 'info' | 'warn' | 'error';
-
-  constructor(eventEmitter: EventEmitter, logLevel: 'debug' | 'info' | 'warn' | 'error' = 'info') {
-    this.eventEmitter = eventEmitter;
-    this.logLevel = logLevel;
-    this.setupLogging();
-  }
-
-  private setupLogging(): void {
-    // Log all events if debug level
-    if (this.logLevel === 'debug') {
-      const originalEmit = this.eventEmitter.emit.bind(this.eventEmitter);
-      this.eventEmitter.emit = async (eventName: string, data: any) => {
-        console.debug(`[EventLogger] Event emitted: ${eventName}`, data);
-        return originalEmit(eventName, data);
-      };
-    }
-
-    // Log error events
-    this.eventEmitter.on('error:occurred', (data) => {
-      console.error(`[EventLogger] Error event:`, data);
-    });
-
-    // Log performance warnings
-    this.eventEmitter.on('system:performance:warning', (data) => {
-      console.warn(`[EventLogger] Performance warning:`, data);
-    });
-  }
+export function on<T extends AppEvent>(
+  eventType: T['type'],
+  listener: EventListener<T>,
+  options?: { once?: boolean; priority?: number; source?: string }
+): () => void {
+  return EventSystem.getInstance().on(eventType, listener, options);
 }
 
 /**
- * Event analytics for monitoring event patterns
+ * Subscribe to an event once globally
  */
-export class EventAnalytics {
-  private eventCounts = new Map<string, number>();
-  private eventTimes = new Map<string, number[]>();
-  private eventEmitter: EventEmitter;
-
-  constructor(eventEmitter: EventEmitter) {
-    this.eventEmitter = eventEmitter;
-    this.setupAnalytics();
-  }
-
-  private setupAnalytics(): void {
-    const originalEmit = this.eventEmitter.emit.bind(this.eventEmitter);
-    this.eventEmitter.emit = async (eventName: string, data: any) => {
-      // Record event count
-      this.eventCounts.set(eventName, (this.eventCounts.get(eventName) || 0) + 1);
-      
-      // Record event time
-      const times = this.eventTimes.get(eventName) || [];
-      times.push(Date.now());
-      
-      // Keep only last 100 timestamps per event
-      if (times.length > 100) {
-        times.splice(0, times.length - 100);
-      }
-      
-      this.eventTimes.set(eventName, times);
-
-      return originalEmit(eventName, data);
-    };
-  }
-
-  public getEventStats(): Record<string, { count: number; frequency: number; lastEmitted?: Date }> {
-    const stats: Record<string, { count: number; frequency: number; lastEmitted?: Date }> = {};
-    
-    for (const [eventName, count] of this.eventCounts) {
-      const times = this.eventTimes.get(eventName) || [];
-      const lastEmitted = times.length > 0 ? new Date(times[times.length - 1]) : undefined;
-      
-      // Calculate frequency (events per minute over last hour)
-      const oneHourAgo = Date.now() - (60 * 60 * 1000);
-      const recentTimes = times.filter(time => time > oneHourAgo);
-      const frequency = recentTimes.length / 60; // per minute
-      
-      stats[eventName] = {
-        count,
-        frequency,
-        lastEmitted,
-      };
-    }
-    
-    return stats;
-  }
-
-  public getMostFrequentEvents(limit: number = 10): Array<{ eventName: string; count: number; frequency: number }> {
-    const stats = this.getEventStats();
-    
-    return Object.entries(stats)
-      .map(([eventName, data]) => ({ eventName, ...data }))
-      .sort((a, b) => b.frequency - a.frequency)
-      .slice(0, limit);
-  }
+export function once<T extends AppEvent>(
+  eventType: T['type'],
+  listener: EventListener<T>,
+  options?: { priority?: number; source?: string }
+): () => void {
+  return EventSystem.getInstance().once(eventType, listener, options);
 }
 
 /**
- * Factory function for creating event emitters
+ * Emit an event globally
  */
-export function createEventEmitter(context?: string): EventEmitter {
-  return new TypedEventEmitter(context);
+export function emit<T extends AppEvent>(event: T): Promise<void> {
+  return EventSystem.getInstance().emit(event);
 }
 
 /**
- * Setup global event logging and analytics
+ * Create a scoped emitter for a component
  */
-export function setupEventMonitoring(logLevel: 'debug' | 'info' | 'warn' | 'error' = 'info') {
-  new EventLogger(appEvents, logLevel);
-  const analytics = new EventAnalytics(appEvents);
-  
-  // Expose analytics globally for debugging
-  (globalThis as any).__eventAnalytics = analytics;
-  
-  return analytics;
+export function createEventEmitter(source: string) {
+  return EventSystem.getInstance().createScopedEmitter(source);
 }
+
+/**
+ * Default event system instance
+ */
+export const defaultEventSystem = EventSystem.getInstance();

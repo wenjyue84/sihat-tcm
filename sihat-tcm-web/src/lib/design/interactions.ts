@@ -4,7 +4,7 @@
  * Provides utilities for delightful micro-interactions
  */
 
-import { appleDurations, appleEase } from './apple-motion';
+import { appleDurations, appleEase } from './motion';
 
 /**
  * CSS classes for common interactions
@@ -70,5 +70,4 @@ export const appleInteractions = {
     transition: `all ${appleDurations.fast}ms cubic-bezier(${appleEase.join(', ')})`,
   },
 } as const;
-
 

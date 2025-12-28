@@ -1,6 +1,6 @@
 "use client";
 
-import { Author } from "@/lib/authors";
+import { Author } from "@/lib/content/authors";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

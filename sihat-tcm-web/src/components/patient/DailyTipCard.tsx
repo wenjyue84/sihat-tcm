@@ -9,7 +9,7 @@ import {
   shouldRefreshTip,
   getDailyGradient,
   type DailyTip,
-} from "@/lib/daily-tips";
+} from "@/lib/data/dailyTips";
 import { useLanguage } from "@/stores/useAppStore";
 
 const STORAGE_KEY = "sihat-tcm-daily-tip";

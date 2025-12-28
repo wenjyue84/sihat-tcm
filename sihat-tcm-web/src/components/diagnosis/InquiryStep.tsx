@@ -12,12 +12,7 @@ import { ShowPromptButton } from "./ShowPromptButton";
 import { INTERACTIVE_CHAT_PROMPT } from "@/lib/systemPrompts";
 import { ThinkingAnimation } from "./ThinkingAnimation";
 import { TextReviewModal } from "./TextReviewModal";
-
-interface FileData {
-  name: string;
-  type: string;
-  data: string;
-}
+import type { FileData } from "@/types/diagnosis";
 
 interface Message {
   id: string;

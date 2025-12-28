@@ -115,4 +115,3 @@ export const appleTransitions = {
   slow: `all ${appleDurations.slow}ms cubic-bezier(${appleEase.join(', ')})`,
 } as const;
 
-

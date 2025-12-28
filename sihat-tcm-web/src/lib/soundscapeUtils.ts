@@ -1,4 +1,4 @@
-import { DiagnosisSession } from "@/types/database";
+import { DiagnosisSession, DiagnosisReport, DiagnosisPattern } from "@/types/database";
 import { extractConstitutionType } from "./tcm-utils";
 
 /**
@@ -58,14 +58,20 @@ export function determineSoundscape(diagnosis: DiagnosisSession | null): Soundsc
   const constitution = extractConstitutionType(diagnosis.constitution || "");
   const constitutionLower = constitution.toLowerCase();
   const diagnosisData = diagnosis.full_report?.diagnosis;
-  const pattern =
-    (typeof diagnosisData === "object" &&
-      diagnosisData !== null &&
-      "pattern_differentiation" in diagnosisData
-      ? (diagnosisData as any).pattern_differentiation?.toLowerCase()
-      : "") ||
-    diagnosis.primary_diagnosis?.toLowerCase() ||
-    "";
+  
+  // Extract pattern from diagnosis data - can be DiagnosisPattern object or string
+  let pattern = "";
+  if (typeof diagnosisData === "object" && diagnosisData !== null) {
+    const patternObj = diagnosisData as DiagnosisPattern;
+    pattern = patternObj.primary_pattern?.toLowerCase() || "";
+  } else if (typeof diagnosisData === "string") {
+    pattern = diagnosisData.toLowerCase();
+  }
+  
+  // Fallback to primary_diagnosis if pattern not found
+  if (!pattern) {
+    pattern = diagnosis.primary_diagnosis?.toLowerCase() || "";
+  }
 
   // Damp Heat - needs cooling (Water) and clearing (Metal)
   if (constitutionLower.includes("damp") && constitutionLower.includes("heat")) {

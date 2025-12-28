@@ -26,11 +26,24 @@ export interface BasicInfo {
 // Inquiry Data
 // ============================================================================
 
+/**
+ * Unified file data interface for all file upload scenarios
+ * Used by: UploadReportsStep, InquiryStep, useDoctorDiagnosis, etc.
+ */
 export interface FileData {
+  /** File name */
   name: string;
+  /** MIME type (e.g., 'image/jpeg', 'application/pdf') */
+  type?: string;
+  /** Base64 encoded data or data URL */
+  data?: string;
+  /** Original File object (browser only) */
   file?: File;
+  /** Text extracted from document/image via OCR */
   extractedText?: string;
+  /** Remote URL if file is stored externally */
   url?: string;
+  /** Allow additional properties for flexibility */
   [key: string]: unknown;
 }
 

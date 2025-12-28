@@ -12,7 +12,7 @@ import {
   isCurrentSolarTerm,
   type SolarTerm,
   type Season,
-} from "@/lib/solar-terms";
+} from "@/lib/data/solarTerms";
 import { useLanguage } from "@/stores/useAppStore";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

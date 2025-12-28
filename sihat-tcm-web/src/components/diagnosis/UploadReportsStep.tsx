@@ -15,13 +15,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { getMedicalReports } from "@/lib/actions";
+import type { FileData } from "@/types/diagnosis";
 
-export interface FileData {
-  name: string;
-  type: string;
-  data: string;
-  extractedText?: string;
-}
+// Re-export for backwards compatibility
+export type { FileData };
 
 interface UploadReportsStepProps {
   onComplete: (files: FileData[]) => void;

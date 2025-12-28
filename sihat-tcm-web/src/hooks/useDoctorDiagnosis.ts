@@ -1,13 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import type { FileData } from "@/types/diagnosis";
 
-export interface FileData {
-    name: string;
-    type: string;
-    data: string; // Base64 or URL
-    extractedText?: string;
-}
+// Re-export for backwards compatibility
+export type { FileData };
 
 export interface DoctorDiagnosisData {
     patientInfo: {

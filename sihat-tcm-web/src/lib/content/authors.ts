@@ -57,3 +57,4 @@ export const authors: Record<string, Author> = {
 export function getAuthor(id: string): Author {
   return authors[id] || authors["sihat-team"];
 }
+

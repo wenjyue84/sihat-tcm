@@ -7,8 +7,6 @@ import { User, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/stores/useAppStore";
 import { useDiagnosisProgress } from "@/stores/useAppStore";
-import { useAuth } from "@/stores/useAppStore";
-import { useRouter } from "next/navigation";
 
 // Import sub-components from basic-info folder
 import { BasicInfoData } from "./basic-info/types";
@@ -16,6 +14,10 @@ import { StepProgress } from "./basic-info/StepProgress";
 import { PersonalInfoStep } from "./basic-info/PersonalInfoStep";
 import { SymptomsStep } from "./basic-info/SymptomsStep";
 // DoctorSelectionStep removed - model is now Admin-only controlled via DoctorContext
+
+// Import hooks
+import { useProfileCompleteness } from "./basic-info/hooks/useProfileCompleteness";
+import { useAutoFillFormData } from "./basic-info/hooks/useAutoFillFormData";
 
 // Re-export for external consumers
 export type { BasicInfoData } from "./basic-info/types";
@@ -55,84 +57,30 @@ export function BasicInfoForm({
   const [direction, setDirection] = useState(0);
   const [stepError, setStepError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<BasicInfoData>(
-    initialData || {
-      name: "anonymous",
-      age: "",
-      gender: "",
-      weight: "",
-      height: "",
-      mainComplaint: "",
-      otherSymptoms: "",
-      symptoms: "",
-      symptomDuration: "",
-    }
-  );
+  // Form data is now managed by useAutoFillFormData hook
 
   // Track which input was last focused to direct quick selections (for SymptomsStep)
   const [activeInput, setActiveInput] = useState<"main" | "other">("main");
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
 
-  // Auth context for profile check
-  const { user, profile, loading: authLoading } = useAuth();
-  const router = useRouter();
-  const [hasCheckedProfile, setHasCheckedProfile] = useState(false);
+  // Use profile completeness hook
+  const { autoFilledData } = useProfileCompleteness({
+    autoSkipToStep2: true,
+    currentStep,
+    onStepChange: (step, dir) => {
+      setDirection(dir);
+      setCurrentStep(step);
+    },
+    t,
+    patientsOnly: true,
+  });
 
-  /**
-   * ============================================================================
-   * PROFILE COMPLETENESS CHECK
-   * ============================================================================
-   * If user is logged in:
-   * 1. Check if profile is complete (Name, Age, Gender, Height, Weight)
-   * 2. If COMPLETE: Auto-fill data and jump to Step 2
-   * 3. If INCOMPLETE: Prompt user to go to Patient Portal
-   */
-  useEffect(() => {
-    if (authLoading || !user || !profile || hasCheckedProfile) return;
-
-    // Only perform profile completeness check and auto-fill for patients
-    // Admins, Doctors, and Developers should start with a clean form and not be prompted
-    if (profile.role !== "patient") {
-      setHasCheckedProfile(true);
-      return;
-    }
-
-    const isProfileComplete =
-      profile.full_name && profile.age && profile.gender && profile.height && profile.weight;
-
-    if (isProfileComplete) {
-      // Auto-fill form data from profile for patients
-      setFormData((prev) => ({
-        ...prev,
-        name: profile.full_name || prev.name,
-        age: profile.age?.toString() || prev.age,
-        gender: profile.gender || prev.gender,
-        weight: profile.weight?.toString() || prev.weight,
-        height: profile.height?.toString() || prev.height,
-      }));
-
-      // Skip to Step 2 if currently on Step 1
-      if (currentStep === 1) {
-        setDirection(1);
-        setCurrentStep(2);
-      }
-    } else {
-      // Profile incomplete - Prompt patient to complete it
-      // We use a small timeout to ensure UI is ready
-      setTimeout(() => {
-        if (
-          confirm(
-            t.basicInfo?.lockedProfile?.profileIncomplete ||
-            "Your profile is incomplete. Please complete your details in the Patient Portal first."
-          )
-        ) {
-          router.push("/patient");
-        }
-      }, 500);
-    }
-
-    setHasCheckedProfile(true);
-  }, [user, profile, authLoading, hasCheckedProfile, currentStep, router, t.basicInfo]);
+  // Use auto-fill form data hook
+  const { formData, setFormData, resetFormData } = useAutoFillFormData({
+    initialData,
+    profileData: autoFilledData,
+    loadFromLocalStorage: true,
+  });
 
   /**
    * ============================================================================
@@ -159,42 +107,7 @@ export function BasicInfoForm({
     updateFormProgress("basic_info", completedFields, totalFields);
   }, [formData, updateFormProgress]);
 
-  // Load patient profile data from localStorage
-  useEffect(() => {
-    const savedProfileData = localStorage.getItem("patientProfileData");
-    if (savedProfileData) {
-      try {
-        const profileData = JSON.parse(savedProfileData);
-        setFormData((prev) => ({
-          ...prev,
-          name: profileData.name ?? prev.name ?? "",
-          age: profileData.age ?? prev.age ?? "",
-          gender: profileData.gender ?? prev.gender ?? "",
-          weight: profileData.weight ?? prev.weight ?? "",
-          height: profileData.height ?? prev.height ?? "",
-        }));
-        localStorage.removeItem("patientProfileData");
-      } catch (e) {
-        console.error("Error loading profile data:", e);
-      }
-    }
-  }, []);
-
-  // Sync with initialData changes (e.g. when profile loads)
-  useEffect(() => {
-    if (initialData) {
-      setFormData((prev) => ({
-        ...prev,
-        name: initialData.name ?? prev.name ?? "",
-        age: initialData.age ?? prev.age ?? "",
-        gender: (initialData.gender ?? prev.gender ?? "").toLowerCase(),
-        weight: initialData.weight ?? prev.weight ?? "",
-        height: initialData.height ?? prev.height ?? "",
-        symptoms: initialData.symptoms ?? prev.symptoms ?? "",
-        symptomDuration: initialData.symptomDuration ?? prev.symptomDuration ?? "",
-      }));
-    }
-  }, [initialData]);
+  // Data loading and auto-fill is now handled by useAutoFillFormData hook
 
   // Listen for test data fill and clear events
   useEffect(() => {

@@ -27,7 +27,11 @@ import { useReportOptions, type ReportOptions } from "./summary/hooks/useReportO
 
 interface DiagnosisSummaryProps {
   data: any;
-  onConfirm: (confirmedData: any, options: any, additionalInfo?: any) => void;
+  onConfirm: (
+    confirmedData: Record<string, unknown>,
+    options: Record<string, unknown>,
+    additionalInfo?: Record<string, unknown>
+  ) => void;
   onBack: () => void;
 }
 
@@ -138,7 +142,7 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
     });
   }, [setNavigationState, handleNext, handleBack]);
 
-  const toggleSection = (section: keyof typeof expandedSections) => {
+  const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 

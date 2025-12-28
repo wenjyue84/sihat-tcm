@@ -32,14 +32,24 @@ interface AudioAnalysisData {
 // Recording states for clean UI
 type RecordingState = "idle" | "initializing" | "recording" | "recorded" | "playing";
 
+import type { AudioAnalysisData } from "@/types/diagnosis";
+
+interface AudioRecorderData {
+  audio?: string | null;
+  analysis?: AudioAnalysisData | null;
+  analysisSkipped?: boolean;
+  skipCelebration?: boolean;
+  note?: string;
+}
+
 export function AudioRecorder({
   onComplete,
   onBack,
   initialData,
 }: {
-  onComplete: (data: any) => void;
+  onComplete: (data: AudioRecorderData) => void;
   onBack?: () => void;
-  initialData?: any;
+  initialData?: Partial<AudioRecorderData>;
 }) {
   const { t, language } = useLanguage();
   const { setNavigationState } = useDiagnosisProgress();

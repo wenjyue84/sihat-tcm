@@ -5,21 +5,14 @@
  * implementing the Strategy pattern for better separation of concerns.
  */
 
-export interface AIRequest {
-  messages?: any[];
-  images?: any[];
-  files?: any[];
-  requiresAnalysis?: boolean;
-  requiresPersonalization?: boolean;
-  medicalHistory?: any;
-  urgency?: 'low' | 'normal' | 'high' | 'urgent';
-  language?: string;
-  medicalSpecialty?: string;
-}
+import type { AIRequest, AIResponse } from "@/types/ai-request";
+
+// Re-export for backward compatibility
+export type { AIRequest, AIResponse };
 
 export interface AIResponse {
   text: string;
-  parsed?: any;
+  parsed?: Record<string, unknown>;
   modelUsed: string;
   responseTime: number;
   confidence?: number;

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
-import { getPaginatedPosts, getAllPosts } from "@/lib/blog";
+import { getPaginatedPosts, getAllPosts } from "@/lib/content/blog";
 import {
   Card,
   CardContent,

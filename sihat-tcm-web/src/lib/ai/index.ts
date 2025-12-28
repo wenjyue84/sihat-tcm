@@ -1,16 +1,46 @@
 /**
- * AI Utilities
+ * AI Model Router - Modular Architecture
  * 
- * Barrel export for all AI-related utilities
- * 
- * Note: Files are still in lib root. This index provides a clean import path.
- * When files are moved to ai/ subdirectory, update paths accordingly.
+ * This is the new modular approach to AI model routing.
+ * Use these exports for new code instead of the legacy aiModelRouter.ts
  */
 
-// Re-export from current locations (lib root)
-export * from "../aiModelRouter";
-export * from "../enhancedAIDiagnosticEngine";
-export * from "../personalizationEngine";
-export * from "../medicalSafetyValidator";
-export * from "../modelFallback";
+// Core interfaces
+export type {
+  ModelSelectionCriteria,
+  RequestComplexity,
+  RequestComplexityType,
+  ComplexityFactors,
+  ModelPerformanceMetrics,
+  ModelCapabilities,
+  ModelRouterConfig
+} from "./interfaces/ModelInterfaces";
 
+// Main router class
+export { AIModelRouter } from "./ModelRouter";
+
+// Specialized components
+export { ComplexityAnalyzer } from "./analysis/ComplexityAnalyzer";
+export { ModelSelectionStrategy } from "./selection/ModelSelectionStrategy";
+export { PerformanceMonitor } from "./monitoring/PerformanceMonitor";
+
+// Factory and utilities
+export { 
+  ModelFactory,
+  defaultModelRouter,
+  highPerformanceRouter,
+  testingRouter
+} from "./factories/ModelFactory";
+
+export { 
+  routeAIRequest,
+  createSelectionCriteria
+} from "./utils/RouterUtils";
+
+// Convenience function for quick setup
+export function createAIRouter(
+  appName: string = "SihatTCM",
+  config?: Partial<ModelRouterConfig>
+) {
+  return ModelFactory.createCustomRouter(appName, config || {});
+}
