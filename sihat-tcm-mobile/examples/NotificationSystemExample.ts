@@ -1,194 +1,106 @@
 /**
- * Mobile Notification System Implementation Example
+ * Notification System Usage Examples
  * 
- * Demonstrates how to use the new refactored notification system
- * for TCM health reminders and patient care.
+ * Demonstrates how to use the refactored notification system
+ * with real-world scenarios for the Sihat TCM mobile application.
  */
 
 import {
+  createNotificationScheduler,
+} from '../lib/notifications/NotificationScheduler';
+
+import {
+  createPreferenceManager,
+} from '../lib/notifications/PreferenceManager';
+
+import type {
   NotificationService,
   NotificationRequest,
   NotificationPreferences,
-  NotificationScheduler,
-  PreferenceManager,
+  ScheduledNotification,
 } from '../lib/notifications/NotificationInterfaces';
 
-import { createNotificationScheduler } from '../lib/notifications/NotificationScheduler';
-import { createPreferenceManager } from '../lib/notifications/PreferenceManager';
-import { createEventEmitter } from '../lib/events/EventSystem';
+import {
+  NOTIFICATION_TEMPLATES,
+  NOTIFICATION_CATEGORIES,
+  PRIORITY_LEVELS,
+} from '../constants';
 
 /**
- * TCM Health Notification Service
- * 
- * Comprehensive notification service specifically designed for
- * TCM health reminders, medication alerts, and wellness coaching.
+ * Example Notification Service Implementation
  */
-export class TCMHealthNotificationService implements NotificationService {
-  private scheduler: NotificationScheduler;
-  private preferenceManager: PreferenceManager;
-  private eventEmitter = createEventEmitter('TCMNotifications');
+class TCMNotificationService implements NotificationService {
+  private scheduler = createNotificationScheduler('TCM-Mobile');
+  private preferenceManager = createPreferenceManager('TCM-Mobile');
   private isInitialized = false;
-  private pushToken?: string;
 
-  constructor() {
-    this.scheduler = createNotificationScheduler('TCMHealth');
-    this.preferenceManager = createPreferenceManager('TCMHealth');
-    this.setupEventListeners();
-  }
-
-  /**
-   * Initialize the notification service
-   */
   async initialize() {
     try {
-      console.log('[TCMNotifications] Initializing notification service...');
-
-      // Initialize preference manager
+      console.log('🔔 Initializing TCM Notification Service...');
+      
+      // Load preferences
       await this.preferenceManager.getPreferences();
-
-      // Set up notification permissions and get push token
-      // This would integrate with Expo Notifications in a real implementation
-      this.pushToken = await this.requestNotificationPermissions();
-
+      
       this.isInitialized = true;
-
-      await this.eventEmitter.emit({
-        type: 'notification:service:initialized',
-        data: {
-          pushToken: this.pushToken,
-          timestamp: new Date(),
-        },
-      });
-
-      console.log('[TCMNotifications] Service initialized successfully');
-      return { success: true, token: this.pushToken };
-
+      
+      console.log('✅ Notification service initialized successfully');
+      return { success: true, token: 'mock-expo-token' };
     } catch (error) {
-      console.error('[TCMNotifications] Initialization failed:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Initialization failed' 
-      };
+      console.error('❌ Notification service initialization failed:', error);
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Schedule a TCM-specific notification
-   */
   async schedule(notification: NotificationRequest): Promise<string | null> {
     if (!this.isInitialized) {
       throw new Error('Notification service not initialized');
     }
 
-    try {
-      // Check if notification should be allowed based on preferences
-      const preferences = await this.preferenceManager.getPreferences();
-      const allowanceCheck = this.preferenceManager.shouldAllowNotification(
-        notification.category,
-        notification.priority
-      );
+    // Check preferences before scheduling
+    const shouldAllow = this.preferenceManager.shouldAllowNotification(
+      notification.category,
+      notification.priority
+    );
 
-      if (!allowanceCheck.allowed) {
-        console.log(`[TCMNotifications] Notification blocked: ${allowanceCheck.reason}`);
-        return null;
-      }
-
-      // Schedule the notification
-      const notificationId = await this.scheduler.schedule(notification);
-
-      if (notificationId) {
-        await this.eventEmitter.emit({
-          type: 'notification:scheduled',
-          data: {
-            notificationId,
-            category: notification.category,
-            priority: notification.priority,
-            title: notification.title,
-          },
-        });
-      }
-
-      return notificationId;
-
-    } catch (error) {
-      console.error('[TCMNotifications] Failed to schedule notification:', error);
-      throw error;
+    if (!shouldAllow.allowed) {
+      console.log(`🚫 Notification blocked: ${shouldAllow.reason}`);
+      return null;
     }
+
+    return this.scheduler.schedule(notification);
   }
 
-  /**
-   * Cancel a scheduled notification
-   */
   async cancel(id: string): Promise<boolean> {
-    try {
-      const result = await this.scheduler.cancel(id);
-      
-      if (result) {
-        await this.eventEmitter.emit({
-          type: 'notification:cancelled',
-          data: { notificationId: id },
-        });
-      }
-
-      return result;
-    } catch (error) {
-      console.error('[TCMNotifications] Failed to cancel notification:', error);
-      return false;
-    }
+    return this.scheduler.cancel(id);
   }
 
-  /**
-   * Cancel all scheduled notifications
-   */
   async cancelAll(): Promise<boolean> {
     return this.scheduler.cancelAll();
   }
 
-  /**
-   * Get scheduled notifications
-   */
-  async getScheduled() {
+  async getScheduled(): Promise<ScheduledNotification[]> {
     return this.scheduler.getScheduled();
   }
 
-  /**
-   * Get notification history (mock implementation)
-   */
   async getHistory() {
-    // In a real implementation, this would fetch from storage
+    // Mock implementation
     return [];
   }
 
-  /**
-   * Update notification preferences
-   */
   async updatePreferences(preferences: Partial<NotificationPreferences>): Promise<boolean> {
-    try {
-      const result = await this.preferenceManager.updatePreferences(preferences);
-      
-      if (result) {
-        // Reschedule notifications based on new preferences
-        const currentPreferences = await this.preferenceManager.getPreferences();
-        await this.scheduler.rescheduleAll(currentPreferences);
-
-        await this.eventEmitter.emit({
-          type: 'notification:preferences:updated',
-          data: { preferences: currentPreferences },
-        });
-      }
-
-      return result;
-    } catch (error) {
-      console.error('[TCMNotifications] Failed to update preferences:', error);
-      return false;
+    const success = await this.preferenceManager.updatePreferences(preferences);
+    
+    if (success) {
+      // Reschedule notifications based on new preferences
+      const currentPrefs = await this.preferenceManager.getPreferences();
+      await this.scheduler.rescheduleAll(currentPrefs);
     }
+    
+    return success;
   }
 
-  /**
-   * Get current preferences
-   */
   getPreferences(): NotificationPreferences {
-    // This would be async in a real implementation
+    // This would normally be async, but for demo purposes
     return {
       enabled: true,
       healthReminders: true,
@@ -196,8 +108,16 @@ export class TCMHealthNotificationService implements NotificationService {
       appointmentReminders: true,
       exerciseReminders: true,
       sleepReminders: true,
-      quietHours: { enabled: true, start: '22:00', end: '07:00' },
-      frequency: { daily: true, weekly: true, monthly: false },
+      quietHours: {
+        enabled: true,
+        start: '22:00',
+        end: '07:00',
+      },
+      frequency: {
+        daily: true,
+        weekly: true,
+        monthly: false,
+      },
       categories: {
         health: true,
         medication: true,
@@ -210,362 +130,455 @@ export class TCMHealthNotificationService implements NotificationService {
     };
   }
 
-  /**
-   * Get notification statistics
-   */
   getStats() {
     return {
-      totalScheduled: 0, // Would be calculated from actual data
+      totalScheduled: 0,
       totalReceived: 0,
       totalClicked: 0,
-      pushToken: this.pushToken,
+      pushToken: 'mock-expo-token',
       preferences: this.getPreferences(),
       isInitialized: this.isInitialized,
-      lastSync: new Date(),
     };
   }
 
-  /**
-   * Clean up resources
-   */
   cleanup(): void {
-    console.log('[TCMNotifications] Cleaning up notification service');
-    // Clean up any resources, listeners, etc.
-  }
-
-  // TCM-specific notification methods
-
-  /**
-   * Schedule herbal medicine reminder
-   */
-  async scheduleHerbalMedicineReminder(medicineData: {
-    name: string;
-    dosage: string;
-    frequency: 'daily' | 'twice-daily' | 'three-times-daily';
-    duration: number; // days
-    instructions?: string;
-  }) {
-    const notifications: NotificationRequest[] = [];
-    const now = new Date();
-
-    // Calculate notification times based on frequency
-    const times = this.calculateMedicationTimes(medicineData.frequency);
-
-    // Schedule notifications for the duration
-    for (let day = 0; day < medicineData.duration; day++) {
-      for (const time of times) {
-        const scheduledDate = new Date(now);
-        scheduledDate.setDate(scheduledDate.getDate() + day);
-        scheduledDate.setHours(time.hour, time.minute, 0, 0);
-
-        notifications.push({
-          title: '🌿 TCM Herbal Medicine',
-          body: `Time to take ${medicineData.name} (${medicineData.dosage})`,
-          category: 'medication',
-          priority: 'high',
-          data: {
-            type: 'herbal-medicine',
-            medicineName: medicineData.name,
-            dosage: medicineData.dosage,
-            instructions: medicineData.instructions,
-          },
-          trigger: {
-            type: 'time',
-            date: scheduledDate,
-          },
-        });
-      }
-    }
-
-    // Schedule all notifications
-    const scheduledIds = await Promise.all(
-      notifications.map(notification => this.schedule(notification))
-    );
-
-    return scheduledIds.filter(id => id !== null);
-  }
-
-  /**
-   * Schedule seasonal TCM advice
-   */
-  async scheduleSeasonalAdvice(season: 'spring' | 'summer' | 'autumn' | 'winter') {
-    const seasonalAdvice = {
-      spring: {
-        title: '🌸 Spring TCM Wisdom',
-        body: 'Support your Liver Qi with gentle detox and green foods.',
-        advice: 'Focus on liver cleansing, eat more greens, practice gentle exercise.',
-      },
-      summer: {
-        title: '☀️ Summer TCM Balance',
-        body: 'Cool your Heart Fire with hydrating foods and calm activities.',
-        advice: 'Stay cool, eat cooling foods, practice meditation.',
-      },
-      autumn: {
-        title: '🍂 Autumn TCM Preparation',
-        body: 'Nourish your Lung Qi with warming foods and breathing exercises.',
-        advice: 'Strengthen lungs, eat warming foods, practice breathing exercises.',
-      },
-      winter: {
-        title: '❄️ Winter TCM Nourishment',
-        body: 'Tonify your Kidney Yang with warming foods and rest.',
-        advice: 'Conserve energy, eat warming foods, get adequate rest.',
-      },
-    };
-
-    const advice = seasonalAdvice[season];
-
-    return this.schedule({
-      title: advice.title,
-      body: advice.body,
-      category: 'health',
-      priority: 'normal',
-      data: {
-        type: 'seasonal-advice',
-        season,
-        advice: advice.advice,
-      },
-      trigger: {
-        type: 'time',
-        seconds: 3600, // 1 hour from now
-      },
-    });
-  }
-
-  /**
-   * Schedule Qi exercise reminders
-   */
-  async scheduleQiExerciseReminders(exerciseSchedule: {
-    exercises: string[];
-    frequency: 'daily' | 'weekly';
-    preferredTimes: string[]; // ['08:00', '18:00']
-  }) {
-    const notifications: NotificationRequest[] = [];
-
-    for (const timeStr of exerciseSchedule.preferredTimes) {
-      const [hour, minute] = timeStr.split(':').map(Number);
-      
-      notifications.push({
-        title: '🧘 Qi Exercise Time',
-        body: 'Practice your daily Qi exercises for energy balance.',
-        category: 'exercise',
-        priority: 'normal',
-        data: {
-          type: 'qi-exercise',
-          exercises: exerciseSchedule.exercises,
-          preferredTime: timeStr,
-        },
-        trigger: {
-          type: 'time',
-          seconds: this.calculateSecondsUntilTime(hour, minute),
-          repeats: true,
-        },
-      });
-    }
-
-    const scheduledIds = await Promise.all(
-      notifications.map(notification => this.schedule(notification))
-    );
-
-    return scheduledIds.filter(id => id !== null);
-  }
-
-  /**
-   * Schedule constitution-based dietary reminders
-   */
-  async scheduleConstitutionDietReminders(constitution: {
-    type: string;
-    recommendations: string[];
-    avoidFoods: string[];
-  }) {
-    return this.schedule({
-      title: '🍲 TCM Nutrition Reminder',
-      body: `Foods that support your ${constitution.type} constitution are ready!`,
-      category: 'diet',
-      priority: 'normal',
-      data: {
-        type: 'constitution-diet',
-        constitutionType: constitution.type,
-        recommendations: constitution.recommendations,
-        avoidFoods: constitution.avoidFoods,
-      },
-      trigger: {
-        type: 'time',
-        seconds: 1800, // 30 minutes
-      },
-    });
-  }
-
-  // Private helper methods
-
-  private async requestNotificationPermissions(): Promise<string> {
-    // Mock implementation - in real app, this would use Expo Notifications
-    return `mock-token-${Date.now()}`;
-  }
-
-  private setupEventListeners(): void {
-    // Set up any event listeners for cross-component communication
-    this.eventEmitter.on('user:constitution:updated', async (event) => {
-      // Reschedule constitution-based notifications
-      console.log('[TCMNotifications] Constitution updated, rescheduling notifications');
-    });
-  }
-
-  private calculateMedicationTimes(frequency: string): Array<{ hour: number; minute: number }> {
-    switch (frequency) {
-      case 'daily':
-        return [{ hour: 8, minute: 0 }]; // 8 AM
-      case 'twice-daily':
-        return [
-          { hour: 8, minute: 0 },  // 8 AM
-          { hour: 20, minute: 0 }, // 8 PM
-        ];
-      case 'three-times-daily':
-        return [
-          { hour: 8, minute: 0 },  // 8 AM
-          { hour: 14, minute: 0 }, // 2 PM
-          { hour: 20, minute: 0 }, // 8 PM
-        ];
-      default:
-        return [{ hour: 8, minute: 0 }];
-    }
-  }
-
-  private calculateSecondsUntilTime(hour: number, minute: number): number {
-    const now = new Date();
-    const target = new Date();
-    target.setHours(hour, minute, 0, 0);
-
-    // If target time has passed today, schedule for tomorrow
-    if (target <= now) {
-      target.setDate(target.getDate() + 1);
-    }
-
-    return Math.floor((target.getTime() - now.getTime()) / 1000);
+    console.log('🧹 Cleaning up notification service...');
+    this.isInitialized = false;
   }
 }
 
 /**
- * Usage Examples
+ * Example 1: Basic Notification Setup
  */
+export async function basicNotificationSetup() {
+  console.log('=== Basic Notification Setup ===');
 
-// Example 1: Basic Notification Service Setup
-export async function exampleNotificationSetup() {
-  const notificationService = new TCMHealthNotificationService();
+  const notificationService = new TCMNotificationService();
   
   // Initialize the service
   const initResult = await notificationService.initialize();
-  console.log('Notification service initialized:', initResult);
+  
+  if (!initResult.success) {
+    throw new Error(`Initialization failed: ${initResult.error}`);
+  }
 
-  // Update preferences
-  await notificationService.updatePreferences({
-    healthReminders: true,
-    medicationAlerts: true,
-    quietHours: {
-      enabled: true,
-      start: '22:00',
-      end: '07:00',
-    },
-  });
-
+  console.log('Notification service ready with token:', initResult.token);
   return notificationService;
 }
 
-// Example 2: Schedule Herbal Medicine Reminders
-export async function exampleHerbalMedicineReminders() {
-  const service = await exampleNotificationSetup();
+/**
+ * Example 2: TCM Medication Reminders
+ */
+export async function medicationReminderExample() {
+  console.log('=== TCM Medication Reminder Example ===');
 
-  const scheduledIds = await service.scheduleHerbalMedicineReminder({
-    name: 'Liu Wei Di Huang Wan',
-    dosage: '6 pills',
-    frequency: 'twice-daily',
-    duration: 30, // 30 days
-    instructions: 'Take with warm water after meals',
-  });
+  const service = await basicNotificationSetup();
 
-  console.log('Scheduled herbal medicine reminders:', scheduledIds);
+  // Schedule herbal medicine reminder
+  const medicationReminder: NotificationRequest = {
+    title: '💊 Herbal Medicine Time',
+    body: 'Time to take your prescribed herbal formula: Liu Wei Di Huang Wan',
+    category: 'medication',
+    priority: 'high',
+    data: {
+      medicationType: 'herbal_formula',
+      formulaName: 'Liu Wei Di Huang Wan',
+      dosage: '6 pills',
+      instructions: 'Take with warm water after meals',
+    },
+    trigger: {
+      type: 'time',
+      seconds: 60, // 1 minute from now for demo
+      repeats: false,
+    },
+  };
+
+  try {
+    const notificationId = await service.schedule(medicationReminder);
+    
+    if (notificationId) {
+      console.log(`✅ Medication reminder scheduled: ${notificationId}`);
+      console.log(`   Formula: ${medicationReminder.data.formulaName}`);
+      console.log(`   Dosage: ${medicationReminder.data.dosage}`);
+    } else {
+      console.log('🚫 Medication reminder was blocked by user preferences');
+    }
+
+    return notificationId;
+  } catch (error) {
+    console.error('❌ Failed to schedule medication reminder:', error);
+    throw error;
+  }
+}
+
+/**
+ * Example 3: TCM Health Reminders
+ */
+export async function healthReminderExample() {
+  console.log('=== TCM Health Reminder Example ===');
+
+  const service = await basicNotificationSetup();
+
+  // Schedule various TCM health reminders
+  const healthReminders = [
+    {
+      title: '🌿 Seasonal TCM Wisdom',
+      body: 'Winter is the season of the Kidney. Focus on warming foods and rest.',
+      category: 'health' as const,
+      priority: 'normal' as const,
+      data: {
+        season: 'winter',
+        organ: 'kidney',
+        advice: 'warming_foods_and_rest',
+      },
+    },
+    {
+      title: '⚖️ Constitution Balance',
+      body: 'Your Yang deficiency constitution benefits from ginger tea in the morning.',
+      category: 'health' as const,
+      priority: 'normal' as const,
+      data: {
+        constitution: 'yang_deficiency',
+        recommendation: 'ginger_tea_morning',
+      },
+    },
+    {
+      title: '🧘 Qi Exercise Time',
+      body: 'Practice your daily Qi Gong exercises for 15 minutes.',
+      category: 'exercise' as const,
+      priority: 'normal' as const,
+      data: {
+        exerciseType: 'qi_gong',
+        duration: '15_minutes',
+      },
+    },
+  ];
+
+  const scheduledIds: string[] = [];
+
+  for (const reminder of healthReminders) {
+    try {
+      const notificationId = await service.schedule({
+        ...reminder,
+        trigger: {
+          type: 'time',
+          seconds: Math.random() * 300 + 60, // Random time between 1-5 minutes
+          repeats: false,
+        },
+      });
+
+      if (notificationId) {
+        scheduledIds.push(notificationId);
+        console.log(`✅ Health reminder scheduled: ${reminder.title}`);
+      }
+    } catch (error) {
+      console.error(`❌ Failed to schedule reminder: ${reminder.title}`, error);
+    }
+  }
+
+  console.log(`Total health reminders scheduled: ${scheduledIds.length}`);
   return scheduledIds;
 }
 
-// Example 3: Seasonal TCM Advice
-export async function exampleSeasonalAdvice() {
-  const service = await exampleNotificationSetup();
+/**
+ * Example 4: Appointment Reminders
+ */
+export async function appointmentReminderExample() {
+  console.log('=== TCM Appointment Reminder Example ===');
 
-  const notificationId = await service.scheduleSeasonalAdvice('winter');
-  console.log('Scheduled seasonal advice:', notificationId);
+  const service = await basicNotificationSetup();
 
-  return notificationId;
+  // Schedule appointment reminder
+  const appointmentReminder: NotificationRequest = {
+    title: '📅 TCM Consultation Tomorrow',
+    body: 'Your consultation with Dr. Chen is scheduled for tomorrow at 2:00 PM.',
+    category: 'appointments',
+    priority: 'high',
+    data: {
+      appointmentId: 'apt-123',
+      practitionerName: 'Dr. Chen',
+      appointmentTime: '2024-01-15T14:00:00Z',
+      type: 'follow_up_consultation',
+      location: 'TCM Wellness Center',
+    },
+    trigger: {
+      type: 'time',
+      date: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+      repeats: false,
+    },
+  };
+
+  try {
+    const notificationId = await service.schedule(appointmentReminder);
+    
+    if (notificationId) {
+      console.log(`✅ Appointment reminder scheduled: ${notificationId}`);
+      console.log(`   Practitioner: ${appointmentReminder.data.practitionerName}`);
+      console.log(`   Location: ${appointmentReminder.data.location}`);
+    }
+
+    return notificationId;
+  } catch (error) {
+    console.error('❌ Failed to schedule appointment reminder:', error);
+    throw error;
+  }
 }
 
-// Example 4: Qi Exercise Reminders
-export async function exampleQiExerciseReminders() {
-  const service = await exampleNotificationSetup();
+/**
+ * Example 5: Preference Management
+ */
+export async function preferenceManagementExample() {
+  console.log('=== Preference Management Example ===');
 
-  const scheduledIds = await service.scheduleQiExerciseReminders({
-    exercises: ['Ba Duan Jin', 'Tai Chi', 'Qi Gong breathing'],
-    frequency: 'daily',
-    preferredTimes: ['07:00', '18:00'], // Morning and evening
+  const service = await basicNotificationSetup();
+
+  // Get current preferences
+  const currentPrefs = service.getPreferences();
+  console.log('Current Preferences:', {
+    enabled: currentPrefs.enabled,
+    quietHours: currentPrefs.quietHours,
+    enabledCategories: Object.entries(currentPrefs.categories)
+      .filter(([_, enabled]) => enabled)
+      .map(([category, _]) => category),
   });
 
-  console.log('Scheduled Qi exercise reminders:', scheduledIds);
-  return scheduledIds;
+  // Update preferences
+  const updates = {
+    quietHours: {
+      enabled: true,
+      start: '23:00', // Later bedtime
+      end: '06:00',   // Earlier wake time
+    },
+    medicationAlerts: true,
+    exerciseReminders: false, // Disable exercise reminders
+    categories: {
+      ...currentPrefs.categories,
+      exercise: false,
+      sleep: true,
+    },
+  };
+
+  try {
+    const success = await service.updatePreferences(updates);
+    
+    if (success) {
+      console.log('✅ Preferences updated successfully');
+      console.log('   New quiet hours: 23:00 - 06:00');
+      console.log('   Exercise reminders: disabled');
+      console.log('   Sleep reminders: enabled');
+    } else {
+      console.log('❌ Failed to update preferences');
+    }
+
+    return success;
+  } catch (error) {
+    console.error('❌ Preference update error:', error);
+    throw error;
+  }
 }
 
-// Example 5: Constitution-based Diet Reminders
-export async function exampleConstitutionDietReminders() {
-  const service = await exampleNotificationSetup();
+/**
+ * Example 6: Notification Analytics and Management
+ */
+export async function notificationAnalyticsExample() {
+  console.log('=== Notification Analytics Example ===');
 
-  const notificationId = await service.scheduleConstitutionDietReminders({
-    type: 'Yang Deficiency',
-    recommendations: [
-      'Warm ginger tea',
-      'Cooked vegetables',
-      'Warming spices (cinnamon, cloves)',
-      'Bone broth',
-    ],
-    avoidFoods: [
-      'Cold drinks',
-      'Raw foods',
-      'Excessive dairy',
-      'Cold fruits',
-    ],
+  const service = await basicNotificationSetup();
+
+  // Schedule some test notifications
+  await medicationReminderExample();
+  await healthReminderExample();
+
+  // Get scheduled notifications
+  const scheduled = await service.getScheduled();
+  console.log(`📊 Currently scheduled: ${scheduled.length} notifications`);
+
+  scheduled.forEach((notification, index) => {
+    console.log(`   ${index + 1}. ${notification.title} (${notification.category})`);
   });
 
-  console.log('Scheduled constitution diet reminder:', notificationId);
-  return notificationId;
-}
-
-// Example 6: Comprehensive TCM Notification Schedule
-export async function exampleComprehensiveTCMSchedule() {
-  const service = await exampleNotificationSetup();
-
-  // Schedule various TCM-related notifications
-  const results = await Promise.all([
-    service.scheduleHerbalMedicineReminder({
-      name: 'Gan Mao Ling',
-      dosage: '3 tablets',
-      frequency: 'three-times-daily',
-      duration: 7,
-    }),
-    service.scheduleSeasonalAdvice('spring'),
-    service.scheduleQiExerciseReminders({
-      exercises: ['Morning Qi Gong'],
-      frequency: 'daily',
-      preferredTimes: ['06:30'],
-    }),
-    service.scheduleConstitutionDietReminders({
-      type: 'Qi Deficiency',
-      recommendations: ['Cooked grains', 'Root vegetables', 'Gentle soups'],
-      avoidFoods: ['Cold foods', 'Excessive raw foods'],
-    }),
-  ]);
-
-  console.log('Comprehensive TCM schedule created:', results);
-  
   // Get service statistics
   const stats = service.getStats();
-  console.log('Notification service stats:', stats);
+  console.log('Service Statistics:', {
+    totalScheduled: stats.totalScheduled,
+    isInitialized: stats.isInitialized,
+    pushToken: stats.pushToken ? 'Available' : 'Not available',
+  });
 
-  return { results, stats };
+  // Demonstrate cancellation
+  if (scheduled.length > 0) {
+    const firstNotification = scheduled[0];
+    console.log(`\n🗑️ Cancelling notification: ${firstNotification.title}`);
+    
+    const cancelled = await service.cancel(firstNotification.id);
+    console.log(`   Cancellation ${cancelled ? 'successful' : 'failed'}`);
+  }
+
+  return { scheduled, stats };
 }
 
-export default TCMHealthNotificationService;
+/**
+ * Example 7: Batch Notification Operations
+ */
+export async function batchNotificationExample() {
+  console.log('=== Batch Notification Example ===');
+
+  const service = await basicNotificationSetup();
+
+  // Create a week's worth of medication reminders
+  const weeklyMedications = [
+    { day: 'Monday', time: '08:00', formula: 'Liu Wei Di Huang Wan' },
+    { day: 'Tuesday', time: '08:00', formula: 'Gan Mai Da Zao Tang' },
+    { day: 'Wednesday', time: '08:00', formula: 'Liu Wei Di Huang Wan' },
+    { day: 'Thursday', time: '08:00', formula: 'Xiao Yao San' },
+    { day: 'Friday', time: '08:00', formula: 'Liu Wei Di Huang Wan' },
+    { day: 'Saturday', time: '09:00', formula: 'Bu Yang Huan Wu Tang' },
+    { day: 'Sunday', time: '09:00', formula: 'Rest Day - No medication' },
+  ];
+
+  const batchResults: (string | null)[] = [];
+
+  console.log('📅 Scheduling weekly medication plan...');
+
+  for (const med of weeklyMedications) {
+    if (med.formula === 'Rest Day - No medication') {
+      console.log(`   ${med.day}: Rest day - no medication`);
+      continue;
+    }
+
+    const notification: NotificationRequest = {
+      title: `💊 ${med.day} Medication`,
+      body: `Time for your ${med.formula} - ${med.time}`,
+      category: 'medication',
+      priority: 'high',
+      data: {
+        day: med.day,
+        time: med.time,
+        formula: med.formula,
+        weeklyPlan: true,
+      },
+      trigger: {
+        type: 'time',
+        seconds: Math.random() * 60 + 30, // Random time for demo
+        repeats: false,
+      },
+    };
+
+    try {
+      const id = await service.schedule(notification);
+      batchResults.push(id);
+      console.log(`   ✅ ${med.day}: ${med.formula} scheduled`);
+    } catch (error) {
+      batchResults.push(null);
+      console.log(`   ❌ ${med.day}: Failed to schedule`);
+    }
+  }
+
+  const successCount = batchResults.filter(id => id !== null).length;
+  console.log(`\n📊 Batch Results: ${successCount}/${weeklyMedications.length - 1} notifications scheduled`);
+
+  return batchResults;
+}
+
+/**
+ * Example 8: Error Handling and Recovery
+ */
+export async function errorHandlingExample() {
+  console.log('=== Error Handling Example ===');
+
+  const service = await basicNotificationSetup();
+
+  // Test various error scenarios
+  const errorScenarios = [
+    {
+      name: 'Invalid Notification (Missing Title)',
+      notification: {
+        title: '', // Invalid: empty title
+        body: 'This should fail validation',
+        category: 'health' as const,
+        priority: 'normal' as const,
+      },
+    },
+    {
+      name: 'Invalid Category',
+      notification: {
+        title: 'Test Notification',
+        body: 'This has an invalid category',
+        category: 'invalid_category' as any,
+        priority: 'normal' as const,
+      },
+    },
+    {
+      name: 'Disabled Category',
+      notification: {
+        title: 'Exercise Reminder',
+        body: 'Time to exercise',
+        category: 'exercise' as const,
+        priority: 'normal' as const,
+      },
+      setup: async () => {
+        // Disable exercise category
+        await service.updatePreferences({
+          categories: { exercise: false },
+        });
+      },
+    },
+  ];
+
+  for (const scenario of errorScenarios) {
+    console.log(`\n🧪 Testing: ${scenario.name}`);
+    
+    try {
+      // Run setup if provided
+      if (scenario.setup) {
+        await scenario.setup();
+      }
+
+      const result = await service.schedule(scenario.notification as NotificationRequest);
+      
+      if (result === null) {
+        console.log('   ✅ Notification appropriately blocked');
+      } else {
+        console.log(`   ⚠️ Notification scheduled unexpectedly: ${result}`);
+      }
+    } catch (error) {
+      console.log(`   ✅ Expected error caught: ${error.message}`);
+    }
+  }
+}
+
+/**
+ * Run all notification examples
+ */
+export async function runAllNotificationExamples() {
+  console.log('🔔 Running All Notification System Examples\n');
+
+  try {
+    await basicNotificationSetup();
+    await medicationReminderExample();
+    await healthReminderExample();
+    await appointmentReminderExample();
+    await preferenceManagementExample();
+    await notificationAnalyticsExample();
+    await batchNotificationExample();
+    await errorHandlingExample();
+    
+    console.log('\n✅ All notification examples completed successfully!');
+  } catch (error) {
+    console.error('\n❌ Notification example execution failed:', error);
+  }
+}
+
+// Export for use in other files
+export default {
+  TCMNotificationService,
+  basicNotificationSetup,
+  medicationReminderExample,
+  healthReminderExample,
+  appointmentReminderExample,
+  preferenceManagementExample,
+  notificationAnalyticsExample,
+  batchNotificationExample,
+  errorHandlingExample,
+  runAllNotificationExamples,
+};

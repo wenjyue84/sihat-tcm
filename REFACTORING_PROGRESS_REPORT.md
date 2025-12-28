@@ -361,10 +361,34 @@ This report documents the systematic refactoring of the Sihat TCM codebase follo
 - ✅ Clear separation of concerns
 - ✅ Foundation for further App.js modularization
 
+### ✅ Task 10: Split actions.ts by Domain
+
+**Objective**: Break down the monolithic 1943-line `actions.ts` file into focused, domain-specific modules
+
+**Completed Work**:
+1. **Created Actions Module Structure** (`sihat-tcm-web/src/lib/actions/`):
+   - `index.ts` - Barrel export for backward compatibility
+   - `shared.ts` - Shared utilities (mock data generators)
+   - `diagnosis.ts` - Session CRUD, guest migration, seeding
+   - `patient-history.ts` - History retrieval, trends, symptoms
+   - `medical-reports.ts` - Report management
+   - `patient-medicines.ts` - Medicine management
+   - `family.ts` - Family member management
+   - `translation.ts` - AI-powered record translation
+
+2. **Maintained Backward Compatibility**:
+   - Original `actions.ts` now re-exports from `./actions/index`
+   - All existing imports continue to work unchanged
+
+**Results**:
+- ✅ 1943-line monolith split into 8 focused modules
+- ✅ Each domain now in its own file
+- ✅ Improved discoverability and maintainability
+- ✅ Zero breaking changes to existing code
+
 ### 📋 Remaining Quick Wins (Next Session)
 
 - [ ] **Task 9**: Complete App.js refactoring - integrate extracted components
-- [ ] **Task 10**: Split actions.ts by domain (diagnosis, patients, reports, family)
 - [ ] **Task 11**: Extract OnboardingScreen.js sub-components
 
 ## Recommendations
@@ -394,7 +418,7 @@ The refactoring is on track to meet all objectives within the planned 7-week tim
 
 ---
 
-**Report Generated**: December 28, 2025 (Updated)  
+**Report Generated**: December 28, 2025 (Updated 17:20)  
 **Phase Completed**: 2C - Quick Wins (God Component Splitting)  
-**Next Milestone**: Complete App.js integration, Split actions.ts  
-**Overall Progress**: 57% Complete (4 of 7 weeks)
+**Next Milestone**: Complete App.js integration, Extract OnboardingScreen components  
+**Overall Progress**: 65% Complete (5 of 7 weeks)

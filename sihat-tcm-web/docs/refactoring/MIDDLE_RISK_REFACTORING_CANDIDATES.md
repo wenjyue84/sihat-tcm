@@ -263,7 +263,14 @@ After refactoring, each file should:
    - Reduced component complexity by ~80 lines
    - Improved separation of concerns
 
+### 🔄 In Progress
+
+4. **`DiagnosisWizard.tsx`** - Extracting step rendering logic
+   - ✅ Created `wizard/StepRenderer.tsx` - Centralized step rendering
+   - ✅ Created `wizard/utils/testDataHelpers.ts` - Test data utilities
+   - ⏳ Update main component to use extracted modules
+
 ### 📋 Remaining
 
-- Refactor `DiagnosisWizard.tsx` - extract step rendering logic
+- Complete `DiagnosisWizard.tsx` refactoring
 - Refactor `PatientCommunication.tsx` - extract data layer into hook

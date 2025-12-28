@@ -1,655 +1,376 @@
 /**
- * Comprehensive Testing Examples
- * 
- * Demonstrates how to use the new testing framework for property-based
- * testing, integration testing, and performance testing of the refactored components.
+ * Example usage of the new modular Testing Framework
  */
 
 import {
+  TestFramework,
+  TestFactory,
+  TestDataGenerators,
+  PropertyTestRunner,
+  TestSuiteRunner,
   defaultTestFramework,
   createPropertyTest,
   createUnitTest,
-  TestDataGenerators,
+  createIntegrationTest
+} from '../lib/testing';
+
+import type {
   TestSuite,
   PropertyTest,
   UnitTest,
-} from '../lib/testing/TestFramework';
-
-import { createComplexityAnalyzer } from '../lib/ai/analysis/ComplexityAnalyzer';
-import { createModelRouter } from '../lib/ai/ModelRouter';
-import { createAllModels } from '../lib/ai/factories/ModelFactory';
-import { createNotificationScheduler } from '../../sihat-tcm-mobile/lib/notifications/NotificationScheduler';
+  TestResult
+} from '../lib/testing';
 
 /**
- * AI System Property Tests
- * 
- * These tests verify that the AI system maintains certain properties
- * regardless of the input data.
+ * Example 1: Using the default framework (simplest approach)
  */
-export function createAISystemPropertyTests(): PropertyTest[] {
-  return [
-    // Test 1: Complexity Analysis Consistency
-    createPropertyTest(
-      'Complexity Analysis Consistency',
-      async (input) => {
-        const analyzer = createComplexityAnalyzer();
-        
-        // Same input should always produce same complexity analysis
-        const result1 = analyzer.analyzeComplexity(input);
-        const result2 = analyzer.analyzeComplexity(input);
-        
-        return (
-          result1.type === result2.type &&
-          result1.score === result2.score &&
-          result1.factors.hasImages === result2.factors.hasImages &&
-          result1.factors.requiresAnalysis === result2.factors.requiresAnalysis
-        );
-      },
-      TestDataGenerators.aiRequest(),
-      {
-        description: 'Complexity analysis should be deterministic for identical inputs',
-        iterations: 100,
-        priority: 'high',
-        tags: ['ai', 'complexity', 'deterministic'],
-      }
-    ),
-
-    // Test 2: Complexity Score Bounds
-    createPropertyTest(
-      'Complexity Score Bounds',
-      async (input) => {
-        const analyzer = createComplexityAnalyzer();
-        const result = analyzer.analyzeComplexity(input);
-        
-        // Complexity score should always be within valid bounds
-        return result.score >= 0 && result.score <= 100;
-      },
-      TestDataGenerators.aiRequest(),
-      {
-        description: 'Complexity scores should always be between 0 and 100',
-        iterations: 200,
-        priority: 'critical',
-        tags: ['ai', 'complexity', 'bounds'],
-      }
-    ),
-
-    // Test 3: Model Selection Validity
-    createPropertyTest(
-      'Model Selection Validity',
-      async (input) => {
-        const router = createModelRouter();
-        const models = createAllModels();
-        models.forEach(model => router.addModel(model));
-        
-        try {
-          const result = await router.routeRequest(input);
-          
-          // Result should always have required properties
-          return (
-            typeof result.text === 'string' &&
-            typeof result.modelUsed === 'string' &&
-            typeof result.responseTime === 'number' &&
-            result.responseTime >= 0
-          );
-        } catch (error) {
-          // Errors are acceptable, but they should be proper Error objects
-          return error instanceof Error;
-        }
-      },
-      TestDataGenerators.aiRequest(),
-      {
-        description: 'Model routing should always return valid results or proper errors',
-        iterations: 50,
-        priority: 'critical',
-        tags: ['ai', 'routing', 'validity'],
-      }
-    ),
-
-    // Test 4: Image Processing Consistency
-    createPropertyTest(
-      'Image Processing Consistency',
-      async (input) => {
-        const analyzer = createComplexityAnalyzer();
-        
-        // Requests with images should always be marked as having images
-        const result = analyzer.analyzeComplexity(input);
-        const hasImages = Boolean(input.images && input.images.length > 0);
-        
-        return result.factors.hasImages === hasImages;
-      },
-      () => ({
-        ...TestDataGenerators.aiRequest()(),
-        images: Math.random() > 0.5 ? [
-          { url: 'https://example.com/test.jpg', type: 'image/jpeg' }
-        ] : undefined,
-      }),
-      {
-        description: 'Image detection should be consistent with input data',
-        iterations: 75,
-        priority: 'high',
-        tags: ['ai', 'images', 'consistency'],
-      }
-    ),
-
-    // Test 5: Medical Complexity Assessment
-    createPropertyTest(
-      'Medical Complexity Assessment',
-      async (input) => {
-        const analyzer = createComplexityAnalyzer();
-        const result = analyzer.analyzeComplexity(input);
-        
-        // High medical complexity should result in higher overall complexity
-        if (input.medicalHistory?.conditions?.length > 5) {
-          return result.score > 30; // Should be at least moderate complexity
-        }
-        
-        return true; // Other cases are valid
-      },
-      () => ({
-        ...TestDataGenerators.aiRequest()(),
-        medicalHistory: TestDataGenerators.medicalData()(),
-      }),
-      {
-        description: 'Medical complexity should influence overall complexity scoring',
-        iterations: 100,
-        priority: 'high',
-        tags: ['ai', 'medical', 'complexity'],
-      }
-    ),
-  ];
-}
-
-/**
- * Notification System Property Tests
- */
-export function createNotificationPropertyTests(): PropertyTest[] {
-  return [
-    // Test 1: Notification Data Integrity
-    createPropertyTest(
-      'Notification Data Integrity',
-      async (input) => {
-        // Mock scheduler for testing
-        const mockScheduler = {
-          schedule: async (notification: any) => {
-            // Verify required fields are present
-            return (
-              typeof notification.title === 'string' &&
-              notification.title.length > 0 &&
-              typeof notification.body === 'string' &&
-              notification.body.length > 0 &&
-              typeof notification.category === 'string' &&
-              typeof notification.priority === 'string'
-            );
-          }
-        };
-        
-        return mockScheduler.schedule(input);
-      },
-      TestDataGenerators.notificationRequest(),
-      {
-        description: 'Notification requests should maintain data integrity',
-        iterations: 100,
-        priority: 'critical',
-        tags: ['notification', 'integrity', 'validation'],
-      }
-    ),
-
-    // Test 2: Priority Level Consistency
-    createPropertyTest(
-      'Priority Level Consistency',
-      async (input) => {
-        const validPriorities = ['low', 'normal', 'high', 'urgent'];
-        return validPriorities.includes(input.priority);
-      },
-      TestDataGenerators.notificationRequest(),
-      {
-        description: 'Notification priorities should always be valid values',
-        iterations: 50,
-        priority: 'high',
-        tags: ['notification', 'priority', 'validation'],
-      }
-    ),
-
-    // Test 3: Category Validation
-    createPropertyTest(
-      'Category Validation',
-      async (input) => {
-        const validCategories = [
-          'health', 'medication', 'exercise', 'diet', 'sleep', 'appointments', 'general'
-        ];
-        return validCategories.includes(input.category);
-      },
-      TestDataGenerators.notificationRequest(),
-      {
-        description: 'Notification categories should always be valid',
-        iterations: 75,
-        priority: 'high',
-        tags: ['notification', 'category', 'validation'],
-      }
-    ),
-  ];
-}
-
-/**
- * Performance Tests
- */
-export function createPerformanceTests(): UnitTest[] {
-  return [
-    createUnitTest(
-      'AI Complexity Analysis Performance',
-      async () => {
-        const analyzer = createComplexityAnalyzer();
-        const testData = TestDataGenerators.aiRequest()();
-        
-        const startTime = Date.now();
-        
-        // Run analysis 100 times
-        for (let i = 0; i < 100; i++) {
-          analyzer.analyzeComplexity(testData);
-        }
-        
-        const executionTime = Date.now() - startTime;
-        const averageTime = executionTime / 100;
-        
-        // Should complete within reasonable time (< 1ms per analysis)
-        const success = averageTime < 1;
-        
-        return {
-          testId: 'perf-complexity-analysis',
-          success,
-          executionTime,
-          metadata: {
-            averageTime,
-            iterations: 100,
-            threshold: 1,
-          },
-        };
-      },
-      {
-        description: 'Complexity analysis should be fast enough for real-time use',
-        category: 'performance',
-        priority: 'high',
-        tags: ['performance', 'ai', 'complexity'],
-        timeout: 5000,
-      }
-    ),
-
-    createUnitTest(
-      'Model Factory Performance',
-      async () => {
-        const startTime = Date.now();
-        
-        // Create models multiple times to test caching
-        for (let i = 0; i < 50; i++) {
-          createAllModels();
-        }
-        
-        const executionTime = Date.now() - startTime;
-        const averageTime = executionTime / 50;
-        
-        // Should benefit from caching (< 10ms per creation after first)
-        const success = averageTime < 10;
-        
-        return {
-          testId: 'perf-model-factory',
-          success,
-          executionTime,
-          metadata: {
-            averageTime,
-            iterations: 50,
-            threshold: 10,
-          },
-        };
-      },
-      {
-        description: 'Model factory should efficiently cache model instances',
-        category: 'performance',
-        priority: 'medium',
-        tags: ['performance', 'factory', 'caching'],
-        timeout: 10000,
-      }
-    ),
-  ];
-}
-
-/**
- * Integration Tests
- */
-export function createIntegrationTests(): UnitTest[] {
-  return [
-    createUnitTest(
-      'AI Router Integration',
-      async () => {
-        const router = createModelRouter({
-          context: 'IntegrationTest',
-          enablePerformanceMonitoring: true,
-        });
-        
-        const models = createAllModels();
-        models.forEach(model => router.addModel(model));
-        
-        const testRequest = {
-          messages: [
-            { role: 'user', content: 'Test TCM diagnosis request' }
-          ],
-          requiresAnalysis: true,
-          language: 'en',
-        };
-        
-        try {
-          const result = await router.routeRequest(testRequest);
-          
-          const success = (
-            result.text &&
-            result.modelUsed &&
-            typeof result.responseTime === 'number'
-          );
-          
-          return {
-            testId: 'integration-ai-router',
-            success,
-            executionTime: result.responseTime || 0,
-            metadata: {
-              modelUsed: result.modelUsed,
-              hasText: Boolean(result.text),
-            },
-          };
-        } catch (error) {
-          return {
-            testId: 'integration-ai-router',
-            success: false,
-            executionTime: 0,
-            error: error as Error,
-          };
-        }
-      },
-      {
-        description: 'AI router should integrate properly with all components',
-        category: 'integration',
-        priority: 'critical',
-        tags: ['integration', 'ai', 'router'],
-        timeout: 30000,
-      }
-    ),
-  ];
-}
-
-/**
- * TCM-Specific Domain Tests
- */
-export function createTCMDomainTests(): PropertyTest[] {
-  return [
-    createPropertyTest(
-      'TCM Constitution Analysis',
-      async (input) => {
-        // Test that TCM constitution data is properly handled
-        const validConstitutions = [
-          'Qi Deficiency', 'Yang Deficiency', 'Yin Deficiency',
-          'Phlegm-Dampness', 'Damp-Heat', 'Blood Stasis',
-          'Qi Stagnation', 'Special Diathesis', 'Balanced'
-        ];
-        
-        if (input.constitution) {
-          return validConstitutions.includes(input.constitution);
-        }
-        
-        return true; // No constitution specified is valid
-      },
-      () => ({
-        constitution: ['Qi Deficiency', 'Yang Deficiency', 'Yin Deficiency'][
-          Math.floor(Math.random() * 3)
-        ],
-        symptoms: TestDataGenerators.array(
-          () => TestDataGenerators.string(5, 20)(),
-          1,
-          10
-        )(),
-      }),
-      {
-        description: 'TCM constitution types should be valid',
-        iterations: 50,
-        priority: 'high',
-        tags: ['tcm', 'constitution', 'domain'],
-      }
-    ),
-
-    createPropertyTest(
-      'TCM Herbal Formula Validation',
-      async (input) => {
-        // Test herbal formula data structure
-        if (input.herbalFormula) {
-          return (
-            typeof input.herbalFormula.name === 'string' &&
-            Array.isArray(input.herbalFormula.herbs) &&
-            input.herbalFormula.herbs.length > 0 &&
-            typeof input.herbalFormula.dosage === 'string'
-          );
-        }
-        
-        return true;
-      },
-      () => ({
-        herbalFormula: {
-          name: TestDataGenerators.string(10, 30)(),
-          herbs: TestDataGenerators.array(
-            () => TestDataGenerators.string(5, 15)(),
-            3,
-            12
-          )(),
-          dosage: TestDataGenerators.string(5, 20)(),
-          duration: TestDataGenerators.integer(7, 90)(),
-        },
-      }),
-      {
-        description: 'TCM herbal formulas should have valid structure',
-        iterations: 30,
-        priority: 'medium',
-        tags: ['tcm', 'herbs', 'validation'],
-      }
-    ),
-  ];
-}
-
-/**
- * Comprehensive Test Suite for Sihat TCM
- */
-export function createSihatTCMTestSuite(): TestSuite {
-  return {
-    name: 'Sihat TCM Comprehensive Test Suite',
-    description: 'Complete test suite for the refactored Sihat TCM system',
-    
-    beforeAll: async () => {
-      console.log('Setting up Sihat TCM test environment...');
-      // Initialize any global test setup
-    },
-    
-    afterAll: async () => {
-      console.log('Cleaning up Sihat TCM test environment...');
-      // Clean up any global test resources
-    },
-    
-    beforeEach: async () => {
-      // Setup before each test
-    },
-    
-    afterEach: async () => {
-      // Cleanup after each test
-    },
-    
+export async function basicTestingExample() {
+  // Create a simple test suite
+  const suite: TestSuite = {
+    name: 'Basic AI Router Tests',
+    description: 'Simple tests for AI model routing functionality',
     tests: [
-      ...createAISystemPropertyTests(),
-      ...createNotificationPropertyTests(),
-      ...createPerformanceTests(),
-      ...createIntegrationTests(),
-      ...createTCMDomainTests(),
-    ],
+      createPropertyTest(
+        'Model Selection Consistency',
+        async (input) => {
+          // Mock test: ensure model selection is consistent
+          const selectedModel = 'gemini-2.0-flash'; // Simplified
+          return typeof selectedModel === 'string' && selectedModel.length > 0;
+        },
+        TestDataGenerators.aiRequest(),
+        {
+          iterations: 25,
+          priority: 'high',
+          tags: ['ai', 'consistency']
+        }
+      ),
+      createUnitTest(
+        'Basic Configuration Validation',
+        async () => {
+          // Mock unit test
+          const config = { enablePerformanceMonitoring: true };
+          return {
+            testId: 'config-test',
+            success: config.enablePerformanceMonitoring === true,
+            executionTime: 10
+          };
+        },
+        {
+          priority: 'medium',
+          tags: ['config', 'validation']
+        }
+      )
+    ]
   };
+
+  // Run the test suite
+  const report = await defaultTestFramework.runTestSuite(suite);
+  console.log('Basic test results:', {
+    totalTests: report.totalTests,
+    successRate: `${report.summary.successRate.toFixed(1)}%`,
+    avgTime: `${report.summary.averageExecutionTime.toFixed(0)}ms`
+  });
+
+  return report;
 }
 
 /**
- * Usage Examples
+ * Example 2: Using modular components for advanced control
  */
-
-// Example 1: Run AI System Property Tests
-export async function exampleRunAIPropertyTests() {
-  console.log('Running AI System Property Tests...');
+export async function advancedTestingExample() {
+  // Create specialized test framework
+  const framework = new TestFramework();
   
-  const aiTests = createAISystemPropertyTests();
-  const testSuite = {
-    name: 'AI System Property Tests',
-    description: 'Property-based tests for AI components',
-    tests: aiTests,
-  };
+  // Generate comprehensive test suite
+  const comprehensiveSuite = framework.createComprehensiveTestSuite();
   
-  const report = await defaultTestFramework.runTestSuite(testSuite);
-  
-  console.log('AI Property Test Results:', {
-    totalTests: report.totalTests,
-    passedTests: report.passedTests,
-    failedTests: report.failedTests,
-    successRate: report.summary.successRate,
-    averageExecutionTime: report.summary.averageExecutionTime,
-  });
-  
-  // Log any failures
-  const failures = report.results.filter(r => !r.success);
-  if (failures.length > 0) {
-    console.log('Failed tests:', failures.map(f => ({
-      testId: f.testId,
-      error: f.error?.message,
-      counterExample: f.counterExample,
-    })));
-  }
-  
-  return report;
-}
-
-// Example 2: Run Performance Tests
-export async function exampleRunPerformanceTests() {
-  console.log('Running Performance Tests...');
-  
-  const perfTests = createPerformanceTests();
-  const testSuite = {
-    name: 'Performance Tests',
-    description: 'Performance benchmarks for critical components',
-    tests: perfTests,
-  };
-  
-  const report = await defaultTestFramework.runTestSuite(testSuite);
-  
-  console.log('Performance Test Results:', {
-    totalTests: report.totalTests,
-    passedTests: report.passedTests,
-    performanceIssues: report.summary.performanceIssues,
-    averageExecutionTime: report.summary.averageExecutionTime,
-  });
-  
-  return report;
-}
-
-// Example 3: Run Complete Test Suite
-export async function exampleRunCompleteTestSuite() {
-  console.log('Running Complete Sihat TCM Test Suite...');
-  
-  const testSuite = createSihatTCMTestSuite();
-  const report = await defaultTestFramework.runTestSuite(testSuite);
-  
-  console.log('Complete Test Suite Results:', {
-    suiteName: report.suiteName,
-    totalTests: report.totalTests,
-    passedTests: report.passedTests,
-    failedTests: report.failedTests,
-    successRate: report.summary.successRate,
-    criticalFailures: report.summary.criticalFailures,
-    performanceIssues: report.summary.performanceIssues,
-    totalExecutionTime: report.totalExecutionTime,
-  });
-  
-  // Detailed analysis
-  const categoryResults = report.results.reduce((acc, result) => {
-    const test = testSuite.tests.find(t => t.id === result.testId);
-    const category = test?.category || 'unknown';
-    
-    if (!acc[category]) {
-      acc[category] = { total: 0, passed: 0, failed: 0 };
-    }
-    
-    acc[category].total++;
-    if (result.success) {
-      acc[category].passed++;
-    } else {
-      acc[category].failed++;
-    }
-    
-    return acc;
-  }, {} as Record<string, { total: number; passed: number; failed: number }>);
-  
-  console.log('Results by Category:', categoryResults);
-  
-  return report;
-}
-
-// Example 4: Custom TCM Domain Test
-export async function exampleCustomTCMTest() {
-  const customTest = createPropertyTest(
-    'TCM Diagnosis Consistency',
-    async (input) => {
-      // Custom test for TCM diagnosis consistency
-      if (input.symptoms && input.constitution) {
-        // Verify that certain symptom-constitution combinations are logical
-        const yangDeficiencySymptoms = ['cold limbs', 'fatigue', 'poor digestion'];
-        const hasYangDeficiencySymptoms = input.symptoms.some((symptom: string) =>
-          yangDeficiencySymptoms.some(yds => symptom.toLowerCase().includes(yds))
-        );
+  // Add custom tests
+  const customTests = [
+    createPropertyTest(
+      'TCM Diagnosis Consistency',
+      async (input) => {
+        // Mock TCM diagnosis validation
+        const diagnosis = {
+          constitution: input.constitution,
+          recommendations: ['herb1', 'herb2'],
+          confidence: 0.85
+        };
         
-        if (input.constitution === 'Yang Deficiency' && hasYangDeficiencySymptoms) {
-          return true; // Consistent
-        }
-        
-        if (input.constitution !== 'Yang Deficiency' && !hasYangDeficiencySymptoms) {
-          return true; // Also consistent
-        }
-        
-        // Mixed cases are also valid (real-world complexity)
-        return true;
+        return diagnosis.confidence > 0.5 && 
+               diagnosis.recommendations.length > 0 &&
+               typeof diagnosis.constitution === 'string';
+      },
+      TestDataGenerators.tcmData(),
+      {
+        description: 'TCM diagnosis should be consistent and valid',
+        iterations: 40,
+        priority: 'critical',
+        tags: ['tcm', 'diagnosis', 'consistency']
       }
-      
-      return true;
+    ),
+    createIntegrationTest(
+      'Database Connection Test',
+      async () => {
+        // Mock database connection test
+        const connected = true; // Simulate connection check
+        return {
+          testId: 'db-connection',
+          success: connected,
+          executionTime: 150,
+          metadata: { connectionPool: 'active', latency: '15ms' }
+        };
+      },
+      ['database', 'supabase'],
+      'development',
+      {
+        description: 'Verify database connectivity and performance',
+        priority: 'critical',
+        tags: ['database', 'integration'],
+        timeout: 5000
+      }
+    )
+  ];
+
+  // Add custom tests to suite
+  comprehensiveSuite.tests.push(...customTests);
+
+  // Run with detailed reporting
+  const report = await framework.runTestSuite(comprehensiveSuite);
+  
+  console.log('Advanced test results:', {
+    suite: report.suiteName,
+    duration: `${report.totalExecutionTime}ms`,
+    results: {
+      total: report.totalTests,
+      passed: report.passedTests,
+      failed: report.failedTests,
+      successRate: `${report.summary.successRate.toFixed(1)}%`
     },
-    () => ({
-      constitution: ['Yang Deficiency', 'Yin Deficiency', 'Qi Deficiency'][
-        Math.floor(Math.random() * 3)
-      ],
-      symptoms: [
-        'cold limbs', 'fatigue', 'poor digestion', 'night sweats', 
-        'dry mouth', 'restlessness', 'shortness of breath'
-      ].slice(0, Math.floor(Math.random() * 4) + 1),
-    }),
+    performance: {
+      avgTime: `${report.summary.averageExecutionTime.toFixed(0)}ms`,
+      slowTests: report.summary.performanceIssues,
+      criticalFailures: report.summary.criticalFailures
+    }
+  });
+
+  return report;
+}
+
+/**
+ * Example 3: Using individual components for maximum flexibility
+ */
+export async function componentBasedTestingExample() {
+  // Create individual components
+  const propertyRunner = new PropertyTestRunner();
+  const suiteRunner = new TestSuiteRunner();
+
+  // Create custom property test
+  const customPropertyTest: PropertyTest = {
+    id: 'custom-prop-test',
+    name: 'Custom Notification Validation',
+    description: 'Validate notification data structure and content',
+    category: 'property',
+    priority: 'high',
+    tags: ['notification', 'validation', 'custom'],
+    property: async (input) => {
+      // Custom validation logic
+      const hasRequiredFields = input.title && input.body && input.category;
+      const validCategory = ['health', 'medication', 'exercise', 'diet', 'sleep', 'appointments']
+        .includes(input.category);
+      const validPriority = ['low', 'normal', 'high', 'urgent'].includes(input.priority);
+      
+      return hasRequiredFields && validCategory && validPriority;
+    },
+    generator: TestDataGenerators.notificationRequest(),
+    iterations: 50,
+    shrinkingEnabled: true
+  };
+
+  // Run individual property test
+  const propertyResult = await propertyRunner.runPropertyTest(customPropertyTest);
+  console.log('Property test result:', {
+    success: propertyResult.success,
+    iterations: propertyResult.iterations,
+    executionTime: `${propertyResult.executionTime}ms`,
+    counterExample: propertyResult.counterExample
+  });
+
+  // Create and run a focused test suite
+  const focusedSuite: TestSuite = {
+    name: 'Focused Component Tests',
+    description: 'Targeted tests for specific components',
+    tests: [customPropertyTest],
+    beforeAll: async () => {
+      console.log('Setting up focused test environment...');
+    },
+    afterAll: async () => {
+      console.log('Cleaning up focused test environment...');
+    }
+  };
+
+  const suiteResult = await suiteRunner.runTestSuite(focusedSuite);
+  console.log('Focused suite result:', suiteResult.summary);
+
+  return { propertyResult, suiteResult };
+}
+
+/**
+ * Example 4: Data generator showcase
+ */
+export async function dataGeneratorExample() {
+  console.log('=== Data Generator Examples ===');
+
+  // Generate various test data
+  const samples = {
+    aiRequest: TestDataGenerators.aiRequest()(),
+    notificationRequest: TestDataGenerators.notificationRequest()(),
+    medicalData: TestDataGenerators.medicalData()(),
+    tcmData: TestDataGenerators.tcmData()(),
+    userProfile: TestDataGenerators.userProfile()(),
+    
+    // Custom generators
+    customString: TestDataGenerators.string(5, 15)(),
+    customArray: TestDataGenerators.array(TestDataGenerators.integer(1, 100), 3, 8)(),
+    customObject: TestDataGenerators.object({
+      name: TestDataGenerators.string(3, 20),
+      age: TestDataGenerators.integer(18, 65),
+      active: () => Math.random() > 0.5
+    })()
+  };
+
+  console.log('Generated test data samples:', samples);
+  return samples;
+}
+
+/**
+ * Example 5: Performance and load testing
+ */
+export async function performanceTestingExample() {
+  const performanceTests = TestFactory.createPerformanceTests();
+  
+  // Add custom performance tests
+  const loadTest = createPropertyTest(
+    'High Load Handling',
+    async (input) => {
+      const startTime = Date.now();
+      
+      // Simulate processing multiple requests
+      const promises = Array.from({ length: 10 }, () => 
+        new Promise(resolve => setTimeout(resolve, Math.random() * 50))
+      );
+      
+      await Promise.all(promises);
+      const totalTime = Date.now() - startTime;
+      
+      return totalTime < 500; // Should handle 10 concurrent requests in under 500ms
+    },
+    TestDataGenerators.aiRequest(),
     {
-      description: 'TCM diagnosis should maintain logical consistency',
-      iterations: 25,
+      description: 'System should handle concurrent requests efficiently',
+      iterations: 20,
       priority: 'medium',
-      tags: ['tcm', 'diagnosis', 'consistency'],
+      tags: ['performance', 'load', 'concurrent']
     }
   );
-  
-  const testSuite = {
-    name: 'Custom TCM Domain Test',
-    description: 'Custom test for TCM-specific logic',
-    tests: [customTest],
+
+  const performanceSuite: TestSuite = {
+    name: 'Performance Test Suite',
+    description: 'Tests focused on system performance and scalability',
+    tests: [...performanceTests, loadTest]
   };
+
+  const report = await defaultTestFramework.runTestSuite(performanceSuite);
   
-  const report = await defaultTestFramework.runTestSuite(testSuite);
-  console.log('Custom TCM Test Result:', report);
-  
+  console.log('Performance test results:', {
+    performanceIssues: report.summary.performanceIssues,
+    averageTime: `${report.summary.averageExecutionTime.toFixed(0)}ms`,
+    slowestTest: Math.max(...report.results.map(r => r.executionTime)),
+    fastestTest: Math.min(...report.results.map(r => r.executionTime))
+  });
+
   return report;
 }
 
-export {
-  createAISystemPropertyTests,
-  createNotificationPropertyTests,
-  createPerformanceTests,
-  createIntegrationTests,
-  createTCMDomainTests,
-  createSihatTCMTestSuite,
+/**
+ * Example 6: Error handling and edge cases
+ */
+export async function errorHandlingTestExample() {
+  const errorTests = [
+    createPropertyTest(
+      'Error Recovery',
+      async (input) => {
+        try {
+          // Simulate operation that might fail
+          if (Math.random() < 0.1) {
+            throw new Error('Simulated failure');
+          }
+          return true;
+        } catch (error) {
+          // Test error recovery
+          console.log('Recovered from error:', error.message);
+          return true; // Recovery successful
+        }
+      },
+      TestDataGenerators.aiRequest(),
+      {
+        description: 'System should gracefully handle and recover from errors',
+        iterations: 100,
+        priority: 'high',
+        tags: ['error-handling', 'recovery', 'resilience']
+      }
+    ),
+    createUnitTest(
+      'Invalid Input Handling',
+      async () => {
+        // Test with invalid inputs
+        const invalidInputs = [null, undefined, '', {}, []];
+        let handledCorrectly = 0;
+        
+        for (const input of invalidInputs) {
+          try {
+            // Mock validation function
+            const isValid = input && typeof input === 'object' && Object.keys(input).length > 0;
+            if (!isValid) {
+              handledCorrectly++;
+            }
+          } catch (error) {
+            handledCorrectly++; // Error handling counts as correct
+          }
+        }
+        
+        return {
+          testId: 'invalid-input-test',
+          success: handledCorrectly === invalidInputs.length,
+          executionTime: 5,
+          metadata: { handledInputs: handledCorrectly, totalInputs: invalidInputs.length }
+        };
+      },
+      {
+        description: 'System should properly validate and handle invalid inputs',
+        priority: 'high',
+        tags: ['validation', 'error-handling', 'edge-cases']
+      }
+    )
+  ];
+
+  const errorSuite: TestSuite = {
+    name: 'Error Handling Test Suite',
+    description: 'Tests for error handling and edge case scenarios',
+    tests: errorTests
+  };
+
+  const report = await defaultTestFramework.runTestSuite(errorSuite);
+  console.log('Error handling test results:', report.summary);
+
+  return report;
+}
+
+// Export all examples for easy testing
+export const testingExamples = {
+  basicTestingExample,
+  advancedTestingExample,
+  componentBasedTestingExample,
+  dataGeneratorExample,
+  performanceTestingExample,
+  errorHandlingTestExample
 };

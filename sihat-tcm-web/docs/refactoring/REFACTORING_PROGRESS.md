@@ -188,10 +188,45 @@ DiagnosisSummary.tsx (~350 lines - orchestrator)
 
 ---
 
+### 4. Component: `DiagnosisWizard.tsx` 🔄
+
+**Before**: 658 lines with embedded step rendering and test data logic  
+**After**: ~400-450 lines (orchestrator only) - In Progress
+
+**Changes**:
+
+#### Extracted Components
+- **`wizard/StepRenderer.tsx`** (~200 lines)
+  - Centralized step rendering logic
+  - Maps step types to appropriate components
+  - Handles all step transitions and data updates
+
+#### Extracted Utilities
+- **`wizard/utils/testDataHelpers.ts`** (~50 lines)
+  - `generateTestData()` - Generates mock data for all steps
+  - `clearTestData()` - Clears all diagnosis data
+
+**Files Created**:
+- `src/components/diagnosis/wizard/StepRenderer.tsx`
+- `src/components/diagnosis/wizard/utils/testDataHelpers.ts`
+
+**Files Modified**:
+- `src/components/diagnosis/wizard/index.ts` (exports)
+
+**Status**: Components created, main component update pending
+
+**Expected Impact**:
+- ✅ **~200-250 lines reduced** in main component
+- ✅ Step rendering logic is reusable
+- ✅ Test data utilities are testable independently
+- ✅ Better separation of concerns
+
+---
+
 ## Next Steps
 
 ### High Priority
-1. **`DiagnosisWizard.tsx`** (658 lines)
+1. **Complete `DiagnosisWizard.tsx` refactoring** (658 lines)
    - Extract step rendering logic
    - Move test data logic to utilities
    - Simplify step transitions

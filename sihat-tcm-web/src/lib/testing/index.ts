@@ -1,35 +1,41 @@
 /**
- * Property-Based Testing Framework - Main Export
- *
- * This module exports all the property-based testing utilities
- * for the Sihat TCM system.
+ * Testing Framework - Modular Architecture
+ * 
+ * This is the new modular approach to testing framework.
+ * Use these exports for new code instead of the monolithic TestFramework.ts
  */
 
-// Core framework
+// Main framework
+export { TestFramework, defaultTestFramework } from './TestFramework';
+
+// Core interfaces
+export type {
+  TestCase,
+  PropertyTest,
+  UnitTest,
+  IntegrationTest,
+  TestResult,
+  TestCoverage,
+  TestSuite,
+  TestReport,
+  TestCategory,
+  TestPriority
+} from './interfaces/TestInterfaces';
+
+// Specialized components
+export { TestDataGenerators } from './generators/TestDataGenerators';
+export { PropertyTestRunner } from './runners/PropertyTestRunner';
+export { TestSuiteRunner } from './runners/TestSuiteRunner';
+export { TestFactory } from './factories/TestFactory';
+
+// Convenience functions
 export {
-  PBT_CONFIG,
-  runPropertyTest,
   createPropertyTest,
-  PropertyTestReporter,
-  globalReporter,
-  runPropertyTestWithReporting,
-} from "./propertyTestFramework";
+  createUnitTest,
+  createIntegrationTest
+} from './TestFramework';
 
-// Medical data generators
-export {
-  arbitraries,
-  medicalHistoryArbitrary,
-  patientProfileArbitrary,
-  diagnosisSessionArbitrary,
-  treatmentRecommendationArbitrary,
-  healthTimeSeriesArbitrary,
-  validationContextArbitrary,
-  imageQualityDataArbitrary,
-  syncDataArbitrary,
-} from "./medicalDataGenerators";
-
-// Test helpers and patterns
-export { testProperty, assertions, patterns, validators, cleanup } from "./propertyTestHelpers";
-
-// Re-export fast-check for convenience
-export * as fc from "fast-check";
+// Convenience function for quick setup
+export function createTestFramework(): TestFramework {
+  return new TestFramework();
+}
