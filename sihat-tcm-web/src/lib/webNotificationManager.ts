@@ -1,47 +1,50 @@
 /**
- * Web Notification Manager
- * Handles browser notifications, service worker integration, and cross-device sync
+ * Web Notification Manager - Legacy Wrapper
+ * 
+ * @deprecated This file is maintained for backward compatibility.
+ * Use the new modular system: import { webNotificationManager } from './web-notifications'
+ * 
+ * The new system provides:
+ * - Modular architecture with focused components
+ * - Better separation of concerns
+ * - Enhanced testing capabilities
+ * - Improved maintainability
  */
 
-interface NotificationPreferences {
-  enabled: boolean;
-  healthReminders: boolean;
-  medicationAlerts: boolean;
-  appointmentReminders: boolean;
-  exerciseReminders: boolean;
-  sleepReminders: boolean;
-  quietHours: {
-    enabled: boolean;
-    start: string;
-    end: string;
-  };
-  frequency: {
-    daily: boolean;
-    weekly: boolean;
-    monthly: boolean;
-  };
-  categories: {
-    health: boolean;
-    medication: boolean;
-    exercise: boolean;
-    diet: boolean;
-    sleep: boolean;
-    appointments: boolean;
-  };
-}
+import { 
+  webNotificationManager,
+  type NotificationPreferences,
+  type ScheduledNotification,
+  type NotificationOptions,
+  type ScheduleNotificationOptions,
+  type NotificationStats
+} from './web-notifications';
 
-interface ScheduledNotification {
-  id: string;
-  type: string;
+// Legacy interface compatibility
+interface LegacyNotificationOptions {
   title: string;
   body: string;
-  data: Record<string, any>;
-  scheduledFor: Date;
-  category: string;
-  priority: "low" | "normal" | "high" | "urgent";
-  repeatPattern?: string;
+  icon?: string;
+  badge?: string;
+  data?: Record<string, any>;
+  tag?: string;
+  requireInteraction?: boolean;
 }
 
+interface LegacyScheduleOptions {
+  id?: string;
+  title: string;
+  body: string;
+  scheduledFor: Date;
+  category: string;
+  priority?: "low" | "normal" | "high" | "urgent";
+  repeatPattern?: string;
+  data?: Record<string, any>;
+}
+
+/**
+ * @deprecated Use the new modular WebNotificationManager from './web-notifications'
+ */
 class WebNotificationManager {
   private isInitialized = false;
   private permission: NotificationPermission = "default";
