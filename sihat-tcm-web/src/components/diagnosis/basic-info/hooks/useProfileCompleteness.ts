@@ -24,7 +24,7 @@ interface UseProfileCompletenessOptions {
   /**
    * Translation function
    */
-  t: any;
+  t?: any;
   /**
    * Whether to only check for patients (skip for admins/doctors)
    */
@@ -67,10 +67,11 @@ export function validateProfileCompleteness(profile: any): boolean {
  * Extracts basic info data from a profile
  */
 export function extractProfileData(profile: Record<string, unknown> | null | undefined): Partial<BasicInfoData> {
+  if (!profile) return {};
   return {
-    name: profile.full_name || "",
+    name: (profile.full_name as string) || "",
     age: profile.age?.toString() || "",
-    gender: profile.gender || "",
+    gender: (profile.gender as string) || "",
     weight: profile.weight?.toString() || "",
     height: profile.height?.toString() || "",
   };
@@ -112,7 +113,7 @@ export function useProfileCompleteness(
     const complete = validateProfileCompleteness(profile);
 
     if (complete) {
-      const extracted = extractProfileData(profile);
+      const extracted = extractProfileData(profile as unknown as Record<string, unknown>);
       setAutoFilledData(extracted);
       setIsProfileComplete(true);
 

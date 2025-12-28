@@ -16,7 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lang === "en"
           ? `${baseUrl}/blog/${post.slug}`
           : `${baseUrl}/blog/${post.slug}?lang=${lang}`,
-      lastModified: new Date(post.date),
+      lastModified: post.date ? new Date(post.date) : new Date(),
       changeFrequency: "monthly" as const,
       priority: lang === "en" ? 0.7 : 0.6, // Primary language has slightly higher priority
     }))

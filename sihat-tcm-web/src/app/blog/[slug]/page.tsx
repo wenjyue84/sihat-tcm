@@ -95,7 +95,7 @@ export default async function BlogPost(props: Props) {
 
   // Extract headings for Table of Contents
   const headings: Heading[] =
-    post.content.match(/^##\s+(.+)$/gm)?.map((heading: string) => {
+    post.content?.match(/^##\s+(.+)$/gm)?.map((heading: string) => {
       const title = heading.replace(/^##\s+/, "");
       // Use Unicode property escapes to support generic characters (Chinese, Malay, etc.)
       const id = title
@@ -172,12 +172,17 @@ export default async function BlogPost(props: Props) {
       : "https://sihat-tcm.vercel.app/og-image.png",
     datePublished: post.date,
     dateModified: post.date,
-    author: [
-      {
-        "@type": "Person",
-        name: post.author.name,
-      },
-    ],
+    author: post.author
+      ? [
+          {
+            "@type": "Person",
+            name:
+              typeof post.author === "string"
+                ? post.author
+                : (post.author as { name: string }).name,
+          },
+        ]
+      : [],
     publisher: {
       "@type": "Organization",
       name: "Sihat TCM",
@@ -219,7 +224,7 @@ export default async function BlogPost(props: Props) {
 
   // FAQ Structured Data
   const faqJsonLd =
-    post.faq && post.faq.length > 0
+    post.faq && Array.isArray(post.faq) && post.faq.length > 0
       ? {
           "@context": "https://schema.org",
           "@type": "FAQPage",
@@ -293,7 +298,13 @@ export default async function BlogPost(props: Props) {
   type LangType = "en" | "ms" | "zh";
   const t = blogTranslations[lang as LangType] || blogTranslations.en;
 
-  const isDrAi = post.author?.name?.toLowerCase().includes("ai") || false;
+  const isDrAi =
+    (typeof post.author === "object" &&
+      post.author &&
+      "name" in post.author &&
+      (post.author as { name: string }).name?.toLowerCase().includes("ai")) ||
+    (typeof post.author === "string" && post.author.toLowerCase().includes("ai")) ||
+    false;
   const authorId = isDrAi ? "dr-ai" : "sihat-team"; // Simple mapping logic for now
   const authorProfile = getAuthor(authorId);
 
@@ -374,7 +385,13 @@ export default async function BlogPost(props: Props) {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    post.author?.name?.[0] || "S"
+                    (typeof post.author === "object" &&
+                    post.author &&
+                    "name" in post.author
+                      ? (post.author as { name: string }).name[0]
+                      : typeof post.author === "string"
+                        ? post.author[0]
+                        : "S") || "S"
                   )}
                 </div>
                 <div>
@@ -456,12 +473,12 @@ export default async function BlogPost(props: Props) {
           )}
 
           <div className="prose prose-stone prose-lg max-w-none">
-            <MDXRemote source={post.content} components={components} />
+            {post.content && <MDXRemote source={post.content} components={components} />}
           </div>
 
           <SocialShare
             url={`https://sihat-tcm.vercel.app/blog/${params.slug}`}
-            title={post.title}
+            title={post.title || ""}
           />
 
           <AuthorBio author={authorProfile} lang={lang as "en" | "ms" | "zh"} />
@@ -528,7 +545,7 @@ export default async function BlogPost(props: Props) {
       </div>
       <FloatingShareButton
         url={`https://sihat-tcm.vercel.app/blog/${params.slug}`}
-        title={post.title}
+        title={post.title || ""}
       />
     </article>
   );

@@ -126,7 +126,8 @@ export default async function BlogIndex(props: Props) {
     );
     posts = allPosts.filter(
       (post) =>
-        post.title.toLowerCase().includes(query) || post.excerpt.toLowerCase().includes(query)
+        (post.title?.toLowerCase().includes(query) || false) ||
+        (post.excerpt?.toLowerCase().includes(query) || false)
     );
   } else {
     // Normal paginated view
@@ -165,7 +166,12 @@ export default async function BlogIndex(props: Props) {
       datePublished: post.date,
       author: {
         "@type": "Person",
-        name: post.author?.name || "Sihat Team",
+        name:
+          typeof post.author === "object" && post.author && "name" in post.author
+            ? (post.author as { name: string }).name
+            : typeof post.author === "string"
+              ? post.author
+              : "Sihat Team",
       },
       ...(post.coverImage && {
         image: post.coverImage.startsWith("http")
@@ -238,7 +244,7 @@ export default async function BlogIndex(props: Props) {
                   {post.coverImage ? (
                     <Image
                       src={post.coverImage}
-                      alt={post.title}
+                      alt={post.title || ""}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -260,7 +266,12 @@ export default async function BlogIndex(props: Props) {
                     </span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
-                      <User className="w-3 h-3" /> {post.author.name || "Sihat Team"}
+                      <User className="w-3 h-3" />{" "}
+                      {typeof post.author === "object" && post.author && "name" in post.author
+                        ? (post.author as { name: string }).name
+                        : typeof post.author === "string"
+                          ? post.author
+                          : "Sihat Team"}
                     </span>
                     {post.readingTime && (
                       <>

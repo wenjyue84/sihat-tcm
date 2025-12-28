@@ -15,8 +15,11 @@ import { AudioAnalysisLoader } from "./AudioAnalysisLoader";
 import { AudioAnalysisResult } from "./AudioAnalysisResult";
 import { useLanguage } from "@/stores/useAppStore";
 import { useDiagnosisProgress } from "@/stores/useAppStore";
+import type { AudioAnalysisData as BaseAudioAnalysisData } from "@/types/diagnosis";
 
-interface AudioAnalysisData {
+// Extended AudioAnalysisData for this component with additional fields
+// This matches the type expected by AudioAnalysisResult component
+interface AudioAnalysisData extends BaseAudioAnalysisData {
   overall_observation: string;
   voice_quality_analysis: any;
   breathing_patterns: any;
@@ -31,8 +34,6 @@ interface AudioAnalysisData {
 
 // Recording states for clean UI
 type RecordingState = "idle" | "initializing" | "recording" | "recorded" | "playing";
-
-import type { AudioAnalysisData } from "@/types/diagnosis";
 
 interface AudioRecorderData {
   audio?: string | null;
@@ -377,7 +378,7 @@ export function AudioRecorder({
         return;
       }
 
-      setAnalysisResult(result);
+      setAnalysisResult(result as AudioAnalysisData);
     } catch (error) {
       console.error("[AudioRecorder] Analysis failed:", error);
       setAnalysisResult({
@@ -471,7 +472,7 @@ export function AudioRecorder({
   if (analysisResult) {
     return (
       <AudioAnalysisResult
-        analysisData={analysisResult}
+        analysisData={analysisResult as AudioAnalysisData}
         onRetake={handleRetake}
         onUpload={triggerFileUpload}
         onContinue={handleContinueWithResult}

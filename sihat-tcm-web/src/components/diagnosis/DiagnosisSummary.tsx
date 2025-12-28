@@ -81,7 +81,7 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
   // handleOptionChange is now provided by useReportOptions hook
 
   const handleConfirm = useCallback(() => {
-    onConfirm(summaries, options, additionalInfo);
+    onConfirm(summaries, options as unknown as Record<string, unknown>, additionalInfo);
   }, [onConfirm, summaries, options, additionalInfo]);
 
   // FIX: Memoize steps to prevent infinite re-render loop caused by unstable dependencies updating Context
