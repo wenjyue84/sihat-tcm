@@ -16,7 +16,8 @@ This implementation plan converts the Sihat TCM enhancement design into a series
   - **Property 1: Progress tracking monotonicity**
   - **Validates: Requirements 1.1, 1.3**
 
-- [ ] 1.2 Implement DiagnosisSessionManager for auto-save
+- [-] 1.2 Implement DiagnosisSessionManager for auto-save
+
   - Create session persistence layer with Supabase integration
   - Add session recovery logic for interrupted consultations
   - Implement session cleanup for completed consultations

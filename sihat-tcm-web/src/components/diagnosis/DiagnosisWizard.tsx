@@ -300,8 +300,8 @@ export default function DiagnosisWizard() {
               onComplete={(result) => {
                 setData((prev) => ({
                   ...prev,
-                  wen_inquiry: result,
-                  wen_chat: result.chatHistory || [],
+                  wen_inquiry: result as any,
+                  wen_chat: (result.chatHistory || []) as any,
                 }));
                 setTimeout(() => nextStep("wen_inquiry"), 0);
               }}

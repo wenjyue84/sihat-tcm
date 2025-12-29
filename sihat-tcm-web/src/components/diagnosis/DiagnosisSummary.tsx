@@ -117,7 +117,11 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
     if (stepIndex < steps.length - 1) {
       setCurrentStep(steps[stepIndex + 1].id as WizardStep);
     } else {
-      onConfirmRef.current(summariesRef.current, optionsRef.current, additionalInfoRef.current);
+      onConfirmRef.current(
+        summariesRef.current,
+        optionsRef.current as unknown as Record<string, unknown>,
+        additionalInfoRef.current
+      );
     }
   }, [currentStep, steps]);
 

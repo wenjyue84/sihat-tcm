@@ -38,6 +38,11 @@ export {
 
 // Core components
 export { DiagnosticOrchestrator } from './core/DiagnosticOrchestrator';
+export { 
+  DiagnosisSessionManager,
+  diagnosisSessionManager,
+  createDiagnosisSessionManager 
+} from './core/DiagnosisSessionManager';
 
 // Monitoring and analytics
 export { DiagnosticMonitor } from './monitoring/DiagnosticMonitor';
