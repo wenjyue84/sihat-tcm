@@ -1,6 +1,6 @@
 // Barrel exports for diagnosis components
 // Main wizard components
-export { DiagnosisWizard } from "./DiagnosisWizard";
+export { default as DiagnosisWizard } from "./DiagnosisWizard";
 export { BasicInfoForm } from "./BasicInfoForm";
 export { InquiryWizard } from "./InquiryWizard";
 export { InquiryStep } from "./InquiryStep";

@@ -362,7 +362,7 @@ export default function DiagnosisWizard() {
             <AudioRecorder
               initialData={data.wen_audio as any}
               onComplete={(result) => {
-                setData((prev) => ({ ...prev, wen_audio: result }));
+                setData((prev) => ({ ...prev, wen_audio: result as any }));
                 setTimeout(() => nextStep("wen_audio", result.skipCelebration), 0);
               }}
               onBack={() => prevStep("wen_audio")}
