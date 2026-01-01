@@ -4,152 +4,227 @@
  * Visual indicator for gesture hints and feedback
  */
 
-import React, { useRef, useEffect } from 'react';
-import { View, Text, Animated, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  View,
+  Animated,
+  StyleSheet,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { GestureIndicatorProps } from '../interfaces/TouchInterfaces';
+import {
+  GestureIndicatorProps,
+  GestureType,
+  SwipeDirection,
+} from '../interfaces/TouchInterfaces';
 
 export const GestureIndicator: React.FC<GestureIndicatorProps> = ({
   visible,
+  type,
   direction,
-  text,
+  position,
   theme,
   style,
 }) => {
-  // Animations
+  // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const translateAnim = useRef(new Animated.Value(0)).current;
 
-  // Handle visibility changes
+  // Animate visibility
   useEffect(() => {
     if (visible) {
+      // Fade in and scale up
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 300,
           useNativeDriver: true,
         }),
-        Animated.timing(slideAnim, {
+        Animated.spring(scaleAnim, {
           toValue: 1,
-          duration: 300,
           useNativeDriver: true,
         }),
       ]).start();
+
+      // Add movement animation for swipe gestures
+      if (type === 'swipe' && direction) {
+        animateSwipeDirection(direction);
+      }
     } else {
+      // Fade out
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 0,
           duration: 200,
           useNativeDriver: true,
         }),
-        Animated.timing(slideAnim, {
-          toValue: 0,
+        Animated.timing(scaleAnim, {
+          toValue: 0.8,
           duration: 200,
           useNativeDriver: true,
         }),
       ]).start();
     }
-  }, [visible, fadeAnim, slideAnim]);
+  }, [visible, type, direction]);
 
   /**
-   * Get icon name based on direction
+   * Animate swipe direction
+   */
+  const animateSwipeDirection = (swipeDirection: SwipeDirection) => {
+    const distance = 20;
+    let toValue = 0;
+
+    switch (swipeDirection) {
+      case 'left':
+        toValue = -distance;
+        break;
+      case 'right':
+        toValue = distance;
+        break;
+      case 'up':
+        toValue = -distance;
+        break;
+      case 'down':
+        toValue = distance;
+        break;
+    }
+
+    // Animate back and forth to show direction
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(translateAnim, {
+          toValue,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateAnim, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  };
+
+  /**
+   * Get icon name based on gesture type and direction
    */
   const getIconName = (): string => {
-    switch (direction) {
-      case 'left':
-        return 'chevron-back';
-      case 'right':
-        return 'chevron-forward';
-      case 'up':
-        return 'chevron-up';
-      case 'down':
-        return 'chevron-down';
+    switch (type) {
+      case 'swipe':
+        switch (direction) {
+          case 'left':
+            return 'arrow-back';
+          case 'right':
+            return 'arrow-forward';
+          case 'up':
+            return 'arrow-up';
+          case 'down':
+            return 'arrow-down';
+          default:
+            return 'hand-left';
+        }
+      case 'tap':
+        return 'finger-print';
+      case 'pinch':
+        return 'contract';
+      case 'rotate':
+        return 'refresh';
       default:
         return 'hand-left';
     }
   };
 
   /**
-   * Get transform animation based on direction
+   * Get transform style based on gesture type
    */
-  const getTransform = () => {
-    const slideValue = slideAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [20, 0],
-    });
+  const getTransformStyle = () => {
+    const baseTransform = [
+      { scale: scaleAnim },
+    ];
 
-    switch (direction) {
-      case 'left':
-        return [{ translateX: slideValue }];
-      case 'right':
-        return [{ translateX: slideAnim.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }];
-      case 'up':
-        return [{ translateY: slideValue }];
-      case 'down':
-        return [{ translateY: slideAnim.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }];
-      default:
-        return [{ scale: slideAnim }];
+    if (type === 'swipe') {
+      if (direction === 'left' || direction === 'right') {
+        baseTransform.push({ translateX: translateAnim });
+      } else {
+        baseTransform.push({ translateY: translateAnim });
+      }
     }
+
+    return baseTransform;
   };
 
-  const styles = createStyles(theme);
+  /**
+   * Get position style
+   */
+  const getPositionStyle = () => {
+    if (position) {
+      return {
+        position: 'absolute' as const,
+        left: position.x - 25, // Center the 50px indicator
+        top: position.y - 25,
+      };
+    }
+    return {};
+  };
+
+  if (!visible) {
+    return null;
+  }
 
   return (
     <Animated.View
       style={[
         styles.container,
+        getPositionStyle(),
         {
           opacity: fadeAnim,
-          transform: getTransform(),
+          transform: getTransformStyle(),
         },
         style,
       ]}
-      pointerEvents="none"
     >
-      <View style={styles.indicator}>
+      <View style={[
+        styles.indicator,
+        {
+          backgroundColor: theme?.accent?.primary || '#007AFF',
+          borderColor: theme?.accent?.secondary || '#0056CC',
+        },
+      ]}>
         <Ionicons
-          name={getIconName()}
+          name={getIconName() as any}
           size={24}
-          color={theme?.accent?.primary || '#007AFF'}
+          color="#ffffff"
         />
-        {text && (
-          <Text style={[styles.text, { color: theme?.text?.primary || '#000000' }]}>
-            {text}
-          </Text>
-        )}
       </View>
     </Animated.View>
   );
 };
 
-/**
- * Create styles for gesture indicator
- */
-const createStyles = (theme?: any) => StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -50 }, { translateY: -50 }],
-    zIndex: 1000,
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   indicator: {
-    flexDirection: 'row',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: theme?.surface?.elevated || 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 20,
+    borderWidth: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowRadius: 3.84,
     elevation: 5,
   },
-  text: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: '500',
-  },
 });
+
+export default GestureIndicator;

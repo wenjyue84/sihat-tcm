@@ -98,9 +98,9 @@ export function SessionRecoveryModal({
             </div>
           ) : (
             <div className="space-y-4">
-              {sessions.map((session) => (
+              {sessions.map((session, index) => (
                 <div
-                  key={session.sessionId}
+                  key={session.sessionId || session.timestamp || index}
                   className="border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors"
                 >
                   <div className="flex items-start justify-between">
@@ -144,11 +144,12 @@ export function SessionRecoveryModal({
                       {session.data && Object.keys(session.data).length > 0 && (
                         <div className="text-xs text-gray-500">
                           <p>
-                            Data collected: {Object.keys(session.data).filter(key => 
-                              session.data[key] && 
-                              typeof session.data[key] === 'object' && 
-                              Object.keys(session.data[key] as object).length > 0
-                            ).length} sections
+                            Data collected: {Object.keys(session.data).filter(key => {
+                              const value = (session.data as any)[key];
+                              return value && 
+                                typeof value === 'object' && 
+                                Object.keys(value).length > 0;
+                            }).length} sections
                           </p>
                         </div>
                       )}

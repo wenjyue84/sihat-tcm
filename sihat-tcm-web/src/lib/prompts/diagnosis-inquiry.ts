@@ -149,9 +149,9 @@ Do NOT continue normal questioning in these cases.
 
 ## SUGGESTED OPTIONS (QUICK REPLIES):
 To speed up the patient's input, you SHOULD provide 2-4 likely short answer options when appropriate.
-- Format: At the very end of your message, add \\<OPTIONS\\>Option1,Option2,Option3\\</OPTIONS>
+- Format: At the very end of your message, add <OPTIONS>Option1,Option2,Option3</OPTIONS>
 - Use for: Yes/No questions, duration selection, severity, frequency, etc.
-- Example: "Do you feel hot or cold? \\<OPTIONS\\>Hot,Cold,Neither,Both\\</OPTIONS>"
+- Example: "Do you feel hot or cold? <OPTIONS>Hot,Cold,Neither,Both</OPTIONS>"
 - Constraint: Options must be short (1-3 words).
 - Language: Options must match the response language.
 
@@ -285,25 +285,25 @@ Provide a structured summary in the following format:
  * Build interactive chat prompt with patient context
  */
 export function buildChatPromptWithContext(basicInfo?: {
-    name?: string;
-    age?: string | number;
-    gender?: string;
-    height?: string | number;
-    weight?: string | number;
-    symptoms?: string;
-    symptomDuration?: string;
+  name?: string;
+  age?: string | number;
+  gender?: string;
+  height?: string | number;
+  weight?: string | number;
+  symptoms?: string;
+  symptomDuration?: string;
 }): string {
-    let prompt = INTERACTIVE_CHAT_PROMPT;
+  let prompt = INTERACTIVE_CHAT_PROMPT;
 
-    if (basicInfo) {
-        const height = basicInfo.height ? Number(basicInfo.height) : null;
-        const weight = basicInfo.weight ? Number(basicInfo.weight) : null;
-        const bmi =
-            height && weight && height > 0
-                ? (weight / (height / 100) ** 2).toFixed(1)
-                : null;
+  if (basicInfo) {
+    const height = basicInfo.height ? Number(basicInfo.height) : null;
+    const weight = basicInfo.weight ? Number(basicInfo.weight) : null;
+    const bmi =
+      height && weight && height > 0
+        ? (weight / (height / 100) ** 2).toFixed(1)
+        : null;
 
-        prompt += `
+    prompt += `
 
 ═══════════════════════════════════════════════════════════════════════════════
                     CURRENT PATIENT INFORMATION
@@ -331,7 +331,7 @@ INSTRUCTION
 4. Do NOT repeat their basic information back to them
 5. Do NOT introduce yourself or greet - the conversation has already started
   `;
-    }
+  }
 
-    return prompt;
+  return prompt;
 }

@@ -386,10 +386,49 @@ This report documents the systematic refactoring of the Sihat TCM codebase follo
 - ✅ Improved discoverability and maintainability
 - ✅ Zero breaking changes to existing code
 
+### ✅ Task 9: Complete App.js Refactoring (Mobile)
+
+**Objective**: finalize the modularization of the mobile entry point by integrating extracted auth components and logic
+
+**Completed Work**:
+1. **Simplified App.js**:
+   - Replaced ~1000 lines of auth UI and logic with the modular `AuthScreen` component.
+   - Removed redundant state variables, animations, and massive event handlers.
+   - Cleaned up styles by removing unused auth-related definitions.
+   - Maintained clean app flow logic (onboarding → auth → dashboard/diagnosis).
+
+2. **Improved Maintainability**:
+   - The main `AppContent` is now focused purely on high-level navigation and app state.
+   - Authentication is a black box that communicates success via a simple callback.
+
+**Results**:
+- ✅ App.js reduced from 1584 lines to ~350 lines (78% reduction).
+- ✅ Faster development cycle for auth features (isolated from main App).
+- ✅ Cleaner high-level application structure.
+
+### ✅ Task 11: Extract OnboardingScreen sub-components (Mobile)
+
+**Objective**: Modularize the 897-line `OnboardingScreen.js` for better readability and maintainability
+
+**Completed Work**:
+1. **Created Onboarding Module Structure** (`sihat-tcm-mobile/screens/onboarding/`):
+   - `index.js`: Barrel export for onboarding components.
+   - `OnboardingConstants.js`: Centralized slides, colors, and marketing copy.
+   - `OnboardingSlide.js`: Extracted the complex carousel item component with its unique animations for each slide type.
+
+2. **Refactored Main Component**:
+   - `OnboardingScreen.js` now only handles the `FlatList` logic, pagination, and navigation.
+   - Reduced file size and complexity by outsourcing slide rendering and configuration.
+
+**Results**:
+- ✅ `OnboardingScreen.js` reduced from 897 lines to ~150 lines.
+- ✅ Content (marketing copy) separated from logic.
+- ✅ animations and styles for individual slides are now isolated and easier to tweak.
+
 ### 📋 Remaining Quick Wins (Next Session)
 
-- [ ] **Task 9**: Complete App.js refactoring - integrate extracted components
-- [ ] **Task 11**: Extract OnboardingScreen.js sub-components
+- [ ] **Task 12**: Extract sub-components from `DiagnosisScreen.js` (Mobile) - currently 1800+ lines.
+- [ ] **Task 13**: Refactor `useDiagnosisWizard.ts` (Web) - currently 1100 lines.
 
 ## Recommendations
 
@@ -418,7 +457,7 @@ The refactoring is on track to meet all objectives within the planned 7-week tim
 
 ---
 
-**Report Generated**: December 28, 2025 (Updated 17:20)  
+**Report Generated**: December 28, 2025 (Updated 17:30)  
 **Phase Completed**: 2C - Quick Wins (God Component Splitting)  
-**Next Milestone**: Complete App.js integration, Extract OnboardingScreen components  
-**Overall Progress**: 65% Complete (5 of 7 weeks)
+**Next Milestone**: Refactor DiagnosisScreen (Mobile) and DiagnosisWizard (Web)  
+**Overall Progress**: 75% Complete (5.5 of 7 weeks)

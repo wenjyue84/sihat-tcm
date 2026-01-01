@@ -118,12 +118,19 @@ export function IoTConnectionWizard({
     e.preventDefault();
     if (deviceType === "bp") {
       if (systolic && diastolic) {
-        onDataReceived(`${systolic}/${diastolic}`);
+        onDataReceived({
+          value: parseFloat(`${systolic}.${diastolic}`),
+          unit: "mmHg",
+          metadata: { systolic: parseFloat(systolic), diastolic: parseFloat(diastolic) },
+        });
         onClose();
       }
     } else {
       if (value) {
-        onDataReceived(value);
+        onDataReceived({
+          value: parseFloat(value),
+          unit: deviceConfig[deviceType].unit,
+        });
         onClose();
       }
     }

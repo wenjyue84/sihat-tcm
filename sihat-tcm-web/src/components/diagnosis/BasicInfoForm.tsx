@@ -279,7 +279,7 @@ export function BasicInfoForm({
             onComplete(formData);
           } else {
             setDirection(1);
-            setCurrentStep((prev) => prev + 1);
+            setCurrentStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
           }
         } else {
           validateStep(currentStep, true);
@@ -290,7 +290,7 @@ export function BasicInfoForm({
           ? () => {
             setStepError(null);
             setDirection(-1);
-            setCurrentStep((prev) => prev - 1);
+            setCurrentStep((prev) => Math.max(prev - 1, 1));
           }
           : undefined,
       showNext: true,

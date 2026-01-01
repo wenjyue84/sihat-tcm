@@ -24,3 +24,4 @@ export interface TestResult {
   critical?: boolean;
 }
 
+

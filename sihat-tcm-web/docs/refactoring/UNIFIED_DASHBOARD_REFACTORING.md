@@ -106,3 +106,4 @@ src/components/patient/
 - Maintain backward compatibility
 - Test each section after extraction
 
+

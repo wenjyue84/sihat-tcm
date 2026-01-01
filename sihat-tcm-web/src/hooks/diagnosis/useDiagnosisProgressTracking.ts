@@ -45,3 +45,4 @@ export function useDiagnosisProgressTracking({
   }, [step, setGlobalProgress, activeStepsConfig, maxStepReached, setMaxStepReached]);
 }
 
+

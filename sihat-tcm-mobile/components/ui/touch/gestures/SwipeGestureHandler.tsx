@@ -1,24 +1,30 @@
 /**
  * Swipe Gesture Handler Component
  * 
- * Enhanced swipe gesture detection with haptic feedback
+ * Handles swipe gestures with haptic feedback and customizable thresholds
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Animated } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
-import { SwipeGestureHandlerProps, GestureState } from '../interfaces/TouchInterfaces';
-import { HapticManager } from '../core/HapticManager';
+import {
+  SwipeGestureProps,
+  SwipeDirection,
+  TouchMetrics,
+} from '../interfaces/TouchInterfaces';
 
-export const SwipeGestureHandler: React.FC<SwipeGestureHandlerProps> = ({
+import HapticManager from '../core/HapticManager';
+import { GESTURE_CONFIG } from '../../../../constants';
+
+export const SwipeGestureHandler: React.FC<SwipeGestureProps> = ({
   children,
   onSwipeLeft,
   onSwipeRight,
   onSwipeUp,
   onSwipeDown,
-  swipeThreshold = 50,
-  velocityThreshold = 500,
+  swipeThreshold = GESTURE_CONFIG.SWIPE_THRESHOLD,
+  velocityThreshold = GESTURE_CONFIG.VELOCITY_THRESHOLD,
   enabled = true,
   theme,
   style,
@@ -28,17 +34,11 @@ export const SwipeGestureHandler: React.FC<SwipeGestureHandlerProps> = ({
   const translateY = useRef(new Animated.Value(0)).current;
   
   // State
-  const [gestureState, setGestureState] = useState<GestureState>({
-    isActive: false,
-    velocity: { x: 0, y: 0 },
-    translation: { x: 0, y: 0 },
-  });
-
-  // Haptic manager
-  const hapticManager = HapticManager.getInstance();
+  const [isGesturing, setIsGesturing] = useState(false);
+  const [startTime, setStartTime] = useState(0);
 
   /**
-   * Handle gesture events
+   * Handle gesture event
    */
   const onGestureEvent = Animated.event(
     [{ nativeEvent: { translationX: translateX, translationY: translateY } }],
@@ -55,32 +55,45 @@ export const SwipeGestureHandler: React.FC<SwipeGestureHandlerProps> = ({
 
     switch (state) {
       case State.BEGAN:
-        setGestureState(prev => ({ ...prev, isActive: true }));
-        await hapticManager.triggerHaptic('light');
+        handleGestureBegan();
         break;
-
+      
       case State.ACTIVE:
-        setGestureState(prev => ({
-          ...prev,
-          translation: { x: translationX, y: translationY },
-          velocity: { x: velocityX, y: velocityY },
-        }));
+        handleGestureActive(translationX, translationY);
         break;
-
+      
       case State.END:
         await handleGestureEnd(translationX, translationY, velocityX, velocityY);
-        resetGesture();
         break;
-
+      
       case State.CANCELLED:
       case State.FAILED:
-        resetGesture();
+        handleGestureCancelled();
         break;
     }
   };
 
   /**
-   * Handle gesture completion
+   * Handle gesture began
+   */
+  const handleGestureBegan = async () => {
+    setIsGesturing(true);
+    setStartTime(Date.now());
+    
+    // Light haptic feedback on gesture start
+    await HapticManager.impact('light');
+  };
+
+  /**
+   * Handle active gesture
+   */
+  const handleGestureActive = (translationX: number, translationY: number) => {
+    // Could add real-time feedback here if needed
+    // For now, just track that gesture is active
+  };
+
+  /**
+   * Handle gesture end
    */
   const handleGestureEnd = async (
     translationX: number,
@@ -88,50 +101,90 @@ export const SwipeGestureHandler: React.FC<SwipeGestureHandlerProps> = ({
     velocityX: number,
     velocityY: number
   ) => {
-    const absX = Math.abs(translationX);
-    const absY = Math.abs(translationY);
-    const absVelX = Math.abs(velocityX);
-    const absVelY = Math.abs(velocityY);
+    setIsGesturing(false);
+    
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+    const distance = Math.sqrt(translationX * translationX + translationY * translationY);
+    const velocity = Math.sqrt(velocityX * velocityX + velocityY * velocityY);
 
-    // Check if gesture meets threshold requirements
-    const meetsDistanceThreshold = absX > swipeThreshold || absY > swipeThreshold;
-    const meetsVelocityThreshold = absVelX > velocityThreshold || absVelY > velocityThreshold;
+    // Create touch metrics
+    const metrics: TouchMetrics = {
+      startTime,
+      endTime,
+      duration,
+      distance,
+      velocity,
+    };
+
+    // Determine if gesture meets thresholds
+    const meetsDistanceThreshold = Math.abs(translationX) > swipeThreshold || Math.abs(translationY) > swipeThreshold;
+    const meetsVelocityThreshold = velocity > velocityThreshold;
 
     if (meetsDistanceThreshold || meetsVelocityThreshold) {
-      // Determine primary direction
-      if (absX > absY) {
-        // Horizontal swipe
-        if (translationX > 0 && onSwipeRight) {
-          await hapticManager.triggerHaptic('medium');
-          onSwipeRight();
-        } else if (translationX < 0 && onSwipeLeft) {
-          await hapticManager.triggerHaptic('medium');
-          onSwipeLeft();
-        }
-      } else {
-        // Vertical swipe
-        if (translationY > 0 && onSwipeDown) {
-          await hapticManager.triggerHaptic('medium');
-          onSwipeDown();
-        } else if (translationY < 0 && onSwipeUp) {
-          await hapticManager.triggerHaptic('medium');
-          onSwipeUp();
-        }
-      }
+      const direction = determineSwipeDirection(translationX, translationY);
+      await handleSwipe(direction, metrics);
+    }
+
+    // Reset animations
+    resetAnimations();
+  };
+
+  /**
+   * Handle gesture cancelled
+   */
+  const handleGestureCancelled = () => {
+    setIsGesturing(false);
+    resetAnimations();
+  };
+
+  /**
+   * Determine swipe direction
+   */
+  const determineSwipeDirection = (translationX: number, translationY: number): SwipeDirection | null => {
+    const absX = Math.abs(translationX);
+    const absY = Math.abs(translationY);
+
+    // Determine primary direction
+    if (absX > absY) {
+      // Horizontal swipe
+      return translationX > 0 ? 'right' : 'left';
+    } else {
+      // Vertical swipe
+      return translationY > 0 ? 'down' : 'up';
     }
   };
 
   /**
-   * Reset gesture state and animations
+   * Handle swipe in specific direction
    */
-  const resetGesture = () => {
-    setGestureState({
-      isActive: false,
-      velocity: { x: 0, y: 0 },
-      translation: { x: 0, y: 0 },
-    });
+  const handleSwipe = async (direction: SwipeDirection | null, metrics: TouchMetrics) => {
+    if (!direction) return;
 
-    // Reset animations
+    // Provide haptic feedback based on metrics
+    await HapticManager.feedbackForMetrics(metrics);
+
+    // Call appropriate callback
+    switch (direction) {
+      case 'left':
+        onSwipeLeft?.();
+        break;
+      case 'right':
+        onSwipeRight?.();
+        break;
+      case 'up':
+        onSwipeUp?.();
+        break;
+      case 'down':
+        onSwipeDown?.();
+        break;
+    }
+  };
+
+  /**
+   * Reset animations to initial state
+   */
+  const resetAnimations = () => {
     Animated.parallel([
       Animated.spring(translateX, {
         toValue: 0,
@@ -152,15 +205,13 @@ export const SwipeGestureHandler: React.FC<SwipeGestureHandlerProps> = ({
     >
       <Animated.View
         style={[
-          { flex: 1 },
+          style,
           {
             transform: [
-              { translateX: translateX },
-              { translateY: translateY },
+              { translateX },
+              { translateY },
             ],
           },
-          gestureState.isActive && { opacity: 0.8 },
-          style,
         ]}
       >
         {children}
@@ -168,3 +219,5 @@ export const SwipeGestureHandler: React.FC<SwipeGestureHandlerProps> = ({
     </PanGestureHandler>
   );
 };
+
+export default SwipeGestureHandler;

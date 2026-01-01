@@ -4,3 +4,4 @@ export type { VerificationRequest, Message } from "./hooks/usePatientCommunicati
 export { RequestList } from "./components/RequestList";
 export { ChatArea } from "./components/ChatArea";
 
+

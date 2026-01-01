@@ -1,8 +1,8 @@
 /**
- * Medical Safety Interfaces - Core type definitions for safety validation system
+ * Medical Safety Interfaces
  * 
- * Defines all interfaces and types used throughout the medical safety validation
- * system for consistent type safety and clear contracts between components.
+ * Comprehensive type definitions for medical safety validation system.
+ * Defines all interfaces, types, and enums used across safety components.
  */
 
 import { DietaryPreferences } from "@/app/actions/meal-planner";
@@ -37,6 +37,9 @@ export interface SafetyValidationResult {
   alternative_suggestions: string[];
 }
 
+/**
+ * Individual safety concern
+ */
 export interface SafetyConcern {
   type:
     | "allergy"
@@ -58,6 +61,9 @@ export interface SafetyConcern {
     | "emergency_care";
 }
 
+/**
+ * Emergency condition flag
+ */
 export interface EmergencyFlag {
   condition: string;
   symptoms: string[];
@@ -66,6 +72,9 @@ export interface EmergencyFlag {
   emergency_contacts?: string[];
 }
 
+/**
+ * Contraindication information
+ */
 export interface Contraindication {
   substance: string;
   condition: string;
@@ -74,6 +83,9 @@ export interface Contraindication {
   alternative_options: string[];
 }
 
+/**
+ * Drug-herb interaction details
+ */
 export interface DrugInteraction {
   herb_or_food: string;
   medication: string;
@@ -84,6 +96,9 @@ export interface DrugInteraction {
   management: string;
 }
 
+/**
+ * Validation context for safety checks
+ */
 export interface ValidationContext {
   medical_history: MedicalHistory;
   dietary_preferences?: DietaryPreferences;
@@ -93,29 +108,101 @@ export interface ValidationContext {
   language?: "en" | "zh" | "ms";
 }
 
-export interface SafetyValidationConfig {
-  enableAllergyChecking: boolean;
-  enableDrugInteractionAnalysis: boolean;
-  enableContraindicationChecking: boolean;
-  enableEmergencyDetection: boolean;
-  enablePregnancySafety: boolean;
-  enableAgeAppropriateChecking: boolean;
-  maxAlternativeSuggestions: number;
-  conservativeMode: boolean;
+/**
+ * Recommendations structure for validation
+ */
+export interface RecommendationsToValidate {
+  dietary?: string[];
+  herbal?: string[];
+  lifestyle?: string[];
+  acupressure?: string[];
 }
 
-export interface InteractionAnalysisRequest {
-  herb: string;
-  medication: string;
-  context?: ValidationContext;
+/**
+ * Safety guidelines response
+ */
+export interface SafetyGuidelines {
+  guidelines: string[];
+  warnings: string[];
+  emergency_signs: string[];
+  when_to_seek_help: string[];
 }
 
-export interface InteractionAnalysisResponse {
-  has_interaction: boolean;
-  interaction_type: "synergistic" | "antagonistic" | "toxic" | "absorption_interference";
-  severity: "minor" | "moderate" | "major" | "severe";
-  mechanism: string;
-  clinical_significance: string;
-  management: string;
-  evidence_level: "clinical_study" | "case_report" | "theoretical" | "traditional_knowledge";
+/**
+ * Allergy check result
+ */
+export interface AllergyCheckResult {
+  concerns: SafetyConcern[];
 }
+
+/**
+ * Drug interaction check result
+ */
+export interface DrugInteractionCheckResult {
+  concerns: SafetyConcern[];
+  interactions: DrugInteraction[];
+}
+
+/**
+ * Contraindication check result
+ */
+export interface ContraindicationCheckResult {
+  concerns: SafetyConcern[];
+  contraindications: Contraindication[];
+}
+
+/**
+ * Emergency condition check result
+ */
+export interface EmergencyCheckResult {
+  concerns: SafetyConcern[];
+  emergency_flags: EmergencyFlag[];
+}
+
+/**
+ * Pregnancy safety check result
+ */
+export interface PregnancyCheckResult {
+  concerns: SafetyConcern[];
+}
+
+/**
+ * Age appropriateness check result
+ */
+export interface AgeCheckResult {
+  concerns: SafetyConcern[];
+}
+
+/**
+ * Risk level type
+ */
+export type RiskLevel = "low" | "medium" | "high" | "critical";
+
+/**
+ * Severity level type
+ */
+export type SeverityLevel = "low" | "medium" | "high" | "critical";
+
+/**
+ * Action required type
+ */
+export type ActionRequired = 
+  | "monitor"
+  | "modify_dosage"
+  | "avoid_completely"
+  | "seek_medical_advice"
+  | "emergency_care";
+
+/**
+ * Evidence level type
+ */
+export type EvidenceLevel = 
+  | "clinical_study"
+  | "case_report"
+  | "theoretical"
+  | "traditional_knowledge";
+
+/**
+ * Language support type
+ */
+export type SupportedLanguage = "en" | "zh" | "ms";

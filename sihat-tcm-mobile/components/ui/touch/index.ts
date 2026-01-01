@@ -1,32 +1,34 @@
 /**
- * Touch Module Exports
+ * Enhanced Touch Interface Module Exports
  * 
  * Centralized exports for the enhanced touch interface system
  */
 
-// Main components
-export { SwipeGestureHandler } from './gestures/SwipeGestureHandler';
-export { HapticTouchButton } from './buttons/HapticTouchButton';
-export { GestureIndicator } from './indicators/GestureIndicator';
+// Core components
+export { default as HapticTouchButton } from './buttons/HapticTouchButton';
+export { default as SwipeGestureHandler } from './gestures/SwipeGestureHandler';
+export { default as GestureIndicator } from './indicators/GestureIndicator';
 
-// Core utilities
-export { HapticManager } from './core/HapticManager';
-
-// Main interface (backward compatibility)
-export { default as EnhancedTouchInterface } from './EnhancedTouchInterface';
+// Core managers
+export { default as HapticManager } from './core/HapticManager';
 
 // Interfaces
 export type {
   SwipeGestureConfig,
-  SwipeCallbacks,
-  SwipeGestureHandlerProps,
-  HapticConfig,
-  HapticTouchButtonProps,
+  SwipeGestureCallbacks,
+  SwipeGestureProps,
+  HapticTouchConfig,
+  HapticTouchProps,
   GestureIndicatorProps,
   TouchFeedbackConfig,
   GestureState,
   TouchMetrics,
-  HapticFeedbackType,
-  GestureDirection,
-  TouchEventType,
+  HapticImpactStyle,
+  GestureType,
+  SwipeDirection,
 } from './interfaces/TouchInterfaces';
+
+// Legacy exports for backward compatibility
+export { HapticTouchButton } from './buttons/HapticTouchButton';
+export { SwipeGestureHandler } from './gestures/SwipeGestureHandler';
+export { GestureIndicator } from './indicators/GestureIndicator';

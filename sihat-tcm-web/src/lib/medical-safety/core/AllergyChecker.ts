@@ -1,226 +1,192 @@
 /**
- * Allergy Checker - Validates recommendations against known allergies
+ * Allergy Checker
  * 
- * Provides comprehensive allergy checking functionality including
- * cross-reactivity analysis and alternative suggestion generation.
+ * Specialized component for checking allergies against recommendations.
+ * Provides comprehensive allergy validation with cross-referencing.
  */
 
-import { SafetyConcern, ValidationContext } from '../interfaces/SafetyInterfaces';
+import { devLog } from "../../systemLogger";
+import {
+  AllergyCheckResult,
+  SafetyConcern,
+  ValidationContext
+} from "../interfaces/SafetyInterfaces";
 
 export class AllergyChecker {
-  private readonly context = 'AllergyChecker';
-  
-  // Cross-reactivity mapping for related allergens
-  private readonly crossReactivityMap: Record<string, string[]> = {
-    'shellfish': ['crustaceans', 'mollusks', 'iodine'],
-    'nuts': ['tree nuts', 'peanuts', 'seeds'],
-    'dairy': ['milk', 'lactose', 'casein', 'whey'],
-    'eggs': ['albumin', 'ovalbumin'],
-    'soy': ['soybeans', 'soy protein', 'lecithin'],
-    'gluten': ['wheat', 'barley', 'rye', 'oats'],
-    'sesame': ['tahini', 'sesame oil', 'sesame seeds']
-  };
+  private context: string;
+
+  constructor(context: string = "AllergyChecker") {
+    this.context = context;
+  }
 
   /**
-   * Check recommendations against user allergies
+   * Check for allergies in recommendations
    */
-  public async checkAllergies(
+  async checkAllergies(
     recommendations: string[],
-    context: ValidationContext
-  ): Promise<{ concerns: SafetyConcern[] }> {
-    const concerns: SafetyConcern[] = [];
-    const allergies = context.medical_history.allergies;
+    validationContext: ValidationContext
+  ): Promise<AllergyCheckResult> {
+    try {
+      devLog("info", this.context, "Checking allergies", {
+        recommendationCount: recommendations.length,
+        allergyCount: validationContext.medical_history.allergies.length
+      });
 
-    for (const allergy of allergies) {
-      // Check direct matches
-      const directMatches = this.findDirectMatches(recommendations, allergy);
-      concerns.push(...directMatches);
+      const concerns: SafetyConcern[] = [];
+      const allergies = validationContext.medical_history.allergies;
 
-      // Check cross-reactive substances
-      const crossReactiveMatches = this.findCrossReactiveMatches(recommendations, allergy);
-      concerns.push(...crossReactiveMatches);
-
-      // Check hidden allergens
-      const hiddenMatches = this.findHiddenAllergens(recommendations, allergy);
-      concerns.push(...hiddenMatches);
-    }
-
-    return { concerns };
-  }
-
-  /**
-   * Generate allergy-safe alternatives
-   */
-  public generateAllergyAlternatives(
-    original_recommendation: string,
-    allergies: string[]
-  ): string[] {
-    const alternatives: string[] = [];
-
-    for (const allergy of allergies) {
-      const alternative = this.getAllergyAlternative(allergy, original_recommendation);
-      if (alternative && !alternatives.includes(alternative)) {
-        alternatives.push(alternative);
-      }
-    }
-
-    return alternatives;
-  }
-
-  /**
-   * Check if substance is safe for user with allergies
-   */
-  public isSafeForAllergies(substance: string, allergies: string[]): boolean {
-    for (const allergy of allergies) {
-      if (this.containsAllergen(substance, allergy)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Get severity level for allergy exposure
-   */
-  public getAllergySeverity(allergy: string, exposure_type: string): "low" | "medium" | "high" | "critical" {
-    // High-risk allergens that can cause anaphylaxis
-    const highRiskAllergens = ['shellfish', 'nuts', 'peanuts', 'eggs', 'milk'];
-    
-    if (highRiskAllergens.includes(allergy.toLowerCase())) {
-      return exposure_type === 'direct' ? 'critical' : 'high';
-    }
-
-    // Medium-risk allergens
-    const mediumRiskAllergens = ['soy', 'wheat', 'fish', 'sesame'];
-    if (mediumRiskAllergens.includes(allergy.toLowerCase())) {
-      return exposure_type === 'direct' ? 'high' : 'medium';
-    }
-
-    return 'medium';
-  }
-
-  // Private helper methods
-
-  private findDirectMatches(recommendations: string[], allergy: string): SafetyConcern[] {
-    const concerns: SafetyConcern[] = [];
-
-    for (const recommendation of recommendations) {
-      if (this.containsAllergen(recommendation, allergy)) {
-        concerns.push({
-          type: "allergy",
-          severity: this.getAllergySeverity(allergy, 'direct'),
-          description: `Recommendation contains ${allergy} which user is allergic to`,
-          affected_recommendation: recommendation,
-          evidence_level: "clinical_study",
-          action_required: "avoid_completely",
-        });
-      }
-    }
-
-    return concerns;
-  }
-
-  private findCrossReactiveMatches(recommendations: string[], allergy: string): SafetyConcern[] {
-    const concerns: SafetyConcern[] = [];
-    const crossReactiveSubstances = this.crossReactivityMap[allergy.toLowerCase()] || [];
-
-    for (const substance of crossReactiveSubstances) {
-      for (const recommendation of recommendations) {
-        if (this.containsAllergen(recommendation, substance)) {
-          concerns.push({
-            type: "allergy",
-            severity: this.getAllergySeverity(allergy, 'cross_reactive'),
-            description: `Recommendation contains ${substance} which may cross-react with ${allergy} allergy`,
-            affected_recommendation: recommendation,
-            evidence_level: "clinical_study",
-            action_required: "seek_medical_advice",
-          });
+      for (const allergy of allergies) {
+        for (const recommendation of recommendations) {
+          if (this.isAllergyMatch(recommendation, allergy)) {
+            concerns.push(this.createAllergyConcern(recommendation, allergy));
+          }
         }
       }
-    }
 
-    return concerns;
+      // Check for cross-reactive allergies
+      const crossReactiveConcerns = this.checkCrossReactiveAllergies(
+        recommendations,
+        allergies
+      );
+      concerns.push(...crossReactiveConcerns);
+
+      return { concerns };
+    } catch (error) {
+      devLog("error", this.context, "Allergy check failed", { error });
+      return { concerns: [] };
+    }
   }
 
-  private findHiddenAllergens(recommendations: string[], allergy: string): SafetyConcern[] {
-    const concerns: SafetyConcern[] = [];
-    const hiddenSources = this.getHiddenAllergenSources(allergy);
+  /**
+   * Check if recommendation contains allergen
+   */
+  private isAllergyMatch(recommendation: string, allergy: string): boolean {
+    const recLower = recommendation.toLowerCase();
+    const allergyLower = allergy.toLowerCase();
 
-    for (const source of hiddenSources) {
-      for (const recommendation of recommendations) {
-        if (recommendation.toLowerCase().includes(source.toLowerCase())) {
-          concerns.push({
-            type: "allergy",
-            severity: "medium",
-            description: `Recommendation may contain hidden ${allergy} in ${source}`,
-            affected_recommendation: recommendation,
-            evidence_level: "theoretical",
-            action_required: "seek_medical_advice",
-          });
-        }
-      }
-    }
-
-    return concerns;
-  }
-
-  private containsAllergen(text: string, allergen: string): boolean {
-    const normalizedText = text.toLowerCase();
-    const normalizedAllergen = allergen.toLowerCase();
-    
     // Direct match
-    if (normalizedText.includes(normalizedAllergen)) {
+    if (recLower.includes(allergyLower)) {
       return true;
     }
 
-    // Check alternative names
-    const alternativeNames = this.getAllergenAlternativeNames(allergen);
-    return alternativeNames.some(name => normalizedText.includes(name.toLowerCase()));
+    // Check for common allergen synonyms
+    const allergenSynonyms = this.getAllergenSynonyms(allergyLower);
+    return allergenSynonyms.some(synonym => recLower.includes(synonym));
   }
 
-  private getAllergenAlternativeNames(allergen: string): string[] {
-    const alternativeNames: Record<string, string[]> = {
-      'shellfish': ['shrimp', 'crab', 'lobster', 'prawns', 'crayfish', 'scallops', 'mussels', 'clams', 'oysters'],
-      'nuts': ['almonds', 'walnuts', 'cashews', 'pistachios', 'hazelnuts', 'pecans', 'brazil nuts', 'macadamia'],
-      'peanuts': ['groundnuts', 'arachis oil'],
-      'dairy': ['milk', 'cheese', 'yogurt', 'butter', 'cream', 'lactose', 'casein', 'whey'],
-      'eggs': ['albumin', 'ovalbumin', 'egg white', 'egg yolk'],
-      'soy': ['soybeans', 'soya', 'tofu', 'tempeh', 'miso', 'soy sauce', 'edamame'],
-      'wheat': ['flour', 'gluten', 'semolina', 'bulgur', 'spelt'],
-      'fish': ['salmon', 'tuna', 'cod', 'mackerel', 'sardines', 'anchovies'],
-      'sesame': ['tahini', 'sesame oil', 'sesame seeds', 'sesamum']
+  /**
+   * Get synonyms for common allergens
+   */
+  private getAllergenSynonyms(allergy: string): string[] {
+    const synonymMap: Record<string, string[]> = {
+      "shellfish": ["shrimp", "crab", "lobster", "prawns", "scallops", "oysters"],
+      "nuts": ["peanuts", "tree nuts", "almonds", "walnuts", "cashews"],
+      "dairy": ["milk", "cheese", "yogurt", "butter", "lactose"],
+      "eggs": ["egg", "albumin", "ovalbumin"],
+      "soy": ["soybean", "tofu", "miso", "tempeh"],
+      "wheat": ["gluten", "flour", "bread", "pasta"],
+      "fish": ["salmon", "tuna", "cod", "mackerel"],
+      "sesame": ["sesame seeds", "tahini", "sesame oil"]
     };
 
-    return alternativeNames[allergen.toLowerCase()] || [];
+    return synonymMap[allergy] || [];
   }
 
-  private getHiddenAllergenSources(allergy: string): string[] {
-    const hiddenSources: Record<string, string[]> = {
-      'dairy': ['processed foods', 'baked goods', 'chocolate', 'margarine'],
-      'eggs': ['mayonnaise', 'pasta', 'baked goods', 'processed meats'],
-      'soy': ['processed foods', 'vegetable oil', 'emulsifiers', 'protein powders'],
-      'wheat': ['soy sauce', 'processed meats', 'soup mixes', 'seasonings'],
-      'nuts': ['processed foods', 'baked goods', 'chocolates', 'cereals'],
-      'shellfish': ['fish sauce', 'worcestershire sauce', 'caesar dressing', 'surimi']
+  /**
+   * Check for cross-reactive allergies
+   */
+  private checkCrossReactiveAllergies(
+    recommendations: string[],
+    allergies: string[]
+  ): SafetyConcern[] {
+    const concerns: SafetyConcern[] = [];
+
+    // Cross-reactivity patterns
+    const crossReactivity: Record<string, string[]> = {
+      "shellfish": ["iodine", "seaweed"],
+      "latex": ["banana", "avocado", "kiwi", "chestnut"],
+      "birch pollen": ["apple", "cherry", "peach", "apricot"],
+      "ragweed": ["banana", "melon", "cucumber"],
+      "grass pollen": ["tomato", "orange", "melon"]
     };
 
-    return hiddenSources[allergy.toLowerCase()] || [];
+    for (const allergy of allergies) {
+      const crossReactants = crossReactivity[allergy.toLowerCase()];
+      if (crossReactants) {
+        for (const recommendation of recommendations) {
+          for (const crossReactant of crossReactants) {
+            if (recommendation.toLowerCase().includes(crossReactant)) {
+              concerns.push({
+                type: "allergy",
+                severity: "medium",
+                description: `Potential cross-reactivity: ${crossReactant} may cause reaction in patients allergic to ${allergy}`,
+                affected_recommendation: recommendation,
+                evidence_level: "clinical_study",
+                action_required: "seek_medical_advice"
+              });
+            }
+          }
+        }
+      }
+    }
+
+    return concerns;
   }
 
-  private getAllergyAlternative(allergy: string, context: string): string {
-    const alternatives: Record<string, string> = {
-      'nuts': "seeds (sunflower, pumpkin)",
-      'dairy': "plant-based alternatives (oat, almond milk)",
-      'eggs': "flax eggs or chia seeds",
-      'shellfish': "seaweed or fish alternatives",
-      'soy': "other legumes (lentils, chickpeas)",
-      'gluten': "gluten-free grains (rice, quinoa)",
-      'fish': "seaweed or plant-based omega-3 sources",
-      'sesame': "tahini alternatives (sunflower seed butter)",
-      'peanuts': "other nuts or seeds (if not allergic)",
-      'wheat': "alternative grains (rice, corn, quinoa)"
+  /**
+   * Create allergy concern
+   */
+  private createAllergyConcern(recommendation: string, allergy: string): SafetyConcern {
+    return {
+      type: "allergy",
+      severity: "high",
+      description: `Recommendation contains ${allergy} which user is allergic to`,
+      affected_recommendation: recommendation,
+      evidence_level: "clinical_study",
+      action_required: "avoid_completely"
+    };
+  }
+
+  /**
+   * Validate specific allergen against recommendation
+   */
+  async validateAllergen(
+    recommendation: string,
+    allergen: string
+  ): Promise<SafetyConcern | null> {
+    if (this.isAllergyMatch(recommendation, allergen)) {
+      return this.createAllergyConcern(recommendation, allergen);
+    }
+    return null;
+  }
+
+  /**
+   * Get allergen information
+   */
+  getAllergenInfo(allergen: string): {
+    synonyms: string[];
+    crossReactants: string[];
+    severity: "mild" | "moderate" | "severe";
+  } {
+    const synonyms = this.getAllergenSynonyms(allergen.toLowerCase());
+    
+    const crossReactivity: Record<string, string[]> = {
+      "shellfish": ["iodine", "seaweed"],
+      "latex": ["banana", "avocado", "kiwi", "chestnut"],
+      "nuts": ["tree pollen", "stone fruits"],
+      "dairy": ["beef", "goat milk"]
     };
 
-    return alternatives[allergy.toLowerCase()] || "suitable alternative";
+    const crossReactants = crossReactivity[allergen.toLowerCase()] || [];
+
+    // Determine severity based on allergen type
+    const highRiskAllergens = ["shellfish", "nuts", "eggs", "dairy"];
+    const severity = highRiskAllergens.includes(allergen.toLowerCase()) ? "severe" : "moderate";
+
+    return {
+      synonyms,
+      crossReactants,
+      severity
+    };
   }
 }

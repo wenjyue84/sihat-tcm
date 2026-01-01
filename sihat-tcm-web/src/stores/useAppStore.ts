@@ -429,7 +429,25 @@ export const useAppStore = create<AppState>()(
     },
 
     setDiagnosisNavigationState: (state) => {
-      set({ diagnosisNavigationState: state });
+      // Shallow compare to prevent infinite update loops
+      // Only compare primitive values (booleans, strings) - functions are intentionally ignored
+      const current = get().diagnosisNavigationState;
+      const hasChanged =
+        current.showNext !== state.showNext ||
+        current.showBack !== state.showBack ||
+        current.showSkip !== state.showSkip ||
+        current.canNext !== state.canNext ||
+        current.nextLabel !== state.nextLabel ||
+        current.backLabel !== state.backLabel ||
+        current.hideBottomNav !== state.hideBottomNav;
+
+      if (hasChanged) {
+        set({ diagnosisNavigationState: state });
+      } else {
+        // Update function references without triggering re-render
+        // by mutating in place (safe since we're the only writer)
+        Object.assign(current, state);
+      }
     },
 
     // ============================================================================

@@ -7,7 +7,8 @@
 
 import { DoctorLevel } from "../../doctorLevels";
 import { DiagnosisReport } from "@/types/database";
-import { RequestComplexity, PersonalizationFactors, PersonalizedRecommendation } from "../../ai/interfaces/ModelInterfaces";
+import { RequestComplexity } from "../../ai/interfaces/ModelInterfaces";
+import { PersonalizationFactors, PersonalizedRecommendation } from "../../personalization/interfaces/PersonalizationInterfaces";
 import { SafetyValidationResult } from "../../medicalSafetyValidator";
 
 export interface EnhancedDiagnosticRequest {

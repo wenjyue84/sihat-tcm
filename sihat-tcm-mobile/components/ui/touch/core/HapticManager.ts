@@ -1,19 +1,34 @@
 /**
  * Haptic Manager
  * 
- * Centralized haptic feedback management with intelligent patterns
+ * Centralized haptic feedback management for touch interactions
  */
 
 import * as Haptics from 'expo-haptics';
-import { HapticFeedbackType, TouchEventType } from '../interfaces/TouchInterfaces';
+import { Platform } from 'react-native';
+
+import {
+  HapticImpactStyle,
+  TouchFeedbackConfig,
+  TouchMetrics,
+} from '../interfaces/TouchInterfaces';
+
+import { HAPTIC_CONFIG } from '../../../../constants';
+import { ErrorFactory } from '../../../../lib/errors/AppError';
 
 export class HapticManager {
   private static instance: HapticManager;
   private isEnabled = true;
-  private lastHapticTime = 0;
-  private hapticThrottleMs = 50; // Minimum time between haptics
+  private feedbackConfig: TouchFeedbackConfig;
 
-  private constructor() {}
+  private constructor() {
+    this.feedbackConfig = {
+      hapticEnabled: true,
+      visualEnabled: true,
+      audioEnabled: false,
+      intensity: 'medium',
+    };
+  }
 
   /**
    * Get singleton instance
@@ -26,109 +41,164 @@ export class HapticManager {
   }
 
   /**
-   * Trigger haptic feedback with throttling
+   * Initialize haptic manager
    */
-  async triggerHaptic(type: HapticFeedbackType): Promise<void> {
-    if (!this.isEnabled) return;
-
-    const now = Date.now();
-    if (now - this.lastHapticTime < this.hapticThrottleMs) {
-      return; // Throttle rapid haptic calls
-    }
-
-    this.lastHapticTime = now;
-
+  async initialize(): Promise<void> {
     try {
-      switch (type) {
-        case 'light':
-          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          break;
-        case 'medium':
-          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          break;
-        case 'heavy':
-          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-          break;
-        case 'success':
-          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          break;
-        case 'warning':
-          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-          break;
-        case 'error':
-          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-          break;
-        default:
-          await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      // Check if haptics are supported
+      if (Platform.OS === 'ios') {
+        // iOS always supports haptics on modern devices
+        this.isEnabled = true;
+      } else if (Platform.OS === 'android') {
+        // Android support varies by device
+        this.isEnabled = true; // Assume supported, will handle errors gracefully
+      } else {
+        this.isEnabled = false;
       }
     } catch (error) {
-      console.warn('[HapticManager] Haptic feedback failed:', error);
+      console.warn('[HapticManager] Initialization failed:', error);
+      this.isEnabled = false;
     }
   }
 
   /**
-   * Trigger contextual haptic for touch events
+   * Trigger impact haptic feedback
    */
-  async triggerContextualHaptic(eventType: TouchEventType): Promise<void> {
-    const hapticMap: Record<TouchEventType, HapticFeedbackType> = {
-      press: 'light',
-      longPress: 'heavy',
-      swipe: 'medium',
-      pinch: 'light',
-      rotate: 'light',
-      tap: 'light',
-    };
+  async impact(style: HapticImpactStyle = 'medium'): Promise<void> {
+    try {
+      if (!this.isEnabled || !this.feedbackConfig.hapticEnabled) {
+        return;
+      }
 
-    const hapticType = hapticMap[eventType] || 'medium';
-    await this.triggerHaptic(hapticType);
+      const hapticStyle = this.getHapticStyle(style);
+      await Haptics.impactAsync(hapticStyle);
+    } catch (error) {
+      console.warn('[HapticManager] Impact feedback failed:', error);
+    }
   }
 
   /**
-   * Enable/disable haptic feedback
+   * Trigger selection haptic feedback
+   */
+  async selection(): Promise<void> {
+    try {
+      if (!this.isEnabled || !this.feedbackConfig.hapticEnabled) {
+        return;
+      }
+
+      await Haptics.selectionAsync();
+    } catch (error) {
+      console.warn('[HapticManager] Selection feedback failed:', error);
+    }
+  }
+
+  /**
+   * Trigger notification haptic feedback
+   */
+  async notification(type: 'success' | 'warning' | 'error' = 'success'): Promise<void> {
+    try {
+      if (!this.isEnabled || !this.feedbackConfig.hapticEnabled) {
+        return;
+      }
+
+      const notificationType = this.getNotificationType(type);
+      await Haptics.notificationAsync(notificationType);
+    } catch (error) {
+      console.warn('[HapticManager] Notification feedback failed:', error);
+    }
+  }
+
+  /**
+   * Trigger haptic feedback based on touch metrics
+   */
+  async feedbackForMetrics(metrics: TouchMetrics): Promise<void> {
+    try {
+      if (!this.isEnabled || !this.feedbackConfig.hapticEnabled) {
+        return;
+      }
+
+      // Determine feedback intensity based on metrics
+      let style: HapticImpactStyle = 'light';
+
+      if (metrics.velocity > HAPTIC_CONFIG.HIGH_VELOCITY_THRESHOLD) {
+        style = 'heavy';
+      } else if (metrics.velocity > HAPTIC_CONFIG.MEDIUM_VELOCITY_THRESHOLD) {
+        style = 'medium';
+      }
+
+      // Adjust for duration
+      if (metrics.duration > HAPTIC_CONFIG.LONG_PRESS_DURATION) {
+        style = 'heavy';
+      }
+
+      await this.impact(style);
+    } catch (error) {
+      console.warn('[HapticManager] Metrics-based feedback failed:', error);
+    }
+  }
+
+  /**
+   * Enable or disable haptic feedback
    */
   setEnabled(enabled: boolean): void {
     this.isEnabled = enabled;
   }
 
   /**
-   * Check if haptics are enabled
+   * Update feedback configuration
+   */
+  updateConfig(config: Partial<TouchFeedbackConfig>): void {
+    this.feedbackConfig = { ...this.feedbackConfig, ...config };
+  }
+
+  /**
+   * Get current configuration
+   */
+  getConfig(): TouchFeedbackConfig {
+    return { ...this.feedbackConfig };
+  }
+
+  /**
+   * Check if haptics are supported and enabled
    */
   isHapticEnabled(): boolean {
-    return this.isEnabled;
+    return this.isEnabled && this.feedbackConfig.hapticEnabled;
   }
 
-  /**
-   * Set haptic throttle time
-   */
-  setThrottleTime(ms: number): void {
-    this.hapticThrottleMs = Math.max(0, ms);
-  }
+  // Private helper methods
 
   /**
-   * Create haptic pattern for complex interactions
+   * Convert style to Expo Haptics style
    */
-  async triggerPattern(pattern: HapticFeedbackType[], intervals: number[]): Promise<void> {
-    if (!this.isEnabled || pattern.length !== intervals.length) return;
-
-    for (let i = 0; i < pattern.length; i++) {
-      await this.triggerHaptic(pattern[i]);
-      if (i < intervals.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, intervals[i]));
-      }
+  private getHapticStyle(style: HapticImpactStyle): Haptics.ImpactFeedbackStyle {
+    switch (style) {
+      case 'light':
+        return Haptics.ImpactFeedbackStyle.Light;
+      case 'medium':
+        return Haptics.ImpactFeedbackStyle.Medium;
+      case 'heavy':
+        return Haptics.ImpactFeedbackStyle.Heavy;
+      default:
+        return Haptics.ImpactFeedbackStyle.Medium;
     }
   }
 
   /**
-   * Trigger success pattern
+   * Convert notification type to Expo Haptics type
    */
-  async triggerSuccessPattern(): Promise<void> {
-    await this.triggerPattern(['light', 'medium', 'success'], [100, 100]);
-  }
-
-  /**
-   * Trigger error pattern
-   */
-  async triggerErrorPattern(): Promise<void> {
-    await this.triggerPattern(['heavy', 'error'], [150]);
+  private getNotificationType(type: 'success' | 'warning' | 'error'): Haptics.NotificationFeedbackType {
+    switch (type) {
+      case 'success':
+        return Haptics.NotificationFeedbackType.Success;
+      case 'warning':
+        return Haptics.NotificationFeedbackType.Warning;
+      case 'error':
+        return Haptics.NotificationFeedbackType.Error;
+      default:
+        return Haptics.NotificationFeedbackType.Success;
+    }
   }
 }
+
+// Export singleton instance
+export default HapticManager.getInstance();

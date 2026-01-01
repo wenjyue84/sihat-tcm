@@ -22,3 +22,4 @@ export type DashboardSection =
   | "heart-companion"
   | "communication";
 
+

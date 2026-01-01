@@ -10,15 +10,6 @@ import type { AIRequest, AIResponse } from "@/types/ai-request";
 // Re-export for backward compatibility
 export type { AIRequest, AIResponse };
 
-export interface AIResponse {
-  text: string;
-  parsed?: Record<string, unknown>;
-  modelUsed: string;
-  responseTime: number;
-  confidence?: number;
-  metadata?: Record<string, any>;
-}
-
 export interface ModelCapabilities {
   id: string;
   name: string;
@@ -76,7 +67,7 @@ export interface ModelSelectionCriteria {
 export interface AIModel {
   readonly id: string;
   readonly capabilities: ModelCapabilities;
-  
+
   generate(request: AIRequest): Promise<AIResponse>;
   stream(request: AIRequest): Promise<ReadableStream>;
   isAvailable(): Promise<boolean>;

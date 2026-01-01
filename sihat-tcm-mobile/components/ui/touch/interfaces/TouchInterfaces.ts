@@ -1,11 +1,8 @@
 /**
  * Touch Interface Types
  * 
- * Type definitions for enhanced touch and gesture components
+ * Type definitions for the enhanced touch interface system
  */
-
-import { ReactNode } from 'react';
-import { ViewStyle, TouchableOpacityProps } from 'react-native';
 
 export interface SwipeGestureConfig {
   swipeThreshold: number;
@@ -13,59 +10,63 @@ export interface SwipeGestureConfig {
   enabled: boolean;
 }
 
-export interface SwipeCallbacks {
+export interface SwipeGestureCallbacks {
   onSwipeLeft?: () => void;
   onSwipeRight?: () => void;
   onSwipeUp?: () => void;
   onSwipeDown?: () => void;
 }
 
-export interface SwipeGestureHandlerProps extends SwipeCallbacks {
-  children: ReactNode;
+export interface SwipeGestureProps extends SwipeGestureCallbacks {
+  children: React.ReactNode;
   swipeThreshold?: number;
   velocityThreshold?: number;
   enabled?: boolean;
   theme?: any;
-  style?: ViewStyle;
+  style?: any;
 }
 
-export interface HapticConfig {
-  type: 'light' | 'medium' | 'heavy';
-  longPressDelay: number;
-  enabled: boolean;
+export interface HapticTouchConfig {
+  impactStyle: 'light' | 'medium' | 'heavy';
+  enableHaptics: boolean;
+  delayMs: number;
 }
 
-export interface HapticTouchButtonProps extends TouchableOpacityProps {
+export interface HapticTouchProps {
+  children: React.ReactNode;
   onPress?: () => void;
   onLongPress?: () => void;
-  children: ReactNode;
-  hapticType?: 'light' | 'medium' | 'heavy';
-  longPressDelay?: number;
+  impactStyle?: 'light' | 'medium' | 'heavy';
+  enableHaptics?: boolean;
+  delayMs?: number;
   disabled?: boolean;
+  style?: any;
   theme?: any;
-  style?: ViewStyle;
 }
 
 export interface GestureIndicatorProps {
   visible: boolean;
-  direction: 'left' | 'right' | 'up' | 'down' | 'tap';
-  text?: string;
+  type: 'swipe' | 'tap' | 'pinch' | 'rotate';
+  direction?: 'left' | 'right' | 'up' | 'down';
+  position?: { x: number; y: number };
   theme?: any;
-  style?: ViewStyle;
+  style?: any;
 }
 
 export interface TouchFeedbackConfig {
   hapticEnabled: boolean;
-  visualFeedbackEnabled: boolean;
-  soundEnabled: boolean;
-  animationDuration: number;
+  visualEnabled: boolean;
+  audioEnabled: boolean;
+  intensity: 'light' | 'medium' | 'heavy';
 }
 
 export interface GestureState {
   isActive: boolean;
-  direction?: 'left' | 'right' | 'up' | 'down';
+  startPosition: { x: number; y: number };
+  currentPosition: { x: number; y: number };
   velocity: { x: number; y: number };
-  translation: { x: number; y: number };
+  scale: number;
+  rotation: number;
 }
 
 export interface TouchMetrics {
@@ -77,6 +78,6 @@ export interface TouchMetrics {
   pressure?: number;
 }
 
-export type HapticFeedbackType = 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error';
-export type GestureDirection = 'left' | 'right' | 'up' | 'down' | 'tap' | 'pinch' | 'rotate';
-export type TouchEventType = 'press' | 'longPress' | 'swipe' | 'pinch' | 'rotate' | 'tap';
+export type HapticImpactStyle = 'light' | 'medium' | 'heavy';
+export type GestureType = 'swipe' | 'tap' | 'pinch' | 'rotate' | 'pan';
+export type SwipeDirection = 'left' | 'right' | 'up' | 'down';

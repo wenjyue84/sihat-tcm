@@ -5,10 +5,6 @@
  * This replaces the monolithic MobileDeviceIntegrationManager.js with a modular approach.
  */
 
-import { Platform } from 'react-native';
-import * as Device from 'expo-device';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import {
   DeviceIntegrationManager as IDeviceIntegrationManager,
   Device as IDevice,
@@ -28,8 +24,9 @@ import { HealthDataProvider } from './providers/HealthDataProvider';
 import { SensorManager } from './sensors/SensorManager';
 import { DataAnalyzer } from './analysis/DataAnalyzer';
 import { DataSynchronizer } from './sync/DataSynchronizer';
+import { DeviceCapabilityChecker } from './core/DeviceCapabilityChecker';
+import { ConfigurationManager } from './core/ConfigurationManager';
 
-import { HEALTH_DEVICE_CONFIG } from '../../constants';
 import { ErrorFactory, DeviceError } from '../errors/AppError';
 
 /**
@@ -39,17 +36,17 @@ export class DeviceIntegrationManager implements IDeviceIntegrationManager {
   private static instance: DeviceIntegrationManager;
   
   // Core components
-  private deviceScanner: DeviceScanner;
-  private deviceConnector: DeviceConnector;
-  private healthDataProvider: HealthDataProvider;
-  private sensorManager: SensorManager;
-  private dataAnalyzer: DataAnalyzer;
-  private dataSynchronizer: DataSynchronizer;
+  private readonly deviceScanner: DeviceScanner;
+  private readonly deviceConnector: DeviceConnector;
+  private readonly healthDataProvider: HealthDataProvider;
+  private readonly sensorManager: SensorManager;
+  private readonly dataAnalyzer: DataAnalyzer;
+  private readonly dataSynchronizer: DataSynchronizer;
+  private readonly capabilityChecker: DeviceCapabilityChecker;
+  private readonly configManager: ConfigurationManager;
   
   // State
   private isInitialized = false;
-  private capabilities?: DeviceCapabilities;
-  private config: DeviceIntegrationConfig;
   private errors: string[] = [];
 
   private constructor() {
@@ -60,26 +57,11 @@ export class DeviceIntegrationManager implements IDeviceIntegrationManager {
     this.sensorManager = new SensorManager();
     this.dataAnalyzer = new DataAnalyzer();
     this.dataSynchronizer = new DataSynchronizer();
-
-    // Default configuration
-    this.config = {
-      healthDataRetentionDays: HEALTH_DEVICE_CONFIG.DATA_SYNC_INTERVAL / (1000 * 60 * 60 * 24),
-      syncIntervalMinutes: HEALTH_DEVICE_CONFIG.DATA_SYNC_INTERVAL / (1000 * 60),
-      maxCacheSize: 1000,
-      enabledSensors: ['accelerometer', 'gyroscope'],
-      bluetoothScanDuration: HEALTH_DEVICE_CONFIG.SCAN_TIMEOUT,
-      maxRetryAttempts: HEALTH_DEVICE_CONFIG.MAX_RETRY_ATTEMPTS,
-      offlineMode: false,
-    };
+    this.capabilityChecker = new DeviceCapabilityChecker();
+    this.configManager = new ConfigurationManager();
 
     // Set up device connector callbacks
-    this.deviceConnector.setDataCallback = (deviceId: string, callback) => {
-      this.deviceConnector.setDataCallback(deviceId, (data: HealthDataPoint) => {
-        // Process received data
-        this.handleDeviceData(data);
-        callback(data);
-      });
-    };
+    this.setupDeviceConnectorCallbacks();
   }
 
   /**
@@ -100,8 +82,15 @@ export class DeviceIntegrationManager implements IDeviceIntegrationManager {
       console.log('[DeviceIntegrationManager] Initializing...');
       this.errors = [];
 
+      // Initialize configuration manager first
+      await this.configManager.initialize();
+
       // Check device capabilities
-      this.capabilities = await this.checkDeviceCapabilities();
+      await this.capabilityChecker.checkDeviceCapabilities();
+
+      // Initialize components with configuration
+      const sensorConfig = this.configManager.getComponentConfiguration('sensors');
+      const syncConfig = this.configManager.getComponentConfiguration('sync');
 
       // Initialize health data provider
       try {
@@ -112,13 +101,13 @@ export class DeviceIntegrationManager implements IDeviceIntegrationManager {
 
       // Initialize sensor manager
       try {
-        await this.sensorManager.initialize(this.config.enabledSensors);
+        await this.sensorManager.initialize(sensorConfig.enabledSensors);
       } catch (error) {
         this.errors.push(`Sensor manager initialization failed: ${error}`);
       }
 
       // Start background sync
-      this.dataSynchronizer.startPeriodicSync(this.config.syncIntervalMinutes);
+      this.dataSynchronizer.startPeriodicSync(syncConfig.syncIntervalMinutes);
 
       this.isInitialized = true;
       console.log('[DeviceIntegrationManager] Initialization complete');
@@ -155,7 +144,8 @@ export class DeviceIntegrationManager implements IDeviceIntegrationManager {
         throw new DeviceError('Manager not initialized');
       }
 
-      return await this.deviceScanner.scan(this.config.bluetoothScanDuration);
+      const bluetoothConfig = this.configManager.getComponentConfiguration('bluetooth');
+      return await this.deviceScanner.scan(bluetoothConfig.bluetoothScanDuration);
     } catch (error) {
       throw ErrorFactory.fromUnknownError(error, {
         component: 'DeviceIntegrationManager',
@@ -303,13 +293,15 @@ export class DeviceIntegrationManager implements IDeviceIntegrationManager {
    * Get system status
    */
   getStatus(): DeviceIntegrationStatus {
+    const capabilities = this.capabilityChecker.getCachedCapabilities();
+    
     return {
       isInitialized: this.isInitialized,
-      capabilities: this.capabilities || {} as DeviceCapabilities,
+      capabilities: capabilities || {} as DeviceCapabilities,
       connectedDevicesCount: this.deviceConnector.getConnectedDevices().length,
       cacheSize: this.sensorManager.getCacheSize(),
       syncQueueSize: this.dataSynchronizer.getQueueSize(),
-      isOnline: !this.config.offlineMode,
+      isOnline: !this.configManager.getConfiguration().offlineMode,
       lastSyncTime: this.dataSynchronizer.getLastSyncTime(),
       errors: [...this.errors],
     };
@@ -320,9 +312,9 @@ export class DeviceIntegrationManager implements IDeviceIntegrationManager {
    */
   async updateConfiguration(config: Partial<DeviceIntegrationConfig>): Promise<void> {
     try {
-      this.config = { ...this.config, ...config };
+      await this.configManager.updateConfiguration(config);
       
-      // Apply configuration changes
+      // Apply configuration changes to components
       if (config.enabledSensors) {
         await this.sensorManager.updateEnabledSensors(config.enabledSensors);
       }
@@ -330,9 +322,6 @@ export class DeviceIntegrationManager implements IDeviceIntegrationManager {
       if (config.syncIntervalMinutes) {
         this.dataSynchronizer.updateSyncInterval(config.syncIntervalMinutes);
       }
-
-      // Save configuration
-      await AsyncStorage.setItem('deviceIntegrationConfig', JSON.stringify(this.config));
       
       console.log('[DeviceIntegrationManager] Configuration updated');
     } catch (error) {
@@ -341,6 +330,20 @@ export class DeviceIntegrationManager implements IDeviceIntegrationManager {
         action: 'updateConfiguration'
       });
     }
+  }
+
+  /**
+   * Get current configuration
+   */
+  getConfiguration(): DeviceIntegrationConfig {
+    return this.configManager.getConfiguration();
+  }
+
+  /**
+   * Get device capabilities
+   */
+  async getDeviceCapabilities(): Promise<DeviceCapabilities> {
+    return await this.capabilityChecker.checkDeviceCapabilities();
   }
 
   /**
@@ -370,29 +373,11 @@ export class DeviceIntegrationManager implements IDeviceIntegrationManager {
   // Private helper methods
 
   /**
-   * Check device capabilities
+   * Set up device connector callbacks
    */
-  private async checkDeviceCapabilities(): Promise<DeviceCapabilities> {
-    const capabilities: DeviceCapabilities = {
-      platform: Platform.OS as 'ios' | 'android',
-      deviceType: Device.deviceType || 0,
-      hasHealthApp: Platform.OS === 'ios' || Platform.OS === 'android',
-      hasBluetooth: true, // Assume Bluetooth is available
-      hasNFC: false, // Would need to check actual NFC availability
-      sensors: {
-        accelerometer: await this.sensorManager.isSensorAvailable('accelerometer'),
-        gyroscope: await this.sensorManager.isSensorAvailable('gyroscope'),
-        magnetometer: await this.sensorManager.isSensorAvailable('magnetometer'),
-        barometer: await this.sensorManager.isSensorAvailable('barometer'),
-      },
-      permissions: {}, // Will be populated by permission requests
-      systemVersion: Device.osVersion || 'unknown',
-    };
-
-    // Store capabilities
-    await AsyncStorage.setItem('deviceCapabilities', JSON.stringify(capabilities));
-    
-    return capabilities;
+  private setupDeviceConnectorCallbacks(): void {
+    // This would be implemented to set up proper callbacks
+    // For now, it's a placeholder for the callback setup logic
   }
 
   /**

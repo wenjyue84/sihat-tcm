@@ -31,20 +31,7 @@ interface Message {
   content: string;
 }
 
-// Helper to extract options from message content
-const extractOptions = (content: string) => {
-  const match = content.match(/<OPTIONS>([\s\S]*?)<\/OPTIONS>/);
-  if (match) {
-    const optionsStr = match[1];
-    const cleanContent = content.replace(/<OPTIONS>[\s\S]*?<\/OPTIONS>/, "").trim();
-    const options = optionsStr
-      .split(",")
-      .map((o) => o.trim())
-      .filter((o) => o);
-    return { cleanContent, options };
-  }
-  return { cleanContent: content, options: [] as string[] };
-};
+import { extractOptions } from "@/lib/utils/chatMessageParser";
 
 import type { DiagnosisReport } from "@/types/database";
 import type { PDFPatientInfo } from "@/types/pdf";
@@ -92,7 +79,7 @@ export function WesternDoctorChat({
   useEffect(() => {
     setIsSpeechSupported(
       typeof window !== "undefined" &&
-        ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
+      ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
     );
   }, []);
 
@@ -121,41 +108,42 @@ export function WesternDoctorChat({
 
   // Build context from TCM report
   const buildTCMContext = () => {
+    const tcmData = tcmReportData as any;
     const diagnosis =
-      typeof tcmReportData?.diagnosis === "string"
-        ? tcmReportData.diagnosis
-        : tcmReportData?.diagnosis?.primary_pattern || "Not available";
+      typeof tcmData?.diagnosis === "string"
+        ? tcmData.diagnosis
+        : tcmData?.diagnosis?.primary_pattern || "Not available";
 
     const constitution =
-      typeof tcmReportData?.constitution === "string"
-        ? tcmReportData.constitution
-        : tcmReportData?.constitution?.type || "Not available";
+      typeof tcmData?.constitution === "string"
+        ? tcmData.constitution
+        : tcmData?.constitution?.type || "Not available";
 
     const analysis =
-      typeof tcmReportData?.analysis === "string"
-        ? tcmReportData.analysis
-        : tcmReportData?.analysis?.summary || "Not available";
+      typeof tcmData?.analysis === "string"
+        ? tcmData.analysis
+        : tcmData?.analysis?.summary || "Not available";
 
     return `
-=== TCM DIAGNOSIS REPORT SUMMARY ===
-TCM Diagnosis: ${diagnosis}
-Constitution Type: ${constitution}
-Analysis: ${analysis}
+  === TCM DIAGNOSIS REPORT SUMMARY ===
+  TCM Diagnosis: ${diagnosis}
+  Constitution Type: ${constitution}
+  Analysis: ${analysis}
 
-=== PATIENT INFORMATION ===
-Name: ${patientInfo?.name || "Not provided"}
-Age: ${patientInfo?.age || "Not provided"}
-Gender: ${patientInfo?.gender || "Not provided"}
-Height: ${patientInfo?.height || "Not provided"} cm
-Weight: ${patientInfo?.weight || "Not provided"} kg
-Chief Complaint: ${patientInfo?.symptoms || "Not provided"}
-`;
+  === PATIENT INFORMATION ===
+  Name: ${patientInfo?.name || "Not provided"}
+  Age: ${patientInfo?.age || "Not provided"}
+  Gender: ${patientInfo?.gender || "Not provided"}
+  Height: ${patientInfo?.height || "Not provided"} cm
+  Weight: ${patientInfo?.weight || "Not provided"} kg
+  Chief Complaint: ${patientInfo?.symptoms || "Not provided"}
+  `;
   };
 
   // Construct the system message
   const systemMessage = `${activePrompt}
-
-${buildTCMContext()}`;
+  
+  ${buildTCMContext()}`;
 
   // Send message to API with manual streaming
   // Uses /api/western-chat which is specifically designed for Western Doctor second opinion
@@ -375,11 +363,10 @@ ${buildTCMContext()}`;
 
       {/* Chat Window */}
       <Card
-        className={`relative flex flex-col bg-white shadow-2xl transition-all duration-300 ${
-          isMaximized
-            ? "w-full h-full rounded-none"
-            : "w-full max-w-2xl h-[80vh] max-h-[700px] rounded-xl"
-        }`}
+        className={`relative flex flex-col bg-white shadow-2xl transition-all duration-300 ${isMaximized
+          ? "w-full h-full rounded-none"
+          : "w-full max-w-2xl h-[80vh] max-h-[700px] rounded-xl"
+          }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-cyan-50 to-blue-50">
@@ -440,11 +427,10 @@ ${buildTCMContext()}`;
               <div key={m.id}>
                 <div className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
-                    className={`max-w-[85%] p-3 rounded-lg whitespace-pre-wrap text-sm ${
-                      m.role === "user"
-                        ? "bg-cyan-600 text-white rounded-br-none"
-                        : "bg-stone-100 text-stone-800 rounded-bl-none"
-                    }`}
+                    className={`max-w-[85%] p-3 rounded-lg whitespace-pre-wrap text-sm ${m.role === "user"
+                      ? "bg-cyan-600 text-white rounded-br-none"
+                      : "bg-stone-100 text-stone-800 rounded-bl-none"
+                      }`}
                   >
                     {cleanContent}
                   </div>
@@ -474,7 +460,21 @@ ${buildTCMContext()}`;
           {isLoading && (
             <div className="flex justify-start">
               <div className="max-w-[85%]">
-                <ThinkingAnimation basicInfo={patientInfo} variant="compact" />
+                <ThinkingAnimation
+                  basicInfo={patientInfo ? {
+                    ...patientInfo,
+                    name: patientInfo.name || "Patient",
+                    age: String(patientInfo.age || "N/A"),
+                    gender: patientInfo.gender || "N/A",
+                    height: String(patientInfo.height || ""),
+                    weight: String(patientInfo.weight || ""),
+                    mainComplaint: patientInfo.symptoms || "",
+                    symptoms: patientInfo.symptoms || "",
+                    otherSymptoms: "",
+                    symptomDuration: ""
+                  } : undefined}
+                  variant="compact"
+                />
               </div>
             </div>
           )}

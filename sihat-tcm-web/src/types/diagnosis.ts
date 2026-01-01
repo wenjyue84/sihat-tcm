@@ -147,8 +147,10 @@ export interface AnalysisResult {
 // ============================================================================
 
 export interface PendingResumeState {
+  sessionId?: string;
   step: string;
   data: DiagnosisWizardData;
   timestamp: string;
+  completionPercentage?: number;
 }
 

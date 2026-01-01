@@ -4,14 +4,13 @@
 
 import { RequestComplexity, RequestComplexityType, ComplexityFactors } from "../interfaces/ModelInterfaces";
 import { COMPLEXITY_SCORING, AI_MODELS } from "../../constants";
+import type { AIRequest } from "@/types/ai-request";
 
 export class ComplexityAnalyzer {
   /**
    * Analyze request complexity based on various factors
    */
   public analyzeComplexity(request: {
-import type { AIRequest } from "@/types/ai-request";
-
     messages?: AIRequest["messages"];
     images?: AIRequest["images"];
     files?: AIRequest["files"];
@@ -61,25 +60,25 @@ import type { AIRequest } from "@/types/ai-request";
 
   private calculateComplexityScore(factors: ComplexityFactors): number {
     let score = 0;
-    
+
     // Base scoring using constants
     score += factors.messageCount * COMPLEXITY_SCORING.BASE_MESSAGE_WEIGHT;
     score += factors.imageCount * COMPLEXITY_SCORING.IMAGE_WEIGHT;
     score += Math.min(factors.fileSize / 1024 / 1024, 10) * COMPLEXITY_SCORING.FILE_SIZE_WEIGHT;
-    
+
     // Boolean factors
     if (factors.hasImages) score += COMPLEXITY_SCORING.IMAGE_BONUS;
     if (factors.hasMultipleFiles) score += COMPLEXITY_SCORING.MULTIPLE_FILES_BONUS;
     if (factors.hasLongHistory) score += COMPLEXITY_SCORING.LONG_HISTORY_BONUS;
     if (factors.requiresAnalysis) score += COMPLEXITY_SCORING.ANALYSIS_BONUS;
     if (factors.requiresPersonalization) score += COMPLEXITY_SCORING.PERSONALIZATION_BONUS;
-    
+
     // Medical complexity
     score += COMPLEXITY_SCORING.MEDICAL_COMPLEXITY[factors.medicalComplexity.toUpperCase() as keyof typeof COMPLEXITY_SCORING.MEDICAL_COMPLEXITY] || 0;
-    
+
     // Urgency
     score += COMPLEXITY_SCORING.URGENCY_LEVELS[factors.urgencyLevel.toUpperCase() as keyof typeof COMPLEXITY_SCORING.URGENCY_LEVELS] || 0;
-    
+
     return Math.min(score, COMPLEXITY_SCORING.MAX_SCORE);
   }
 
@@ -92,9 +91,9 @@ import type { AIRequest } from "@/types/ai-request";
 
   private generateComplexityReasoning(factors: ComplexityFactors, score: number): string[] {
     const reasoning: string[] = [];
-    
+
     reasoning.push(`Overall complexity score: ${score}/100`);
-    
+
     if (factors.hasImages) reasoning.push("Contains images requiring vision analysis");
     if (factors.hasMultipleFiles) reasoning.push("Multiple files need processing");
     if (factors.hasLongHistory) reasoning.push("Long conversation history");
@@ -102,7 +101,7 @@ import type { AIRequest } from "@/types/ai-request";
     if (factors.requiresPersonalization) reasoning.push("Needs personalized recommendations");
     if (factors.medicalComplexity === "high") reasoning.push("High medical complexity detected");
     if (factors.urgencyLevel === "urgent") reasoning.push("Urgent priority level");
-    
+
     return reasoning;
   }
 

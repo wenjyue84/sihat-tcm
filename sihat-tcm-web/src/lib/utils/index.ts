@@ -28,3 +28,9 @@ export * from "../soundscapeUtils";
 // Report extraction utilities
 export * from "./report-extraction";
 
+// BMI calculation utilities
+export * from "./bmi";
+
+// Chat message parsing utilities
+export * from "./chatMessageParser";
+

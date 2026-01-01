@@ -13,8 +13,8 @@
 
 import {
   VoiceCommandHandler as ModularVoiceCommandHandler,
-  getVoiceCommandHandler,
-  checkVoiceSupport,
+  getVoiceCommandHandler as getModularVoiceCommandHandler,
+  checkVoiceSupport as checkModularVoiceSupport,
   type VoiceCommand,
   type VoiceRecognitionOptions,
   type VoiceSynthesisOptions,
@@ -204,5 +204,5 @@ export function getVoiceCommandHandler(
  */
 export function checkVoiceSupport(): VoiceSupportInfo {
   console.warn('[checkVoiceSupport] Using deprecated API. Please migrate to the new modular system.');
-  return checkVoiceSupport();
+  return checkModularVoiceSupport();
 }

@@ -109,16 +109,98 @@ const TypingIndicator = ({ theme, isDark, styles }) => {
 
 // Helper to extract OPTIONS from AI response
 const extractOptions = (content) => {
-    // Check for OPTIONS tag (case-insensitive)
-    const match = content.match(/<OPTIONS>([\s\S]*?)<\/OPTIONS>/i);
+    if (!content) return { cleanContent: '', options: [] };
+
+    // Debug: Log raw content to see what we're working with
+    console.log("DEBUG - Raw AI content:", JSON.stringify(content));
+
+    // First, normalize the content - handle various escape formats
+    let normalizedContent = content
+        // Handle backslash-escaped angle brackets: \< and \>
+        .replace(/\\</g, '<')
+        .replace(/\\>/g, '>')
+        // Handle HTML entities
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        // Handle unicode angle brackets
+        .replace(/\u003c/g, '<')
+        .replace(/\u003e/g, '>')
+        // Handle curly/smart quotes that AI sometimes uses
+        .replace(/['']/g, "'")
+        .replace(/[""]/g, '"');
+
+    console.log("DEBUG - Normalized content:", normalizedContent);
+
+    // Try multiple regex patterns to handle various tag formats
+    const patterns = [
+        // Standard patterns
+        /<options>([\s\S]*?)<\/options>/i,
+        /<OPTIONS>([\s\S]*?)<\/OPTIONS>/,
+        // With spaces
+        /<\s*options\s*>([\s\S]*?)<\s*\/\s*options\s*>/i,
+        // With newlines inside
+        /<options>\s*([\s\S]*?)\s*<\/options>/i,
+        // Malformed tags with quotes (the exact pattern from user's error)
+        /['"]?<options['"]?>([\s\S]*?)<\/options>/i,
+        /['"]<options['"]>([\s\S]*?)<['"]?\/options['"]?>/i,
+        // Alternative formats AI might use
+        /\[options\]([\s\S]*?)\[\/options\]/i,
+        /\(options\)([\s\S]*?)\(\/options\)/i,
+        // Markdown-style
+        /\*\*OPTIONS:\*\*\s*([\s\S]*?)(?:\n\n|$)/i,
+        /OPTIONS:\s*([\s\S]*?)(?:\n\n|$)/i,
+        // Catch-all: anything that looks like options marker with comma-separated values
+        /options[>'":]*\s*([\w\s,]+(?:,[\w\s]+)+)\s*[<'":]*\/?options/i,
+    ];
+
+    let match = null;
+    for (const pattern of patterns) {
+        match = normalizedContent.match(pattern);
+        if (match) {
+            console.log("DEBUG - Matched pattern:", pattern.toString());
+            break;
+        }
+    }
+
     if (match) {
         const optionsStr = match[1];
-        const cleanContent = content.replace(/<OPTIONS>[\s\S]*?<\/OPTIONS>/i, '').trim();
+        // Clean content: remove the options tag and all variants
+        let cleanContent = normalizedContent
+            .replace(/<options>[\s\S]*?<\/options>/gi, '')
+            .replace(/<OPTIONS>[\s\S]*?<\/OPTIONS>/g, '')
+            .replace(/<\s*options\s*>[\s\S]*?<\s*\/\s*options\s*>/gi, '')
+            // Malformed tags with quotes
+            .replace(/['"]?<options['"]?>[\s\S]*?<\/options>/gi, '')
+            .replace(/['"]<options['"]>[\s\S]*?<['"]?\/options['"]?>/gi, '')
+            // Catch-all for options markers
+            .replace(/options[>'":]*\s*[\w\s,]+(?:,[\w\s]+)+\s*[<'":]*\/?options/gi, '')
+            .replace(/\[options\][\s\S]*?\[\/options\]/gi, '')
+            .replace(/\(options\)[\s\S]*?\(\/options\)/gi, '')
+            .replace(/\*\*OPTIONS:\*\*\s*[\s\S]*?(?:\n\n|$)/gi, '')
+            .replace(/OPTIONS:\s*[\s\S]*?(?:\n\n|$)/gi, '')
+            .trim();
         const options = optionsStr.split(',').map(o => o.trim()).filter(o => o);
-        console.log("DEBUG - Extracted Options:", options);
+        console.log("DEBUG - Successfully extracted options:", options);
+        console.log("DEBUG - Clean content:", cleanContent);
         return { cleanContent, options };
     }
-    console.log("DEBUG - No OPTIONS tag found, will use intelligent fallback");
+
+    // Last resort: check if the content literally contains the string "<options>" as text
+    // This happens when AI writes it as literal text instead of as a tag
+    const literalMatch = content.match(/['"]?<options>['"]?\s*(.*?)\s*['"]?<\/options>['"]?/i) ||
+        content.match(/<options>\s*(.*?)\s*<\/options>/i);
+    if (literalMatch) {
+        const optionsStr = literalMatch[1];
+        let cleanContent = content
+            .replace(/['"]?<options>['"]?\s*.*?\s*['"]?<\/options>['"]?/gi, '')
+            .replace(/<options>\s*.*?\s*<\/options>/gi, '')
+            .trim();
+        const options = optionsStr.split(',').map(o => o.trim()).filter(o => o);
+        console.log("DEBUG - Extracted from literal text:", options);
+        return { cleanContent, options };
+    }
+
+    console.log("DEBUG - No OPTIONS tag found in content, will use intelligent fallback");
     return { cleanContent: content, options: [] };
 };
 

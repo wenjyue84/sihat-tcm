@@ -1,81 +1,92 @@
 /**
- * Drug Interaction Analyzer - Analyzes herb-drug interactions
+ * Drug Interaction Analyzer
  * 
- * Provides comprehensive analysis of potential interactions between
- * TCM herbs and Western medications using both knowledge base and AI analysis.
+ * Specialized component for analyzing drug-herb interactions.
+ * Uses AI analysis and knowledge base for comprehensive interaction checking.
  */
 
 import { generateText } from "ai";
 import { getGoogleProvider } from "../../googleProvider";
-import { logError } from "../../systemLogger";
-import { 
-  SafetyConcern, 
-  DrugInteraction, 
-  ValidationContext,
-  InteractionAnalysisRequest,
-  InteractionAnalysisResponse
-} from '../interfaces/SafetyInterfaces';
+import { devLog, logError } from "../../systemLogger";
+import {
+  DrugInteractionCheckResult,
+  DrugInteraction,
+  SafetyConcern,
+  ValidationContext
+} from "../interfaces/SafetyInterfaces";
 
 export class DrugInteractionAnalyzer {
-  private readonly context = 'DrugInteractionAnalyzer';
+  private context: string;
   private knownInteractions: Map<string, DrugInteraction[]> = new Map();
 
-  constructor() {
+  constructor(context: string = "DrugInteractionAnalyzer") {
+    this.context = context;
     this.initializeKnownInteractions();
   }
 
   /**
-   * Check for drug interactions in herbal recommendations
+   * Check for drug interactions with herbal recommendations
    */
-  public async checkDrugInteractions(
-    herbal_recommendations: string[],
-    context: ValidationContext
-  ): Promise<{ concerns: SafetyConcern[]; interactions: DrugInteraction[] }> {
-    const concerns: SafetyConcern[] = [];
-    const interactions: DrugInteraction[] = [];
-    const medications = context.medical_history.current_medications;
+  async checkDrugInteractions(
+    herbalRecommendations: string[],
+    validationContext: ValidationContext
+  ): Promise<DrugInteractionCheckResult> {
+    try {
+      devLog("info", this.context, "Checking drug interactions", {
+        herbCount: herbalRecommendations.length,
+        medicationCount: validationContext.medical_history.current_medications.length
+      });
 
-    for (const herb of herbal_recommendations) {
-      for (const medication of medications) {
-        const interaction = await this.analyzeSpecificInteraction(herb, medication, context);
-        if (interaction) {
-          interactions.push(interaction);
+      const concerns: SafetyConcern[] = [];
+      const interactions: DrugInteraction[] = [];
+      const medications = validationContext.medical_history.current_medications;
 
-          concerns.push({
-            type: "drug_interaction",
-            severity: this.mapSeverityToConcernLevel(interaction.severity),
-            description: `${herb} may interact with ${medication}: ${interaction.clinical_significance}`,
-            affected_recommendation: herb,
-            evidence_level: "clinical_study",
-            action_required: this.getActionRequired(interaction.severity),
-          });
+      for (const herb of herbalRecommendations) {
+        for (const medication of medications) {
+          const interaction = await this.analyzeSpecificInteraction(
+            herb,
+            medication,
+            validationContext
+          );
+          
+          if (interaction) {
+            interactions.push(interaction);
+            concerns.push(this.createInteractionConcern(interaction));
+          }
         }
       }
-    }
 
-    return { concerns, interactions };
+      return { concerns, interactions };
+    } catch (error) {
+      logError(this.context, "Drug interaction check failed", { error });
+      return { concerns: [], interactions: [] };
+    }
   }
 
   /**
-   * Analyze specific herb-drug interaction
+   * Analyze specific herb-drug interaction using AI
    */
-  public async analyzeSpecificInteraction(
+  async analyzeSpecificInteraction(
     herb: string,
     medication: string,
     context?: ValidationContext
   ): Promise<DrugInteraction | null> {
     try {
       // First check known interactions
-      const knownInteraction = this.checkKnownInteractions(herb, medication);
+      const knownInteraction = this.checkKnownInteraction(herb, medication);
       if (knownInteraction) {
         return knownInteraction;
       }
 
-      // Use AI analysis for unknown combinations
-      return await this.performAIInteractionAnalysis(herb, medication, context);
+      // Use AI for unknown combinations
+      return await this.analyzeWithAI(herb, medication, context);
     } catch (error) {
-      logError(this.context, "Failed to analyze interaction", { error, herb, medication });
-      
+      logError(this.context, "Failed to analyze specific interaction", { 
+        error, 
+        herb, 
+        medication 
+      });
+
       // Return conservative interaction warning on error
       return {
         herb_or_food: herb,
@@ -84,121 +95,124 @@ export class DrugInteractionAnalyzer {
         severity: "moderate",
         mechanism: "Unknown - system error during analysis",
         clinical_significance: "Potential interaction cannot be ruled out",
-        management: "Consult healthcare provider before combining",
+        management: "Consult healthcare provider before combining"
       };
     }
   }
 
   /**
-   * Get interaction management recommendations
+   * Check known interactions from knowledge base
    */
-  public getInteractionManagement(interaction: DrugInteraction): {
-    immediate_actions: string[];
-    monitoring_requirements: string[];
-    alternative_suggestions: string[];
-    follow_up_recommendations: string[];
-  } {
-    const management = {
-      immediate_actions: [] as string[],
-      monitoring_requirements: [] as string[],
-      alternative_suggestions: [] as string[],
-      follow_up_recommendations: [] as string[]
-    };
+  private checkKnownInteraction(herb: string, medication: string): DrugInteraction | null {
+    const medicationLower = medication.toLowerCase();
+    const herbLower = herb.toLowerCase();
 
-    switch (interaction.severity) {
-      case 'severe':
-        management.immediate_actions.push(
-          'Discontinue herb immediately',
-          'Contact healthcare provider urgently',
-          'Monitor for adverse effects'
-        );
-        management.follow_up_recommendations.push(
-          'Emergency medical evaluation if symptoms develop',
-          'Medication level monitoring may be required'
-        );
-        break;
-
-      case 'major':
-        management.immediate_actions.push(
-          'Avoid combination or use with extreme caution',
-          'Consult healthcare provider before continuing'
-        );
-        management.monitoring_requirements.push(
-          'Regular monitoring of medication levels',
-          'Watch for signs of interaction'
-        );
-        break;
-
-      case 'moderate':
-        management.monitoring_requirements.push(
-          'Monitor for effectiveness changes',
-          'Watch for side effects',
-          'Consider timing separation'
-        );
-        management.follow_up_recommendations.push(
-          'Regular check-ins with healthcare provider',
-          'Dose adjustments may be needed'
-        );
-        break;
-
-      case 'minor':
-        management.monitoring_requirements.push(
-          'Minimal monitoring required',
-          'Be aware of potential effects'
-        );
-        break;
+    const interactions = this.knownInteractions.get(medicationLower);
+    if (interactions) {
+      return interactions.find(interaction => 
+        interaction.herb_or_food.toLowerCase().includes(herbLower) ||
+        herbLower.includes(interaction.herb_or_food.toLowerCase())
+      ) || null;
     }
 
-    // Add general alternative suggestions
-    management.alternative_suggestions.push(
-      'Consider herbs with similar therapeutic effects but no interaction',
-      'Explore non-herbal TCM approaches (acupuncture, lifestyle)',
-      'Discuss timing strategies with practitioner'
-    );
-
-    return management;
+    return null;
   }
 
   /**
-   * Batch analyze multiple interactions
+   * Analyze interaction using AI
    */
-  public async batchAnalyzeInteractions(
-    requests: InteractionAnalysisRequest[]
-  ): Promise<Map<string, DrugInteraction | null>> {
-    const results = new Map<string, DrugInteraction | null>();
-    
-    // Process in batches to avoid overwhelming the AI service
-    const batchSize = 5;
-    for (let i = 0; i < requests.length; i += batchSize) {
-      const batch = requests.slice(i, i + batchSize);
-      const batchPromises = batch.map(async (request) => {
-        const key = `${request.herb}_${request.medication}`;
-        const result = await this.analyzeSpecificInteraction(
-          request.herb, 
-          request.medication, 
-          request.context
-        );
-        return { key, result };
-      });
+  private async analyzeWithAI(
+    herb: string,
+    medication: string,
+    context?: ValidationContext
+  ): Promise<DrugInteraction | null> {
+    const prompt = `
+      As a clinical pharmacist and TCM expert, analyze the potential interaction between:
+      - TCM herb/substance: "${herb}"
+      - Western medication: "${medication}"
 
-      const batchResults = await Promise.all(batchPromises);
-      batchResults.forEach(({ key, result }) => {
-        results.set(key, result);
-      });
-
-      // Small delay between batches
-      if (i + batchSize < requests.length) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      Provide a detailed analysis in JSON format:
+      {
+          "has_interaction": boolean,
+          "interaction_type": "synergistic|antagonistic|toxic|absorption_interference",
+          "severity": "minor|moderate|major|severe",
+          "mechanism": "detailed mechanism of interaction",
+          "clinical_significance": "clinical implications",
+          "management": "how to manage this interaction",
+          "evidence_level": "clinical_study|case_report|theoretical|traditional_knowledge"
       }
+
+      Consider:
+      1. Pharmacokinetic interactions (absorption, metabolism, excretion)
+      2. Pharmacodynamic interactions (additive, synergistic, antagonistic effects)
+      3. Traditional Chinese Medicine principles
+      4. Published clinical studies and case reports
+      5. Theoretical interactions based on known mechanisms
+
+      Be conservative - if uncertain, err on the side of caution.
+    `;
+
+    const google = getGoogleProvider();
+    const { text: responseText } = await generateText({
+      model: google("gemini-2.5-pro"),
+      messages: [{ role: "user", content: prompt }]
+    });
+
+    const cleanText = responseText
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+    
+    const analysis = JSON.parse(cleanText);
+
+    if (analysis.has_interaction) {
+      return {
+        herb_or_food: herb,
+        medication: medication,
+        interaction_type: analysis.interaction_type,
+        severity: analysis.severity,
+        mechanism: analysis.mechanism,
+        clinical_significance: analysis.clinical_significance,
+        management: analysis.management
+      };
     }
 
-    return results;
+    return null;
   }
 
-  // Private helper methods
+  /**
+   * Create safety concern from interaction
+   */
+  private createInteractionConcern(interaction: DrugInteraction): SafetyConcern {
+    const severityMap: Record<string, "low" | "medium" | "high" | "critical"> = {
+      "minor": "low",
+      "moderate": "medium", 
+      "major": "high",
+      "severe": "critical"
+    };
 
+    const actionMap: Record<string, SafetyConcern["action_required"]> = {
+      "minor": "monitor",
+      "moderate": "seek_medical_advice",
+      "major": "seek_medical_advice", 
+      "severe": "avoid_completely"
+    };
+
+    return {
+      type: "drug_interaction",
+      severity: severityMap[interaction.severity] || "medium",
+      description: `${interaction.herb_or_food} may interact with ${interaction.medication}: ${interaction.clinical_significance}`,
+      affected_recommendation: interaction.herb_or_food,
+      evidence_level: "clinical_study",
+      action_required: actionMap[interaction.severity] || "seek_medical_advice"
+    };
+  }
+
+  /**
+   * Initialize known interactions database
+   */
   private initializeKnownInteractions(): void {
-    // Initialize common drug interactions
+    // Warfarin interactions
     this.knownInteractions.set("warfarin", [
       {
         herb_or_food: "ginkgo",
@@ -207,7 +221,7 @@ export class DrugInteractionAnalyzer {
         severity: "major",
         mechanism: "Increased bleeding risk due to antiplatelet effects",
         clinical_significance: "Significantly increased risk of bleeding",
-        management: "Avoid combination or monitor INR closely",
+        management: "Avoid combination or monitor INR closely"
       },
       {
         herb_or_food: "ginseng",
@@ -216,147 +230,107 @@ export class DrugInteractionAnalyzer {
         severity: "moderate",
         mechanism: "May reduce anticoagulant effect",
         clinical_significance: "Reduced effectiveness of warfarin",
-        management: "Monitor INR, may need dose adjustment",
+        management: "Monitor INR, may need dose adjustment"
       },
       {
-        herb_or_food: "danshen",
+        herb_or_food: "garlic",
         medication: "warfarin",
         interaction_type: "synergistic",
-        severity: "major",
-        mechanism: "Enhanced anticoagulant effects",
-        clinical_significance: "Increased bleeding risk",
-        management: "Avoid combination, monitor closely if used",
-      }
-    ]);
-
-    this.knownInteractions.set("digoxin", [
-      {
-        herb_or_food: "hawthorn",
-        medication: "digoxin",
-        interaction_type: "synergistic",
         severity: "moderate",
-        mechanism: "Additive cardiac effects",
-        clinical_significance: "Increased risk of cardiac toxicity",
-        management: "Monitor digoxin levels and cardiac function",
+        mechanism: "Antiplatelet effects may enhance bleeding risk",
+        clinical_significance: "Increased bleeding risk",
+        management: "Monitor for bleeding, consider dose adjustment"
       }
     ]);
 
-    this.knownInteractions.set("insulin", [
+    // Diabetes medications
+    this.knownInteractions.set("metformin", [
       {
         herb_or_food: "bitter melon",
-        medication: "insulin",
+        medication: "metformin",
         interaction_type: "synergistic",
         severity: "moderate",
-        mechanism: "Additive hypoglycemic effects",
-        clinical_significance: "Increased risk of hypoglycemia",
-        management: "Monitor blood glucose closely, adjust doses as needed",
+        mechanism: "Additive glucose-lowering effects",
+        clinical_significance: "Risk of hypoglycemia",
+        management: "Monitor blood glucose closely"
       }
     ]);
 
-    this.knownInteractions.set("lithium", [
+    // Blood pressure medications
+    this.knownInteractions.set("lisinopril", [
       {
-        herb_or_food: "psyllium",
-        medication: "lithium",
-        interaction_type: "absorption_interference",
+        herb_or_food: "hawthorn",
+        medication: "lisinopril",
+        interaction_type: "synergistic",
         severity: "moderate",
-        mechanism: "Reduced lithium absorption",
-        clinical_significance: "Decreased lithium effectiveness",
-        management: "Separate administration by 2+ hours, monitor levels",
+        mechanism: "Additive hypotensive effects",
+        clinical_significance: "Risk of excessive blood pressure reduction",
+        management: "Monitor blood pressure, adjust doses as needed"
+      }
+    ]);
+
+    // Digoxin interactions
+    this.knownInteractions.set("digoxin", [
+      {
+        herb_or_food: "licorice",
+        medication: "digoxin",
+        interaction_type: "toxic",
+        severity: "major",
+        mechanism: "Hypokalemia increases digoxin toxicity risk",
+        clinical_significance: "Increased risk of digoxin toxicity",
+        management: "Avoid combination, monitor potassium and digoxin levels"
       }
     ]);
   }
 
-  private checkKnownInteractions(herb: string, medication: string): DrugInteraction | null {
-    const medicationInteractions = this.knownInteractions.get(medication.toLowerCase());
-    if (!medicationInteractions) return null;
-
-    return medicationInteractions.find(interaction => 
-      interaction.herb_or_food.toLowerCase().includes(herb.toLowerCase()) ||
-      herb.toLowerCase().includes(interaction.herb_or_food.toLowerCase())
-    ) || null;
+  /**
+   * Add new interaction to knowledge base
+   */
+  addKnownInteraction(medication: string, interaction: DrugInteraction): void {
+    const medicationLower = medication.toLowerCase();
+    
+    if (!this.knownInteractions.has(medicationLower)) {
+      this.knownInteractions.set(medicationLower, []);
+    }
+    
+    this.knownInteractions.get(medicationLower)!.push(interaction);
   }
 
-  private async performAIInteractionAnalysis(
-    herb: string,
-    medication: string,
-    context?: ValidationContext
-  ): Promise<DrugInteraction | null> {
-    try {
-      const prompt = `
-        As a clinical pharmacist and TCM expert, analyze the potential interaction between:
-        - TCM herb/substance: "${herb}"
-        - Western medication: "${medication}"
+  /**
+   * Get all known interactions for a medication
+   */
+  getKnownInteractions(medication: string): DrugInteraction[] {
+    return this.knownInteractions.get(medication.toLowerCase()) || [];
+  }
 
-        Provide a detailed analysis in JSON format:
-        {
-            "has_interaction": boolean,
-            "interaction_type": "synergistic|antagonistic|toxic|absorption_interference",
-            "severity": "minor|moderate|major|severe",
-            "mechanism": "detailed mechanism of interaction",
-            "clinical_significance": "clinical implications",
-            "management": "how to manage this interaction",
-            "evidence_level": "clinical_study|case_report|theoretical|traditional_knowledge"
-        }
+  /**
+   * Get interaction statistics
+   */
+  getInteractionStats(): {
+    totalMedications: number;
+    totalInteractions: number;
+    severityBreakdown: Record<string, number>;
+  } {
+    let totalInteractions = 0;
+    const severityBreakdown: Record<string, number> = {
+      minor: 0,
+      moderate: 0,
+      major: 0,
+      severe: 0
+    };
 
-        Consider:
-        1. Pharmacokinetic interactions (absorption, metabolism, excretion)
-        2. Pharmacodynamic interactions (additive, synergistic, antagonistic effects)
-        3. Traditional Chinese Medicine principles
-        4. Published clinical studies and case reports
-        5. Theoretical interactions based on known mechanisms
-
-        Be conservative - if uncertain, err on the side of caution.
-      `;
-
-      const google = getGoogleProvider();
-      const { text: responseText } = await generateText({
-        model: google("gemini-2.5-pro"),
-        messages: [{ role: "user", content: prompt }],
-      });
-
-      const cleanText = responseText
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim();
+    for (const interactions of this.knownInteractions.values()) {
+      totalInteractions += interactions.length;
       
-      const analysis: InteractionAnalysisResponse = JSON.parse(cleanText);
-
-      if (analysis.has_interaction) {
-        return {
-          herb_or_food: herb,
-          medication: medication,
-          interaction_type: analysis.interaction_type,
-          severity: analysis.severity,
-          mechanism: analysis.mechanism,
-          clinical_significance: analysis.clinical_significance,
-          management: analysis.management,
-        };
+      for (const interaction of interactions) {
+        severityBreakdown[interaction.severity]++;
       }
-
-      return null;
-    } catch (error) {
-      logError(this.context, "AI interaction analysis failed", { error, herb, medication });
-      throw error;
     }
-  }
 
-  private mapSeverityToConcernLevel(severity: string): "low" | "medium" | "high" | "critical" {
-    switch (severity) {
-      case "severe": return "critical";
-      case "major": return "high";
-      case "moderate": return "medium";
-      case "minor": return "low";
-      default: return "medium";
-    }
-  }
-
-  private getActionRequired(severity: string): SafetyConcern["action_required"] {
-    switch (severity) {
-      case "severe": return "avoid_completely";
-      case "major": return "seek_medical_advice";
-      case "moderate": return "seek_medical_advice";
-      case "minor": return "monitor";
-      default: return "seek_medical_advice";
-    }
+    return {
+      totalMedications: this.knownInteractions.size,
+      totalInteractions,
+      severityBreakdown
+    };
   }
 }

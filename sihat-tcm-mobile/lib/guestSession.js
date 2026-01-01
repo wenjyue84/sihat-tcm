@@ -60,3 +60,4 @@ export async function hasGuestSessionToken() {
     const token = await getGuestSessionToken();
     return token !== null;
 }
+

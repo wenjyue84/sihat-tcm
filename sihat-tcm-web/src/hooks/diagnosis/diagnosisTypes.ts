@@ -19,3 +19,4 @@ export type DiagnosisStep =
 
 export type AnalysisType = "tongue" | "face" | "part";
 
+

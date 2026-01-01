@@ -14,7 +14,55 @@ import type { DiagnosisWizardData } from "@/types/diagnosis";
  */
 export function repairJSON(jsonString: string): string {
   try {
-    let current = jsonString;
+    let current = jsonString.trim();
+
+    // Step 1: Find and extract valid JSON by matching balanced braces
+    // This handles cases where there's trailing garbage after the JSON
+    const firstBrace = current.indexOf('{');
+    if (firstBrace !== -1) {
+      let braceCount = 0;
+      let inString = false;
+      let escapeNext = false;
+      let lastValidIndex = -1;
+
+      for (let i = firstBrace; i < current.length; i++) {
+        const char = current[i];
+
+        if (escapeNext) {
+          escapeNext = false;
+          continue;
+        }
+
+        if (char === '\\' && inString) {
+          escapeNext = true;
+          continue;
+        }
+
+        if (char === '"' && !escapeNext) {
+          inString = !inString;
+          continue;
+        }
+
+        if (!inString) {
+          if (char === '{') {
+            braceCount++;
+          } else if (char === '}') {
+            braceCount--;
+            if (braceCount === 0) {
+              lastValidIndex = i;
+              break; // Found the complete JSON object
+            }
+          }
+        }
+      }
+
+      // Extract only the valid JSON portion
+      if (lastValidIndex !== -1) {
+        current = current.substring(firstBrace, lastValidIndex + 1);
+      }
+    }
+
+    // Step 2: Apply existing regex-based repairs for internal issues
     const regexSummary = /("summary"\s*:\s*"(?:[^"\\]|\\.)*")\s*,\s*"(?:[^"\\]|\\.)*"\s*(?!:)/;
     const regexObjectOrphan = /(\})\s*,\s*"(?:[^"\\]|\\.)*"\s*(?!:)/;
 
@@ -32,6 +80,7 @@ export function repairJSON(jsonString: string): string {
       if (!changed) break;
       iterations++;
     }
+
     return current;
   } catch (e) {
     logger.error("repairJSON", "Error repairing JSON", e);
@@ -100,8 +149,8 @@ export function calculateOverallScore(reportData: DiagnosisReport | Partial<Diag
         : null;
     const affectedOrgans =
       diagnosisObj &&
-      "affected_organs" in diagnosisObj &&
-      Array.isArray(diagnosisObj.affected_organs)
+        "affected_organs" in diagnosisObj &&
+        Array.isArray(diagnosisObj.affected_organs)
         ? diagnosisObj.affected_organs.length
         : 0;
     score -= Math.min(affectedOrgans * 5, 20);
@@ -133,4 +182,5 @@ export function calculateOverallScore(reportData: DiagnosisReport | Partial<Diag
     return 70; // Default neutral score
   }
 }
+
 

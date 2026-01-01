@@ -15,8 +15,11 @@ import {
   X,
   UserPlus,
   Home,
+  FileText
 } from "lucide-react";
 import { useAuth } from "@/stores/useAppStore";
+import type { ViewMode } from "./ViewSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ReportActionsProps {
   onChatOpen: () => void;
@@ -31,14 +34,14 @@ interface ReportActionsProps {
   language: string;
   variants: any;
   isDoctorView?: boolean;
+  viewMode?: ViewMode;
 }
 
-// Translations for the guest dialog
+// Translations for the guest dialog (Same as before)
 const guestDialogTranslations = {
   en: {
     title: "Create an Account?",
-    message:
-      "Would you like to create an account to save your diagnosis history and access it anytime?",
+    message: "Would you like to create an account to save your diagnosis history and access it anytime?",
     loginSignup: "Login / Sign Up",
     continueWithout: "Continue Without Account",
     benefits: "Benefits of having an account:",
@@ -58,8 +61,7 @@ const guestDialogTranslations = {
   },
   ms: {
     title: "Buat Akaun?",
-    message:
-      "Adakah anda ingin membuat akaun untuk menyimpan sejarah diagnosis anda dan mengaksesnya bila-bila masa?",
+    message: "Adakah anda ingin membuat akaun untuk menyimpan sejarah diagnosis anda dan mengaksesnya bila-bila masa?",
     loginSignup: "Log Masuk / Daftar",
     continueWithout: "Teruskan Tanpa Akaun",
     benefits: "Manfaat mempunyai akaun:",
@@ -68,8 +70,6 @@ const guestDialogTranslations = {
     benefit3: "Dapatkan cadangan yang diperibadikan",
   },
 };
-
-import { useLanguage } from "@/contexts/LanguageContext";
 
 export function ReportActions({
   onChatOpen,
@@ -84,24 +84,20 @@ export function ReportActions({
   language,
   variants,
   isDoctorView = false,
+  viewMode = "modern",
 }: ReportActionsProps) {
   const { user } = useAuth();
   const router = useRouter();
   const { t } = useLanguage();
   const [showGuestDialog, setShowGuestDialog] = useState(false);
 
-  const dialogT =
-    guestDialogTranslations[language as keyof typeof guestDialogTranslations] ||
-    guestDialogTranslations.en;
+  const dialogT = guestDialogTranslations[language as keyof typeof guestDialogTranslations] || guestDialogTranslations.en;
 
   const handleStartNewConsultation = () => {
-    // If user is logged in, proceed directly
     if (user) {
       onRestart();
       return;
     }
-
-    // If guest, show the dialog
     setShowGuestDialog(true);
   };
 
@@ -119,22 +115,41 @@ export function ReportActions({
     setShowGuestDialog(false);
     onRestart();
   };
+
+  if (viewMode === "classic") {
+    return (
+      <motion.div variants={variants} className="mt-8 pt-8 border-t-2 border-stone-800 print:hidden font-serif">
+        <div className="flex flex-wrap justify-center gap-4">
+          <button onClick={onDownloadPDF} className="px-4 py-2 border border-stone-800 text-stone-900 font-bold uppercase hover:bg-stone-100 flex items-center gap-2">
+            <Download className="w-4 h-4" /> Download PDF
+          </button>
+          <button onClick={onShare} className="px-4 py-2 border border-stone-800 text-stone-900 font-bold uppercase hover:bg-stone-100 flex items-center gap-2">
+            <Share2 className="w-4 h-4" /> Share
+          </button>
+          <button onClick={onSave} disabled={hasSaved} className={`px-4 py-2 border border-stone-800 font-bold uppercase hover:bg-stone-100 flex items-center gap-2 ${hasSaved ? 'bg-stone-200 cursor-not-allowed' : 'text-stone-900'}`}>
+            {hasSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {hasSaved ? "Saved" : "Save Report"}
+          </button>
+          <button onClick={handleStartNewConsultation} className="px-4 py-2 bg-stone-900 text-white font-bold uppercase hover:bg-stone-800 flex items-center gap-2">
+            Start New
+          </button>
+        </div>
+      </motion.div>
+    )
+  }
+
+  // Modern View
   return (
-    <motion.div variants={variants} className="w-full pt-6 md:pt-8">
+    <motion.div variants={variants} className="w-full pt-6 md:pt-8 print:hidden">
       <div className="max-w-4xl mx-auto px-4 space-y-6">
         {/* Primary CTA - Chat Button */}
         <div className="flex justify-center">
           <button
             onClick={onChatOpen}
-            className="relative group px-8 py-4 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-500 bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-white rounded-full shadow-xl shadow-emerald-200 hover:shadow-2xl hover:shadow-emerald-300 flex items-center justify-center gap-3 text-lg font-bold min-w-[280px] md:min-w-[320px] transform hover:-translate-y-1 ring-4 ring-emerald-100"
+            className="relative group px-8 py-4 bg-gradient-to-r from-teal-500 via-emerald-500 to-teal-500 bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-white rounded-full shadow-lg hover:shadow-emerald-200 flex items-center justify-center gap-3 text-lg font-bold min-w-[280px] md:min-w-[320px] transform hover:-translate-y-1"
           >
-            <div className="absolute inset-0 rounded-full bg-white/20 group-hover:bg-transparent transition-colors" />
-            <MessageCircle className="h-6 w-6 animate-pulse" />
+            <MessageCircle className="h-6 w-6" />
             <span>{t.report.askAboutReport}</span>
-            <span className="absolute -top-2 -right-2 flex h-4 w-4">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-amber-500"></span>
-            </span>
           </button>
         </div>
 
@@ -142,29 +157,9 @@ export function ReportActions({
         <div className="space-y-4">
           {/* Export & Share Group */}
           <div className="flex flex-wrap justify-center gap-3">
-            <button
-              onClick={onDownloadPDF}
-              className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center"
-            >
-              <Download className="h-4 w-4" />
-              {t.report.downloadPdf}
-            </button>
-
-            <button
-              onClick={onShare}
-              className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full hover:from-green-600 hover:to-emerald-600 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center"
-            >
-              <Share2 className="h-4 w-4" />
-              {t.report.shareReport}
-            </button>
-
-            <button
-              onClick={onInfographicsOpen}
-              className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center"
-            >
-              <ImageIcon className="h-4 w-4" />
-              {t.report.infographics}
-            </button>
+            <SecondaryButton onClick={onDownloadPDF} icon={FileText} label={t.report.downloadPdf} />
+            <SecondaryButton onClick={onShare} icon={Share2} label={t.report.shareReport} />
+            <SecondaryButton onClick={onInfographicsOpen} icon={ImageIcon} label={t.report.infographics} />
           </div>
 
           {/* Save & Verify Group */}
@@ -172,9 +167,9 @@ export function ReportActions({
             <button
               onClick={onSave}
               disabled={isSaving || hasSaved}
-              className={`px-5 py-2.5 rounded-full transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center ${hasSaved
+              className={`px-6 py-2.5 rounded-full transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-semibold min-w-[140px] justify-center ${hasSaved
                 ? "bg-green-100 border border-green-200 text-green-700 cursor-default"
-                : "bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600"
+                : "bg-slate-900 text-white hover:bg-slate-800"
                 }`}
             >
               {isSaving ? (
@@ -196,24 +191,17 @@ export function ReportActions({
             </button>
 
             {!isDoctorView && (
-              <button
-                onClick={onRequestVerification}
-                className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium min-w-[140px] justify-center"
-              >
-                <BadgeCheck className="h-4 w-4" />
-                <span className="hidden sm:inline">{t.report.requestDoctorVerification}</span>
-                <span className="sm:hidden">{t.report.requestDoctorVerification.slice(0, 10)}</span>
-              </button>
+              <SecondaryButton onClick={onRequestVerification} icon={BadgeCheck} label={t.report.requestDoctorVerification} />
             )}
           </div>
 
-          {/* Navigation Group */}
-          <div className="flex justify-center pt-2 border-t border-stone-200">
+          {/* Start New */}
+          <div className="flex justify-center pt-4">
             <button
               onClick={handleStartNewConsultation}
-              className="px-6 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-medium"
+              className="text-stone-400 hover:text-stone-600 text-sm font-medium flex items-center gap-2 transition-colors"
             >
-              <Home className="h-4 w-4" />
+              <Home className="w-4 h-4" />
               {t.report.backToHome}
             </button>
           </div>
@@ -227,7 +215,7 @@ export function ReportActions({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50 flex items-center justify-center p-4"
             onClick={handleCloseDialog}
           >
             <motion.div
@@ -235,65 +223,30 @@ export function ReportActions({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+              className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden p-6"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header */}
-              <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-6 text-white relative">
-                <button
-                  onClick={handleCloseDialog}
-                  className="absolute top-4 right-4 p-1 rounded-full hover:bg-white/20 transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-white/20 rounded-full">
-                    <UserPlus className="h-6 w-6" />
-                  </div>
-                  <h2 className="text-xl font-bold">{dialogT.title}</h2>
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <UserPlus className="w-8 h-8 text-blue-500" />
                 </div>
+                <h2 className="text-xl font-bold text-slate-900 mb-2">{dialogT.title}</h2>
+                <p className="text-stone-500 text-sm leading-relaxed">{dialogT.message}</p>
               </div>
 
-              {/* Content */}
-              <div className="p-6 space-y-4">
-                <p className="text-stone-600">{dialogT.message}</p>
-
-                {/* Benefits */}
-                <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
-                  <p className="text-sm font-medium text-emerald-800 mb-2">{dialogT.benefits}</p>
-                  <ul className="space-y-2 text-sm text-emerald-700">
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" />
-                      {dialogT.benefit1}
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" />
-                      {dialogT.benefit2}
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500" />
-                      {dialogT.benefit3}
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col gap-3 pt-2">
-                  <button
-                    onClick={handleLoginSignup}
-                    className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full font-semibold hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                  >
-                    <UserPlus className="h-5 w-5" />
-                    {dialogT.loginSignup}
-                  </button>
-                  <button
-                    onClick={handleContinueWithoutAccount}
-                    className="w-full py-3 px-4 bg-stone-100 text-stone-600 rounded-full font-medium hover:bg-stone-200 transition-all flex items-center justify-center gap-2"
-                  >
-                    <Home className="h-5 w-5" />
-                    {dialogT.continueWithout}
-                  </button>
-                </div>
+              <div className="space-y-3">
+                <button
+                  onClick={handleLoginSignup}
+                  className="w-full py-3.5 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+                >
+                  {dialogT.loginSignup}
+                </button>
+                <button
+                  onClick={handleContinueWithoutAccount}
+                  className="w-full py-3.5 bg-stone-100 text-stone-600 rounded-2xl font-bold hover:bg-stone-200 transition-all"
+                >
+                  {dialogT.continueWithout}
+                </button>
               </div>
             </motion.div>
           </motion.div>
@@ -302,3 +255,13 @@ export function ReportActions({
     </motion.div>
   );
 }
+
+const SecondaryButton = ({ onClick, icon: Icon, label }: any) => (
+  <button
+    onClick={onClick}
+    className="px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-full hover:bg-stone-50 hover:border-stone-300 transition-all shadow-sm hover:shadow-md flex items-center gap-2 text-sm font-semibold min-w-[140px] justify-center"
+  >
+    <Icon className="h-4 w-4" />
+    <span className="truncate max-w-[120px]">{label}</span>
+  </button>
+);

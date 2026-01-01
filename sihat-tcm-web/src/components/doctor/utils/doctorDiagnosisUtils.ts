@@ -42,3 +42,4 @@ export function calculateCompletionPercentage(data: DoctorDiagnosisData): number
     return Math.round((completed / total) * 100);
 }
 
+

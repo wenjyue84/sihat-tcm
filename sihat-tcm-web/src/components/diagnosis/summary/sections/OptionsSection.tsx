@@ -3,11 +3,11 @@
  * Displays report customization options organized in collapsible sections
  */
 
-import { useState } from "react";
 import { User, Activity, FileText, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { CollapsibleOptionsSection, CheckboxOption } from "../";
 import type { ReportOptions } from "../hooks/useReportOptions";
+import type { TranslationKeys } from "@/lib/translations";
 
 interface OptionsSectionProps {
   options: ReportOptions;
@@ -20,7 +20,7 @@ interface OptionsSectionProps {
   onAdditionalInfoChange: (key: string, value: string) => void;
   expandedSections: Record<string, boolean>;
   onToggleSection: (section: string) => void;
-  t: Record<string, unknown>;
+  t: TranslationKeys;
 }
 
 export function OptionsSection({
@@ -297,4 +297,5 @@ export function OptionsSection({
     </div>
   );
 }
+
 

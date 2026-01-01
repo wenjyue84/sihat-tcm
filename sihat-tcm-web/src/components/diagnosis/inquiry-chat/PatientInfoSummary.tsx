@@ -2,6 +2,7 @@ import { ChevronDown, ChevronUp, Pill, FileText } from "lucide-react";
 import { useLanguage } from "@/stores/useAppStore";
 import { BasicInfoData } from "../BasicInfoForm";
 import { FileData } from "../UploadReportsStep";
+import { calculateBMI, getBMICategory } from "@/lib/utils/bmi";
 
 interface PatientInfoSummaryProps {
   basicInfo?: BasicInfoData;
@@ -18,41 +19,13 @@ export function PatientInfoSummary({
 
   if (!basicInfo || !basicInfo.weight || !basicInfo.height) return null;
 
-  const calculateBMI = (weight: number, height: number) => {
-    const heightInMeters = height / 100;
-    return weight / (heightInMeters * heightInMeters);
-  };
-
-  const getBMICategory = (bmi: number) => {
-    if (bmi < 18.5)
-      return {
-        category: language === "zh" ? "偏瘦" : language === "ms" ? "Kurang berat" : "Underweight",
-        color: "bg-blue-50 border-blue-300 text-blue-800",
-      };
-    if (bmi < 25)
-      return {
-        category: language === "zh" ? "正常" : language === "ms" ? "Normal" : "Normal",
-        color: "bg-green-50 border-green-300 text-green-800",
-      };
-    if (bmi < 30)
-      return {
-        category:
-          language === "zh" ? "超重" : language === "ms" ? "Berlebihan berat" : "Overweight",
-        color: "bg-yellow-50 border-yellow-300 text-yellow-800",
-      };
-    return {
-      category: language === "zh" ? "肥胖" : language === "ms" ? "Obes" : "Obese",
-      color: "bg-red-50 border-red-300 text-red-800",
-    };
-  };
-
   const weight = parseFloat(basicInfo.weight);
   const height = parseFloat(basicInfo.height);
   let bmiSection = null;
 
   if (weight > 0 && height > 0) {
     const bmi = calculateBMI(weight, height);
-    const bmiInfo = getBMICategory(bmi);
+    const bmiInfo = getBMICategory(bmi, language);
     bmiSection = (
       <div>
         <span className="text-stone-500 text-xs">{t.report.bmi}:</span>

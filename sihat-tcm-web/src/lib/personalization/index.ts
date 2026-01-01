@@ -1,12 +1,37 @@
 /**
- * Personalization System - Main exports
+ * Personalization System - Main Exports
  * 
- * Provides clean, organized exports for the entire personalization system.
- * Use this file to import personalization components throughout the application.
+ * Centralized exports for the personalization system components.
+ * Provides clean interfaces for personalized TCM recommendations.
  */
 
-// Main personalization engine
-export { PersonalizationEngine, defaultPersonalizationEngine } from './PersonalizationEngine';
+// Core orchestrator (recommended for new code)
+export {
+  PersonalizationOrchestrator,
+  createPersonalizationOrchestrator,
+  defaultPersonalizationOrchestrator,
+} from './core/PersonalizationOrchestrator';
+
+// Safety validation
+export {
+  SafetyValidator,
+  createSafetyValidator,
+  defaultSafetyValidator,
+} from './core/SafetyValidator';
+
+// Recommendation generation
+export {
+  RecommendationGenerator,
+  createRecommendationGenerator,
+  defaultRecommendationGenerator,
+} from './core/RecommendationGenerator';
+
+// Legacy engine (for backward compatibility)
+export {
+  PersonalizationEngine,
+  defaultPersonalizationEngine,
+  getPersonalizedRecommendations,
+} from './PersonalizationEngine';
 
 // Core components
 export { CulturalContextBuilder } from './core/CulturalContextBuilder';
@@ -19,25 +44,105 @@ export { LifestyleRecommendationAdapter } from './adapters/LifestyleRecommendati
 // Learning system
 export { LearningProfileManager } from './learning/LearningProfileManager';
 
-// Interfaces and types
+// Type definitions
 export type {
+  // Core interfaces
+  PersonalizationOrchestrator as IPersonalizationOrchestrator,
   UserProfile,
-  UserPreferences,
-  CulturalContext,
   PersonalizationFactors,
-  TreatmentOutcome,
   PersonalizedRecommendation,
-  LearningProfile,
   SafetyValidationResult,
+  SafetyCheck,
+  FeedbackData,
   PersonalizationConfig,
-  FeedbackData
+  
+  // Cultural context
+  CulturalContext,
+  CommunicationStyle,
+  
+  // Health data
+  HealthHistory,
+  DietaryRestrictions,
+  UserPreferences,
+  
+  // Learning system
+  LearningProfile,
+  CommunicationPreferences,
+  LearningTrends,
 } from './interfaces/PersonalizationInterfaces';
 
-// Convenience functions
-export { getPersonalizedRecommendations } from './PersonalizationEngine';
+/**
+ * Quick setup function for personalization system
+ */
+export function setupPersonalizationSystem(config?: {
+  enableCulturalAdaptation?: boolean;
+  enableDietaryModification?: boolean;
+  enableLearningFromFeedback?: boolean;
+  maxAlternativeSuggestions?: number;
+  confidenceThreshold?: number;
+}) {
+  const orchestrator = createPersonalizationOrchestrator('QuickSetup');
+  
+  if (config) {
+    orchestrator.updateConfiguration(config);
+  }
+  
+  return {
+    orchestrator,
+    getPersonalizationFactors: orchestrator.getPersonalizationFactors.bind(orchestrator),
+    personalizeDietaryRecommendations: orchestrator.personalizeDietaryRecommendations.bind(orchestrator),
+    personalizeLifestyleRecommendations: orchestrator.personalizeLifestyleRecommendations.bind(orchestrator),
+    validateRecommendationSafety: orchestrator.validateRecommendationSafety.bind(orchestrator),
+    updateLearningProfile: orchestrator.updateLearningProfile.bind(orchestrator),
+  };
+}
 
-// Re-export for backward compatibility
-export {
-  PersonalizationEngine as PersonalizationEngineClass,
-  defaultPersonalizationEngine as personalizationEngine
-} from './PersonalizationEngine';
+/**
+ * Convenience function for getting comprehensive personalized recommendations
+ */
+export async function getComprehensivePersonalizedRecommendations(
+  userId: string,
+  originalRecommendations: {
+    dietary?: string[];
+    lifestyle?: string[];
+    herbal?: string[];
+  },
+  options?: {
+    enableSafetyValidation?: boolean;
+    maxAlternatives?: number;
+  }
+) {
+  const orchestrator = defaultPersonalizationOrchestrator;
+  const factors = await orchestrator.getPersonalizationFactors(userId);
+
+  // Personalize each type of recommendation
+  const [dietary, lifestyle] = await Promise.all([
+    originalRecommendations.dietary
+      ? orchestrator.personalizeDietaryRecommendations(originalRecommendations.dietary, factors)
+      : Promise.resolve([]),
+    originalRecommendations.lifestyle
+      ? orchestrator.personalizeLifestyleRecommendations(originalRecommendations.lifestyle, factors)
+      : Promise.resolve([]),
+  ]);
+
+  // Safety validation if enabled
+  let safetyCheck: SafetyValidationResult | undefined;
+  if (options?.enableSafetyValidation !== false) {
+    const allRecommendations = [
+      ...(originalRecommendations.dietary || []),
+      ...(originalRecommendations.lifestyle || []),
+      ...(originalRecommendations.herbal || []),
+    ];
+    
+    safetyCheck = await orchestrator.validateRecommendationSafety(allRecommendations, factors);
+  }
+
+  return {
+    dietary,
+    lifestyle,
+    safetyCheck,
+    factors,
+    communicationStyle: await orchestrator.getPersonalizedCommunicationStyle(userId, factors),
+    explanationLevel: orchestrator.getOptimalExplanationLevel(factors),
+  };
+}

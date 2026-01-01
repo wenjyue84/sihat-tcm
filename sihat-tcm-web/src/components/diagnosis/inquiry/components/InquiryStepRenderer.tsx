@@ -7,7 +7,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { UploadReportsStep, FileData } from "../../UploadReportsStep";
 import { UploadMedicineStep } from "../../UploadMedicineStep";
-import { InquiryChatStep } from "../../InquiryChatStep";
+import { InquiryChatStep } from "../../inquiry-chat";
 import { InquirySummaryStep } from "../../InquirySummaryStep";
 import type { BasicInfoData } from "../../BasicInfoForm";
 import type { InquiryStepType, InquiryWizardData } from "../hooks/useInquiryWizardState";

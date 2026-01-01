@@ -13,8 +13,17 @@ export { QuickSelectInquiry } from "./QuickSelectInquiry";
 
 // UI components
 export { CollapsibleSection } from "./CollapsibleSection";
+export * from "./ui";
+
+// Section components
+export * from "./sections";
+
+// Hooks
+export * from "./hooks";
 
 // Subdirectory exports
 export * from "./schedule";
 export * from "./treatment";
+export * from "./reports";
+
 

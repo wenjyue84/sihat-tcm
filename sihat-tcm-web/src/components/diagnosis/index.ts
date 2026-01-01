@@ -4,7 +4,7 @@ export { default as DiagnosisWizard } from "./DiagnosisWizard";
 export { BasicInfoForm } from "./BasicInfoForm";
 export { InquiryWizard } from "./InquiryWizard";
 export { InquiryStep } from "./InquiryStep";
-export { InquiryChatStep } from "./InquiryChatStep";
+export { InquiryChatStep } from "./inquiry-chat"; // Refactored modular version
 export { InquirySummaryStep } from "./InquirySummaryStep";
 
 // Report components

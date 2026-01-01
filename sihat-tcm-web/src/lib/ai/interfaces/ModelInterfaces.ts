@@ -5,12 +5,53 @@
  * in the AI model system. These complement the core AIModel interfaces.
  */
 
-import { 
-  AIModel, 
-  ModelCapabilities, 
+// Import core types from AIModel for use in this file
+import type {
+  AIModel,
+  ModelCapabilities,
   RequestComplexityType,
-  PerformanceMetrics 
+  RequestComplexity,
+  ComplexityFactors,
+  ModelSelectionCriteria,
+  PerformanceMetrics,
+  PerformanceAnalytics,
+  ModelRouter,
+  ModelSelectionStrategy,
+  ComplexityAnalysisStrategy,
+  PerformanceMonitor,
 } from './AIModel';
+
+// Re-export core types from AIModel for convenience
+export type {
+  AIModel,
+  ModelCapabilities,
+  RequestComplexityType,
+  RequestComplexity,
+  ComplexityFactors,
+  ModelSelectionCriteria,
+  PerformanceMetrics,
+  PerformanceAnalytics,
+  ModelRouter,
+  ModelSelectionStrategy,
+  ComplexityAnalysisStrategy,
+  PerformanceMonitor,
+} from './AIModel';
+
+// Type aliases for backward compatibility
+export type ModelPerformanceMetrics = PerformanceMetrics;
+
+/**
+ * Model router configuration
+ */
+export interface ModelRouterConfig {
+  defaultModel?: string;
+  fallbackModels?: string[];
+  maxRetries?: number;
+  retryDelay?: number;
+  enableLogging?: boolean;
+  enableMetrics?: boolean;
+  timeout?: number;
+}
 
 /**
  * Model configuration interface for factory creation
@@ -91,10 +132,10 @@ export interface ModelRegistry {
  */
 export interface ModelLoadBalancer {
   selectModel(
-    availableModels: AIModel[], 
+    availableModels: AIModel[],
     criteria: LoadBalancingCriteria
   ): AIModel;
-  
+
   updateModelWeights(weights: Record<string, number>): void;
   getModelWeights(): Record<string, number>;
   getLoadDistribution(): Record<string, number>;
@@ -418,43 +459,3 @@ export interface ABTestConclusion {
   businessImpact: string;
   nextSteps: string[];
 }
-
-/**
- * Export all interfaces for easy importing
- */
-export type {
-  ModelConfiguration,
-  RateLimitConfig,
-  CacheConfig,
-  ModelHealthStatus,
-  HealthIssue,
-  ModelRegistry,
-  ModelLoadBalancer,
-  LoadBalancingCriteria,
-  ModelPool,
-  ModelVersion,
-  VersionChange,
-  ModelVersionManager,
-  ModelAnalytics,
-  ModelUsage,
-  UsageStats,
-  CostAnalysis,
-  CostDataPoint,
-  CostOptimization,
-  PerformanceTrend,
-  TimeRange,
-  ReportOptions,
-  AnalyticsReport,
-  ReportSummary,
-  Recommendation,
-  ModelCircuitBreaker,
-  CircuitBreakerState,
-  CircuitBreakerConfig,
-  ModelABTesting,
-  ABExperiment,
-  ABVariant,
-  ABTestResult,
-  ABTestResults,
-  VariantResults,
-  ABTestConclusion,
-};

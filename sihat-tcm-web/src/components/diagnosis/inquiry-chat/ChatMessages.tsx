@@ -2,6 +2,7 @@ import { useRef, useEffect } from "react";
 import { ThinkingAnimation } from "../ThinkingAnimation";
 import { BasicInfoData } from "../BasicInfoForm";
 import { Message } from "./useInquiryChat";
+import { extractOptions } from "@/lib/utils/chatMessageParser";
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -11,21 +12,6 @@ interface ChatMessagesProps {
   initialPrompts: string[];
   onOptionSelect: (option: string) => void;
 }
-
-// Helper to extract options from message content
-const extractOptions = (content: string) => {
-  const match = content.match(/<OPTIONS>([\s\S]*?)<\/OPTIONS>/);
-  if (match) {
-    const optionsStr = match[1];
-    const cleanContent = content.replace(/<OPTIONS>[\s\S]*?<\/OPTIONS>/, "").trim();
-    const options = optionsStr
-      .split(",")
-      .map((o) => o.trim())
-      .filter((o) => o);
-    return { cleanContent: cleanContent, options };
-  }
-  return { cleanContent: content, options: [] as string[] };
-};
 
 export function ChatMessages({
   messages,
@@ -72,11 +58,10 @@ export function ChatMessages({
                 className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[85%] md:max-w-[80%] p-3 rounded-lg whitespace-pre-wrap text-sm md:text-base ${
-                    m.role === "user"
+                  className={`max-w-[85%] md:max-w-[80%] p-3 rounded-lg whitespace-pre-wrap text-sm md:text-base ${m.role === "user"
                       ? "bg-emerald-600 text-white rounded-br-none"
                       : "bg-stone-100 text-stone-800 rounded-bl-none"
-                  }`}
+                    }`}
                 >
                   {cleanContent}
                 </div>

@@ -8,3 +8,4 @@ export { ShoppingListWidget } from "./ShoppingListWidget";
 export { TCMFoodChecker } from "./TCMFoodChecker";
 export { WeeklyCalendarView } from "./WeeklyCalendarView";
 
+

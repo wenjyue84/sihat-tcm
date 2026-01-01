@@ -5,7 +5,14 @@
 
 import { useState, useEffect } from "react";
 import type { FileData } from "../../UploadReportsStep";
-import type { ChatMessage } from "@/types/diagnosis";
+
+// ChatMessage type - matches the type used in InquiryWizard
+export interface ChatMessage {
+  id?: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  timestamp?: string;
+}
 
 export type InquiryStepType = "upload_reports" | "upload_medicine" | "chat" | "summary";
 

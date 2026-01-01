@@ -1,37 +1,43 @@
 /**
  * Enhanced Camera Capture Component - Refactored Version
  * 
- * Modular camera capture component for TCM diagnosis
+ * Modular camera capture component for TCM diagnosis using clean architecture.
+ * This component orchestrates smaller focused components for better maintainability.
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
-  TouchableOpacity,
-  Animated,
-  Dimensions,
   Alert,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { Ionicons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
 
+// Core components
 import { CameraController } from './core/CameraController';
 import { ImageOptimizer } from './processing/ImageOptimizer';
 import { CameraGestureHandler } from './gestures/CameraGestureHandler';
+
+// UI components
+import CameraPermissionView from './ui/CameraPermissionView';
+import CameraControls from './ui/CameraControls';
+import CameraOverlays from './ui/CameraOverlays';
+
+// Hooks
+import useCameraState from './hooks/useCameraState';
+import useCameraTimer from './hooks/useCameraTimer';
+
+// Types and interfaces
 import {
   CameraProps,
-  CameraState,
   CapturedImage,
-  CameraSettings,
 } from './interfaces/CameraInterfaces';
 
-import { useTheme } from '../../../hooks/useTheme';
-import { CAMERA_CONFIG } from '../../../constants';
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+// Theme hook (mock for now since it doesn't exist)
+const useTheme = () => ({
+  text: { primary: '#000000', secondary: '#666666' },
+  accent: { primary: '#007AFF', secondary: '#FF6B6B' },
+});
 
 export const EnhancedCameraCapture: React.FC<CameraProps> = ({
   onImageCaptured,
@@ -50,33 +56,53 @@ export const EnhancedCameraCapture: React.FC<CameraProps> = ({
   const finalTheme = customTheme || theme;
   const [permission, requestPermission] = useCameraPermissions();
 
-  // State
-  const [cameraState, setCameraState] = useState<CameraState>({
-    isReady: false,
-    isCapturing: false,
-    hasPermission: false,
-    settings: {
-      facing: 'front',
-      flash: 'off',
-      zoom: 0,
-      quality: CAMERA_CONFIG.DEFAULT_QUALITY,
-    },
-  });
-  const [capturedImages, setCapturedImages] = useState<CapturedImage[]>([]);
-  const [timerCount, setTimerCount] = useState(0);
-  const [showGestureHint, setShowGestureHint] = useState(false);
+  // Custom hooks for state management
+  const {
+    cameraState,
+    timerCount,
+    showGestureHint,
+    zoomAnimation,
+    focusAnimation,
+    captureAnimation,
+    timerAnimation,
+    updateSettings,
+    updateFocusPoint,
+    setCapturing,
+    setError,
+    setReady,
+    setPermission,
+    setTimerCount,
+    setShowGestureHint,
+  } = useCameraState();
 
-  // Refs
-  const cameraRef = useRef<any>();
-  const cameraController = useRef<CameraController>();
-  const imageOptimizer = useRef<ImageOptimizer>();
-  const gestureHandler = useRef<CameraGestureHandler>();
-  
-  // Animations
-  const zoomAnimation = useRef(new Animated.Value(0)).current;
-  const focusAnimation = useRef(new Animated.Value(0)).current;
-  const captureAnimation = useRef(new Animated.Value(1)).current;
-  const timerAnimation = useRef(new Animated.Value(1)).current;
+  // State for captured images
+  const [capturedImages, setCapturedImages] = useState<CapturedImage[]>([]);
+
+  // Refs for core components
+  const cameraRef = useRef<any>(null);
+  const cameraController = useRef<CameraController | null>(null);
+  const imageOptimizer = useRef<ImageOptimizer | null>(null);
+  const gestureHandler = useRef<CameraGestureHandler | null>(null);
+  /**
+   * Handle errors
+   */
+  const handleError = useCallback((error: string) => {
+    setError(error);
+    Alert.alert('Camera Error', error);
+  }, [setError]);
+
+  // Timer hook for delayed capture
+  const { startTimer, cancelTimer } = useCameraTimer({
+    timerDuration,
+    timerAnimation,
+    onTimerComplete: async () => {
+      const image = await cameraController.current!.captureImage();
+      await handleImageCaptured(image);
+    },
+    onTimerUpdate: setTimerCount,
+    onError: handleError,
+  });
+
   // Initialize components
   useEffect(() => {
     initializeComponents();
@@ -88,9 +114,9 @@ export const EnhancedCameraCapture: React.FC<CameraProps> = ({
   // Handle permission changes
   useEffect(() => {
     if (permission?.granted) {
-      setCameraState(prev => ({ ...prev, hasPermission: true }));
+      setPermission(true);
     }
-  }, [permission]);
+  }, [permission, setPermission]);
 
   // Show gesture hint
   useEffect(() => {
@@ -101,7 +127,7 @@ export const EnhancedCameraCapture: React.FC<CameraProps> = ({
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [enableGestures, cameraState.hasPermission]);
+  }, [enableGestures, cameraState.hasPermission, setShowGestureHint]);
 
   /**
    * Initialize camera components
@@ -113,8 +139,8 @@ export const EnhancedCameraCapture: React.FC<CameraProps> = ({
         {
           onImageCaptured: handleImageCaptured,
           onError: handleError,
-          onSettingsChange: handleSettingsChange,
-          onFocusChange: handleFocusChange,
+          onSettingsChange: updateSettings,
+          onFocusChange: updateFocusPoint,
         },
         captureMode,
         imageType
@@ -133,11 +159,8 @@ export const EnhancedCameraCapture: React.FC<CameraProps> = ({
       // Initialize camera controller
       await cameraController.current.initialize();
       
-      setCameraState(prev => ({ 
-        ...prev, 
-        isReady: true,
-        hasPermission: cameraController.current?.getState().hasPermission || false
-      }));
+      setReady(true);
+      setPermission(cameraController.current?.getState().hasPermission || false);
 
     } catch (error) {
       console.error('[EnhancedCameraCapture] Initialization failed:', error);
@@ -179,43 +202,14 @@ export const EnhancedCameraCapture: React.FC<CameraProps> = ({
       handleError('Failed to process captured image');
     }
   }, [captureMode, imageType, maxImages, onImageCaptured]);
-  /**
-   * Handle camera settings change
-   */
-  const handleSettingsChange = useCallback((settings: CameraSettings) => {
-    setCameraState(prev => ({ ...prev, settings }));
-    
-    // Animate zoom changes
-    Animated.timing(zoomAnimation, {
-      toValue: settings.zoom,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  }, []);
 
   /**
-   * Handle focus change
+   * Handle errors
    */
-  const handleFocusChange = useCallback((point: { x: number; y: number }) => {
-    setCameraState(prev => ({ ...prev, focusPoint: point }));
-    
-    // Animate focus indicator
-    focusAnimation.setValue(0);
-    Animated.sequence([
-      Animated.timing(focusAnimation, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(focusAnimation, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setCameraState(prev => ({ ...prev, focusPoint: undefined }));
-    });
-  }, []);
+  const handleError = useCallback((error: string) => {
+    setError(error);
+    Alert.alert('Camera Error', error);
+  }, [setError]);
 
   /**
    * Handle zoom change from gestures
@@ -239,14 +233,6 @@ export const EnhancedCameraCapture: React.FC<CameraProps> = ({
   }, []);
 
   /**
-   * Handle errors
-   */
-  const handleError = useCallback((error: string) => {
-    setCameraState(prev => ({ ...prev, error }));
-    Alert.alert('Camera Error', error);
-  }, []);
-
-  /**
    * Capture image
    */
   const captureImage = useCallback(async () => {
@@ -256,76 +242,21 @@ export const EnhancedCameraCapture: React.FC<CameraProps> = ({
       }
 
       if (captureMode === 'timer') {
-        startTimerCapture();
+        startTimer();
       } else {
-        setCameraState(prev => ({ ...prev, isCapturing: true }));
+        setCapturing(true);
         
-        // Animate capture button
-        Animated.sequence([
-          Animated.timing(captureAnimation, {
-            toValue: 0.8,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(captureAnimation, {
-            toValue: 1,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-        ]).start();
-
         const image = await cameraController.current.captureImage();
         await handleImageCaptured(image);
         
-        setCameraState(prev => ({ ...prev, isCapturing: false }));
+        setCapturing(false);
       }
     } catch (error) {
       console.error('[EnhancedCameraCapture] Capture failed:', error);
-      setCameraState(prev => ({ ...prev, isCapturing: false }));
+      setCapturing(false);
       handleError('Failed to capture image');
     }
-  }, [captureMode, cameraState.isCapturing, handleImageCaptured]);
-  /**
-   * Start timer capture
-   */
-  const startTimerCapture = useCallback(() => {
-    setTimerCount(timerDuration);
-    
-    const countdown = setInterval(() => {
-      setTimerCount(prev => {
-        if (prev <= 1) {
-          clearInterval(countdown);
-          // Capture after timer ends
-          setTimeout(async () => {
-            try {
-              const image = await cameraController.current!.captureImage();
-              await handleImageCaptured(image);
-            } catch (error) {
-              handleError('Timer capture failed');
-            }
-            setTimerCount(0);
-          }, 100);
-          return 0;
-        }
-        
-        // Animate timer
-        Animated.sequence([
-          Animated.timing(timerAnimation, {
-            toValue: 1.2,
-            duration: 200,
-            useNativeDriver: true,
-          }),
-          Animated.timing(timerAnimation, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]).start();
-        
-        return prev - 1;
-      });
-    }, 1000);
-  }, [timerDuration, handleImageCaptured]);
+  }, [captureMode, cameraState.isCapturing, handleImageCaptured, startTimer, setCapturing]);
 
   /**
    * Pick from gallery
@@ -387,33 +318,20 @@ export const EnhancedCameraCapture: React.FC<CameraProps> = ({
       if (gestureHandler.current) {
         gestureHandler.current.reset();
       }
+      cancelTimer();
     } catch (error) {
       console.error('[EnhancedCameraCapture] Cleanup failed:', error);
     }
-  }, []);
+  }, [cancelTimer]);
+
   // Render permission request if needed
   if (!cameraState.hasPermission) {
     return (
-      <View style={[styles.container, style]}>
-        <View style={styles.permissionContainer}>
-          <Ionicons 
-            name="camera-off" 
-            size={64} 
-            color={finalTheme.text.secondary} 
-          />
-          <Text style={[styles.permissionText, { color: finalTheme.text.secondary }]}>
-            Camera access is required for image capture and TCM analysis.
-          </Text>
-          <TouchableOpacity
-            style={[styles.permissionButton, { backgroundColor: finalTheme.accent.primary }]}
-            onPress={requestPermission}
-          >
-            <Text style={styles.permissionButtonText}>
-              Grant Permission
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <CameraPermissionView
+        onRequestPermission={requestPermission}
+        theme={finalTheme}
+        style={style}
+      />
     );
   }
 
@@ -433,119 +351,32 @@ export const EnhancedCameraCapture: React.FC<CameraProps> = ({
           onTouchEnd={handleGestureEvent}
         />
 
-        {/* Focus Indicator */}
-        {cameraState.focusPoint && (
-          <Animated.View
-            style={[
-              styles.focusIndicator,
-              {
-                left: cameraState.focusPoint.x - 25,
-                top: cameraState.focusPoint.y - 25,
-                opacity: focusAnimation,
-                transform: [{ scale: focusAnimation }],
-              },
-            ]}
-          >
-            <View style={[styles.focusRing, { borderColor: finalTheme.accent.primary }]} />
-          </Animated.View>
-        )}
-
-        {/* Timer Countdown */}
-        {timerCount > 0 && (
-          <View style={styles.timerContainer}>
-            <Animated.Text
-              style={[
-                styles.timerText,
-                {
-                  color: finalTheme.accent.primary,
-                  transform: [{ scale: timerAnimation }],
-                },
-              ]}
-            >
-              {timerCount}
-            </Animated.Text>
-          </View>
-        )}
-
-        {/* Gesture Hint */}
-        {showGestureHint && (
-          <BlurView intensity={80} style={styles.gestureHint}>
-            <Text style={[styles.gestureHintText, { color: finalTheme.text.primary }]}>
-              Pinch to zoom, tap to focus
-            </Text>
-          </BlurView>
-        )}
+        {/* Camera Overlays */}
+        <CameraOverlays
+          focusPoint={cameraState.focusPoint}
+          focusAnimation={focusAnimation}
+          timerCount={timerCount}
+          timerAnimation={timerAnimation}
+          showGestureHint={showGestureHint}
+          theme={finalTheme}
+        />
       </View>
-      {/* Controls */}
-      <View style={styles.controlsContainer}>
-        {/* Top Controls */}
-        <View style={styles.topControls}>
-          <TouchableOpacity
-            style={[styles.controlButton, { backgroundColor: 'rgba(0,0,0,0.5)' }]}
-            onPress={onCancel}
-          >
-            <Ionicons name="close" size={24} color="#ffffff" />
-          </TouchableOpacity>
 
-          <View style={styles.topControlsRight}>
-            <TouchableOpacity
-              style={[styles.controlButton, { backgroundColor: 'rgba(0,0,0,0.5)' }]}
-              onPress={toggleFlash}
-            >
-              <Ionicons 
-                name={cameraState.settings.flash === 'off' ? 'flash-off' : 'flash'} 
-                size={24} 
-                color="#ffffff" 
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.controlButton, { backgroundColor: 'rgba(0,0,0,0.5)' }]}
-              onPress={toggleFacing}
-            >
-              <Ionicons name="camera-reverse" size={24} color="#ffffff" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Bottom Controls */}
-        <View style={styles.bottomControls}>
-          <TouchableOpacity
-            style={[styles.secondaryButton, { backgroundColor: 'rgba(0,0,0,0.5)' }]}
-            onPress={pickFromGallery}
-          >
-            <Ionicons name="images" size={24} color="#ffffff" />
-          </TouchableOpacity>
-
-          <Animated.View style={{ transform: [{ scale: captureAnimation }] }}>
-            <TouchableOpacity
-              style={[
-                styles.captureButton,
-                {
-                  backgroundColor: cameraState.isCapturing 
-                    ? finalTheme.accent.secondary 
-                    : finalTheme.accent.primary,
-                },
-              ]}
-              onPress={captureImage}
-              disabled={cameraState.isCapturing || timerCount > 0}
-            >
-              <View style={styles.captureButtonInner} />
-            </TouchableOpacity>
-          </Animated.View>
-
-          <View style={styles.captureInfo}>
-            <Text style={[styles.captureMode, { color: '#ffffff' }]}>
-              {captureMode.toUpperCase()}
-            </Text>
-            {capturedImages.length > 0 && (
-              <Text style={[styles.captureCount, { color: '#ffffff' }]}>
-                {capturedImages.length}/{maxImages}
-              </Text>
-            )}
-          </View>
-        </View>
-      </View>
+      {/* Camera Controls */}
+      <CameraControls
+        settings={cameraState.settings}
+        isCapturing={cameraState.isCapturing}
+        timerCount={timerCount}
+        capturedImagesCount={capturedImages.length}
+        maxImages={maxImages}
+        captureMode={captureMode}
+        captureAnimation={captureAnimation}
+        onCapture={captureImage}
+        onToggleFlash={toggleFlash}
+        onToggleFacing={toggleFacing}
+        onPickFromGallery={pickFromGallery}
+        onCancel={onCancel || (() => {})}
+      />
     </View>
   );
 };
@@ -561,136 +392,6 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
-  },
-  controlsContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'space-between',
-    paddingTop: 50,
-    paddingBottom: 40,
-    paddingHorizontal: 20,
-  },
-  topControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  topControlsRight: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  controlButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bottomControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  secondaryButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  captureButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 4,
-    borderColor: '#ffffff',
-  },
-  captureButtonInner: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#ffffff',
-  },
-  captureInfo: {
-    alignItems: 'center',
-    minWidth: 50,
-  },
-  captureMode: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  captureCount: {
-    fontSize: 10,
-    opacity: 0.8,
-  },
-  focusIndicator: {
-    position: 'absolute',
-    width: 50,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  focusRing: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 2,
-  },
-  timerContainer: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -50 }, { translateY: -50 }],
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  timerText: {
-    fontSize: 72,
-    fontWeight: 'bold',
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 4,
-  },
-  gestureHint: {
-    position: 'absolute',
-    bottom: 120,
-    left: 20,
-    right: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  gestureHintText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  permissionContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  permissionText: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginVertical: 20,
-  },
-  permissionButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 16,
-  },
-  permissionButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#ffffff',
   },
 });
 
