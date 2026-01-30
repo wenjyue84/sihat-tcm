@@ -3,16 +3,16 @@
  * Extracted from DiagnosisWizard.tsx to improve maintainability
  */
 
-import { useEffect } from "react";
+import { useEffect, type Dispatch, type SetStateAction } from "react";
 import { generateMockTestData } from "@/data/mockTestData";
-import type { DiagnosisWizardData } from "@/types/diagnosis";
+import type { DiagnosisWizardData, AnalysisResult } from "@/types/diagnosis";
 import type { DiagnosisStep } from "@/hooks/useDiagnosisWizard";
 
 interface UseTestDataHandlersOptions {
   setData: (fn: (prev: DiagnosisWizardData) => DiagnosisWizardData) => void;
   setStep: (step: DiagnosisStep) => void;
-  setAnalysisResult: (result: any) => void;
-  setCompletion: (completion: string) => void;
+  setAnalysisResult: Dispatch<SetStateAction<AnalysisResult | null>>;
+  setCompletion: Dispatch<SetStateAction<number>>;
 }
 
 /**
@@ -75,7 +75,7 @@ export function useTestDataHandlers({
       // Reset to first step
       setStep("basic_info");
       setAnalysisResult(null);
-      setCompletion("");
+      setCompletion(0);
 
       console.log("[DiagnosisWizard] Test data cleared");
     };

@@ -14,8 +14,8 @@ import type { DiagnosisStep } from "@/features/diagnosis/hooks/diagnosisTypes";
 
 interface ProcessingStepProps {
   isLoading: boolean;
-  error: Error | null;
-  completion: string;
+  error: string | null;
+  completion: number;
   data: Record<string, unknown>;
   isSaved: boolean;
   setData: (fn: (prev: DiagnosisWizardData) => DiagnosisWizardData) => void;
@@ -43,12 +43,12 @@ export function ProcessingStep({
   // Auto-trigger submission if we land here without state (e.g. refresh or resume)
   // Only trigger if we have basic info (ensure data is loaded)
   useEffect(() => {
-    if (!isLoading && !error && !completion && data.basic_info) {
+    if (!isLoading && !error && completion === 0 && data.basic_info) {
       submitConsultation();
     }
   }, [isLoading, error, completion, data.basic_info, submitConsultation]);
 
-  if (isLoading || (!error && !completion)) {
+  if (isLoading || (!error && completion < 100)) {
     return <AnalysisLoadingScreen basicInfo={data.basic_info as any} />;
   }
 
@@ -58,7 +58,7 @@ export function ProcessingStep({
         <div className="p-6 bg-red-50 text-red-800 rounded-xl border border-red-100">
           <h3 className="font-bold text-lg mb-2">{errors.apiError}</h3>
           <p className="mb-2">{errors.connectionFailed}</p>
-          <p className="text-sm text-red-600 mb-4">{error.message}</p>
+          <p className="text-sm text-red-600 mb-4">{error}</p>
           <Button
             onClick={() => {
               setStep("processing");
@@ -82,7 +82,11 @@ export function ProcessingStep({
 
   // Parse and render report
   try {
-    let cleanJson = completion.replace(/```json\n?|\n?```/g, "").trim();
+    const reportJson = data.diagnosis_report as string;
+    if (!reportJson) {
+      throw new Error("No report data available");
+    }
+    let cleanJson = reportJson.replace(/```json\n?|\n?```/g, "").trim();
     let resultData;
     try {
       resultData = JSON.parse(cleanJson);

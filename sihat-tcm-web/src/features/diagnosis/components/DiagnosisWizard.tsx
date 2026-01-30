@@ -132,9 +132,12 @@ export default function DiagnosisWizard() {
       },
     }));
 
-    const mockReport = generateMockReport(mockData as any);
-    setCompletion(JSON.stringify(mockReport));
-    setStep("processing");
+    // Generate mock report and skip directly to report step
+    // Note: In dev mode, we bypass processing and go straight to report
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    generateMockReport(mockData as any);
+    setCompletion(100); // Mark as complete
+    setStep("report");
   };
 
   // Handler for test profile selection
@@ -152,8 +155,8 @@ export default function DiagnosisWizard() {
     };
     setData(newData);
     if (step === "processing" || step === "report") {
-      const mockReport = generateMockReport(profileData);
-      setCompletion(JSON.stringify(mockReport));
+      // For test profiles, just mark as complete
+      setCompletion(100);
     }
   };
 

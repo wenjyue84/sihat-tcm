@@ -95,12 +95,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         logger.error("AuthContext", "Error fetching profile", error);
-      } else {
-        setProfile(data);
+      } else if (data) {
+        // Cast to extended type since DB has more fields than service Profile type
+        const dbData = data as typeof data & {
+          preferred_language?: "en" | "zh" | "ms" | null;
+          preferences?: UIPreferences | null;
+          age?: number | null;
+          gender?: string | null;
+          height?: number | null;
+          weight?: number | null;
+        };
+
+        // Map service Profile to AuthContext Profile, handling null -> undefined conversion
+        const mappedProfile: Profile = {
+          id: dbData.id,
+          role: (dbData.role as Role) || "patient", // Default to patient if role is missing
+          full_name: dbData.full_name ?? undefined,
+          preferred_language: dbData.preferred_language ?? undefined,
+          preferences: dbData.preferences ?? undefined,
+          age: dbData.age ?? undefined,
+          gender: dbData.gender ?? undefined,
+          height: dbData.height ?? undefined,
+          weight: dbData.weight ?? undefined,
+        };
+        setProfile(mappedProfile);
 
         // If user doesn't have a preferred language saved, sync from localStorage
         // This captures language selected during onboarding before login
-        if (!data.preferred_language && typeof window !== "undefined") {
+        if (!dbData.preferred_language && typeof window !== "undefined") {
           const localLanguage = localStorage.getItem("sihat-tcm-language") as
             | "en"
             | "zh"
@@ -112,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               .from("profiles")
               .update({
                 preferred_language: localLanguage,
-                preferences: { ...(data.preferences || {}), language: localLanguage },
+                preferences: { ...(dbData.preferences || {}), language: localLanguage },
               })
               .eq("id", userId)
               .then(({ error: updateError }) => {
