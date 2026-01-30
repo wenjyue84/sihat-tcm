@@ -6,7 +6,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/stores/useAppStore";
-import { useDiagnosisPersistence } from "@/hooks/useDiagnosisPersistence";
+import { useDiagnosisPersistence } from "./useDiagnosisPersistence";
 import type { DiagnosisWizardData } from "@/types/diagnosis";
 import type { PendingResumeState } from "@/types/diagnosis";
 import type { DiagnosisStep } from "./diagnosisTypes";

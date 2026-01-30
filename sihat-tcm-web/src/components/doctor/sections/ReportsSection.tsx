@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { FileText, Camera, Loader2, Eye, X } from "lucide-react";
-import { FileData } from "@/hooks/useDoctorDiagnosis";
+import { FileData } from "@/features/doctor/hooks/useDoctorDiagnosis";
 
 interface ReportsSectionProps {
     uploadedReports: FileData[];

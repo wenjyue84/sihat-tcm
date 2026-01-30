@@ -1,7 +1,7 @@
 "use client";
 
-import { InquiryStep } from "@/components/diagnosis/InquiryStep";
-import { BasicInfoData } from "@/components/diagnosis/BasicInfoForm";
+import { InquiryStep } from "@/features/diagnosis/components/InquiryStep";
+import { BasicInfoData } from "@/features/diagnosis/components/basic-info/types";
 
 export default function TestInquiryPage() {
   // Mocked basic information data

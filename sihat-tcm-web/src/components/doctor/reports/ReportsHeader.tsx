@@ -15,7 +15,7 @@ interface ReportsHeaderProps {
 export function ReportsHeader({
     title = "Medical Reports",
     subtitle = "View and manage patient diagnosis histories",
-}: ReportsHeaderProps): JSX.Element {
+}: ReportsHeaderProps) {
     const router = useRouter();
 
     return (

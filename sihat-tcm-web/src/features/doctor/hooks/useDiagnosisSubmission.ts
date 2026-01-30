@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { DoctorDiagnosisData } from "./useDoctorDiagnosis";
 import { saveDiagnosis } from "@/lib/actions";
-import { repairJSON } from "./useDiagnosisWizard";
+import { repairJSON } from "@/features/diagnosis/hooks/diagnosisUtils";
 import type { DiagnosisReport, SaveDiagnosisInput } from "@/types/database";
 
 /**

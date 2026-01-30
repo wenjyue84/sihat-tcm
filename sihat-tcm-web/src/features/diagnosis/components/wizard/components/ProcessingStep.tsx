@@ -8,9 +8,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AnalysisLoadingScreen } from "../../AnalysisLoadingScreen";
 import { DiagnosisReport } from "../../DiagnosisReport";
-import { repairJSON } from "@/hooks/useDiagnosisWizard";
+import { repairJSON } from "@/features/diagnosis/hooks/diagnosisUtils";
 import type { DiagnosisWizardData } from "@/types/diagnosis";
-import type { DiagnosisStep } from "@/hooks/useDiagnosisWizard";
+import type { DiagnosisStep } from "@/features/diagnosis/hooks/diagnosisTypes";
 
 interface ProcessingStepProps {
   isLoading: boolean;

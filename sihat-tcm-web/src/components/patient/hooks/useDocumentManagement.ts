@@ -41,7 +41,14 @@ export function useDocumentManagement() {
 
     setUploadingReport(true);
     try {
-      const result = await saveMedicalReport(file);
+      // Convert File to SaveMedicalReportInput format
+      const reportInput = {
+        name: file.name,
+        date: new Date().toISOString().split("T")[0],
+        size: `${(file.size / 1024).toFixed(1)} KB`,
+        type: file.type || "application/pdf",
+      };
+      const result = await saveMedicalReport(reportInput);
       if (result.success && result.data) {
         setReports((prev) => [result.data!, ...prev]);
         // Reset file input

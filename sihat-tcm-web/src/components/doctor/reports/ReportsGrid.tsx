@@ -17,7 +17,7 @@ export function ReportsGrid({
     inquiries,
     hasActiveFilters,
     onClearFilters,
-}: ReportsGridProps): JSX.Element {
+}: ReportsGridProps) {
     if (inquiries.length === 0) {
         return (
             <EmptyReportsState

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { PulseCheck } from "@/components/diagnosis/PulseCheck";
+import { PulseCheck } from "@/features/diagnosis/components/PulseCheck";
 // Note: These providers are no longer needed - using Zustand store instead
 // The StoreInitializer in providers.tsx handles initialization
-import { PulseCheckData } from "@/components/diagnosis/pulse";
+import { PulseCheckData } from "@/features/diagnosis/components/pulse";
 
 export default function TestPulsePage() {
   const [result, setResult] = useState<PulseCheckData | null>(null);

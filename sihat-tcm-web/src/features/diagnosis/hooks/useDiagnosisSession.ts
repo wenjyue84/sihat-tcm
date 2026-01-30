@@ -6,7 +6,8 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useUser } from '@supabase/auth-helpers-react';
+import { createClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
 import { 
   DiagnosisSessionManager, 
   diagnosisSessionManager,
@@ -76,8 +77,26 @@ export interface DiagnosisSessionActions {
 export function useDiagnosisSession(
   options: UseDiagnosisSessionOptions = {}
 ): [DiagnosisSessionState, DiagnosisSessionActions] {
-  
-  const user = useUser();
+
+  const [user, setUser] = useState<User | null>(null);
+
+  // Get user from Supabase on mount
+  useEffect(() => {
+    const supabase = createClient();
+
+    // Get initial user
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const {
     autoSaveEnabled = true,
     autoSaveInterval = 30000,

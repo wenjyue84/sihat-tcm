@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CameraCapture } from "@/components/diagnosis/camera-capture";
+import { CameraCapture } from "@/features/diagnosis/components/camera-capture";
 import { Camera, Trash2 } from "lucide-react";
 
 interface ImageCaptureSectionProps {

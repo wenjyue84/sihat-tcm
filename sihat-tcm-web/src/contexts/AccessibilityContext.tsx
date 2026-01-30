@@ -62,6 +62,10 @@ export function AccessibilityProvider({
     fontSize: "medium",
     focusIndicatorStyle: "default",
     announcements: true,
+    colorBlindnessSupport: false,
+    autoplayMedia: true,
+    animationSpeed: "normal",
+    textSpacing: "normal",
     ...initialPreferences,
   });
 
@@ -98,7 +102,11 @@ export function AccessibilityProvider({
     // Initialize manager
     const accessibilityManager = getAccessibilityManager(mergedPreferences);
     setManager(accessibilityManager);
-    setPreferences(accessibilityManager.getPreferences());
+    // Merge with defaults to ensure all required properties are present
+    setPreferences((prev) => ({
+      ...prev,
+      ...accessibilityManager.getPreferences(),
+    }));
 
     // Import accessibility styles
     if (typeof document !== "undefined") {

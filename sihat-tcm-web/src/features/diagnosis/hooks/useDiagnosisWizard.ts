@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "@/stores/useAppStore";
 import { useLanguage } from "@/stores/useAppStore";
 import { useDiagnosisProgress } from "@/stores/useAppStore";
-import { useDiagnosisPersistence } from "@/hooks/useDiagnosisPersistence";
+import { useDiagnosisPersistence } from "./useDiagnosisPersistence";
 import { logger } from "@/lib/clientLogger";
 import type { DiagnosisWizardData, AnalysisResult, PendingResumeState } from "@/types/diagnosis";
 

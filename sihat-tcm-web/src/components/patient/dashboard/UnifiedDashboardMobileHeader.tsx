@@ -18,7 +18,8 @@ import { Button } from "@/components/ui/button";
 
 interface UnifiedDashboardMobileHeaderProps {
     onMenuOpen: () => void;
-    t: Record<string, unknown>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    t: Record<string, any>;
 }
 
 export function UnifiedDashboardMobileHeader({

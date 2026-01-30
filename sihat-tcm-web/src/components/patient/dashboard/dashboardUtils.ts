@@ -7,26 +7,29 @@ import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { DiagnosisSession } from "@/types/database";
 import type { ViewType, SortField, SortDirection } from "./dashboardTypes";
 
-export function getScoreBadge(score: number | undefined | null, t: Record<string, unknown>) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TranslationObject = Record<string, any>;
+
+export function getScoreBadge(score: number | undefined | null, t: TranslationObject) {
   if (score === undefined || score === null) return null;
   if (score >= 75)
     return {
       bg: "bg-emerald-100",
       text: "text-emerald-700",
-      label: (t.patientDashboard?.historyTable?.good as string) || "Good",
+      label: t.patientDashboard?.historyTable?.good || "Good",
       Icon: TrendingUp,
     };
   if (score >= 50)
     return {
       bg: "bg-amber-100",
       text: "text-amber-700",
-      label: (t.patientDashboard?.historyTable?.fair as string) || "Fair",
+      label: t.patientDashboard?.historyTable?.fair || "Fair",
       Icon: Minus,
     };
   return {
     bg: "bg-red-100",
     text: "text-red-700",
-    label: (t.patientDashboard?.historyTable?.needsAttention as string) || "Needs Attention",
+    label: t.patientDashboard?.historyTable?.needsAttention || "Needs Attention",
     Icon: TrendingDown,
   };
 }
@@ -55,7 +58,7 @@ export function sortSessions(
 
 export function getSectionTitle(
   activeSection: string,
-  t: Record<string, unknown>
+  t: TranslationObject
 ): string {
   switch (activeSection) {
     case "journey":

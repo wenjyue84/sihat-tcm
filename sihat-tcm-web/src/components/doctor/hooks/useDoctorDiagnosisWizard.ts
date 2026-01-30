@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
-import { DoctorDiagnosisData, FileData } from "@/hooks/useDoctorDiagnosis";
+import { DoctorDiagnosisData, FileData } from "@/features/doctor/hooks/useDoctorDiagnosis";
 
 type SectionId =
     | "patient-info"

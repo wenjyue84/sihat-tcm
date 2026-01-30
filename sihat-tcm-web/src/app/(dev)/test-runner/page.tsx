@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { repairJSON, generateMockReport } from "@/hooks/useDiagnosisWizard";
+import { repairJSON, generateMockReport } from "@/features/diagnosis/hooks/diagnosisUtils";
 import { MOCK_PROFILES } from "@/data/mockProfiles";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

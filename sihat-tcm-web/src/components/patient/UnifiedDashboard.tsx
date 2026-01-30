@@ -44,7 +44,7 @@ export function UnifiedDashboard() {
   // Data hooks
   const { sessions, loadingSessions } = useUnifiedDashboardData(user?.id);
   const reportsHook = useUnifiedDashboardReports(user?.id);
-  const profileHook = useUnifiedDashboardProfile(user?.id, profile, refreshProfile);
+  const profileHook = useUnifiedDashboardProfile(user?.id, profile as Record<string, unknown> | null, refreshProfile);
 
   // State management
   const state = useUnifiedDashboardState({

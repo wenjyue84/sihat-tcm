@@ -4,7 +4,7 @@
  * Tests for foundational utilities and data integrity
  */
 
-import { repairJSON, generateMockReport } from "@/hooks/useDiagnosisWizard";
+import { repairJSON, generateMockReport } from "@/features/diagnosis/hooks/diagnosisUtils";
 import { MOCK_PROFILES } from "@/data/mockProfiles";
 
 export async function executeCoreUtilitiesTest(testId: string): Promise<void> {

@@ -5,7 +5,7 @@
  */
 
 import { MOCK_PROFILES } from "@/data/mockProfiles";
-import { tcmPulseQualities, pulseQualityConflicts } from "@/components/diagnosis/pulse/types";
+import { tcmPulseQualities, pulseQualityConflicts } from "@/features/diagnosis/components/pulse/types";
 
 export async function executePulseCheckTest(testId: string): Promise<void> {
   switch (testId) {

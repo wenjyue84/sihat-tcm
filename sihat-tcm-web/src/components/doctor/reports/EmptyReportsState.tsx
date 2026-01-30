@@ -15,7 +15,7 @@ interface EmptyReportsStateProps {
 export function EmptyReportsState({
     hasActiveFilters,
     onClearFilters,
-}: EmptyReportsStateProps): JSX.Element {
+}: EmptyReportsStateProps) {
     return (
         <Card className="bg-slate-50 border-dashed border-2 border-slate-200 shadow-none">
             <CardContent className="py-12 text-center">

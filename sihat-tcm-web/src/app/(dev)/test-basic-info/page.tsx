@@ -1,8 +1,8 @@
 "use client";
 
-import { BasicInfoForm } from "@/components/diagnosis/BasicInfoForm";
+import { BasicInfoForm } from "@/features/diagnosis/components/BasicInfoForm";
 import { useState } from "react";
-import { BasicInfoData } from "@/components/diagnosis/basic-info/types";
+import { BasicInfoData } from "@/features/diagnosis/components/basic-info/types";
 
 export default function TestBasicInfoPage() {
   const [result, setResult] = useState<BasicInfoData | null>(null);

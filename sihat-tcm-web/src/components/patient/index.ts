@@ -46,11 +46,11 @@ export { FamilyManagement } from "./FamilyManagement";
 export { DocumentViewerModal } from "./DocumentViewerModal";
 
 // Dashboard widgets
-export { DashboardWidgets } from "./DashboardWidgets";
+export { DashboardGrid as DashboardWidgets } from "./DashboardWidgets";
 
 // Subdirectory exports
-export * from "./sleep";
-export * from "./snore-analysis";
+// Note: Sleep and snore-analysis components can be imported directly from their paths
+export { SnoreAnalysisTab } from "./snore-analysis/SnoreAnalysisTab";
 
 
 

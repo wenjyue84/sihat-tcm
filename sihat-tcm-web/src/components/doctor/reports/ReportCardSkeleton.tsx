@@ -10,7 +10,7 @@ interface ReportCardSkeletonProps {
 /**
  * Single skeleton card for loading state
  */
-function SkeletonCard(): JSX.Element {
+function SkeletonCard() {
     return (
         <Card className="bg-white border-slate-200 animate-pulse">
             <CardHeader className="pb-3">
@@ -45,7 +45,7 @@ function SkeletonCard(): JSX.Element {
 /**
  * Loading skeleton for report cards
  */
-export function ReportCardSkeleton({ count = 3 }: ReportCardSkeletonProps): JSX.Element {
+export function ReportCardSkeleton({ count = 3 }: ReportCardSkeletonProps) {
     return (
         <div className="grid gap-4">
             {Array.from({ length: count }).map((_, i) => (
@@ -58,7 +58,7 @@ export function ReportCardSkeleton({ count = 3 }: ReportCardSkeletonProps): JSX.
 /**
  * Full page loading state with spinner
  */
-export function ReportsLoadingState(): JSX.Element {
+export function ReportsLoadingState() {
     return (
         <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">

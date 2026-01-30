@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useEffect } from "react";
-import {
-  useDiagnosisWizard,
-  DiagnosisStep,
-  generateMockReport,
-} from "@/hooks/useDiagnosisWizard";
+import { useDiagnosisWizard } from "../hooks/useDiagnosisWizard";
+import type { DiagnosisStep } from "../hooks/diagnosisTypes";
+import { generateMockReport } from "../hooks/diagnosisUtils";
 import { useDeveloper } from "@/stores/useAppStore";
 import { MOCK_PROFILES } from "@/data/mockProfiles";
 import { generateMockTestData } from "@/data/mockTestData";

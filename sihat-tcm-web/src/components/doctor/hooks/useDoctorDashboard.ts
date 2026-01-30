@@ -197,7 +197,7 @@ export function useDoctorDashboard(): UseDoctorDashboardReturn {
             const patientName = (
                 reportProfile?.name ||
                 profile?.full_name ||
-                (patient ? `${patient.first_name} ${patient.last_name || ''}`.trim() : "") ||
+                patient?.full_name ||
                 ""
             ).toLowerCase();
 

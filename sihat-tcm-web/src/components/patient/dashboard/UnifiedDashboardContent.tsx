@@ -48,7 +48,7 @@ interface UnifiedDashboardContentProps {
     medical_history: string;
   };
   editingProfile: boolean;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   onDeleteReport: (reportId: string) => Promise<void>;
   onUpdateProfileField: (field: string, value: string) => Promise<void>;
@@ -58,7 +58,8 @@ interface UnifiedDashboardContentProps {
   seedingReports: boolean;
   profile: { full_name?: string | null; preferences?: Record<string, unknown> } | null | undefined;
   userEmail?: string;
-  t: Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: Record<string, any>;
 }
 
 export function UnifiedDashboardContent({
@@ -107,7 +108,7 @@ export function UnifiedDashboardContent({
               ? extractConstitutionType(sessions[0].constitution)
               : undefined
           }
-          diagnosisData={sessions.length > 0 ? sessions[0] : undefined}
+          diagnosisData={sessions.length > 0 ? sessions[0].full_report : undefined}
         />
       </div>
     );
@@ -159,13 +160,13 @@ export function UnifiedDashboardContent({
         {mealSubSection === "plan" ? (
           <MealPlanWizard
             latestDiagnosis={
-              sessions.length > 0 ? sessions[0].full_report || sessions[0] : null
+              sessions.length > 0 ? (sessions[0].full_report || sessions[0]) as any : undefined
             }
           />
         ) : (
           <TCMFoodChecker
             latestDiagnosis={
-              sessions.length > 0 ? sessions[0].full_report || sessions[0] : null
+              sessions.length > 0 ? (sessions[0].full_report || sessions[0]) as any : undefined
             }
             onBack={() => setMealSubSection("plan")}
           />

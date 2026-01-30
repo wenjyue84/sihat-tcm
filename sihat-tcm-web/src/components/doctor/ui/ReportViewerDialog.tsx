@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { FileText } from "lucide-react";
-import { FileData } from "@/hooks/useDoctorDiagnosis";
+import { FileData } from "@/features/doctor/hooks/useDoctorDiagnosis";
 
 interface ReportViewerDialogProps {
     report: FileData | null;

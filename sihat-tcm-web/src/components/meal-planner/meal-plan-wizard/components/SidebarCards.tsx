@@ -26,7 +26,7 @@ interface SidebarCardsProps {
   dietaryPreferences: DietaryPreferences | null;
   latestDiagnosis?: DiagnosisData;
   onEditPreferences: () => void;
-  strings: Record<string, string>;
+  strings: Record<string, unknown>;
   t: Record<string, unknown>;
 }
 
@@ -130,8 +130,9 @@ export function DietaryBalanceCard() {
 export function PreferencesSummaryCard({
   dietaryPreferences,
   onEditPreferences,
-  strings,
+  strings: rawStrings,
 }: Omit<SidebarCardsProps, "latestDiagnosis" | "t">) {
+  const strings = rawStrings as Record<string, string>;
   return (
     <Card className="border border-slate-200 shadow-sm bg-white">
       <CardHeader>

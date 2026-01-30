@@ -14,7 +14,7 @@ interface UseUnifiedDashboardReportsReturn {
   uploadingReport: boolean;
   selectedReport: MedicalReport | null;
   setSelectedReport: (report: MedicalReport | null) => void;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   handleDeleteReport: (reportId: string) => Promise<void>;
 }

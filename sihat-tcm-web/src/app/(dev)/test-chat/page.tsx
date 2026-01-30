@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ReportChatWindow } from "@/components/diagnosis/ReportChatWindow";
+import { ReportChatWindow } from "@/features/diagnosis/components/ReportChatWindow";
 import { Button } from "@/components/ui/button";
 // Note: Providers are no longer needed - using Zustand store instead
 import { useDoctorLevel } from "@/stores/useAppStore";

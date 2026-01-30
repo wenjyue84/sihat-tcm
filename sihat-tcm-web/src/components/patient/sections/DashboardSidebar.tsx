@@ -23,7 +23,8 @@ interface DashboardSidebarProps {
   onSectionChange: (section: ActiveSection) => void;
   isMobileMenuOpen: boolean;
   onMobileMenuClose: () => void;
-  t: Record<string, unknown>; // Translation object
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: Record<string, any>; // Translation object
 }
 
 /**
