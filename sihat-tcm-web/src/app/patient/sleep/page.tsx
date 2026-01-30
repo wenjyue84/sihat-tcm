@@ -1,5 +1,8 @@
 'use client';
 
+// Force dynamic rendering to fix NEXT_MISSING_LAMBDA error on Vercel
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/stores/useAppStore";
