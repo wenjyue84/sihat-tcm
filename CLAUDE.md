@@ -2,40 +2,54 @@
 
 > **Purpose:** Onboard Claude into this codebase each session.
 
+<critical-context>
+## CRITICAL — Must Follow Always
+- **File ops:** Read before edit. Archive instead of delete.
+- **Verify:** Run `npm run lint && npm run type-check && npm run test:run` (web) or `npm test` (mobile).
+- **Types:** Zero `any` in production code. Strict mode enabled.
+</critical-context>
+
+<what-map>
 ## WHAT — Map
 
 - **Repo:** Sihat TCM — AI-powered TCM diagnostic platform
-  - `sihat-tcm-web/` — Next.js 16 web app (TypeScript)
-  - `sihat-tcm-mobile/` — Expo React Native mobile app (JavaScript)
+  - `sihat-tcm-web/` — Next.js 16 (TypeScript)
+  - `sihat-tcm-mobile/` — Expo React Native (JavaScript)
   - `docs/` — Documentation
 - **Tech:** TypeScript (web), JavaScript (mobile), npm, Supabase, Gemini AI
-- **Platform:** Windows 11, PowerShell
-- **Relative paths only;** forward slashes even on Windows.
+- **Platform:** Windows 11, PowerShell. Relative paths; forward slashes.
+</what-map>
 
+<why-purpose>
 ## WHY — Purpose
 
-- Sihat TCM provides AI-powered TCM diagnostics using the 4-Examination Model (四诊合参)
-- Maintain strict typing on web, consistent patterns across both platforms
+Sihat TCM provides AI-powered TCM diagnostics using the 4-Examination Model (四诊合参). Maintain strict typing on web, consistent patterns across platforms.
+</why-purpose>
 
+<how-work>
 ## HOW — How to work
 
-1. **Follow AGENTS.md** in the workspace (scan order, memory, safety). Read it first each session.
-2. **Full project context:** See `.claude/CLAUDE.md` for detailed architecture, commands, and code conventions.
-3. **Verify changes:**
-   - Web: `npm run lint && npm run type-check && npm run test:run`
-   - Mobile: `npm test`
-4. **File ops:** Read before editing. Prefer move over delete; archive if uncertain.
-5. **Memory:** "Remember this" -> MEMORY.md or MEMORY/YYYY-MM-DD.md.
+1. **Follow AGENTS.md** first (scan order, memory, safety).
+2. **Full context:** See `.claude/CLAUDE.md` for architecture, commands, conventions.
+3. **Verify:**
+   - Web: `cd sihat-tcm-web && npm run lint && npm run type-check && npm run test:run`
+   - Mobile: `cd sihat-tcm-mobile && npm test`
+4. **Memory:** "Remember this" → MEMORY.md or MEMORY/YYYY-MM-DD.md.
+</how-work>
 
-## Progressive disclosure — Read when relevant
+<progressive-disclosure>
+## Progressive disclosure
 
-| Doc or skill | When to read |
-|--------------|--------------|
-| AGENTS.md (this workspace) | Always first |
-| `.claude/CLAUDE.md` | Full project context, dev commands, conventions |
+| Doc/skill | When |
+|-----------|------|
+| AGENTS.md | Always first |
+| `.claude/CLAUDE.md` | Full project context, dev commands |
 | `.claude/rules/*` | Domain-specific rules |
 | meta-skill | Governance, structure |
+</progressive-disclosure>
 
+<summary>
 ## Summary
 
-Onboard: WHAT (repo map, tech), WHY (TCM platform), HOW (AGENTS.md first, verify via tests, linter for style, memory). Full details in `.claude/CLAUDE.md`.
+WHAT (repo map, tech), WHY (TCM platform), HOW (AGENTS.md first, verify via tests). Full details in `.claude/CLAUDE.md`.
+</summary>

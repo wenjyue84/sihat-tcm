@@ -1,43 +1,59 @@
 # AGENTS.md — Workspace Operating Rules
 
-> **Purpose:** Onboard the agent each session. This file is loaded into every conversation; keep it short and universally applicable.
+> **Purpose:** Onboard the agent each session. Keep short and universally applicable.
 
+<critical-context>
+## Inherited Rules
+- **File ops:** Read before edit. Archive instead of delete.
+- **Verify:** Lint + type-check + test before committing.
+- **Memory:** Only today's log editable.
+</critical-context>
+
+<what-map>
 ## WHAT — Map of this repo
 
 - **Identity:** `.claude/agents/identity/` (SOUL.md, USER.md, MEMORY.md, MEMORY/, Bank/)
 - **Structure:**
-  - `sihat-tcm-web/` — Next.js 16 web app (TypeScript, Tailwind CSS v4)
-  - `sihat-tcm-mobile/` — Expo React Native app (JavaScript)
-  - `docs/` — Project documentation
-  - `.claude/rules/` — Domain-specific rules (diagnosis, react, typescript)
+  - `sihat-tcm-web/` — Next.js 16 (TypeScript, Tailwind CSS v4)
+  - `sihat-tcm-mobile/` — Expo React Native (JavaScript)
+  - `docs/` — Documentation
+  - `.claude/rules/` — Domain rules (diagnosis, react, typescript)
 - **Tech:** TypeScript/JavaScript, npm, Vitest (web), Jest (mobile), Supabase, Gemini AI
+</what-map>
 
+<why-purpose>
 ## WHY — Purpose
 
-- **Sihat TCM**: AI-powered Traditional Chinese Medicine diagnostic platform implementing the 4-Examination Model (四诊合参)
-- Maintain strict typing on web, consistent patterns across both platforms
+**Sihat TCM:** AI-powered TCM diagnostic platform implementing the 4-Examination Model (四诊合参). Strict typing on web, consistent patterns across platforms.
+</why-purpose>
 
+<how-work>
 ## HOW — How to work here
 
-1. **Every session:** Read AGENTS.md (this file) -> SOUL.md -> USER.md -> memory (today + yesterday). Don't ask permission to follow this file.
-2. **Before coding:** Read foundation files, search codebase, understand existing patterns. Prefer pointers over pasting.
-3. **Verify changes:**
+1. **Every session:** AGENTS.md → SOUL.md → USER.md → memory (today + yesterday).
+2. **Before coding:** Read foundation files, search codebase, understand patterns. Prefer pointers.
+3. **Verify:**
    - Web: `cd sihat-tcm-web && npm run lint && npm run type-check && npm run test:run`
    - Mobile: `cd sihat-tcm-mobile && npm test`
-4. **Memory:** Write it down. MEMORY.md = essential facts; MEMORY/YYYY-MM-DD.md = daily log; Bank/ = typed pages.
-5. **Safety:** Don't exfiltrate data. Don't run destructive commands without asking. Archive instead of delete.
-6. **Code style:** Follow `.claude/rules/` and `.cursor/rules/`. Use project's linter and formatter.
+4. **Memory:** MEMORY.md = essential facts; MEMORY/YYYY-MM-DD.md = daily; Bank/ = typed pages.
+5. **Safety:** No data exfiltration. No destructive commands without asking. Archive instead of delete.
+6. **Code style:** Follow `.claude/rules/` and `.cursor/rules/`. Use linter and formatter.
+</how-work>
 
-## Progressive disclosure — Read when relevant
+<progressive-disclosure>
+## Progressive disclosure
 
-| Doc or skill | When to read |
-|--------------|--------------|
-| `.claude/rules/diagnosis.md` | Diagnosis flow changes |
-| `.claude/rules/react.md` | React component patterns |
+| Doc/skill | When |
+|-----------|------|
+| `.claude/rules/diagnosis.md` | Diagnosis flow |
+| `.claude/rules/react.md` | React patterns |
 | `.claude/rules/typescript.md` | TypeScript conventions |
 | `.claude/CLAUDE.md` | Full project context |
 | meta-skill | Governance, structure |
+</progressive-disclosure>
 
+<summary>
 ## Summary
 
-Onboard: WHAT (repo map), WHY (TCM platform), HOW (scan order, verify via tests, memory, safety, linter). Progressive disclosure for domain-specific rules.
+WHAT (repo map), WHY (TCM platform), HOW (scan order, verify via tests, memory, safety). Progressive disclosure for domain rules.
+</summary>
