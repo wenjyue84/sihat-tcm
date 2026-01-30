@@ -460,7 +460,10 @@ export const zh = {
         saveToHistory: '保存到历史',
         newDiagnosis: '新诊断',
         askQuestion: '提问',
+        askAboutReport: '询问报告',
         chatAboutReport: '咨询报告',
+        startNew: '开始新诊断',
+        returnHome: '返回首页',
         disclaimer: '本报告仅供参考，请咨询持证中医师获取医疗建议。',
         sections: {
             overview: '概览',
@@ -609,6 +612,7 @@ export const zh = {
     // 信息图
     infographic: {
         title: '创建信息图',
+        buttonLabel: '信息图表',
         subtitle: '将报告转换为视觉内容',
         selectStyle: '选择风格',
         selectContent: '选择内容',
@@ -645,26 +649,27 @@ export const zh = {
     // 医生验证
     verification: {
         buttonLabel: '验证',
-        modalTitle: '申请医师验证',
-        modalSubtitle: '让持证中医师审核您的AI诊断结果',
+        modalTitle: '请求医生核实',
+        modalSubtitle: '让合格医生审核您的AI诊断',
         selectDoctor: '选择医师',
-        noSelection: '跳过 - 发送给任何可用医师',
+        noSelection: '默认接收者 - 最快响应',
         specialties: '专长',
         experience: '经验',
-        confirmTitle: '确认验证申请',
-        confirmMessage: '您的完整诊断报告将被发送以供专业审核。验证完成后，您将收到通知。',
-        sendRequest: '发送申请',
+        confirmTitle: '确认请求',
+        confirmMessage: '发送核实请求给',
+        sendRequest: '发送请求',
         cancel: '取消',
-        successTitle: '申请已发送！',
-        successMessage: '您的诊断已发送验证。审核完成后您将收到通知。',
+        successTitle: '请求已发送！',
+        successMessage: '医生将尽快审核您的诊断。',
         errorTitle: '错误',
         errorMessage: '无法发送验证请求。请重试。',
-        noPractitioners: '目前暂无可用医师。',
+        noPractitioners: '暂无其他已认证医生',
     },
 
     // 西医医生聊天
     westernChat: {
         title: '西医专家意见',
+        buttonLabel: '西医咨询',
         subtitle: '基于循证医学的视角',
         intro: '你好。我是史密斯医生。我已经查看了您的中医报告。从西医的角度，我可以帮助将这些发现转化为生理术语，并建议标准评估。我能为您提供什么帮助？',
         placeholder: '咨询史密斯医生...',

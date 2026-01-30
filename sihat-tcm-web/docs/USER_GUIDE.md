@@ -643,3 +643,4 @@ A: The meal planner generates personalized 7-day plans based on your TCM diagnos
 **This documentation consolidates content from USER_MANUAL.md and USER_GUIDES.md. For original detailed files, see archive/.**
 
 
+

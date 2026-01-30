@@ -16,14 +16,17 @@ This implementation plan converts the Sihat TCM enhancement design into a series
   - **Property 1: Progress tracking monotonicity**
   - **Validates: Requirements 1.1, 1.3**
 
-- [-] 1.2 Implement DiagnosisSessionManager for auto-save
+- [x] 1.2 Implement DiagnosisSessionManager for auto-save
+
 
   - Create session persistence layer with Supabase integration
   - Add session recovery logic for interrupted consultations
   - Implement session cleanup for completed consultations
   - _Requirements: 1.3_
 
-- [ ] 1.3 Create enhanced ProgressStepper component
+
+- [x] 1.3 Create enhanced ProgressStepper component
+
   - Add estimated completion time calculation
   - Implement step-by-step guidance tooltips
   - Add accessibility features (ARIA labels, keyboard navigation)
@@ -74,6 +77,9 @@ This implementation plan converts the Sihat TCM enhancement design into a series
   - Add confidence scoring system for all AI responses
   - Create personalization engine for tailored recommendations
   - _Requirements: 2.1, 2.2, 2.3, 2.4_
+
+
+
 
 - [ ] 3.1 Create AIModelRouter class
 

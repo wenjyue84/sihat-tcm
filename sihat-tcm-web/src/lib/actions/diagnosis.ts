@@ -45,7 +45,7 @@ export async function saveDiagnosis(
         const isGuest = reportData.is_guest_session || (!user && !authError);
 
         if (isGuest) {
-            const sessionToken = crypto.randomUUID();
+            const sessionToken = reportData.session_token || crypto.randomUUID();
             const symptoms = reportData.symptoms || extractSymptomsFromReport(reportData.full_report);
             const medicines = reportData.medicines || extractMedicinesFromReport(reportData.full_report);
             const vitalSigns = reportData.vital_signs || extractVitalSignsFromReport(reportData.full_report);

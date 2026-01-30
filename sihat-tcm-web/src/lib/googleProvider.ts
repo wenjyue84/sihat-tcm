@@ -1,11 +1,11 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { getGeminiApiKey } from "./settings";
-
 /**
- * Get a Google provider instance configured with the appropriate API key.
- * Uses custom API key from admin settings if available, otherwise falls back to env var.
+ * Google Provider - Legacy Re-export
+ * 
+ * @deprecated This file is maintained for backward compatibility.
+ * Use the organized providers from './providers' instead:
+ * 
+ * import { getGoogleProvider } from '@/lib/providers';
  */
-export function getGoogleProvider(apiKey?: string) {
-  const key = apiKey || getGeminiApiKey();
-  return createGoogleGenerativeAI({ apiKey: key });
-}
+
+// Re-export from organized providers for backward compatibility
+export * from "./providers/google";

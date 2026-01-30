@@ -259,6 +259,7 @@ export interface SaveDiagnosisInput {
   pulse_data?: PulseData;
   // Guest session fields
   is_guest_session?: boolean;
+  session_token?: string;
   guest_email?: string;
   guest_name?: string;
   // Link to specific patient record

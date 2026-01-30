@@ -327,6 +327,95 @@ DiagnosisSummary.tsx (~350 lines - orchestrator)
 - ✅ Recording logic is reusable
 - ✅ Analysis logic is testable independently
 
+### 8. Component: `DiagnosisReport.tsx` ✅
+
+**Before**: 552 lines with embedded state, data fetching, PDF generation, and actions  
+**After**: ~400 lines using extracted modules
+
+**Changes**:
+
+#### Extracted Hook
+- **`report/hooks/useDiagnosisReportState.ts`** (~100 lines)
+  - `useDiagnosisReportState()` - Manages all UI state and data fetching
+  - Handles doctors fetching
+  - Manages chat, infographics, view mode states
+
+#### Extracted Hook
+- **`report/hooks/useDiagnosisReportActions.ts`** (~120 lines)
+  - `useDiagnosisReportActions()` - Manages all actions
+  - Handles PDF download, sharing, saving to history
+  - Centralized action logic
+
+#### Extracted Utilities
+- **`report/utils/reportDataTransformers.ts`** (~30 lines)
+  - `getFoodRecommendations()` - Extract food recommendations
+  - `getFoodsToAvoid()` - Extract foods to avoid
+  - `getRecipes()` - Extract recipes
+
+- **`report/utils/pdfGenerator.ts`** (~80 lines)
+  - `generateDiagnosisPDF()` - PDF generation logic
+  - Handles all PDF formatting and layout
+
+**Files Created**:
+- `src/components/diagnosis/report/hooks/useDiagnosisReportState.ts`
+- `src/components/diagnosis/report/hooks/useDiagnosisReportActions.ts`
+- `src/components/diagnosis/report/utils/reportDataTransformers.ts`
+- `src/components/diagnosis/report/utils/pdfGenerator.ts`
+
+**Files Modified**:
+- `src/components/diagnosis/DiagnosisReport.tsx`
+
+**Impact**:
+- ✅ **~27% reduction** in main component (552 → ~400 lines)
+- ✅ State management is reusable
+- ✅ PDF generation is testable independently
+- ✅ Actions are centralized and maintainable
+
+### 9. Component: `DiagnosisWizard.tsx` ✅
+
+**Before**: 658 lines with embedded test data handlers, report options, and processing step  
+**After**: ~550 lines using extracted modules
+
+**Changes**:
+
+#### Extracted Hook
+- **`wizard/hooks/useTestDataHandlers.ts`** (~80 lines)
+  - `useTestDataHandlers()` - Manages test data fill/clear event handlers
+  - Handles window event listeners
+  - Centralized test data management
+
+#### Extracted Utility
+- **`wizard/utils/reportOptions.ts`** (~30 lines)
+  - `createDefaultReportOptions()` - Creates default report options
+  - Centralized report configuration
+
+#### Extracted Component
+- **`wizard/components/ProcessingStep.tsx`** (~100 lines)
+  - `ProcessingStep` - Handles processing/loading/error states
+  - Renders analysis loading screen or error states
+  - Parses and renders diagnosis report
+
+#### Extracted Utility (IoT)
+- **`iot/utils/deviceConfig.ts`** (~80 lines)
+  - Device configuration for IoTConnectionWizard
+  - Centralized device metadata
+
+**Files Created**:
+- `src/components/diagnosis/wizard/hooks/useTestDataHandlers.ts`
+- `src/components/diagnosis/wizard/utils/reportOptions.ts`
+- `src/components/diagnosis/wizard/components/ProcessingStep.tsx`
+- `src/components/diagnosis/iot/utils/deviceConfig.ts`
+
+**Files Modified**:
+- `src/components/diagnosis/DiagnosisWizard.tsx`
+- `src/components/diagnosis/IoTConnectionWizard.tsx`
+
+**Impact**:
+- ✅ **~16% reduction** in main component (658 → ~550 lines)
+- ✅ Test data handling is reusable
+- ✅ Processing step is testable independently
+- ✅ Device configuration is centralized
+
 ---
 
 ## Next Steps

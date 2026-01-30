@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { DoctorDiagnosisData } from "@/hooks/useDoctorDiagnosis";
+import { DoctorDiagnosisData } from '@/features/doctor';
 
 interface PatientInfoSectionProps {
     patientInfo: DoctorDiagnosisData["patientInfo"];

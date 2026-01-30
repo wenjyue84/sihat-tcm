@@ -1,267 +1,268 @@
 /**
- * Metric Collector
+ * @fileoverview Metric Collection System
  * 
- * Collects, stores, and manages metric data for alert evaluation.
- * Provides efficient storage and retrieval of time-series data.
+ * Handles collection, storage, and retrieval of system metrics
+ * for alert evaluation and monitoring purposes.
+ * 
+ * @author Sihat TCM Development Team
+ * @version 1.0
  */
 
-import { MetricDataPoint, AlertEvaluationContext } from '../interfaces/AlertInterfaces';
-import { devLog } from '@/lib/systemLogger';
+import { devLog } from "@/lib/systemLogger";
+import type { MetricHistoryEntry } from "../interfaces/AlertInterfaces";
 
+/**
+ * Metric collector for alert system
+ */
 export class MetricCollector {
-  private metricHistory: Map<string, MetricDataPoint[]> = new Map();
-  private readonly maxHistorySize: number;
-  private readonly context: string = 'MetricCollector';
+  private metricHistory: Map<string, MetricHistoryEntry[]> = new Map();
+  private readonly maxHistorySize: number = 1000;
+  private readonly cleanupInterval: number = 3600000; // 1 hour
+  private cleanupTimer?: NodeJS.Timeout;
 
-  constructor(maxHistorySize: number = 1000) {
-    this.maxHistorySize = maxHistorySize;
+  constructor() {
+    this.startPeriodicCleanup();
   }
 
   /**
    * Record a metric value
    */
-  public recordMetric(metric: string, value: number, timestamp?: number): void {
-    const dataPoint: MetricDataPoint = {
-      value,
-      timestamp: timestamp || Date.now()
-    };
-
+  public recordMetric(metric: string, value: number): void {
+    const timestamp = Date.now();
+    
     if (!this.metricHistory.has(metric)) {
       this.metricHistory.set(metric, []);
     }
 
     const history = this.metricHistory.get(metric)!;
-    history.push(dataPoint);
+    history.push({ value, timestamp });
 
     // Keep only the most recent entries
     if (history.length > this.maxHistorySize) {
       history.splice(0, history.length - this.maxHistorySize);
     }
 
-    devLog("debug", this.context, `Metric recorded: ${metric} = ${value}`, {
-      metric,
-      value,
-      timestamp: dataPoint.timestamp,
-      historySize: history.length
-    });
+    devLog("debug", "MetricCollector", `Recorded metric: ${metric} = ${value}`);
   }
 
   /**
-   * Get metric history
+   * Get metric history for a specific metric
    */
-  public getMetricHistory(metric: string): MetricDataPoint[] {
+  public getMetricHistory(metric: string): MetricHistoryEntry[] {
     return this.metricHistory.get(metric) || [];
   }
 
   /**
-   * Get metric history within time window
+   * Get metric values within a time window
    */
-  public getMetricHistoryInWindow(
+  public getMetricWindow(
     metric: string, 
-    windowStart: number, 
-    windowEnd?: number
-  ): MetricDataPoint[] {
+    timeWindow: number, 
+    endTime: number = Date.now()
+  ): MetricHistoryEntry[] {
     const history = this.getMetricHistory(metric);
-    const endTime = windowEnd || Date.now();
-
-    return history.filter(
-      point => point.timestamp >= windowStart && point.timestamp <= endTime
+    const startTime = endTime - timeWindow;
+    
+    return history.filter(entry => 
+      entry.timestamp >= startTime && entry.timestamp <= endTime
     );
   }
 
   /**
-   * Get latest metric value
+   * Get the latest metric value
    */
-  public getLatestMetricValue(metric: string): MetricDataPoint | null {
+  public getLatestMetric(metric: string): MetricHistoryEntry | null {
     const history = this.getMetricHistory(metric);
     return history.length > 0 ? history[history.length - 1] : null;
   }
 
   /**
-   * Get metric statistics for time window
+   * Get average metric value over time window
    */
-  public getMetricStatistics(
+  public getAverageMetric(metric: string, timeWindow: number): number | null {
+    const values = this.getMetricWindow(metric, timeWindow);
+    
+    if (values.length === 0) return null;
+    
+    const sum = values.reduce((acc, entry) => acc + entry.value, 0);
+    return sum / values.length;
+  }
+
+  /**
+   * Get maximum metric value over time window
+   */
+  public getMaxMetric(metric: string, timeWindow: number): number | null {
+    const values = this.getMetricWindow(metric, timeWindow);
+    
+    if (values.length === 0) return null;
+    
+    return Math.max(...values.map(entry => entry.value));
+  }
+
+  /**
+   * Get minimum metric value over time window
+   */
+  public getMinMetric(metric: string, timeWindow: number): number | null {
+    const values = this.getMetricWindow(metric, timeWindow);
+    
+    if (values.length === 0) return null;
+    
+    return Math.min(...values.map(entry => entry.value));
+  }
+
+  /**
+   * Check if metric has consecutive failures
+   */
+  public hasConsecutiveFailures(
     metric: string, 
-    timeWindow: number
-  ): {
-    count: number;
-    min: number;
-    max: number;
-    avg: number;
-    latest: number;
-    trend: 'increasing' | 'decreasing' | 'stable';
-  } | null {
-    const windowStart = Date.now() - timeWindow;
-    const windowData = this.getMetricHistoryInWindow(metric, windowStart);
-
-    if (windowData.length === 0) return null;
-
-    const values = windowData.map(point => point.value);
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
-    const latest = values[values.length - 1];
-
-    // Simple trend calculation
-    let trend: 'increasing' | 'decreasing' | 'stable' = 'stable';
-    if (values.length >= 2) {
-      const firstHalf = values.slice(0, Math.floor(values.length / 2));
-      const secondHalf = values.slice(Math.floor(values.length / 2));
-      
-      const firstAvg = firstHalf.reduce((sum, val) => sum + val, 0) / firstHalf.length;
-      const secondAvg = secondHalf.reduce((sum, val) => sum + val, 0) / secondHalf.length;
-      
-      const changePercent = ((secondAvg - firstAvg) / firstAvg) * 100;
-      
-      if (changePercent > 5) trend = 'increasing';
-      else if (changePercent < -5) trend = 'decreasing';
+    threshold: number, 
+    operator: "gt" | "lt" | "eq" | "gte" | "lte",
+    consecutiveCount: number,
+    timeWindow?: number
+  ): boolean {
+    let history = this.getMetricHistory(metric);
+    
+    if (timeWindow) {
+      history = this.getMetricWindow(metric, timeWindow);
     }
 
-    return {
-      count: windowData.length,
-      min,
-      max,
-      avg,
-      latest,
-      trend
-    };
+    if (history.length < consecutiveCount) return false;
+
+    // Check the last N entries for consecutive failures
+    const recentEntries = history.slice(-consecutiveCount);
+    
+    return recentEntries.every(entry => {
+      switch (operator) {
+        case "gt":
+          return entry.value > threshold;
+        case "lt":
+          return entry.value < threshold;
+        case "gte":
+          return entry.value >= threshold;
+        case "lte":
+          return entry.value <= threshold;
+        case "eq":
+          return entry.value === threshold;
+        default:
+          return false;
+      }
+    });
   }
 
   /**
-   * Create evaluation context for metric
+   * Get all available metrics
    */
-  public createEvaluationContext(metric: string, value: number, timestamp?: number): AlertEvaluationContext {
-    const evalTimestamp = timestamp || Date.now();
-    const history = this.getMetricHistory(metric);
-
-    return {
-      metric,
-      value,
-      timestamp: evalTimestamp,
-      history
-    };
-  }
-
-  /**
-   * Get all tracked metrics
-   */
-  public getTrackedMetrics(): string[] {
+  public getAvailableMetrics(): string[] {
     return Array.from(this.metricHistory.keys());
   }
 
   /**
-   * Get metric count
+   * Get metric statistics
    */
-  public getMetricCount(): number {
-    return this.metricHistory.size;
-  }
+  public getMetricStatistics(metric: string, timeWindow?: number): {
+    count: number;
+    average: number;
+    min: number;
+    max: number;
+    latest: number;
+  } | null {
+    const values = timeWindow 
+      ? this.getMetricWindow(metric, timeWindow)
+      : this.getMetricHistory(metric);
 
-  /**
-   * Get total data points across all metrics
-   */
-  public getTotalDataPoints(): number {
-    return Array.from(this.metricHistory.values())
-      .reduce((total, history) => total + history.length, 0);
+    if (values.length === 0) return null;
+
+    const numericValues = values.map(entry => entry.value);
+    const sum = numericValues.reduce((acc, val) => acc + val, 0);
+
+    return {
+      count: values.length,
+      average: sum / values.length,
+      min: Math.min(...numericValues),
+      max: Math.max(...numericValues),
+      latest: numericValues[numericValues.length - 1],
+    };
   }
 
   /**
    * Clear metric history
    */
-  public clearMetricHistory(metric: string): boolean {
-    const deleted = this.metricHistory.delete(metric);
-    if (deleted) {
-      devLog("info", this.context, `Metric history cleared: ${metric}`);
-    }
-    return deleted;
+  public clearMetric(metric: string): void {
+    this.metricHistory.delete(metric);
+    devLog("info", "MetricCollector", `Cleared metric history: ${metric}`);
   }
 
   /**
-   * Clear all metric history
+   * Clear all metrics
    */
-  public clearAllHistory(): void {
+  public clearAllMetrics(): void {
     this.metricHistory.clear();
-    devLog("info", this.context, "All metric history cleared");
+    devLog("info", "MetricCollector", "Cleared all metric history");
   }
 
   /**
-   * Cleanup old data points beyond retention period
+   * Start periodic cleanup of old metrics
    */
-  public cleanupOldData(retentionPeriod: number): void {
-    const cutoffTime = Date.now() - retentionPeriod;
+  private startPeriodicCleanup(): void {
+    this.cleanupTimer = setInterval(() => {
+      this.cleanupOldMetrics();
+    }, this.cleanupInterval);
+  }
+
+  /**
+   * Cleanup old metric entries
+   */
+  private cleanupOldMetrics(): void {
+    const cutoffTime = Date.now() - (24 * 60 * 60 * 1000); // 24 hours ago
     let totalRemoved = 0;
 
     for (const [metric, history] of this.metricHistory.entries()) {
-      const originalLength = history.length;
-      const filteredHistory = history.filter(point => point.timestamp >= cutoffTime);
+      const initialLength = history.length;
+      const filteredHistory = history.filter(entry => entry.timestamp > cutoffTime);
       
-      if (filteredHistory.length !== originalLength) {
-        this.metricHistory.set(metric, filteredHistory);
-        totalRemoved += originalLength - filteredHistory.length;
-      }
+      this.metricHistory.set(metric, filteredHistory);
+      totalRemoved += initialLength - filteredHistory.length;
     }
 
     if (totalRemoved > 0) {
-      devLog("info", this.context, `Cleaned up ${totalRemoved} old data points`);
+      devLog("info", "MetricCollector", `Cleaned up ${totalRemoved} old metric entries`);
     }
-  }
-
-  /**
-   * Get memory usage statistics
-   */
-  public getMemoryUsage(): {
-    metricsCount: number;
-    totalDataPoints: number;
-    estimatedMemoryKB: number;
-  } {
-    const metricsCount = this.getMetricCount();
-    const totalDataPoints = this.getTotalDataPoints();
-    
-    // Rough estimation: each data point ~24 bytes (number + timestamp + overhead)
-    const estimatedMemoryKB = Math.round((totalDataPoints * 24) / 1024);
-
-    return {
-      metricsCount,
-      totalDataPoints,
-      estimatedMemoryKB
-    };
   }
 
   /**
    * Export metric data for analysis
    */
-  public exportMetricData(metric: string, timeWindow?: number): MetricDataPoint[] {
-    if (timeWindow) {
-      const windowStart = Date.now() - timeWindow;
-      return this.getMetricHistoryInWindow(metric, windowStart);
+  public exportMetrics(): Record<string, MetricHistoryEntry[]> {
+    const exported: Record<string, MetricHistoryEntry[]> = {};
+    
+    for (const [metric, history] of this.metricHistory.entries()) {
+      exported[metric] = [...history]; // Create a copy
     }
-    return this.getMetricHistory(metric);
+
+    return exported;
   }
 
   /**
-   * Import metric data (for testing or data migration)
+   * Import metric data
    */
-  public importMetricData(metric: string, data: MetricDataPoint[]): void {
-    // Sort by timestamp to maintain order
-    const sortedData = data.sort((a, b) => a.timestamp - b.timestamp);
-    
-    // Limit to max history size
-    const limitedData = sortedData.slice(-this.maxHistorySize);
-    
-    this.metricHistory.set(metric, limitedData);
-    
-    devLog("info", this.context, `Imported ${limitedData.length} data points for metric: ${metric}`);
+  public importMetrics(data: Record<string, MetricHistoryEntry[]>): void {
+    for (const [metric, history] of Object.entries(data)) {
+      this.metricHistory.set(metric, [...history]);
+    }
+
+    devLog("info", "MetricCollector", `Imported ${Object.keys(data).length} metrics`);
   }
 
   /**
-   * Batch record multiple metrics
+   * Cleanup resources
    */
-  public recordMetrics(metrics: Record<string, number>, timestamp?: number): void {
-    const recordTimestamp = timestamp || Date.now();
+  public destroy(): void {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = undefined;
+    }
     
-    Object.entries(metrics).forEach(([metric, value]) => {
-      this.recordMetric(metric, value, recordTimestamp);
-    });
-
-    devLog("debug", this.context, `Batch recorded ${Object.keys(metrics).length} metrics`);
+    this.metricHistory.clear();
+    devLog("info", "MetricCollector", "MetricCollector destroyed");
   }
 }

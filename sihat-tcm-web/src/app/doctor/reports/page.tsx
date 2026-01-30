@@ -6,16 +6,17 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import {
     useDoctorReports,
     ReportsHeader,
-    ReportsFilterBar,
     ReportsGrid,
     ReportsLoadingState,
 } from "@/components/doctor/reports";
+import { InquiryFilters } from "@/components/doctor/shared";
+import { SYMPTOM_TAGS } from "@/lib/mock/doctorDashboard";
 
 /**
  * Doctor Reports Page
  * Displays a searchable, filterable list of patient diagnosis reports
  */
-export default function DoctorReportsPage(): JSX.Element {
+export default function DoctorReportsPage() {
     const { loading: authLoading } = useAuth();
     const [showFilters, setShowFilters] = useState(true);
 
@@ -47,19 +48,20 @@ export default function DoctorReportsPage(): JSX.Element {
             <div className="flex-1 overflow-y-auto p-4 md:p-8">
                 <div className="max-w-6xl mx-auto pb-24 md:pb-20">
                     {/* Search & Filter Section */}
-                    <ReportsFilterBar
+                    <InquiryFilters
                         searchQuery={searchQuery}
-                        onSearchChange={setSearchQuery}
+                        setSearchQuery={setSearchQuery}
                         dateFrom={dateFrom}
-                        onDateFromChange={setDateFrom}
+                        setDateFrom={setDateFrom}
                         dateTo={dateTo}
-                        onDateToChange={setDateTo}
+                        setDateTo={setDateTo}
                         symptomFilter={symptomFilter}
-                        onSymptomFilterChange={setSymptomFilter}
+                        setSymptomFilter={setSymptomFilter}
                         hasActiveFilters={hasActiveFilters}
-                        onClearFilters={clearFilters}
+                        clearFilters={clearFilters}
                         showFilters={showFilters}
-                        onToggleFilters={() => setShowFilters(!showFilters)}
+                        setShowFilters={setShowFilters}
+                        symptomTags={SYMPTOM_TAGS}
                     />
 
                     {/* Results Count */}

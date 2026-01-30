@@ -461,7 +461,10 @@ export const en = {
         saveToHistory: 'Save to History',
         newDiagnosis: 'New Diagnosis',
         askQuestion: 'Ask a Question',
+        askAboutReport: 'Ask About Report',
         chatAboutReport: 'Chat About Report',
+        startNew: 'Start New Assessment',
+        returnHome: 'Return to Home',
         disclaimer: 'This report is for reference only. Please consult a licensed TCM practitioner for medical advice.',
         sections: {
             overview: 'Overview',
@@ -610,6 +613,7 @@ export const en = {
     // Infographic
     infographic: {
         title: 'Create Infographic',
+        buttonLabel: 'Visual',
         subtitle: 'Transform your report into visual content',
         selectStyle: 'Select Style',
         selectContent: 'Select Content',
@@ -647,25 +651,26 @@ export const en = {
     verification: {
         buttonLabel: 'Verify',
         modalTitle: 'Request Doctor Verification',
-        modalSubtitle: 'Have a licensed TCM practitioner review your AI diagnosis',
+        modalSubtitle: 'Get your AI diagnosis reviewed by a qualified doctor',
         selectDoctor: 'Select Practitioner',
-        noSelection: 'Skip - Send to Any Available Doctor',
+        noSelection: 'Default Recipient - Fastest Response',
         specialties: 'Specialties',
         experience: 'Experience',
-        confirmTitle: 'Confirm Verification Request',
-        confirmMessage: 'Your complete diagnosis report will be sent for professional review. You will be notified once verified.',
+        confirmTitle: 'Confirm Request',
+        confirmMessage: 'Send verification request to',
         sendRequest: 'Send Request',
         cancel: 'Cancel',
         successTitle: 'Request Sent!',
-        successMessage: 'Your diagnosis has been sent for verification. You will receive a notification once reviewed.',
+        successMessage: 'The doctor will review your diagnosis shortly.',
         errorTitle: 'Error',
         errorMessage: 'Could not send verification request. Please try again.',
-        noPractitioners: 'No practitioners available at this time.',
+        noPractitioners: 'No other approved doctors available',
     },
 
     // Western Doctor Chat
     westernChat: {
         title: 'Western MD Opinion',
+        buttonLabel: 'Western MD',
         subtitle: 'Evidence-Based Perspective',
         intro: 'Hello. I am Dr. Smith. I have reviewed your TCM report. From a Western medical perspective, I can help translate these findings into physiological terms and suggest standard evaluations. How can I assist you?',
         placeholder: 'Ask Dr. Smith...',

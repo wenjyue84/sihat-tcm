@@ -10,8 +10,9 @@ import { User, Stethoscope, Camera, MessageSquare, FileText, Pill } from "lucide
 
 // Stores and Hooks
 import { useLanguage } from "@/stores/useAppStore";
-import { useDoctorDiagnosis, DoctorDiagnosisData, initialData } from "@/hooks/useDoctorDiagnosis";
-import { useDiagnosisSubmission } from "@/hooks/useDiagnosisSubmission";
+import { useDoctorDiagnosis } from "@/features/doctor";
+import { DoctorDiagnosisData, initialData } from "@/features/doctor";
+import { useDiagnosisSubmission } from "@/features/doctor";
 import { useFileUpload, useMedicineChips, useWizardState, SectionId } from "./hooks";
 
 // UI Components

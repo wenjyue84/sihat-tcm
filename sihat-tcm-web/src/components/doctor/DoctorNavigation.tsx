@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/stores/useAppStore";
+import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { AnimatePresence, motion } from "framer-motion";
 import {
     Stethoscope,
     LayoutDashboard,
@@ -19,6 +21,7 @@ import {
     Syringe,
     Menu,
     X,
+    Bell,
 } from "lucide-react";
 
 interface NavItem {
@@ -52,6 +55,8 @@ export function DoctorNavigation() {
     const { signOut } = useAuth();
     const [loggingOut, setLoggingOut] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [notification, setNotification] = useState<{ title: string; message: string } | null>(null);
+    const [newRequestCount, setNewRequestCount] = useState(0);
 
     // Close mobile menu on route change
     useEffect(() => {
@@ -81,6 +86,39 @@ export function DoctorNavigation() {
         };
     }, [mobileMenuOpen]);
 
+    // Realtime Notifications for Doctor
+    useEffect(() => {
+        const channel = supabase
+            .channel('doctor-global-notifications')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'inquiries',
+                    filter: 'symptoms=eq.Request for Verification'
+                },
+                (payload) => {
+                    const newRequest = payload.new as any;
+                    const patientName = newRequest.diagnosis_report?.patient_profile?.name || 'A Patient';
+
+                    setNotification({
+                        title: "New Verification Request",
+                        message: `${patientName} has requested verification`
+                    });
+                    setNewRequestCount(prev => prev + 1);
+
+                    // Auto dismiss toast
+                    setTimeout(() => setNotification(null), 6000);
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
+
     const handleLogout = async () => {
         try {
             setLoggingOut(true);
@@ -102,6 +140,9 @@ export function DoctorNavigation() {
     const handleNavigation = (href: string) => {
         router.push(href);
         setMobileMenuOpen(false);
+        if (href === "/doctor/communication") {
+            setNewRequestCount(0); // Reset count when viewing communication
+        }
     };
 
     // Group items by section
@@ -142,19 +183,45 @@ export function DoctorNavigation() {
                             {sectionName}
                         </p>
                         <div className="space-y-1">
-                            {items.map((item) => (
-                                <button
-                                    key={item.id}
-                                    onClick={() => handleNavigation(item.href)}
-                                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive(item.href)
-                                        ? "bg-blue-50 text-blue-700"
-                                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
-                                        }`}
-                                >
-                                    {item.icon}
-                                    {item.label}
-                                </button>
-                            ))}
+                            {items.map((item) => {
+                                const active = isActive(item.href);
+                                return (
+                                    <motion.button
+                                        key={item.id}
+                                        onClick={() => handleNavigation(item.href)}
+                                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors relative overflow-hidden ${active
+                                            ? "bg-blue-50 text-blue-700 border-l-[3px] border-blue-500"
+                                            : "text-slate-600 border-l-[3px] border-transparent"
+                                            }`}
+                                        whileHover={active ? {} : {
+                                            scale: 1.02,
+                                            backgroundColor: "rgba(248, 250, 252, 1)",
+                                            transition: { type: "spring", stiffness: 400, damping: 25 }
+                                        }}
+                                        whileTap={{ scale: 0.98 }}
+                                    >
+                                        {/* Icon with independent hover color */}
+                                        <motion.span
+                                            className={active ? "text-blue-600" : "text-slate-500"}
+                                            whileHover={active ? {} : { color: "#3b82f6" }}
+                                            transition={{ duration: 0.15 }}
+                                        >
+                                            {item.icon}
+                                        </motion.span>
+                                        <span className="flex-1 text-left">{item.label}</span>
+                                        {item.id === "communication" && newRequestCount > 0 && (
+                                            <motion.span
+                                                className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] flex items-center justify-center"
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                                            >
+                                                {newRequestCount}
+                                            </motion.span>
+                                        )}
+                                    </motion.button>
+                                );
+                            })}
                         </div>
                     </div>
                 ))}
@@ -181,14 +248,49 @@ export function DoctorNavigation() {
 
     return (
         <>
+            {/* Global Notification Toast */}
+            <AnimatePresence>
+                {notification && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20, right: 20 }}
+                        animate={{ opacity: 1, y: 0, right: 20 }}
+                        exit={{ opacity: 0, y: -20, right: 20 }}
+                        className="fixed top-4 right-4 z-[60] bg-white border border-blue-100 shadow-xl rounded-xl p-4 w-80 cursor-pointer"
+                        onClick={() => {
+                            setNotification(null);
+                            handleNavigation("/doctor/communication");
+                        }}
+                    >
+                        <div className="flex items-start gap-3">
+                            <div className="bg-blue-100 p-2 rounded-full mt-1">
+                                <Bell className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex justify-between items-start">
+                                    <h4 className="font-semibold text-slate-800 text-sm">{notification.title}</h4>
+                                    <span className="flex h-2 w-2 rounded-full bg-blue-600"></span>
+                                </div>
+                                <p className="text-slate-600 text-xs mt-1">{notification.message}</p>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Mobile Header Bar */}
             <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-slate-200 flex items-center px-4 z-40">
                 <button
                     onClick={() => setMobileMenuOpen(true)}
-                    className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
+                    className="relative p-2 rounded-lg hover:bg-slate-100 active:bg-slate-200 transition-colors"
                     aria-label="Open menu"
                 >
                     <Menu className="w-6 h-6 text-slate-700" />
+                    {newRequestCount > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        </span>
+                    )}
                 </button>
                 <div className="flex items-center gap-2 ml-3">
                     <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white">

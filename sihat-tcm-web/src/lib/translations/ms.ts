@@ -843,7 +843,11 @@ export const ms: TranslationKeys = {
     addDevices: "Tambah peranti",
     noHealthData: "Tiada aplikasi kesihatan disambungkan",
     editHealthApp: "Sunting aplikasi kesihatan",
-    addHealthApp: "Tambah aplikasi kesihatan",
+    addHealthApp: "Tambah apl kesihatan",
+    skipConfirmationTitle: "Tiada Data Kesihatan Dimasukkan",
+    skipConfirmationMessage:
+      "Anda belum memasukkan sebarang bacaan kesihatan. Memasukkan data ini membantu memberikan diagnosis yang lebih tepat. Adakah anda mahu memasukkan data atau langkau langkah ini?",
+    enterData: "Masukkan Data",
   },
   imageAnalysis: {
     analyzing: "Menganalisis imej...",

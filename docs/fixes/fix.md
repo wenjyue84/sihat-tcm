@@ -199,3 +199,51 @@ Improved the `prepare` script to use Node.js instead of shell-specific syntax. T
 1.  **Cross-Platform Scripts**: Always use Node.js one-liners for `package.json` scripts if they need to run on both Windows (dev) and Linux (CI/Vercel).
 2.  **Security Overrides**: Use the `overrides` field in `package.json` to mitigate vulnerabilities in transitive dependencies when the top-level package maintainer is slow to update.
 3.  **React 19 Compatibility**: When using bleeding-edge frameworks (Next.js 16 / React 19), expect peer dependency warnings. Document forced overrides rather than downgrading the core framework.
+
+---
+
+# Feature: AI-Assisted SQL Migration Capability
+
+**Date:** 2026-01-03
+**Feature:** AI assistants (Claude, Gemini) can now run SQL migrations directly without manual Supabase Dashboard access.
+
+## Setup
+
+1.  **Service Role Key Added**:
+    -   Added `SUPABASE_SERVICE_ROLE_KEY` to `sihat-tcm-web/.env.local`
+    -   This key has admin privileges to the database.
+
+2.  **Migration Scripts Created**:
+    -   `run-migration.mjs` - General migration runner
+    -   `seed-test-doctors.mjs` - Create test doctor accounts
+
+3.  **Workflow Created**:
+    -   `.agent/workflows/run-sql-migration.md` - Guides AI through migration steps
+
+## Usage
+
+When you need to run SQL:
+1. Ask the AI assistant (Claude or Gemini) to run the SQL
+2. It will create/use a Node.js script with the service role key
+3. Execute the migration and report results
+
+## Example
+
+```bash
+# User asks: "Run a migration to add is_approved column"
+# AI creates run-migration.mjs and executes:
+node run-migration.mjs
+```
+
+## Security Notes
+
+1.  **Service Role Key**: Has full admin access. Never commit to git or share publicly.
+2.  **Scripts**: Use Supabase client with service role for admin operations.
+3.  **Backup**: Always consider backing up data before destructive migrations.
+
+## Future Reference & Rules
+
+1.  **AI Capability**: AI assistants can run SQL migrations via Node.js scripts with the service role key.
+2.  **Workflow**: Use `/run-sql-migration` for guided migration steps.
+3.  **Documentation**: This capability is documented in `claude.md`, `GEMINI.md`, and `DEVELOPER_GUIDE.md`.
+

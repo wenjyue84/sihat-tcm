@@ -871,6 +871,10 @@ export const en = {
     noHealthData: "No health app connected",
     editHealthApp: "Edit health app",
     addHealthApp: "Add health app",
+    skipConfirmationTitle: "No Health Data Entered",
+    skipConfirmationMessage:
+      "You haven't entered any health readings. Inputting this data helps provide a more accurate diagnosis. Would you like to enter data or skip this step?",
+    enterData: "Enter Data",
   },
 
   // Image Analysis

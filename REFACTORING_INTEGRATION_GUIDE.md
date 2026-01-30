@@ -249,7 +249,112 @@ const scheduleCommand = new ScheduleNotificationCommand(
 await executeCommand(scheduleCommand);
 ```
 
-### 5. Testing Integration
+### 5. Alert System Integration
+
+#### Step 5.1: Replace Old Alert Manager
+Replace the monolithic alert manager with the new modular system:
+
+```typescript
+// OLD - Remove these imports
+import { alertManager } from '@/lib/monitoring/alertManager';
+
+// NEW - Add these imports
+import { 
+  alertSystemManager,
+  recordMetric,
+  sendAlert,
+  resolveAlert,
+  getActiveAlerts,
+  getAlertStatistics,
+} from '@/lib/monitoring/alerts';
+import type {
+  ManualAlertData,
+  AlertSeverity,
+  AlertCategory,
+} from '@/lib/monitoring/alerts';
+```
+
+#### Step 5.2: Initialize New Alert System
+Initialize the new alert system in your application:
+
+```typescript
+// Initialize with custom configuration
+import { createAlertSystemManager } from '@/lib/monitoring/alerts';
+
+const alertSystem = createAlertSystemManager({
+  enabled: true,
+  healthCheckInterval: 60000, // 1 minute
+  defaultCooldownPeriod: 600000, // 10 minutes
+  alertRetentionPeriod: 7 * 24 * 60 * 60 * 1000, // 7 days
+});
+
+await alertSystem.initialize();
+```
+
+#### Step 5.3: Update Metric Recording
+Replace old metric recording calls:
+
+```typescript
+// OLD
+alertManager.recordMetric('api_response_time', responseTime);
+
+// NEW
+recordMetric('api_response_time', responseTime, {
+  service: 'diagnosis',
+  region: 'us-east-1',
+});
+```
+
+#### Step 5.4: Update Alert Sending
+Replace manual alert sending:
+
+```typescript
+// OLD
+await alertManager.sendAlert({
+  type: 'system_error',
+  message: 'Database connection failed',
+  severity: 'critical',
+});
+
+// NEW
+const alertData: ManualAlertData = {
+  type: 'system_error',
+  message: 'Database connection failed',
+  severity: 'critical' as AlertSeverity,
+  category: 'database' as AlertCategory,
+  metadata: {
+    timestamp: Date.now(),
+    service: 'sihat-tcm',
+  },
+};
+
+const alert = await sendAlert(alertData);
+```
+
+#### Step 5.5: Update Alert Resolution
+Replace alert resolution calls:
+
+```typescript
+// OLD
+alertManager.resolveAlert(alertId, 'admin_user');
+
+// NEW
+resolveAlert(alertId, 'admin_user');
+```
+
+#### Step 5.6: Update Statistics Retrieval
+Replace statistics calls:
+
+```typescript
+// OLD
+const stats = alertManager.getAlertStatistics();
+
+// NEW
+const stats = getAlertStatistics();
+const activeAlerts = getActiveAlerts();
+```
+
+### 6. Testing Integration
 
 #### Step 5.1: Add Property-Based Tests
 Create property-based tests for your components:

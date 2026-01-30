@@ -1,7 +1,11 @@
 /**
- * Alert System Interfaces
+ * @fileoverview Alert System Interfaces
  * 
- * Comprehensive type definitions for the Sihat TCM alert management system.
+ * Core interfaces and types for the alert management system.
+ * Defines the structure for alerts, rules, incidents, and notifications.
+ * 
+ * @author Sihat TCM Development Team
+ * @version 1.0
  */
 
 /**
@@ -105,15 +109,15 @@ export interface IncidentTimelineEntry {
 }
 
 /**
- * Metric data point
+ * Metric history entry
  */
-export interface MetricDataPoint {
+export interface MetricHistoryEntry {
   value: number;
   timestamp: number;
 }
 
 /**
- * Alert statistics
+ * Alert statistics interface
  */
 export interface AlertStatistics {
   totalAlerts: number;
@@ -121,45 +125,8 @@ export interface AlertStatistics {
   resolvedAlerts: number;
   criticalAlerts: number;
   openIncidents: number;
-}
-
-/**
- * Manual alert data
- */
-export interface ManualAlertData {
-  type: string;
-  message: string;
-  severity: AlertSeverity;
-  metadata?: Record<string, any>;
-}
-
-/**
- * Alert evaluation context
- */
-export interface AlertEvaluationContext {
-  metric: string;
-  value: number;
-  timestamp: number;
-  history: MetricDataPoint[];
-}
-
-/**
- * Notification context
- */
-export interface NotificationContext {
-  alert: Alert;
-  channels: NotificationChannel[];
-  escalated?: boolean;
-}
-
-/**
- * Health check result
- */
-export interface HealthCheckResult {
-  database: "healthy" | "unhealthy";
-  api: "healthy" | "unhealthy";
-  responseTime: number;
-  timestamp: number;
+  alertsByCategory: Record<AlertCategory, number>;
+  alertsBySeverity: Record<AlertSeverity, number>;
 }
 
 /**
@@ -167,29 +134,40 @@ export interface HealthCheckResult {
  */
 export interface AlertManagerConfig {
   enabled: boolean;
-  healthCheckInterval: number;
-  staleAlertThreshold: number;
-  maxMetricHistory: number;
+  maxEventsInMemory: number;
+  cleanupInterval: number;
+  defaultCooldownPeriod: number;
+  defaultEscalationDelay: number;
 }
 
 /**
- * Alert event types
+ * Notification context for templating
  */
-export type AlertEventType = 
-  | "alert_triggered"
-  | "alert_resolved"
-  | "alert_escalated"
-  | "incident_created"
-  | "incident_updated"
-  | "incident_resolved";
+export interface NotificationContext {
+  alert: Alert;
+  incident?: Incident;
+  service: string;
+  environment: string;
+  timestamp: number;
+}
 
 /**
- * Alert event
+ * Alert evaluation context
  */
-export interface AlertEvent {
-  type: AlertEventType;
-  alertId?: string;
-  incidentId?: string;
-  data: any;
+export interface AlertEvaluationContext {
+  metric: string;
+  value: number | string;
   timestamp: number;
+  history: MetricHistoryEntry[];
+  rule: AlertRule;
+}
+
+/**
+ * Escalation configuration
+ */
+export interface EscalationConfig {
+  enabled: boolean;
+  delay: number;
+  channels: NotificationChannel[];
+  autoAssign?: string;
 }

@@ -1,55 +1,44 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+// React and React Native core
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
-  Text,
   View,
-  TouchableOpacity,
-  Dimensions,
-  Image,
-  Animated,
-  Easing,
-  Keyboard,
-  TouchableWithoutFeedback,
   Platform,
   UIManager,
-  KeyboardAvoidingView,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+
+// Expo packages
 import * as Haptics from 'expo-haptics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Local screens
 import DiagnosisScreen from './screens/diagnosis/DiagnosisScreen';
 import DashboardScreen from './screens/dashboard/DashboardScreen';
 import DoctorDashboardScreen from './screens/dashboard/DoctorDashboardScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
-import { supabase } from './lib/supabase';
+import { AuthScreen } from './screens/auth';
+
+// Local contexts
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
-import { LanguageSelector } from './components/LanguageSelector';
-import { performBiometricLogin, hasStoredCredentials, isBiometricEnabled } from './lib/biometricAuth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getGuestSessionToken, clearGuestSessionToken } from './lib/guestSession';
-import { API_CONFIG, fetchApiKey } from './lib/apiConfig';
 
-// Extracted components and constants
-import { AUTH_COLORS as COLORS } from './constants/AuthColors';
-import { MOCKED_ACCOUNTS } from './constants/MockedAccounts';
-import { FloatingLabelInput } from './components/auth/FloatingLabelInput';
-import { GlassCard } from './components/ui/GlassCard';
+// Local constants
+import { Colors } from './constants/Colors';
+
+// Local utilities
+import { fetchApiKey } from './lib/apiConfig';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const { width } = Dimensions.get('window');
-
-import { AuthScreen } from './screens/auth';
 
 function AppContent() {
-  const [isGuest, setIsGuest] = useState(false);
+  // Controls whether to show main app content (true) or auth screen (false)
+  // Note: This was previously 'isGuest' but renamed for clarity
+  const [showMainApp, setShowMainApp] = useState(false);
   const [currentScreen, setCurrentScreen] = useState('dashboard'); // 'dashboard' | 'diagnosis'
   const [userRole, setUserRole] = useState('patient'); // 'patient' | 'doctor' | 'admin'
   const [currentUser, setCurrentUser] = useState(null); // Track logged-in user
@@ -98,13 +87,13 @@ function AppContent() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setCurrentUser(user);
     setUserRole(user.role || 'patient');
-    setIsGuest(true); // isGuest here actually means "should show main app"
+    setShowMainApp(true);
   };
 
   // Handle guest mode continue
   const handleGuestContinue = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setIsGuest(true);
+    setShowMainApp(true);
     setCurrentScreen('diagnosis');
   };
 
@@ -112,7 +101,7 @@ function AppContent() {
   if (showOnboarding === null) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#10B981" />
+        <ActivityIndicator size="large" color={Colors.accent} />
       </View>
     );
   }
@@ -123,7 +112,7 @@ function AppContent() {
   }
 
   // Main App Content (Dashboard/Diagnosis)
-  if (isGuest) {
+  if (showMainApp) {
     // Show Diagnosis Screen
     if (currentScreen === 'diagnosis') {
       return (
@@ -131,7 +120,7 @@ function AppContent() {
           isLoggedIn={currentUser !== null}
           onExitToDashboard={() => setCurrentScreen('dashboard')}
           onExitToLogin={() => {
-            setIsGuest(false);
+            setShowMainApp(false);
             setCurrentScreen('dashboard');
           }}
         />
@@ -146,7 +135,7 @@ function AppContent() {
           profile={{ role: 'doctor' }}
           onLogout={() => {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            setIsGuest(false);
+            setShowMainApp(false);
             setUserRole('patient');
             setCurrentUser(null);
             setCurrentScreen('dashboard');
@@ -166,7 +155,7 @@ function AppContent() {
         }}
         onLogout={() => {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          setIsGuest(false);
+          setShowMainApp(false);
           setUserRole('patient');
           setCurrentUser(null);
           setCurrentScreen('dashboard');
@@ -187,21 +176,19 @@ function AppContent() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#064E3B', // COLORS.emeraldDeep
+    backgroundColor: Colors.backgroundSecondary,
     justifyContent: 'center',
     alignItems: 'center',
   },
 });
 
 // Main App wrapper with ThemeProvider and LanguageProvider
-import ResultsDockTest from './screens/diagnosis/ResultsDockTest';
 
 export default function App() {
   return (
     <ThemeProvider>
       <LanguageProvider>
         <AppContent />
-        {/* <ResultsDockTest /> */}
       </LanguageProvider>
     </ThemeProvider>
   );

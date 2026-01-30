@@ -50,7 +50,38 @@
 - Honour rate limits and add provider-level retries/backoff where Gemini fallback logic existed.
 - Surface confidence or validation flags (`is_valid_image`, `modelUsed`, etc.) when available; otherwise, add a generic "analysis confidence not provided" notice.
 
-## 8) References
+## 8) Database & Migration Capability
+
+> **AI Assistants can run SQL migrations directly** - The `SUPABASE_SERVICE_ROLE_KEY` is configured in `sihat-tcm-web/.env.local`.
+
+### Running Migrations
+
+When the user asks to run SQL or database migrations:
+
+1. Create a Node.js script (`.mjs`) in `sihat-tcm-web/`:
+   ```javascript
+   import { createClient } from '@supabase/supabase-js';
+   import dotenv from 'dotenv';
+   dotenv.config({ path: '.env.local' });
+   
+   const supabase = createClient(
+     process.env.NEXT_PUBLIC_SUPABASE_URL,
+     process.env.SUPABASE_SERVICE_ROLE_KEY
+   );
+   // Run queries with admin privileges
+   ```
+
+2. Execute with: `node your-migration.mjs`
+
+### Available Scripts
+- `run-migration.mjs` - Doctor approval column migration
+- `seed-test-doctors.mjs` - Create test doctor accounts
+- `seed-yeak-data.mjs` - Seed patient test data
+
+### Workflow
+Use `/run-sql-migration` workflow for guided migration steps.
+
+## 9) References
 - Web rules and patterns: `GEMINI.md` (project rules), `DEVELOPER_MANUAL.md` (architecture, APIs, prompts), `SYSTEM_DESCRIPTION.md` (product intent).
 - Mobile conventions: `AUTH_IMPLEMENTATION.md`, `FEATURE_PROMPTS.md`, and `constants/SystemPrompts.js`.
 - Data and schema: `supabase_setup.sql`, `schema.sql`, `update_schema.sql`.

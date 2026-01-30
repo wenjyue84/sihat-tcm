@@ -14,10 +14,13 @@ export * from "./data-extraction";
 export * from "./date-formatting";
 
 // Error utilities
-export * from "../errorUtils";
+export * from "./error-utils";
 
 // Validation utilities
-export * from "../validations";
+export * from "./validations";
+
+// TCM utilities
+export * from "./tcm-utils";
 
 // Health metrics utilities
 export * from "../healthMetrics";

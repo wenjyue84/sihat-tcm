@@ -1,166 +1,202 @@
 /**
- * Accessibility Module - Comprehensive WCAG 2.1 AA compliance system
- *
- * This module provides a complete accessibility solution including:
- * - AccessibilityManager for core functionality
- * - React hooks for easy integration
- * - Context providers for global state
- * - Accessible UI components
- * - WCAG compliance utilities
+ * Accessibility System - Main Export
+ * 
+ * Centralized export for the complete accessibility system with
+ * WCAG 2.1 AA compliance and comprehensive accessibility features.
  */
 
-import { getAccessibilityManager } from "../accessibilityManager";
-
-// Core accessibility manager
+// Core Accessibility System
 export {
+  AccessibilityOrchestrator,
+  defaultAccessibilityOrchestrator,
+  createAccessibilityOrchestrator,
+} from './core/AccessibilityOrchestrator';
+
+export {
+  FocusManager,
+} from './core/FocusManager';
+
+export {
+  PreferenceManager,
+} from './core/PreferenceManager';
+
+export {
+  AnnouncementManager,
+} from './core/AnnouncementManager';
+
+export {
+  KeyboardNavigationManager,
+} from './core/KeyboardNavigationManager';
+
+export {
+  WCAGValidator,
+} from './core/WCAGValidator';
+
+// Accessibility Interfaces and Types
+export type {
+  // Core Interfaces
   AccessibilityManager,
-  getAccessibilityManager,
-  type AccessibilityPreferences,
-  type FocusableElement,
-  type AccessibilityAnnouncement,
-} from "../accessibilityManager";
+  FocusManager as IFocusManager,
+  AnnouncementManager as IAnnouncementManager,
+  KeyboardNavigationManager as IKeyboardNavigationManager,
+  PreferenceManager as IPreferenceManager,
+  WCAGValidator as IWCAGValidator,
 
-// React hooks
-export {
-  useAccessibility,
-  useKeyboardNavigation,
-  useFocusTrap,
-  useLiveRegion,
-  useWCAGCompliance,
-  type UseAccessibilityOptions,
-  type UseAccessibilityReturn,
-} from "../../hooks/useAccessibility";
+  // Configuration Interfaces
+  AccessibilityPreferences,
+  SystemAccessibilityPreferences,
+  ScreenReaderDetection,
+  AccessibilityConfig,
+  KeyboardNavigationConfig,
+  ScreenReaderConfig,
+  ColorBlindnessConfig,
+  TouchAccessibilityConfig,
+  MediaAccessibilityConfig,
+  FormAccessibilityConfig,
+  NavigationAccessibilityConfig,
 
-// Context providers
-export {
-  AccessibilityProvider,
-  useAccessibilityContext,
-  withAccessibility,
-  AccessibilitySettings,
-  SkipNavigation,
-  LiveRegion,
-} from "../../contexts/AccessibilityContext";
+  // Focus Management
+  FocusableElement,
+  FocusGroup,
+  FocusManagementOptions,
+  NavigationDirection,
 
-// Accessible UI components
-export { AccessibleButton } from "../../components/ui/AccessibleButton";
-export { AccessibleInput } from "../../components/ui/AccessibleInput";
-export {
-  AccessibleModal,
-  ModalFooter,
-  ConfirmationModal,
-} from "../../components/ui/AccessibleModal";
+  // Announcements
+  AccessibilityAnnouncement,
 
-// Demo component
-export { AccessibilityDemo } from "../../components/examples/AccessibilityDemo";
+  // Keyboard Navigation
+  KeyboardHandler,
 
-/**
- * Quick setup function for basic accessibility features
- */
-export function setupAccessibility(options?: {
-  enableHighContrast?: boolean;
-  enableReducedMotion?: boolean;
-  fontSize?: "small" | "medium" | "large" | "extra-large";
-  enableAnnouncements?: boolean;
-}) {
-  const manager = getAccessibilityManager({
-    highContrast: options?.enableHighContrast ?? false,
-    reducedMotion: options?.enableReducedMotion ?? false,
-    fontSize: options?.fontSize ?? "medium",
-    announcements: options?.enableAnnouncements ?? true,
-    keyboardNavigation: true,
-    focusIndicatorStyle: "default",
-    screenReaderEnabled: false,
-  });
+  // WCAG Compliance
+  WCAGComplianceResult,
+  WCAGComplianceReport,
+  WCAGIssue,
+  WCAGSuggestion,
+  WCAGIssueType,
 
-  // Add skip links to the page
-  if (typeof document !== "undefined") {
-    const skipLinks = [
-      { targetId: "main-content", text: "Skip to main content" },
-      { targetId: "navigation", text: "Skip to navigation" },
-    ];
+  // Events and Metrics
+  AccessibilityEvent,
+  AccessibilityEventType,
+  AccessibilityMetrics,
+} from './interfaces/AccessibilityInterfaces';
 
-    skipLinks.forEach(({ targetId, text }) => {
-      const skipLink = manager.createSkipLink(targetId, text);
-      document.body.insertBefore(skipLink, document.body.firstChild);
-    });
-  }
-
-  return manager;
+// Convenience Functions
+export function initializeAccessibilitySystem(
+  config?: Partial<import('./interfaces/AccessibilityInterfaces').AccessibilityConfig>
+): typeof defaultAccessibilityOrchestrator {
+  defaultAccessibilityOrchestrator.initialize(config);
+  return defaultAccessibilityOrchestrator;
 }
 
 /**
- * Utility function to validate WCAG compliance for multiple elements
+ * Create a complete accessibility setup with all managers initialized
  */
-export function validatePageCompliance(elements?: HTMLElement[]) {
-  const manager = getAccessibilityManager();
-  const elementsToCheck = elements || (Array.from(document.querySelectorAll("*")) as HTMLElement[]);
-
-  const results = elementsToCheck.map((element) => ({
-    element,
-    ...manager.validateWCAGCompliance(element),
-  }));
-
-  const issues = results.filter((result) => !result.isCompliant);
+export function createCompleteAccessibilitySetup(
+  config?: Partial<import('./interfaces/AccessibilityInterfaces').AccessibilityConfig>
+) {
+  const orchestrator = createAccessibilityOrchestrator(config);
+  
+  orchestrator.initialize();
 
   return {
-    totalElements: results.length,
-    compliantElements: results.length - issues.length,
-    issues: issues.map((issue) => ({
-      element:
-        issue.element.tagName.toLowerCase() + (issue.element.id ? `#${issue.element.id}` : ""),
-      issues: issue.issues,
-      suggestions: issue.suggestions,
-    })),
-    compliancePercentage: Math.round(((results.length - issues.length) / results.length) * 100),
+    orchestrator,
+    focusManager: orchestrator.getFocusManager(),
+    announcementManager: orchestrator.getAnnouncementManager(),
+    keyboardNavigationManager: orchestrator.getKeyboardNavigationManager(),
+    preferenceManager: orchestrator.getPreferenceManager(),
+    wcagValidator: orchestrator.getWCAGValidator(),
   };
 }
 
 /**
- * Utility to add basic accessibility attributes to an element
+ * Quick accessibility check for a page or element
  */
-export function makeElementAccessible(
-  element: HTMLElement,
-  options: {
-    label?: string;
-    description?: string;
-    role?: string;
-    focusable?: boolean;
-    announceOnFocus?: string;
+export function quickAccessibilityCheck(element?: HTMLElement): {
+  isCompliant: boolean;
+  score: number;
+  criticalIssues: number;
+  suggestions: string[];
+} {
+  const validator = new WCAGValidator();
+  const result = element ? validator.validateElement(element) : validator.validatePage();
+  
+  const criticalIssues = result.issues.filter(issue => issue.severity === 'critical').length;
+  const suggestions = result.suggestions.map(suggestion => suggestion.description);
+
+  return {
+    isCompliant: result.isCompliant,
+    score: result.score,
+    criticalIssues,
+    suggestions,
+  };
+}
+
+/**
+ * Apply accessibility preferences to the current page
+ */
+export function applyAccessibilityPreferences(
+  preferences: Partial<import('./interfaces/AccessibilityInterfaces').AccessibilityPreferences>
+): void {
+  defaultAccessibilityOrchestrator.applyPreferences(preferences);
+}
+
+/**
+ * Get current accessibility metrics
+ */
+export function getAccessibilityMetrics(): import('./interfaces/AccessibilityInterfaces').AccessibilityMetrics {
+  return defaultAccessibilityOrchestrator.getMetrics();
+}
+
+/**
+ * Announce a message to screen readers
+ */
+export function announce(
+  message: string,
+  priority: 'polite' | 'assertive' = 'polite',
+  category?: string
+): void {
+  const announcementManager = defaultAccessibilityOrchestrator.getAnnouncementManager();
+  announcementManager.announce({
+    message,
+    priority,
+    category,
+  });
+}
+
+/**
+ * Check if accessibility system is initialized
+ */
+export function isAccessibilityInitialized(): boolean {
+  return defaultAccessibilityOrchestrator.isInitialized();
+}
+
+/**
+ * Accessibility system health check
+ */
+export function checkAccessibilitySystemHealth(): {
+  isHealthy: boolean;
+  metrics: import('./interfaces/AccessibilityInterfaces').AccessibilityMetrics;
+  issues: string[];
+} {
+  const metrics = getAccessibilityMetrics();
+  const issues: string[] = [];
+
+  // Check for basic health indicators
+  if (!isAccessibilityInitialized()) {
+    issues.push("Accessibility system not initialized");
   }
-) {
-  const manager = getAccessibilityManager();
 
-  const attributes: Record<string, string> = {};
-
-  if (options.label) {
-    attributes["aria-label"] = options.label;
+  if (metrics.criticalIssues > 0) {
+    issues.push(`${metrics.criticalIssues} critical accessibility issues detected`);
   }
 
-  if (options.description) {
-    const descId = `desc-${Math.random().toString(36).substr(2, 9)}`;
-    const descElement = document.createElement("div");
-    descElement.id = descId;
-    descElement.textContent = options.description;
-    descElement.className = "sr-only";
-    element.parentNode?.insertBefore(descElement, element.nextSibling);
-    attributes["aria-describedby"] = descId;
+  if (metrics.complianceScore < 70) {
+    issues.push(`Low compliance score: ${metrics.complianceScore}%`);
   }
 
-  if (options.role) {
-    attributes["role"] = options.role;
-  }
-
-  if (options.focusable) {
-    element.tabIndex = 0;
-  }
-
-  manager.addAriaAttributes(element, attributes);
-
-  if (options.announceOnFocus) {
-    element.addEventListener("focus", () => {
-      manager.announce(options.announceOnFocus!, "polite");
-    });
-  }
-
-  return element;
+  return {
+    isHealthy: issues.length === 0,
+    metrics,
+    issues,
+  };
 }

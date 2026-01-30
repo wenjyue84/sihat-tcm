@@ -1,60 +1,85 @@
 import { jsPDF } from "jspdf";
 
-// URL for Noto Sans SC font (Simplified Chinese)
-// This is a free font from Google Fonts, hosted on a CDN or raw info
-const FONT_URL =
-  "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5.0.3/files/noto-sans-sc-chinese-simplified-400-normal.woff";
-// Note: jsPDF has better support for TTF, but WOFF might work in modern browsers or if converted.
-// If WOFF fails, we might need to find a direct TTF source or include a base64 subset.
-// A more reliable TTF source for Noto Sans SC:
-const FONT_URL_TTF =
-  "https://raw.githubusercontent.com/googlefonts/noto-cjk/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf";
-// Actually OTF is also supported by recent jsPDF in some environments, but let's try a safe bet.
-// The most reliable way for browser-only pdf with mixed languages is often a base64 string,
-// but for a full CJK font it's too big (20MB+).
-// We will try to fetch it.
+// Flag to track if font is already loaded (cached)
+let fontLoaded = false;
+let cachedFontBase64: string | null = null;
 
-export async function addChineseFont(doc: jsPDF): Promise<void> {
+// Google Fonts Noto Sans SC - Variable font in TTF format
+// This is a smaller subset with common characters
+const NOTO_SANS_SC_TTF_URL =
+  "https://fonts.gstatic.com/s/notosanssc/v37/k3kCo84MPvpLmixcA63oeAL7Iqp5IZJF9bmaG9_FnYxNbPzS5HE.ttf";
+
+// Fallback: Use a subset OTC converted URL from jsDelivr
+const FALLBACK_FONT_URL =
+  "https://cdn.jsdelivr.net/npm/source-han-sans-sc@1.0.0/SourceHanSansSC-Regular.otf";
+
+/**
+ * Convert ArrayBuffer to base64 string
+ */
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
+}
+
+/**
+ * Add Chinese font support to jsPDF document
+ * Uses TTF format which is properly supported by jsPDF for CJK characters
+ * @returns true if font was loaded successfully, false otherwise
+ */
+export async function addChineseFont(doc: jsPDF): Promise<boolean> {
   try {
-    console.log("Fetching Chinese font...");
-    // We use a CDN link for Noto Sans SC Regular
-    const response = await fetch(
-      "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@latest/files/noto-sans-sc-chinese-simplified-400-normal.woff"
-    );
+    // Use cached font if already loaded
+    if (fontLoaded && cachedFontBase64) {
+      doc.addFileToVFS("NotoSansSC-Regular.ttf", cachedFontBase64);
+      doc.addFont("NotoSansSC-Regular.ttf", "NotoSansSC", "normal");
+      return true;
+    }
+
+    console.log("Fetching Chinese font (TTF format)...");
+
+    // Try primary URL first
+    let response = await fetch(NOTO_SANS_SC_TTF_URL);
+
+    if (!response.ok) {
+      console.warn("Primary font URL failed, trying fallback...");
+      response = await fetch(FALLBACK_FONT_URL);
+    }
 
     if (!response.ok) {
       throw new Error(`Failed to fetch font: ${response.statusText}`);
     }
 
-    const blob = await response.blob();
-    const reader = new FileReader();
+    // Read as ArrayBuffer and convert to base64
+    const arrayBuffer = await response.arrayBuffer();
+    const base64data = arrayBufferToBase64(arrayBuffer);
 
-    return new Promise((resolve, reject) => {
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        const base64data = result.split(",")[1];
+    if (!base64data) {
+      throw new Error("Failed to convert font to base64");
+    }
 
-        if (base64data) {
-          // Add the font to VFS
-          const fileName = "NotoSansSC-Regular.woff";
-          doc.addFileToVFS(fileName, base64data);
+    // Cache for subsequent PDF generations
+    cachedFontBase64 = base64data;
+    fontLoaded = true;
 
-          // Add the font to jsPDF
-          // Note: 'Identity-H' is often used for CJK encoding in PDF
-          doc.addFont(fileName, "NotoSansSC", "normal");
+    // Add the font to jsPDF's virtual file system
+    // Must use .ttf extension for jsPDF to recognize fonts properly
+    doc.addFileToVFS("NotoSansSC-Regular.ttf", base64data);
 
-          console.log("Chinese font added successfully");
-          resolve();
-        } else {
-          reject(new Error("Failed to convert font to base64"));
-        }
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+    // Register the font with jsPDF
+    // The 'normal' style is the standard weight
+    doc.addFont("NotoSansSC-Regular.ttf", "NotoSansSC", "normal");
+
+    console.log("Chinese font added successfully");
+    return true;
   } catch (error) {
     console.error("Error adding Chinese font:", error);
-    // We don't throw here to avoid breaking the whole PDF generation,
-    // but text might be garbage.
+    // Return false - caller should use fallback font
+    return false;
   }
 }

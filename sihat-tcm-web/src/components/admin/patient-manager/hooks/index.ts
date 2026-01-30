@@ -1,0 +1,1 @@
+export { usePatientManager } from "./usePatientManager";

@@ -294,6 +294,28 @@ After refactoring, each file should:
    - ✅ Created `audio/hooks/useAudioAnalysis.ts` - Analysis state management
    - ⏳ Continue extracting more logic from this large component
 
+8. **`DiagnosisReport.tsx`** - Extracted state, actions, and utilities
+   - ✅ Created `report/hooks/useDiagnosisReportState.ts` - State and data fetching
+   - ✅ Created `report/hooks/useDiagnosisReportActions.ts` - Action handlers
+   - ✅ Created `report/utils/reportDataTransformers.ts` - Data transformation
+   - ✅ Created `report/utils/pdfGenerator.ts` - PDF generation
+   - ✅ Updated component to use extracted modules
+   - Reduced component from 552 lines to ~400 lines (27% reduction)
+   - Improved separation of concerns
+
+9. **`DiagnosisWizard.tsx`** - Extracted test handlers, processing step, and utilities
+   - ✅ Created `wizard/hooks/useTestDataHandlers.ts` - Test data event handlers
+   - ✅ Created `wizard/utils/reportOptions.ts` - Report options utility
+   - ✅ Created `wizard/components/ProcessingStep.tsx` - Processing step component
+   - ✅ Updated component to use extracted modules
+   - Reduced component from 658 lines to ~550 lines (16% reduction)
+   - Improved modularity
+
+10. **`IoTConnectionWizard.tsx`** - Extracted device configuration
+   - ✅ Created `iot/utils/deviceConfig.ts` - Device configuration
+   - ✅ Updated component to use extracted config
+   - Improved maintainability
+
 ### 📋 Remaining
 
 - Complete `DiagnosisWizard.tsx` refactoring (integration pending)

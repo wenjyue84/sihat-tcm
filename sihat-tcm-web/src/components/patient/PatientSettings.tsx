@@ -19,6 +19,9 @@ import {
   ChevronRight,
   Smartphone,
   Timer,
+  Moon,
+  Sun,
+  Monitor,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +54,9 @@ export function PatientSettings() {
   const [translationProgress, setTranslationProgress] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState("");
   const [pendingLang, setPendingLang] = useState<"en" | "zh" | "ms" | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark" | "auto">(
+    (profile?.preferences?.theme as "light" | "dark" | "auto") || "light"
+  );
 
   const handleLogout = async () => {
     try {
@@ -59,6 +65,7 @@ export function PatientSettings() {
       router.push("/");
     } catch (error) {
       setLoggingOut(false);
+      toast.error("Failed to sign out");
     }
   };
 
@@ -235,6 +242,61 @@ export function PatientSettings() {
                     </button>
                   );
                 })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Display Preferences */}
+          <Card className="border-none shadow-sm bg-white overflow-hidden">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                  <Monitor className="w-5 h-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-base font-semibold text-slate-900">
+                    Display Preferences
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Customize your interface appearance
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-slate-900">Theme</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: "light" as const, icon: Sun, label: "Light" },
+                    { value: "dark" as const, icon: Moon, label: "Dark" },
+                    { value: "auto" as const, icon: Monitor, label: "Auto" },
+                  ].map((themeOption) => {
+                    const isSelected = theme === themeOption.value;
+                    return (
+                      <button
+                        key={themeOption.value}
+                        onClick={() => {
+                          setTheme(themeOption.value);
+                          updatePreferences({ theme: themeOption.value });
+                        }}
+                        className={`relative flex flex-col items-center gap-2 p-4 rounded-lg border transition-all ${
+                          isSelected
+                            ? "border-emerald-500 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-500"
+                            : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700"
+                        }`}
+                      >
+                        <themeOption.icon className="w-5 h-5" />
+                        <span className="text-sm font-medium">{themeOption.label}</span>
+                        {isSelected && (
+                          <div className="absolute top-2 right-2">
+                            <Check className="w-4 h-4 text-emerald-600" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </CardContent>
           </Card>

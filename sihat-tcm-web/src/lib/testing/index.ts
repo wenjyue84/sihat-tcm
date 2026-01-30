@@ -21,6 +21,12 @@ export * from './factories/TestFactory';
 // Main testing framework
 export * from './TestFramework';
 
+// Property test helpers
+export * from './propertyTestHelpers';
+
+// Medical data generators
+export * from './medicalDataGenerators';
+
 // Re-export commonly used types and functions
 export type {
   BaseTest,
@@ -70,3 +76,21 @@ export {
   createPropertyTest,
   createUnitTest,
 } from './TestFramework';
+
+// Re-export specific helpers used in tests
+export {
+  testProperty,
+  assertions,
+  patterns,
+  validators,
+} from './propertyTestHelpers';
+
+export {
+  arbitraries,
+  patientProfileArbitrary,
+  diagnosisSessionArbitrary,
+  treatmentRecommendationArbitrary,
+  healthTimeSeriesArbitrary,
+  validationContextArbitrary,
+  syncDataArbitrary,
+} from './medicalDataGenerators';

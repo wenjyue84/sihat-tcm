@@ -9,7 +9,7 @@ import {
   StreamCallOptions,
   GenerateCallOptions,
 } from "../modelFallback";
-import { ModelSelectionCriteria, ModelRouterConfig } from "./interfaces/ModelInterfaces";
+import { ModelSelectionCriteria, ModelRouterConfig, AnalysisRequestDTO } from "./interfaces/ModelInterfaces";
 import { ComplexityAnalyzer } from "./analysis/ComplexityAnalyzer";
 import { ModelSelectionStrategy } from "./selection/ModelSelectionStrategy";
 import { PerformanceMonitor } from "./monitoring/PerformanceMonitor";
@@ -40,15 +40,10 @@ export class AIModelRouter {
   /**
    * Analyze request complexity
    */
-  public analyzeComplexity(request: {
-    messages?: any[];
-    images?: any[];
-    files?: any[];
-    requiresAnalysis?: boolean;
-    requiresPersonalization?: boolean;
-    medicalHistory?: any;
-    urgency?: string;
-  }) {
+  /**
+   * Analyze request complexity
+   */
+  public analyzeComplexity(request: AnalysisRequestDTO) {
     return this.complexityAnalyzer.analyzeComplexity(request);
   }
 
@@ -62,10 +57,19 @@ export class AIModelRouter {
   /**
    * Generate text with intelligent routing
    */
-  public async generateWithRouting(
+  /**
+   * Generate text with intelligent routing
+   */
+  public async generateWithRouting<T = string>(
     criteria: ModelSelectionCriteria,
     options: GenerateCallOptions
-  ): Promise<any> {
+  ): Promise<{
+    text: string;
+    parsed?: T;
+    modelUsed: number;
+    modelId: string;
+    status: string;
+  }> {
     const startTime = Date.now();
     let selectedModel: string | null = null;
     let retryCount = 0;
@@ -84,7 +88,7 @@ export class AIModelRouter {
         useAsyncApiKey: true,
       };
 
-      const result = await generateTextWithFallback(fallbackOptions, options);
+      const result = await generateTextWithFallback<T>(fallbackOptions, options);
 
       // Record successful metrics
       if (this.config.enablePerformanceMonitoring) {
@@ -124,10 +128,13 @@ export class AIModelRouter {
   /**
    * Stream text with intelligent routing
    */
+  /**
+   * Stream text with intelligent routing
+   */
   public async streamWithRouting(
     criteria: ModelSelectionCriteria,
     options: StreamCallOptions
-  ): Promise<any> {
+  ): Promise<Response> {
     const startTime = Date.now();
     let selectedModel: string | null = null;
     let retryCount = 0;

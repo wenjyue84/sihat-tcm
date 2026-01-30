@@ -5,6 +5,8 @@
  * in the AI model system. These complement the core AIModel interfaces.
  */
 
+import type { AIRequest } from '@/types/ai-request';
+
 // Import core types from AIModel for use in this file
 import type {
   AIModel,
@@ -41,6 +43,12 @@ export type {
 export type ModelPerformanceMetrics = PerformanceMetrics;
 
 /**
+ * Data Transfer Object for analysis requests
+ * Ensures strict typing for complexity analysis and routing
+ */
+export type AnalysisRequestDTO = AIRequest;
+
+/**
  * Model router configuration
  */
 export interface ModelRouterConfig {
@@ -50,6 +58,9 @@ export interface ModelRouterConfig {
   retryDelay?: number;
   enableLogging?: boolean;
   enableMetrics?: boolean;
+  enablePerformanceMonitoring?: boolean;
+  enableAdaptiveSelection?: boolean;
+  fallbackThreshold?: number;
   timeout?: number;
 }
 

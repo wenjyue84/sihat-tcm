@@ -460,7 +460,10 @@ export const ms = {
         saveToHistory: 'Simpan ke Sejarah',
         newDiagnosis: 'Diagnosis Baru',
         askQuestion: 'Tanya Soalan',
+        askAboutReport: 'Tanya Laporan',
         chatAboutReport: 'Sembang Tentang Laporan',
+        startNew: 'Mula Baru',
+        returnHome: 'Balik Utama',
         disclaimer: 'Laporan ini hanya untuk rujukan. Sila rujuk pengamal TCM berlesen untuk nasihat perubatan.',
         sections: {
             overview: 'Gambaran',
@@ -609,6 +612,7 @@ export const ms = {
     // Infografik
     infographic: {
         title: 'Cipta Infografik',
+        buttonLabel: 'Visual',
         subtitle: 'Ubah laporan kepada kandungan visual',
         selectStyle: 'Pilih Gaya',
         selectContent: 'Pilih Kandungan',
@@ -645,26 +649,27 @@ export const ms = {
     // Pengesahan Doktor
     verification: {
         buttonLabel: 'Sahkan',
-        modalTitle: 'Minta Pengesahan Doktor',
-        modalSubtitle: 'Minta pengamal TCM berlesen menyemak diagnosis AI anda',
+        modalTitle: 'Mohon Pengesahan Doktor',
+        modalSubtitle: 'Dapatkan diagnosis AI anda disemak oleh doktor',
         selectDoctor: 'Pilih Pengamal',
-        noSelection: 'Langkau - Hantar kepada Mana-mana Doktor',
+        noSelection: 'Penerima Lalai - Respons Terpantas',
         specialties: 'Kepakaran',
         experience: 'Pengalaman',
         confirmTitle: 'Sahkan Permintaan',
-        confirmMessage: 'Laporan diagnosis lengkap anda akan dihantar untuk semakan profesional. Anda akan dimaklumkan setelah disahkan.',
+        confirmMessage: 'Hantar permintaan pengesahan kepada',
         sendRequest: 'Hantar Permintaan',
         cancel: 'Batal',
         successTitle: 'Permintaan Dihantar!',
-        successMessage: 'Diagnosis anda telah dihantar untuk pengesahan. Anda akan menerima pemberitahuan selepas disemak.',
+        successMessage: 'Doktor akan menyemak diagnosis anda.',
         errorTitle: 'Ralat',
         errorMessage: 'Tidak dapat menghantar permintaan pengesahan. Sila cuba lagi.',
-        noPractitioners: 'Tiada pengamal tersedia buat masa ini.',
+        noPractitioners: 'Tiada doktor lain yang diluluskan',
     },
 
     // Sembang Doktor Barat
     westernChat: {
         title: 'Pendapat Pakar Perubatan Barat',
+        buttonLabel: 'Doktor Barat',
         subtitle: 'Perspektif Berasaskan Bukti',
         intro: 'Hello. Saya Dr. Smith. Saya telah menyemak laporan TCM anda. Dari perspektif perubatan Barat, saya boleh membantu menterjemahkan penemuan ini ke dalam istilah fisiologi dan mencadangkan penilaian standard. Bagaimanakah saya boleh membantu anda?',
         placeholder: 'Tanya Dr. Smith...',

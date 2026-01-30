@@ -680,6 +680,15 @@ if (pathname.startsWith("/admin") && user.role !== "admin") {
    - Add unit tests for complex logic
    - Test with different user roles
 
+### AI Helper Setup (MCP)
+
+To improve coding efficiency, we recommend configuring your AI assistant (Gemini/Claude) with the **Model Context Protocol (MCP)**. This gives the AI direct access to:
+
+- **Supabase**: Query database, manage tables
+- **GitHub**: Manage issues and PRs
+
+👉 **See the full setup guide**: `docs/setup/MCP_SETUP.md`
+
 ---
 
 ## Testing Framework
@@ -784,6 +793,17 @@ supabase db push --db-url "postgresql://..."
 # Verify migration status
 supabase migration list --db-url "postgresql://..."
 ```
+
+#### AI-Assisted Migrations
+
+> **AI assistants (Claude, Gemini) can run SQL migrations directly** - The `SUPABASE_SERVICE_ROLE_KEY` is configured in `.env.local`.
+
+When you ask an AI assistant to run database changes:
+
+1. It will create a Node.js script (`.mjs`) in `sihat-tcm-web/`
+2. Execute with admin privileges via the service role key
+3. Available scripts: `run-migration.mjs`, `seed-test-doctors.mjs`, `seed-yeak-data.mjs`
+4. Use the `/run-sql-migration` workflow for guided steps
 
 ---
 
@@ -1146,5 +1166,6 @@ docs(api): update enhanced diagnosis endpoint documentation
 **Last Updated**: 2025-12-26  
 **Version**: 5.0 (Consolidated)  
 **This documentation consolidates content from DEVELOPER_MANUAL.md and DEVELOPER_DOCUMENTATION.md. For original detailed files, see archive/.**
+
 
 

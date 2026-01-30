@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { createClientServices } from "@/lib/services";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -165,10 +165,10 @@ export function PractitionerManager() {
   const fetchPractitioners = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.from("tcm_practitioners").select("*").order("name");
+      const { data, error } = await createClientServices().practitioners.list({ column: "name", ascending: true });
 
-      if (error) throw error;
-      setPractitioners(data || []);
+      if (error) throw new Error(error.message);
+      setPractitioners((data as Practitioner[]) || []);
     } catch (error) {
       logger.error("PractitionerManager", "Error fetching practitioners", error);
       toast.error("Failed to load practitioners");
@@ -216,17 +216,14 @@ export function PractitionerManager() {
       };
 
       if (editingId) {
-        const { error } = await supabase
-          .from("tcm_practitioners")
-          .update(dataToSave)
-          .eq("id", editingId);
+        const { error } = await createClientServices().practitioners.update(editingId, dataToSave);
 
-        if (error) throw error;
+        if (error) throw new Error(error.message);
         toast.success("Practitioner updated");
       } else {
-        const { error } = await supabase.from("tcm_practitioners").insert([dataToSave]);
+        const { error } = await createClientServices().practitioners.create(dataToSave as Parameters<ReturnType<typeof createClientServices>["practitioners"]["create"]>[0]);
 
-        if (error) throw error;
+        if (error) throw new Error(error.message);
         toast.success("Practitioner added");
       }
 
@@ -244,9 +241,9 @@ export function PractitionerManager() {
     if (!confirm("Are you sure you want to delete this practitioner?")) return;
 
     try {
-      const { error } = await supabase.from("tcm_practitioners").delete().eq("id", id);
+      const { error } = await createClientServices().practitioners.delete(id);
 
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       toast.success("Practitioner deleted");
       fetchPractitioners();
     } catch (error) {
@@ -271,9 +268,9 @@ export function PractitionerManager() {
         return;
       }
 
-      const { error } = await supabase.from("tcm_practitioners").insert(newPractitioners);
+      const { error } = await createClientServices().practitioners.createMany(newPractitioners as Parameters<ReturnType<typeof createClientServices>["practitioners"]["createMany"]>[0]);
 
-      if (error) throw error;
+      if (error) throw new Error(error.message);
 
       toast.success(`Added ${newPractitioners.length} practitioners`);
       fetchPractitioners();

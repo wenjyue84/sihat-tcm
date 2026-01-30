@@ -9,41 +9,59 @@ interface DashboardStatsCardsProps {
 }
 
 export function DashboardStatsCards({ stats }: DashboardStatsCardsProps) {
+    const statsData = [
+        {
+            key: 'patients',
+            value: stats.uniquePatients,
+            label: 'Unique Patients',
+            icon: Users,
+            color: 'blue',
+            bgGradient: 'from-blue-500 to-blue-600'
+        },
+        {
+            key: 'total',
+            value: stats.total,
+            label: 'Total Inquiries',
+            icon: Activity,
+            color: 'green',
+            bgGradient: 'from-green-500 to-emerald-600'
+        },
+        {
+            key: 'recent',
+            value: stats.recent,
+            label: 'Last 7 Days',
+            icon: Clock,
+            color: 'purple',
+            bgGradient: 'from-purple-500 to-indigo-600'
+        },
+    ];
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <Card className="bg-white/80 backdrop-blur border-blue-100">
-                <CardContent className="p-4 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                        <Users className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div>
-                        <p className="text-2xl font-bold text-gray-800">{stats.uniquePatients}</p>
-                        <p className="text-sm text-gray-500">Unique Patients</p>
-                    </div>
-                </CardContent>
-            </Card>
-            <Card className="bg-white/80 backdrop-blur border-green-100">
-                <CardContent className="p-4 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                        <Activity className="w-6 h-6 text-green-600" />
-                    </div>
-                    <div>
-                        <p className="text-2xl font-bold text-gray-800">{stats.total}</p>
-                        <p className="text-sm text-gray-500">Total Inquiries</p>
-                    </div>
-                </CardContent>
-            </Card>
-            <Card className="bg-white/80 backdrop-blur border-purple-100">
-                <CardContent className="p-4 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                        <Clock className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <div>
-                        <p className="text-2xl font-bold text-gray-800">{stats.recent}</p>
-                        <p className="text-sm text-gray-500">Last 7 Days</p>
-                    </div>
-                </CardContent>
-            </Card>
+        <div className="relative mb-6">
+            {/* Mobile: Horizontal scroll | Desktop: Grid */}
+            <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-3 md:gap-4 md:overflow-visible md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
+                {statsData.map((stat) => {
+                    const IconComponent = stat.icon;
+                    return (
+                        <Card
+                            key={stat.key}
+                            className={`min-w-[160px] sm:min-w-[180px] md:min-w-0 snap-center bg-white/90 backdrop-blur border-${stat.color}-100 shadow-sm hover:shadow-md transition-shadow shrink-0 md:shrink`}
+                        >
+                            <CardContent className="p-4 flex items-center gap-3 sm:gap-4">
+                                <div className={`w-11 h-11 sm:w-12 sm:h-12 bg-gradient-to-br ${stat.bgGradient} rounded-xl flex items-center justify-center shadow-sm`}>
+                                    <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-xl sm:text-2xl font-bold text-gray-800 tabular-nums">{stat.value}</p>
+                                    <p className="text-xs sm:text-sm text-gray-500 truncate">{stat.label}</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    );
+                })}
+            </div>
+            {/* Scroll indicator gradient - mobile only */}
+            <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none md:hidden" />
         </div>
     );
 }

@@ -29,8 +29,10 @@ import { useUnifiedDashboardState } from "./dashboard/useUnifiedDashboardState";
 import { useUnifiedDashboardHandlers } from "./dashboard/useUnifiedDashboardHandlers";
 import { UnifiedDashboardSidebar } from "./dashboard/UnifiedDashboardSidebar";
 import { UnifiedDashboardHeader } from "./dashboard/UnifiedDashboardHeader";
+import { UnifiedDashboardMobileHeader } from "./dashboard/UnifiedDashboardMobileHeader";
 import { UnifiedDashboardContent } from "./dashboard/UnifiedDashboardContent";
 import { getSectionTitle } from "./dashboard/dashboardUtils";
+import { MobileBottomNav } from "./dashboard/MobileBottomNav";
 
 export function UnifiedDashboard() {
   const { user, profile, updatePreferences, signOut, refreshProfile } = useAuth();
@@ -55,6 +57,12 @@ export function UnifiedDashboard() {
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
+      {/* Mobile Header - Fixed top bar for navigation on mobile */}
+      <UnifiedDashboardMobileHeader
+        onMenuOpen={() => state.setIsMobileMenuOpen(true)}
+        t={t}
+      />
+
       {/* Sidebar */}
       <UnifiedDashboardSidebar
         activeSection={state.activeSection}
@@ -67,8 +75,8 @@ export function UnifiedDashboard() {
         t={t}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/50">
+      {/* Main Content Area - pt-14 accounts for fixed mobile header */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/50 pt-14 md:pt-0">
         {/* Header */}
         <UnifiedDashboardHeader
           sectionTitle={getSectionTitle(state.activeSection, t)}
@@ -81,10 +89,10 @@ export function UnifiedDashboard() {
 
         {/* Content Container */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
-          <div className="max-w-6xl mx-auto pb-20">
+          <div className="max-w-6xl mx-auto pb-24 md:pb-20">
             <UnifiedDashboardContent
               activeSection={state.activeSection}
-                sessions={sessions}
+              sessions={sessions}
               loadingSessions={loadingSessions}
               reports={reportsHook.reports}
               loadingReports={reportsHook.loadingReports}
@@ -137,6 +145,13 @@ export function UnifiedDashboard() {
           </div>
         </motion.div>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav
+        activeSection={state.activeSection}
+        onSectionChange={state.setActiveSection}
+        onMoreClick={() => state.setIsMobileMenuOpen(true)}
+      />
     </div>
   );
 }

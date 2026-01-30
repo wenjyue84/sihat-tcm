@@ -7,8 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Save, Play, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
-import { useDiagnosisSession } from '@/hooks/useDiagnosisSession';
-import { SessionRecoveryModal } from '@/components/diagnosis/SessionRecoveryModal';
+import { useDiagnosisSession, SessionRecoveryModal } from '@/features/diagnosis';
 import type { DiagnosisWizardData } from '@/types/diagnosis';
 
 export function DiagnosisSessionExample() {
@@ -83,7 +82,7 @@ export function DiagnosisSessionExample() {
   const handleResumeSession = async (sessionId: string) => {
     await sessionActions.resumeSession(sessionId);
     setShowRecoveryModal(false);
-    
+
     // Update form data from resumed session
     if (sessionState.data.basic_info) {
       setCurrentStepData({
@@ -139,14 +138,14 @@ export function DiagnosisSessionExample() {
                 )}
               </div>
             </div>
-            
+
             <div>
               <span className="font-medium">Current Step:</span>
               <div className="mt-1 text-gray-700">
                 {getStepDisplayName(sessionState.currentStep)}
               </div>
             </div>
-            
+
             <div>
               <span className="font-medium">Progress:</span>
               <div className="mt-1">
@@ -161,11 +160,11 @@ export function DiagnosisSessionExample() {
                 </span>
               </div>
             </div>
-            
+
             <div>
               <span className="font-medium">Last Saved:</span>
               <div className="mt-1 text-gray-700">
-                {sessionState.lastSaved 
+                {sessionState.lastSaved
                   ? sessionState.lastSaved.toLocaleTimeString()
                   : 'Never'
                 }
@@ -206,7 +205,7 @@ export function DiagnosisSessionExample() {
                 placeholder="Enter your name"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Age
@@ -222,7 +221,7 @@ export function DiagnosisSessionExample() {
                 placeholder="Enter your age"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Symptoms
@@ -262,14 +261,14 @@ export function DiagnosisSessionExample() {
                 <Save className="w-4 h-4" />
                 Manual Save
               </button>
-              
+
               <button
                 onClick={handleProgressStep}
                 className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
               >
                 Next Step
               </button>
-              
+
               <button
                 onClick={sessionActions.clearSession}
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"

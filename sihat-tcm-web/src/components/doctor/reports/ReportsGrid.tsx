@@ -1,8 +1,8 @@
 "use client";
 
-import { ReportCard } from "./ReportCard";
+import { InquiryCard } from "@/components/doctor/shared";
 import { EmptyReportsState } from "./EmptyReportsState";
-import type { Inquiry } from "@/lib/mock/doctorReports";
+import type { Inquiry } from "@/lib/mock/doctorDashboard";
 
 interface ReportsGridProps {
     inquiries: Inquiry[];
@@ -30,7 +30,7 @@ export function ReportsGrid({
     return (
         <div className="grid gap-4">
             {inquiries.map((inquiry) => (
-                <ReportCard key={inquiry.id} inquiry={inquiry} />
+                <InquiryCard key={inquiry.id} inquiry={inquiry} variant="report" />
             ))}
         </div>
     );

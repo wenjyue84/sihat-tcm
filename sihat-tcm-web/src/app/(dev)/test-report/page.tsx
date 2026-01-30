@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DiagnosisReport } from "@/components/diagnosis/DiagnosisReport";
+import { DiagnosisReport } from "@/features/diagnosis";
 
 export default function TestReportPage() {
   const [key, setKey] = useState(0);

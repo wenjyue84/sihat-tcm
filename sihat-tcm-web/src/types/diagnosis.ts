@@ -123,6 +123,7 @@ export interface DiagnosisWizardData {
   wen_chat: ChatMessage[];
   qie: PulseData | null;
   smart_connect: SmartConnectData | null;
+  diagnosis_report?: string; // Persisted JSON string of the report
 }
 
 // ============================================================================

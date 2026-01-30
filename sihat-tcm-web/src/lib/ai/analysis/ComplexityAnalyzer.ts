@@ -2,23 +2,17 @@
  * Request complexity analysis module
  */
 
-import { RequestComplexity, RequestComplexityType, ComplexityFactors } from "../interfaces/ModelInterfaces";
+import { RequestComplexity, RequestComplexityType, ComplexityFactors, AnalysisRequestDTO } from "../interfaces/ModelInterfaces";
 import { COMPLEXITY_SCORING, AI_MODELS } from "../../constants";
-import type { AIRequest } from "@/types/ai-request";
 
 export class ComplexityAnalyzer {
   /**
    * Analyze request complexity based on various factors
    */
-  public analyzeComplexity(request: {
-    messages?: AIRequest["messages"];
-    images?: AIRequest["images"];
-    files?: AIRequest["files"];
-    requiresAnalysis?: boolean;
-    requiresPersonalization?: boolean;
-    medicalHistory?: AIRequest["medicalHistory"];
-    urgency?: string;
-  }): RequestComplexity {
+  /**
+   * Analyze request complexity based on various factors
+   */
+  public analyzeComplexity(request: AnalysisRequestDTO): RequestComplexity {
     const factors: ComplexityFactors = {
       hasImages: Boolean(request.images?.length),
       hasMultipleFiles: Boolean(request.files && request.files.length > 1),
@@ -47,14 +41,14 @@ export class ComplexityAnalyzer {
     };
   }
 
-  private calculateTotalFileSize(files?: AIRequest["files"]): number {
+  private calculateTotalFileSize(files?: AnalysisRequestDTO["files"]): number {
     if (!files) return 0;
     return files.reduce((total, file) => total + (file.size || 0), 0);
   }
 
-  private assessMedicalComplexity(request: any): "low" | "medium" | "high" {
-    if (request.medicalHistory?.conditions?.length > 3) return "high";
-    if (request.medicalHistory?.medications?.length > 2) return "medium";
+  private assessMedicalComplexity(request: AnalysisRequestDTO): "low" | "medium" | "high" {
+    if ((request.medicalHistory?.diagnoses?.length || 0) > 3) return "high";
+    if ((request.medicalHistory?.medications?.length || 0) > 2) return "medium";
     return "low";
   }
 

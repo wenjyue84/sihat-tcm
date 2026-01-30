@@ -528,7 +528,7 @@ export default function ResultsStep({ data, onStartNew, onExit, theme, isDark })
                                 end={{ x: 1, y: 0 }}
                             >
                                 <Ionicons name="chatbubbles" size={24} color={theme.text.inverse} />
-                                <Text style={styles.primaryChatText}>Ask About Report</Text>
+                                <Text style={styles.primaryChatText}>{t.report?.askAboutReport || 'Ask About Report'}</Text>
                             </LinearGradient>
                         </TouchableOpacity>
 
@@ -539,7 +539,7 @@ export default function ResultsStep({ data, onStartNew, onExit, theme, isDark })
                                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setShowWesternChat(true); }}
                             >
                                 <Ionicons name="medkit" size={20} color="#0ea5e9" />
-                                <Text style={styles.secondaryActionText}>Western MD</Text>
+                                <Text style={styles.secondaryActionText}>{t.westernChat?.buttonLabel || 'Western MD'}</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -547,7 +547,7 @@ export default function ResultsStep({ data, onStartNew, onExit, theme, isDark })
                                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setShowInfographic(true); }}
                             >
                                 <Ionicons name="image" size={20} color={theme.accent.secondary} />
-                                <Text style={styles.secondaryActionText}>Visual</Text>
+                                <Text style={styles.secondaryActionText}>{t.infographic?.buttonLabel || 'Visual'}</Text>
                             </TouchableOpacity>
                         </View>
 
@@ -564,7 +564,7 @@ export default function ResultsStep({ data, onStartNew, onExit, theme, isDark })
                                     <Ionicons name="document-text" size={20} color={theme.text.secondary} />
                                 )}
                                 <Text style={styles.secondaryActionText}>
-                                    {isPdfGenerating ? '...' : 'PDF'}
+                                    {isPdfGenerating ? '...' : (t.report?.pdf?.download || 'PDF')}
                                 </Text>
                             </TouchableOpacity>
 
@@ -575,7 +575,7 @@ export default function ResultsStep({ data, onStartNew, onExit, theme, isDark })
                             >
                                 <Ionicons name="share-social-outline" size={20} color={theme.text.secondary} />
                                 <Text style={styles.secondaryActionText}>
-                                    {isSharing ? '...' : 'Share'}
+                                    {isSharing ? '...' : (t.report?.share || 'Share')}
                                 </Text>
                             </TouchableOpacity>
 
@@ -585,7 +585,7 @@ export default function ResultsStep({ data, onStartNew, onExit, theme, isDark })
                             >
                                 <Ionicons name="shield-checkmark-outline" size={20} color={theme.semantic.success} />
                                 <Text style={[styles.secondaryActionText, { color: theme.semantic.success }]}>
-                                    Verify
+                                    {t.verification?.buttonLabel || 'Verify'}
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -600,12 +600,12 @@ export default function ResultsStep({ data, onStartNew, onExit, theme, isDark })
                                     end={{ x: 1, y: 0 }}
                                 >
                                     <Ionicons name="refresh" size={20} color={theme.text.inverse} />
-                                    <Text style={styles.resetButtonText}>Start New Assessment</Text>
+                                    <Text style={styles.resetButtonText}>{t.report?.startNew || 'Start New Assessment'}</Text>
                                 </LinearGradient>
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.homeButton} onPress={onExit}>
-                                <Text style={styles.homeButtonText}>Return to Home</Text>
+                                <Text style={styles.homeButtonText}>{t.report?.returnHome || 'Return to Home'}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -650,6 +650,11 @@ export default function ResultsStep({ data, onStartNew, onExit, theme, isDark })
             <DoctorVerificationModal
                 visible={showVerification}
                 onClose={() => setShowVerification(false)}
+                onNavigateToCommunication={() => {
+                    // Navigate to patient communication - for now just close
+                    // In future, integrate with navigation to communication screen
+                    console.log('Navigate to communication requested');
+                }}
                 reportData={reportData}
                 patientData={data}
                 theme={theme}

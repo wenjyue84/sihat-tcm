@@ -61,3 +61,4 @@ export async function hasGuestSessionToken() {
     return token !== null;
 }
 
+

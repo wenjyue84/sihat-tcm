@@ -12,9 +12,10 @@ import { SystemManual } from "@/components/ui/SystemManual";
 import { useDiagnosisProgressOptional } from "@/stores/useAppStore";
 import Image from "next/image";
 import { AppDownloadSection } from "@/components/landing/AppDownloadSection";
+import { PullToRefresh } from "@/components/ui/PullToRefresh";
 
 // Lazy load DiagnosisWizard to reduce initial bundle size
-const DiagnosisWizard = dynamic(() => import("@/components/diagnosis/DiagnosisWizard"), {
+const DiagnosisWizard = dynamic(() => import("@/features/diagnosis/components/DiagnosisWizard"), {
   loading: () => (
     <div className="flex items-center justify-center min-h-[400px]">
       <div className="flex flex-col items-center gap-4">
@@ -96,52 +97,63 @@ export default function Home() {
     }
   };
 
+  /**
+   * Handle pull-to-refresh gesture on mobile
+   * Dispatches clear-test-data event to reset the wizard
+   */
+  const handlePullRefresh = () => {
+    window.dispatchEvent(new CustomEvent("clear-test-data"));
+    // Reset button state to 'test' for visual consistency
+    setButtonState("test");
+  };
+
   return (
-    <main className="min-h-screen bg-gradient-to-b from-stone-50 to-emerald-50/30 text-stone-800 font-sans selection:bg-emerald-100">
-      <header className="relative bg-emerald-900 text-white min-h-[4rem] h-auto py-2 px-3 sm:px-6 flex flex-nowrap items-center justify-between gap-2 transition-all">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+    <PullToRefresh onRefresh={handlePullRefresh}>
+      <main className="min-h-screen bg-gradient-to-b from-stone-50 to-emerald-50/30 text-stone-800 font-sans selection:bg-emerald-100">
+        <header className="relative bg-emerald-900 text-white min-h-[4rem] h-auto py-2 px-3 sm:px-6 flex flex-nowrap items-center justify-between gap-2 transition-all">
+          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
 
-        {/* Left side: Logo and Title */}
-        <Link
-          href="/credentials"
-          className="relative z-10 flex items-center gap-2 sm:gap-3 hover:opacity-90 transition-opacity cursor-pointer group shrink-0"
-        >
-          <div className="bg-white/10 p-1.5 rounded-full backdrop-blur-sm border border-white/10 group-hover:bg-white/20 transition-colors">
-            <Image
-              src="/logo.png"
-              alt="Sihat TCM Logo"
-              width={40}
-              height={40}
-              className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
-              priority
-            />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-lg sm:text-xl font-bold leading-none tracking-tight text-white group-hover:text-emerald-50 transition-colors whitespace-nowrap">
-              Sihat TCM
-            </span>
-            {/* Tagline hidden on mobile/tablet to save space */}
-            <p className="text-xs text-emerald-200 font-medium tracking-wide hidden lg:block">
-              AI-Powered Traditional Chinese Medicine
-            </p>
-          </div>
-        </Link>
-
-        {/* Top right buttons */}
-        <div className="relative z-50 flex items-center gap-2 shrink-0">
+          {/* Left side: Logo and Title */}
           <Link
-            href="/blog"
-            className="flex items-center gap-1 text-sm font-medium text-emerald-100 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors"
+            href="/credentials"
+            className="relative z-10 flex items-center gap-2 sm:gap-3 hover:opacity-90 transition-opacity cursor-pointer group shrink-0"
           >
-            {t.nav.blog}
+            <div className="bg-white/10 p-1.5 rounded-full backdrop-blur-sm border border-white/10 group-hover:bg-white/20 transition-colors">
+              <Image
+                src="/logo.png"
+                alt="Sihat TCM Logo"
+                width={40}
+                height={40}
+                className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+                priority
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-lg sm:text-xl font-bold leading-none tracking-tight text-white group-hover:text-emerald-50 transition-colors whitespace-nowrap">
+                Sihat TCM
+              </span>
+              {/* Tagline hidden on mobile/tablet to save space */}
+              <p className="text-xs text-emerald-200 font-medium tracking-wide hidden lg:block">
+                AI-Powered Traditional Chinese Medicine
+              </p>
+            </div>
           </Link>
-          <SystemManual />
-          <LanguageSelector variant="compact" className="sm:hidden" />
-          <div className="hidden sm:block">
-            <LanguageSelector />
-          </div>
 
-          {/* 
+          {/* Top right buttons */}
+          <div className="relative z-50 flex items-center gap-2 shrink-0">
+            <Link
+              href="/blog"
+              className="flex items-center gap-1 text-sm font-medium text-emerald-100 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors"
+            >
+              {t.nav.blog}
+            </Link>
+            <SystemManual />
+            <LanguageSelector variant="compact" className="sm:hidden" />
+            <div className="hidden sm:block">
+              <LanguageSelector />
+            </div>
+
+            {/* 
             ========================================================================
             TEST/CLEAR BUTTON WITH STATE MACHINE FEEDBACK
             ========================================================================
@@ -151,68 +163,68 @@ export default function Home() {
             - clear: Rose, Eraser icon, "Clear"
             - clearing: Emerald, Check icon (bounce), "Cleared!"
             */}
-          <button
-            onClick={handleButtonClick}
-            disabled={buttonState === "filling" || buttonState === "clearing"}
-            className={`flex items-center gap-2 p-2 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl
-              ${
-                buttonState === "test"
+            <button
+              onClick={handleButtonClick}
+              disabled={buttonState === "filling" || buttonState === "clearing"}
+              className={`flex items-center gap-2 p-2 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl
+              ${buttonState === "test"
                   ? "bg-amber-500 hover:bg-amber-400 text-amber-950 hover:scale-105"
                   : buttonState === "filling" || buttonState === "clearing"
                     ? "bg-emerald-500 text-white scale-95 ring-4 ring-emerald-300/50"
                     : "bg-rose-500 hover:bg-rose-400 text-white hover:scale-105"
-              }
+                }
               ${buttonState === "filling" || buttonState === "clearing" ? "cursor-not-allowed" : "cursor-pointer"}
             `}
-            title={
-              buttonState === "test" || buttonState === "filling" ? t.nav.test : t.common.clear
-            }
-          >
-            {/* Icon based on state */}
-            {buttonState === "test" ? (
-              <FlaskConical className="w-4 h-4" />
-            ) : buttonState === "filling" || buttonState === "clearing" ? (
-              <Check className="w-4 h-4 animate-bounce" />
-            ) : (
-              <Eraser className="w-4 h-4" />
+              title={
+                buttonState === "test" || buttonState === "filling" ? t.nav.test : t.common.clear
+              }
+            >
+              {/* Icon based on state */}
+              {buttonState === "test" ? (
+                <FlaskConical className="w-4 h-4" />
+              ) : buttonState === "filling" || buttonState === "clearing" ? (
+                <Check className="w-4 h-4 animate-bounce" />
+              ) : (
+                <Eraser className="w-4 h-4" />
+              )}
+              {/* Text: Always show during transitions, hide on mobile for idle states */}
+              <span
+                className={`${buttonState === "filling" || buttonState === "clearing" ? "inline" : "hidden lg:inline"}`}
+              >
+                {buttonState === "test"
+                  ? t.nav.test
+                  : buttonState === "filling"
+                    ? t.common.filled
+                    : buttonState === "clearing"
+                      ? t.common.cleared
+                      : t.common.clear}
+              </span>
+            </button>
+
+            {/* Login/Sign Up button - visible on PC view */}
+            {!loading && !user && (
+              <Link
+                href="/login"
+                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl backdrop-blur-sm"
+              >
+                {t.nav.login}
+              </Link>
             )}
-            {/* Text: Always show during transitions, hide on mobile for idle states */}
-            <span
-              className={`${buttonState === "filling" || buttonState === "clearing" ? "inline" : "hidden lg:inline"}`}
-            >
-              {buttonState === "test"
-                ? t.nav.test
-                : buttonState === "filling"
-                  ? t.common.filled
-                  : buttonState === "clearing"
-                    ? t.common.cleared
-                    : t.common.clear}
-            </span>
-          </button>
+          </div>
+        </header>
 
-          {/* Login/Sign Up button - visible on PC view */}
-          {!loading && !user && (
-            <Link
-              href="/login"
-              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl backdrop-blur-sm"
-            >
-              {t.nav.login}
-            </Link>
-          )}
+        <section className="container mx-auto py-8 md:py-16 px-5 md:px-10 relative z-20">
+          <div className="bg-white rounded-[18px] shadow-depth-2 border border-border overflow-hidden">
+            <DiagnosisWizard />
+          </div>
+        </section>
+
+        {/* Promotional footer - hidden on mobile during step 2/7 and beyond to reduce confusion during data entry */}
+        {/* Promotional footer / App Download Section - hidden on mobile during step 2/7 and beyond */}
+        <div className={isStep2OrBeyondMobile ? "hidden md:block" : ""}>
+          <AppDownloadSection />
         </div>
-      </header>
-
-      <section className="container mx-auto py-8 md:py-16 px-5 md:px-10 relative z-20">
-        <div className="bg-white rounded-[18px] shadow-depth-2 border border-border overflow-hidden">
-          <DiagnosisWizard />
-        </div>
-      </section>
-
-      {/* Promotional footer - hidden on mobile during step 2/7 and beyond to reduce confusion during data entry */}
-      {/* Promotional footer / App Download Section - hidden on mobile during step 2/7 and beyond */}
-      <div className={isStep2OrBeyondMobile ? "hidden md:block" : ""}>
-        <AppDownloadSection />
-      </div>
-    </main>
+      </main>
+    </PullToRefresh>
   );
 }

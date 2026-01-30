@@ -9,10 +9,10 @@ import { usePatientFlags } from "@/components/doctor/hooks/usePatientFlags";
 import {
   DashboardDemoNotice,
   DashboardStatsCards,
-  DashboardFilters,
-  PatientCard,
+  PatientCardSkeleton,
   EmptyState,
 } from "@/components/doctor/dashboard";
+import { InquiryCard, InquiryFilters } from "@/components/doctor/shared";
 
 export default function DoctorDashboard() {
   const { loading: authLoading } = useAuth();
@@ -80,7 +80,7 @@ export default function DoctorDashboard() {
           <DashboardStatsCards stats={stats} />
 
           {/* Search & Filter Section */}
-          <DashboardFilters
+          <InquiryFilters
             searchQuery={filters.searchQuery}
             setSearchQuery={setSearchQuery}
             dateFrom={filters.dateFrom}
@@ -96,10 +96,11 @@ export default function DoctorDashboard() {
             clearFilters={clearFilters}
             hasActiveFilters={hasActiveFilters}
             symptomTags={symptomTags}
+            sticky
           />
 
           {/* Results Count */}
-          <div className="mb-4 text-sm text-gray-600">
+          <div className="mb-4 text-xs sm:text-sm text-gray-600">
             Showing {filteredInquiries.length} of {inquiries.length} records
             {hasActiveFilters && " (filtered)"}
           </div>
@@ -107,10 +108,11 @@ export default function DoctorDashboard() {
           {/* Patient Records List */}
           <div className="grid gap-4">
             {filteredInquiries.map((inquiry) => (
-              <PatientCard
+              <InquiryCard
                 key={inquiry.id}
                 inquiry={inquiry}
                 onUpdateFlag={updateProfileFlag}
+                variant="dashboard"
               />
             ))}
 

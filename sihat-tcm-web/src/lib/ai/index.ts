@@ -16,8 +16,13 @@ export type {
   ModelRouterConfig
 } from "./interfaces/ModelInterfaces";
 
-// Main router class
+// Main router classes
 export { AIModelRouter } from "./ModelRouter";
+export { 
+  EnhancedAIModelRouter,
+  defaultEnhancedRouter,
+  createEnhancedRouter 
+} from "./core/EnhancedAIModelRouter";
 
 // Specialized components
 export { ComplexityAnalyzer } from "./analysis/ComplexityAnalyzer";

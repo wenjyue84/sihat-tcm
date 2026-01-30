@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/stores/useAppStore";
 import { getSessionById, updateSessionNotes, deleteSession } from "@/lib/actions";
-import { DiagnosisReport } from "@/components/diagnosis/DiagnosisReport";
+import { DiagnosisReport } from "@/features/diagnosis";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -217,10 +217,10 @@ export default function HistoryViewerPage() {
               {session.overall_score !== null && session.overall_score !== undefined && (
                 <div
                   className={`px-4 py-2 rounded-full font-bold ${session.overall_score >= 75
-                      ? "bg-emerald-100 text-emerald-700"
-                      : session.overall_score >= 50
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-red-100 text-red-700"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : session.overall_score >= 50
+                      ? "bg-amber-100 text-amber-700"
+                      : "bg-red-100 text-red-700"
                     }`}
                 >
                   Score: {session.overall_score}

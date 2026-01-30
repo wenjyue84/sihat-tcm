@@ -754,6 +754,10 @@ export const zh: TranslationKeys = {
     noHealthData: "未连接健康应用",
     editHealthApp: "编辑健康应用",
     addHealthApp: "添加健康应用",
+    skipConfirmationTitle: "未输入健康数据",
+    skipConfirmationMessage:
+      "您尚未输入任何健康读数。输入这些数据有助于提供更准确的诊断。您想要输入数据还是跳过此步骤？",
+    enterData: "输入数据",
   },
   imageAnalysis: {
     analyzing: "正在分析图像...",

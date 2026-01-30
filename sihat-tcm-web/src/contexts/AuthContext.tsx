@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
+import { createClientServices } from "@/lib/services";
 import { logger } from "@/lib/clientLogger";
 
 export type Role = "admin" | "doctor" | "patient" | "developer";
@@ -90,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single();
+      const { data, error } = await createClientServices().profiles.getById(userId);
 
       if (error) {
         logger.error("AuthContext", "Error fetching profile", error);
@@ -122,10 +123,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   setProfile((prev) =>
                     prev
                       ? {
-                          ...prev,
-                          preferred_language: localLanguage,
-                          preferences: { ...(prev.preferences || {}), language: localLanguage },
-                        }
+                        ...prev,
+                        preferred_language: localLanguage,
+                        preferences: { ...(prev.preferences || {}), language: localLanguage },
+                      }
                       : prev
                   );
                 }
@@ -184,10 +185,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile((prev) =>
         prev
           ? {
-              ...prev,
-              preferences: updatedPrefs,
-              ...(newPrefs.language ? { preferred_language: newPrefs.language } : {}),
-            }
+            ...prev,
+            preferences: updatedPrefs,
+            ...(newPrefs.language ? { preferred_language: newPrefs.language } : {}),
+          }
           : prev
       );
     } catch (err) {

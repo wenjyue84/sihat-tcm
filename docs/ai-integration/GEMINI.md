@@ -224,3 +224,35 @@ cd sihat-tcm-mobile && npx expo start --clear
    - Always check BOTH when building patient displays
 
 4. **Types Location**: All database types are in `sihat-tcm-web/src/types/database.ts`
+
+---
+
+## AI Assistant Capabilities
+
+> **SQL migrations can be run directly** - `SUPABASE_SERVICE_ROLE_KEY` is configured in `sihat-tcm-web/.env.local`.
+
+### Running Migrations
+
+When asked to run SQL or database changes:
+1. Create a Node.js script (`.mjs`) in `sihat-tcm-web/`
+2. Use the Supabase client with service role key for admin access
+3. Execute with: `node your-migration.mjs`
+
+### Available Scripts
+| Script | Purpose |
+|--------|---------|
+| `run-migration.mjs` | Doctor approval column migration |
+| `seed-test-doctors.mjs` | Create test doctor accounts |
+
+### Workflow
+Use `/run-sql-migration` for guided migration execution.
+
+
+## AI Tooling (MCP)
+
+> **Supercharge your workflow**: Use the Model Context Protocol (MCP) to give Gemini direct access to your tools.
+
+- **Guide**: See `docs/setup/MCP_SETUP.md`
+- **Supported Tools**: Supabase, GitHub, PostgreSQL
+- **Usage**: Once configured, you can ask Gemini to "Run this SQL query" or "Create a GitHub issue" directly.
+
