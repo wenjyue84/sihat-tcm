@@ -7,7 +7,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, FileText, Upload, Eye, Trash2, Utensils, Sparkles, Users, Plus } from "lucide-react";
+import {
+  Loader2,
+  FileText,
+  Upload,
+  Eye,
+  Trash2,
+  Utensils,
+  Sparkles,
+  Users,
+  Plus,
+} from "lucide-react";
 import { HealthJourneyTimeline } from "../HealthJourneyTimeline";
 import { FiveElementsRadar } from "../FiveElementsRadar";
 import { MealPlanWizard } from "../../meal-planner/MealPlanWizard";
@@ -137,10 +147,11 @@ export function UnifiedDashboardContent({
           <div className="inline-flex p-1 bg-slate-100 rounded-xl w-fit shadow-sm">
             <button
               onClick={() => setMealSubSection("plan")}
-              className={`relative px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ease-out ${mealSubSection === "plan"
+              className={`relative px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ease-out ${
+                mealSubSection === "plan"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-600 hover:text-slate-900"
-                }`}
+              }`}
             >
               <span className="relative z-10 flex items-center gap-2">
                 <Utensils className="w-4 h-4" />
@@ -149,10 +160,11 @@ export function UnifiedDashboardContent({
             </button>
             <button
               onClick={() => setMealSubSection("checker")}
-              className={`relative px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ease-out ${mealSubSection === "checker"
+              className={`relative px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ease-out ${
+                mealSubSection === "checker"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-600 hover:text-slate-900"
-                }`}
+              }`}
             >
               <span className="relative z-10 flex items-center gap-2">
                 <Sparkles className="w-4 h-4" />
@@ -165,13 +177,13 @@ export function UnifiedDashboardContent({
         {mealSubSection === "plan" ? (
           <MealPlanWizard
             latestDiagnosis={
-              sessions.length > 0 ? (sessions[0].full_report || sessions[0]) as any : undefined
+              sessions.length > 0 ? ((sessions[0].full_report || sessions[0]) as any) : undefined
             }
           />
         ) : (
           <TCMFoodChecker
             latestDiagnosis={
-              sessions.length > 0 ? (sessions[0].full_report || sessions[0]) as any : undefined
+              sessions.length > 0 ? ((sessions[0].full_report || sessions[0]) as any) : undefined
             }
             onBack={() => setMealSubSection("plan")}
           />
@@ -204,7 +216,7 @@ export function UnifiedDashboardContent({
             </CardDescription>
           </CardHeader>
           <CardContent className="px-0 pb-0">
-            <ConstitutionTrendChart />
+            <ConstitutionTrendChart sessions={sessions} loading={loadingSessions} />
           </CardContent>
         </Card>
       </div>
@@ -237,8 +249,8 @@ export function UnifiedDashboardContent({
               </div>
               <h3 className="text-xl font-bold text-slate-800 mb-3">Join Our Community</h3>
               <p className="text-slate-600 mb-6 leading-relaxed">
-                Complete your first diagnosis to unlock personalized community groups based on
-                your constitution.
+                Complete your first diagnosis to unlock personalized community groups based on your
+                constitution.
               </p>
               <Button
                 onClick={() => router.push("/")}
@@ -275,10 +287,7 @@ export function UnifiedDashboardContent({
       <div className="space-y-6 max-w-7xl mx-auto">
         <DailyWellnessTip />
         {/* Hero Section */}
-        <ProfileHero
-          name={profileData.full_name || "Patient"}
-          email={userEmail}
-        />
+        <ProfileHero name={profileData.full_name || "Patient"} email={userEmail} />
 
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -506,9 +515,7 @@ export function UnifiedDashboardContent({
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <FileText className="w-5 h-5 text-blue-600 shrink-0" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-slate-800 truncate">
-                          {report.name}
-                        </p>
+                        <p className="text-sm font-medium text-slate-800 truncate">{report.name}</p>
                         <p className="text-xs text-slate-500">
                           {report.date} • {report.size}
                         </p>
@@ -568,4 +575,3 @@ export function UnifiedDashboardContent({
 
   return null;
 }
-
