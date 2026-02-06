@@ -45,6 +45,12 @@ const chipsVariants = {
 };
 
 type ActiveField = "age" | "height" | "weight" | null;
+type FieldErrors = {
+  name?: string;
+  age?: string;
+  height?: string;
+  weight?: string;
+};
 
 /**
  * Combined step for personal information:
@@ -56,12 +62,58 @@ export function PersonalInfoStep({ formData, setFormData }: PersonalInfoStepProp
   const { t } = useLanguage();
   const [showBMIModal, setShowBMIModal] = useState(false);
   const [activeField, setActiveField] = useState<ActiveField>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   // Calculate BMI if height and weight are filled
   const bmi =
     formData.height && formData.weight
       ? (parseFloat(formData.weight) / Math.pow(parseFloat(formData.height) / 100, 2)).toFixed(1)
       : null;
+
+  // Validation functions
+  const validateName = (value: string): string | null => {
+    const trimmed = value.trim();
+    if (!trimmed) return "Name is required";
+    if (trimmed.length < 2) return "Name must be at least 2 characters";
+    return null;
+  };
+
+  const validateAge = (value: string): string | null => {
+    if (!value) return "Age is required";
+    const age = parseInt(value, 10);
+    if (isNaN(age)) return "Please enter a valid age";
+    if (age < 0 || age > 120) return "Please enter an age between 0 and 120";
+    return null;
+  };
+
+  const validateHeight = (value: string): string | null => {
+    if (!value) return null; // Optional field
+    const height = parseFloat(value);
+    if (isNaN(height)) return "Please enter a valid height";
+    if (height < 100 || height > 250) return "Please enter a height between 100 and 250 cm";
+    return null;
+  };
+
+  const validateWeight = (value: string): string | null => {
+    if (!value) return null; // Optional field
+    const weight = parseFloat(value);
+    if (isNaN(weight)) return "Please enter a valid weight";
+    if (weight < 20 || weight > 300) return "Please enter a weight between 20 and 300 kg";
+    return null;
+  };
+
+  // Error management functions
+  const setFieldError = (field: keyof FieldErrors, message: string): void => {
+    setFieldErrors((prev) => ({ ...prev, [field]: message }));
+  };
+
+  const clearFieldError = (field: keyof FieldErrors): void => {
+    setFieldErrors((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [field]: _, ...rest } = prev;
+      return rest;
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -77,13 +129,27 @@ export function PersonalInfoStep({ formData, setFormData }: PersonalInfoStepProp
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, name: e.target.value });
+                clearFieldError("name");
+              }}
+              onBlur={(e) => {
+                const error = validateName(e.target.value);
+                if (error) setFieldError("name", error);
+              }}
               placeholder={t.basicInfo.fullNamePlaceholder}
               className="pl-10 h-10 border-border focus-visible:ring-ring focus-visible:border-primary bg-muted/20 text-foreground"
               suppressHydrationWarning
               onFocus={() => setActiveField(null)}
+              aria-invalid={!!fieldErrors.name}
+              aria-describedby={fieldErrors.name ? "name-error" : undefined}
             />
           </div>
+          {fieldErrors.name && (
+            <p id="name-error" className="text-sm text-destructive mt-1" role="alert">
+              {fieldErrors.name}
+            </p>
+          )}
         </div>
 
         {/* Gender Dropdown */}
@@ -122,14 +188,29 @@ export function PersonalInfoStep({ formData, setFormData }: PersonalInfoStepProp
           <StepperInput
             id="age"
             value={formData.age}
-            onChange={(val) => setFormData({ ...formData, age: val })}
+            onChange={(val) => {
+              setFormData({ ...formData, age: val });
+              clearFieldError("age");
+            }}
+            onBlur={(val) => {
+              const error = validateAge(val);
+              if (error) setFieldError("age", error);
+            }}
             min={1}
             max={150}
             step={1}
             placeholder="25"
             unit="yr"
+            pattern="[0-9]*"
             onFocus={() => setActiveField("age")}
+            aria-invalid={!!fieldErrors.age}
+            aria-describedby={fieldErrors.age ? "age-error" : undefined}
           />
+          {fieldErrors.age && (
+            <p id="age-error" className="text-sm text-destructive mt-1" role="alert">
+              {fieldErrors.age}
+            </p>
+          )}
           <AnimatePresence>
             {activeField === "age" && (
               <motion.div
@@ -162,14 +243,29 @@ export function PersonalInfoStep({ formData, setFormData }: PersonalInfoStepProp
           <StepperInput
             id="height"
             value={formData.height}
-            onChange={(val) => setFormData({ ...formData, height: val })}
+            onChange={(val) => {
+              setFormData({ ...formData, height: val });
+              clearFieldError("height");
+            }}
+            onBlur={(val) => {
+              const error = validateHeight(val);
+              if (error) setFieldError("height", error);
+            }}
             min={50}
             max={250}
             step={1}
             placeholder="170"
             unit="cm"
+            pattern="[0-9]*"
             onFocus={() => setActiveField("height")}
+            aria-invalid={!!fieldErrors.height}
+            aria-describedby={fieldErrors.height ? "height-error" : undefined}
           />
+          {fieldErrors.height && (
+            <p id="height-error" className="text-sm text-destructive mt-1" role="alert">
+              {fieldErrors.height}
+            </p>
+          )}
           <AnimatePresence>
             {activeField === "height" && (
               <motion.div
@@ -202,14 +298,29 @@ export function PersonalInfoStep({ formData, setFormData }: PersonalInfoStepProp
           <StepperInput
             id="weight"
             value={formData.weight}
-            onChange={(val) => setFormData({ ...formData, weight: val })}
+            onChange={(val) => {
+              setFormData({ ...formData, weight: val });
+              clearFieldError("weight");
+            }}
+            onBlur={(val) => {
+              const error = validateWeight(val);
+              if (error) setFieldError("weight", error);
+            }}
             min={20}
             max={300}
             step={1}
             placeholder="65"
             unit="kg"
+            pattern="[0-9]*"
             onFocus={() => setActiveField("weight")}
+            aria-invalid={!!fieldErrors.weight}
+            aria-describedby={fieldErrors.weight ? "weight-error" : undefined}
           />
+          {fieldErrors.weight && (
+            <p id="weight-error" className="text-sm text-destructive mt-1" role="alert">
+              {fieldErrors.weight}
+            </p>
+          )}
           <AnimatePresence>
             {activeField === "weight" && (
               <motion.div

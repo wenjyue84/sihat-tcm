@@ -47,6 +47,10 @@ interface SymptomsStepProps {
 }
 
 type CategoryMode = "simple" | "western" | "tcm";
+type FieldErrors = {
+  mainComplaint?: string;
+  symptomDuration?: string;
+};
 
 export function SymptomsStep({
   formData,
@@ -65,6 +69,33 @@ export function SymptomsStep({
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [historySessions, setHistorySessions] = useState<DiagnosisSession[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  // Validation functions
+  const validateMainComplaint = (value: string): string | null => {
+    const trimmed = value.trim();
+    if (!trimmed) return "Main concern is required";
+    if (trimmed.length < 2) return "Please provide more details (at least 2 characters)";
+    return null;
+  };
+
+  const validateSymptomDuration = (value: string): string | null => {
+    if (!value) return "Symptom duration is required";
+    return null;
+  };
+
+  // Error management functions
+  const setFieldError = (field: keyof FieldErrors, message: string): void => {
+    setFieldErrors((prev) => ({ ...prev, [field]: message }));
+  };
+
+  const clearFieldError = (field: keyof FieldErrors): void => {
+    setFieldErrors((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [field]: _, ...rest } = prev;
+      return rest;
+    });
+  };
 
   const handleImportPrevious = async () => {
     setIsLoadingHistory(true);
@@ -484,16 +515,30 @@ export function SymptomsStep({
         <Input
           id="mainComplaint"
           value={formData.mainComplaint}
-          onChange={(e) => setFormData({ ...formData, mainComplaint: e.target.value })}
+          onChange={(e) => {
+            setFormData({ ...formData, mainComplaint: e.target.value });
+            clearFieldError("mainComplaint");
+          }}
           onFocus={() => {
             setActiveInput("main");
             setIsInputFocused(true);
           }}
-          onBlur={() => setIsInputFocused(false)}
+          onBlur={(e) => {
+            setIsInputFocused(false);
+            const error = validateMainComplaint(e.target.value);
+            if (error) setFieldError("mainComplaint", error);
+          }}
           placeholder={t.basicInfo.mainConcernPlaceholder || "e.g. Severe Headache"}
           className={`border-border bg-muted/20 transition-all ${activeInput === "main" ? "ring-2 ring-primary/20 border-primary" : ""}`}
           suppressHydrationWarning
+          aria-invalid={!!fieldErrors.mainComplaint}
+          aria-describedby={fieldErrors.mainComplaint ? "mainComplaint-error" : undefined}
         />
+        {fieldErrors.mainComplaint && (
+          <p id="mainComplaint-error" className="text-sm text-destructive mt-1" role="alert">
+            {fieldErrors.mainComplaint}
+          </p>
+        )}
       </div>
       {isInputFocused && activeInput === "main" && quickSelectionsSection}
 
@@ -542,11 +587,22 @@ export function SymptomsStep({
         </Label>
         <Select
           value={formData.symptomDuration}
-          onValueChange={(val) => setFormData({ ...formData, symptomDuration: val })}
+          onValueChange={(val) => {
+            setFormData({ ...formData, symptomDuration: val });
+            clearFieldError("symptomDuration");
+          }}
+          onOpenChange={(open) => {
+            if (!open && !formData.symptomDuration) {
+              const error = validateSymptomDuration(formData.symptomDuration);
+              if (error) setFieldError("symptomDuration", error);
+            }
+          }}
         >
           <SelectTrigger
             id="symptomDuration"
             className="h-12 border-border focus:ring-primary/50 focus:border-primary bg-muted/20 text-foreground"
+            aria-invalid={!!fieldErrors.symptomDuration}
+            aria-describedby={fieldErrors.symptomDuration ? "symptomDuration-error" : undefined}
           >
             <SelectValue placeholder={t.basicInfo.durationPlaceholder} />
           </SelectTrigger>
@@ -565,6 +621,11 @@ export function SymptomsStep({
             <SelectItem value="chronic">{t.basicInfo.durationOptions.chronic}</SelectItem>
           </SelectContent>
         </Select>
+        {fieldErrors.symptomDuration && (
+          <p id="symptomDuration-error" className="text-sm text-destructive mt-1" role="alert">
+            {fieldErrors.symptomDuration}
+          </p>
+        )}
       </div>
 
       {/* History Selection Dialog */}

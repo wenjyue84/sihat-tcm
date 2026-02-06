@@ -18,7 +18,12 @@ interface StepperInputProps {
   /** Called when the input receives focus */
   onFocus?: () => void;
   /** Called when the input loses focus */
-  onBlur?: () => void;
+  onBlur?: (value: string) => void;
+  /** HTML pattern attribute for mobile keyboard optimization */
+  pattern?: string;
+  /** ARIA attributes for accessibility */
+  "aria-invalid"?: boolean;
+  "aria-describedby"?: string;
 }
 
 export function StepperInput({
@@ -34,6 +39,9 @@ export function StepperInput({
   id,
   onFocus: onFocusProp,
   onBlur: onBlurProp,
+  pattern,
+  "aria-invalid": ariaInvalid,
+  "aria-describedby": ariaDescribedby,
 }: StepperInputProps) {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -59,14 +67,18 @@ export function StepperInput({
 
   const handleBlur = () => {
     setIsFocused(false);
-    onBlurProp?.();
     // Clamp value on blur
     if (value !== "") {
       const num = parseFloat(value);
       if (!isNaN(num)) {
         const clamped = Math.min(Math.max(num, min), max);
         onChange(clamped.toString());
+        onBlurProp?.(clamped.toString());
+      } else {
+        onBlurProp?.(value);
       }
+    } else {
+      onBlurProp?.(value);
     }
   };
 
@@ -111,6 +123,7 @@ export function StepperInput({
           id={id}
           type="text"
           inputMode="numeric"
+          pattern={pattern}
           value={value}
           onChange={handleInputChange}
           onFocus={handleFocus}
@@ -122,6 +135,8 @@ export function StepperInput({
             "focus:outline-none",
             icon ? "pl-7" : ""
           )}
+          aria-invalid={ariaInvalid}
+          aria-describedby={ariaDescribedby}
         />
         {unit && (
           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-medium">
