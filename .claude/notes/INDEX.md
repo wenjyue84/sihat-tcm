@@ -13,9 +13,11 @@
 
 | Mistake | Where | Last Seen | Fix Note |
 |---------|-------|-----------|----------|
-| DiagnosisWizard import error | Web | 2026-01-15 | [Link](diagnosis/iot-connection-wizard.md#import-error) |
-| Missing platform detection for IoT | Mobile | 2026-02-01 | [Link](diagnosis/iot-connection-wizard.md#platform-detection) |
-| Type safety violations | Web | 2026-01-20 | [Link](patterns/type-safety.md#any-types) |
+| Infinite loop from unstable callbacks | Web | 2026-02-06 | [Link](patterns/react-hooks.md#infinite-loops-from-unstable-callbacks) |
+| `!!onBack` in dependency array | Web | 2026-02-06 | [Link](patterns/react-hooks.md#boolean-coercion-in-dependencies) |
+| DiagnosisWizard import error | Web | 2026-02-06 | [Link](diagnosis/iot-connection-wizard.md#1-import-error---default-vs-named-export) |
+| Missing platform detection for IoT | Mobile | 2026-02-06 | [Link](diagnosis/iot-connection-wizard.md#2-platform-detection-missing) |
+| Type safety violations | Web | 2026-02-06 | [Link](patterns/type-safety.md#1-using-any-type) |
 
 ## By Feature Area
 
@@ -24,16 +26,9 @@
 - [Session Recovery](diagnosis/session-recovery.md) - Draft management, edge cases
 - [4-Examination Flow](diagnosis/4-examination-flow.md) - Wizard navigation, state management
 
-### Mobile App
-- [Biometric Auth](mobile/biometric-auth.md) - Platform-specific authentication
-- [Offline Sync](mobile/offline-sync.md) - Data persistence patterns
-
-### Deployment
-- [Vercel Builds](deployment/vercel-builds.md) - Type errors, build failures
-- [Supabase Migrations](deployment/supabase-migrations.md) - Schema changes, data integrity
-
 ## By Pattern
 
+- [React Hooks](patterns/react-hooks.md) - useEffect dependencies, callback stability, infinite loop prevention
 - [Error Handling](patterns/error-handling.md) - AppError system, boundary patterns
 - [Type Safety](patterns/type-safety.md) - Zero `any` enforcement, strict mode
 - [Testing](patterns/testing.md) - Vitest, property-based testing
