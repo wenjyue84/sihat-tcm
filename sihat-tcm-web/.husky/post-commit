@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
 
 # Get commit message
 COMMIT_MSG=$(git log -1 --pretty=%B)
@@ -7,14 +6,13 @@ COMMIT_MSG=$(git log -1 --pretty=%B)
 # Check if this looks like a fix or refactor
 if echo "$COMMIT_MSG" | grep -qE "^(fix|refactor|perf)"; then
   echo ""
-  echo "📝 Post-commit reminder:"
+  echo "[notes] Post-commit reminder:"
   echo "   This looks like a fix/refactor. Did you learn something new?"
   echo "   Update task notes: .claude/notes/INDEX.md"
   echo "   Run: npm run notes:update"
   echo ""
 else
-  # For other commits, show brief reminder
   echo ""
-  echo "📝 Reminder: Update .claude/notes/ if you learned something new"
+  echo "[notes] Reminder: Update .claude/notes/ if you learned something new"
   echo ""
 fi
