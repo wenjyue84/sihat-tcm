@@ -26,7 +26,9 @@ AI-powered Traditional Chinese Medicine (TCM) diagnostic platform implementing t
 sihat-tcm-web/
 ├── src/app/          # Next.js App Router pages
 ├── src/components/   # React components by feature
-│   └── diagnosis/    # DiagnosisWizard, IoTConnectionWizard, SessionRecoveryModal
+│   ├── doctor/       # DoctorDiagnosisWizard (main diagnosis flow)
+│   ├── patient/      # Patient dashboard components
+│   └── ui/           # Shared UI components (ErrorBoundary, etc.)
 ├── src/lib/          # Utilities, AI routing, constants
 ├── src/types/        # TypeScript interfaces
 └── src/app/api/      # API routes
@@ -34,7 +36,7 @@ sihat-tcm-web/
 sihat-tcm-mobile/
 ├── screens/          # App screens
 ├── components/       # Reusable UI
-├── lib/              # Device integration
+├── lib/              # Device integration (BLE, sensors)
 └── contexts/         # Theme, Language providers
 ```
 
@@ -127,10 +129,9 @@ git commit -m "refactor(iot): extract device connection logic"
 Steps: Basic Info → Inquiry (WEN) → Visual Analysis (WANG) → Audio (WEN) → Pulse (QIE) → IoT Smart Connect → Analysis → Results
 
 **Critical Components:**
-- `DiagnosisWizard` - **Default export** (not named export)
-- `IoTConnectionWizard` - Manual device input with validation
-- `SessionRecoveryModal` - Resume incomplete sessions
-- `useInquiryWizardState` - State management hook
+- `DoctorDiagnosisWizard` - Main diagnosis wizard (at `src/components/doctor/DoctorDiagnosisWizard.tsx`) - **Default export** (not named export)
+- IoT device integration built into wizard - Manual device input with validation
+- Session recovery built into wizard - Resume incomplete sessions from Supabase drafts
 
 ### IoT Devices
 Supported types: pulse, blood pressure, oxygen, temperature, HRV, stress
@@ -188,9 +189,9 @@ Centralized in:
 Quick reference:
 | Issue | Solution |
 |-------|----------|
-| DiagnosisWizard import error | Use default import, not named |
-| IoT connection fails | Check transport configuration |
-| Session recovery not showing | Verify Supabase draft table |
+| DoctorDiagnosisWizard import error | Use default import from `@/components/doctor/DoctorDiagnosisWizard` |
+| IoT connection fails | Check transport configuration (BLE for mobile, WS for web) |
+| Session recovery not showing | Verify Supabase `diagnosis_drafts` table and TTL |
 | Type errors in diagnosis | Check `src/types/diagnosis.ts` |
 
 ## Do NOT Modify

@@ -139,14 +139,12 @@ const currentStepIndex = activeSteps.findIndex(s => s.id === currentStepId);
 
 | Date | Decision | Rationale | PR |
 |------|----------|-----------|-----|
-| 2026-01-10 | IoT step optional | Not all practitioners have devices | #65 |
-| 2026-01-15 | Auto-save on navigation | Prevent data loss when going back | #73 |
-| 2026-01-25 | Progress bar based on completed steps | Better user feedback | #91 |
+| 2026-02-06 | IoT step optional | Not all practitioners have devices | — |
+| 2026-02-06 | Auto-save on navigation | Prevent data loss when going back | — |
 
 ## Related Files
 
-- `sihat-tcm-web/src/components/diagnosis/DiagnosisWizard.tsx` - Main wizard component
-- `sihat-tcm-web/src/components/diagnosis/inquiry/hooks/useInquiryWizardState.ts` - State hook
+- `sihat-tcm-web/src/components/doctor/DoctorDiagnosisWizard.tsx` - Main wizard component
 - `sihat-tcm-web/src/types/diagnosis.ts` - `DiagnosisWizardData` type
 
 ## Related Notes

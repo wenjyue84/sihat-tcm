@@ -118,14 +118,13 @@ $$ LANGUAGE plpgsql;
 
 | Date | Decision | Rationale | PR |
 |------|----------|-----------|-----|
-| 2026-01-18 | 7-day TTL for drafts | Balance between convenience and data hygiene | #85 |
-| 2026-01-22 | Auto-save every 30 seconds | Prevent data loss without excessive DB writes | #88 |
-| 2026-02-01 | Show completion % in modal | Help user decide which session to resume | #97 |
+| 2026-02-06 | 7-day TTL for drafts | Balance between convenience and data hygiene | — |
+| 2026-02-06 | Auto-save every 30 seconds | Prevent data loss without excessive DB writes | — |
 
 ## Related Files
 
-- `sihat-tcm-web/src/components/diagnosis/SessionRecoveryModal.tsx` - Recovery UI
-- `sihat-tcm-web/src/lib/supabase/drafts.ts` - Draft CRUD operations
+- `sihat-tcm-web/src/components/doctor/DoctorDiagnosisWizard.tsx` - Wizard with session recovery
+- `sihat-tcm-web/src/lib/supabase/client.ts` - Supabase client for draft operations
 - `sihat-tcm-web/src/types/diagnosis.ts` - `PendingResumeState` type
 
 ## Related Notes

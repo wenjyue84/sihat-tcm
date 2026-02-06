@@ -104,7 +104,7 @@ try {
 **Fix:**
 ```typescript
 // Add Error Boundary component
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 // Wrap critical components
 <ErrorBoundary
@@ -113,7 +113,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
     console.error("Diagnosis wizard error:", error, errorInfo);
   }}
 >
-  <DiagnosisWizard />
+  <DoctorDiagnosisWizard />
 </ErrorBoundary>
 ```
 
@@ -181,7 +181,7 @@ useEffect(() => {
 ### Usage Pattern
 
 ```typescript
-import { AppError } from "@/lib/errors";
+import { AppError } from "@/lib/errors/AppError";
 
 // Create typed error
 throw new AppError(
@@ -216,7 +216,7 @@ App
 ├── ErrorBoundary (global fallback)
 │   ├── DiagnosisPage
 │   │   └── ErrorBoundary (diagnosis-specific)
-│   │       └── DiagnosisWizard
+│   │       └── DoctorDiagnosisWizard
 │   └── PatientDashboard
 │       └── ErrorBoundary (dashboard-specific)
 │           └── PatientCharts
@@ -250,15 +250,13 @@ enum ErrorLevel {
 
 | Date | Decision | Rationale | PR |
 |------|----------|-----------|-----|
-| 2026-01-12 | AppError centralized system | Consistent error handling across app | #70 |
-| 2026-01-18 | Error boundaries per feature | Prevent full app crashes | #76 |
-| 2026-02-03 | Error tracking integration | Monitor production errors | #100 |
+| 2026-02-06 | AppError centralized system | Consistent error handling across app | — |
+| 2026-02-06 | Error boundaries per feature | Prevent full app crashes | — |
 
 ## Related Files
 
 - `sihat-tcm-web/src/lib/errors/AppError.ts` - Error class definition
-- `sihat-tcm-web/src/components/ErrorBoundary.tsx` - React Error Boundary
-- `sihat-tcm-web/src/lib/errors/index.ts` - Error utilities
+- `sihat-tcm-web/src/components/ui/ErrorBoundary.tsx` - React Error Boundary
 
 ## Related Notes
 

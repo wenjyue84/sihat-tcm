@@ -10,7 +10,7 @@ Type safety patterns and learnings from enforcing strict TypeScript across Sihat
 
 ## Common Mistakes & Fixes
 
-### 1. Using `any` Type {#any-types}
+### 1. Using `any` Type
 
 **Problem:**
 - Type errors bypassed with `any`
@@ -255,17 +255,15 @@ type DeviceType = "pulse" | "bloodPressure" | "oxygen"; // Must maintain manuall
 
 | Date | Decision | Rationale | PR |
 |------|----------|-----------|-----|
-| 2026-01-10 | Strict mode enabled | Catch errors at compile time, not runtime | #67 |
-| 2026-01-15 | Zero `any` policy | Enforce complete type coverage | #72 |
-| 2026-01-20 | Centralized constants | Eliminated 47 magic numbers | #78 |
-| 2026-02-01 | Zod for API validation | Runtime validation at boundaries | #95 |
+| 2026-02-06 | Strict mode enabled | Catch errors at compile time, not runtime | — |
+| 2026-02-06 | Zero `any` policy | Enforce complete type coverage | — |
+| 2026-02-06 | Centralized constants | Eliminated 47 magic numbers | — |
 
 ## Related Files
 
 - `sihat-tcm-web/tsconfig.json` - TypeScript configuration
 - `sihat-tcm-web/src/types/diagnosis.ts` - Core type definitions
 - `sihat-tcm-web/src/lib/constants/index.ts` - Centralized constants
-- `sihat-tcm-web/src/lib/validation/` - Zod schemas
 
 ## Related Notes
 

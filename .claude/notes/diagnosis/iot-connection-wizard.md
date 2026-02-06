@@ -10,7 +10,7 @@ The IoT Connection Wizard (`IoTConnectionWizard.tsx`) manages the connection flo
 
 ## Common Mistakes & Fixes
 
-### 1. Import Error - Default vs Named Export {#import-error}
+### 1. Import Error - Default vs Named Export
 
 **Problem:**
 - Import fails with "IoTConnectionWizard is not exported from module"
@@ -23,10 +23,11 @@ The IoT Connection Wizard (`IoTConnectionWizard.tsx`) manages the connection flo
 **Fix:**
 ```typescript
 // ❌ Wrong
-import { IoTConnectionWizard } from "@/components/diagnosis/IoTConnectionWizard";
+import { DoctorDiagnosisWizard } from "@/components/doctor/DoctorDiagnosisWizard";
 
 // ✅ Correct
-import IoTConnectionWizard from "@/components/diagnosis/IoTConnectionWizard";
+import DoctorDiagnosisWizard from "@/components/doctor/DoctorDiagnosisWizard";
+// Note: IoTConnectionWizard is integrated within DoctorDiagnosisWizard
 ```
 
 **Prevention:**
@@ -36,7 +37,7 @@ import IoTConnectionWizard from "@/components/diagnosis/IoTConnectionWizard";
 
 ---
 
-### 2. Platform Detection Missing {#platform-detection}
+### 2. Platform Detection Missing
 
 **Problem:**
 - Device connection works on web but fails on mobile
@@ -88,16 +89,17 @@ const transport = Platform.OS === "ios" || Platform.OS === "android"
 
 | Date | Decision | Rationale | PR |
 |------|----------|-----------|-----|
-| 2026-01-15 | Default export for main component | Consistency with Next.js page patterns | #89 |
-| 2026-01-20 | Manual input as fallback | Device auto-discovery not reliable in all environments | #92 |
-| 2026-02-01 | Platform-specific transport | BLE required for mobile, WebSocket for web | #98 |
+| 2026-02-06 | Default export for main component | Consistency with Next.js page patterns | — |
+| 2026-02-06 | Manual input as fallback | Device auto-discovery not reliable in all environments | — |
+| 2026-02-06 | Platform-specific transport | BLE required for mobile, WebSocket for web | — |
 
 ## Related Files
 
-- `sihat-tcm-web/src/components/diagnosis/IoTConnectionWizard.tsx` - Main component
+- `sihat-tcm-web/src/components/doctor/DoctorDiagnosisWizard.tsx` - Main wizard with IoT step integration
 - `sihat-tcm-web/src/types/diagnosis.ts` - `SmartConnectData` type definition
 - `sihat-tcm-web/src/lib/constants/index.ts` - Device validation rules
-- `sihat-tcm-mobile/lib/device-integration.ts` - Mobile BLE implementation
+- `sihat-tcm-mobile/lib/device-integration/index.ts` - Mobile device integration entry point
+- `sihat-tcm-mobile/lib/device-integration/DeviceIntegrationManager.ts` - Core BLE manager
 
 ## Related Notes
 

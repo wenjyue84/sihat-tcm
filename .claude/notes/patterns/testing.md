@@ -187,7 +187,7 @@ afterEach(() => {
 ```typescript
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
 
-describe("DiagnosisWizard", () => {
+describe("DoctorDiagnosisWizard", () => {
   // Setup
   beforeEach(() => {
     // Reset state
@@ -254,12 +254,13 @@ test("fetches diagnosis data", async () => {
 ```typescript
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import DoctorDiagnosisWizard from "@/components/doctor/DoctorDiagnosisWizard";
 
 test("submits diagnosis on button click", async () => {
   const user = userEvent.setup();
   const mockSubmit = vi.fn();
 
-  render(<DiagnosisForm onSubmit={mockSubmit} />);
+  render(<DoctorDiagnosisWizard onSubmit={mockSubmit} />);
 
   // Fill form
   await user.type(screen.getByLabelText("Name"), "Test Patient");
@@ -282,15 +283,15 @@ test("submits diagnosis on button click", async () => {
 
 | Date | Decision | Rationale | PR |
 |------|----------|-----------|-----|
-| 2026-01-08 | Vitest over Jest | Faster, better ESM support, Vite integration | #62 |
-| 2026-01-12 | Property-based testing with fast-check | Find edge cases automatically | #68 |
-| 2026-01-20 | Separate command for property tests | Long-running, not for every commit | #80 |
+| 2026-02-06 | Vitest over Jest | Faster, better ESM support, Vite integration | — |
+| 2026-02-06 | Property-based testing with fast-check | Find edge cases automatically | — |
+| 2026-02-06 | Separate command for property tests | Long-running, not for every commit | — |
 
 ## Related Files
 
-- `sihat-tcm-web/vitest.config.ts` - Vitest configuration
-- `sihat-tcm-web/src/**/*.test.ts` - Test files
-- `sihat-tcm-web/src/lib/testing/` - Property-based tests
+- `sihat-tcm-web/vitest.config.mts` - Vitest configuration (TypeScript module)
+- `sihat-tcm-web/src/**/*.test.ts` - Test files (glob pattern)
+- `sihat-tcm-web/src/lib/testing/` - Property-based testing utilities and generators
 
 ## Related Notes
 

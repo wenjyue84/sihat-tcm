@@ -19,31 +19,29 @@ The diagnosis flow follows traditional TCM methodology:
 
 ## Critical Import Rules
 
-### DiagnosisWizard
+### DoctorDiagnosisWizard
 
 **ALWAYS use default import:**
 
 ```typescript
 // ✅ Correct
-import DiagnosisWizard from "@/components/diagnosis/DiagnosisWizard";
+import DoctorDiagnosisWizard from "@/components/doctor/DoctorDiagnosisWizard";
 
 // ❌ Wrong - will cause runtime error
-import { DiagnosisWizard } from "@/components/diagnosis/DiagnosisWizard";
+import { DoctorDiagnosisWizard } from "@/components/doctor/DoctorDiagnosisWizard";
 ```
 
 ## State Management
 
-### useInquiryWizardState Hook
+### Diagnosis State Management
 
-Located at: `src/components/diagnosis/inquiry/hooks/useInquiryWizardState.ts`
+**Note:** `useInquiryWizardState` hook is integrated within `DoctorDiagnosisWizard` component. The wizard manages all state internally.
+
+Located at: `src/components/doctor/DoctorDiagnosisWizard.tsx`
 
 ```typescript
-const {
-  inquiryData,
-  updateInquiry,
-  resetInquiry,
-  isComplete,
-} = useInquiryWizardState(initialData);
+// State is managed within the wizard component
+// No separate hook import needed for external use
 ```
 
 ### DiagnosisWizardData Structure
