@@ -1,0 +1,81 @@
+# [Conventional Commits Format]
+# <type>(<scope>): <subject>
+#
+# [optional body]
+#
+# Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ATOMIC COMMIT CHECKLIST
+# ──────────────────────────────────────────────────────────────────────────────
+# ☐ Does this commit represent ONE logical change?
+# ☐ Can I explain the "why" in one sentence?
+# ☐ If reverted, does it cleanly undo one thing?
+# ☐ Does the codebase still work after THIS commit alone?
+# ☐ Are tests passing for THIS commit?
+#
+# ──────────────────────────────────────────────────────────────────────────────
+# COMMIT TYPES
+# ──────────────────────────────────────────────────────────────────────────────
+# feat:     New feature (user-facing)
+# fix:      Bug fix (user-facing)
+# docs:     Documentation only changes
+# style:    Formatting, missing semicolons, etc (no code change)
+# refactor: Code change that neither fixes a bug nor adds a feature
+# perf:     Performance improvement
+# test:     Adding/updating tests
+# chore:    Maintenance (build, dependencies, configs)
+# ci:       CI/CD changes
+# build:    Build system or external dependencies
+#
+# ──────────────────────────────────────────────────────────────────────────────
+# COMMON SCOPES (see npm run git:scope for suggestions)
+# ──────────────────────────────────────────────────────────────────────────────
+# diagnosis    - Diagnosis wizard, 4-Examination Model
+# doctor       - Doctor portal, dashboard, reports
+# patient      - Patient dashboard, communication
+# auth         - Authentication, login, sessions
+# api          - API routes, endpoints
+# db           - Database, migrations, schema
+# ui           - UI components, design system
+# iot          - IoT device integration
+# hooks        - Git hooks, Husky configuration
+# config       - Configuration files
+# deps         - Dependencies, package.json
+#
+# ──────────────────────────────────────────────────────────────────────────────
+# EXAMPLES
+# ──────────────────────────────────────────────────────────────────────────────
+# feat(diagnosis): add pulse waveform visualization
+#
+# Implements real-time pulse waveform display using Canvas API.
+# Integrates with IoT pulse sensor data stream.
+#
+# - Add PulseWaveform component
+# - Connect to WebSocket pulse data
+# - Add waveform smoothing algorithm
+#
+# Fixes: #123
+# ──────────────────────────────────────────────────────────────────────────────
+# fix(auth): resolve token refresh on session timeout
+#
+# Previously, expired tokens caused silent logout. Now properly
+# refreshes token before expiry and shows warning to user.
+#
+# Root cause: setTimeout not cleared on unmount
+# ──────────────────────────────────────────────────────────────────────────────
+# refactor(iot): extract device connection logic
+#
+# Moves device pairing logic into reusable hook for consistency
+# across diagnosis wizard steps.
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# BEST PRACTICES
+# ───────────────────────────────────────────────────────────────────────────────
+# • Subject: imperative mood ("add" not "added"), max 72 chars
+# • Body: explain WHY not WHAT (code shows what)
+# • Reference issues: "Fixes: #123" or "Refs: #456"
+# • Breaking changes: Add "BREAKING CHANGE:" in body
+# • Co-author: Always credit Claude with Co-Authored-By line
+#
+# Need help? Run: npm run git:scope

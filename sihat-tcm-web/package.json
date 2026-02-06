@@ -41,7 +41,9 @@
     "release:promote": "node scripts/promote-release.js",
     "notes:update": "node scripts/notes-open.js",
     "notes:create": "node scripts/notes-create.js",
-    "notes:index": "node scripts/notes-index.js"
+    "notes:index": "node scripts/notes-index.js",
+    "git:scope": "node scripts/suggest-commit-scope.js",
+    "git:setup": "git config --local commit.template .gitmessage && echo 'Git commit template configured!'"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.1",

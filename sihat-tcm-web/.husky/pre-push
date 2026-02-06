@@ -1,0 +1,51 @@
+#!/usr/bin/env sh
+
+# Pre-push validation hook
+# Runs comprehensive checks before pushing to protected branches
+
+# Get current branch name
+BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD)
+
+# Protected branches (main, master, production)
+PROTECTED_BRANCHES="main|master|production"
+
+echo "[pre-push] Validating push to branch: $BRANCH"
+
+if echo "$BRANCH" | grep -qE "^($PROTECTED_BRANCHES)$"; then
+  echo "[pre-push] Protected branch detected - running full validation..."
+  echo ""
+
+  # Run type check
+  echo "[pre-push] Running TypeScript type check..."
+  npm run type-check
+  TYPE_CHECK_EXIT=$?
+
+  if [ $TYPE_CHECK_EXIT -ne 0 ]; then
+    echo ""
+    echo "[pre-push] Type check failed! Fix errors before pushing to $BRANCH."
+    exit 1
+  fi
+
+  # Run tests
+  echo ""
+  echo "[pre-push] Running test suite..."
+  npm run test:run
+  TEST_EXIT=$?
+
+  if [ $TEST_EXIT -ne 0 ]; then
+    echo ""
+    echo "[pre-push] Tests failed! Fix failing tests before pushing to $BRANCH."
+    exit 1
+  fi
+
+  echo ""
+  echo "[pre-push] All validations passed! Proceeding with push."
+  echo ""
+else
+  # Feature branch - just show a reminder
+  echo "[pre-push] Feature branch - skipping full validation"
+  echo "[pre-push] Reminder: Run 'npm run type-check && npm run test:run' before creating PR"
+  echo ""
+fi
+
+exit 0
