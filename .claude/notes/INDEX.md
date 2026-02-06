@@ -26,6 +26,9 @@
 - [Session Recovery](diagnosis/session-recovery.md) - Draft management, edge cases
 - [4-Examination Flow](diagnosis/4-examination-flow.md) - Wizard navigation, state management
 
+### Integrations
+- [Telegram Notifications](telegram-notifications.md) - Context and purpose: send app information to a designated chat ID via Telegram bot
+
 ## By Pattern
 
 - [React Hooks](patterns/react-hooks.md) - useEffect dependencies, callback stability, infinite loop prevention
