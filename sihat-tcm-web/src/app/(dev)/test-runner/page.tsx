@@ -1088,7 +1088,7 @@ export default function TestRunnerPage() {
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: [], model: "gemini-1.5-pro" }),
+          body: JSON.stringify({ messages: [], model: "gemini-2.0-flash" }),
         });
         if (response.status === 404) throw new Error("Chat API not found (404)");
         break;
@@ -1149,7 +1149,7 @@ export default function TestRunnerPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               messages: [{ role: "user", content: "Test" }],
-              model: "gemini-1.5-pro",
+              model: "gemini-2.0-flash",
               language: lang,
             }),
           });
@@ -1965,7 +1965,7 @@ export default function TestRunnerPage() {
           body: JSON.stringify({
             prompt: "Test",
             data: {},
-            model: "gemini-1.5-pro",
+            model: "gemini-2.0-flash",
             language: "en",
           }),
         });
@@ -1980,7 +1980,7 @@ export default function TestRunnerPage() {
           body: JSON.stringify({
             prompt: "Analyze patient",
             data: MOCK_PROFILES[0].data,
-            model: "gemini-1.5-pro",
+            model: "gemini-2.0-flash",
             language: "en",
           }),
         });

@@ -15,12 +15,11 @@ import { devLog, logError, logInfo } from "@/lib/systemLogger";
 export const DEFAULT_FALLBACK_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash"];
 
 // Advanced fallback models for vision/analysis tasks
-export const ADVANCED_FALLBACK_MODELS = ["gemini-1.5-pro", "gemini-2.0-flash"];
+export const ADVANCED_FALLBACK_MODELS = ["gemini-2.0-flash", "gemini-1.5-flash"];
 
 // Model status messages (user-friendly, no model names exposed)
 export const MODEL_STATUS_MESSAGES: Record<string, string> = {
   "gemini-2.0-flash": "Using rapid analysis...",
-  "gemini-1.5-pro": "Using professional analysis...",
   "gemini-1.5-flash": "Using standard analysis...",
 };
 

@@ -9,8 +9,7 @@ const MODELS_TO_TEST = [
   { id: "gemini-3.0-preview", name: "Master (Gemini 3.0 Preview)" },
   { id: "gemini-2.5-pro", name: "Expert (Gemini 2.5 Pro)" },
   { id: "gemini-2.0-flash", name: "Physician (Gemini 2.0 Flash)" },
-  // Adding 1.5 models as control group to verify API key works at all
-  { id: "gemini-1.5-pro", name: "Control: Gemini 1.5 Pro" },
+  // Adding flash model as control group to verify API key works at all
   { id: "gemini-1.5-flash", name: "Control: Gemini 1.5 Flash" },
 ];
 

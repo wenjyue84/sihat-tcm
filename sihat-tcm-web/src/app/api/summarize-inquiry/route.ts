@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     }
 
     // Model is now passed from frontend based on doctor level selection:
-    // - Master (名医): gemini-1.5-pro
+    // - Master (名医): gemini-2.0-flash
     // - Expert (专家): gemini-1.5-flash
     // - Physician (医师): gemini-2.0-flash
     const { chatHistory, reportFiles, medicineFiles, basicInfo, language, model } = validation.data;
@@ -72,20 +72,22 @@ export async function POST(req: Request) {
 - Symptom Duration: ${basicInfo?.symptomDuration || "Not provided"}
 
 ## Uploaded Medical Reports:
-${(reportFiles?.length || 0) > 0
-        ? (reportFiles || [])
-          .map((f: any) => `- ${f.name}:\n${f.extractedText || "No text extracted"}`)
-          .join("\n\n")
-        : "None uploaded"
-      }
+${
+  (reportFiles?.length || 0) > 0
+    ? (reportFiles || [])
+        .map((f: any) => `- ${f.name}:\n${f.extractedText || "No text extracted"}`)
+        .join("\n\n")
+    : "None uploaded"
+}
 
 ## Current Medications (from uploaded images):
-${(medicineFiles?.length || 0) > 0
-        ? (medicineFiles || [])
-          .map((f: any) => `- ${f.name}: ${f.extractedText || "No medication info extracted"}`)
-          .join("\n")
-        : "None uploaded"
-      }
+${
+  (medicineFiles?.length || 0) > 0
+    ? (medicineFiles || [])
+        .map((f: any) => `- ${f.name}: ${f.extractedText || "No medication info extracted"}`)
+        .join("\n")
+    : "None uploaded"
+}
 
 ## Complete Chat History (问诊记录):
 ${chatHistory.map((m: any) => `[${m.role.toUpperCase()}]: ${m.content}`).join("\n\n")}
@@ -146,19 +148,16 @@ Follow the structured format specified in your system prompt.
     // Map error to step for frontend compatibility
     let step = "generation";
     if (errorMessage.includes("API_KEY") || errorMessage.includes("API key")) step = "api_key";
-    else if (errorMessage.includes("quota") || errorMessage.includes("rate limit")) step = "rate_limit";
+    else if (errorMessage.includes("quota") || errorMessage.includes("rate limit"))
+      step = "rate_limit";
     else if (errorMessage.includes("model") || errorMessage.includes("MODEL")) step = "model";
-    else if (errorMessage.includes("fetch") || errorMessage.includes("network")) step = "connection";
+    else if (errorMessage.includes("fetch") || errorMessage.includes("network"))
+      step = "connection";
     else if (errorMessage.includes("timeout")) step = "timeout";
 
-    return createErrorResponseWithStatus(
-      error,
-      "API/summarize-inquiry",
-      500,
-      {
-        step: step,
-        duration: duration,
-      }
-    );
+    return createErrorResponseWithStatus(error, "API/summarize-inquiry", 500, {
+      step: step,
+      duration: duration,
+    });
   }
 }
