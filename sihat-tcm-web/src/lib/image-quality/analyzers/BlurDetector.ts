@@ -1,12 +1,12 @@
 /**
  * Blur Detector
- * 
+ *
  * Implements various blur detection algorithms for medical image quality assessment.
  * Provides multiple methods including Laplacian variance, Sobel gradient, and Tenengrad.
  */
 
-import { BlurMetrics, IBlurDetector } from '../interfaces/ImageQualityInterfaces';
-import { ImageProcessor } from '../core/ImageProcessor';
+import { BlurMetrics, IBlurDetector } from "../interfaces/ImageQualityInterfaces";
+import { ImageProcessor } from "../core/ImageProcessor";
 
 export class BlurDetector implements IBlurDetector {
   private imageProcessor: ImageProcessor;
@@ -18,28 +18,32 @@ export class BlurDetector implements IBlurDetector {
   /**
    * Detect blur using multiple methods and return comprehensive metrics
    */
-  detectBlur(imageData: ImageData, options?: {
-    method?: 'laplacian' | 'sobel' | 'gradient' | 'auto';
-    sampleRegions?: boolean;
-    detailedAnalysis?: boolean;
-  }): BlurMetrics {
-    const method = options?.method || 'auto';
+  detectBlur(
+    imageData: ImageData,
+    options?: {
+      method?: "laplacian" | "sobel" | "gradient" | "auto";
+      sampleRegions?: boolean;
+      detailedAnalysis?: boolean;
+    }
+  ): BlurMetrics {
+    const method = options?.method || "auto";
     const sampleRegions = options?.sampleRegions ?? false;
-    
+
     let primaryScore: number;
     let variance: number;
-    let selectedMethod: 'laplacian' | 'sobel' | 'gradient';
+    let selectedMethod: "laplacian" | "sobel" | "gradient";
 
-    if (method === 'auto') {
+    if (method === "auto") {
       // Use multiple methods and combine results
       const laplacianResult = this.detectBlurLaplacian(imageData, sampleRegions);
       const sobelResult = this.detectBlurSobel(imageData, sampleRegions);
       const gradientResult = this.detectBlurGradient(imageData, sampleRegions);
 
       // Weight the results (Laplacian is generally most reliable for medical images)
-      primaryScore = (laplacianResult.score * 0.5 + sobelResult.score * 0.3 + gradientResult.score * 0.2);
+      primaryScore =
+        laplacianResult.score * 0.5 + sobelResult.score * 0.3 + gradientResult.score * 0.2;
       variance = laplacianResult.variance;
-      selectedMethod = 'laplacian';
+      selectedMethod = "laplacian";
     } else {
       const result = this.detectBlurByMethod(imageData, method, sampleRegions);
       primaryScore = result.score;
@@ -54,14 +58,17 @@ export class BlurDetector implements IBlurDetector {
       score: primaryScore,
       variance,
       method: selectedMethod,
-      confidence
+      confidence,
     };
   }
 
   /**
    * Laplacian variance method - most common for blur detection
    */
-  private detectBlurLaplacian(imageData: ImageData, sampleRegions: boolean = false): {
+  private detectBlurLaplacian(
+    imageData: ImageData,
+    sampleRegions: boolean = false
+  ): {
     score: number;
     variance: number;
   } {
@@ -69,11 +76,7 @@ export class BlurDetector implements IBlurDetector {
     const gray = this.imageProcessor.convertToGrayscale(imageData);
 
     // Laplacian kernel
-    const kernel = [
-      -1, -1, -1,
-      -1,  8, -1,
-      -1, -1, -1
-    ];
+    const kernel = [-1, -1, -1, -1, 8, -1, -1, -1, -1];
 
     let variance = 0;
     let count = 0;
@@ -81,10 +84,14 @@ export class BlurDetector implements IBlurDetector {
     if (sampleRegions) {
       // Sample multiple regions for more robust detection
       const regions = this.getSampleRegions(width, height);
-      
+
       for (const region of regions) {
         const regionVariance = this.calculateLaplacianVarianceInRegion(
-          gray, width, height, region, kernel
+          gray,
+          width,
+          height,
+          region,
+          kernel
         );
         variance += regionVariance.variance;
         count += regionVariance.count;
@@ -101,21 +108,24 @@ export class BlurDetector implements IBlurDetector {
     }
 
     const normalizedVariance = count > 0 ? variance / count : 0;
-    
+
     // Normalize to 0-1 scale (higher = sharper)
     // Typical values: blurry < 100, sharp > 1000
     const score = Math.min(normalizedVariance / 1000, 1);
 
     return {
       score,
-      variance: normalizedVariance
+      variance: normalizedVariance,
     };
   }
 
   /**
    * Sobel gradient method - good for edge-based blur detection
    */
-  private detectBlurSobel(imageData: ImageData, sampleRegions: boolean = false): {
+  private detectBlurSobel(
+    imageData: ImageData,
+    sampleRegions: boolean = false
+  ): {
     score: number;
     variance: number;
   } {
@@ -134,27 +144,30 @@ export class BlurDetector implements IBlurDetector {
         const gx = this.applyKernel3x3(gray, width, x, y, sobelX);
         const gy = this.applyKernel3x3(gray, width, x, y, sobelY);
         const gradient = Math.sqrt(gx * gx + gy * gy);
-        
+
         totalGradient += gradient;
         count++;
       }
     }
 
     const avgGradient = count > 0 ? totalGradient / count : 0;
-    
+
     // Normalize to 0-1 scale
     const score = Math.min(avgGradient / 100, 1);
 
     return {
       score,
-      variance: avgGradient
+      variance: avgGradient,
     };
   }
 
   /**
    * Gradient-based method using simple differences
    */
-  private detectBlurGradient(imageData: ImageData, sampleRegions: boolean = false): {
+  private detectBlurGradient(
+    imageData: ImageData,
+    sampleRegions: boolean = false
+  ): {
     score: number;
     variance: number;
   } {
@@ -169,24 +182,24 @@ export class BlurDetector implements IBlurDetector {
         const current = gray[y * width + x];
         const right = gray[y * width + (x + 1)];
         const down = gray[(y + 1) * width + x];
-        
+
         const gradientX = Math.abs(right - current);
         const gradientY = Math.abs(down - current);
         const gradient = Math.sqrt(gradientX * gradientX + gradientY * gradientY);
-        
+
         totalGradient += gradient;
         count++;
       }
     }
 
     const avgGradient = count > 0 ? totalGradient / count : 0;
-    
+
     // Normalize to 0-1 scale
     const score = Math.min(avgGradient / 50, 1);
 
     return {
       score,
-      variance: avgGradient
+      variance: avgGradient,
     };
   }
 
@@ -194,16 +207,16 @@ export class BlurDetector implements IBlurDetector {
    * Detect blur using specified method
    */
   private detectBlurByMethod(
-    imageData: ImageData, 
-    method: 'laplacian' | 'sobel' | 'gradient',
+    imageData: ImageData,
+    method: "laplacian" | "sobel" | "gradient",
     sampleRegions: boolean
   ): { score: number; variance: number } {
     switch (method) {
-      case 'laplacian':
+      case "laplacian":
         return this.detectBlurLaplacian(imageData, sampleRegions);
-      case 'sobel':
+      case "sobel":
         return this.detectBlurSobel(imageData, sampleRegions);
-      case 'gradient':
+      case "gradient":
         return this.detectBlurGradient(imageData, sampleRegions);
       default:
         return this.detectBlurLaplacian(imageData, sampleRegions);
@@ -221,23 +234,30 @@ export class BlurDetector implements IBlurDetector {
 
     const scores = [laplacian.score, sobel.score, gradient.score];
     const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
-    const variance = scores.reduce((acc, score) => acc + Math.pow(score - mean, 2), 0) / scores.length;
+    const variance =
+      scores.reduce((acc, score) => acc + Math.pow(score - mean, 2), 0) / scores.length;
     const standardDeviation = Math.sqrt(variance);
 
     // Higher confidence when methods agree (low standard deviation)
-    const consistency = Math.max(0, 1 - (standardDeviation / 0.5));
-    
+    const consistency = Math.max(0, 1 - standardDeviation / 0.5);
+
     // Higher confidence for extreme values (very sharp or very blurry)
     const extremeness = Math.abs(primaryScore - 0.5) * 2;
-    
-    return Math.min(1, (consistency * 0.7 + extremeness * 0.3));
+
+    return Math.min(1, consistency * 0.7 + extremeness * 0.3);
   }
 
   /**
    * Get sample regions for regional blur analysis
    */
-  private getSampleRegions(width: number, height: number): Array<{
-    x: number; y: number; width: number; height: number;
+  private getSampleRegions(
+    width: number,
+    height: number
+  ): Array<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
   }> {
     const regionSize = Math.min(width, height) / 4;
     const regions = [];
@@ -247,7 +267,7 @@ export class BlurDetector implements IBlurDetector {
       x: (width - regionSize) / 2,
       y: (height - regionSize) / 2,
       width: regionSize,
-      height: regionSize
+      height: regionSize,
     });
 
     // Corner regions
@@ -301,9 +321,15 @@ export class BlurDetector implements IBlurDetector {
     kernel: number[]
   ): number {
     const positions = [
-      (y - 1) * width + (x - 1), (y - 1) * width + x, (y - 1) * width + (x + 1),
-      y * width + (x - 1),       y * width + x,       y * width + (x + 1),
-      (y + 1) * width + (x - 1), (y + 1) * width + x, (y + 1) * width + (x + 1)
+      (y - 1) * width + (x - 1),
+      (y - 1) * width + x,
+      (y - 1) * width + (x + 1),
+      y * width + (x - 1),
+      y * width + x,
+      y * width + (x + 1),
+      (y + 1) * width + (x - 1),
+      (y + 1) * width + x,
+      (y + 1) * width + (x + 1),
     ];
 
     let result = 0;

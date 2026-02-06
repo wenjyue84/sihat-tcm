@@ -7,7 +7,13 @@ import { useState, useRef, useCallback, useEffect } from "react";
 
 export type RecordingState = "idle" | "initializing" | "recording" | "recorded" | "playing";
 
-export type MicErrorType = "permission_denied" | "not_found" | "busy" | "https_required" | "generic" | null;
+export type MicErrorType =
+  | "permission_denied"
+  | "not_found"
+  | "busy"
+  | "https_required"
+  | "generic"
+  | null;
 
 interface UseAudioRecordingOptions {
   initialAudio?: string | null;
@@ -50,9 +56,7 @@ function getSupportedMimeType(): string {
 /**
  * Hook for managing audio recording
  */
-export function useAudioRecording(
-  options: UseAudioRecordingOptions = {}
-): UseAudioRecordingResult {
+export function useAudioRecording(options: UseAudioRecordingOptions = {}): UseAudioRecordingResult {
   const { initialAudio } = options;
 
   // State
@@ -285,5 +289,3 @@ export function useAudioRecording(
     triggerFileUpload,
   };
 }
-
-

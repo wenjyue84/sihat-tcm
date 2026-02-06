@@ -1,17 +1,17 @@
 /**
  * Optimization Provider
- * 
+ *
  * Provides platform-specific optimizations for performance, UI adaptations,
  * and image processing based on device capabilities and characteristics.
  */
 
-import { 
-  DeviceInfo, 
-  PlatformOptimizations, 
-  UIAdaptations, 
+import {
+  DeviceInfo,
+  PlatformOptimizations,
+  UIAdaptations,
   OptimizedImageDimensions,
-  IOptimizationProvider 
-} from '../interfaces/PlatformInterfaces';
+  IOptimizationProvider,
+} from "../interfaces/PlatformInterfaces";
 
 export class OptimizationProvider implements IOptimizationProvider {
   /**
@@ -244,7 +244,7 @@ export class OptimizationProvider implements IOptimizationProvider {
 
     const deviceMemory = (navigator as any).deviceMemory;
     const shouldReduceQuality = deviceMemory && deviceMemory < 4; // Less than 4GB RAM
-    const maxCacheSize = deviceMemory 
+    const maxCacheSize = deviceMemory
       ? Math.min(deviceMemory * 10 * 1024 * 1024, 100 * 1024 * 1024) // 10MB per GB, max 100MB
       : 50 * 1024 * 1024;
 

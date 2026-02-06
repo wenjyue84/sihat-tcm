@@ -27,7 +27,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const searchParams = await props.searchParams;
   const lang = (searchParams.lang as string) || "en";
-  const post = getPostBySlug(params.slug, ["title", "excerpt", "coverImage", "date", "author"], lang);
+  const post = getPostBySlug(
+    params.slug,
+    ["title", "excerpt", "coverImage", "date", "author"],
+    lang
+  );
 
   // Build canonical URL based on current language
   const baseUrl = `/blog/${params.slug}`;
@@ -385,9 +389,7 @@ export default async function BlogPost(props: Props) {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    (typeof post.author === "object" &&
-                    post.author &&
-                    "name" in post.author
+                    (typeof post.author === "object" && post.author && "name" in post.author
                       ? (post.author as { name: string }).name[0]
                       : typeof post.author === "string"
                         ? post.author[0]

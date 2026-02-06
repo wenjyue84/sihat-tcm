@@ -1,6 +1,6 @@
 /**
  * Hook for handling diagnosis wizard resume/start new logic
- * 
+ *
  * Manages loading saved progress and providing handlers for resuming or starting fresh
  */
 
@@ -77,10 +77,7 @@ export function useDiagnosisResume({
       if (targetStep === "report") targetStep = "processing";
     } else {
       // Redirect if testing to access Summary in Simple Mode (e.g. Guest resumed session)
-      if (
-        !isAdvancedMode &&
-        (targetStep === "summary" || isReportStep)
-      ) {
+      if (!isAdvancedMode && (targetStep === "summary" || isReportStep)) {
         targetStep = "smart_connect";
       } else if (isReportStep) {
         targetStep = "summary"; // Advanced mode resumes at summary if near end but no report
@@ -141,4 +138,3 @@ function calculateMaxStepIndex(step: string, activeStepsConfig: Array<{ id: stri
   const restoredIndex = activeStepsConfig.findIndex((s) => s.id === restoredStepId);
   return restoredIndex > 0 ? restoredIndex : 0;
 }
-

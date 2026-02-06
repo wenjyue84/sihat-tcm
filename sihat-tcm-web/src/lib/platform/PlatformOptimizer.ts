@@ -1,27 +1,27 @@
 /**
  * Platform Optimizer - Main orchestrator
- * 
+ *
  * Provides comprehensive platform optimization by coordinating
  * device detection, responsive management, optimization provision,
  * and platform styling.
  */
 
-import { 
-  DeviceInfo, 
-  ResponsiveBreakpoints, 
-  PlatformOptimizations, 
-  UIAdaptations, 
+import {
+  DeviceInfo,
+  ResponsiveBreakpoints,
+  PlatformOptimizations,
+  UIAdaptations,
   OptimizedImageDimensions,
   MediaQueryListener,
   IPlatformOptimizer,
   PlatformConfig,
-  DeviceCapabilities
-} from './interfaces/PlatformInterfaces';
+  DeviceCapabilities,
+} from "./interfaces/PlatformInterfaces";
 
-import { PlatformDetector } from './core/PlatformDetector';
-import { ResponsiveManager } from './core/ResponsiveManager';
-import { OptimizationProvider } from './optimization/OptimizationProvider';
-import { PlatformStyler } from './styling/PlatformStyler';
+import { PlatformDetector } from "./core/PlatformDetector";
+import { ResponsiveManager } from "./core/ResponsiveManager";
+import { OptimizationProvider } from "./optimization/OptimizationProvider";
+import { PlatformStyler } from "./styling/PlatformStyler";
 
 /**
  * Enhanced Platform Optimizer with modular architecture
@@ -29,13 +29,13 @@ import { PlatformStyler } from './styling/PlatformStyler';
 export class PlatformOptimizer implements IPlatformOptimizer {
   private deviceInfo: DeviceInfo | null = null;
   private config: PlatformConfig;
-  
+
   // Core components
   private detector: PlatformDetector;
   private responsiveManager: ResponsiveManager;
   private optimizationProvider: OptimizationProvider;
   private styler: PlatformStyler;
-  
+
   private isInitialized = false;
 
   constructor(config?: Partial<PlatformConfig>) {
@@ -74,7 +74,7 @@ export class PlatformOptimizer implements IPlatformOptimizer {
     if (!this.deviceInfo && this.config.enableAutoDetection) {
       this.deviceInfo = this.detector.detectDevice();
     }
-    
+
     return this.deviceInfo || this.getServerSideDefaults();
   }
 
@@ -176,7 +176,7 @@ export class PlatformOptimizer implements IPlatformOptimizer {
    */
   applyPerformanceOptimizations(): void {
     if (!this.config.enablePerformanceOptimizations) return;
-    
+
     const device = this.getDeviceInfo();
     this.styler.applyPerformanceOptimizations(device);
   }
@@ -231,7 +231,7 @@ export class PlatformOptimizer implements IPlatformOptimizer {
    */
   updateConfiguration(newConfig: Partial<PlatformConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    
+
     // Reinitialize if breakpoints changed
     if (newConfig.breakpoints) {
       this.responsiveManager.cleanup();
@@ -251,10 +251,12 @@ export class PlatformOptimizer implements IPlatformOptimizer {
     configuration: PlatformConfig;
   } {
     const device = this.getDeviceInfo();
-    
+
     return {
       device,
-      activeBreakpoints: this.responsiveManager.getActiveBreakpoints?.() || [this.getCurrentBreakpoint()],
+      activeBreakpoints: this.responsiveManager.getActiveBreakpoints?.() || [
+        this.getCurrentBreakpoint(),
+      ],
       optimizations: this.getPlatformOptimizations(),
       adaptations: this.getUIAdaptations(),
       configuration: this.config,

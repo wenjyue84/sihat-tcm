@@ -20,12 +20,7 @@ interface ViewPatientDialogProps {
   onEdit: (patient: Patient) => void;
 }
 
-export function ViewPatientDialog({
-  open,
-  onOpenChange,
-  patient,
-  onEdit,
-}: ViewPatientDialogProps) {
+export function ViewPatientDialog({ open, onOpenChange, patient, onEdit }: ViewPatientDialogProps) {
   if (!patient) return null;
 
   const bmi = calculateBMI(patient.height, patient.weight);
@@ -81,7 +76,9 @@ export function ViewPatientDialog({
 
           <div className="p-3 border rounded-lg">
             <div className="text-sm text-muted-foreground mb-1">Medical History</div>
-            <div className="text-sm">{patient.medical_history || "No medical history recorded."}</div>
+            <div className="text-sm">
+              {patient.medical_history || "No medical history recorded."}
+            </div>
           </div>
 
           <div className="text-xs text-muted-foreground text-center pt-2 border-t">

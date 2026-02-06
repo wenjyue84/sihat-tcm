@@ -23,6 +23,3 @@ export interface TestResult {
   duration?: number;
   critical?: boolean;
 }
-
-
-

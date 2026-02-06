@@ -1,6 +1,6 @@
 /**
  * Accessibility Orchestrator
- * 
+ *
  * Central orchestrator for managing all accessibility features with
  * WCAG 2.1 AA compliance and comprehensive accessibility support.
  */
@@ -18,7 +18,7 @@ import type {
   AccessibilityMetrics,
   AccessibilityEvent,
   WCAGComplianceResult,
-  AccessibilityEventType
+  AccessibilityEventType,
 } from "../interfaces/AccessibilityInterfaces";
 
 /**
@@ -33,7 +33,8 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
   private config: AccessibilityConfig;
   private metrics: AccessibilityMetrics;
   private eventHistory: AccessibilityEvent[] = [];
-  private eventListeners: Map<AccessibilityEventType, ((event: AccessibilityEvent) => void)[]> = new Map();
+  private eventListeners: Map<AccessibilityEventType, ((event: AccessibilityEvent) => void)[]> =
+    new Map();
   private initialized: boolean = false;
 
   constructor(config: Partial<AccessibilityConfig> = {}) {
@@ -48,7 +49,7 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
       announceFormErrors: true,
       enableSkipLinks: true,
       enableFocusTrap: true,
-      customCSS: '',
+      customCSS: "",
       ...config,
     };
 
@@ -146,13 +147,13 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
 
     // Track keyboard navigation usage
     this.keyboardNavigationManager.addKeyBinding({
-      keys: ['Tab'],
+      keys: ["Tab"],
       handler: () => {
         this.metrics.keyboardNavigationUsage++;
         this.emitEvent({
           type: "navigation_occurred",
           timestamp: Date.now(),
-          data: { method: 'keyboard', key: 'Tab' },
+          data: { method: "keyboard", key: "Tab" },
           source: "KeyboardNavigationManager",
         });
       },
@@ -189,7 +190,7 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
       this.emitEvent({
         type: "announcement_made",
         timestamp: Date.now(),
-        data: { 
+        data: {
           message: announcement.message,
           priority: announcement.priority,
           category: announcement.category,
@@ -267,7 +268,9 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
       const result = this.wcagValidator.validatePage();
       this.metrics.complianceScore = result.score;
       this.metrics.totalIssues = result.issues.length;
-      this.metrics.criticalIssues = result.issues.filter(issue => issue.severity === 'critical').length;
+      this.metrics.criticalIssues = result.issues.filter(
+        (issue) => issue.severity === "critical"
+      ).length;
 
       this.emitEvent({
         type: "compliance_checked",
@@ -287,7 +290,7 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
       this.emitEvent({
         type: "error_detected",
         timestamp: Date.now(),
-        data: { error: error.message },
+        data: { error: error instanceof Error ? error.message : String(error) },
         source: "WCAGValidator",
       });
 
@@ -306,7 +309,7 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
 
     // Add to history
     this.eventHistory.push(fullEvent);
-    
+
     // Trim history if too long
     if (this.eventHistory.length > 1000) {
       this.eventHistory.shift();
@@ -314,7 +317,7 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
 
     // Notify listeners
     const listeners = this.eventListeners.get(event.type) || [];
-    listeners.forEach(listener => {
+    listeners.forEach((listener) => {
       try {
         listener(fullEvent);
       } catch (error) {
@@ -402,9 +405,9 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
     if (typeof document === "undefined") return;
 
     if (enabled) {
-      document.documentElement.classList.add('high-contrast');
+      document.documentElement.classList.add("high-contrast");
     } else {
-      document.documentElement.classList.remove('high-contrast');
+      document.documentElement.classList.remove("high-contrast");
     }
 
     logger.debug("AccessibilityOrchestrator", "High contrast mode", { enabled });
@@ -417,9 +420,9 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
     if (typeof document === "undefined") return;
 
     if (enabled) {
-      document.documentElement.classList.add('reduced-motion');
+      document.documentElement.classList.add("reduced-motion");
     } else {
-      document.documentElement.classList.remove('reduced-motion');
+      document.documentElement.classList.remove("reduced-motion");
     }
 
     logger.debug("AccessibilityOrchestrator", "Reduced motion", { enabled });
@@ -432,17 +435,17 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
     if (typeof document === "undefined") return;
 
     if (enabled) {
-      document.documentElement.classList.add('screen-reader');
+      document.documentElement.classList.add("screen-reader");
       // Configure announcement manager for screen reader
       this.announcementManager.setAnnouncementPreferences({
         enabled: true,
-        verbosity: 'verbose',
+        verbosity: "verbose",
         announceChanges: true,
         announceNavigation: true,
         announceErrors: true,
       });
     } else {
-      document.documentElement.classList.remove('screen-reader');
+      document.documentElement.classList.remove("screen-reader");
     }
 
     logger.debug("AccessibilityOrchestrator", "Screen reader mode", { enabled });
@@ -451,12 +454,17 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
   /**
    * Apply font size
    */
-  private applyFontSize(fontSize: AccessibilityPreferences['fontSize']): void {
+  private applyFontSize(fontSize: AccessibilityPreferences["fontSize"]): void {
     if (typeof document === "undefined") return;
 
     // Remove existing font size classes
-    document.documentElement.classList.remove('font-small', 'font-medium', 'font-large', 'font-extra-large');
-    
+    document.documentElement.classList.remove(
+      "font-small",
+      "font-medium",
+      "font-large",
+      "font-extra-large"
+    );
+
     // Add new font size class
     document.documentElement.classList.add(`font-${fontSize}`);
   }
@@ -464,12 +472,16 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
   /**
    * Apply focus indicator style
    */
-  private applyFocusIndicatorStyle(style: AccessibilityPreferences['focusIndicatorStyle']): void {
+  private applyFocusIndicatorStyle(style: AccessibilityPreferences["focusIndicatorStyle"]): void {
     if (typeof document === "undefined") return;
 
     // Remove existing focus indicator classes
-    document.documentElement.classList.remove('focus-default', 'focus-high-contrast', 'focus-thick');
-    
+    document.documentElement.classList.remove(
+      "focus-default",
+      "focus-high-contrast",
+      "focus-thick"
+    );
+
     // Add new focus indicator class
     document.documentElement.classList.add(`focus-${style}`);
   }
@@ -477,12 +489,16 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
   /**
    * Apply text spacing
    */
-  private applyTextSpacing(spacing: AccessibilityPreferences['textSpacing']): void {
+  private applyTextSpacing(spacing: AccessibilityPreferences["textSpacing"]): void {
     if (typeof document === "undefined") return;
 
     // Remove existing text spacing classes
-    document.documentElement.classList.remove('text-spacing-normal', 'text-spacing-increased', 'text-spacing-maximum');
-    
+    document.documentElement.classList.remove(
+      "text-spacing-normal",
+      "text-spacing-increased",
+      "text-spacing-maximum"
+    );
+
     // Add new text spacing class
     document.documentElement.classList.add(`text-spacing-${spacing}`);
   }
@@ -490,12 +506,17 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
   /**
    * Apply animation speed
    */
-  private applyAnimationSpeed(speed: AccessibilityPreferences['animationSpeed']): void {
+  private applyAnimationSpeed(speed: AccessibilityPreferences["animationSpeed"]): void {
     if (typeof document === "undefined") return;
 
     // Remove existing animation speed classes
-    document.documentElement.classList.remove('animation-slow', 'animation-normal', 'animation-fast', 'animation-disabled');
-    
+    document.documentElement.classList.remove(
+      "animation-slow",
+      "animation-normal",
+      "animation-fast",
+      "animation-disabled"
+    );
+
     // Add new animation speed class
     document.documentElement.classList.add(`animation-${speed}`);
   }
@@ -559,11 +580,14 @@ export class AccessibilityOrchestrator implements AccessibilityManager {
 
     try {
       // Clean up managers
-      if (this.focusManager && typeof this.focusManager.destroy === 'function') {
+      if (this.focusManager && typeof this.focusManager.destroy === "function") {
         this.focusManager.destroy();
       }
-      
-      if (this.keyboardNavigationManager && typeof this.keyboardNavigationManager.destroy === 'function') {
+
+      if (
+        this.keyboardNavigationManager &&
+        typeof this.keyboardNavigationManager.destroy === "function"
+      ) {
         this.keyboardNavigationManager.destroy();
       }
 

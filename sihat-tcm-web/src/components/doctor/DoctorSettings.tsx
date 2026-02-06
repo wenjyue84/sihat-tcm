@@ -41,7 +41,7 @@ export function DoctorSettings() {
   const [savingLanguage, setSavingLanguage] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [saving, setSaving] = useState(false);
-  
+
   // Profile state
   const [fullName, setFullName] = useState(profile?.full_name || "");
   const [licenseNumber, setLicenseNumber] = useState("");
@@ -96,7 +96,7 @@ export function DoctorSettings() {
 
   const handleSaveProfile = async () => {
     if (!user) return;
-    
+
     setSaving(true);
     try {
       const { error } = await supabase
@@ -194,7 +194,9 @@ export function DoctorSettings() {
                   placeholder="Acupuncture, Herbal Medicine, etc."
                   className="w-full"
                 />
-                <p className="text-xs text-slate-500">Separate multiple specializations with commas</p>
+                <p className="text-xs text-slate-500">
+                  Separate multiple specializations with commas
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -314,24 +316,17 @@ export function DoctorSettings() {
             <CardContent className="p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium text-slate-900">
-                    Enable Notifications
-                  </Label>
+                  <Label className="text-sm font-medium text-slate-900">Enable Notifications</Label>
                   <p className="text-xs text-slate-500 max-w-sm">
                     Receive notifications about patient updates and system alerts
                   </p>
                 </div>
-                <Switch
-                  checked={notificationsEnabled}
-                  onCheckedChange={setNotificationsEnabled}
-                />
+                <Switch checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} />
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium text-slate-900">
-                    Email Notifications
-                  </Label>
+                  <Label className="text-sm font-medium text-slate-900">Email Notifications</Label>
                   <p className="text-xs text-slate-500 max-w-sm">
                     Receive important updates via email
                   </p>
@@ -345,9 +340,7 @@ export function DoctorSettings() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium text-slate-900">
-                    Critical Alerts
-                  </Label>
+                  <Label className="text-sm font-medium text-slate-900">Critical Alerts</Label>
                   <p className="text-xs text-slate-500 max-w-sm">
                     Immediate notifications for critical patient cases
                   </p>
@@ -361,9 +354,7 @@ export function DoctorSettings() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium text-slate-900">
-                    Review Reminders
-                  </Label>
+                  <Label className="text-sm font-medium text-slate-900">Review Reminders</Label>
                   <p className="text-xs text-slate-500 max-w-sm">
                     Reminders for pending report reviews
                   </p>
@@ -469,9 +460,7 @@ export function DoctorSettings() {
                 <div className="flex items-center justify-between p-2 rounded-md hover:bg-slate-50 transition-colors">
                   <span className="text-xs text-slate-500">Member Since</span>
                   <span className="text-xs font-medium text-slate-700">
-                    {user?.created_at
-                      ? new Date(user.created_at).toLocaleDateString()
-                      : "-"}
+                    {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "-"}
                   </span>
                 </div>
               </div>
@@ -496,5 +485,3 @@ export function DoctorSettings() {
     </div>
   );
 }
-
-

@@ -129,9 +129,7 @@ export function findDominantFrequency(
   }
 
   // Apply Hanning window
-  const windowed = padded.map(
-    (val, i) => val * 0.5 * (1 - Math.cos((2 * Math.PI * i) / (n - 1)))
-  );
+  const windowed = padded.map((val, i) => val * 0.5 * (1 - Math.cos((2 * Math.PI * i) / (n - 1))));
 
   // Simple DFT for the frequency range of interest
   const minBin = Math.floor((CONFIG.MIN_FREQUENCY * paddedLength) / sampleRate);
@@ -166,10 +164,7 @@ export function findDominantFrequency(
 /**
  * Calculate BPM from signal buffer
  */
-export function calculateBPM(
-  signalBuffer: number[],
-  sampleRate: number
-): BPMCalculationResult {
+export function calculateBPM(signalBuffer: number[], sampleRate: number): BPMCalculationResult {
   if (signalBuffer.length < CONFIG.STABILIZATION_WINDOW) {
     return { bpm: null, quality: 0 };
   }

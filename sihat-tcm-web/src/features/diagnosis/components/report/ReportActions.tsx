@@ -15,7 +15,7 @@ import {
   X,
   UserPlus,
   Home,
-  FileText
+  FileText,
 } from "lucide-react";
 import { useAuth } from "@/stores/useAppStore";
 import type { ViewMode } from "./ViewSwitcher";
@@ -41,7 +41,8 @@ interface ReportActionsProps {
 const guestDialogTranslations = {
   en: {
     title: "Create an Account?",
-    message: "Would you like to create an account to save your diagnosis history and access it anytime?",
+    message:
+      "Would you like to create an account to save your diagnosis history and access it anytime?",
     loginSignup: "Login / Sign Up",
     continueWithout: "Continue Without Account",
     benefits: "Benefits of having an account:",
@@ -61,7 +62,8 @@ const guestDialogTranslations = {
   },
   ms: {
     title: "Buat Akaun?",
-    message: "Adakah anda ingin membuat akaun untuk menyimpan sejarah diagnosis anda dan mengaksesnya bila-bila masa?",
+    message:
+      "Adakah anda ingin membuat akaun untuk menyimpan sejarah diagnosis anda dan mengaksesnya bila-bila masa?",
     loginSignup: "Log Masuk / Daftar",
     continueWithout: "Teruskan Tanpa Akaun",
     benefits: "Manfaat mempunyai akaun:",
@@ -92,7 +94,9 @@ export function ReportActions({
   const t = translations[language as keyof typeof translations] || translations.en;
   const [showGuestDialog, setShowGuestDialog] = useState(false);
 
-  const dialogT = guestDialogTranslations[language as keyof typeof guestDialogTranslations] || guestDialogTranslations.en;
+  const dialogT =
+    guestDialogTranslations[language as keyof typeof guestDialogTranslations] ||
+    guestDialogTranslations.en;
 
   const handleStartNewConsultation = () => {
     if (user) {
@@ -119,24 +123,40 @@ export function ReportActions({
 
   if (viewMode === "classic") {
     return (
-      <motion.div variants={variants} className="mt-8 pt-8 border-t-2 border-stone-800 print:hidden font-serif">
+      <motion.div
+        variants={variants}
+        className="mt-8 pt-8 border-t-2 border-stone-800 print:hidden font-serif"
+      >
         <div className="flex flex-wrap justify-center gap-4">
-          <button onClick={onDownloadPDF} className="px-4 py-2 border border-stone-800 text-stone-900 font-bold uppercase hover:bg-stone-100 flex items-center gap-2">
+          <button
+            onClick={onDownloadPDF}
+            className="px-4 py-2 border border-stone-800 text-stone-900 font-bold uppercase hover:bg-stone-100 flex items-center gap-2"
+          >
             <Download className="w-4 h-4" /> Download PDF
           </button>
-          <button onClick={onShare} className="px-4 py-2 border border-stone-800 text-stone-900 font-bold uppercase hover:bg-stone-100 flex items-center gap-2">
+          <button
+            onClick={onShare}
+            className="px-4 py-2 border border-stone-800 text-stone-900 font-bold uppercase hover:bg-stone-100 flex items-center gap-2"
+          >
             <Share2 className="w-4 h-4" /> Share
           </button>
-          <button onClick={onSave} disabled={hasSaved} className={`px-4 py-2 border border-stone-800 font-bold uppercase hover:bg-stone-100 flex items-center gap-2 ${hasSaved ? 'bg-stone-200 cursor-not-allowed' : 'text-stone-900'}`}>
+          <button
+            onClick={onSave}
+            disabled={hasSaved}
+            className={`px-4 py-2 border border-stone-800 font-bold uppercase hover:bg-stone-100 flex items-center gap-2 ${hasSaved ? "bg-stone-200 cursor-not-allowed" : "text-stone-900"}`}
+          >
             {hasSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
             {hasSaved ? "Saved" : "Save Report"}
           </button>
-          <button onClick={handleStartNewConsultation} className="px-4 py-2 bg-stone-900 text-white font-bold uppercase hover:bg-stone-800 flex items-center gap-2">
+          <button
+            onClick={handleStartNewConsultation}
+            className="px-4 py-2 bg-stone-900 text-white font-bold uppercase hover:bg-stone-800 flex items-center gap-2"
+          >
             Start New
           </button>
         </div>
       </motion.div>
-    )
+    );
   }
 
   // Modern View
@@ -160,7 +180,11 @@ export function ReportActions({
           <div className="grid grid-cols-1 gap-3 w-full max-w-md mx-auto sm:max-w-none sm:w-auto sm:grid-cols-3 md:flex md:flex-wrap md:justify-center">
             <SecondaryButton onClick={onDownloadPDF} icon={FileText} label={t.report.downloadPdf} />
             <SecondaryButton onClick={onShare} icon={Share2} label={t.report.shareReport} />
-            <SecondaryButton onClick={onInfographicsOpen} icon={ImageIcon} label={t.report.infographics} />
+            <SecondaryButton
+              onClick={onInfographicsOpen}
+              icon={ImageIcon}
+              label={t.report.infographics}
+            />
           </div>
 
           {/* Save & Verify Group */}
@@ -168,10 +192,11 @@ export function ReportActions({
             <button
               onClick={onSave}
               disabled={isSaving || hasSaved}
-              className={`w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-full transition-all shadow-sm hover:shadow-md active:scale-[0.98] flex items-center gap-2 text-sm font-semibold min-w-[140px] justify-center ${hasSaved
-                ? "bg-green-100 border border-green-200 text-green-700 cursor-default"
-                : "bg-slate-900 text-white hover:bg-slate-800 active:bg-slate-950"
-                }`}
+              className={`w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-full transition-all shadow-sm hover:shadow-md active:scale-[0.98] flex items-center gap-2 text-sm font-semibold min-w-[140px] justify-center ${
+                hasSaved
+                  ? "bg-green-100 border border-green-200 text-green-700 cursor-default"
+                  : "bg-slate-900 text-white hover:bg-slate-800 active:bg-slate-950"
+              }`}
             >
               {isSaving ? (
                 <>
@@ -192,7 +217,11 @@ export function ReportActions({
             </button>
 
             {!isDoctorView && (
-              <SecondaryButton onClick={onRequestVerification} icon={BadgeCheck} label={t.report.requestDoctorVerification} />
+              <SecondaryButton
+                onClick={onRequestVerification}
+                icon={BadgeCheck}
+                label={t.report.requestDoctorVerification}
+              />
             )}
           </div>
 
@@ -257,7 +286,15 @@ export function ReportActions({
   );
 }
 
-const SecondaryButton = ({ onClick, icon: Icon, label }: { onClick: () => void; icon: React.ElementType; label: string }) => (
+const SecondaryButton = ({
+  onClick,
+  icon: Icon,
+  label,
+}: {
+  onClick: () => void;
+  icon: React.ElementType;
+  label: string;
+}) => (
   <button
     onClick={onClick}
     title={label}

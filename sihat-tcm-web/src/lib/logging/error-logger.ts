@@ -55,7 +55,7 @@ class ErrorLogger {
   constructor(config: Partial<ErrorLoggerConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.sessionId = this.generateSessionId();
-    
+
     if (typeof window !== "undefined" && this.config.enableAutoCapture) {
       this.setupAutoCapture();
     }
@@ -80,10 +80,7 @@ class ErrorLogger {
   /**
    * Log an error manually
    */
-  public async logError(
-    error: Error | string,
-    context: ErrorContext = {}
-  ): Promise<string | null> {
+  public async logError(error: Error | string, context: ErrorContext = {}): Promise<string | null> {
     try {
       const errorData = this.prepareErrorData(error, context);
       const errorId = await this.sendErrorToAPI(errorData);
@@ -168,7 +165,7 @@ class ErrorLogger {
     context: ErrorContext = {}
   ): Promise<string | null> {
     const error = `Performance issue: ${operation} took ${duration}ms (threshold: ${threshold}ms)`;
-    
+
     return this.logError(error, {
       ...context,
       component: "Performance",
@@ -220,7 +217,7 @@ class ErrorLogger {
     window.fetch = async (...args) => {
       try {
         const response = await originalFetch(...args);
-        
+
         // Log failed HTTP requests
         if (!response.ok) {
           this.logNetworkError(
@@ -236,20 +233,16 @@ class ErrorLogger {
             }
           );
         }
-        
+
         return response;
       } catch (error) {
-        this.logNetworkError(
-          args[0] as string,
-          error as Error,
-          {
-            severity: "critical",
-            metadata: {
-              autoCapture: true,
-              fetchError: true,
-            },
-          }
-        );
+        this.logNetworkError(args[0] as string, error as Error, {
+          severity: "critical",
+          metadata: {
+            autoCapture: true,
+            fetchError: true,
+          },
+        });
         throw error;
       }
     };
@@ -258,12 +251,9 @@ class ErrorLogger {
   /**
    * Prepare error data for API
    */
-  private prepareErrorData(
-    error: Error | string,
-    context: ErrorContext
-  ): LogErrorRequest {
+  private prepareErrorData(error: Error | string, context: ErrorContext): LogErrorRequest {
     const errorObj = typeof error === "string" ? new Error(error) : error;
-    
+
     return {
       error_type: errorObj.name || "ClientError",
       message: errorObj.message,
@@ -280,10 +270,13 @@ class ErrorLogger {
         clientSide: true,
         timestamp: new Date().toISOString(),
         userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
-        viewport: typeof window !== "undefined" ? {
-          width: window.innerWidth,
-          height: window.innerHeight,
-        } : undefined,
+        viewport:
+          typeof window !== "undefined"
+            ? {
+                width: window.innerWidth,
+                height: window.innerHeight,
+              }
+            : undefined,
       },
     };
   }
@@ -313,7 +306,7 @@ class ErrorLogger {
     } catch (error) {
       if (attempt < this.config.maxRetries) {
         // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, this.config.retryDelay * attempt));
+        await new Promise((resolve) => setTimeout(resolve, this.config.retryDelay * attempt));
         return this.sendErrorToAPI(errorData, attempt + 1);
       }
 
@@ -393,8 +386,11 @@ export const initializeErrorLogger = (config?: Partial<ErrorLoggerConfig>) => {
 export const logError = (error: Error | string, context?: ErrorContext) =>
   errorLogger.logError(error, context);
 
-export const logUserActionError = (action: string, error: Error | string, context?: Omit<ErrorContext, "action">) =>
-  errorLogger.logUserActionError(action, error, context);
+export const logUserActionError = (
+  action: string,
+  error: Error | string,
+  context?: Omit<ErrorContext, "action">
+) => errorLogger.logUserActionError(action, error, context);
 
 export const logNetworkError = (endpoint: string, error: Error | string, context?: ErrorContext) =>
   errorLogger.logNetworkError(endpoint, error, context);
@@ -402,8 +398,12 @@ export const logNetworkError = (endpoint: string, error: Error | string, context
 export const logValidationError = (field: string, error: Error | string, context?: ErrorContext) =>
   errorLogger.logValidationError(field, error, context);
 
-export const logPerformanceIssue = (operation: string, duration: number, threshold: number, context?: ErrorContext) =>
-  errorLogger.logPerformanceIssue(operation, duration, threshold, context);
+export const logPerformanceIssue = (
+  operation: string,
+  duration: number,
+  threshold: number,
+  context?: ErrorContext
+) => errorLogger.logPerformanceIssue(operation, duration, threshold, context);
 
 /**
  * Higher-order function to wrap async functions with error logging
@@ -446,5 +446,3 @@ export function LogErrors(context: ErrorContext = {}) {
     };
   };
 }
-
-

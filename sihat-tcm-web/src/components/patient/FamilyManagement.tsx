@@ -41,11 +41,7 @@ import {
 } from "@/components/ui/dialog";
 import { useLanguage } from "@/stores/useAppStore";
 import { formatDate } from "@/lib/utils/date-formatting";
-import {
-  getFamilyMembers,
-  addFamilyMember,
-  deleteFamilyMember,
-} from "@/lib/actions";
+import { getFamilyMembers, addFamilyMember, deleteFamilyMember } from "@/lib/actions";
 import type { SaveFamilyMemberInput } from "@/types/database";
 
 // Types
@@ -85,7 +81,6 @@ export function FamilyManagement() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedMember, setSelectedMember] = useState<FamilyMember | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   // Form state for adding new member
   const [formData, setFormData] = useState({

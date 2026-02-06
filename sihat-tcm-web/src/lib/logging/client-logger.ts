@@ -148,5 +148,3 @@ export function createLogger(category: string) {
 }
 
 export default logger;
-
-

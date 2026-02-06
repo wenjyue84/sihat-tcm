@@ -11,8 +11,8 @@ import {
   VoiceEvent,
   VoiceEventListener,
   ExtendedSpeechRecognitionEvent,
-  ExtendedSpeechRecognitionErrorEvent
-} from '../interfaces/VoiceInterfaces';
+  ExtendedSpeechRecognitionErrorEvent,
+} from "../interfaces/VoiceInterfaces";
 
 // Browser speech recognition types
 interface SpeechRecognition extends EventTarget {
@@ -244,8 +244,10 @@ export class SpeechRecognitionManager {
    * Check if speech recognition is supported
    */
   public isRecognitionSupported(): boolean {
-    return typeof window !== "undefined" &&
-           ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+    return (
+      typeof window !== "undefined" &&
+      ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
+    );
   }
 
   /**

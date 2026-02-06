@@ -1,20 +1,20 @@
 /**
  * @fileoverview Security Event Tracking System
- * 
+ *
  * Handles collection, storage, and analysis of security events.
  * Provides real-time tracking and historical analysis capabilities.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 1.0
  */
 
 import { devLog } from "@/lib/systemLogger";
-import type { 
-  SecurityEvent, 
-  SecurityEventType, 
-  IPTrackingInfo, 
+import type {
+  SecurityEvent,
+  SecurityEventType,
+  IPTrackingInfo,
   UserSecurityProfile,
-  GeolocationInfo 
+  GeolocationInfo,
 } from "../interfaces/SecurityInterfaces";
 
 /**
@@ -46,7 +46,7 @@ export class EventTracker {
 
     // Update tracking information
     this.updateIPTracking(securityEvent);
-    
+
     if (securityEvent.userId) {
       this.updateUserProfile(securityEvent);
     }
@@ -149,16 +149,16 @@ export class EventTracker {
         profile.lastLogin = event.timestamp;
         profile.failedLoginAttempts = 0;
         profile.riskScore = Math.max(0, profile.riskScore - 10);
-        
+
         // Add IP to known IPs if not already present
         if (!profile.knownIPs.includes(event.ipAddress)) {
           profile.knownIPs.push(event.ipAddress);
-          
+
           // Keep only last 10 known IPs
           if (profile.knownIPs.length > 10) {
             profile.knownIPs = profile.knownIPs.slice(-10);
           }
-          
+
           // Flag login from new location
           profile.securityFlags.push(`new_location_${event.timestamp}`);
         }
@@ -193,7 +193,7 @@ export class EventTracker {
 
     // Cap risk score and limit flags
     profile.riskScore = Math.min(100, profile.riskScore);
-    
+
     // Keep only recent flags (last 50)
     if (profile.securityFlags.length > 50) {
       profile.securityFlags = profile.securityFlags.slice(-50);
@@ -204,7 +204,7 @@ export class EventTracker {
    * Get events by type
    */
   public getEventsByType(type: SecurityEventType, limit?: number): SecurityEvent[] {
-    const filtered = this.events.filter(event => event.type === type);
+    const filtered = this.events.filter((event) => event.type === type);
     return limit ? filtered.slice(-limit) : filtered;
   }
 
@@ -212,7 +212,7 @@ export class EventTracker {
    * Get events by IP address
    */
   public getEventsByIP(ipAddress: string, limit?: number): SecurityEvent[] {
-    const filtered = this.events.filter(event => event.ipAddress === ipAddress);
+    const filtered = this.events.filter((event) => event.ipAddress === ipAddress);
     return limit ? filtered.slice(-limit) : filtered;
   }
 
@@ -220,19 +220,16 @@ export class EventTracker {
    * Get events by user ID
    */
   public getEventsByUser(userId: string, limit?: number): SecurityEvent[] {
-    const filtered = this.events.filter(event => event.userId === userId);
+    const filtered = this.events.filter((event) => event.userId === userId);
     return limit ? filtered.slice(-limit) : filtered;
   }
 
   /**
    * Get events within time window
    */
-  public getEventsInTimeWindow(
-    startTime: number, 
-    endTime: number = Date.now()
-  ): SecurityEvent[] {
+  public getEventsInTimeWindow(startTime: number, endTime: number = Date.now()): SecurityEvent[] {
     return this.events.filter(
-      event => event.timestamp >= startTime && event.timestamp <= endTime
+      (event) => event.timestamp >= startTime && event.timestamp <= endTime
     );
   }
 
@@ -240,7 +237,7 @@ export class EventTracker {
    * Get events by severity
    */
   public getEventsBySeverity(severity: string, limit?: number): SecurityEvent[] {
-    const filtered = this.events.filter(event => event.severity === severity);
+    const filtered = this.events.filter((event) => event.severity === severity);
     return limit ? filtered.slice(-limit) : filtered;
   }
 
@@ -277,7 +274,7 @@ export class EventTracker {
    */
   public getHighRiskIPs(threshold: number = 50): IPTrackingInfo[] {
     return Array.from(this.ipTracking.values())
-      .filter(ip => ip.riskScore >= threshold)
+      .filter((ip) => ip.riskScore >= threshold)
       .sort((a, b) => b.riskScore - a.riskScore);
   }
 
@@ -286,7 +283,7 @@ export class EventTracker {
    */
   public getHighRiskUsers(threshold: number = 50): UserSecurityProfile[] {
     return Array.from(this.userProfiles.values())
-      .filter(user => user.riskScore >= threshold)
+      .filter((user) => user.riskScore >= threshold)
       .sort((a, b) => b.riskScore - a.riskScore);
   }
 
@@ -312,27 +309,27 @@ export class EventTracker {
     let filtered = this.events;
 
     if (criteria.type) {
-      filtered = filtered.filter(event => event.type === criteria.type);
+      filtered = filtered.filter((event) => event.type === criteria.type);
     }
 
     if (criteria.severity) {
-      filtered = filtered.filter(event => event.severity === criteria.severity);
+      filtered = filtered.filter((event) => event.severity === criteria.severity);
     }
 
     if (criteria.ipAddress) {
-      filtered = filtered.filter(event => event.ipAddress === criteria.ipAddress);
+      filtered = filtered.filter((event) => event.ipAddress === criteria.ipAddress);
     }
 
     if (criteria.userId) {
-      filtered = filtered.filter(event => event.userId === criteria.userId);
+      filtered = filtered.filter((event) => event.userId === criteria.userId);
     }
 
     if (criteria.startTime) {
-      filtered = filtered.filter(event => event.timestamp >= criteria.startTime!);
+      filtered = filtered.filter((event) => event.timestamp >= criteria.startTime!);
     }
 
     if (criteria.endTime) {
-      filtered = filtered.filter(event => event.timestamp <= criteria.endTime!);
+      filtered = filtered.filter((event) => event.timestamp <= criteria.endTime!);
     }
 
     return criteria.limit ? filtered.slice(-criteria.limit) : filtered;
@@ -351,8 +348,8 @@ export class EventTracker {
     uniqueUsers: number;
   } {
     const now = Date.now();
-    const last24Hours = now - (24 * 60 * 60 * 1000);
-    const lastHour = now - (60 * 60 * 1000);
+    const last24Hours = now - 24 * 60 * 60 * 1000;
+    const lastHour = now - 60 * 60 * 1000;
 
     const eventsByType = {} as Record<SecurityEventType, number>;
     const eventsBySeverity = {} as Record<string, number>;
@@ -362,13 +359,13 @@ export class EventTracker {
     let eventsLast24Hours = 0;
     let eventsLastHour = 0;
 
-    this.events.forEach(event => {
+    this.events.forEach((event) => {
       // Count by type
       eventsByType[event.type] = (eventsByType[event.type] || 0) + 1;
-      
+
       // Count by severity
       eventsBySeverity[event.severity] = (eventsBySeverity[event.severity] || 0) + 1;
-      
+
       // Track unique IPs and users
       uniqueIPs.add(event.ipAddress);
       if (event.userId) {
@@ -409,10 +406,10 @@ export class EventTracker {
    * Cleanup old events
    */
   private cleanupOldEvents(): void {
-    const cutoffTime = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days ago
+    const cutoffTime = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days ago
     const initialCount = this.events.length;
 
-    this.events = this.events.filter(event => event.timestamp > cutoffTime);
+    this.events = this.events.filter((event) => event.timestamp > cutoffTime);
 
     const removedCount = initialCount - this.events.length;
     if (removedCount > 0) {
@@ -471,14 +468,14 @@ export class EventTracker {
 
     if (data.ipTracking) {
       this.ipTracking.clear();
-      data.ipTracking.forEach(ip => {
+      data.ipTracking.forEach((ip) => {
         this.ipTracking.set(ip.ipAddress, ip);
       });
     }
 
     if (data.userProfiles) {
       this.userProfiles.clear();
-      data.userProfiles.forEach(profile => {
+      data.userProfiles.forEach((profile) => {
         this.userProfiles.set(profile.userId, profile);
       });
     }

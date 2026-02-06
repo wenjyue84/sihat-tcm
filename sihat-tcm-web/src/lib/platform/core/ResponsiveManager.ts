@@ -1,15 +1,15 @@
 /**
  * Responsive Manager
- * 
+ *
  * Handles responsive breakpoint management and media query monitoring.
  * Provides reactive breakpoint detection and change notifications.
  */
 
-import { 
-  ResponsiveBreakpoints, 
-  IResponsiveManager, 
-  MediaQueryListener 
-} from '../interfaces/PlatformInterfaces';
+import {
+  ResponsiveBreakpoints,
+  IResponsiveManager,
+  MediaQueryListener,
+} from "../interfaces/PlatformInterfaces";
 
 export class ResponsiveManager implements IResponsiveManager {
   private breakpoints: ResponsiveBreakpoints;
@@ -19,7 +19,7 @@ export class ResponsiveManager implements IResponsiveManager {
 
   constructor(breakpoints: ResponsiveBreakpoints) {
     this.breakpoints = breakpoints;
-    
+
     if (typeof window !== "undefined") {
       this.initialize();
     }
@@ -95,7 +95,7 @@ export class ResponsiveManager implements IResponsiveManager {
           currentListeners.forEach((cb) => cb(e.matches));
         }
       };
-      
+
       try {
         mediaQuery.addEventListener("change", handler);
         // Store handler for cleanup
@@ -141,7 +141,7 @@ export class ResponsiveManager implements IResponsiveManager {
    */
   getActiveBreakpoints(): Array<keyof ResponsiveBreakpoints> {
     const active: Array<keyof ResponsiveBreakpoints> = [];
-    
+
     Object.keys(this.breakpoints).forEach((breakpoint) => {
       if (this.isBreakpoint(breakpoint as keyof ResponsiveBreakpoints)) {
         active.push(breakpoint as keyof ResponsiveBreakpoints);

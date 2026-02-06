@@ -120,7 +120,7 @@ export const zh: TranslationKeys = {
         zero: "0 个月",
         lessThanMonth: "少于 1 个月",
         oneMonth: "1 个月",
-        months: "{count} 个月"
+        months: "{count} 个月",
       },
       filters: {
         all: "全部",
@@ -131,7 +131,7 @@ export const zh: TranslationKeys = {
         score: "分数",
         diagnosis: "诊断",
         ascending: "升序",
-        descending: "降序"
+        descending: "降序",
       },
       card: {
         viewReport: "查看完整报告",
@@ -139,10 +139,10 @@ export const zh: TranslationKeys = {
         tongue: "舌诊",
         face: "面诊",
         voice: "闻诊",
-        pulse: "脉诊"
+        pulse: "脉诊",
       },
       cantFindData: "找不到您的数据？",
-      restoreMockData: "恢复数据"
+      restoreMockData: "恢复数据",
     },
     historyTable: {
       good: "良好",
@@ -185,8 +185,8 @@ export const zh: TranslationKeys = {
       useInDiagnosis: {
         title: "诊断默认设置",
         description: "这些详情将作为您下一次诊断评估的默认信息。",
-      }
-    }
+      },
+    },
   },
   login: {
     title: "思和中医",
@@ -1113,7 +1113,8 @@ export const zh: TranslationKeys = {
       stepPulse: "脉搏测量",
       stepDiagnosisSummary: "诊断总结",
       meridianClock: "子午流注图",
-      meridianClockDesc: "在控制面板上显示子午流注图和二十四节气。（建议生活在有季节变化地区的患者开启）",
+      meridianClockDesc:
+        "在控制面板上显示子午流注图和二十四节气。（建议生活在有季节变化地区的患者开启）",
     },
 
     // Meal Planner / 食疗方案
@@ -1849,7 +1850,8 @@ export const zh: TranslationKeys = {
     title: "气通 (Qi Dose)",
     subtitle: "通过8分钟中医运动微量调理您的活力",
     promoTitle: "准备好您的每日8分钟导引了吗？",
-    promoDesc: "根据您的中医体质，我们准备了这一剂微量活力的导引，以调节您的内在气机。无需任何器材。",
+    promoDesc:
+      "根据您的中医体质，我们准备了这一剂微量活力的导引，以调节您的内在气机。无需任何器材。",
     startFlow: "开始导引",
     eightMinuteBrocade: "八段锦 8分钟版",
     eightMinuteBrocadeDesc: "来自八段锦的精炼动作，调节您的内在能量。",

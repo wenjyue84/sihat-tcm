@@ -27,7 +27,7 @@ export async function routeAIRequest(
   } = {}
 ) {
   // Create or use existing router
-  const router = options.context 
+  const router = options.context
     ? ModelFactory.createCustomRouter(options.context, options.routerConfig || {})
     : defaultModelRouter;
 

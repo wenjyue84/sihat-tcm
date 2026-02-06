@@ -1,6 +1,6 @@
 /**
  * Basic Info Test Executor
- * 
+ *
  * Tests for Step 1: Basic Info form validation and data handling
  */
 
@@ -60,9 +60,7 @@ export async function executeBasicInfoTest(testId: string): Promise<void> {
         const num = typeof age === "number" ? age : parseInt(age as string);
         const isValid = !isNaN(num) && num >= 0 && num <= 150;
         if (isValid !== valid) {
-          throw new Error(
-            `Age validation failed for '${age}': expected ${valid}, got ${isValid}`
-          );
+          throw new Error(`Age validation failed for '${age}': expected ${valid}, got ${isValid}`);
         }
       });
       break;
@@ -120,9 +118,7 @@ export async function executeBasicInfoTest(testId: string): Promise<void> {
         const isValid = isHeightValid && isWeightValid;
 
         if (isValid !== valid) {
-          throw new Error(
-            `Height/Weight validation failed for ${h}cm / ${w}kg: expected ${valid}`
-          );
+          throw new Error(`Height/Weight validation failed for ${h}cm / ${w}kg: expected ${valid}`);
         }
       });
       break;
@@ -132,6 +128,3 @@ export async function executeBasicInfoTest(testId: string): Promise<void> {
       throw new Error(`Unknown basic info test: ${testId}`);
   }
 }
-
-
-

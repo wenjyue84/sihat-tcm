@@ -74,5 +74,3 @@ export function ScoreRing({ score, size = 64, strokeWidth = 6, className = "" }:
     </div>
   );
 }
-
-

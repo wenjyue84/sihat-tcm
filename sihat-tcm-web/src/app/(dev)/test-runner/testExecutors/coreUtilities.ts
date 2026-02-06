@@ -1,6 +1,6 @@
 /**
  * Core Utilities Test Executor
- * 
+ *
  * Tests for foundational utilities and data integrity
  */
 
@@ -58,6 +58,3 @@ export async function executeCoreUtilitiesTest(testId: string): Promise<void> {
       throw new Error(`Unknown core utilities test: ${testId}`);
   }
 }
-
-
-

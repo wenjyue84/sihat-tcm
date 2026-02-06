@@ -96,7 +96,9 @@ export function PatientCommunication() {
               <Info className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-blue-900 text-sm mb-1">How Doctor Communication Works</h3>
+              <h3 className="font-semibold text-blue-900 text-sm mb-1">
+                How Doctor Communication Works
+              </h3>
               <ul className="text-xs text-blue-800 space-y-1">
                 <li className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />

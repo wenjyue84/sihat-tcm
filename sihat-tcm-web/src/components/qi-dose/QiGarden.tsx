@@ -93,9 +93,7 @@ export function QiGarden() {
               <Flame className="w-5 h-5 text-slate-600" />
             </div>
             <div>
-              <p className="text-xs font-medium text-slate-500">
-                {tg.essence}
-              </p>
+              <p className="text-xs font-medium text-slate-500">{tg.essence}</p>
               <p className="text-lg font-semibold text-slate-900">{essence}</p>
             </div>
           </CardContent>
@@ -107,9 +105,7 @@ export function QiGarden() {
               <Droplets className="w-5 h-5 text-slate-600" />
             </div>
             <div>
-              <p className="text-xs font-medium text-slate-500">
-                {tg.water}
-              </p>
+              <p className="text-xs font-medium text-slate-500">{tg.water}</p>
               <p className="text-lg font-semibold text-slate-900">{water}</p>
             </div>
           </CardContent>
@@ -121,9 +117,7 @@ export function QiGarden() {
               <Trophy className="w-5 h-5 text-slate-600" />
             </div>
             <div>
-              <p className="text-xs font-medium text-slate-500">
-                {tg.level}
-              </p>
+              <p className="text-xs font-medium text-slate-500">{tg.level}</p>
               <p className="text-lg font-semibold text-slate-900">{herb.level}</p>
             </div>
           </CardContent>
@@ -135,9 +129,7 @@ export function QiGarden() {
               <Gift className="w-5 h-5 text-slate-600" />
             </div>
             <div>
-              <p className="text-xs font-medium text-slate-500">
-                Rewards
-              </p>
+              <p className="text-xs font-medium text-slate-500">Rewards</p>
               <p className="text-lg font-semibold text-slate-900">2 Active</p>
             </div>
           </CardContent>
@@ -304,9 +296,7 @@ export function QiGarden() {
 
           {/* How to Earn Section */}
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-slate-900">
-              Get More Essence
-            </h2>
+            <h2 className="text-2xl font-semibold text-slate-900">Get More Essence</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 {
@@ -334,9 +324,7 @@ export function QiGarden() {
                     <habit.icon className="w-5 h-5 text-slate-600" />
                   </div>
                   <h5 className="font-semibold text-slate-900 text-sm">{habit.title}</h5>
-                  <span className="text-xs font-medium text-slate-500">
-                    {habit.reward}
-                  </span>
+                  <span className="text-xs font-medium text-slate-500">{habit.reward}</span>
                 </motion.div>
               ))}
             </div>

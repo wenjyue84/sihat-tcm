@@ -1,6 +1,6 @@
 /**
  * Test Factory Implementation
- * 
+ *
  * Factory for creating different types of tests with proper configuration
  * and validation. Supports all test categories with sensible defaults.
  */
@@ -19,10 +19,10 @@ import {
   TestSuiteConfig,
   TestCategory,
   TestPriority,
-} from '../interfaces/TestInterfaces';
+} from "../interfaces/TestInterfaces";
 
-import { TestDataGenerators } from '../generators/TestDataGenerators';
-import { devLog } from '../../systemLogger';
+import { TestDataGenerators } from "../generators/TestDataGenerators";
+import { devLog } from "../../systemLogger";
 
 /**
  * Enhanced test factory with validation and defaults
@@ -31,7 +31,7 @@ export class EnhancedTestFactory implements TestFactory {
   private readonly context: string;
   private testIdCounter = 0;
 
-  constructor(context: string = 'TestFactory') {
+  constructor(context: string = "TestFactory") {
     this.context = context;
   }
 
@@ -39,28 +39,28 @@ export class EnhancedTestFactory implements TestFactory {
    * Create a unit test with proper defaults
    */
   public createUnitTest(config: UnitTestConfig): UnitTest {
-    const testId = this.generateTestId('unit');
-    
+    const testId = this.generateTestId("unit");
+
     const test: UnitTest = {
       id: testId,
       name: config.name,
       description: config.description,
-      category: 'unit',
-      priority: config.priority || 'medium',
+      category: "unit",
+      priority: config.priority || "medium",
       tags: config.tags || [],
       timeout: config.timeout,
       test: config.test,
       expectedResult: config.expectedResult,
       assertions: config.assertions,
       metadata: {
-        author: 'TestFactory',
+        author: "TestFactory",
         createdAt: new Date(),
-        version: '1.0.0',
+        version: "1.0.0",
       },
     };
 
     this.validateTest(test);
-    
+
     devLog(`[${this.context}] Created unit test: ${test.name}`, {
       testId,
       priority: test.priority,
@@ -73,29 +73,29 @@ export class EnhancedTestFactory implements TestFactory {
    * Create a property-based test with generator
    */
   public createPropertyTest(config: PropertyTestConfig): PropertyTest {
-    const testId = this.generateTestId('property');
-    
+    const testId = this.generateTestId("property");
+
     const test: PropertyTest = {
       id: testId,
       name: config.name,
       description: config.description,
-      category: 'property',
-      priority: config.priority || 'medium',
+      category: "property",
+      priority: config.priority || "medium",
       tags: config.tags || [],
       property: config.property,
       generator: config.generator,
       iterations: config.iterations || 100,
       shrinkingEnabled: config.shrinkingEnabled !== false,
-      shrinkingStrategy: 'smart',
+      shrinkingStrategy: "smart",
       metadata: {
-        author: 'TestFactory',
+        author: "TestFactory",
         createdAt: new Date(),
-        version: '1.0.0',
+        version: "1.0.0",
       },
     };
 
     this.validateTest(test);
-    
+
     devLog(`[${this.context}] Created property test: ${test.name}`, {
       testId,
       iterations: test.iterations,
@@ -109,30 +109,30 @@ export class EnhancedTestFactory implements TestFactory {
    * Create an integration test with environment setup
    */
   public createIntegrationTest(config: IntegrationTestConfig): IntegrationTest {
-    const testId = this.generateTestId('integration');
-    
+    const testId = this.generateTestId("integration");
+
     const test: IntegrationTest = {
       id: testId,
       name: config.name,
       description: config.description,
-      category: 'integration',
-      priority: config.priority || 'high',
+      category: "integration",
+      priority: config.priority || "high",
       tags: config.tags || [],
       timeout: config.timeout || 60000, // 1 minute default for integration tests
       test: config.test,
       dependencies: config.dependencies,
       environment: config.environment,
       metadata: {
-        author: 'TestFactory',
+        author: "TestFactory",
         createdAt: new Date(),
-        version: '1.0.0',
+        version: "1.0.0",
         requirements: config.dependencies,
         environment: [config.environment.name],
       },
     };
 
     this.validateTest(test);
-    
+
     devLog(`[${this.context}] Created integration test: ${test.name}`, {
       testId,
       dependencies: test.dependencies.length,
@@ -146,14 +146,14 @@ export class EnhancedTestFactory implements TestFactory {
    * Create a performance test with targets
    */
   public createPerformanceTest(config: PerformanceTestConfig): PerformanceTest {
-    const testId = this.generateTestId('performance');
-    
+    const testId = this.generateTestId("performance");
+
     const test: PerformanceTest = {
       id: testId,
       name: config.name,
       description: config.description,
-      category: 'performance',
-      priority: config.priority || 'high',
+      category: "performance",
+      priority: config.priority || "high",
       tags: config.tags || [],
       timeout: 120000, // 2 minutes default for performance tests
       test: config.test,
@@ -162,14 +162,14 @@ export class EnhancedTestFactory implements TestFactory {
       warmupIterations: 5,
       measurementIterations: 10,
       metadata: {
-        author: 'TestFactory',
+        author: "TestFactory",
         createdAt: new Date(),
-        version: '1.0.0',
+        version: "1.0.0",
       },
     };
 
     this.validateTest(test);
-    
+
     devLog(`[${this.context}] Created performance test: ${test.name}`, {
       testId,
       maxExecutionTime: test.performanceTargets.maxExecutionTime,
@@ -183,8 +183,8 @@ export class EnhancedTestFactory implements TestFactory {
    * Create a test suite with lifecycle hooks
    */
   public createTestSuite(config: TestSuiteConfig): TestSuite {
-    const suiteId = this.generateTestId('suite');
-    
+    const suiteId = this.generateTestId("suite");
+
     const suite: TestSuite = {
       id: suiteId,
       name: config.name,
@@ -207,7 +207,7 @@ export class EnhancedTestFactory implements TestFactory {
     };
 
     this.validateTestSuite(suite);
-    
+
     devLog(`[${this.context}] Created test suite: ${suite.name}`, {
       suiteId,
       testCount: suite.tests.length,
@@ -225,33 +225,33 @@ export class EnhancedTestFactory implements TestFactory {
       // Unit tests for basic functionality
       this.createUnitTest({
         name: `${modelName} - Basic Response Generation`,
-        description: 'Test that the model can generate basic responses',
+        description: "Test that the model can generate basic responses",
         test: async () => {
           // Mock test implementation
           return true;
         },
-        priority: 'critical',
-        tags: ['ai', 'basic', modelName],
+        priority: "critical",
+        tags: ["ai", "basic", modelName],
       }),
 
       // Property tests for consistency
       this.createPropertyTest({
         name: `${modelName} - Response Consistency`,
-        description: 'Test that similar inputs produce consistent outputs',
+        description: "Test that similar inputs produce consistent outputs",
         property: async (input: any) => {
           // Property: similar inputs should produce similar outputs
           return true; // Mock implementation
         },
         generator: TestDataGenerators.aiRequest,
         iterations: 50,
-        priority: 'high',
-        tags: ['ai', 'consistency', modelName],
+        priority: "high",
+        tags: ["ai", "consistency", modelName],
       }),
 
       // Performance tests
       this.createPerformanceTest({
         name: `${modelName} - Response Time`,
-        description: 'Test response time performance',
+        description: "Test response time performance",
         test: async () => {
           // Mock performance test
           return true;
@@ -260,8 +260,8 @@ export class EnhancedTestFactory implements TestFactory {
           maxExecutionTime: 5000, // 5 seconds
           maxMemoryUsage: 100 * 1024 * 1024, // 100MB
         },
-        priority: 'high',
-        tags: ['ai', 'performance', modelName],
+        priority: "high",
+        tags: ["ai", "performance", modelName],
       }),
     ];
 
@@ -285,55 +285,55 @@ export class EnhancedTestFactory implements TestFactory {
     const tests = [
       // Unit tests
       this.createUnitTest({
-        name: 'Notification Scheduling - Basic',
-        description: 'Test basic notification scheduling functionality',
+        name: "Notification Scheduling - Basic",
+        description: "Test basic notification scheduling functionality",
         test: async () => {
           // Mock test implementation
           return true;
         },
-        priority: 'critical',
-        tags: ['notification', 'scheduling'],
+        priority: "critical",
+        tags: ["notification", "scheduling"],
       }),
 
       // Property tests
       this.createPropertyTest({
-        name: 'Notification Validation',
-        description: 'Test that all valid notifications are accepted',
+        name: "Notification Validation",
+        description: "Test that all valid notifications are accepted",
         property: async (notification: any) => {
           // Property: valid notifications should always be accepted
           return true; // Mock implementation
         },
         generator: TestDataGenerators.notificationRequest,
         iterations: 100,
-        priority: 'high',
-        tags: ['notification', 'validation'],
+        priority: "high",
+        tags: ["notification", "validation"],
       }),
 
       // Integration tests
       this.createIntegrationTest({
-        name: 'Notification Delivery Integration',
-        description: 'Test end-to-end notification delivery',
+        name: "Notification Delivery Integration",
+        description: "Test end-to-end notification delivery",
         test: async () => {
           // Mock integration test
           return true;
         },
-        dependencies: ['notification-service', 'push-service'],
+        dependencies: ["notification-service", "push-service"],
         environment: {
-          name: 'test',
+          name: "test",
           requirements: [
-            { type: 'service', name: 'notification-service' },
-            { type: 'service', name: 'push-service' },
+            { type: "service", name: "notification-service" },
+            { type: "service", name: "push-service" },
           ],
           configuration: {},
         },
-        priority: 'high',
-        tags: ['notification', 'integration'],
+        priority: "high",
+        tags: ["notification", "integration"],
       }),
     ];
 
     return this.createTestSuite({
-      name: 'Notification System Test Suite',
-      description: 'Comprehensive tests for notification system',
+      name: "Notification System Test Suite",
+      description: "Comprehensive tests for notification system",
       tests,
     });
   }
@@ -345,22 +345,22 @@ export class EnhancedTestFactory implements TestFactory {
     const tests = [
       // Property tests for medical data
       this.createPropertyTest({
-        name: 'TCM Constitution Analysis',
-        description: 'Test that constitution analysis produces valid results',
+        name: "TCM Constitution Analysis",
+        description: "Test that constitution analysis produces valid results",
         property: async (medicalHistory: any) => {
           // Property: valid medical history should produce valid constitution
           return true; // Mock implementation
         },
         generator: TestDataGenerators.medicalHistory,
         iterations: 200,
-        priority: 'critical',
-        tags: ['tcm', 'constitution', 'medical'],
+        priority: "critical",
+        tags: ["tcm", "constitution", "medical"],
       }),
 
       // Performance tests for diagnosis
       this.createPerformanceTest({
-        name: 'Diagnosis Performance',
-        description: 'Test diagnosis system performance under load',
+        name: "Diagnosis Performance",
+        description: "Test diagnosis system performance under load",
         test: async () => {
           // Mock performance test
           return true;
@@ -375,14 +375,14 @@ export class EnhancedTestFactory implements TestFactory {
           sustainTime: 60000,
           rampDownTime: 30000,
         },
-        priority: 'high',
-        tags: ['tcm', 'performance', 'diagnosis'],
+        priority: "high",
+        tags: ["tcm", "performance", "diagnosis"],
       }),
     ];
 
     return this.createTestSuite({
-      name: 'TCM Diagnosis Test Suite',
-      description: 'Comprehensive tests for TCM diagnosis system',
+      name: "TCM Diagnosis Test Suite",
+      description: "Comprehensive tests for TCM diagnosis system",
       tests,
       configuration: {
         timeout: 900000, // 15 minutes for medical tests
@@ -403,36 +403,36 @@ export class EnhancedTestFactory implements TestFactory {
    * Validate test configuration
    */
   private validateTest(test: any): void {
-    if (!test.name || typeof test.name !== 'string') {
-      throw new Error('Test name is required and must be a string');
+    if (!test.name || typeof test.name !== "string") {
+      throw new Error("Test name is required and must be a string");
     }
 
-    if (!test.description || typeof test.description !== 'string') {
-      throw new Error('Test description is required and must be a string');
+    if (!test.description || typeof test.description !== "string") {
+      throw new Error("Test description is required and must be a string");
     }
 
     if (!test.category) {
-      throw new Error('Test category is required');
+      throw new Error("Test category is required");
     }
 
     // Category-specific validation
     switch (test.category) {
-      case 'unit':
-      case 'integration':
-      case 'performance':
-      case 'security':
-      case 'e2e':
-        if (!test.test || typeof test.test !== 'function') {
-          throw new Error('Test function is required for standard tests');
+      case "unit":
+      case "integration":
+      case "performance":
+      case "security":
+      case "e2e":
+        if (!test.test || typeof test.test !== "function") {
+          throw new Error("Test function is required for standard tests");
         }
         break;
-      
-      case 'property':
-        if (!test.property || typeof test.property !== 'function') {
-          throw new Error('Property function is required for property tests');
+
+      case "property":
+        if (!test.property || typeof test.property !== "function") {
+          throw new Error("Property function is required for property tests");
         }
-        if (!test.generator || typeof test.generator !== 'function') {
-          throw new Error('Generator function is required for property tests');
+        if (!test.generator || typeof test.generator !== "function") {
+          throw new Error("Generator function is required for property tests");
         }
         break;
     }
@@ -442,20 +442,20 @@ export class EnhancedTestFactory implements TestFactory {
    * Validate test suite configuration
    */
   private validateTestSuite(suite: TestSuite): void {
-    if (!suite.name || typeof suite.name !== 'string') {
-      throw new Error('Suite name is required and must be a string');
+    if (!suite.name || typeof suite.name !== "string") {
+      throw new Error("Suite name is required and must be a string");
     }
 
-    if (!suite.description || typeof suite.description !== 'string') {
-      throw new Error('Suite description is required and must be a string');
+    if (!suite.description || typeof suite.description !== "string") {
+      throw new Error("Suite description is required and must be a string");
     }
 
     if (!Array.isArray(suite.tests)) {
-      throw new Error('Suite tests must be an array');
+      throw new Error("Suite tests must be an array");
     }
 
     if (suite.tests.length === 0) {
-      throw new Error('Suite must contain at least one test');
+      throw new Error("Suite must contain at least one test");
     }
 
     // Validate each test in the suite
@@ -488,11 +488,15 @@ export const TestFactoryHelpers = {
   /**
    * Create a simple unit test
    */
-  unitTest: (name: string, testFn: () => Promise<void> | void, options?: {
-    priority?: TestPriority;
-    tags?: string[];
-    timeout?: number;
-  }) => {
+  unitTest: (
+    name: string,
+    testFn: () => Promise<void> | void,
+    options?: {
+      priority?: TestPriority;
+      tags?: string[];
+      timeout?: number;
+    }
+  ) => {
     return defaultTestFactory.createUnitTest({
       name,
       description: `Unit test: ${name}`,

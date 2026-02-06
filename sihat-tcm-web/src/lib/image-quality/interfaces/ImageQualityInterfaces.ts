@@ -1,6 +1,6 @@
 /**
  * Image Quality Validation Interfaces
- * 
+ *
  * Comprehensive type definitions for medical image quality assessment,
  * including blur detection, lighting analysis, and composition guidance.
  */
@@ -129,11 +129,19 @@ export interface ILightingAnalyzer {
 }
 
 export interface ICompositionAnalyzer {
-  analyzeComposition(imageData: ImageData, mode: ImageAnalysisMode, options?: any): CompositionMetrics;
+  analyzeComposition(
+    imageData: ImageData,
+    mode: ImageAnalysisMode,
+    options?: any
+  ): CompositionMetrics;
 }
 
 export interface IResolutionAnalyzer {
-  analyzeResolution(imageData: ImageData, mode: ImageAnalysisMode, options?: any): ResolutionMetrics;
+  analyzeResolution(
+    imageData: ImageData,
+    mode: ImageAnalysisMode,
+    options?: any
+  ): ResolutionMetrics;
 }
 
 export interface IImageProcessor {

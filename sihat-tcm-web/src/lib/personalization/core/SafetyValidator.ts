@@ -1,6 +1,6 @@
 /**
  * Safety Validator
- * 
+ *
  * Validates recommendation safety with personalization context.
  * Checks for allergies, dietary conflicts, and medical contraindications.
  */
@@ -8,11 +8,16 @@
 import {
   PersonalizationFactors,
   SafetyValidationResult,
-  SafetyCheck,
-} from '../interfaces/PersonalizationInterfaces';
+} from "../interfaces/PersonalizationInterfaces";
 
-import { devLog, logError } from '../../systemLogger';
-import { ErrorFactory } from '../../errors/AppError';
+import { devLog } from "../../logging/client-safe";
+import { ErrorFactory } from "../../errors/AppError";
+
+interface SafetyCheck {
+  is_safe: boolean;
+  concerns: string[];
+  severity: "low" | "medium" | "high";
+}
 
 /**
  * Enhanced safety validator for personalized recommendations
@@ -22,36 +27,38 @@ export class SafetyValidator {
   private readonly allergyPatterns: Map<string, RegExp>;
   private readonly dietaryConflicts: Map<string, RegExp[]>;
 
-  constructor(context: string = 'SafetyValidator') {
+  constructor(context: string = "SafetyValidator") {
     this.context = context;
-    
+
     // Initialize allergy patterns
     this.allergyPatterns = new Map([
-      ['nuts', /\b(almond|walnut|peanut|cashew|pistachio|hazelnut|pecan|macadamia)\b/i],
-      ['dairy', /\b(milk|cheese|yogurt|butter|cream|lactose)\b/i],
-      ['gluten', /\b(wheat|barley|rye|gluten|bread|pasta)\b/i],
-      ['shellfish', /\b(shrimp|crab|lobster|oyster|clam|mussel|scallop)\b/i],
-      ['soy', /\b(soy|tofu|tempeh|miso|edamame)\b/i],
-      ['eggs', /\b(egg|mayonnaise)\b/i],
-      ['fish', /\b(salmon|tuna|cod|mackerel|sardine|anchovy)\b/i],
+      ["nuts", /\b(almond|walnut|peanut|cashew|pistachio|hazelnut|pecan|macadamia)\b/i],
+      ["dairy", /\b(milk|cheese|yogurt|butter|cream|lactose)\b/i],
+      ["gluten", /\b(wheat|barley|rye|gluten|bread|pasta)\b/i],
+      ["shellfish", /\b(shrimp|crab|lobster|oyster|clam|mussel|scallop)\b/i],
+      ["soy", /\b(soy|tofu|tempeh|miso|edamame)\b/i],
+      ["eggs", /\b(egg|mayonnaise)\b/i],
+      ["fish", /\b(salmon|tuna|cod|mackerel|sardine|anchovy)\b/i],
     ]);
 
     // Initialize dietary conflict patterns
     this.dietaryConflicts = new Map([
-      ['vegetarian', [
-        /\b(meat|beef|pork|chicken|turkey|lamb|fish|seafood|gelatin)\b/i,
-        /\b(chicken broth|beef stock|fish sauce)\b/i,
-      ]],
-      ['vegan', [
-        /\b(meat|beef|pork|chicken|turkey|lamb|fish|seafood|dairy|milk|cheese|egg|honey|gelatin)\b/i,
-        /\b(chicken broth|beef stock|fish sauce|butter|cream)\b/i,
-      ]],
-      ['halal', [
-        /\b(pork|bacon|ham|alcohol|wine|beer)\b/i,
-      ]],
-      ['kosher', [
-        /\b(pork|shellfish|mixing meat and dairy)\b/i,
-      ]],
+      [
+        "vegetarian",
+        [
+          /\b(meat|beef|pork|chicken|turkey|lamb|fish|seafood|gelatin)\b/i,
+          /\b(chicken broth|beef stock|fish sauce)\b/i,
+        ],
+      ],
+      [
+        "vegan",
+        [
+          /\b(meat|beef|pork|chicken|turkey|lamb|fish|seafood|dairy|milk|cheese|egg|honey|gelatin)\b/i,
+          /\b(chicken broth|beef stock|fish sauce|butter|cream)\b/i,
+        ],
+      ],
+      ["halal", [/\b(pork|bacon|ham|alcohol|wine|beer)\b/i]],
+      ["kosher", [/\b(pork|shellfish|mixing meat and dairy)\b/i]],
     ]);
   }
 
@@ -99,11 +106,10 @@ export class SafetyValidator {
       });
 
       return result;
-
     } catch (error) {
       throw ErrorFactory.fromUnknownError(error, {
         component: this.context,
-        action: 'validateRecommendations',
+        action: "validateRecommendations",
       });
     }
   }
@@ -156,10 +162,9 @@ export class SafetyValidator {
         concerns,
         severity,
       };
-
     } catch (error) {
       logError(`[${this.context}] Error checking recommendation safety`, { error, recommendation });
-      
+
       // Return safe by default if check fails
       return {
         is_safe: true,
@@ -172,10 +177,7 @@ export class SafetyValidator {
   /**
    * Check for allergy conflicts
    */
-  private checkAllergyConflicts(
-    recommendation: string,
-    factors: PersonalizationFactors
-  ): string[] {
+  private checkAllergyConflicts(recommendation: string, factors: PersonalizationFactors): string[] {
     const concerns: string[] = [];
     const allergies = factors.dietary_restrictions.allergies;
 
@@ -195,10 +197,7 @@ export class SafetyValidator {
   /**
    * Check for dietary type conflicts
    */
-  private checkDietaryConflicts(
-    recommendation: string,
-    factors: PersonalizationFactors
-  ): string[] {
+  private checkDietaryConflicts(recommendation: string, factors: PersonalizationFactors): string[] {
     const concerns: string[] = [];
     const dietaryType = factors.dietary_restrictions.dietary_type;
 
@@ -281,15 +280,15 @@ export class SafetyValidator {
 
     // Common TCM herb-medication interactions
     const interactions = new Map([
-      ['ginseng', ['warfarin', 'diabetes medications', 'blood pressure medications']],
-      ['ginkgo', ['anticoagulants', 'aspirin', 'warfarin']],
-      ['garlic', ['anticoagulants', 'blood thinners']],
-      ['ginger', ['anticoagulants', 'diabetes medications']],
-      ['licorice', ['blood pressure medications', 'diuretics', 'corticosteroids']],
+      ["ginseng", ["warfarin", "diabetes medications", "blood pressure medications"]],
+      ["ginkgo", ["anticoagulants", "aspirin", "warfarin"]],
+      ["garlic", ["anticoagulants", "blood thinners"]],
+      ["ginger", ["anticoagulants", "diabetes medications"]],
+      ["licorice", ["blood pressure medications", "diuretics", "corticosteroids"]],
     ]);
 
-    const medicationName = medication.name?.toLowerCase() || '';
-    
+    const medicationName = medication.name?.toLowerCase() || "";
+
     for (const [herb, conflictingMeds] of interactions) {
       if (recommendation.toLowerCase().includes(herb)) {
         for (const conflictingMed of conflictingMeds) {
@@ -311,11 +310,11 @@ export class SafetyValidator {
 
     // Common condition contraindications
     const contraindications = new Map([
-      ['hypertension', ['licorice', 'high sodium foods', 'excessive salt']],
-      ['diabetes', ['high sugar foods', 'refined carbohydrates']],
-      ['kidney disease', ['high potassium foods', 'excessive protein']],
-      ['liver disease', ['alcohol', 'high fat foods']],
-      ['heart disease', ['high sodium foods', 'saturated fats']],
+      ["hypertension", ["licorice", "high sodium foods", "excessive salt"]],
+      ["diabetes", ["high sugar foods", "refined carbohydrates"]],
+      ["kidney disease", ["high potassium foods", "excessive protein"]],
+      ["liver disease", ["alcohol", "high fat foods"]],
+      ["heart disease", ["high sodium foods", "saturated fats"]],
     ]);
 
     const conditionName = condition.name?.toLowerCase() || condition.toLowerCase();

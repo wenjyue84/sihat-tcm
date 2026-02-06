@@ -45,9 +45,9 @@ export function DigitalTwin({ sessions, loading }: DigitalTwinProps) {
   const diagnosis = latestSession?.full_report?.diagnosis;
   const affectedOrgans =
     typeof diagnosis === "object" &&
-      diagnosis !== null &&
-      "affected_organs" in diagnosis &&
-      Array.isArray((diagnosis as any).affected_organs)
+    diagnosis !== null &&
+    "affected_organs" in diagnosis &&
+    Array.isArray((diagnosis as any).affected_organs)
       ? (diagnosis as any).affected_organs
       : [];
 
@@ -58,9 +58,9 @@ export function DigitalTwin({ sessions, loading }: DigitalTwinProps) {
     const prevDiagnosis = s.full_report?.diagnosis;
     const organs =
       typeof prevDiagnosis === "object" &&
-        prevDiagnosis !== null &&
-        "affected_organs" in prevDiagnosis &&
-        Array.isArray((prevDiagnosis as any).affected_organs)
+      prevDiagnosis !== null &&
+      "affected_organs" in prevDiagnosis &&
+      Array.isArray((prevDiagnosis as any).affected_organs)
         ? (prevDiagnosis as any).affected_organs
         : [];
     organs.forEach((o: string) => previouslyAffectedOrgans.add(o));

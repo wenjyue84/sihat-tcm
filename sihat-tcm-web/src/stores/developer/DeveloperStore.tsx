@@ -1,6 +1,6 @@
 /**
  * Developer Store
- * 
+ *
  * Manages developer mode and debugging features
  * for the Sihat TCM application.
  */
@@ -8,10 +8,7 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { logger } from "@/lib/clientLogger";
-import {
-  DeveloperStore,
-  STORAGE_KEYS
-} from "../interfaces/StoreInterfaces";
+import { DeveloperStore, STORAGE_KEYS } from "../interfaces/StoreInterfaces";
 
 export const useDeveloperStore = create<DeveloperStore>()(
   subscribeWithSelector((set, get) => ({
@@ -28,32 +25,32 @@ export const useDeveloperStore = create<DeveloperStore>()(
       const newValue = !isDeveloperMode;
 
       set({ isDeveloperMode: newValue });
-      
+
       // Save to localStorage
       if (typeof window !== "undefined") {
         localStorage.setItem(STORAGE_KEYS.developer, JSON.stringify(newValue));
       }
 
-      logger.info("DeveloperStore", "Developer mode toggled", { 
-        oldValue: isDeveloperMode, 
-        newValue 
+      logger.info("DeveloperStore", "Developer mode toggled", {
+        oldValue: isDeveloperMode,
+        newValue,
       });
     },
 
     initializeDeveloper: () => {
       // Note: This method should be called after auth is initialized
       // to check if user has developer role
-      
+
       if (typeof window !== "undefined") {
         const stored = localStorage.getItem(STORAGE_KEYS.developer);
-        
+
         if (stored) {
           try {
             const isDeveloperMode = JSON.parse(stored);
             set({ isDeveloperMode });
-            
-            logger.info("DeveloperStore", "Developer mode loaded from localStorage", { 
-              isDeveloperMode 
+
+            logger.info("DeveloperStore", "Developer mode loaded from localStorage", {
+              isDeveloperMode,
             });
           } catch (e) {
             logger.warn("DeveloperStore", "Failed to parse isDeveloperMode from localStorage", e);
@@ -64,7 +61,7 @@ export const useDeveloperStore = create<DeveloperStore>()(
           // Default to false if not stored
           set({ isDeveloperMode: false });
           localStorage.setItem(STORAGE_KEYS.developer, "false");
-          
+
           logger.debug("DeveloperStore", "Developer mode initialized to false (no stored value)");
         }
       } else {
@@ -100,7 +97,7 @@ export const useDeveloper = () => {
  */
 export const useDeveloperFeatures = () => {
   const isDeveloperMode = useDeveloperStore((state) => state.isDeveloperMode);
-  
+
   const showDebugInfo = isDeveloperMode;
   const showPerformanceMetrics = isDeveloperMode;
   const enableExperimentalFeatures = isDeveloperMode;
@@ -120,7 +117,7 @@ export const useDeveloperFeatures = () => {
  */
 export const useDevOnly = () => {
   const isDeveloperMode = useDeveloperStore((state) => state.isDeveloperMode);
-  
+
   const DevOnly: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return isDeveloperMode ? <>{children}</> : null;
   };
@@ -136,7 +133,7 @@ export const useDevOnly = () => {
  */
 export const useDeveloperDebug = () => {
   const isDeveloperMode = useDeveloperStore((state) => state.isDeveloperMode);
-  
+
   const debugLog = (message: string, data?: any) => {
     if (isDeveloperMode) {
       console.log(`[DEV] ${message}`, data);

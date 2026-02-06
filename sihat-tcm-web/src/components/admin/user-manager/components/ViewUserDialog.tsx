@@ -93,14 +93,15 @@ export function ViewUserDialog({ open, onOpenChange, user, onEdit }: ViewUserDia
 
               <div className="p-3 border rounded-lg">
                 <div className="text-sm text-muted-foreground mb-1">Medical History</div>
-                <div className="text-sm">{user.medical_history || "No medical history recorded."}</div>
+                <div className="text-sm">
+                  {user.medical_history || "No medical history recorded."}
+                </div>
               </div>
             </>
           )}
 
           <div className="text-xs text-muted-foreground text-center pt-2 border-t">
-            Last updated:{" "}
-            {user.updated_at ? new Date(user.updated_at).toLocaleString() : "Unknown"}
+            Last updated: {user.updated_at ? new Date(user.updated_at).toLocaleString() : "Unknown"}
           </div>
         </div>
 

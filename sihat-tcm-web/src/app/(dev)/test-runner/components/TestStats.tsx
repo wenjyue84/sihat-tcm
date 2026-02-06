@@ -1,6 +1,6 @@
 /**
  * Test Statistics Component
- * 
+ *
  * Displays overall test statistics
  */
 
@@ -53,6 +53,3 @@ export function TestStats({ tests }: TestStatsProps) {
     </div>
   );
 }
-
-
-

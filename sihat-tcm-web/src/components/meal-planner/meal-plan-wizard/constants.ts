@@ -14,7 +14,8 @@ export const MESSAGE_ROTATION_INTERVAL_MS = 2500;
 export const DAILY_WISDOM_TIPS = [
   {
     title: "Eat warm foods in winter",
-    description: "Warming foods like ginger and cinnamon help maintain body heat during cold seasons.",
+    description:
+      "Warming foods like ginger and cinnamon help maintain body heat during cold seasons.",
   },
   {
     title: "Balance hot and cold foods",

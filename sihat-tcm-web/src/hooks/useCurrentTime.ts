@@ -10,6 +10,3 @@ export function useCurrentTime() {
 
   return currentTime;
 }
-
-
-

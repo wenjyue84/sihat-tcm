@@ -1,6 +1,6 @@
 /**
  * Hook for diagnosis wizard image analysis
- * 
+ *
  * Handles image analysis for tongue, face, and body parts
  */
 
@@ -100,7 +100,11 @@ export function useDiagnosisImageAnalysis({
       setAnalysisResult(null);
       setPendingAnalysis(null);
       const dataKey =
-        currentStep === "tongue" ? "wang_tongue" : currentStep === "face" ? "wang_face" : "wang_part";
+        currentStep === "tongue"
+          ? "wang_tongue"
+          : currentStep === "face"
+            ? "wang_face"
+            : "wang_part";
       setData((prev) => ({
         ...prev,
         [dataKey]: {
@@ -130,6 +134,3 @@ export function useDiagnosisImageAnalysis({
     handleSkipAnalysis,
   };
 }
-
-
-

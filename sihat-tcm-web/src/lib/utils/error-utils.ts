@@ -2,7 +2,7 @@
  * Error Handling Utilities
  *
  * Helper functions for type-safe error handling
- * 
+ *
  * Moved from errorUtils.ts for better organization
  */
 
@@ -32,5 +32,3 @@ export function getErrorMessage(error: unknown): string {
 export function isError(error: unknown): error is Error {
   return error instanceof Error;
 }
-
-

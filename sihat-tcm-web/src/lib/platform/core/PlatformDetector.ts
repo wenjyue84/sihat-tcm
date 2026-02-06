@@ -1,12 +1,16 @@
 /**
  * Platform Detector
- * 
+ *
  * Handles device and platform detection with capability checking.
  * Provides comprehensive information about the user's device, browser,
  * and available features.
  */
 
-import { DeviceInfo, IPlatformDetector, ResponsiveBreakpoints } from '../interfaces/PlatformInterfaces';
+import {
+  DeviceInfo,
+  IPlatformDetector,
+  ResponsiveBreakpoints,
+} from "../interfaces/PlatformInterfaces";
 
 export class PlatformDetector implements IPlatformDetector {
   private breakpoints: ResponsiveBreakpoints;
@@ -103,7 +107,7 @@ export class PlatformDetector implements IPlatformDetector {
 
   private detectDeviceType(userAgent: string): DeviceInfo["type"] {
     const width = Math.max(window.screen?.width || 0, window.innerWidth || 0);
-    
+
     if (width < this.breakpoints.md || /mobile/.test(userAgent)) {
       return "mobile";
     } else if (width < this.breakpoints.lg || /tablet|ipad/.test(userAgent)) {

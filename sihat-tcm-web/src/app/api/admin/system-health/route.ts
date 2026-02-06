@@ -39,13 +39,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const supabase = await createClient();
 
     // Check if user is authenticated first to avoid unnecessary DB calls
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
 
     if (sessionError || !session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -84,19 +90,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
     // Gather all dashboard data in parallel
-    const [
-      errorStatistics,
-      healthMetrics,
-      performanceMetrics,
-      recentErrors,
-      systemInfo,
-    ] = await Promise.all([
-      getErrorStatistics(supabase),
-      getSystemHealthMetrics(supabase),
-      getPerformanceMetrics(supabase),
-      getRecentErrors(supabase),
-      getSystemInfo(),
-    ]);
+    const [errorStatistics, healthMetrics, performanceMetrics, recentErrors, systemInfo] =
+      await Promise.all([
+        getErrorStatistics(supabase),
+        getSystemHealthMetrics(supabase),
+        getPerformanceMetrics(supabase),
+        getRecentErrors(supabase),
+        getSystemInfo(),
+      ]);
 
     // Determine overall system status
     const overallStatus = determineOverallStatus(healthMetrics, errorStatistics);
@@ -146,10 +147,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       timestamp: Date.now(),
     });
 
-    return NextResponse.json(
-      { error: "Failed to fetch system health data" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch system health data" }, { status: 500 });
   }
 }
 
@@ -164,10 +162,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Validate required fields
     if (!body.error_type || !body.message) {
-      return NextResponse.json(
-        { error: "error_type and message are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "error_type and message are required" }, { status: 400 });
     }
 
     const supabase = await createClient();
@@ -193,29 +188,34 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (error) {
       // Check for "relation does not exist" error (code 42P01)
-      if (error.code === '42P01') {
-        devLog("warn", "SystemHealthAPI", "system_errors table missing, falling back to system_logs");
+      if (error.code === "42P01") {
+        devLog(
+          "warn",
+          "SystemHealthAPI",
+          "system_errors table missing, falling back to system_logs"
+        );
 
         // Fallback to system_logs table
-        const { error: logError } = await supabase
-          .from("system_logs")
-          .insert({
-            level: body.severity === 'critical' ? 'error' : (body.severity === 'high' ? 'error' : 'warn'),
-            category: body.error_type || 'SystemError',
-            message: body.message,
-            metadata: {
-              ...body.metadata,
-              stack_trace: body.stack_trace,
-              component: body.component,
-              session_id: body.session_id,
-              severity: body.severity,
-              original_table: 'system_errors'
-            },
-            user_id: body.user_id
-          });
+        const { error: logError } = await supabase.from("system_logs").insert({
+          level:
+            body.severity === "critical" ? "error" : body.severity === "high" ? "error" : "warn",
+          category: body.error_type || "SystemError",
+          message: body.message,
+          metadata: {
+            ...body.metadata,
+            stack_trace: body.stack_trace,
+            component: body.component,
+            session_id: body.session_id,
+            severity: body.severity,
+            original_table: "system_errors",
+          },
+          user_id: body.user_id,
+        });
 
         if (logError) {
-          devLog("error", "SystemHealthAPI", "Failed to log to system_logs fallback", { error: logError.message });
+          devLog("error", "SystemHealthAPI", "Failed to log to system_logs fallback", {
+            error: logError.message,
+          });
           // Even if fallback fails, log to console and return success to client
           console.error("Critical: Both system_errors and system_logs writes failed:", logError);
         }
@@ -261,7 +261,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     const errorStack = error instanceof Error ? error.stack : undefined;
-    
+
     devLog("error", "SystemHealthAPI", "Failed to process error logging request", {
       error: errorMessage,
       stack: errorStack,
@@ -295,7 +295,7 @@ async function getErrorStatistics(supabase: any): Promise<ErrorStatistics> {
       .gte("timestamp", twentyFourHoursAgo);
 
     if (error) {
-      if (error.code === '42P01') {
+      if (error.code === "42P01") {
         // Table missing, return empty stats
         return getEmptyErrorStats();
       }
@@ -331,10 +331,11 @@ async function getErrorStatistics(supabase: any): Promise<ErrorStatistics> {
     const resolvedErrors = errorCounts?.filter((e: any) => e.resolved).length || 0;
 
     // Calculate most common errors
-    const errorTypeCount = commonErrors?.reduce((acc: Record<string, number>, error: any) => {
-      acc[error.error_type] = (acc[error.error_type] || 0) + 1;
-      return acc;
-    }, {}) || {};
+    const errorTypeCount =
+      commonErrors?.reduce((acc: Record<string, number>, error: any) => {
+        acc[error.error_type] = (acc[error.error_type] || 0) + 1;
+        return acc;
+      }, {}) || {};
 
     const mostCommonErrors = Object.entries(errorTypeCount)
       .map(([error_type, count]) => ({
@@ -346,16 +347,20 @@ async function getErrorStatistics(supabase: any): Promise<ErrorStatistics> {
       .slice(0, 5);
 
     // Calculate errors by component
-    const componentCount = componentErrors?.reduce((acc: Record<string, { total: number; critical: number }>, error: any) => {
-      if (!acc[error.component]) {
-        acc[error.component] = { total: 0, critical: 0 };
-      }
-      acc[error.component].total++;
-      if (error.severity === "critical") {
-        acc[error.component].critical++;
-      }
-      return acc;
-    }, {}) || {};
+    const componentCount =
+      componentErrors?.reduce(
+        (acc: Record<string, { total: number; critical: number }>, error: any) => {
+          if (!acc[error.component]) {
+            acc[error.component] = { total: 0, critical: 0 };
+          }
+          acc[error.component].total++;
+          if (error.severity === "critical") {
+            acc[error.component].critical++;
+          }
+          return acc;
+        },
+        {}
+      ) || {};
 
     const errorsByComponent = Object.entries(componentCount)
       .map(([component, counts]: [string, any]) => ({
@@ -367,25 +372,32 @@ async function getErrorStatistics(supabase: any): Promise<ErrorStatistics> {
       .slice(0, 10);
 
     // Process hourly trend data
-    const hourlyErrorTrend = hourlyTrend?.reduce((acc: Array<{ hour: string; count: number; critical_count: number }>, error: { timestamp: string; severity: string }) => {
-      const hour = new Date(error.timestamp).toISOString().slice(0, 13) + ":00:00Z";
-      const existing = acc.find(item => item.hour === hour);
+    const hourlyErrorTrend =
+      hourlyTrend?.reduce(
+        (
+          acc: Array<{ hour: string; count: number; critical_count: number }>,
+          error: { timestamp: string; severity: string }
+        ) => {
+          const hour = new Date(error.timestamp).toISOString().slice(0, 13) + ":00:00Z";
+          const existing = acc.find((item) => item.hour === hour);
 
-      if (existing) {
-        existing.count++;
-        if (error.severity === "critical") {
-          existing.critical_count++;
-        }
-      } else {
-        acc.push({
-          hour,
-          count: 1,
-          critical_count: error.severity === "critical" ? 1 : 0,
-        });
-      }
+          if (existing) {
+            existing.count++;
+            if (error.severity === "critical") {
+              existing.critical_count++;
+            }
+          } else {
+            acc.push({
+              hour,
+              count: 1,
+              critical_count: error.severity === "critical" ? 1 : 0,
+            });
+          }
 
-      return acc;
-    }, []) || [];
+          return acc;
+        },
+        []
+      ) || [];
 
     return {
       total_errors: totalErrors,
@@ -441,7 +453,8 @@ async function getSystemHealthMetrics(supabase: any): Promise<SystemHealthMetric
       // if profiles table missing or other error, try a simpler query or assume healthy if it's just permissions
       dbStatus = "unhealthy";
     } else {
-      dbStatus = dbResponseTime < 1000 ? "healthy" : dbResponseTime < 3000 ? "degraded" : "unhealthy";
+      dbStatus =
+        dbResponseTime < 1000 ? "healthy" : dbResponseTime < 3000 ? "degraded" : "unhealthy";
     }
   } catch (e) {
     dbStatus = "unhealthy";
@@ -483,8 +496,8 @@ async function getSystemHealthMetrics(supabase: any): Promise<SystemHealthMetric
       usage_percentage: Math.round((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100),
     },
     alerts: {
-      active_count: alertStats.activeAlerts,
-      critical_count: alertStats.criticalAlerts,
+      active_count: alertStats.activeAlerts ?? 0,
+      critical_count: alertStats.criticalAlerts ?? 0,
       recent_alerts: [], // This would come from alert manager
     },
   };
@@ -528,7 +541,7 @@ async function getRecentErrors(supabase: any): Promise<SystemError[]> {
       .limit(20);
 
     if (error) {
-      if (error.code === '42P01') {
+      if (error.code === "42P01") {
         // try to fetch from system_logs as fallback?
         // The schema is different, so it's hard to map back.
         // Returning empty list is safer.

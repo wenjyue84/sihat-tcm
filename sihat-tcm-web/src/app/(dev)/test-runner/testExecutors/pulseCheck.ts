@@ -1,11 +1,14 @@
 /**
  * Pulse Check Test Executor
- * 
+ *
  * Tests for Step 6: Pulse Check functionality
  */
 
 import { MOCK_PROFILES } from "@/data/mockProfiles";
-import { tcmPulseQualities, pulseQualityConflicts } from "@/features/diagnosis/components/pulse/types";
+import {
+  tcmPulseQualities,
+  pulseQualityConflicts,
+} from "@/features/diagnosis/components/pulse/types";
 
 export async function executePulseCheckTest(testId: string): Promise<void> {
   switch (testId) {
@@ -13,12 +16,12 @@ export async function executePulseCheckTest(testId: string): Promise<void> {
       // Verify all TCM pulse types are defined correctly
       const mockPulse = MOCK_PROFILES[0].data.qie;
       if (!mockPulse.quality) throw new Error("pulse quality missing");
-      
+
       // Verify tcmPulseQualities array is populated
       if (!tcmPulseQualities || tcmPulseQualities.length === 0) {
         throw new Error("tcmPulseQualities array is empty or undefined");
       }
-      
+
       // Verify each pulse quality has required fields
       tcmPulseQualities.forEach((quality) => {
         if (!quality.id) throw new Error(`Pulse quality missing id: ${JSON.stringify(quality)}`);
@@ -59,11 +62,11 @@ export async function executePulseCheckTest(testId: string): Promise<void> {
     case "pulse_rhythm_validation": {
       // Tests pulse rhythm values are valid TCM pulse types
       const validPulseIds = tcmPulseQualities.map((q) => q.id);
-      
+
       MOCK_PROFILES.forEach((profile) => {
         const quality = profile.data.qie.quality;
         if (!quality) return; // Skip if no quality specified
-        
+
         // Extract pulse quality IDs from the string format (e.g., "Deep (Chen), Weak (Ruo)")
         const qualityMatches = quality.match(/\((\w+)\)/g);
         if (qualityMatches) {
@@ -98,11 +101,9 @@ export async function executePulseCheckTest(testId: string): Promise<void> {
         const isNormal = bpm >= 60 && bpm <= 100;
         const isHigh = bpm > 100;
         const actualCategory = isLow ? "low" : isNormal ? "normal" : "high";
-        
+
         if (actualCategory !== category && valid) {
-          throw new Error(
-            `BPM ${bpm} categorized as ${actualCategory}, expected ${category}`
-          );
+          throw new Error(`BPM ${bpm} categorized as ${actualCategory}, expected ${category}`);
         }
       });
       break;
@@ -114,12 +115,12 @@ export async function executePulseCheckTest(testId: string): Promise<void> {
       MOCK_PROFILES.forEach((profile) => {
         const quality = profile.data.qie.quality;
         if (!quality) return;
-        
+
         // Extract pulse quality IDs
         const qualityMatches = quality.match(/\((\w+)\)/g);
         if (qualityMatches && qualityMatches.length > 1) {
           const pulseIds = qualityMatches.map((match) => match.slice(1, -1).toLowerCase());
-          
+
           // Check for conflicts
           pulseIds.forEach((id1) => {
             const conflicts = pulseQualityConflicts[id1] || [];
@@ -133,13 +134,13 @@ export async function executePulseCheckTest(testId: string): Promise<void> {
           });
         }
       });
-      
+
       // Test that valid combinations work
       const validCombinations = [
         ["xian", "hua"], // Wiry + Slippery (should work)
         ["chen", "ruo"], // Deep + Weak (should work)
       ];
-      
+
       validCombinations.forEach(([id1, id2]) => {
         const conflicts = pulseQualityConflicts[id1] || [];
         if (conflicts.includes(id2)) {
@@ -153,5 +154,3 @@ export async function executePulseCheckTest(testId: string): Promise<void> {
       throw new Error(`Unknown pulse check test: ${testId}`);
   }
 }
-
-

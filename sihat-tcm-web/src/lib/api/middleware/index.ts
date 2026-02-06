@@ -7,4 +7,4 @@
 
 export * from "./error-handler";
 export * from "./request-validator";
-
+export * from "./rate-limiter";

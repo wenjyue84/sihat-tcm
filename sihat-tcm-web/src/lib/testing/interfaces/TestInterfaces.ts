@@ -1,6 +1,6 @@
 /**
  * Testing Framework Interfaces
- * 
+ *
  * Comprehensive interfaces for the advanced testing framework with
  * property-based testing, test generation, and analytics.
  */
@@ -17,7 +17,7 @@ export interface BaseTest {
   readonly tags: string[];
   readonly timeout?: number;
   readonly metadata?: TestMetadata;
-  
+
   // Lifecycle hooks
   setup?(): Promise<void>;
   teardown?(): Promise<void>;
@@ -26,12 +26,12 @@ export interface BaseTest {
 /**
  * Test categories for organization
  */
-export type TestCategory = 'unit' | 'integration' | 'property' | 'performance' | 'security' | 'e2e';
+export type TestCategory = "unit" | "integration" | "property" | "performance" | "security" | "e2e";
 
 /**
  * Test priority levels
  */
-export type TestPriority = 'low' | 'medium' | 'high' | 'critical';
+export type TestPriority = "low" | "medium" | "high" | "critical";
 
 /**
  * Test metadata for additional context
@@ -50,7 +50,7 @@ export interface TestMetadata {
  * Property-based test interface
  */
 export interface PropertyTest extends BaseTest {
-  category: 'property';
+  category: "property";
   property: PropertyFunction;
   generator: DataGenerator;
   iterations?: number;
@@ -78,13 +78,13 @@ export type PredicateFunction<T = any> = (input: T) => boolean;
 /**
  * Shrinking strategies for counterexample minimization
  */
-export type ShrinkingStrategy = 'aggressive' | 'conservative' | 'smart' | 'none';
+export type ShrinkingStrategy = "aggressive" | "conservative" | "smart" | "none";
 
 /**
  * Unit test interface
  */
 export interface UnitTest extends BaseTest {
-  category: 'unit';
+  category: "unit";
   test: TestFunction;
   expectedResult?: any;
   assertions?: AssertionFunction[];
@@ -104,7 +104,7 @@ export type AssertionFunction = (result: any) => boolean | Promise<boolean>;
  * Integration test interface
  */
 export interface IntegrationTest extends BaseTest {
-  category: 'integration';
+  category: "integration";
   test: TestFunction;
   dependencies: string[];
   environment: TestEnvironment;
@@ -125,7 +125,7 @@ export interface TestEnvironment {
  * Environment requirement
  */
 export interface EnvironmentRequirement {
-  type: 'service' | 'database' | 'api' | 'file' | 'network';
+  type: "service" | "database" | "api" | "file" | "network";
   name: string;
   version?: string;
   configuration?: Record<string, any>;
@@ -145,7 +145,7 @@ export type DataCleanupFunction = (setupData: any) => Promise<void>;
  * Performance test interface
  */
 export interface PerformanceTest extends BaseTest {
-  category: 'performance';
+  category: "performance";
   test: TestFunction;
   performanceTargets: PerformanceTargets;
   loadProfile?: LoadProfile;
@@ -191,18 +191,18 @@ export interface TestResult {
   executionTime: number;
   error?: Error;
   metadata?: Record<string, any>;
-  
+
   // Property test specific
   iterations?: number;
   counterExample?: any;
   shrinkingSteps?: number;
-  
+
   // Performance test specific
   performanceMetrics?: PerformanceMetrics;
-  
+
   // Coverage information
   coverage?: TestCoverage;
-  
+
   // Assertions
   assertions?: AssertionResult[];
 }
@@ -264,7 +264,7 @@ export interface TestSuite {
   readonly description: string;
   readonly tests: BaseTest[];
   readonly configuration: TestSuiteConfiguration;
-  
+
   // Lifecycle hooks
   beforeAll?: LifecycleHook;
   afterAll?: LifecycleHook;
@@ -347,12 +347,12 @@ export interface TestRunner {
   runTest(test: BaseTest): Promise<TestResult>;
   runSuite(suite: TestSuite): Promise<TestExecutionReport>;
   runTests(tests: BaseTest[], configuration?: TestRunConfiguration): Promise<TestExecutionReport>;
-  
+
   // Filtering and selection
   runByCategory(category: TestCategory): Promise<TestExecutionReport>;
   runByTags(tags: string[]): Promise<TestExecutionReport>;
   runByPriority(priority: TestPriority): Promise<TestExecutionReport>;
-  
+
   // State management
   isRunning(): boolean;
   cancel(): Promise<void>;
@@ -417,11 +417,13 @@ export interface TestDataGeneratorRegistry {
   unregister(name: string): boolean;
   get<T>(name: string): DataGenerator<T> | null;
   getAll(): Record<string, DataGenerator>;
-  
+
   // Composite generators
   combine<T>(...generators: DataGenerator<T>[]): DataGenerator<T[]>;
   oneOf<T>(...generators: DataGenerator<T>[]): DataGenerator<T>;
-  frequency<T>(weightedGenerators: Array<{ weight: number; generator: DataGenerator<T> }>): DataGenerator<T>;
+  frequency<T>(
+    weightedGenerators: Array<{ weight: number; generator: DataGenerator<T> }>
+  ): DataGenerator<T>;
 }
 
 /**
@@ -442,7 +444,7 @@ export interface TestAnalytics {
 export interface TimeRange {
   start: Date;
   end: Date;
-  granularity: 'hour' | 'day' | 'week' | 'month';
+  granularity: "hour" | "day" | "week" | "month";
 }
 
 /**
@@ -461,7 +463,7 @@ export interface FlakinessReport {
  * Flakiness pattern
  */
 export interface FlakinessPattern {
-  type: 'timing' | 'environment' | 'data' | 'concurrency';
+  type: "timing" | "environment" | "data" | "concurrency";
   description: string;
   frequency: number;
   confidence: number;
@@ -473,8 +475,8 @@ export interface FlakinessPattern {
 export interface RegressionReport {
   testId: string;
   hasRegression: boolean;
-  regressionType: 'performance' | 'functionality' | 'coverage';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  regressionType: "performance" | "functionality" | "coverage";
+  severity: "low" | "medium" | "high" | "critical";
   baseline: any;
   current: any;
   changePercentage: number;
@@ -523,12 +525,12 @@ export interface AnalyticsSummary {
  * Recommendation for test improvements
  */
 export interface Recommendation {
-  type: 'performance' | 'reliability' | 'coverage' | 'maintenance';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  type: "performance" | "reliability" | "coverage" | "maintenance";
+  priority: "low" | "medium" | "high" | "critical";
   title: string;
   description: string;
   impact: string;
-  effort: 'low' | 'medium' | 'high';
+  effort: "low" | "medium" | "high";
   actionItems: string[];
 }
 

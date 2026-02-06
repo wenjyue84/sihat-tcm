@@ -1,6 +1,6 @@
 /**
  * Voice Command Handler - Main Orchestrator
- * 
+ *
  * Coordinates all voice-related functionality including speech recognition,
  * synthesis, command processing, and dictation for the Sihat TCM application.
  */
@@ -16,20 +16,20 @@ import {
   VoiceEvent,
   VoiceEventListener,
   VoiceStatus,
-  VoiceSupportInfo
-} from './interfaces/VoiceInterfaces';
+  VoiceSupportInfo,
+} from "./interfaces/VoiceInterfaces";
 
-import { SpeechRecognitionManager } from './core/SpeechRecognitionManager';
-import { SpeechSynthesisManager } from './core/SpeechSynthesisManager';
-import { CommandRegistry } from './commands/CommandRegistry';
-import { DictationManager, DictationResult } from './commands/DictationManager';
+import { SpeechRecognitionManager } from "./core/SpeechRecognitionManager";
+import { SpeechSynthesisManager } from "./core/SpeechSynthesisManager";
+import { CommandRegistry } from "./commands/CommandRegistry";
+import { DictationManager, DictationResult } from "./commands/DictationManager";
 
 export class VoiceCommandHandler {
   private recognitionManager: SpeechRecognitionManager;
   private synthesisManager: SpeechSynthesisManager;
   private commandRegistry: CommandRegistry;
   private dictationManager: DictationManager;
-  
+
   private isEnabled: boolean = false;
   private currentLanguage: string = "en-US";
   private eventListeners: Map<VoiceEventType, Set<VoiceEventListener>> = new Map();
@@ -76,7 +76,7 @@ export class VoiceCommandHandler {
     this.dictationManager = new DictationManager({
       language: this.currentLanguage,
       autoCapitalize: true,
-      autoPunctuation: true
+      autoPunctuation: true,
     });
 
     this.setupEventHandlers();
@@ -207,7 +207,7 @@ export class VoiceCommandHandler {
       transcript,
       confidence,
       language: this.currentLanguage,
-      isDictationMode: this.dictationManager.isDictating()
+      isDictationMode: this.dictationManager.isDictating(),
     });
 
     if (matches.length > 0) {
@@ -234,7 +234,7 @@ export class VoiceCommandHandler {
       await this.commandRegistry.executeCommand({
         match,
         enableFeedback: this.options.enableFeedback,
-        debugMode: this.options.debugMode
+        debugMode: this.options.debugMode,
       });
 
       if (this.options.debugMode) {
@@ -267,7 +267,7 @@ export class VoiceCommandHandler {
   public stop(): void {
     this.isEnabled = false;
     this.recognitionManager.stop();
-    
+
     if (this.dictationManager.isDictating()) {
       this.dictationManager.stopDictation();
     }
@@ -291,7 +291,7 @@ export class VoiceCommandHandler {
     }
 
     this.dictationManager.startDictation();
-    
+
     if (this.options.enableFeedback) {
       this.speak("Dictation mode started. Speak your input.");
     }
@@ -306,7 +306,7 @@ export class VoiceCommandHandler {
    */
   public stopDictation(): DictationResult {
     const result = this.dictationManager.stopDictation();
-    
+
     if (this.options.enableFeedback) {
       this.speak("Dictation mode stopped.");
     }
@@ -464,7 +464,9 @@ export class VoiceCommandHandler {
       support: {
         recognition: VoiceCommandHandler.isRecognitionSupported(),
         synthesis: VoiceCommandHandler.isSynthesisSupported(),
-        fullSupport: VoiceCommandHandler.isRecognitionSupported() && VoiceCommandHandler.isSynthesisSupported(),
+        fullSupport:
+          VoiceCommandHandler.isRecognitionSupported() &&
+          VoiceCommandHandler.isSynthesisSupported(),
       },
       recognition: this.recognitionManager.getStatus(),
       synthesis: this.synthesisManager.getStatus(),
@@ -478,12 +480,12 @@ export class VoiceCommandHandler {
    */
   public destroy(): void {
     this.stop();
-    
+
     this.recognitionManager.destroy();
     this.synthesisManager.destroy();
     this.commandRegistry.destroy();
     this.dictationManager.destroy();
-    
+
     this.eventListeners.clear();
   }
 }

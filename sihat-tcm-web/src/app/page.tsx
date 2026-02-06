@@ -167,12 +167,13 @@ export default function Home() {
               onClick={handleButtonClick}
               disabled={buttonState === "filling" || buttonState === "clearing"}
               className={`flex items-center gap-2 p-2 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl
-              ${buttonState === "test"
+              ${
+                buttonState === "test"
                   ? "bg-amber-500 hover:bg-amber-400 text-amber-950 hover:scale-105"
                   : buttonState === "filling" || buttonState === "clearing"
                     ? "bg-emerald-500 text-white scale-95 ring-4 ring-emerald-300/50"
                     : "bg-rose-500 hover:bg-rose-400 text-white hover:scale-105"
-                }
+              }
               ${buttonState === "filling" || buttonState === "clearing" ? "cursor-not-allowed" : "cursor-pointer"}
             `}
               title={

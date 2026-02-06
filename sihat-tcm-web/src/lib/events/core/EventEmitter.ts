@@ -1,6 +1,6 @@
 /**
  * Event Emitter Core Implementation
- * 
+ *
  * High-performance event emitter with advanced features like priority handling,
  * error recovery, and comprehensive monitoring.
  */
@@ -15,10 +15,10 @@ import {
   EventEmissionOptions,
   EventEmissionResult,
   EventStatistics,
-} from '../interfaces/EventInterfaces';
+} from "../interfaces/EventInterfaces";
 
-import { devLog, logError } from '../../systemLogger';
-import { ErrorFactory } from '../../errors/AppError';
+import { devLog, logError } from "../../systemLogger";
+import { ErrorFactory } from "../../errors/AppError";
 
 /**
  * High-performance event emitter implementation
@@ -28,7 +28,7 @@ export class EnhancedEventEmitter implements EventEmitter {
   private listenerIdCounter = 0;
   private readonly context: string;
   private readonly config: EventEmitterConfig;
-  
+
   // Statistics tracking
   private stats = {
     totalEvents: 0,
@@ -37,13 +37,13 @@ export class EnhancedEventEmitter implements EventEmitter {
     executionTimes: [] as number[],
   };
 
-  constructor(context: string = 'EventEmitter', config: Partial<EventEmitterConfig> = {}) {
+  constructor(context: string = "EventEmitter", config: Partial<EventEmitterConfig> = {}) {
     this.context = context;
     this.config = {
       maxListeners: 100,
       defaultTimeout: 5000,
       enableStatistics: true,
-      errorHandling: 'log',
+      errorHandling: "log",
       asyncByDefault: true,
       ...config,
     };
@@ -58,7 +58,7 @@ export class EnhancedEventEmitter implements EventEmitter {
   ): Promise<EventEmissionResult> {
     const startTime = Date.now();
     const eventId = event.id || this.generateEventId();
-    
+
     const emissionOptions = {
       async: this.config.asyncByDefault,
       timeout: this.config.defaultTimeout,
@@ -76,9 +76,9 @@ export class EnhancedEventEmitter implements EventEmitter {
       }
 
       const listeners = this.listeners.get(event.type) || [];
-      
+
       if (listeners.length === 0) {
-        devLog(`[${this.context}] No listeners for event: ${event.type}`);
+        devLog("debug", this.context, `No listeners for event: ${event.type}`);
         return {
           eventId,
           success: true,
@@ -88,7 +88,7 @@ export class EnhancedEventEmitter implements EventEmitter {
         };
       }
 
-      devLog(`[${this.context}] Emitting event: ${event.type}`, {
+      devLog("debug", this.context, `Emitting event: ${event.type}`, {
         listenerCount: listeners.length,
         source: event.source,
         async: emissionOptions.async,
@@ -102,14 +102,14 @@ export class EnhancedEventEmitter implements EventEmitter {
 
       if (emissionOptions.async) {
         // Execute all listeners concurrently
-        const promises = sortedListeners.map(entry => 
+        const promises = sortedListeners.map((entry) =>
           this.executeListener(entry, event, emissionOptions)
         );
 
         const results = await Promise.allSettled(promises);
-        
+
         results.forEach((result, index) => {
-          if (result.status === 'fulfilled') {
+          if (result.status === "fulfilled") {
             if (result.value.success) {
               successfulExecutions++;
             } else {
@@ -154,22 +154,21 @@ export class EnhancedEventEmitter implements EventEmitter {
       };
 
       // Log errors if any
-      if (errors.length > 0 && this.config.errorHandling === 'log') {
-        logError(`[${this.context}] Event emission had ${errors.length} errors`, {
+      if (errors.length > 0 && this.config.errorHandling === "log") {
+        logError(this.context, `Event emission had ${errors.length} errors`, {
           eventType: event.type,
-          errors: errors.map(e => e.error.message),
+          errors: errors.map((e) => e.error.message),
         });
       }
 
       return result;
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
-      if (this.config.errorHandling === 'throw') {
+
+      if (this.config.errorHandling === "throw") {
         throw ErrorFactory.fromUnknownError(error, {
           component: this.context,
-          action: 'emit',
+          action: "emit",
           metadata: { eventType: event.type, eventId },
         });
       }
@@ -179,12 +178,14 @@ export class EnhancedEventEmitter implements EventEmitter {
         success: false,
         listenersNotified: 0,
         executionTime,
-        errors: [{
-          error: error as Error,
-          event,
-          timestamp: new Date(),
-          attempt: 1,
-        }],
+        errors: [
+          {
+            error: error as Error,
+            event,
+            timestamp: new Date(),
+            attempt: 1,
+          },
+        ],
       };
     }
   }
@@ -193,24 +194,24 @@ export class EnhancedEventEmitter implements EventEmitter {
    * Register an event listener
    */
   public on<T extends BaseEvent>(
-    eventType: T['type'],
+    eventType: T["type"],
     listener: EventListener<T>,
     config: EventListenerConfig = {}
   ): string {
     const listenerId = this.generateListenerId();
-    
+
     const entry: EventListenerEntry = {
       id: listenerId,
       listener: listener as EventListener,
       config: {
         once: false,
         priority: 0,
-        source: 'unknown',
+        source: "unknown",
         timeout: this.config.defaultTimeout,
         retryAttempts: 0,
-        errorHandler: undefined,
+        errorHandler: () => {},
         ...config,
-      },
+      } as Required<EventListenerConfig>,
       registeredAt: new Date(),
       executionCount: 0,
       errors: [],
@@ -221,15 +222,17 @@ export class EnhancedEventEmitter implements EventEmitter {
     }
 
     const listeners = this.listeners.get(eventType)!;
-    
+
     // Check listener limit
     if (listeners.length >= this.config.maxListeners) {
-      throw new Error(`Maximum listeners (${this.config.maxListeners}) exceeded for event: ${eventType}`);
+      throw new Error(
+        `Maximum listeners (${this.config.maxListeners}) exceeded for event: ${eventType}`
+      );
     }
 
     listeners.push(entry);
 
-    devLog(`[${this.context}] Listener registered for ${eventType}`, {
+    devLog("debug", this.context, `Listener registered for ${eventType}`, {
       listenerId,
       priority: entry.config.priority,
       source: entry.config.source,
@@ -243,9 +246,9 @@ export class EnhancedEventEmitter implements EventEmitter {
    * Register a one-time event listener
    */
   public once<T extends BaseEvent>(
-    eventType: T['type'],
+    eventType: T["type"],
     listener: EventListener<T>,
-    config: Omit<EventListenerConfig, 'once'> = {}
+    config: Omit<EventListenerConfig, "once"> = {}
   ): string {
     return this.on(eventType, listener, { ...config, once: true });
   }
@@ -259,23 +262,23 @@ export class EnhancedEventEmitter implements EventEmitter {
 
     if (listenerId) {
       // Remove specific listener
-      const index = listeners.findIndex(entry => entry.id === listenerId);
+      const index = listeners.findIndex((entry) => entry.id === listenerId);
       if (index === -1) return false;
 
       listeners.splice(index, 1);
-      devLog(`[${this.context}] Listener ${listenerId} removed from ${eventType}`);
-      
+      devLog("debug", this.context, `Listener ${listenerId} removed from ${eventType}`);
+
       // Clean up empty listener arrays
       if (listeners.length === 0) {
         this.listeners.delete(eventType);
       }
-      
+
       return true;
     } else {
       // Remove all listeners for event type
       const count = listeners.length;
       this.listeners.delete(eventType);
-      devLog(`[${this.context}] All ${count} listeners removed from ${eventType}`);
+      devLog("debug", this.context, `All ${count} listeners removed from ${eventType}`);
       return count > 0;
     }
   }
@@ -289,16 +292,18 @@ export class EnhancedEventEmitter implements EventEmitter {
       if (listeners) {
         const count = listeners.length;
         this.listeners.delete(eventType);
-        devLog(`[${this.context}] Removed ${count} listeners from ${eventType}`);
+        devLog("debug", this.context, `Removed ${count} listeners from ${eventType}`);
         return count;
       }
       return 0;
     } else {
-      const totalCount = Array.from(this.listeners.values())
-        .reduce((sum, listeners) => sum + listeners.length, 0);
-      
+      const totalCount = Array.from(this.listeners.values()).reduce(
+        (sum, listeners) => sum + listeners.length,
+        0
+      );
+
       this.listeners.clear();
-      devLog(`[${this.context}] Removed all ${totalCount} listeners`);
+      devLog("debug", this.context, `Removed all ${totalCount} listeners`);
       return totalCount;
     }
   }
@@ -340,15 +345,14 @@ export class EnhancedEventEmitter implements EventEmitter {
     for (const [eventType, listeners] of this.listeners) {
       eventsByType[eventType] = listeners.length;
       totalListeners += listeners.length;
-      
+
       for (const listener of listeners) {
         if (listener.executionCount > 0) {
           activeListeners++;
         }
-        
-        eventsBySource[listener.config.source] = 
-          (eventsBySource[listener.config.source] || 0) + 1;
-        
+
+        eventsBySource[listener.config.source] = (eventsBySource[listener.config.source] || 0) + 1;
+
         // Collect recent errors (last 10)
         recentErrors.push(...listener.errors.slice(-2));
       }
@@ -357,13 +361,14 @@ export class EnhancedEventEmitter implements EventEmitter {
     // Sort recent errors by timestamp
     recentErrors.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
-    const averageExecutionTime = this.stats.executionTimes.length > 0
-      ? this.stats.executionTimes.reduce((sum, time) => sum + time, 0) / this.stats.executionTimes.length
-      : 0;
+    const averageExecutionTime =
+      this.stats.executionTimes.length > 0
+        ? this.stats.executionTimes.reduce((sum, time) => sum + time, 0) /
+          this.stats.executionTimes.length
+        : 0;
 
-    const errorRate = this.stats.totalExecutions > 0
-      ? this.stats.totalErrors / this.stats.totalExecutions
-      : 0;
+    const errorRate =
+      this.stats.totalExecutions > 0 ? this.stats.totalErrors / this.stats.totalExecutions : 0;
 
     return {
       totalEvents: this.stats.totalEvents,
@@ -388,15 +393,11 @@ export class EnhancedEventEmitter implements EventEmitter {
     options: Required<EventEmissionOptions>
   ): Promise<{ success: boolean; error?: EventListenerError }> {
     let lastError: Error | null = null;
-    
+
     for (let attempt = 0; attempt <= entry.config.retryAttempts; attempt++) {
       try {
         // Execute with timeout
-        const result = await this.executeWithTimeout(
-          entry.listener,
-          event,
-          entry.config.timeout
-        );
+        const result = await this.executeWithTimeout(entry.listener, event, entry.config.timeout);
 
         // Update entry statistics
         entry.executionCount++;
@@ -408,10 +409,9 @@ export class EnhancedEventEmitter implements EventEmitter {
         }
 
         return { success: true };
-
       } catch (error) {
         lastError = error as Error;
-        
+
         const listenerError: EventListenerError = {
           error: lastError,
           event,
@@ -426,7 +426,7 @@ export class EnhancedEventEmitter implements EventEmitter {
           try {
             entry.config.errorHandler(lastError, event);
           } catch (handlerError) {
-            logError(`[${this.context}] Error handler failed`, handlerError);
+            logError(this.context, "Error handler failed", { error: handlerError instanceof Error ? handlerError.message : String(handlerError) });
           }
         }
 
@@ -458,8 +458,8 @@ export class EnhancedEventEmitter implements EventEmitter {
   ): Promise<void> {
     return Promise.race([
       Promise.resolve(listener(event)),
-      new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Listener timeout')), timeout)
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Listener timeout")), timeout)
       ),
     ]);
   }
@@ -468,16 +468,16 @@ export class EnhancedEventEmitter implements EventEmitter {
    * Validate event structure
    */
   private validateEvent(event: BaseEvent): void {
-    if (!event.type || typeof event.type !== 'string') {
-      throw new Error('Event must have a valid type');
+    if (!event.type || typeof event.type !== "string") {
+      throw new Error("Event must have a valid type");
     }
-    
+
     if (!event.timestamp || !(event.timestamp instanceof Date)) {
-      throw new Error('Event must have a valid timestamp');
+      throw new Error("Event must have a valid timestamp");
     }
-    
-    if (!event.source || typeof event.source !== 'string') {
-      throw new Error('Event must have a valid source');
+
+    if (!event.source || typeof event.source !== "string") {
+      throw new Error("Event must have a valid source");
     }
   }
 
@@ -487,13 +487,13 @@ export class EnhancedEventEmitter implements EventEmitter {
   private updateStatistics(executionTime: number, hasErrors: boolean): void {
     this.stats.totalEvents++;
     this.stats.totalExecutions++;
-    
+
     if (hasErrors) {
       this.stats.totalErrors++;
     }
-    
+
     this.stats.executionTimes.push(executionTime);
-    
+
     // Keep only last 1000 execution times for memory efficiency
     if (this.stats.executionTimes.length > 1000) {
       this.stats.executionTimes = this.stats.executionTimes.slice(-1000);
@@ -518,7 +518,7 @@ export class EnhancedEventEmitter implements EventEmitter {
    * Delay utility for retries
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -529,7 +529,7 @@ export interface EventEmitterConfig {
   maxListeners: number;
   defaultTimeout: number;
   enableStatistics: boolean;
-  errorHandling: 'throw' | 'log' | 'ignore';
+  errorHandling: "throw" | "log" | "ignore";
   asyncByDefault: boolean;
 }
 
@@ -546,4 +546,4 @@ export function createEventEmitter(
 /**
  * Default event emitter instance
  */
-export const defaultEventEmitter = new EnhancedEventEmitter('DefaultEmitter');
+export const defaultEventEmitter = new EnhancedEventEmitter("DefaultEmitter");

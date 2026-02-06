@@ -1,6 +1,6 @@
 /**
  * Report Data Extraction Utilities
- * 
+ *
  * Helper functions for extracting structured data from diagnosis reports.
  * These utilities handle various report formats and extract common fields.
  */
@@ -9,11 +9,11 @@ import type { DiagnosisReport } from "@/types/database";
 
 /**
  * Extract symptoms from diagnosis report
- * 
+ *
  * Looks for symptoms in:
  * - analysis.key_findings.from_inquiry (text parsing)
  * - input_data.symptoms (structured)
- * 
+ *
  * @param report - Diagnosis report
  * @returns Array of symptom strings, or null if none found
  */
@@ -61,11 +61,11 @@ export function extractSymptomsFromReport(report: DiagnosisReport): string[] | n
 
 /**
  * Extract medicines from diagnosis report
- * 
+ *
  * Looks for medicines in:
  * - input_data.medicines (most reliable)
  * - recommendations.herbal_formulas
- * 
+ *
  * @param report - Diagnosis report
  * @returns Array of medicine names, or null if none found
  */
@@ -90,17 +90,15 @@ export function extractMedicinesFromReport(report: DiagnosisReport): string[] | 
 
 /**
  * Extract vital signs from diagnosis report
- * 
+ *
  * Checks multiple locations:
  * - patient_summary.vital_signs (preferred)
  * - input_data (pulse, temperature, blood_pressure, respiratory_rate)
- * 
+ *
  * @param report - Diagnosis report
  * @returns Vital signs object, or null if none found
  */
-export function extractVitalSignsFromReport(
-  report: DiagnosisReport
-): VitalSigns | null {
+export function extractVitalSignsFromReport(report: DiagnosisReport): VitalSigns | null {
   // First check patient_summary (most reliable)
   if (report.patient_summary?.vital_signs) {
     return report.patient_summary.vital_signs;
@@ -115,31 +113,36 @@ export function extractVitalSignsFromReport(
   } = {};
 
   if (report.input_data?.pulse) {
-    vitalSigns.pulse = typeof report.input_data.pulse === "number" 
-      ? report.input_data.pulse 
-      : parseFloat(String(report.input_data.pulse));
+    vitalSigns.pulse =
+      typeof report.input_data.pulse === "number"
+        ? report.input_data.pulse
+        : parseFloat(String(report.input_data.pulse));
   }
 
   if (report.input_data?.temperature) {
-    vitalSigns.temperature = typeof report.input_data.temperature === "number"
-      ? report.input_data.temperature
-      : parseFloat(String(report.input_data.temperature));
+    vitalSigns.temperature =
+      typeof report.input_data.temperature === "number"
+        ? report.input_data.temperature
+        : parseFloat(String(report.input_data.temperature));
   }
 
   if (report.input_data?.blood_pressure) {
     const bp = report.input_data.blood_pressure;
     if (typeof bp === "object" && bp !== null) {
       vitalSigns.bloodPressure = {
-        systolic: typeof bp.systolic === "number" ? bp.systolic : parseFloat(String(bp.systolic || 0)),
-        diastolic: typeof bp.diastolic === "number" ? bp.diastolic : parseFloat(String(bp.diastolic || 0)),
+        systolic:
+          typeof bp.systolic === "number" ? bp.systolic : parseFloat(String(bp.systolic || 0)),
+        diastolic:
+          typeof bp.diastolic === "number" ? bp.diastolic : parseFloat(String(bp.diastolic || 0)),
       };
     }
   }
 
   if (report.input_data?.respiratory_rate) {
-    vitalSigns.respiratoryRate = typeof report.input_data.respiratory_rate === "number"
-      ? report.input_data.respiratory_rate
-      : parseFloat(String(report.input_data.respiratory_rate));
+    vitalSigns.respiratoryRate =
+      typeof report.input_data.respiratory_rate === "number"
+        ? report.input_data.respiratory_rate
+        : parseFloat(String(report.input_data.respiratory_rate));
   }
 
   return Object.keys(vitalSigns).length > 0 ? vitalSigns : null;
@@ -147,9 +150,9 @@ export function extractVitalSignsFromReport(
 
 /**
  * Extract treatment plan summary from diagnosis report
- * 
+ *
  * Combines dietary, lifestyle, and herbal recommendations into a summary string.
- * 
+ *
  * @param report - Diagnosis report
  * @returns Treatment plan summary string, or null if none found
  */
@@ -183,7 +186,7 @@ export function extractTreatmentPlanFromReport(report: DiagnosisReport): string 
 
 /**
  * Extract diagnosis pattern from report
- * 
+ *
  * @param report - Diagnosis report
  * @returns Primary diagnosis pattern, or null
  */
@@ -205,4 +208,3 @@ export function extractDiagnosisPattern(report: DiagnosisReport): string | null 
 
   return null;
 }
-

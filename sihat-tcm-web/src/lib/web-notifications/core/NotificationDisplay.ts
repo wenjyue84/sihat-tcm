@@ -3,7 +3,10 @@
  * Handles immediate notification display and interaction
  */
 
-import { NotificationOptions, NotificationHistoryItem } from '../interfaces/WebNotificationInterfaces';
+import {
+  NotificationOptions,
+  NotificationHistoryItem,
+} from "../interfaces/WebNotificationInterfaces";
 
 export class NotificationDisplay {
   private notificationHistory: NotificationHistoryItem[] = [];
@@ -81,7 +84,7 @@ export class NotificationDisplay {
    */
   private addToHistory(item: NotificationHistoryItem): void {
     this.notificationHistory.unshift(item);
-    
+
     // Keep only last 100 notifications
     if (this.notificationHistory.length > 100) {
       this.notificationHistory = this.notificationHistory.slice(0, 100);
@@ -93,8 +96,7 @@ export class NotificationDisplay {
    */
   markAsClicked(notificationData: any): void {
     const historyItem = this.notificationHistory.find(
-      item => item.title === notificationData.title && 
-               item.sentAt === notificationData.sentAt
+      (item) => item.title === notificationData.title && item.sentAt === notificationData.sentAt
     );
 
     if (historyItem) {
@@ -143,12 +145,12 @@ export class NotificationDisplay {
     recent: number;
   } {
     const total = this.notificationHistory.length;
-    const clicked = this.notificationHistory.filter(item => item.clicked).length;
+    const clicked = this.notificationHistory.filter((item) => item.clicked).length;
     const clickRate = total > 0 ? (clicked / total) * 100 : 0;
-    
+
     // Recent notifications (last 24 hours)
-    const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
-    const recent = this.notificationHistory.filter(item => item.sentAt > oneDayAgo).length;
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const recent = this.notificationHistory.filter((item) => item.sentAt > oneDayAgo).length;
 
     return {
       total,

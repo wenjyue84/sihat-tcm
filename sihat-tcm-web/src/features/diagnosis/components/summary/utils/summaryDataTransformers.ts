@@ -47,38 +47,26 @@ export function formatInquirySummary(
 /**
  * Formats observation summary (tongue, face, body part)
  */
-export function formatObservationSummary(
-  observation: string | undefined,
-  t: any
-): string {
+export function formatObservationSummary(observation: string | undefined, t: any): string {
   return observation || t.diagnosisSummary.defaultMessages.noObservation;
 }
 
 /**
  * Formats audio summary from diagnosis data
  */
-export function formatAudioSummary(
-  wenAudio: DiagnosisWizardData["wen_audio"],
-  t: any
-): string {
+export function formatAudioSummary(wenAudio: DiagnosisWizardData["wen_audio"], t: any): string {
   if (!wenAudio) return "";
   return (
-    wenAudio.transcription ||
-    wenAudio.analysis ||
-    t.diagnosisSummary.defaultMessages.audioCompleted
+    wenAudio.transcription || wenAudio.analysis || t.diagnosisSummary.defaultMessages.audioCompleted
   );
 }
 
 /**
  * Formats pulse summary from diagnosis data
  */
-export function formatPulseSummary(
-  qie: DiagnosisWizardData["qie"],
-  t: any
-): string {
+export function formatPulseSummary(qie: DiagnosisWizardData["qie"], t: any): string {
   if (!qie) return "";
-  const qualities =
-    qie.pulseQualities?.map((q: any) => q.nameEn).join(", ") || t.common.none;
+  const qualities = qie.pulseQualities?.map((q: any) => q.nameEn).join(", ") || t.common.none;
   return `BPM: ${qie.bpm}\n${t.pulse.tcmPulseQualities}: ${qualities}`;
 }
 
@@ -91,20 +79,15 @@ export function formatSmartConnectSummary(
 ): string {
   if (!smartConnect) return "";
   const metrics = [];
-  if (smartConnect.pulseRate)
-    metrics.push(`${t.pulse.pulseRate}: ${smartConnect.pulseRate} BPM`);
+  if (smartConnect.pulseRate) metrics.push(`${t.pulse.pulseRate}: ${smartConnect.pulseRate} BPM`);
   if (smartConnect.bloodPressure)
     metrics.push(`${t.pulse.bloodPressure}: ${smartConnect.bloodPressure} mmHg`);
   if (smartConnect.bloodOxygen)
     metrics.push(`${t.pulse.bloodOxygen}: ${smartConnect.bloodOxygen}%`);
-  if (smartConnect.bodyTemp)
-    metrics.push(`${t.pulse.bodyTemperature}: ${smartConnect.bodyTemp}°C`);
+  if (smartConnect.bodyTemp) metrics.push(`${t.pulse.bodyTemperature}: ${smartConnect.bodyTemp}°C`);
   if (smartConnect.hrv) metrics.push(`${t.pulse.hrv}: ${smartConnect.hrv} ms`);
-  if (smartConnect.stressLevel)
-    metrics.push(`${t.pulse.stressLevel}: ${smartConnect.stressLevel}`);
-  return metrics.length > 0
-    ? metrics.join("\n")
-    : t.diagnosisSummary.defaultMessages.noDeviceData;
+  if (smartConnect.stressLevel) metrics.push(`${t.pulse.stressLevel}: ${smartConnect.stressLevel}`);
+  return metrics.length > 0 ? metrics.join("\n") : t.diagnosisSummary.defaultMessages.noDeviceData;
 }
 
 /**
@@ -128,26 +111,17 @@ export function transformDiagnosisDataToSummaries(
 
   // Tongue
   if (data.wang_tongue) {
-    summaries["wang_tongue"] = formatObservationSummary(
-      data.wang_tongue.observation,
-      t
-    );
+    summaries["wang_tongue"] = formatObservationSummary(data.wang_tongue.observation, t);
   }
 
   // Face
   if (data.wang_face) {
-    summaries["wang_face"] = formatObservationSummary(
-      data.wang_face.observation,
-      t
-    );
+    summaries["wang_face"] = formatObservationSummary(data.wang_face.observation, t);
   }
 
   // Body Part
   if (data.wang_part) {
-    summaries["wang_part"] = formatObservationSummary(
-      data.wang_part.observation,
-      t
-    );
+    summaries["wang_part"] = formatObservationSummary(data.wang_part.observation, t);
   }
 
   // Audio
@@ -162,14 +136,8 @@ export function transformDiagnosisDataToSummaries(
 
   // Smart Connect
   if (data.smart_connect) {
-    summaries["smart_connect"] = formatSmartConnectSummary(
-      data.smart_connect,
-      t
-    );
+    summaries["smart_connect"] = formatSmartConnectSummary(data.smart_connect, t);
   }
 
   return summaries;
 }
-
-
-

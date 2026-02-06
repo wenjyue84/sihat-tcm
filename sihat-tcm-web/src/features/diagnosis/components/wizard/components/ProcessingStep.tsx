@@ -49,7 +49,7 @@ export function ProcessingStep({
   }, [isLoading, error, completion, data.basic_info, submitConsultation]);
 
   if (isLoading || (!error && completion < 100)) {
-    return <AnalysisLoadingScreen basicInfo={data.basic_info as any} />;
+    return <AnalysisLoadingScreen basicInfo={data.basic_info as never} />;
   }
 
   if (error) {
@@ -99,9 +99,9 @@ export function ProcessingStep({
     return (
       <DiagnosisReport
         data={resultData}
-        patientInfo={data.basic_info as any}
-        reportOptions={data.report_options as any}
-        smartConnectData={data.smart_connect as any}
+        patientInfo={data.basic_info as never}
+        reportOptions={data.report_options as never}
+        smartConnectData={data.smart_connect as never}
         onRestart={() => {
           setData(() => ({
             basic_info: null,
@@ -118,6 +118,7 @@ export function ProcessingStep({
           setIsSaved(false);
         }}
         saved={isSaved}
+        notifyOnFirstView
       />
     );
   } catch (parseError) {
@@ -141,4 +142,3 @@ export function ProcessingStep({
     );
   }
 }
-

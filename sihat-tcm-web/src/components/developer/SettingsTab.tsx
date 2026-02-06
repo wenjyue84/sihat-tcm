@@ -90,9 +90,7 @@ export function SettingsTab() {
                   {envTestMessage[env.key] && (
                     <span
                       className={`text-[10px] ${
-                        envTestStatus[env.key] === "success"
-                          ? "text-emerald-400"
-                          : "text-red-400"
+                        envTestStatus[env.key] === "success" ? "text-emerald-400" : "text-red-400"
                       }`}
                     >
                       {envTestMessage[env.key]}
@@ -128,6 +126,3 @@ export function SettingsTab() {
     </div>
   );
 }
-
-
-

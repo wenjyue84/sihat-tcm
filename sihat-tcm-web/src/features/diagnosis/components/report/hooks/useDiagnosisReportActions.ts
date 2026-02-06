@@ -48,14 +48,15 @@ export function useDiagnosisReportActions({
   const { user, profile } = useAuth();
   const router = useRouter();
 
-  const diagnosisText = extractDiagnosisTitle(data.diagnosis ?? "");
-  const constitutionText = extractConstitutionType(data.constitution ?? "");
+  const reportData = data as Record<string, unknown>;
+  const diagnosisText = extractDiagnosisTitle(String(reportData.diagnosis ?? ""));
+  const constitutionText = extractConstitutionType(String(reportData.constitution ?? ""));
 
   const downloadPDF = useCallback(
     async (languageKey = "en") => {
       const tPdf = translations[languageKey as keyof typeof translations];
       await generateDiagnosisPDF({
-        data,
+        data: data as DiagnosisReport,
         translations: tPdf,
         languageKey,
       });
@@ -113,7 +114,11 @@ export function useDiagnosisReportActions({
     }
 
     // Final fallback: inform user
-    alert(language === "zh" ? "无法复制，请手动复制链接。" : "Unable to copy. Please copy the link manually.");
+    alert(
+      language === "zh"
+        ? "无法复制，请手动复制链接。"
+        : "Unable to copy. Please copy the link manually."
+    );
   }, [diagnosisText, constitutionText, language]);
 
   const handleSaveToHistory = useCallback(async () => {
@@ -182,4 +187,3 @@ export function useDiagnosisReportActions({
     handleRequestVerification,
   };
 }
-

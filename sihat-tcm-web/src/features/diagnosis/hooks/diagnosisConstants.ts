@@ -1,6 +1,6 @@
 /**
  * Diagnosis Wizard Constants
- * 
+ *
  * Constants and configuration for the diagnosis wizard flow
  */
 
@@ -28,6 +28,3 @@ export const STEP_PROGRESS: Record<string, number> = {
   processing: 98,
   report: 100,
 };
-
-
-

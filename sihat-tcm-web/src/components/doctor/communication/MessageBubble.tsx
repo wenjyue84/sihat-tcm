@@ -44,9 +44,7 @@ export function MessageBubble({ message, isDoctor }: MessageBubbleProps) {
             isFromDoctor ? "text-blue-100" : "text-gray-400"
           }`}
         >
-          <span className="text-[10px]">
-            {format(new Date(message.timestamp), "h:mm a")}
-          </span>
+          <span className="text-[10px]">{format(new Date(message.timestamp), "h:mm a")}</span>
           {isFromDoctor && (
             <span className="ml-0.5">
               {message.read ? (

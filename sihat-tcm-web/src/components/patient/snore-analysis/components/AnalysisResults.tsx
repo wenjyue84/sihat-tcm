@@ -24,11 +24,7 @@ interface AnalysisResultsProps {
   };
 }
 
-export function AnalysisResults({
-  result,
-  onReset,
-  translations,
-}: AnalysisResultsProps) {
+export function AnalysisResults({ result, onReset, translations }: AnalysisResultsProps) {
   return (
     <motion.div
       key="result"

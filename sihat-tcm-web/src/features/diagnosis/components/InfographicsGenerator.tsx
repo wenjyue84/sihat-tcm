@@ -36,31 +36,31 @@ const styleOptions: {
   description: string;
   colors: string[];
 }[] = [
-    {
-      id: "modern",
-      name: "Modern",
-      description: "Clean, professional design",
-      colors: ["#10b981", "#3b82f6", "#f8fafc"],
-    },
-    {
-      id: "traditional",
-      name: "Traditional",
-      description: "Classic TCM aesthetic",
-      colors: ["#7c3aed", "#dc2626", "#fef3c7"],
-    },
-    {
-      id: "minimal",
-      name: "Minimal",
-      description: "Simple, elegant look",
-      colors: ["#1f2937", "#6b7280", "#ffffff"],
-    },
-    {
-      id: "colorful",
-      name: "Colorful",
-      description: "Vibrant and engaging",
-      colors: ["#f43f5e", "#8b5cf6", "#06b6d4"],
-    },
-  ];
+  {
+    id: "modern",
+    name: "Modern",
+    description: "Clean, professional design",
+    colors: ["#10b981", "#3b82f6", "#f8fafc"],
+  },
+  {
+    id: "traditional",
+    name: "Traditional",
+    description: "Classic TCM aesthetic",
+    colors: ["#7c3aed", "#dc2626", "#fef3c7"],
+  },
+  {
+    id: "minimal",
+    name: "Minimal",
+    description: "Simple, elegant look",
+    colors: ["#1f2937", "#6b7280", "#ffffff"],
+  },
+  {
+    id: "colorful",
+    name: "Colorful",
+    description: "Vibrant and engaging",
+    colors: ["#f43f5e", "#8b5cf6", "#06b6d4"],
+  },
+];
 
 const translations = {
   en: {
@@ -334,10 +334,11 @@ export function InfographicsGenerator({
                       <button
                         key={style.id}
                         onClick={() => setSelectedStyle(style.id)}
-                        className={`relative p-4 rounded-xl border-2 transition-all text-left min-h-[72px] active:scale-[0.98] ${selectedStyle === style.id
+                        className={`relative p-4 rounded-xl border-2 transition-all text-left min-h-[72px] active:scale-[0.98] ${
+                          selectedStyle === style.id
                             ? "border-violet-500 bg-violet-50"
                             : "border-stone-200 hover:border-stone-300 active:bg-stone-50 bg-white"
-                          }`}
+                        }`}
                       >
                         {selectedStyle === style.id && (
                           <div className="absolute top-2 right-2 w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center">

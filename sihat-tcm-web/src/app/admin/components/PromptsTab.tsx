@@ -10,13 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Loader2, ChevronDown, ChevronUp, UserCog, LayoutDashboard } from "lucide-react";
 import {
   PROMPT_TYPES,
@@ -70,10 +64,7 @@ export function PromptsTab({
           <div className="flex flex-wrap items-end gap-4 p-1">
             <div className="space-y-2 flex-1 min-w-[200px]">
               <Label className="text-slate-700 font-medium">Core Medical Engine</Label>
-              <Select
-                value={doctorLevel}
-                onValueChange={(v) => setDoctorLevel(v as DoctorLevel)}
-              >
+              <Select value={doctorLevel} onValueChange={(v) => setDoctorLevel(v as DoctorLevel)}>
                 <SelectTrigger className="h-11">
                   <SelectValue />
                 </SelectTrigger>
@@ -185,9 +176,7 @@ function PromptCard({
   return (
     <Card
       className={`border border-slate-200 transition-all duration-300 ${
-        isExpanded
-          ? "ring-2 ring-slate-900 shadow-lg"
-          : "hover:border-slate-300 hover:shadow-sm"
+        isExpanded ? "ring-2 ring-slate-900 shadow-lg" : "hover:border-slate-300 hover:shadow-sm"
       }`}
     >
       <div

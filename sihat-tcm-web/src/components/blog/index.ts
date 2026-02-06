@@ -7,6 +7,3 @@ export { FloatingShareButton } from "./FloatingShareButton";
 export { Newsletter } from "./Newsletter";
 export { PaginationControl } from "./PaginationControl";
 export { SocialShare } from "./SocialShare";
-
-
-

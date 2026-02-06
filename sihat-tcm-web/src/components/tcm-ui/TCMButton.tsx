@@ -108,8 +108,8 @@ function TCMButton({
     <Comp
       data-slot="tcm-button"
       className={cn(tcmButtonVariants({ variant, size, isLoading }), className)}
-      disabled={disabled || isLoading}
-      aria-busy={isLoading}
+      disabled={disabled || !!isLoading}
+      aria-busy={!!isLoading || undefined}
       {...props}
     >
       {isLoading && <LoadingSpinner />}

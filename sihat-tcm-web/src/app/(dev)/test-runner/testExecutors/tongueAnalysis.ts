@@ -1,8 +1,8 @@
 /**
  * Tongue Analysis Test Executor
- * 
+ *
  * Tests for Step 3: Tongue Analysis functionality
- * 
+ *
  * TODO: Extract test cases from page.tsx executeTest function
  */
 
@@ -14,6 +14,3 @@ export async function executeTongueAnalysisTest(testId: string): Promise<void> {
   // This is a placeholder - actual implementation should be extracted from the original file
   throw new Error(`Tongue analysis test executor not yet implemented: ${testId}`);
 }
-
-
-

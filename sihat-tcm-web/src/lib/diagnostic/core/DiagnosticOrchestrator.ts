@@ -1,16 +1,16 @@
 /**
  * Diagnostic Orchestrator - Main processing pipeline coordinator
- * 
+ *
  * Orchestrates the entire diagnostic processing pipeline including
  * complexity analysis, model selection, personalization, and safety validation.
  */
 
-import { 
-  EnhancedDiagnosticRequest, 
-  EnhancedDiagnosticResponse, 
+import {
+  EnhancedDiagnosticRequest,
+  EnhancedDiagnosticResponse,
   DiagnosticProcessingStep,
-  DiagnosticConfig 
-} from '../interfaces/DiagnosticInterfaces';
+  DiagnosticConfig,
+} from "../interfaces/DiagnosticInterfaces";
 import { AIModelRouter, ModelSelectionCriteria } from "../../aiModelRouter";
 import { PersonalizationEngine } from "../../personalizationEngine";
 import { MedicalSafetyValidator, ValidationContext } from "../../medicalSafetyValidator";
@@ -29,14 +29,14 @@ export class DiagnosticOrchestrator {
     this.modelRouter = new AIModelRouter(`${context}/ModelRouter`);
     this.personalizationEngine = new PersonalizationEngine(`${context}/Personalization`);
     this.safetyValidator = new MedicalSafetyValidator(`${context}/Safety`);
-    
+
     // Default configuration
     this.config = {
       enablePersonalization: true,
       enableSafetyValidation: true,
       enablePerformanceMonitoring: true,
       maxProcessingTime: 30000, // 30 seconds
-      fallbackModel: "gemini-2.5-pro"
+      fallbackModel: "gemini-2.5-pro",
     };
   }
 
@@ -69,7 +69,7 @@ export class DiagnosticOrchestrator {
       // Step 4: Apply personalization if requested
       let personalizedRecommendations;
       let personalizationFactors;
-      
+
       if (request.requiresPersonalization && this.config.enablePersonalization) {
         const personalizationResult = await this.applyPersonalization(
           request.userId,
@@ -81,8 +81,12 @@ export class DiagnosticOrchestrator {
 
       // Step 5: Validate safety if requested
       let safetyValidation;
-      
-      if (request.requiresSafetyValidation && this.config.enableSafetyValidation && request.medicalHistory) {
+
+      if (
+        request.requiresSafetyValidation &&
+        this.config.enableSafetyValidation &&
+        request.medicalHistory
+      ) {
         safetyValidation = await this.validateSafety(diagnosisResult.diagnosis, {
           medical_history: request.medicalHistory,
           user_age: request.basicInfo?.age,
@@ -144,7 +148,7 @@ export class DiagnosticOrchestrator {
 
   private async analyzeComplexity(request: EnhancedDiagnosticRequest) {
     const step = this.startStep("complexity_analysis");
-    
+
     try {
       const complexity = this.modelRouter.analyzeComplexity({
         messages: request.messages,
@@ -153,7 +157,7 @@ export class DiagnosticOrchestrator {
         requiresAnalysis: true,
         requiresPersonalization: request.requiresPersonalization,
       });
-      
+
       this.completeStep(step, { complexity });
       return complexity;
     } catch (error) {
@@ -162,7 +166,10 @@ export class DiagnosticOrchestrator {
     }
   }
 
-  private async buildModelCriteria(request: EnhancedDiagnosticRequest, complexity: any): Promise<ModelSelectionCriteria> {
+  private async buildModelCriteria(
+    request: EnhancedDiagnosticRequest,
+    complexity: any
+  ): Promise<ModelSelectionCriteria> {
     return {
       complexity,
       doctorLevel: request.doctorLevel,
@@ -177,7 +184,7 @@ export class DiagnosticOrchestrator {
     criteria: ModelSelectionCriteria
   ) {
     const step = this.startStep("base_diagnosis");
-    
+
     try {
       // This would integrate with the existing diagnosis API
       // For now, return a mock structure
@@ -218,7 +225,7 @@ export class DiagnosticOrchestrator {
 
   private async applyPersonalization(userId: string, diagnosis: any) {
     const step = this.startStep("personalization");
-    
+
     try {
       const factors = await this.personalizationEngine.getPersonalizationFactors(userId);
 
@@ -241,11 +248,11 @@ export class DiagnosticOrchestrator {
         factors,
       };
 
-      this.completeStep(step, { 
-        dietaryCount: dietary.length, 
-        lifestyleCount: lifestyle.length 
+      this.completeStep(step, {
+        dietaryCount: dietary.length,
+        lifestyleCount: lifestyle.length,
       });
-      
+
       return result;
     } catch (error) {
       this.failStep(step, error);
@@ -255,7 +262,7 @@ export class DiagnosticOrchestrator {
 
   private async validateSafety(diagnosis: any, context: ValidationContext) {
     const step = this.startStep("safety_validation");
-    
+
     try {
       const recommendations = {
         dietary: diagnosis.recommendations.food_therapy?.beneficial || [],
@@ -265,12 +272,12 @@ export class DiagnosticOrchestrator {
       };
 
       const result = await this.safetyValidator.validateRecommendations(recommendations, context);
-      
-      this.completeStep(step, { 
-        riskLevel: result.risk_level, 
-        concernCount: result.concerns.length 
+
+      this.completeStep(step, {
+        riskLevel: result.risk_level,
+        concernCount: result.concerns.length,
       });
-      
+
       return result;
     } catch (error) {
       this.failStep(step, error);
@@ -302,7 +309,7 @@ export class DiagnosticOrchestrator {
       name,
       startTime: Date.now(),
     };
-    
+
     this.processingSteps.push(step);
     return step;
   }

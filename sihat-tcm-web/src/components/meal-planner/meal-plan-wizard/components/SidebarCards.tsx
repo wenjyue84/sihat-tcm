@@ -94,14 +94,7 @@ export function DietaryBalanceCard() {
             className="absolute inset-0 w-full h-full transform -rotate-90"
             viewBox="0 0 100 100"
           >
-            <circle
-              cx="50"
-              cy="50"
-              r="45"
-              fill="none"
-              stroke="rgb(241 245 249)"
-              strokeWidth="6"
-            />
+            <circle cx="50" cy="50" r="45" fill="none" stroke="rgb(241 245 249)" strokeWidth="6" />
             <motion.circle
               cx="50"
               cy="50"
@@ -302,7 +295,10 @@ export function ConstitutionInfoCard({
           </span>
         </div>
         <h4 className="text-base font-semibold text-slate-900 mb-2">
-          {translateConstitution(extractConstitutionType(constitutionName), t as Record<string, unknown>)}
+          {translateConstitution(
+            extractConstitutionType(constitutionName),
+            t as Record<string, unknown>
+          )}
         </h4>
         <p className="text-sm text-slate-600 leading-relaxed">
           Your meal plan is personalized based on your TCM constitution type.

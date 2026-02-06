@@ -333,7 +333,7 @@ function checkMonitoringHealth(): ComponentHealth {
     }
 
     // Check for excessive critical alerts
-    if (alertStats.criticalAlerts > 5) {
+    if ((alertStats.criticalAlerts ?? 0) > 5) {
       status = "degraded";
     }
 

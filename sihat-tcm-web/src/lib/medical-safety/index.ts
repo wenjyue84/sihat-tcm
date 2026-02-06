@@ -1,16 +1,16 @@
 /**
  * Medical Safety System - Main Export
- * 
+ *
  * Provides a unified interface for all medical safety validation functionality.
  * This is the new modular approach to medical safety validation.
  */
 
 // Core components
-export { SafetyValidator } from './core/SafetyValidator';
-export { AllergyChecker } from './core/AllergyChecker';
-export { DrugInteractionAnalyzer } from './core/DrugInteractionAnalyzer';
-export { ContraindicationChecker } from './core/ContraindicationChecker';
-export { EmergencyDetector } from './core/EmergencyDetector';
+export { SafetyValidator } from "./core/SafetyValidator";
+export { AllergyChecker } from "./core/AllergyChecker";
+export { DrugInteractionAnalyzer } from "./core/DrugInteractionAnalyzer";
+export { ContraindicationChecker } from "./core/ContraindicationChecker";
+export { EmergencyDetector } from "./core/EmergencyDetector";
 
 // Interfaces and types
 export type {
@@ -33,11 +33,11 @@ export type {
   SeverityLevel,
   ActionRequired,
   EvidenceLevel,
-  SupportedLanguage
-} from './interfaces/SafetyInterfaces';
+  SupportedLanguage,
+} from "./interfaces/SafetyInterfaces";
 
 // Create default instances
-import { SafetyValidator } from './core/SafetyValidator';
+import { SafetyValidator } from "./core/SafetyValidator";
 
 /**
  * Default safety validator instance
@@ -96,5 +96,5 @@ import type {
   EmergencyFlag,
   DrugInteraction,
   SafetyGuidelines,
-  SupportedLanguage
-} from './interfaces/SafetyInterfaces';
+  SupportedLanguage,
+} from "./interfaces/SafetyInterfaces";

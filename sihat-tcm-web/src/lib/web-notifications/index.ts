@@ -4,17 +4,20 @@
  */
 
 // Main manager (singleton and class)
-export { default as webNotificationManager, WebNotificationManager } from './WebNotificationManager';
+export {
+  default as webNotificationManager,
+  WebNotificationManager,
+} from "./WebNotificationManager";
 
 // Core components
-export { PermissionManager } from './core/PermissionManager';
-export { PreferenceManager } from './core/PreferenceManager';
-export { NotificationScheduler } from './core/NotificationScheduler';
-export { NotificationDisplay } from './core/NotificationDisplay';
+export { PermissionManager } from "./core/PermissionManager";
+export { PreferenceManager } from "./core/PreferenceManager";
+export { NotificationScheduler } from "./core/NotificationScheduler";
+export { NotificationDisplay } from "./core/NotificationDisplay";
 
 // Handlers and sync
-export { NotificationHandlers } from './handlers/NotificationHandlers';
-export { SyncManager } from './sync/SyncManager';
+export { NotificationHandlers } from "./handlers/NotificationHandlers";
+export { SyncManager } from "./sync/SyncManager";
 
 // Interfaces
 export type {
@@ -28,7 +31,7 @@ export type {
   InitializationResult,
   PermissionResult,
   SyncResult,
-} from './interfaces/WebNotificationInterfaces';
+} from "./interfaces/WebNotificationInterfaces";
 
 // Convenience functions
 export const checkNotificationSupport = () => WebNotificationManager.isSupported();

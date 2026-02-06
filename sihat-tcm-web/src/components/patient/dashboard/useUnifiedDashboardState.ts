@@ -37,8 +37,7 @@ export function useUnifiedDashboardState({
   // Initialize from profile preferences
   useEffect(() => {
     if (profilePreferences) {
-      if (profilePreferences.viewType)
-        setViewTypeState(profilePreferences.viewType as ViewType);
+      if (profilePreferences.viewType) setViewTypeState(profilePreferences.viewType as ViewType);
       if (profilePreferences.sortField)
         setSortFieldState(profilePreferences.sortField as SortField);
       if (profilePreferences.sortDirection)
@@ -82,6 +81,3 @@ export function useUnifiedDashboardState({
     setIsMobileMenuOpen,
   };
 }
-
-
-

@@ -1,12 +1,12 @@
 /**
  * Platform Styler
- * 
+ *
  * Handles platform-specific styling, CSS class generation,
  * and performance optimizations for visual elements.
  */
 
-import { DeviceInfo, UIAdaptations, IPlatformStyler } from '../interfaces/PlatformInterfaces';
-import { OptimizationProvider } from '../optimization/OptimizationProvider';
+import { DeviceInfo, UIAdaptations, IPlatformStyler } from "../interfaces/PlatformInterfaces";
+import { OptimizationProvider } from "../optimization/OptimizationProvider";
 
 export class PlatformStyler implements IPlatformStyler {
   private optimizationProvider: OptimizationProvider;
@@ -121,13 +121,13 @@ export class PlatformStyler implements IPlatformStyler {
     const optimizations = this.optimizationProvider.getPlatformOptimizations(device);
 
     return {
-      '--touch-target-size': `${adaptations.touchTargetSize}px`,
-      '--font-size-multiplier': this.getFontSizeMultiplier(adaptations.fontSize).toString(),
-      '--spacing-multiplier': this.getSpacingMultiplier(adaptations.spacing).toString(),
-      '--animation-duration': optimizations.animationLevel === 'none' ? '0s' : '0.3s',
-      '--transition-duration': optimizations.animationLevel === 'none' ? '0s' : '0.15s',
-      '--border-radius': device.type === 'mobile' ? '8px' : '6px',
-      '--shadow-intensity': device.type === 'mobile' ? '0.1' : '0.15',
+      "--touch-target-size": `${adaptations.touchTargetSize}px`,
+      "--font-size-multiplier": this.getFontSizeMultiplier(adaptations.fontSize).toString(),
+      "--spacing-multiplier": this.getSpacingMultiplier(adaptations.spacing).toString(),
+      "--animation-duration": optimizations.animationLevel === "none" ? "0s" : "0.3s",
+      "--transition-duration": optimizations.animationLevel === "none" ? "0s" : "0.15s",
+      "--border-radius": device.type === "mobile" ? "8px" : "6px",
+      "--shadow-intensity": device.type === "mobile" ? "0.1" : "0.15",
     };
   }
 
@@ -138,7 +138,7 @@ export class PlatformStyler implements IPlatformStyler {
     if (typeof document === "undefined") return;
 
     const properties = this.getCSSCustomProperties(device);
-    
+
     Object.entries(properties).forEach(([property, value]) => {
       document.documentElement.style.setProperty(property, value);
     });
@@ -194,18 +194,18 @@ export class PlatformStyler implements IPlatformStyler {
 
   private applyConnectionOptimizations(): void {
     const connectionInfo = this.optimizationProvider.getConnectionOptimizations();
-    
+
     if (connectionInfo.isSlowConnection) {
       document.documentElement.classList.add("slow-connection");
-      
+
       // Reduce image quality for slow connections
-      const images = document.querySelectorAll('img');
+      const images = document.querySelectorAll("img");
       images.forEach((img) => {
         if (img instanceof HTMLImageElement && img.src) {
           // Add quality parameter if supported
           const url = new URL(img.src, window.location.origin);
-          if (!url.searchParams.has('q')) {
-            url.searchParams.set('q', '70');
+          if (!url.searchParams.has("q")) {
+            url.searchParams.set("q", "70");
             img.src = url.toString();
           }
         }
@@ -215,10 +215,10 @@ export class PlatformStyler implements IPlatformStyler {
 
   private applyMemoryOptimizations(): void {
     const memoryInfo = this.optimizationProvider.getMemoryOptimizations();
-    
+
     if (memoryInfo.shouldReduceQuality) {
       document.documentElement.classList.add("low-memory");
-      
+
       // Reduce animation complexity
       document.documentElement.style.setProperty("--animation-complexity", "reduced");
     }
@@ -226,17 +226,23 @@ export class PlatformStyler implements IPlatformStyler {
 
   private getFontSizeMultiplier(fontSize: UIAdaptations["fontSize"]): number {
     switch (fontSize) {
-      case "small": return 0.875;
-      case "large": return 1.125;
-      default: return 1;
+      case "small":
+        return 0.875;
+      case "large":
+        return 1.125;
+      default:
+        return 1;
     }
   }
 
   private getSpacingMultiplier(spacing: UIAdaptations["spacing"]): number {
     switch (spacing) {
-      case "compact": return 0.75;
-      case "comfortable": return 1.25;
-      default: return 1;
+      case "compact":
+        return 0.75;
+      case "comfortable":
+        return 1.25;
+      default:
+        return 1;
     }
   }
 }

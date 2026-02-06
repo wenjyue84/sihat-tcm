@@ -1,9 +1,8 @@
 import { useCallback } from "react";
 import { logger } from "@/lib/clientLogger";
-import type { DiagnosisStep } from "./diagnosis/diagnosisTypes";
-import { DIAGNOSIS_STORAGE_KEYS } from "./diagnosisConstants";
+import type { DiagnosisStep } from "./diagnosisTypes";
 
-const STORAGE_KEY = "sihat-tcm-diagnosis-progress";
+const STORAGE_KEY = "sihat_diagnosis_progress";
 
 interface PersistedState {
   step: DiagnosisStep;

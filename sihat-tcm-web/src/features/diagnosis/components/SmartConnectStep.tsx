@@ -191,9 +191,7 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
 
   const handleSubmit = useCallback(() => {
     // Check if any data field has a value
-    const hasData = Object.values(data).some(
-      (v) => v !== undefined && v !== "" && v !== null
-    );
+    const hasData = Object.values(data).some((v) => v !== undefined && v !== "" && v !== null);
 
     if (!hasData) {
       setShowSkipConfirmation(true);
@@ -268,12 +266,13 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
               onClick={() => setCurrentSection(section)}
               className={`
                                 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full text-xs font-semibold transition-all
-                                ${isActive
-                  ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
-                  : isCompleted
-                    ? "bg-emerald-500/30 text-emerald-400 border border-emerald-500/50"
-                    : "bg-slate-700/50 text-slate-500 border border-slate-600/50"
-                }
+                                ${
+                                  isActive
+                                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                                    : isCompleted
+                                      ? "bg-emerald-500/30 text-emerald-400 border border-emerald-500/50"
+                                      : "bg-slate-700/50 text-slate-500 border border-slate-600/50"
+                                }
                             `}
             >
               {isCompleted ? <Check className="w-3.5 h-3.5" /> : index + 1}
@@ -399,10 +398,11 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                 className={`
                                     relative w-full min-h-[100px] p-3 rounded-xl border transition-all duration-300
                                     active:scale-[0.98] touch-manipulation
-                                    ${isFilled
-                    ? `${metric.bgColor} ${metric.borderColor} shadow-lg`
-                    : "bg-slate-800/50 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600"
-                  }
+                                    ${
+                                      isFilled
+                                        ? `${metric.bgColor} ${metric.borderColor} shadow-lg`
+                                        : "bg-slate-800/50 border-slate-700/50 hover:bg-slate-800 hover:border-slate-600"
+                                    }
                                 `}
               >
                 {isFilled && (
@@ -418,10 +418,11 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
                 <div
                   className={`
                                     w-10 h-10 rounded-lg flex items-center justify-center mb-2 mx-auto
-                                    ${isFilled
-                      ? `bg-gradient-to-br ${metric.color}`
-                      : "bg-slate-700/50"
-                    }
+                                    ${
+                                      isFilled
+                                        ? `bg-gradient-to-br ${metric.color}`
+                                        : "bg-slate-700/50"
+                                    }
                                 `}
                 >
                   <Icon className={`w-5 h-5 ${isFilled ? "text-white" : metric.textColor}`} />
@@ -553,7 +554,9 @@ export function SmartConnectStep({ onComplete, onBack, initialData }: SmartConne
             onClick={currentSection === "overview" ? goToNextSection : handleSubmit}
             className="bg-emerald-600 hover:bg-emerald-500 text-white min-w-[100px]"
           >
-            {currentSection === "overview" ? (t?.common?.next || "Next") : ((t?.common as any)?.complete || "Finish")}
+            {currentSection === "overview"
+              ? t?.common?.next || "Next"
+              : (t?.common as any)?.complete || "Finish"}
           </Button>
         </div>
       </div>

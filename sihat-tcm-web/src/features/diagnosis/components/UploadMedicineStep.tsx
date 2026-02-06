@@ -71,7 +71,7 @@ export function UploadMedicineStep({
 
       const result = await getLastMedicines();
       if (result.success && result.data && result.data.length > 0) {
-        const portfolioFiles: FileData[] = result.data.map(med => ({
+        const portfolioFiles: FileData[] = result.data.map((med) => ({
           name: `${t.patientDashboard_v1.healthPortfolio.medicines.title} - ${med}`,
           type: "text/plain",
           data: "",
@@ -150,7 +150,7 @@ export function UploadMedicineStep({
     if (!validation.isValid) {
       alert(
         validation.message ||
-        (language === "zh" ? "无效的药物信息" : "Invalid medicine information")
+          (language === "zh" ? "无效的药物信息" : "Invalid medicine information")
       );
       return;
     }

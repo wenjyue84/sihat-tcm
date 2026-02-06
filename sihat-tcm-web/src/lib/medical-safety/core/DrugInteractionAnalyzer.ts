@@ -1,6 +1,6 @@
 /**
  * Drug Interaction Analyzer
- * 
+ *
  * Specialized component for analyzing drug-herb interactions.
  * Uses AI analysis and knowledge base for comprehensive interaction checking.
  */
@@ -12,7 +12,7 @@ import {
   DrugInteractionCheckResult,
   DrugInteraction,
   SafetyConcern,
-  ValidationContext
+  ValidationContext,
 } from "../interfaces/SafetyInterfaces";
 
 export class DrugInteractionAnalyzer {
@@ -34,7 +34,7 @@ export class DrugInteractionAnalyzer {
     try {
       devLog("info", this.context, "Checking drug interactions", {
         herbCount: herbalRecommendations.length,
-        medicationCount: validationContext.medical_history.current_medications.length
+        medicationCount: validationContext.medical_history.current_medications.length,
       });
 
       const concerns: SafetyConcern[] = [];
@@ -48,7 +48,7 @@ export class DrugInteractionAnalyzer {
             medication,
             validationContext
           );
-          
+
           if (interaction) {
             interactions.push(interaction);
             concerns.push(this.createInteractionConcern(interaction));
@@ -81,10 +81,10 @@ export class DrugInteractionAnalyzer {
       // Use AI for unknown combinations
       return await this.analyzeWithAI(herb, medication, context);
     } catch (error) {
-      logError(this.context, "Failed to analyze specific interaction", { 
-        error, 
-        herb, 
-        medication 
+      logError(this.context, "Failed to analyze specific interaction", {
+        error,
+        herb,
+        medication,
       });
 
       // Return conservative interaction warning on error
@@ -95,7 +95,7 @@ export class DrugInteractionAnalyzer {
         severity: "moderate",
         mechanism: "Unknown - system error during analysis",
         clinical_significance: "Potential interaction cannot be ruled out",
-        management: "Consult healthcare provider before combining"
+        management: "Consult healthcare provider before combining",
       };
     }
   }
@@ -109,10 +109,13 @@ export class DrugInteractionAnalyzer {
 
     const interactions = this.knownInteractions.get(medicationLower);
     if (interactions) {
-      return interactions.find(interaction => 
-        interaction.herb_or_food.toLowerCase().includes(herbLower) ||
-        herbLower.includes(interaction.herb_or_food.toLowerCase())
-      ) || null;
+      return (
+        interactions.find(
+          (interaction) =>
+            interaction.herb_or_food.toLowerCase().includes(herbLower) ||
+            herbLower.includes(interaction.herb_or_food.toLowerCase())
+        ) || null
+      );
     }
 
     return null;
@@ -155,14 +158,14 @@ export class DrugInteractionAnalyzer {
     const google = getGoogleProvider();
     const { text: responseText } = await generateText({
       model: google("gemini-2.5-pro"),
-      messages: [{ role: "user", content: prompt }]
+      messages: [{ role: "user", content: prompt }],
     });
 
     const cleanText = responseText
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
-    
+
     const analysis = JSON.parse(cleanText);
 
     if (analysis.has_interaction) {
@@ -173,7 +176,7 @@ export class DrugInteractionAnalyzer {
         severity: analysis.severity,
         mechanism: analysis.mechanism,
         clinical_significance: analysis.clinical_significance,
-        management: analysis.management
+        management: analysis.management,
       };
     }
 
@@ -185,17 +188,17 @@ export class DrugInteractionAnalyzer {
    */
   private createInteractionConcern(interaction: DrugInteraction): SafetyConcern {
     const severityMap: Record<string, "low" | "medium" | "high" | "critical"> = {
-      "minor": "low",
-      "moderate": "medium", 
-      "major": "high",
-      "severe": "critical"
+      minor: "low",
+      moderate: "medium",
+      major: "high",
+      severe: "critical",
     };
 
     const actionMap: Record<string, SafetyConcern["action_required"]> = {
-      "minor": "monitor",
-      "moderate": "seek_medical_advice",
-      "major": "seek_medical_advice", 
-      "severe": "avoid_completely"
+      minor: "monitor",
+      moderate: "seek_medical_advice",
+      major: "seek_medical_advice",
+      severe: "avoid_completely",
     };
 
     return {
@@ -204,7 +207,7 @@ export class DrugInteractionAnalyzer {
       description: `${interaction.herb_or_food} may interact with ${interaction.medication}: ${interaction.clinical_significance}`,
       affected_recommendation: interaction.herb_or_food,
       evidence_level: "clinical_study",
-      action_required: actionMap[interaction.severity] || "seek_medical_advice"
+      action_required: actionMap[interaction.severity] || "seek_medical_advice",
     };
   }
 
@@ -221,7 +224,7 @@ export class DrugInteractionAnalyzer {
         severity: "major",
         mechanism: "Increased bleeding risk due to antiplatelet effects",
         clinical_significance: "Significantly increased risk of bleeding",
-        management: "Avoid combination or monitor INR closely"
+        management: "Avoid combination or monitor INR closely",
       },
       {
         herb_or_food: "ginseng",
@@ -230,7 +233,7 @@ export class DrugInteractionAnalyzer {
         severity: "moderate",
         mechanism: "May reduce anticoagulant effect",
         clinical_significance: "Reduced effectiveness of warfarin",
-        management: "Monitor INR, may need dose adjustment"
+        management: "Monitor INR, may need dose adjustment",
       },
       {
         herb_or_food: "garlic",
@@ -239,8 +242,8 @@ export class DrugInteractionAnalyzer {
         severity: "moderate",
         mechanism: "Antiplatelet effects may enhance bleeding risk",
         clinical_significance: "Increased bleeding risk",
-        management: "Monitor for bleeding, consider dose adjustment"
-      }
+        management: "Monitor for bleeding, consider dose adjustment",
+      },
     ]);
 
     // Diabetes medications
@@ -252,8 +255,8 @@ export class DrugInteractionAnalyzer {
         severity: "moderate",
         mechanism: "Additive glucose-lowering effects",
         clinical_significance: "Risk of hypoglycemia",
-        management: "Monitor blood glucose closely"
-      }
+        management: "Monitor blood glucose closely",
+      },
     ]);
 
     // Blood pressure medications
@@ -265,8 +268,8 @@ export class DrugInteractionAnalyzer {
         severity: "moderate",
         mechanism: "Additive hypotensive effects",
         clinical_significance: "Risk of excessive blood pressure reduction",
-        management: "Monitor blood pressure, adjust doses as needed"
-      }
+        management: "Monitor blood pressure, adjust doses as needed",
+      },
     ]);
 
     // Digoxin interactions
@@ -278,8 +281,8 @@ export class DrugInteractionAnalyzer {
         severity: "major",
         mechanism: "Hypokalemia increases digoxin toxicity risk",
         clinical_significance: "Increased risk of digoxin toxicity",
-        management: "Avoid combination, monitor potassium and digoxin levels"
-      }
+        management: "Avoid combination, monitor potassium and digoxin levels",
+      },
     ]);
   }
 
@@ -288,11 +291,11 @@ export class DrugInteractionAnalyzer {
    */
   addKnownInteraction(medication: string, interaction: DrugInteraction): void {
     const medicationLower = medication.toLowerCase();
-    
+
     if (!this.knownInteractions.has(medicationLower)) {
       this.knownInteractions.set(medicationLower, []);
     }
-    
+
     this.knownInteractions.get(medicationLower)!.push(interaction);
   }
 
@@ -316,12 +319,12 @@ export class DrugInteractionAnalyzer {
       minor: 0,
       moderate: 0,
       major: 0,
-      severe: 0
+      severe: 0,
     };
 
     for (const interactions of this.knownInteractions.values()) {
       totalInteractions += interactions.length;
-      
+
       for (const interaction of interactions) {
         severityBreakdown[interaction.severity]++;
       }
@@ -330,7 +333,7 @@ export class DrugInteractionAnalyzer {
     return {
       totalMedications: this.knownInteractions.size,
       totalInteractions,
-      severityBreakdown
+      severityBreakdown,
     };
   }
 }

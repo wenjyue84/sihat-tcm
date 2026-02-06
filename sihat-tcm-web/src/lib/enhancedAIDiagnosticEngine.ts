@@ -34,8 +34,8 @@
 export {
   EnhancedAIDiagnosticEngine,
   defaultEnhancedAIDiagnosticEngine,
-  processEnhancedDiagnosis
-} from './diagnostic/EnhancedAIDiagnosticEngine';
+  processEnhancedDiagnosis,
+} from "./diagnostic/EnhancedAIDiagnosticEngine";
 
 // Re-export interfaces for backward compatibility
 export type {
@@ -43,7 +43,5 @@ export type {
   EnhancedDiagnosticResponse,
   DiagnosticConfig,
   DiagnosticStats,
-  DiagnosticFeedback
-} from './diagnostic/interfaces/DiagnosticInterfaces';
-
-
+  DiagnosticFeedback,
+} from "./diagnostic/interfaces/DiagnosticInterfaces";

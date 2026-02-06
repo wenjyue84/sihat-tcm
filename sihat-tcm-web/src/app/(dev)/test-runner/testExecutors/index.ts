@@ -1,6 +1,6 @@
 /**
  * Test Executor Router
- * 
+ *
  * Routes test execution to the appropriate category-specific executor
  */
 
@@ -57,4 +57,3 @@ export async function executeTest(test: TestResult): Promise<void> {
       throw new Error(`Unknown test category: ${category}`);
   }
 }
-

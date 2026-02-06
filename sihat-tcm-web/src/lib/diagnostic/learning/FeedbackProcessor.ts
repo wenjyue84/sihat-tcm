@@ -1,6 +1,6 @@
 /**
  * Feedback Processor - Processes user feedback for diagnostic improvement
- * 
+ *
  * Handles user feedback on diagnostic accuracy and recommendation effectiveness
  * to continuously improve the diagnostic system performance.
  */
@@ -70,7 +70,6 @@ export class FeedbackProcessor {
 
       // Trigger learning updates if needed
       await this.updateLearningFromFeedback(feedback);
-
     } catch (error) {
       logError(this.context, "Failed to process feedback", { error, feedback });
       throw error;
@@ -86,7 +85,7 @@ export class FeedbackProcessor {
     // Filter by timeframe if provided
     if (timeframe) {
       relevantFeedback = this.feedbackHistory.filter(
-        f => f.timestamp >= timeframe.start && f.timestamp <= timeframe.end
+        (f) => f.timestamp >= timeframe.start && f.timestamp <= timeframe.end
       );
     }
 
@@ -103,13 +102,12 @@ export class FeedbackProcessor {
 
     // Calculate averages
     const totalDiagnosisAccuracy = relevantFeedback.reduce(
-      (sum, f) => sum + f.diagnosisAccuracy, 0
+      (sum, f) => sum + f.diagnosisAccuracy,
+      0
     );
     const averageDiagnosisAccuracy = totalDiagnosisAccuracy / relevantFeedback.length;
 
-    const totalUserSatisfaction = relevantFeedback.reduce(
-      (sum, f) => sum + f.userSatisfaction, 0
-    );
+    const totalUserSatisfaction = relevantFeedback.reduce((sum, f) => sum + f.userSatisfaction, 0);
     const averageUserSatisfaction = totalUserSatisfaction / relevantFeedback.length;
 
     // Calculate recommendation effectiveness
@@ -117,9 +115,11 @@ export class FeedbackProcessor {
     for (const feedback of relevantFeedback) {
       allRecommendationRatings.push(...Object.values(feedback.recommendationEffectiveness));
     }
-    const averageRecommendationEffectiveness = allRecommendationRatings.length > 0
-      ? allRecommendationRatings.reduce((sum, rating) => sum + rating, 0) / allRecommendationRatings.length
-      : 0;
+    const averageRecommendationEffectiveness =
+      allRecommendationRatings.length > 0
+        ? allRecommendationRatings.reduce((sum, rating) => sum + rating, 0) /
+          allRecommendationRatings.length
+        : 0;
 
     // Analyze side effects
     const sideEffectCounts: Record<string, number> = {};
@@ -162,28 +162,31 @@ export class FeedbackProcessor {
       userSatisfaction: number;
       feedbackCount: number;
     }>;
-    overallTrend: 'improving' | 'stable' | 'declining';
+    overallTrend: "improving" | "stable" | "declining";
   } {
     const endDate = new Date();
     const startDate = new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000);
 
-    const dailyData: Record<string, {
-      diagnosisAccuracy: number[];
-      userSatisfaction: number[];
-    }> = {};
+    const dailyData: Record<
+      string,
+      {
+        diagnosisAccuracy: number[];
+        userSatisfaction: number[];
+      }
+    > = {};
 
     // Group feedback by day
     for (const feedback of this.feedbackHistory) {
       if (feedback.timestamp >= startDate && feedback.timestamp <= endDate) {
-        const dateKey = feedback.timestamp.toISOString().split('T')[0];
-        
+        const dateKey = feedback.timestamp.toISOString().split("T")[0];
+
         if (!dailyData[dateKey]) {
           dailyData[dateKey] = {
             diagnosisAccuracy: [],
             userSatisfaction: [],
           };
         }
-        
+
         dailyData[dateKey].diagnosisAccuracy.push(feedback.diagnosisAccuracy);
         dailyData[dateKey].userSatisfaction.push(feedback.userSatisfaction);
       }
@@ -193,26 +196,28 @@ export class FeedbackProcessor {
     const dailyAverages = Object.entries(dailyData)
       .map(([date, data]) => ({
         date,
-        diagnosisAccuracy: data.diagnosisAccuracy.reduce((sum, val) => sum + val, 0) / data.diagnosisAccuracy.length,
-        userSatisfaction: data.userSatisfaction.reduce((sum, val) => sum + val, 0) / data.userSatisfaction.length,
+        diagnosisAccuracy:
+          data.diagnosisAccuracy.reduce((sum, val) => sum + val, 0) / data.diagnosisAccuracy.length,
+        userSatisfaction:
+          data.userSatisfaction.reduce((sum, val) => sum + val, 0) / data.userSatisfaction.length,
         feedbackCount: data.diagnosisAccuracy.length,
       }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
     // Determine overall trend
-    let overallTrend: 'improving' | 'stable' | 'declining' = 'stable';
-    
+    let overallTrend: "improving" | "stable" | "declining" = "stable";
+
     if (dailyAverages.length >= 7) {
       const recent = dailyAverages.slice(-7);
       const older = dailyAverages.slice(0, 7);
-      
+
       const recentAvg = recent.reduce((sum, day) => sum + day.diagnosisAccuracy, 0) / recent.length;
       const olderAvg = older.reduce((sum, day) => sum + day.diagnosisAccuracy, 0) / older.length;
-      
+
       if (recentAvg > olderAvg * 1.05) {
-        overallTrend = 'improving';
+        overallTrend = "improving";
       } else if (recentAvg < olderAvg * 0.95) {
-        overallTrend = 'declining';
+        overallTrend = "declining";
       }
     }
 
@@ -231,11 +236,11 @@ export class FeedbackProcessor {
       diagnosisAccuracy: number;
       userSatisfaction: number;
     };
-    improvementTrend: 'improving' | 'stable' | 'declining';
+    improvementTrend: "improving" | "stable" | "declining";
     lastFeedbackDate?: Date;
   } {
-    const userFeedback = this.feedbackHistory.filter(f => f.userId === userId);
-    
+    const userFeedback = this.feedbackHistory.filter((f) => f.userId === userId);
+
     if (userFeedback.length === 0) {
       return {
         feedbackCount: 0,
@@ -243,29 +248,31 @@ export class FeedbackProcessor {
           diagnosisAccuracy: 0,
           userSatisfaction: 0,
         },
-        improvementTrend: 'stable',
+        improvementTrend: "stable",
       };
     }
 
     const averageRatings = {
-      diagnosisAccuracy: userFeedback.reduce((sum, f) => sum + f.diagnosisAccuracy, 0) / userFeedback.length,
-      userSatisfaction: userFeedback.reduce((sum, f) => sum + f.userSatisfaction, 0) / userFeedback.length,
+      diagnosisAccuracy:
+        userFeedback.reduce((sum, f) => sum + f.diagnosisAccuracy, 0) / userFeedback.length,
+      userSatisfaction:
+        userFeedback.reduce((sum, f) => sum + f.userSatisfaction, 0) / userFeedback.length,
     };
 
     // Determine improvement trend
-    let improvementTrend: 'improving' | 'stable' | 'declining' = 'stable';
-    
+    let improvementTrend: "improving" | "stable" | "declining" = "stable";
+
     if (userFeedback.length >= 3) {
       const recent = userFeedback.slice(-2);
       const older = userFeedback.slice(0, -2);
-      
+
       const recentAvg = recent.reduce((sum, f) => sum + f.diagnosisAccuracy, 0) / recent.length;
       const olderAvg = older.reduce((sum, f) => sum + f.diagnosisAccuracy, 0) / older.length;
-      
+
       if (recentAvg > olderAvg * 1.1) {
-        improvementTrend = 'improving';
+        improvementTrend = "improving";
       } else if (recentAvg < olderAvg * 0.9) {
-        improvementTrend = 'declining';
+        improvementTrend = "declining";
       }
     }
 
@@ -295,7 +302,9 @@ export class FeedbackProcessor {
     // Validate recommendation effectiveness ratings
     for (const [recommendation, rating] of Object.entries(feedback.recommendationEffectiveness)) {
       if (rating < 1 || rating > 5) {
-        throw new Error(`Recommendation effectiveness rating for "${recommendation}" must be between 1 and 5`);
+        throw new Error(
+          `Recommendation effectiveness rating for "${recommendation}" must be between 1 and 5`
+        );
       }
     }
   }
@@ -322,19 +331,21 @@ export class FeedbackProcessor {
     const areas: string[] = [];
 
     // Check for low diagnosis accuracy
-    const lowAccuracyCount = feedback.filter(f => f.diagnosisAccuracy <= 2).length;
+    const lowAccuracyCount = feedback.filter((f) => f.diagnosisAccuracy <= 2).length;
     if (lowAccuracyCount > feedback.length * 0.2) {
       areas.push("Diagnosis accuracy needs improvement");
     }
 
     // Check for low user satisfaction
-    const lowSatisfactionCount = feedback.filter(f => f.userSatisfaction <= 2).length;
+    const lowSatisfactionCount = feedback.filter((f) => f.userSatisfaction <= 2).length;
     if (lowSatisfactionCount > feedback.length * 0.2) {
       areas.push("User experience needs enhancement");
     }
 
     // Check for common side effects
-    const sideEffectCount = feedback.filter(f => f.sideEffects && f.sideEffects.length > 0).length;
+    const sideEffectCount = feedback.filter(
+      (f) => f.sideEffects && f.sideEffects.length > 0
+    ).length;
     if (sideEffectCount > feedback.length * 0.3) {
       areas.push("Recommendation safety needs review");
     }
@@ -346,21 +357,22 @@ export class FeedbackProcessor {
     const patterns: string[] = [];
 
     // Check for high accuracy
-    const highAccuracyCount = feedback.filter(f => f.diagnosisAccuracy >= 4).length;
+    const highAccuracyCount = feedback.filter((f) => f.diagnosisAccuracy >= 4).length;
     if (highAccuracyCount > feedback.length * 0.7) {
       patterns.push("Consistently high diagnosis accuracy");
     }
 
     // Check for high satisfaction
-    const highSatisfactionCount = feedback.filter(f => f.userSatisfaction >= 4).length;
+    const highSatisfactionCount = feedback.filter((f) => f.userSatisfaction >= 4).length;
     if (highSatisfactionCount > feedback.length * 0.7) {
       patterns.push("High user satisfaction levels");
     }
 
     // Check for effective recommendations
-    const effectiveRecommendations = feedback.filter(f => {
-      const avgEffectiveness = Object.values(f.recommendationEffectiveness)
-        .reduce((sum, rating) => sum + rating, 0) / Object.values(f.recommendationEffectiveness).length;
+    const effectiveRecommendations = feedback.filter((f) => {
+      const avgEffectiveness =
+        Object.values(f.recommendationEffectiveness).reduce((sum, rating) => sum + rating, 0) /
+        Object.values(f.recommendationEffectiveness).length;
       return avgEffectiveness >= 4;
     }).length;
 

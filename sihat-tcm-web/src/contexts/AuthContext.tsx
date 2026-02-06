@@ -145,10 +145,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                   setProfile((prev) =>
                     prev
                       ? {
-                        ...prev,
-                        preferred_language: localLanguage,
-                        preferences: { ...(prev.preferences || {}), language: localLanguage },
-                      }
+                          ...prev,
+                          preferred_language: localLanguage,
+                          preferences: { ...(prev.preferences || {}), language: localLanguage },
+                        }
                       : prev
                   );
                 }
@@ -207,10 +207,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile((prev) =>
         prev
           ? {
-            ...prev,
-            preferences: updatedPrefs,
-            ...(newPrefs.language ? { preferred_language: newPrefs.language } : {}),
-          }
+              ...prev,
+              preferences: updatedPrefs,
+              ...(newPrefs.language ? { preferred_language: newPrefs.language } : {}),
+            }
           : prev
       );
     } catch (err) {

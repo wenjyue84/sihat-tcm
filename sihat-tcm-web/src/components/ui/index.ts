@@ -47,4 +47,3 @@ export { SystemManual } from "./SystemManual";
 export { VoiceCommandIndicator } from "./VoiceCommandIndicator";
 export { VoiceCommandProvider } from "./VoiceCommandProvider";
 export { VoiceInput } from "./VoiceInput";
-

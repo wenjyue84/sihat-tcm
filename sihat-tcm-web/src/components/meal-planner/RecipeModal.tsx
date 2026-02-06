@@ -193,4 +193,3 @@ export function RecipeModal({ meal, mealType, onClose }: RecipeModalProps) {
     </AnimatePresence>
   );
 }
-

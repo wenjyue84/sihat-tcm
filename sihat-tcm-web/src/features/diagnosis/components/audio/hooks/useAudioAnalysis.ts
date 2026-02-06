@@ -77,9 +77,7 @@ function createErrorFallbackResult(): AudioAnalysisData {
 /**
  * Hook for managing audio analysis
  */
-export function useAudioAnalysis(
-  options: UseAudioAnalysisOptions = {}
-): UseAudioAnalysisResult {
+export function useAudioAnalysis(options: UseAudioAnalysisOptions = {}): UseAudioAnalysisResult {
   const { initialAnalysis } = options;
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -130,5 +128,3 @@ export function useAudioAnalysis(
     setAnalysisResult,
   };
 }
-
-

@@ -165,7 +165,10 @@ export function PractitionerManager() {
   const fetchPractitioners = async () => {
     try {
       setLoading(true);
-      const { data, error } = await createClientServices().practitioners.list({ column: "name", ascending: true });
+      const { data, error } = await createClientServices().practitioners.list({
+        column: "name",
+        ascending: true,
+      });
 
       if (error) throw new Error(error.message);
       setPractitioners((data as Practitioner[]) || []);
@@ -221,7 +224,11 @@ export function PractitionerManager() {
         if (error) throw new Error(error.message);
         toast.success("Practitioner updated");
       } else {
-        const { error } = await createClientServices().practitioners.create(dataToSave as Parameters<ReturnType<typeof createClientServices>["practitioners"]["create"]>[0]);
+        const { error } = await createClientServices().practitioners.create(
+          dataToSave as Parameters<
+            ReturnType<typeof createClientServices>["practitioners"]["create"]
+          >[0]
+        );
 
         if (error) throw new Error(error.message);
         toast.success("Practitioner added");
@@ -268,7 +275,11 @@ export function PractitionerManager() {
         return;
       }
 
-      const { error } = await createClientServices().practitioners.createMany(newPractitioners as Parameters<ReturnType<typeof createClientServices>["practitioners"]["createMany"]>[0]);
+      const { error } = await createClientServices().practitioners.createMany(
+        newPractitioners as Parameters<
+          ReturnType<typeof createClientServices>["practitioners"]["createMany"]
+        >[0]
+      );
 
       if (error) throw new Error(error.message);
 

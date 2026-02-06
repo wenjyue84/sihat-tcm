@@ -124,12 +124,10 @@ describe("ErrorLogger", () => {
     });
 
     it("should retry on failure", async () => {
-      mockFetch
-        .mockRejectedValueOnce(new Error("First failure"))
-        .mockResolvedValueOnce({
-          ok: true,
-          json: () => Promise.resolve({ error_id: "retry-success" }),
-        });
+      mockFetch.mockRejectedValueOnce(new Error("First failure")).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ error_id: "retry-success" }),
+      });
 
       const errorId = await logError(new Error("Retry test"));
 

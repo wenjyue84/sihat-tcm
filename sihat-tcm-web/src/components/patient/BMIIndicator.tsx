@@ -18,11 +18,7 @@ export function BMIIndicator({ bmi, size = 80, showLabel = true }: BMIIndicatorP
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="relative" style={{ width: size, height: size }}>
-        <svg
-          width={size}
-          height={size}
-          className="transform -rotate-90"
-        >
+        <svg width={size} height={size} className="transform -rotate-90">
           {/* Background circle */}
           <circle
             cx={size / 2}
@@ -64,10 +60,7 @@ export function BMIIndicator({ bmi, size = 80, showLabel = true }: BMIIndicatorP
       </div>
       {showLabel && (
         <div className="text-center">
-          <div
-            className="text-xs font-semibold"
-            style={{ color: bmi.color }}
-          >
+          <div className="text-xs font-semibold" style={{ color: bmi.color }}>
             {bmi.label}
           </div>
           <div className="text-[10px] text-slate-500 mt-0.5">BMI</div>
@@ -76,5 +69,3 @@ export function BMIIndicator({ bmi, size = 80, showLabel = true }: BMIIndicatorP
     </div>
   );
 }
-
-

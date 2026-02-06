@@ -1,18 +1,24 @@
 /**
  * Refactored Testing Framework - Main orchestrator
- * 
+ *
  * This is the new modular version that delegates to specialized components.
  * The original large file has been broken down into focused modules.
  */
 
-import { TestSuite, TestReport, PropertyTest, UnitTest, IntegrationTest } from './interfaces/TestInterfaces';
-import { TestSuiteRunner } from './runners/TestSuiteRunner';
-import { TestFactory } from './factories/TestFactory';
-import { TestDataGenerators } from './generators/TestDataGenerators';
+import {
+  TestSuite,
+  TestReport,
+  PropertyTest,
+  UnitTest,
+  IntegrationTest,
+} from "./interfaces/TestInterfaces";
+import { TestSuiteRunner } from "./runners/TestSuiteRunner";
+import { TestFactory } from "./factories/TestFactory";
+import { TestDataGenerators } from "./generators/TestDataGenerators";
 
 export class TestFramework {
   private suiteRunner = new TestSuiteRunner();
-  private readonly context = 'TestFramework';
+  private readonly context = "TestFramework";
 
   /**
    * Run a complete test suite
@@ -54,8 +60,8 @@ export class TestFramework {
    */
   createComprehensiveTestSuite(): TestSuite {
     return {
-      name: 'Sihat TCM Comprehensive Test Suite',
-      description: 'Complete property-based and unit tests for the Sihat TCM application',
+      name: "Sihat TCM Comprehensive Test Suite",
+      description: "Complete property-based and unit tests for the Sihat TCM application",
       tests: [
         ...this.createAIModelRouterTests(),
         ...this.createNotificationTests(),
@@ -63,23 +69,23 @@ export class TestFramework {
         ...this.createPerformanceTests(),
       ],
       beforeAll: async () => {
-        console.log('Setting up comprehensive test environment...');
+        console.log("Setting up comprehensive test environment...");
       },
       afterAll: async () => {
-        console.log('Cleaning up test environment...');
+        console.log("Cleaning up test environment...");
       },
     };
   }
 }
 
 // Re-export key components for convenience
-export { TestFactory } from './factories/TestFactory';
-export { TestDataGenerators } from './generators/TestDataGenerators';
-export { PropertyTestRunner } from './runners/PropertyTestRunner';
-export { TestSuiteRunner } from './runners/TestSuiteRunner';
+export { TestFactory } from "./factories/TestFactory";
+export { TestDataGenerators } from "./generators/TestDataGenerators";
+export { PropertyTestRunner } from "./runners/PropertyTestRunner";
+export { TestSuiteRunner } from "./runners/TestSuiteRunner";
 
 // Re-export interfaces
-export * from './interfaces/TestInterfaces';
+export * from "./interfaces/TestInterfaces";
 
 // Convenience functions (maintaining backward compatibility)
 export const createPropertyTest = TestFactory.createPropertyTest;

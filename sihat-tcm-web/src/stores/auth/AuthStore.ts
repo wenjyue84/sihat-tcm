@@ -1,6 +1,6 @@
 /**
  * Auth Store
- * 
+ *
  * Manages authentication state, user sessions, and profile data
  * for the Sihat TCM application.
  */
@@ -10,12 +10,7 @@ import { subscribeWithSelector } from "zustand/middleware";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/clientLogger";
-import {
-  AuthStore,
-  Profile,
-  UIPreferences,
-  STORAGE_KEYS
-} from "../interfaces/StoreInterfaces";
+import { AuthStore, Profile, UIPreferences, STORAGE_KEYS } from "../interfaces/StoreInterfaces";
 
 export const useAuthStore = create<AuthStore>()(
   subscribeWithSelector((set, get) => ({
@@ -31,11 +26,11 @@ export const useAuthStore = create<AuthStore>()(
     // ACTIONS
     // ============================================================================
     setUser: (user) => set({ user }),
-    
+
     setSession: (session) => set({ session }),
-    
+
     setProfile: (profile) => set({ profile }),
-    
+
     setAuthLoading: (loading) => set({ authLoading: loading }),
 
     signOut: async () => {
@@ -112,10 +107,7 @@ export const useAuthStore = create<AuthStore>()(
           updateData.preferred_language = newPrefs.language;
         }
 
-        const { error } = await supabase
-          .from("profiles")
-          .update(updateData)
-          .eq("id", user.id);
+        const { error } = await supabase.from("profiles").update(updateData).eq("id", user.id);
 
         if (error) {
           logger.error("AuthStore", "Error updating preferences", error);
@@ -169,9 +161,9 @@ export const useAuthStore = create<AuthStore>()(
         data: { subscription },
       } = supabase.auth.onAuthStateChange((event, session) => {
         logger.info("AuthStore", "Auth state changed", { event, userId: session?.user?.id });
-        
+
         set({ session, user: session?.user ?? null });
-        
+
         if (session?.user) {
           set({ authLoading: true });
           get().refreshProfile(session.user.id);

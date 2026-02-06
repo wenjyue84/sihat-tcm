@@ -215,9 +215,7 @@ export function QiDose() {
         <button
           onClick={() => setShowGarden(true)}
           className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
-            showGarden
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-slate-600 hover:text-slate-900"
+            showGarden ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
           }`}
         >
           <Leaf className="w-4 h-4" />

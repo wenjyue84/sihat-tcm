@@ -1,22 +1,22 @@
 /**
  * @fileoverview Alert Rule Engine
- * 
+ *
  * Manages alert rules, evaluates conditions, and triggers alerts
  * based on metric thresholds and business logic.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 1.0
  */
 
 import { devLog } from "@/lib/systemLogger";
-import type { 
-  AlertRule, 
-  AlertCondition, 
-  Alert, 
-  AlertCategory, 
+import type {
+  AlertRule,
+  AlertCondition,
+  Alert,
+  AlertCategory,
   AlertSeverity,
   AlertEvaluationContext,
-  MetricHistoryEntry 
+  MetricHistoryEntry,
 } from "../interfaces/AlertInterfaces";
 import { MetricCollector } from "./MetricCollector";
 
@@ -170,7 +170,7 @@ export class AlertRuleEngine {
       },
     ];
 
-    defaultRules.forEach(rule => {
+    defaultRules.forEach((rule) => {
       this.alertRules.set(rule.id, rule);
     });
 
@@ -217,7 +217,7 @@ export class AlertRuleEngine {
     const rule = this.alertRules.get(ruleId);
     if (rule) {
       rule.enabled = enabled;
-      devLog("info", "AlertRuleEngine", `Rule ${ruleId} ${enabled ? 'enabled' : 'disabled'}`);
+      devLog("info", "AlertRuleEngine", `Rule ${ruleId} ${enabled ? "enabled" : "disabled"}`);
       return true;
     }
     return false;
@@ -260,18 +260,14 @@ export class AlertRuleEngine {
     value: number | string,
     timestamp: number
   ): boolean {
-    const history = this.metricCollector.getMetricWindow(
-      metric, 
-      condition.timeWindow, 
-      timestamp
-    );
+    const history = this.metricCollector.getMetricWindow(metric, condition.timeWindow, timestamp);
 
     if (history.length === 0) return false;
 
     // Check if current condition is met
     let conditionMet = false;
 
-    if (typeof value === 'number' && typeof condition.threshold === 'number') {
+    if (typeof value === "number" && typeof condition.threshold === "number") {
       switch (condition.operator) {
         case "gt":
           conditionMet = value > condition.threshold;
@@ -293,7 +289,7 @@ export class AlertRuleEngine {
       // String-based conditions
       const stringValue = String(value);
       const stringThreshold = String(condition.threshold);
-      
+
       switch (condition.operator) {
         case "contains":
           conditionMet = stringValue.includes(stringThreshold);
@@ -351,25 +347,21 @@ export class AlertRuleEngine {
    * Get rules by category
    */
   public getRulesByCategory(category: AlertCategory): AlertRule[] {
-    return Array.from(this.alertRules.values()).filter(
-      rule => rule.category === category
-    );
+    return Array.from(this.alertRules.values()).filter((rule) => rule.category === category);
   }
 
   /**
    * Get rules by severity
    */
   public getRulesBySeverity(severity: AlertSeverity): AlertRule[] {
-    return Array.from(this.alertRules.values()).filter(
-      rule => rule.severity === severity
-    );
+    return Array.from(this.alertRules.values()).filter((rule) => rule.severity === severity);
   }
 
   /**
    * Get enabled rules
    */
   public getEnabledRules(): AlertRule[] {
-    return Array.from(this.alertRules.values()).filter(rule => rule.enabled);
+    return Array.from(this.alertRules.values()).filter((rule) => rule.enabled);
   }
 
   /**
@@ -378,37 +370,37 @@ export class AlertRuleEngine {
   public validateRule(rule: AlertRule): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    if (!rule.id || rule.id.trim() === '') {
-      errors.push('Rule ID is required');
+    if (!rule.id || rule.id.trim() === "") {
+      errors.push("Rule ID is required");
     }
 
-    if (!rule.name || rule.name.trim() === '') {
-      errors.push('Rule name is required');
+    if (!rule.name || rule.name.trim() === "") {
+      errors.push("Rule name is required");
     }
 
-    if (!rule.condition.metric || rule.condition.metric.trim() === '') {
-      errors.push('Metric name is required');
+    if (!rule.condition.metric || rule.condition.metric.trim() === "") {
+      errors.push("Metric name is required");
     }
 
     if (rule.condition.timeWindow <= 0) {
-      errors.push('Time window must be positive');
+      errors.push("Time window must be positive");
     }
 
     if (rule.cooldownPeriod < 0) {
-      errors.push('Cooldown period cannot be negative');
+      errors.push("Cooldown period cannot be negative");
     }
 
     if (rule.escalationDelay < 0) {
-      errors.push('Escalation delay cannot be negative');
+      errors.push("Escalation delay cannot be negative");
     }
 
     if (!rule.notificationChannels || rule.notificationChannels.length === 0) {
-      errors.push('At least one notification channel is required');
+      errors.push("At least one notification channel is required");
     }
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -423,12 +415,12 @@ export class AlertRuleEngine {
     rulesBySeverity: Record<AlertSeverity, number>;
   } {
     const allRules = Array.from(this.alertRules.values());
-    const enabledRules = allRules.filter(rule => rule.enabled);
-    
+    const enabledRules = allRules.filter((rule) => rule.enabled);
+
     const rulesByCategory = {} as Record<AlertCategory, number>;
     const rulesBySeverity = {} as Record<AlertSeverity, number>;
 
-    allRules.forEach(rule => {
+    allRules.forEach((rule) => {
       rulesByCategory[rule.category] = (rulesByCategory[rule.category] || 0) + 1;
       rulesBySeverity[rule.severity] = (rulesBySeverity[rule.severity] || 0) + 1;
     });
@@ -456,13 +448,13 @@ export class AlertRuleEngine {
     let imported = 0;
     const errors: string[] = [];
 
-    rules.forEach(rule => {
+    rules.forEach((rule) => {
       const validation = this.validateRule(rule);
       if (validation.valid) {
         this.alertRules.set(rule.id, rule);
         imported++;
       } else {
-        errors.push(`Rule ${rule.id}: ${validation.errors.join(', ')}`);
+        errors.push(`Rule ${rule.id}: ${validation.errors.join(", ")}`);
       }
     });
 

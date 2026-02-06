@@ -1,6 +1,6 @@
 /**
  * Diagnosis Progress Store
- * 
+ *
  * Manages diagnosis workflow progress, step navigation, and form completion
  * for the Sihat TCM application.
  */
@@ -12,7 +12,7 @@ import {
   DiagnosisProgressStore,
   NavigationState,
   STEP_WEIGHTS,
-  STEP_BASE_PROGRESS
+  STEP_BASE_PROGRESS,
 } from "../interfaces/StoreInterfaces";
 
 export const useDiagnosisProgressStore = create<DiagnosisProgressStore>()(
@@ -34,7 +34,7 @@ export const useDiagnosisProgressStore = create<DiagnosisProgressStore>()(
 
       logger.debug("DiagnosisProgressStore", "Progress updated", {
         oldValue: get().diagnosisProgress,
-        newValue: clampedValue
+        newValue: clampedValue,
       });
     },
 
@@ -47,7 +47,7 @@ export const useDiagnosisProgressStore = create<DiagnosisProgressStore>()(
       logger.debug("DiagnosisProgressStore", "Progress incremented", {
         delta,
         oldProgress: diagnosisProgress,
-        newProgress
+        newProgress,
       });
     },
 
@@ -57,13 +57,15 @@ export const useDiagnosisProgressStore = create<DiagnosisProgressStore>()(
 
       logger.debug("DiagnosisProgressStore", "Step index updated", {
         oldIndex: get().diagnosisStepIndex,
-        newIndex: clampedIndex
+        newIndex: clampedIndex,
       });
     },
 
     updateDiagnosisFormProgress: (stepId, completedFields, totalFields) => {
       if (totalFields === 0) {
-        logger.warn("DiagnosisProgressStore", "Cannot update progress: totalFields is 0", { stepId });
+        logger.warn("DiagnosisProgressStore", "Cannot update progress: totalFields is 0", {
+          stepId,
+        });
         return;
       }
 
@@ -75,7 +77,7 @@ export const useDiagnosisProgressStore = create<DiagnosisProgressStore>()(
       const { diagnosisFormProgress } = get();
       const updatedFormProgress = {
         ...diagnosisFormProgress,
-        [stepId]: newProgress
+        [stepId]: newProgress,
       };
 
       set({
@@ -90,7 +92,7 @@ export const useDiagnosisProgressStore = create<DiagnosisProgressStore>()(
         stepWeight,
         baseProgress,
         fieldProgress,
-        newProgress: Math.round(newProgress)
+        newProgress: Math.round(newProgress),
       });
     },
 
@@ -107,7 +109,7 @@ export const useDiagnosisProgressStore = create<DiagnosisProgressStore>()(
     setDiagnosisNavigationState: (state) => {
       const current = get().diagnosisNavigationState;
 
-      // Compare all properties including functions to ensure BottomNavigation 
+      // Compare all properties including functions to ensure BottomNavigation
       // receives the correct handlers when switching steps.
       const hasChanged =
         current.showNext !== state.showNext ||
@@ -130,9 +132,9 @@ export const useDiagnosisProgressStore = create<DiagnosisProgressStore>()(
             handlerUpdates: {
               onNext: current.onNext !== state.onNext,
               onBack: current.onBack !== state.onBack,
-              onSkip: current.onSkip !== state.onSkip
-            }
-          }
+              onSkip: current.onSkip !== state.onSkip,
+            },
+          },
         });
       }
     },
@@ -149,10 +151,14 @@ export const useDiagnosisProgress = () => {
   const incrementProgress = useDiagnosisProgressStore((state) => state.incrementDiagnosisProgress);
   const currentStepIndex = useDiagnosisProgressStore((state) => state.diagnosisStepIndex);
   const setCurrentStepIndex = useDiagnosisProgressStore((state) => state.setDiagnosisStepIndex);
-  const updateFormProgress = useDiagnosisProgressStore((state) => state.updateDiagnosisFormProgress);
+  const updateFormProgress = useDiagnosisProgressStore(
+    (state) => state.updateDiagnosisFormProgress
+  );
   const resetProgress = useDiagnosisProgressStore((state) => state.resetDiagnosisProgress);
   const navigationState = useDiagnosisProgressStore((state) => state.diagnosisNavigationState);
-  const setNavigationState = useDiagnosisProgressStore((state) => state.setDiagnosisNavigationState);
+  const setNavigationState = useDiagnosisProgressStore(
+    (state) => state.setDiagnosisNavigationState
+  );
   const formProgress = useDiagnosisProgressStore((state) => state.diagnosisFormProgress);
 
   return {
@@ -183,7 +189,9 @@ export const useDiagnosisProgressOptional = useDiagnosisProgress;
  */
 export const useStepProgress = (stepId: string) => {
   const formProgress = useDiagnosisProgressStore((state) => state.diagnosisFormProgress);
-  const updateFormProgress = useDiagnosisProgressStore((state) => state.updateDiagnosisFormProgress);
+  const updateFormProgress = useDiagnosisProgressStore(
+    (state) => state.updateDiagnosisFormProgress
+  );
 
   const stepProgress = formProgress[stepId] || 0;
   const stepWeight = STEP_WEIGHTS[stepId as keyof typeof STEP_WEIGHTS] || 14;
@@ -198,7 +206,7 @@ export const useStepProgress = (stepId: string) => {
     stepWeight,
     baseProgress,
     updateProgress,
-    isStepComplete: stepProgress >= (baseProgress + stepWeight),
+    isStepComplete: stepProgress >= baseProgress + stepWeight,
     stepPercentage: Math.round(((stepProgress - baseProgress) / stepWeight) * 100),
   };
 };
@@ -208,7 +216,9 @@ export const useStepProgress = (stepId: string) => {
  */
 export const useDiagnosisNavigation = () => {
   const navigationState = useDiagnosisProgressStore((state) => state.diagnosisNavigationState);
-  const setNavigationState = useDiagnosisProgressStore((state) => state.setDiagnosisNavigationState);
+  const setNavigationState = useDiagnosisProgressStore(
+    (state) => state.setDiagnosisNavigationState
+  );
   const currentStepIndex = useDiagnosisProgressStore((state) => state.diagnosisStepIndex);
   const setCurrentStepIndex = useDiagnosisProgressStore((state) => state.setDiagnosisStepIndex);
 

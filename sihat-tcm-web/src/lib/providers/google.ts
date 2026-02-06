@@ -9,5 +9,3 @@ export function getGoogleProvider(apiKey?: string) {
   const key = apiKey || getGeminiApiKey();
   return createGoogleGenerativeAI({ apiKey: key });
 }
-
-

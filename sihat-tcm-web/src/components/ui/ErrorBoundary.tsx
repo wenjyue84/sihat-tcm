@@ -274,14 +274,13 @@ export class ErrorBoundary extends Component<Props, State> {
               <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
                 <AlertTriangle className="w-6 h-6 text-red-600" />
               </div>
-              <CardTitle className="text-xl text-gray-900">
-                Something went wrong
-              </CardTitle>
+              <CardTitle className="text-xl text-gray-900">Something went wrong</CardTitle>
             </CardHeader>
 
             <CardContent className="space-y-4">
               <p className="text-sm text-gray-600 text-center">
-                We've encountered an unexpected error. Our team has been notified and is working on a fix.
+                We've encountered an unexpected error. Our team has been notified and is working on
+                a fix.
               </p>
 
               {this.state.errorId && (
@@ -316,19 +315,11 @@ export class ErrorBoundary extends Component<Props, State> {
                 </Button>
 
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={this.handleReload}
-                    className="flex-1"
-                  >
+                  <Button variant="outline" onClick={this.handleReload} className="flex-1">
                     Reload Page
                   </Button>
 
-                  <Button
-                    variant="outline"
-                    onClick={this.handleGoHome}
-                    className="flex-1"
-                  >
+                  <Button variant="outline" onClick={this.handleGoHome} className="flex-1">
                     <Home className="w-4 h-4 mr-2" />
                     Go Home
                   </Button>

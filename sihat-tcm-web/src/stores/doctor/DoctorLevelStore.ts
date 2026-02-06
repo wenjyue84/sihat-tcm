@@ -1,6 +1,6 @@
 /**
  * Doctor Level Store
- * 
+ *
  * Manages doctor level configuration and AI model selection
  * for the Sihat TCM application.
  */
@@ -10,10 +10,7 @@ import { subscribeWithSelector } from "zustand/middleware";
 import { supabase } from "@/lib/supabase/client";
 import { logger } from "@/lib/clientLogger";
 import { DOCTOR_LEVELS, DoctorLevel } from "@/lib/doctorLevels";
-import {
-  DoctorLevelStore,
-  ADMIN_LEVEL_MAPPING
-} from "../interfaces/StoreInterfaces";
+import { DoctorLevelStore, ADMIN_LEVEL_MAPPING } from "../interfaces/StoreInterfaces";
 
 export const useDoctorLevelStore = create<DoctorLevelStore>()(
   subscribeWithSelector((set, get) => ({
@@ -52,7 +49,7 @@ export const useDoctorLevelStore = create<DoctorLevelStore>()(
     initializeDoctorLevel: async () => {
       try {
         set({ doctorLevelLoading: true });
-        
+
         logger.info("DoctorLevelStore", "Initializing doctor level from admin settings");
 
         const { data, error } = await supabase
@@ -70,13 +67,13 @@ export const useDoctorLevelStore = create<DoctorLevelStore>()(
         if (data?.config?.default_level) {
           const adminLevel = data.config.default_level;
           const mappedLevel = ADMIN_LEVEL_MAPPING[adminLevel];
-          
+
           if (mappedLevel) {
             set({ doctorLevel: mappedLevel });
             logger.info("DoctorLevelStore", "Doctor level loaded from admin settings", {
               adminLevel,
               mappedLevel,
-              model: DOCTOR_LEVELS[mappedLevel].model
+              model: DOCTOR_LEVELS[mappedLevel].model,
             });
           } else {
             logger.warn("DoctorLevelStore", "Invalid admin level mapping", { adminLevel });
@@ -138,15 +135,15 @@ export const useDoctorCapabilities = () => {
   return useDoctorLevelStore((state) => {
     const level = state.doctorLevel;
     const info = DOCTOR_LEVELS[level];
-    
+
     return {
       level,
       name: info.name,
       model: info.model,
-      capabilities: info.capabilities || [],
+      capabilities: (info as Record<string, unknown>).capabilities as string[] || [],
       description: info.description || "",
-      maxTokens: info.maxTokens || 8192,
-      temperature: info.temperature || 0.7,
+      maxTokens: ((info as Record<string, unknown>).maxTokens as number) || 8192,
+      temperature: ((info as Record<string, unknown>).temperature as number) || 0.7,
     };
   });
 };
@@ -158,7 +155,7 @@ export const useHasCapability = (capability: string) => {
   return useDoctorLevelStore((state) => {
     const level = state.doctorLevel;
     const info = DOCTOR_LEVELS[level];
-    return info.capabilities?.includes(capability) || false;
+    return ((info as Record<string, unknown>).capabilities as string[] | undefined)?.includes(capability) || false;
   });
 };
 
@@ -167,7 +164,7 @@ export const useHasCapability = (capability: string) => {
  */
 export const useAvailableDoctorLevels = () => {
   const currentLevel = useDoctorLevelStore((state) => state.doctorLevel);
-  
+
   const levels = Object.entries(DOCTOR_LEVELS).map(([key, info]) => ({
     key: key as DoctorLevel,
     name: info.name,

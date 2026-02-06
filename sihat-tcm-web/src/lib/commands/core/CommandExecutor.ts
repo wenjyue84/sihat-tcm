@@ -1,6 +1,6 @@
 /**
  * Command Executor Core Implementation
- * 
+ *
  * Handles command execution with retry logic, timeout management,
  * and comprehensive error handling.
  */
@@ -12,10 +12,10 @@ import {
   CommandContext,
   RetryPolicy,
   ValidationResult,
-} from '../interfaces/CommandInterfaces';
+} from "../interfaces/CommandInterfaces";
 
-import { devLog, logError } from '../../systemLogger';
-import { ErrorFactory } from '../../errors/AppError';
+import { devLog, logError } from "../../systemLogger";
+import { ErrorFactory } from "../../errors/AppError";
 
 /**
  * Enhanced command executor with advanced features
@@ -23,7 +23,7 @@ import { ErrorFactory } from '../../errors/AppError';
 export class EnhancedCommandExecutor implements CommandExecutor {
   private readonly context: string;
   private readonly config: CommandExecutorConfig;
-  
+
   // Execution tracking
   private activeExecutions = new Map<string, ExecutionInfo>();
   private executionStats = {
@@ -33,7 +33,7 @@ export class EnhancedCommandExecutor implements CommandExecutor {
     totalExecutionTime: 0,
   };
 
-  constructor(context: string = 'CommandExecutor', config: Partial<CommandExecutorConfig> = {}) {
+  constructor(context: string = "CommandExecutor", config: Partial<CommandExecutorConfig> = {}) {
     this.context = context;
     this.config = {
       defaultTimeout: 30000,
@@ -48,13 +48,16 @@ export class EnhancedCommandExecutor implements CommandExecutor {
   /**
    * Execute a command with full lifecycle management
    */
-  public async execute(command: Command, context?: Partial<CommandContext>): Promise<CommandResult> {
+  public async execute(
+    command: Command,
+    context?: Partial<CommandContext>
+  ): Promise<CommandResult> {
     const executionId = this.generateExecutionId();
     const startTime = Date.now();
-    
+
     const executionContext: CommandContext = {
-      source: 'direct',
-      priority: 'normal',
+      source: "direct",
+      priority: "normal",
       timeout: this.config.defaultTimeout,
       retryAttempts: 0,
       dryRun: false,
@@ -65,7 +68,9 @@ export class EnhancedCommandExecutor implements CommandExecutor {
     try {
       // Check concurrent execution limit
       if (this.activeExecutions.size >= this.config.maxConcurrentExecutions) {
-        throw new Error(`Maximum concurrent executions (${this.config.maxConcurrentExecutions}) exceeded`);
+        throw new Error(
+          `Maximum concurrent executions (${this.config.maxConcurrentExecutions}) exceeded`
+        );
       }
 
       // Track execution
@@ -75,7 +80,7 @@ export class EnhancedCommandExecutor implements CommandExecutor {
         startTime: new Date(),
       });
 
-      devLog(`[${this.context}] Executing command: ${command.description}`, {
+      devLog("debug", this.context, `Executing command: ${command.description}`, {
         commandId: command.id,
         executionId,
         dryRun: executionContext.dryRun,
@@ -98,7 +103,7 @@ export class EnhancedCommandExecutor implements CommandExecutor {
       }
 
       // Execute the command
-      const result = executionContext.dryRun 
+      const result = executionContext.dryRun
         ? await this.dryRunExecution(command)
         : await this.executeWithTimeout(command, executionContext.timeout!);
 
@@ -112,22 +117,21 @@ export class EnhancedCommandExecutor implements CommandExecutor {
         this.updateExecutionStats(Date.now() - startTime, true);
       }
 
-      devLog(`[${this.context}] Command executed successfully: ${command.id}`, {
+      devLog("debug", this.context, `Command executed successfully: ${command.id}`, {
         executionTime: result.executionTime,
         success: result.success,
       });
 
       return result;
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
+
       // Execute error hook
       if (this.config.enableHooks && command.onError) {
         try {
           await command.onError(error as Error);
         } catch (hookError) {
-          logError(`[${this.context}] Error hook failed`, hookError);
+          logError(this.context, "Error hook failed", { error: hookError instanceof Error ? hookError.message : String(hookError) });
         }
       }
 
@@ -138,18 +142,17 @@ export class EnhancedCommandExecutor implements CommandExecutor {
 
       const commandResult: CommandResult = {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         executionTime,
         metadata: {
           commandId: command.id,
           executionId,
-          errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+          errorType: error instanceof Error ? error.constructor.name : "Unknown",
         },
       };
 
-      logError(`[${this.context}] Command execution failed: ${command.id}`, error);
+      logError(this.context, `Command execution failed: ${command.id}`, { error: error instanceof Error ? error.message : String(error) });
       return commandResult;
-
     } finally {
       // Clean up execution tracking
       this.activeExecutions.delete(executionId);
@@ -189,10 +192,9 @@ export class EnhancedCommandExecutor implements CommandExecutor {
         }
 
         lastError = new Error(result.error);
-
       } catch (error) {
         lastError = error as Error;
-        
+
         // Check if error is retryable
         if (!this.isRetryableError(lastError.message, retryPolicy)) {
           throw error;
@@ -204,7 +206,10 @@ export class EnhancedCommandExecutor implements CommandExecutor {
       // If this is not the last attempt, wait before retrying
       if (attempt <= retryPolicy.maxAttempts) {
         const delay = this.calculateRetryDelay(attempt, retryPolicy);
-        devLog(`[${this.context}] Retrying command in ${delay}ms (attempt ${attempt + 1}/${retryPolicy.maxAttempts + 1})`);
+        devLog(
+          "debug", this.context,
+          `Retrying command in ${delay}ms (attempt ${attempt + 1}/${retryPolicy.maxAttempts + 1})`
+        );
         await this.delay(delay);
       }
     }
@@ -212,7 +217,7 @@ export class EnhancedCommandExecutor implements CommandExecutor {
     // All retries exhausted
     throw ErrorFactory.fromUnknownError(lastError!, {
       component: this.context,
-      action: 'executeWithRetry',
+      action: "executeWithRetry",
       metadata: {
         commandId: command.id,
         attempts: attempt,
@@ -227,7 +232,7 @@ export class EnhancedCommandExecutor implements CommandExecutor {
   public async canExecute(command: Command): Promise<boolean> {
     try {
       // Check if command has required methods
-      if (typeof command.execute !== 'function') {
+      if (typeof command.execute !== "function") {
         return false;
       }
 
@@ -249,9 +254,8 @@ export class EnhancedCommandExecutor implements CommandExecutor {
       }
 
       return true;
-
     } catch (error) {
-      logError(`[${this.context}] Error checking if command can execute`, error);
+      logError(this.context, "Error checking if command can execute", { error: error instanceof Error ? error.message : String(error) });
       return false;
     }
   }
@@ -268,14 +272,13 @@ export class EnhancedCommandExecutor implements CommandExecutor {
 
       // Use command type-based estimation
       const baseEstimate = this.getBaseExecutionEstimate(command.type);
-      
+
       // Adjust based on command complexity
       const complexityMultiplier = this.getComplexityMultiplier(command);
-      
-      return Math.round(baseEstimate * complexityMultiplier);
 
+      return Math.round(baseEstimate * complexityMultiplier);
     } catch (error) {
-      logError(`[${this.context}] Error estimating execution time`, error);
+      logError(this.context, "Error estimating execution time", { error: error instanceof Error ? error.message : String(error) });
       return this.config.defaultTimeout;
     }
   }
@@ -284,13 +287,15 @@ export class EnhancedCommandExecutor implements CommandExecutor {
    * Get execution statistics
    */
   public getExecutionStatistics(): ExecutionStatistics {
-    const averageExecutionTime = this.executionStats.totalExecutions > 0
-      ? this.executionStats.totalExecutionTime / this.executionStats.totalExecutions
-      : 0;
+    const averageExecutionTime =
+      this.executionStats.totalExecutions > 0
+        ? this.executionStats.totalExecutionTime / this.executionStats.totalExecutions
+        : 0;
 
-    const successRate = this.executionStats.totalExecutions > 0
-      ? this.executionStats.successfulExecutions / this.executionStats.totalExecutions
-      : 0;
+    const successRate =
+      this.executionStats.totalExecutions > 0
+        ? this.executionStats.successfulExecutions / this.executionStats.totalExecutions
+        : 0;
 
     return {
       totalExecutions: this.executionStats.totalExecutions,
@@ -323,12 +328,11 @@ export class EnhancedCommandExecutor implements CommandExecutor {
       // In a real implementation, you'd need to implement cancellation logic
       // This might involve setting a cancellation token or flag
       this.activeExecutions.delete(executionId);
-      
-      devLog(`[${this.context}] Execution cancelled: ${executionId}`);
-      return true;
 
+      devLog("debug", this.context, `Execution cancelled: ${executionId}`);
+      return true;
     } catch (error) {
-      logError(`[${this.context}] Failed to cancel execution`, error);
+      logError(this.context, "Failed to cancel execution", { error: error instanceof Error ? error.message : String(error) });
       return false;
     }
   }
@@ -340,27 +344,27 @@ export class EnhancedCommandExecutor implements CommandExecutor {
    */
   private async validateCommand(command: Command): Promise<void> {
     // Basic structure validation
-    if (!command.id || typeof command.id !== 'string') {
-      throw new Error('Command must have a valid ID');
+    if (!command.id || typeof command.id !== "string") {
+      throw new Error("Command must have a valid ID");
     }
 
-    if (!command.type || typeof command.type !== 'string') {
-      throw new Error('Command must have a valid type');
+    if (!command.type || typeof command.type !== "string") {
+      throw new Error("Command must have a valid type");
     }
 
-    if (!command.description || typeof command.description !== 'string') {
-      throw new Error('Command must have a valid description');
+    if (!command.description || typeof command.description !== "string") {
+      throw new Error("Command must have a valid description");
     }
 
-    if (typeof command.execute !== 'function') {
-      throw new Error('Command must have an execute method');
+    if (typeof command.execute !== "function") {
+      throw new Error("Command must have an execute method");
     }
 
     // Custom validation if available
     if (command.validate) {
       const validation = await command.validate();
       if (!validation.valid) {
-        throw new Error(`Command validation failed: ${validation.errors.join(', ')}`);
+        throw new Error(`Command validation failed: ${validation.errors.join(", ")}`);
       }
     }
   }
@@ -371,8 +375,8 @@ export class EnhancedCommandExecutor implements CommandExecutor {
   private async executeWithTimeout(command: Command, timeout: number): Promise<CommandResult> {
     return Promise.race([
       command.execute(),
-      new Promise<CommandResult>((_, reject) => 
-        setTimeout(() => reject(new Error('Command execution timeout')), timeout)
+      new Promise<CommandResult>((_, reject) =>
+        setTimeout(() => reject(new Error("Command execution timeout")), timeout)
       ),
     ]);
   }
@@ -383,7 +387,7 @@ export class EnhancedCommandExecutor implements CommandExecutor {
   private async dryRunExecution(command: Command): Promise<CommandResult> {
     // Simulate execution without side effects
     const estimatedTime = await this.estimateExecutionTime(command);
-    
+
     return {
       success: true,
       executionTime: estimatedTime,
@@ -391,7 +395,7 @@ export class EnhancedCommandExecutor implements CommandExecutor {
         dryRun: true,
         estimatedTime,
       },
-      warnings: ['This was a dry run - no actual changes were made'],
+      warnings: ["This was a dry run - no actual changes were made"],
     };
   }
 
@@ -403,7 +407,7 @@ export class EnhancedCommandExecutor implements CommandExecutor {
       try {
         await command.beforeExecute();
       } catch (error) {
-        throw new Error(`Before execute hook failed: ${error.message}`);
+        throw new Error(`Before execute hook failed: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
   }
@@ -416,7 +420,7 @@ export class EnhancedCommandExecutor implements CommandExecutor {
       try {
         await command.afterExecute(result);
       } catch (error) {
-        logError(`[${this.context}] After execute hook failed`, error);
+        logError(this.context, "After execute hook failed", { error: error instanceof Error ? error.message : String(error) });
         // Don't throw here as the main execution was successful
       }
     }
@@ -430,24 +434,22 @@ export class EnhancedCommandExecutor implements CommandExecutor {
 
     // If specific retryable errors are defined, check against them
     if (retryPolicy.retryableErrors && retryPolicy.retryableErrors.length > 0) {
-      return retryPolicy.retryableErrors.some(retryableError => 
+      return retryPolicy.retryableErrors.some((retryableError) =>
         errorMessage.toLowerCase().includes(retryableError.toLowerCase())
       );
     }
 
     // Default retryable error patterns
     const retryablePatterns = [
-      'timeout',
-      'network',
-      'connection',
-      'temporary',
-      'rate limit',
-      'service unavailable',
+      "timeout",
+      "network",
+      "connection",
+      "temporary",
+      "rate limit",
+      "service unavailable",
     ];
 
-    return retryablePatterns.some(pattern => 
-      errorMessage.toLowerCase().includes(pattern)
-    );
+    return retryablePatterns.some((pattern) => errorMessage.toLowerCase().includes(pattern));
   }
 
   /**
@@ -457,13 +459,13 @@ export class EnhancedCommandExecutor implements CommandExecutor {
     let delay: number;
 
     switch (retryPolicy.backoffStrategy) {
-      case 'linear':
+      case "linear":
         delay = retryPolicy.baseDelay * attempt;
         break;
-      case 'exponential':
+      case "exponential":
         delay = retryPolicy.baseDelay * Math.pow(2, attempt - 1);
         break;
-      case 'fixed':
+      case "fixed":
       default:
         delay = retryPolicy.baseDelay;
         break;
@@ -484,13 +486,13 @@ export class EnhancedCommandExecutor implements CommandExecutor {
    */
   private getBaseExecutionEstimate(commandType: string): number {
     const estimates: Record<string, number> = {
-      'ai:select-model': 1000,
-      'ai:update-config': 500,
-      'notification:schedule': 200,
-      'notification:update-preferences': 300,
-      'system:configure': 1500,
-      'tcm:start-diagnosis': 2000,
-      'tcm:save-diagnosis': 800,
+      "ai:select-model": 1000,
+      "ai:update-config": 500,
+      "notification:schedule": 200,
+      "notification:update-preferences": 300,
+      "system:configure": 1500,
+      "tcm:start-diagnosis": 2000,
+      "tcm:save-diagnosis": 800,
     };
 
     return estimates[commandType] || 1000; // Default 1 second
@@ -504,14 +506,14 @@ export class EnhancedCommandExecutor implements CommandExecutor {
 
     // Check metadata for complexity indicators
     if (command.metadata?.tags) {
-      if (command.metadata.tags.includes('complex')) multiplier *= 2.0;
-      if (command.metadata.tags.includes('batch')) multiplier *= 1.5;
-      if (command.metadata.tags.includes('async')) multiplier *= 0.8;
+      if (command.metadata.tags.includes("complex")) multiplier *= 2.0;
+      if (command.metadata.tags.includes("batch")) multiplier *= 1.5;
+      if (command.metadata.tags.includes("async")) multiplier *= 0.8;
     }
 
     // Check for dependencies
     if (command.metadata?.dependencies?.length) {
-      multiplier *= 1 + (command.metadata.dependencies.length * 0.2);
+      multiplier *= 1 + command.metadata.dependencies.length * 0.2;
     }
 
     return multiplier;
@@ -523,7 +525,7 @@ export class EnhancedCommandExecutor implements CommandExecutor {
   private updateExecutionStats(executionTime: number, success: boolean): void {
     this.executionStats.totalExecutions++;
     this.executionStats.totalExecutionTime += executionTime;
-    
+
     if (success) {
       this.executionStats.successfulExecutions++;
     } else {
@@ -542,7 +544,7 @@ export class EnhancedCommandExecutor implements CommandExecutor {
    * Delay utility
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

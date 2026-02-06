@@ -1,23 +1,23 @@
 /**
  * Refactored Event System - Main orchestrator
- * 
+ *
  * This is the new modular version that delegates to specialized components.
  * The original large file has been broken down into focused modules.
  */
 
-import { AppEvent, EventListener, EventSystemStats } from './interfaces/EventInterfaces';
-import { EventEmitter } from './core/EventEmitter';
-import { EventHistory } from './core/EventHistory';
-import { ScopedEmitter } from './utils/ScopedEmitter';
-import { ErrorFactory } from '../errors/AppError';
+import { AppEvent, EventListener, EventSystemStats } from "./interfaces/EventInterfaces";
+import { EventEmitter } from "./core/EventEmitter";
+import { EventHistory } from "./core/EventHistory";
+import { ScopedEmitter } from "./utils/ScopedEmitter";
+import { ErrorFactory } from "../errors/AppError";
 
 export class EventSystem {
   private static instance: EventSystem;
   private emitter: EventEmitter;
   private history: EventHistory;
-  private readonly context = 'EventSystem';
+  private readonly context = "EventSystem";
 
-  private constructor() {
+  constructor() {
     this.emitter = new EventEmitter(this.context);
     this.history = new EventHistory(1000);
   }
@@ -36,14 +36,14 @@ export class EventSystem {
    * Subscribe to events of a specific type
    */
   public on<T extends AppEvent>(
-    eventType: T['type'],
+    eventType: T["type"],
     listener: EventListener<T>,
     options: {
       once?: boolean;
       priority?: number;
       source?: string;
     } = {}
-  ): () => void {
+  ): string {
     return this.emitter.on(eventType, listener, options);
   }
 
@@ -51,7 +51,7 @@ export class EventSystem {
    * Subscribe to an event once
    */
   public once<T extends AppEvent>(
-    eventType: T['type'],
+    eventType: T["type"],
     listener: EventListener<T>,
     options: {
       priority?: number;
@@ -71,12 +71,11 @@ export class EventSystem {
 
       // Emit through emitter
       await this.emitter.emit(event);
-
     } catch (error) {
       console.error(`[${this.context}] Failed to emit event: ${event.type}`, error);
       throw ErrorFactory.fromUnknownError(error, {
         component: this.context,
-        action: 'emit',
+        action: "emit",
         metadata: { eventType: event.type },
       });
     }
@@ -99,10 +98,7 @@ export class EventSystem {
   /**
    * Get event history
    */
-  public getEventHistory(
-    eventType?: string,
-    limit?: number
-  ): AppEvent[] {
+  public getEventHistory(eventType?: string, limit?: number): AppEvent[] {
     return this.history.getHistory(eventType, limit);
   }
 
@@ -137,12 +133,12 @@ export class EventSystem {
 }
 
 // Re-export key components for convenience
-export { EventEmitter } from './core/EventEmitter';
-export { EventHistory } from './core/EventHistory';
-export { ScopedEmitter } from './utils/ScopedEmitter';
+export { EventEmitter } from "./core/EventEmitter";
+export { EventHistory } from "./core/EventHistory";
+export { ScopedEmitter } from "./utils/ScopedEmitter";
 
 // Re-export interfaces
-export * from './interfaces/EventInterfaces';
+export * from "./interfaces/EventInterfaces";
 
 // Convenience functions for global event system
 export function getEventSystem(): EventSystem {
@@ -150,7 +146,7 @@ export function getEventSystem(): EventSystem {
 }
 
 export function on<T extends AppEvent>(
-  eventType: T['type'],
+  eventType: T["type"],
   listener: EventListener<T>,
   options?: { once?: boolean; priority?: number; source?: string }
 ): () => void {
@@ -158,7 +154,7 @@ export function on<T extends AppEvent>(
 }
 
 export function once<T extends AppEvent>(
-  eventType: T['type'],
+  eventType: T["type"],
   listener: EventListener<T>,
   options?: { priority?: number; source?: string }
 ): () => void {

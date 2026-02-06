@@ -1,14 +1,14 @@
 /**
  * Cultural Context Builder - Builds cultural context for personalization
- * 
+ *
  * Creates comprehensive cultural context based on user language and region
  * to enable culturally appropriate TCM recommendations and adaptations.
  */
 
-import { CulturalContext } from '../interfaces/PersonalizationInterfaces';
+import { CulturalContext } from "../interfaces/PersonalizationInterfaces";
 
 export class CulturalContextBuilder {
-  private readonly context = 'CulturalContextBuilder';
+  private readonly context = "CulturalContextBuilder";
 
   /**
    * Build cultural context based on language
@@ -121,23 +121,23 @@ export class CulturalContextBuilder {
     const meal_timings: Record<string, any> = {
       chinese: {
         breakfast: "7:00-8:00 AM",
-        lunch: "12:00-1:00 PM", 
+        lunch: "12:00-1:00 PM",
         dinner: "6:00-7:00 PM",
         recommendations: [
           "Eat warm foods in the morning to support Spleen Qi",
           "Have your largest meal at lunch when digestive fire is strongest",
-          "Keep dinner light and early to aid sleep"
-        ]
+          "Keep dinner light and early to aid sleep",
+        ],
       },
       southeast_asian: {
         breakfast: "7:00-9:00 AM",
         lunch: "12:30-2:00 PM",
-        dinner: "7:00-8:00 PM", 
+        dinner: "7:00-8:00 PM",
         recommendations: [
           "Start with a substantial breakfast for energy",
           "Enjoy family-style meals when possible",
-          "Include variety of flavors and textures"
-        ]
+          "Include variety of flavors and textures",
+        ],
       },
       western: {
         breakfast: "7:00-9:00 AM",
@@ -146,9 +146,9 @@ export class CulturalContextBuilder {
         recommendations: [
           "Maintain consistent meal times",
           "Balance portions throughout the day",
-          "Consider your work schedule for meal planning"
-        ]
-      }
+          "Consider your work schedule for meal planning",
+        ],
+      },
     };
 
     return meal_timings[cultural_context.region] || meal_timings["western"];
@@ -168,40 +168,40 @@ export class CulturalContextBuilder {
         preferences: [
           "Respect for traditional wisdom",
           "Holistic explanations connecting mind-body-spirit",
-          "References to seasonal and natural cycles"
+          "References to seasonal and natural cycles",
         ],
         considerations: [
           "Use traditional TCM terminology appropriately",
           "Acknowledge family involvement in health decisions",
-          "Respect for elder wisdom and experience"
-        ]
+          "Respect for elder wisdom and experience",
+        ],
       },
       southeast_asian: {
         style: "indirect",
         preferences: [
           "Gentle, respectful communication",
           "Community and family-centered approach",
-          "Practical, actionable advice"
+          "Practical, actionable advice",
         ],
         considerations: [
           "Be sensitive to religious dietary restrictions",
           "Consider extended family influence",
-          "Respect for traditional healing practices"
-        ]
+          "Respect for traditional healing practices",
+        ],
       },
       western: {
         style: "direct",
         preferences: [
           "Clear, evidence-based explanations",
           "Individual autonomy in health decisions",
-          "Scientific rationale for recommendations"
+          "Scientific rationale for recommendations",
         ],
         considerations: [
           "Provide research backing when possible",
           "Respect skepticism about traditional medicine",
-          "Focus on measurable outcomes"
-        ]
-      }
+          "Focus on measurable outcomes",
+        ],
+      },
     };
 
     return communication_styles[cultural_context.region] || communication_styles["western"];

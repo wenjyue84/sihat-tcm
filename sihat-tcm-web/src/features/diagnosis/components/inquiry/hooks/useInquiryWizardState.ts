@@ -90,12 +90,7 @@ export function useInquiryWizardState(
   };
 
   const nextStep = () => {
-    const stepOrder: InquiryStepType[] = [
-      "upload_reports",
-      "upload_medicine",
-      "chat",
-      "summary",
-    ];
+    const stepOrder: InquiryStepType[] = ["upload_reports", "upload_medicine", "chat", "summary"];
     const currentIndex = stepOrder.indexOf(step);
     if (currentIndex < stepOrder.length - 1) {
       setStep(stepOrder[currentIndex + 1]);
@@ -103,12 +98,7 @@ export function useInquiryWizardState(
   };
 
   const prevStep = () => {
-    const stepOrder: InquiryStepType[] = [
-      "upload_reports",
-      "upload_medicine",
-      "chat",
-      "summary",
-    ];
+    const stepOrder: InquiryStepType[] = ["upload_reports", "upload_medicine", "chat", "summary"];
     const currentIndex = stepOrder.indexOf(step);
     if (currentIndex > 0) {
       setStep(stepOrder[currentIndex - 1]);
@@ -128,4 +118,3 @@ export function useInquiryWizardState(
     prevStep,
   };
 }
-

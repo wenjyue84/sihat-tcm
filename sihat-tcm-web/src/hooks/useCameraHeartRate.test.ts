@@ -172,4 +172,3 @@ describe("useCameraHeartRate Hook (Browser Environment)", () => {
     expect(isMobile).toBe(false);
   });
 });
-

@@ -46,10 +46,7 @@ export class ModelFactory {
   /**
    * Create a router with custom configuration
    */
-  static createCustomRouter(
-    appName: string,
-    config: Partial<ModelRouterConfig>
-  ): AIModelRouter {
+  static createCustomRouter(appName: string, config: Partial<ModelRouterConfig>): AIModelRouter {
     return new AIModelRouter(appName, config);
   }
 }

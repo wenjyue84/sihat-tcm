@@ -1,6 +1,6 @@
 /**
  * Personalization Orchestrator
- * 
+ *
  * Main orchestrator for personalized TCM recommendations with clean architecture.
  * Coordinates between different personalization components.
  */
@@ -12,26 +12,25 @@ import {
   SafetyValidationResult,
   FeedbackData,
   PersonalizationConfig,
-  PersonalizationOrchestrator as IPersonalizationOrchestrator,
-} from '../interfaces/PersonalizationInterfaces';
+} from "../interfaces/PersonalizationInterfaces";
 
-import { CulturalContextBuilder } from './CulturalContextBuilder';
-import { HealthHistoryAnalyzer } from './HealthHistoryAnalyzer';
-import { DietaryRecommendationAdapter } from '../adapters/DietaryRecommendationAdapter';
-import { LifestyleRecommendationAdapter } from '../adapters/LifestyleRecommendationAdapter';
-import { LearningProfileManager } from '../learning/LearningProfileManager';
-import { SafetyValidator } from './SafetyValidator';
-import { RecommendationGenerator } from './RecommendationGenerator';
+import { CulturalContextBuilder } from "./CulturalContextBuilder";
+import { HealthHistoryAnalyzer } from "./HealthHistoryAnalyzer";
+import { DietaryRecommendationAdapter } from "../adapters/DietaryRecommendationAdapter";
+import { LifestyleRecommendationAdapter } from "../adapters/LifestyleRecommendationAdapter";
+import { LearningProfileManager } from "../learning/LearningProfileManager";
+import { SafetyValidator } from "./SafetyValidator";
+import { RecommendationGenerator } from "./RecommendationGenerator";
 
-import { devLog, logError, logInfo } from '../../systemLogger';
-import { ErrorFactory } from '../../errors/AppError';
+import { devLog } from "../../logging/client-safe";
+import { ErrorFactory } from "../../errors/AppError";
 
 /**
  * Enhanced Personalization Orchestrator with modular architecture
  */
-export class PersonalizationOrchestrator implements IPersonalizationOrchestrator {
+export class PersonalizationOrchestrator {
   private readonly context: string;
-  
+
   // Core components
   private readonly culturalBuilder: CulturalContextBuilder;
   private readonly healthAnalyzer: HealthHistoryAnalyzer;
@@ -40,13 +39,13 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
   private readonly learningManager: LearningProfileManager;
   private readonly safetyValidator: SafetyValidator;
   private readonly recommendationGenerator: RecommendationGenerator;
-  
+
   // Configuration
   private config: PersonalizationConfig;
 
   constructor(context: string = "PersonalizationOrchestrator") {
     this.context = context;
-    
+
     // Initialize components
     this.culturalBuilder = new CulturalContextBuilder();
     this.healthAnalyzer = new HealthHistoryAnalyzer();
@@ -55,7 +54,7 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
     this.learningManager = new LearningProfileManager();
     this.safetyValidator = new SafetyValidator();
     this.recommendationGenerator = new RecommendationGenerator();
-    
+
     // Default configuration
     this.config = {
       enableCulturalAdaptation: true,
@@ -71,7 +70,7 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
    */
   public async getPersonalizationFactors(userId: string): Promise<PersonalizationFactors> {
     try {
-      devLog(`[${this.context}] Getting personalization factors for user: ${userId}`);
+      devLog("info", this.context, `Getting personalization factors for user: ${userId}`);
 
       // Get user profile and health history in parallel
       const [userProfile, healthHistory] = await Promise.all([
@@ -95,18 +94,17 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
         preferences,
       };
 
-      devLog(`[${this.context}] Personalization factors retrieved successfully`, {
+      devLog("info", this.context, "Personalization factors retrieved successfully", {
         userId,
         culturalContext: culturalContext.language,
         dietaryType: dietaryRestrictions.dietary_type,
       });
 
       return factors;
-
     } catch (error) {
       throw ErrorFactory.fromUnknownError(error, {
         component: this.context,
-        action: 'getPersonalizationFactors',
+        action: "getPersonalizationFactors",
         metadata: { userId },
       });
     }
@@ -127,15 +125,17 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
         );
       }
 
-      devLog(`[${this.context}] Personalizing ${originalRecommendations.length} dietary recommendations`);
+      devLog(
+        "info", this.context, `Personalizing ${originalRecommendations.length} dietary recommendations`
+      );
 
       const personalized = await Promise.all(
         originalRecommendations.map(async (recommendation) => {
           try {
             return await this.dietaryAdapter.adaptDietaryRecommendation(recommendation, factors);
           } catch (error) {
-            logError(`[${this.context}] Failed to personalize dietary recommendation`, {
-              error,
+            devLog("error", this.context, "Failed to personalize dietary recommendation", {
+              error: error instanceof Error ? error.message : String(error),
               recommendation,
             });
 
@@ -148,11 +148,10 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
       );
 
       return personalized;
-
     } catch (error) {
       throw ErrorFactory.fromUnknownError(error, {
         component: this.context,
-        action: 'personalizeDietaryRecommendations',
+        action: "personalizeDietaryRecommendations",
       });
     }
   }
@@ -172,18 +171,19 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
         );
       }
 
-      devLog(`[${this.context}] Personalizing ${originalRecommendations.length} lifestyle recommendations`);
+      devLog(
+        "info", this.context, `Personalizing ${originalRecommendations.length} lifestyle recommendations`
+      );
 
       const personalized = originalRecommendations.map((recommendation) => {
         return this.lifestyleAdapter.adaptLifestyleRecommendation(recommendation, factors);
       });
 
       return personalized;
-
     } catch (error) {
       throw ErrorFactory.fromUnknownError(error, {
         component: this.context,
-        action: 'personalizeLifestyleRecommendations',
+        action: "personalizeLifestyleRecommendations",
       });
     }
   }
@@ -196,7 +196,7 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
     factors: PersonalizationFactors
   ): Promise<SafetyValidationResult> {
     try {
-      devLog(`[${this.context}] Validating safety for ${recommendations.length} recommendations`);
+      devLog("info", this.context, `Validating safety for ${recommendations.length} recommendations`);
 
       const result = await this.safetyValidator.validateRecommendations(recommendations, factors);
 
@@ -207,16 +207,15 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
           factors,
           this.config.maxAlternativeSuggestions
         );
-        
+
         result.alternative_suggestions = alternatives;
       }
 
       return result;
-
     } catch (error) {
       throw ErrorFactory.fromUnknownError(error, {
         component: this.context,
-        action: 'validateRecommendationSafety',
+        action: "validateRecommendationSafety",
       });
     }
   }
@@ -227,18 +226,17 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
   public async updateLearningProfile(userId: string, feedback: FeedbackData): Promise<void> {
     try {
       if (!this.config.enableLearningFromFeedback) {
-        devLog(`[${this.context}] Learning from feedback is disabled`);
+        devLog("info", this.context, "Learning from feedback is disabled");
         return;
       }
 
       await this.learningManager.updateLearningProfile(userId, feedback);
-      
-      devLog(`[${this.context}] Updated learning profile`, { userId, feedbackType: feedback.type });
 
+      devLog("info", this.context, "Updated learning profile", { userId });
     } catch (error) {
       throw ErrorFactory.fromUnknownError(error, {
         component: this.context,
-        action: 'updateLearningProfile',
+        action: "updateLearningProfile",
         metadata: { userId },
       });
     }
@@ -247,7 +245,9 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
   /**
    * Get optimal explanation complexity level for user
    */
-  public getOptimalExplanationLevel(factors: PersonalizationFactors): "basic" | "intermediate" | "advanced" {
+  public getOptimalExplanationLevel(
+    factors: PersonalizationFactors
+  ): "basic" | "intermediate" | "advanced" {
     const { user_profile, health_history } = factors;
 
     // Consider user's role and experience
@@ -275,7 +275,7 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
     try {
       // Get learned preferences
       const communicationPrefs = await this.learningManager.getOptimalCommunicationStyle(userId);
-      
+
       // Get cultural preferences
       const culturalStyle = this.culturalBuilder.getCulturalCommunicationStyle(
         factors.cultural_context
@@ -285,16 +285,12 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
       return {
         style: culturalStyle.style,
         complexity: communicationPrefs.complexity_level as any,
-        preferences: [
-          ...culturalStyle.preferences,
-          ...communicationPrefs.effective_types
-        ]
+        preferences: [...culturalStyle.preferences, ...communicationPrefs.effective_types],
       };
-
     } catch (error) {
       throw ErrorFactory.fromUnknownError(error, {
         component: this.context,
-        action: 'getPersonalizedCommunicationStyle',
+        action: "getPersonalizedCommunicationStyle",
         metadata: { userId },
       });
     }
@@ -305,7 +301,7 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
    */
   public updateConfiguration(newConfig: Partial<PersonalizationConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    logInfo(`[${this.context}] Configuration updated`, { config: this.config });
+    devLog("info", this.context, "Configuration updated", { config: JSON.stringify(this.config) });
   }
 
   /**
@@ -319,7 +315,7 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
     return {
       total_profiles: 0, // Would need to track this
       learning_trends: this.learningManager.analyzeLearningTrends(),
-      configuration: this.config
+      configuration: this.config,
     };
   }
 
@@ -333,8 +329,8 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
     // For now, return a mock profile
     return {
       id: userId,
-      preferred_language: 'en',
-      role: 'patient',
+      preferred_language: "en",
+      role: "patient",
       dietary_preferences: {},
     } as UserProfile;
   }
@@ -356,7 +352,9 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
   /**
    * Build dietary restrictions from preferences
    */
-  private buildDietaryRestrictions(dietaryPreferences?: any): PersonalizationFactors["dietary_restrictions"] {
+  private buildDietaryRestrictions(
+    dietaryPreferences?: any
+  ): PersonalizationFactors["dietary_restrictions"] {
     return {
       allergies: dietaryPreferences?.allergies || [],
       dietary_type: dietaryPreferences?.dietary_type || "no_restrictions",
@@ -368,7 +366,10 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
   /**
    * Determine user preferences from profile and history
    */
-  private determineUserPreferences(userProfile: UserProfile, healthHistory: any): PersonalizationFactors["preferences"] {
+  private determineUserPreferences(
+    userProfile: UserProfile,
+    healthHistory: any
+  ): PersonalizationFactors["preferences"] {
     const sessionCount = healthHistory.previous_diagnoses?.length || 0;
 
     return {
@@ -385,7 +386,7 @@ export class PersonalizationOrchestrator implements IPersonalizationOrchestrator
     originalRecommendations: string[],
     reason: string
   ): PersonalizedRecommendation[] {
-    return originalRecommendations.map(rec => this.createFallbackRecommendation(rec, reason));
+    return originalRecommendations.map((rec) => this.createFallbackRecommendation(rec, reason));
   }
 
   /**

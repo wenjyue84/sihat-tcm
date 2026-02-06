@@ -268,7 +268,9 @@ export function TCMFoodChecker({ latestDiagnosis, onBack }: TCMFoodCheckerProps)
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="space-y-6"
           >
-            <div className={`bg-white rounded-2xl shadow-sm border-2 overflow-hidden ${getSuitabilityColor(result.suitability)}`}>
+            <div
+              className={`bg-white rounded-2xl shadow-sm border-2 overflow-hidden ${getSuitabilityColor(result.suitability)}`}
+            >
               <div className="p-8 flex flex-col md:flex-row gap-8">
                 <div className="flex-shrink-0 flex flex-col items-center text-center space-y-3">
                   <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-sm">
@@ -293,7 +295,9 @@ export function TCMFoodChecker({ latestDiagnosis, onBack }: TCMFoodCheckerProps)
                     <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
                       {strings.recommendation}
                     </h3>
-                    <p className="text-lg font-medium text-slate-900 leading-relaxed">{result.recommendation}</p>
+                    <p className="text-lg font-medium text-slate-900 leading-relaxed">
+                      {result.recommendation}
+                    </p>
                   </div>
                   <div className="p-5 bg-slate-50 rounded-xl border border-slate-200">
                     <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-2">

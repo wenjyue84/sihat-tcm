@@ -97,7 +97,9 @@ export function HeartCompanion({ profile }: HeartCompanionProps) {
         })),
         language,
         model: doctorInfo?.model || "gemini-2.0-flash",
-        profile: profile ? { name: profile.full_name, age: profile.age, gender: profile.gender } : undefined,
+        profile: profile
+          ? { name: profile.full_name, age: profile.age, gender: profile.gender }
+          : undefined,
       };
 
       const response = await fetch("/api/heart-companion", {
@@ -139,7 +141,8 @@ export function HeartCompanion({ profile }: HeartCompanionProps) {
       const errorMessage: Message = {
         id: Date.now().toString(),
         role: "assistant",
-        content: "I'm sorry, I'm having trouble connecting right now. Please try again in a moment. 💚",
+        content:
+          "I'm sorry, I'm having trouble connecting right now. Please try again in a moment. 💚",
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -266,7 +269,10 @@ export function HeartCompanion({ profile }: HeartCompanionProps) {
       </div>
 
       {/* Input Area */}
-      <form onSubmit={handleSubmit} className="p-6 border-t border-emerald-100 bg-white/80 backdrop-blur-sm shrink-0">
+      <form
+        onSubmit={handleSubmit}
+        className="p-6 border-t border-emerald-100 bg-white/80 backdrop-blur-sm shrink-0"
+      >
         <div className="flex gap-3">
           <input
             ref={inputRef}
@@ -289,5 +295,3 @@ export function HeartCompanion({ profile }: HeartCompanionProps) {
     </Card>
   );
 }
-
-

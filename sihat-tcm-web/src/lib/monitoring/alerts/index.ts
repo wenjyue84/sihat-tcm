@@ -1,9 +1,9 @@
 /**
  * @fileoverview Alert System Exports
- * 
+ *
  * Central export point for the modular alert management system.
  * Provides clean API access to all alert system components.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 1.0
  */

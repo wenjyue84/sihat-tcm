@@ -79,4 +79,3 @@ export function clearGuestSessionToken(): void {
 export function hasGuestSessionToken(): boolean {
   return getGuestSessionToken() !== null;
 }
-

@@ -4,5 +4,5 @@
  * Barrel export for scheduling-related components
  */
 
-export { CalendarView } from './CalendarView';
-export { NewAppointmentDialog } from './NewAppointmentDialog';
+export { CalendarView } from "./CalendarView";
+export { NewAppointmentDialog } from "./NewAppointmentDialog";

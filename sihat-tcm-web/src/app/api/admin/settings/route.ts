@@ -107,17 +107,18 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Try to verify admin (but don't fail if Supabase is unavailable)
-    let isAdmin = false;
-    if (supabaseAdmin) {
-      isAdmin = await verifyAdmin(user.id);
-    } else {
-      // If Supabase is not available, allow saving to file (for development/testing)
-      console.warn("[Admin Settings PUT] Supabase not available, allowing file-based save");
-      isAdmin = true;
+    // SECURITY: Always verify admin - no bypass allowed
+    if (!supabaseAdmin) {
+      console.error("[Admin Settings PUT] Service role key not available - cannot verify admin");
+      return NextResponse.json(
+        { error: "Admin verification unavailable. Please configure SUPABASE_SERVICE_ROLE_KEY." },
+        { status: 503 }
+      );
     }
 
+    const isAdmin = await verifyAdmin(user.id);
     if (!isAdmin) {
+      console.warn(`[Admin Settings PUT] Non-admin user ${user.id} attempted to modify settings`);
       return NextResponse.json({ error: "Admin access required" }, { status: 403 });
     }
 

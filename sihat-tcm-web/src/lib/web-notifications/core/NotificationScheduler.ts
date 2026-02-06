@@ -3,7 +3,10 @@
  * Handles scheduling and managing timed notifications
  */
 
-import { ScheduledNotification, ScheduleNotificationOptions } from '../interfaces/WebNotificationInterfaces';
+import {
+  ScheduledNotification,
+  ScheduleNotificationOptions,
+} from "../interfaces/WebNotificationInterfaces";
 
 export class NotificationScheduler {
   private scheduledNotifications: Map<string, ScheduledNotification> = new Map();
@@ -125,16 +128,18 @@ export class NotificationScheduler {
   /**
    * Apply scheduled notifications from sync data
    */
-  async applyScheduledNotifications(scheduledNotifications: Array<{
-    id: string;
-    title: string;
-    body: string;
-    scheduled_for: string;
-    category: string;
-    priority: string;
-    repeat_pattern?: string;
-    data: Record<string, any>;
-  }>): Promise<void> {
+  async applyScheduledNotifications(
+    scheduledNotifications: Array<{
+      id: string;
+      title: string;
+      body: string;
+      scheduled_for: string;
+      category: string;
+      priority: string;
+      repeat_pattern?: string;
+      data: Record<string, any>;
+    }>
+  ): Promise<void> {
     for (const serverNotification of scheduledNotifications) {
       const scheduledFor = new Date(serverNotification.scheduled_for);
       if (scheduledFor > new Date()) {

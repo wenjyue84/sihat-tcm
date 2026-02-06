@@ -4,7 +4,7 @@
  */
 
 import { Heart, Activity, Droplets, Thermometer, Brain } from "lucide-react";
-import type { IoTDeviceType } from "../IoTConnectionWizard";
+import type { IoTDeviceType } from "../../IoTConnectionWizard";
 
 export interface DeviceConfig {
   name: string;
@@ -85,5 +85,3 @@ export const deviceConfig: Record<IoTDeviceType, DeviceConfig> = {
     normalRangeText: "10 - 40",
   },
 };
-
-

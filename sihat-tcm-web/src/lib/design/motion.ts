@@ -1,6 +1,6 @@
 /**
  * Apple-inspired Motion System
- * 
+ *
  * Provides animation presets that match Apple's design language:
  * - Natural easing curves
  * - Spring animations for organic feel
@@ -18,7 +18,7 @@ export const appleEase = [0.25, 0.1, 0.25, 1] as const;
  * Natural, bouncy feel without being excessive
  */
 export const appleSpring = {
-  type: 'spring' as const,
+  type: "spring" as const,
   damping: 20,
   stiffness: 300,
   mass: 1,
@@ -110,10 +110,7 @@ export const appleMotionVariants = {
  * CSS transition strings for non-Framer Motion animations
  */
 export const appleTransitions = {
-  fast: `all ${appleDurations.fast}ms cubic-bezier(${appleEase.join(', ')})`,
-  normal: `all ${appleDurations.normal}ms cubic-bezier(${appleEase.join(', ')})`,
-  slow: `all ${appleDurations.slow}ms cubic-bezier(${appleEase.join(', ')})`,
+  fast: `all ${appleDurations.fast}ms cubic-bezier(${appleEase.join(", ")})`,
+  normal: `all ${appleDurations.normal}ms cubic-bezier(${appleEase.join(", ")})`,
+  slow: `all ${appleDurations.slow}ms cubic-bezier(${appleEase.join(", ")})`,
 } as const;
-
-
-

@@ -144,7 +144,7 @@ export async function DELETE(request: NextRequest) {
     // Cancel by type (e.g., all sleep_cultivation notifications)
     else if (type) {
       query = query.eq("notification_type", type);
-      
+
       // Optionally filter by reminder_type within the data JSONB
       if (reminderType) {
         query = query.contains("data", { reminder_type: reminderType });

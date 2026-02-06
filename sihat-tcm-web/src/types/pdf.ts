@@ -1,6 +1,6 @@
 /**
  * PDF Generation Types
- * 
+ *
  * Type definitions for PDF generation utilities
  */
 
@@ -56,6 +56,3 @@ export interface PDFGenerationData {
   timestamp?: string;
   disclaimer?: string;
 }
-
-
-

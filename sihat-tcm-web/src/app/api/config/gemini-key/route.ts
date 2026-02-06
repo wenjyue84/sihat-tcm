@@ -6,15 +6,41 @@ import { createErrorResponse } from "@/lib/api/middleware/error-handler";
  * API Endpoint: GET /api/config/gemini-key
  *
  * Returns the Gemini API key for the mobile app to use.
- * This allows both web and mobile apps to use the same API key
- * configured in the admin dashboard.
+ * SECURITY: Requires X-App-Token header for authentication.
  *
- * Security note: This endpoint is intentionally public to allow
- * the mobile app to fetch the key. In production, consider adding
- * authentication or app-specific tokens.
+ * Set MOBILE_APP_TOKEN in .env.local and configure it in mobile app.
  */
+
+// App-specific token for mobile app authentication
+const MOBILE_APP_TOKEN = process.env.MOBILE_APP_TOKEN;
+
 export async function GET(request: NextRequest) {
   try {
+    // SECURITY: Require app token for API key access
+    const appToken = request.headers.get("x-app-token");
+
+    if (!MOBILE_APP_TOKEN) {
+      console.error("[Gemini Key API] MOBILE_APP_TOKEN not configured");
+      return NextResponse.json(
+        {
+          success: false,
+          error: "API key endpoint not configured. Set MOBILE_APP_TOKEN in environment.",
+        },
+        { status: 503 }
+      );
+    }
+
+    if (!appToken || appToken !== MOBILE_APP_TOKEN) {
+      console.warn("[Gemini Key API] Invalid or missing app token");
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized. Valid app token required.",
+        },
+        { status: 401 }
+      );
+    }
+
     const apiKey = getGeminiApiKey();
 
     if (!apiKey) {

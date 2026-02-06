@@ -85,11 +85,19 @@ export interface AudioAnalysisData {
   observation?: string;
   potential_issues?: string[];
   skipped?: boolean;
+  transcription?: string;
+  analysis?: string;
 }
 
 // ============================================================================
 // Pulse Data
 // ============================================================================
+
+export interface PulseQuality {
+  nameEn: string;
+  nameCn?: string;
+  description?: string;
+}
 
 export interface PulseData {
   bpm?: number;
@@ -97,6 +105,7 @@ export interface PulseData {
   rhythm?: string;
   strength?: string;
   notes?: string;
+  pulseQualities?: PulseQuality[];
 }
 
 // ============================================================================
@@ -107,6 +116,12 @@ export interface SmartConnectData {
   connected?: boolean;
   device_type?: string;
   data?: Record<string, unknown>;
+  pulseRate?: number;
+  bloodPressure?: string;
+  bloodOxygen?: number;
+  bodyTemp?: number;
+  hrv?: number;
+  stressLevel?: string;
 }
 
 // ============================================================================
@@ -124,6 +139,11 @@ export interface DiagnosisWizardData {
   qie: PulseData | null;
   smart_connect: SmartConnectData | null;
   diagnosis_report?: string; // Persisted JSON string of the report
+  reportFiles?: FileData[];
+  medicineFiles?: FileData[];
+  verified_summaries?: Record<string, string>;
+  report_options?: Record<string, unknown>;
+  additional_info?: string;
 }
 
 // ============================================================================
@@ -154,4 +174,3 @@ export interface PendingResumeState {
   timestamp: string;
   completionPercentage?: number;
 }
-

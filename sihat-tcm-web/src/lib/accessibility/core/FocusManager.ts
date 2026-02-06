@@ -1,6 +1,6 @@
 /**
  * Focus Manager
- * 
+ *
  * Manages keyboard focus, focus groups, and focus restoration.
  * Provides comprehensive focus management for accessibility.
  */
@@ -9,7 +9,7 @@ import {
   FocusableElement,
   FocusGroup,
   FocusManagementOptions,
-  NavigationDirection
+  NavigationDirection,
 } from "../interfaces/AccessibilityInterfaces";
 
 export class FocusManager {
@@ -144,9 +144,8 @@ export class FocusManager {
         targetIndex = (this.currentFocusIndex + 1) % elements.length;
         break;
       case "previous":
-        targetIndex = this.currentFocusIndex === 0
-          ? elements.length - 1
-          : this.currentFocusIndex - 1;
+        targetIndex =
+          this.currentFocusIndex === 0 ? elements.length - 1 : this.currentFocusIndex - 1;
         break;
       case "first":
         targetIndex = 0;
@@ -214,7 +213,10 @@ export class FocusManager {
         this.currentFocusGroup = groupId;
         this.focusTrapContainer = elements[0].element.parentElement;
         if (this.focusTrapContainer) {
-          this.setupFocusTrapHandlers(this.focusTrapContainer, elements.map(e => e.element));
+          this.setupFocusTrapHandlers(
+            this.focusTrapContainer,
+            elements.map((e) => e.element)
+          );
         }
       }
     } else {
@@ -275,7 +277,7 @@ export class FocusManager {
   private removeFocusTrapHandlers(): void {
     if (this.focusTrapContainer) {
       const handlers = this.focusTrapContainer.querySelectorAll("[data-focus-trap-handler]");
-      handlers.forEach(element => {
+      handlers.forEach((element) => {
         element.removeAttribute("data-focus-trap-handler");
       });
     }
@@ -286,18 +288,18 @@ export class FocusManager {
    */
   private findFocusableElements(container: HTMLElement): HTMLElement[] {
     const focusableSelectors = [
-      'button:not([disabled])',
-      '[href]',
-      'input:not([disabled])',
-      'select:not([disabled])',
-      'textarea:not([disabled])',
+      "button:not([disabled])",
+      "[href]",
+      "input:not([disabled])",
+      "select:not([disabled])",
+      "textarea:not([disabled])",
       '[tabindex]:not([tabindex="-1"])',
-      '[contenteditable="true"]'
-    ].join(', ');
+      '[contenteditable="true"]',
+    ].join(", ");
 
     const elements = Array.from(container.querySelectorAll(focusableSelectors)) as HTMLElement[];
 
-    return elements.filter(element => this.isElementFocusable(element));
+    return elements.filter((element) => this.isElementFocusable(element));
   }
 
   /**
@@ -330,7 +332,7 @@ export class FocusManager {
   private updateFocusContext(element: HTMLElement): void {
     // Find the focus group this element belongs to
     for (const [groupId, elements] of this.focusableElements.entries()) {
-      const index = elements.findIndex(item => item.element === element);
+      const index = elements.findIndex((item) => item.element === element);
       if (index !== -1) {
         this.currentFocusGroup = groupId;
         this.currentFocusIndex = index;
@@ -344,7 +346,7 @@ export class FocusManager {
    */
   private addToFocusHistory(element: HTMLElement): void {
     // Remove element if it already exists in history
-    this.focusHistory = this.focusHistory.filter(el => el !== element);
+    this.focusHistory = this.focusHistory.filter((el) => el !== element);
 
     // Add to end of history
     this.focusHistory.push(element);
@@ -401,14 +403,15 @@ export class FocusManager {
       ? this.focusableElements.get(this.currentFocusGroup)
       : null;
 
-    const element = elements && elements[this.currentFocusIndex]
-      ? elements[this.currentFocusIndex].element
-      : null;
+    const element =
+      elements && elements[this.currentFocusIndex]
+        ? elements[this.currentFocusIndex].element
+        : null;
 
     return {
       group: this.currentFocusGroup,
       index: this.currentFocusIndex,
-      element
+      element,
     };
   }
 

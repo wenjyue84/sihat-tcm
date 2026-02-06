@@ -1,21 +1,25 @@
 /**
  * Voice Command System - Barrel Export
- * 
+ *
  * Provides a clean interface to the modular voice command system
  * for the Sihat TCM application.
  */
 
 // Main orchestrator
-export { VoiceCommandHandler, getVoiceCommandHandler, checkVoiceSupport } from './VoiceCommandHandler';
+export {
+  VoiceCommandHandler,
+  getVoiceCommandHandler,
+  checkVoiceSupport,
+} from "./VoiceCommandHandler";
 
 // Core managers
-export { SpeechRecognitionManager } from './core/SpeechRecognitionManager';
-export { SpeechSynthesisManager } from './core/SpeechSynthesisManager';
+export { SpeechRecognitionManager } from "./core/SpeechRecognitionManager";
+export { SpeechSynthesisManager } from "./core/SpeechSynthesisManager";
 
 // Command system
-export { CommandRegistry } from './commands/CommandRegistry';
-export { DictationManager } from './commands/DictationManager';
-export type { DictationOptions, DictationResult } from './commands/DictationManager';
+export { CommandRegistry } from "./commands/CommandRegistry";
+export { DictationManager } from "./commands/DictationManager";
+export type { DictationOptions, DictationResult } from "./commands/DictationManager";
 
 // Interfaces and types
 export type {
@@ -32,9 +36,9 @@ export type {
   VoiceEventListener,
   CommandProcessingContext,
   CommandExecutionContext,
-  SpeechQueueItem
-} from './interfaces/VoiceInterfaces';
+  SpeechQueueItem,
+} from "./interfaces/VoiceInterfaces";
 
 // Default instance for backward compatibility
-import { getVoiceCommandHandler } from './VoiceCommandHandler';
+import { getVoiceCommandHandler } from "./VoiceCommandHandler";
 export const voiceCommandHandler = getVoiceCommandHandler();

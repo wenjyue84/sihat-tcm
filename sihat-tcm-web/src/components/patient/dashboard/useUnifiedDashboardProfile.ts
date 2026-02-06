@@ -115,10 +115,7 @@ export function useUnifiedDashboardProfile(
       }
 
       // Update in database
-      const { error } = await supabase
-        .from("profiles")
-        .update(updateData)
-        .eq("id", userId);
+      const { error } = await supabase.from("profiles").update(updateData).eq("id", userId);
 
       if (error) throw error;
 
@@ -150,4 +147,3 @@ export function useUnifiedDashboardProfile(
     handleUpdateProfileField,
   };
 }
-

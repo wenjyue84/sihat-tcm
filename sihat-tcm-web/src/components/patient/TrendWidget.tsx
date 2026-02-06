@@ -189,7 +189,9 @@ export function TrendWidget({ trendData, loading, sessions, journeyDuration }: T
                     {t.patientDashboard.healthJourney.journeyDuration || "Journey"}
                     <Info className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                   </p>
-                  <p className="text-xl font-bold text-violet-900 leading-tight">{journeyDuration}</p>
+                  <p className="text-xl font-bold text-violet-900 leading-tight">
+                    {journeyDuration}
+                  </p>
                   <p className="text-[9px] text-violet-600 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     Click for timeline →
                   </p>
@@ -222,20 +224,22 @@ export function TrendWidget({ trendData, loading, sessions, journeyDuration }: T
                   </p>
                 </div>
                 <div
-                  className={`p-1.5 rounded-md ml-2 flex-shrink-0 ${averageScore >= 75
-                    ? "bg-emerald-100"
-                    : averageScore >= 50
-                      ? "bg-amber-100"
-                      : "bg-red-100"
-                    }`}
+                  className={`p-1.5 rounded-md ml-2 flex-shrink-0 ${
+                    averageScore >= 75
+                      ? "bg-emerald-100"
+                      : averageScore >= 50
+                        ? "bg-amber-100"
+                        : "bg-red-100"
+                  }`}
                 >
                   <Activity
-                    className={`w-4 h-4 ${averageScore >= 75
-                      ? "text-emerald-600"
-                      : averageScore >= 50
-                        ? "text-amber-600"
-                        : "text-red-600"
-                      }`}
+                    className={`w-4 h-4 ${
+                      averageScore >= 75
+                        ? "text-emerald-600"
+                        : averageScore >= 50
+                          ? "text-amber-600"
+                          : "text-red-600"
+                    }`}
                   />
                 </div>
               </div>
@@ -259,12 +263,13 @@ export function TrendWidget({ trendData, loading, sessions, journeyDuration }: T
                   </p>
                   <div className="flex items-baseline gap-1.5">
                     <p
-                      className={`text-2xl font-bold leading-tight ${improvement > 0
-                        ? "text-emerald-600"
-                        : improvement < 0
-                          ? "text-red-600"
-                          : "text-slate-600"
-                        }`}
+                      className={`text-2xl font-bold leading-tight ${
+                        improvement > 0
+                          ? "text-emerald-600"
+                          : improvement < 0
+                            ? "text-red-600"
+                            : "text-slate-600"
+                      }`}
                     >
                       {improvement > 0 ? "+" : ""}
                       {improvement}
@@ -278,12 +283,13 @@ export function TrendWidget({ trendData, loading, sessions, journeyDuration }: T
                   </p>
                 </div>
                 <div
-                  className={`p-1.5 rounded-md ml-2 flex-shrink-0 ${improvement > 0
-                    ? "bg-emerald-100"
-                    : improvement < 0
-                      ? "bg-red-100"
-                      : "bg-slate-100"
-                    }`}
+                  className={`p-1.5 rounded-md ml-2 flex-shrink-0 ${
+                    improvement > 0
+                      ? "bg-emerald-100"
+                      : improvement < 0
+                        ? "bg-red-100"
+                        : "bg-slate-100"
+                  }`}
                 >
                   {improvement > 0 ? (
                     <TrendingUp className="w-4 h-4 text-emerald-600" />
@@ -346,7 +352,8 @@ export function TrendWidget({ trendData, loading, sessions, journeyDuration }: T
                       </h2>
                     </Dialog.Title>
                     <Dialog.Description className="sr-only">
-                      Interactive 3D visualization of your current organs and energy balance based on TCM diagnosis.
+                      Interactive 3D visualization of your current organs and energy balance based
+                      on TCM diagnosis.
                     </Dialog.Description>
                     <p className="text-cyan-400/60 text-xs font-mono mt-1 uppercase tracking-widest">
                       AI Energy Mapping System v2.0
@@ -366,11 +373,15 @@ export function TrendWidget({ trendData, loading, sessions, journeyDuration }: T
 
                   <div className="mt-8 grid grid-cols-2 gap-4 w-full">
                     <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                      <p className="text-[10px] uppercase tracking-widest text-cyan-400 font-bold mb-1">Status</p>
+                      <p className="text-[10px] uppercase tracking-widest text-cyan-400 font-bold mb-1">
+                        Status
+                      </p>
                       <p className="text-white text-sm">Real-time Analysis Active</p>
                     </div>
                     <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
-                      <p className="text-[10px] uppercase tracking-widest text-cyan-400 font-bold mb-1">Data Source</p>
+                      <p className="text-[10px] uppercase tracking-widest text-cyan-400 font-bold mb-1">
+                        Data Source
+                      </p>
                       <p className="text-white text-sm">{sessions.length} Medical Sessions</p>
                     </div>
                   </div>
@@ -399,10 +410,12 @@ export function TrendWidget({ trendData, loading, sessions, journeyDuration }: T
                       </h2>
                     </Dialog.Title>
                     <Dialog.Description className="sr-only">
-                      Traditional Chinese Medicine organ health assessment based on the Five Elements theory.
+                      Traditional Chinese Medicine organ health assessment based on the Five
+                      Elements theory.
                     </Dialog.Description>
                     <p className="text-amber-600/80 text-xs font-medium mt-1">
-                      {t.fiveElementsRadar?.subtitle || "Traditional Chinese Medicine organ health assessment based on the Five Elements theory"}
+                      {t.fiveElementsRadar?.subtitle ||
+                        "Traditional Chinese Medicine organ health assessment based on the Five Elements theory"}
                     </p>
                   </div>
                   <Dialog.Close asChild>

@@ -95,12 +95,9 @@ export function useReportOptions(initialOptions?: Partial<ReportOptions>) {
     ...initialOptions,
   });
 
-  const handleOptionChange = useCallback(
-    (key: keyof ReportOptions, checked: boolean) => {
-      setOptions((prev) => ({ ...prev, [key]: checked }));
-    },
-    []
-  );
+  const handleOptionChange = useCallback((key: keyof ReportOptions, checked: boolean) => {
+    setOptions((prev) => ({ ...prev, [key]: checked }));
+  }, []);
 
   const resetOptions = useCallback(() => {
     setOptions({ ...DEFAULT_REPORT_OPTIONS, ...initialOptions });
@@ -113,6 +110,3 @@ export function useReportOptions(initialOptions?: Partial<ReportOptions>) {
     resetOptions,
   };
 }
-
-
-

@@ -32,5 +32,3 @@ export function createDefaultReportOptions() {
     includeDoctorSignature: true,
   };
 }
-
-

@@ -1,6 +1,6 @@
 /**
  * Diagnosis Wizard Utility Functions
- * 
+ *
  * Helper functions for diagnosis wizard operations
  */
 
@@ -18,7 +18,7 @@ export function repairJSON(jsonString: string): string {
 
     // Step 1: Find and extract valid JSON by matching balanced braces
     // This handles cases where there's trailing garbage after the JSON
-    const firstBrace = current.indexOf('{');
+    const firstBrace = current.indexOf("{");
     if (firstBrace !== -1) {
       let braceCount = 0;
       let inString = false;
@@ -33,7 +33,7 @@ export function repairJSON(jsonString: string): string {
           continue;
         }
 
-        if (char === '\\' && inString) {
+        if (char === "\\" && inString) {
           escapeNext = true;
           continue;
         }
@@ -44,9 +44,9 @@ export function repairJSON(jsonString: string): string {
         }
 
         if (!inString) {
-          if (char === '{') {
+          if (char === "{") {
             braceCount++;
-          } else if (char === '}') {
+          } else if (char === "}") {
             braceCount--;
             if (braceCount === 0) {
               lastValidIndex = i;
@@ -111,7 +111,9 @@ export const generateMockReport = (data: DiagnosisWizardData): DiagnosisReport =
 /**
  * Calculate an overall health score from the diagnosis report (0-100)
  */
-export function calculateOverallScore(reportData: DiagnosisReport | Partial<DiagnosisReport>): number {
+export function calculateOverallScore(
+  reportData: DiagnosisReport | Partial<DiagnosisReport>
+): number {
   try {
     // Default to 70 (neutral/fair) if we can't calculate
     let score = 70;
@@ -149,8 +151,8 @@ export function calculateOverallScore(reportData: DiagnosisReport | Partial<Diag
         : null;
     const affectedOrgans =
       diagnosisObj &&
-        "affected_organs" in diagnosisObj &&
-        Array.isArray(diagnosisObj.affected_organs)
+      "affected_organs" in diagnosisObj &&
+      Array.isArray(diagnosisObj.affected_organs)
         ? diagnosisObj.affected_organs.length
         : 0;
     score -= Math.min(affectedOrgans * 5, 20);
@@ -182,6 +184,3 @@ export function calculateOverallScore(reportData: DiagnosisReport | Partial<Diag
     return 70; // Default neutral score
   }
 }
-
-
-

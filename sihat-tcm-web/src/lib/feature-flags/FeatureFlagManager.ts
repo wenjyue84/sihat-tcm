@@ -3,14 +3,15 @@
  * Enables safe deployment of refactored components
  */
 
-import { AppError, ErrorCode } from '../errors/AppError';
-import { EventSystem } from '../events/EventSystem';
+import { AppError, ERROR_CODES } from "../errors/AppError";
+import { EventSystem } from "../events/EventSystem";
+import type { BaseEvent } from "../events/interfaces/EventInterfaces";
 
 export interface FeatureFlag {
   key: string;
   enabled: boolean;
   rolloutPercentage: number;
-  environment: 'development' | 'staging' | 'production';
+  environment: "development" | "staging" | "production";
   description: string;
   dependencies?: string[];
   createdAt: Date;
@@ -43,6 +44,23 @@ export class FeatureFlagManager {
   }
 
   /**
+   * Emit event helper
+   */
+  private emitEvent(type: string, data?: Record<string, unknown>): void {
+    this.eventSystem
+      .emit({
+        type,
+        timestamp: new Date(),
+        source: "FeatureFlagManager",
+        id: `ffm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        data,
+      })
+      .catch(() => {
+        /* fire-and-forget */
+      });
+  }
+
+  /**
    * Initialize feature flags from configuration
    */
   private initializeFlags(): void {
@@ -52,20 +70,18 @@ export class FeatureFlagManager {
           ...flag,
           key,
           createdAt: flag.createdAt || new Date(),
-          updatedAt: flag.updatedAt || new Date()
+          updatedAt: flag.updatedAt || new Date(),
         });
       });
 
-      this.eventSystem.emit('featureFlags:initialized', {
+      this.emitEvent("featureFlags:initialized", {
         flagCount: this.flags.size,
-        environment: this.config.environment
+        environment: this.config.environment,
       });
     } catch (error) {
-      throw new AppError(
-        'Failed to initialize feature flags',
-        ErrorCode.CONFIGURATION_ERROR,
-        { error: error instanceof Error ? error.message : 'Unknown error' }
-      );
+      throw new AppError(ERROR_CODES.CONFIGURATION_ERROR, "Failed to initialize feature flags", {
+        metadata: { error: error instanceof Error ? error.message : "Unknown error" },
+      });
     }
   }
 
@@ -75,9 +91,9 @@ export class FeatureFlagManager {
   isEnabled(flagKey: string, context?: FeatureFlagContext): boolean {
     try {
       const flag = this.flags.get(flagKey);
-      
+
       if (!flag) {
-        this.eventSystem.emit('featureFlags:flagNotFound', { flagKey });
+        this.emitEvent("featureFlags:flagNotFound", { flagKey });
         return this.config.defaultEnabled;
       }
 
@@ -93,9 +109,7 @@ export class FeatureFlagManager {
 
       // Check dependencies
       if (flag.dependencies) {
-        const dependenciesMet = flag.dependencies.every(dep => 
-          this.isEnabled(dep, context)
-        );
+        const dependenciesMet = flag.dependencies.every((dep) => this.isEnabled(dep, context));
         if (!dependenciesMet) {
           return false;
         }
@@ -105,23 +119,23 @@ export class FeatureFlagManager {
       if (flag.rolloutPercentage < 100) {
         const hash = this.generateHash(flagKey, context);
         const enabled = hash < flag.rolloutPercentage;
-        
-        this.eventSystem.emit('featureFlags:rolloutCheck', {
+
+        this.emitEvent("featureFlags:rolloutCheck", {
           flagKey,
           rolloutPercentage: flag.rolloutPercentage,
           hash,
           enabled,
-          context
+          context,
         });
-        
+
         return enabled;
       }
 
       return true;
     } catch (error) {
-      this.eventSystem.emit('featureFlags:error', {
+      this.emitEvent("featureFlags:error", {
         flagKey,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       return this.config.defaultEnabled;
     }
@@ -131,16 +145,16 @@ export class FeatureFlagManager {
    * Generate consistent hash for rollout percentage
    */
   private generateHash(flagKey: string, context?: FeatureFlagContext): number {
-    const identifier = context?.userId || context?.sessionId || 'anonymous';
+    const identifier = context?.userId || context?.sessionId || "anonymous";
     const combined = `${flagKey}:${identifier}`;
-    
+
     let hash = 0;
     for (let i = 0; i < combined.length; i++) {
       const char = combined.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
-    
+
     return Math.abs(hash) % 100;
   }
 
@@ -151,65 +165,55 @@ export class FeatureFlagManager {
     try {
       const existingFlag = this.flags.get(flagKey);
       if (!existingFlag) {
-        throw new AppError(
-          `Feature flag '${flagKey}' not found`,
-          ErrorCode.NOT_FOUND
-        );
+        throw new AppError(ERROR_CODES.NOT_FOUND, `Feature flag '${flagKey}' not found`);
       }
 
       const updatedFlag: FeatureFlag = {
         ...existingFlag,
         ...updates,
         key: flagKey,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       this.flags.set(flagKey, updatedFlag);
 
-      this.eventSystem.emit('featureFlags:updated', {
+      this.emitEvent("featureFlags:updated", {
         flagKey,
         previousFlag: existingFlag,
         updatedFlag,
-        updates
+        updates,
       });
     } catch (error) {
-      throw new AppError(
-        `Failed to update feature flag '${flagKey}'`,
-        ErrorCode.OPERATION_FAILED,
-        { error: error instanceof Error ? error.message : 'Unknown error' }
-      );
+      throw new AppError(ERROR_CODES.OPERATION_FAILED, `Failed to update feature flag '${flagKey}'`, {
+        metadata: { error: error instanceof Error ? error.message : "Unknown error" },
+      });
     }
   }
 
   /**
    * Add a new feature flag
    */
-  addFlag(flag: Omit<FeatureFlag, 'createdAt' | 'updatedAt'>): void {
+  addFlag(flag: Omit<FeatureFlag, "createdAt" | "updatedAt">): void {
     try {
       if (this.flags.has(flag.key)) {
-        throw new AppError(
-          `Feature flag '${flag.key}' already exists`,
-          ErrorCode.ALREADY_EXISTS
-        );
+        throw new AppError(ERROR_CODES.ALREADY_EXISTS, `Feature flag '${flag.key}' already exists`);
       }
 
       const newFlag: FeatureFlag = {
         ...flag,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       this.flags.set(flag.key, newFlag);
 
-      this.eventSystem.emit('featureFlags:added', {
-        flag: newFlag
+      this.emitEvent("featureFlags:added", {
+        flag: newFlag,
       });
     } catch (error) {
-      throw new AppError(
-        `Failed to add feature flag '${flag.key}'`,
-        ErrorCode.OPERATION_FAILED,
-        { error: error instanceof Error ? error.message : 'Unknown error' }
-      );
+      throw new AppError(ERROR_CODES.OPERATION_FAILED, `Failed to add feature flag '${flag.key}'`, {
+        metadata: { error: error instanceof Error ? error.message : "Unknown error" },
+      });
     }
   }
 
@@ -220,24 +224,19 @@ export class FeatureFlagManager {
     try {
       const flag = this.flags.get(flagKey);
       if (!flag) {
-        throw new AppError(
-          `Feature flag '${flagKey}' not found`,
-          ErrorCode.NOT_FOUND
-        );
+        throw new AppError(ERROR_CODES.NOT_FOUND, `Feature flag '${flagKey}' not found`);
       }
 
       this.flags.delete(flagKey);
 
-      this.eventSystem.emit('featureFlags:removed', {
+      this.emitEvent("featureFlags:removed", {
         flagKey,
-        removedFlag: flag
+        removedFlag: flag,
       });
     } catch (error) {
-      throw new AppError(
-        `Failed to remove feature flag '${flagKey}'`,
-        ErrorCode.OPERATION_FAILED,
-        { error: error instanceof Error ? error.message : 'Unknown error' }
-      );
+      throw new AppError(ERROR_CODES.OPERATION_FAILED, `Failed to remove feature flag '${flagKey}'`, {
+        metadata: { error: error instanceof Error ? error.message : "Unknown error" },
+      });
     }
   }
 
@@ -259,9 +258,7 @@ export class FeatureFlagManager {
    * Get flags enabled for context
    */
   getEnabledFlags(context?: FeatureFlagContext): string[] {
-    return Array.from(this.flags.keys()).filter(key => 
-      this.isEnabled(key, context)
-    );
+    return Array.from(this.flags.keys()).filter((key) => this.isEnabled(key, context));
   }
 
   /**
@@ -274,8 +271,8 @@ export class FeatureFlagManager {
       Object.entries(updates).forEach(([flagKey, percentage]) => {
         if (percentage < 0 || percentage > 100) {
           throw new AppError(
-            `Invalid rollout percentage for '${flagKey}': ${percentage}`,
-            ErrorCode.VALIDATION_ERROR
+            ERROR_CODES.VALIDATION_ERROR,
+            `Invalid rollout percentage for '${flagKey}': ${percentage}`
           );
         }
 
@@ -286,16 +283,14 @@ export class FeatureFlagManager {
         }
       });
 
-      this.eventSystem.emit('featureFlags:bulkRolloutUpdate', {
+      this.emitEvent("featureFlags:bulkRolloutUpdate", {
         updatedFlags,
-        updates
+        updates,
       });
     } catch (error) {
-      throw new AppError(
-        'Failed to update rollout percentages',
-        ErrorCode.OPERATION_FAILED,
-        { error: error instanceof Error ? error.message : 'Unknown error' }
-      );
+      throw new AppError(ERROR_CODES.OPERATION_FAILED, "Failed to update rollout percentages", {
+        metadata: { error: error instanceof Error ? error.message : "Unknown error" },
+      });
     }
   }
 
@@ -310,7 +305,7 @@ export class FeatureFlagManager {
 
     return {
       ...this.config,
-      flags
+      flags,
     };
   }
 
@@ -323,15 +318,15 @@ export class FeatureFlagManager {
       this.flags.clear();
       this.initializeFlags();
 
-      this.eventSystem.emit('featureFlags:configImported', {
+      this.emitEvent("featureFlags:configImported", {
         flagCount: this.flags.size,
-        environment: config.environment
+        environment: config.environment,
       });
     } catch (error) {
       throw new AppError(
-        'Failed to import feature flag configuration',
-        ErrorCode.OPERATION_FAILED,
-        { error: error instanceof Error ? error.message : 'Unknown error' }
+        ERROR_CODES.OPERATION_FAILED,
+        "Failed to import feature flag configuration",
+        { metadata: { error: error instanceof Error ? error.message : "Unknown error" } }
       );
     }
   }

@@ -68,5 +68,3 @@ export function ProfileHero({ name, email, avatar }: ProfileHeroProps) {
     </motion.div>
   );
 }
-
-

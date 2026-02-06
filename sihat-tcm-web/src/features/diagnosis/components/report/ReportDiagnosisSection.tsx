@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Stethoscope, HeartPulse, BarChart3, Activity, BrainCircuit } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { pdfTranslations } from "./utils";
 import type { ViewMode } from "./ViewSwitcher";
 
 interface ReportDiagnosisSectionProps {
@@ -20,20 +21,32 @@ export function ReportDiagnosisSection({
   variants,
   viewMode = "modern",
 }: ReportDiagnosisSectionProps) {
-  const { t } = useLanguage();
+  const { t: globalT, language } = useLanguage();
+  const reportT = pdfTranslations[language as keyof typeof pdfTranslations] || pdfTranslations.en;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const t = { ...globalT, ...reportT } as any;
 
   if (viewMode === "classic") {
     return (
-      <motion.div variants={variants} className="space-y-6 font-serif border-b border-stone-300 pb-8">
+      <motion.div
+        variants={variants}
+        className="space-y-6 font-serif border-b border-stone-300 pb-8"
+      >
         <div>
-          <h3 className="text-lg font-bold uppercase mb-3 border-b border-stone-200 inline-block pr-8">{t.mainDiagnosis}</h3>
+          <h3 className="text-lg font-bold uppercase mb-3 border-b border-stone-200 inline-block pr-8">
+            {t.mainDiagnosis}
+          </h3>
           <p className="text-xl font-bold text-stone-900">{diagnosisText}</p>
           {/* Secondary Patterns */}
-          {typeof data.diagnosis === "object" && data.diagnosis !== null && "secondary_patterns" in data.diagnosis && Array.isArray((data.diagnosis as any).secondary_patterns) && (data.diagnosis as any).secondary_patterns.length > 0 && (
-            <p className="text-stone-700 mt-1 italic">
-              Secondary: {(data.diagnosis as any).secondary_patterns.join(", ")}
-            </p>
-          )}
+          {typeof data.diagnosis === "object" &&
+            data.diagnosis !== null &&
+            "secondary_patterns" in data.diagnosis &&
+            Array.isArray((data.diagnosis as any).secondary_patterns) &&
+            (data.diagnosis as any).secondary_patterns.length > 0 && (
+              <p className="text-stone-700 mt-1 italic">
+                Secondary: {(data.diagnosis as any).secondary_patterns.join(", ")}
+              </p>
+            )}
         </div>
 
         <div>
@@ -43,9 +56,7 @@ export function ReportDiagnosisSection({
 
         <div>
           <h3 className="text-lg font-bold uppercase mb-3">{t.report.detailedAnalysis}</h3>
-          <p className="text-sm leading-relaxed whitespace-pre-wrap text-justify">
-            {analysisText}
-          </p>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap text-justify">{analysisText}</p>
         </div>
       </motion.div>
     );
@@ -63,7 +74,9 @@ export function ReportDiagnosisSection({
             <div className="p-2 bg-white rounded-xl shadow-sm">
               <Stethoscope className="w-5 h-5 text-emerald-600" />
             </div>
-            <span className="text-sm font-bold text-emerald-800 uppercase tracking-widest">{t.report.tcmDiagnosis}</span>
+            <span className="text-sm font-bold text-emerald-800 uppercase tracking-widest">
+              {t.report.tcmDiagnosis}
+            </span>
           </div>
 
           <h2 className="text-2xl md:text-4xl font-bold text-emerald-950 mb-4 leading-tight">
@@ -72,22 +85,32 @@ export function ReportDiagnosisSection({
 
           {/* Tags for Secondary/Organs */}
           <div className="flex flex-wrap gap-2 mb-6">
-            {typeof data.diagnosis === "object" && data.diagnosis?.secondary_patterns?.map((p: string, i: number) => (
-              <span key={i} className="px-3 py-1 bg-white/60 border border-emerald-200/50 rounded-full text-xs font-semibold text-emerald-800">
-                {p}
-              </span>
-            ))}
-            {typeof data.diagnosis === "object" && data.diagnosis?.affected_organs?.map((o: string, i: number) => (
-              <span key={i} className="px-3 py-1 bg-emerald-100/50 border border-emerald-200/50 rounded-full text-xs font-semibold text-emerald-900">
-                {o}
-              </span>
-            ))}
+            {typeof data.diagnosis === "object" &&
+              data.diagnosis?.secondary_patterns?.map((p: string, i: number) => (
+                <span
+                  key={i}
+                  className="px-3 py-1 bg-white/60 border border-emerald-200/50 rounded-full text-xs font-semibold text-emerald-800"
+                >
+                  {p}
+                </span>
+              ))}
+            {typeof data.diagnosis === "object" &&
+              data.diagnosis?.affected_organs?.map((o: string, i: number) => (
+                <span
+                  key={i}
+                  className="px-3 py-1 bg-emerald-100/50 border border-emerald-200/50 rounded-full text-xs font-semibold text-emerald-900"
+                >
+                  {o}
+                </span>
+              ))}
           </div>
 
           <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-4 border border-emerald-100/50">
             <div className="flex items-center gap-2 mb-2">
               <HeartPulse className="w-4 h-4 text-emerald-700" />
-              <span className="font-bold text-emerald-900">{t.report.constitution}: {constitutionText}</span>
+              <span className="font-bold text-emerald-900">
+                {t.report.constitution}: {constitutionText}
+              </span>
             </div>
             {typeof data.constitution === "object" && data.constitution.description && (
               <p className="text-sm text-emerald-800/80 leading-relaxed">
@@ -150,15 +173,17 @@ const FindingCard = ({ icon: Icon, title, content, color }: any) => {
     blue: "bg-blue-50 text-blue-700 border-blue-100",
     purple: "bg-purple-50 text-purple-700 border-purple-100",
     rose: "bg-rose-50 text-rose-700 border-rose-100",
-  }
+  };
 
   return (
-    <div className={`p-4 rounded-2xl border ${colors[color as keyof typeof colors] || colors.blue} bg-opacity-50`}>
+    <div
+      className={`p-4 rounded-2xl border ${colors[color as keyof typeof colors] || colors.blue} bg-opacity-50`}
+    >
       <div className="flex items-center gap-2 mb-2">
         <Icon className="w-4 h-4" />
         <span className="font-bold text-xs uppercase tracking-wider">{title}</span>
       </div>
       <p className="text-sm font-medium opacity-90 leading-relaxed">{content}</p>
     </div>
-  )
-}
+  );
+};

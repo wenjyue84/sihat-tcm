@@ -26,9 +26,7 @@ interface DietaryPreferencesSidebarProps {
   onPreferencesChange?: (prefs: DietaryPreferences) => void;
 }
 
-export function DietaryPreferencesSidebar({
-  onPreferencesChange,
-}: DietaryPreferencesSidebarProps) {
+export function DietaryPreferencesSidebar({ onPreferencesChange }: DietaryPreferencesSidebarProps) {
   const { t } = useLanguage();
   const strings = t.patientDashboard.mealPlanner;
 
@@ -122,13 +120,10 @@ export function DietaryPreferencesSidebar({
         toast.success(strings.preferencesSaved);
         onPreferencesChange?.(finalPreferences);
       } else {
-        toast.error(
-          result.error || strings.savePreferencesError || "Failed to save preferences"
-        );
+        toast.error(result.error || strings.savePreferencesError || "Failed to save preferences");
       }
     } catch (error: any) {
-      const errorMessage =
-        error?.message || error?.toString() || "An unexpected error occurred";
+      const errorMessage = error?.message || error?.toString() || "An unexpected error occurred";
       toast.error(errorMessage);
       console.error("Error saving dietary preferences:", error);
     } finally {
@@ -153,9 +148,7 @@ export function DietaryPreferencesSidebar({
             Dietary Preferences
           </h3>
         </div>
-        <p className="text-sm text-slate-600 font-light">
-          {strings.subtitle}
-        </p>
+        <p className="text-sm text-slate-600 font-light">{strings.subtitle}</p>
       </div>
 
       {/* Content */}
@@ -213,9 +206,7 @@ export function DietaryPreferencesSidebar({
                 >
                   <div
                     className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-                      isSelected
-                        ? "border-blue-500 bg-blue-500"
-                        : "border-slate-300 bg-white"
+                      isSelected ? "border-blue-500 bg-blue-500" : "border-slate-300 bg-white"
                     }`}
                   >
                     {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -247,9 +238,7 @@ export function DietaryPreferencesSidebar({
             onChange={(e) => handleDislikedFoodsChange(e.target.value)}
             className="h-10 text-sm border-slate-200 focus:border-blue-500 focus:ring-blue-500 rounded-lg"
           />
-          <p className="text-xs text-slate-500 font-light">
-            Separate multiple items with commas
-          </p>
+          <p className="text-xs text-slate-500 font-light">Separate multiple items with commas</p>
         </div>
 
         {/* Divider */}
@@ -260,10 +249,7 @@ export function DietaryPreferencesSidebar({
           <Label className="text-xs font-semibold text-slate-900 uppercase tracking-wide block">
             {strings.servingSize}
           </Label>
-          <Select
-            value={String(preferences.serving_size)}
-            onValueChange={handleServingSizeChange}
-          >
+          <Select value={String(preferences.serving_size)} onValueChange={handleServingSizeChange}>
             <SelectTrigger className="w-full h-10 border-slate-200 rounded-lg focus:border-blue-500 focus:ring-blue-500">
               <SelectValue placeholder={strings.servingSizePlaceholder} />
             </SelectTrigger>
@@ -302,5 +288,3 @@ export function DietaryPreferencesSidebar({
     </div>
   );
 }
-
-

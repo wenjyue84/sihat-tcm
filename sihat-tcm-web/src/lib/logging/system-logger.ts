@@ -1,9 +1,9 @@
 /**
  * Server-side System Logger
- * 
+ *
  * This module provides logging utilities with database persistence.
  * IMPORTANT: Only import this in server components and API routes.
- * 
+ *
  * For client components, use: import { devLog } from "@/lib/logging/client-safe"
  */
 
@@ -98,5 +98,3 @@ export async function logDebug(
     return log({ level: "debug", category, message, metadata, userId });
   }
 }
-
-

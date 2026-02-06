@@ -1,12 +1,12 @@
 /**
  * Lighting Analyzer
- * 
+ *
  * Analyzes lighting conditions in medical images including brightness,
  * contrast, exposure, and histogram distribution for optimal image quality.
  */
 
-import { LightingMetrics, ILightingAnalyzer } from '../interfaces/ImageQualityInterfaces';
-import { ImageProcessor } from '../core/ImageProcessor';
+import { LightingMetrics, ILightingAnalyzer } from "../interfaces/ImageQualityInterfaces";
+import { ImageProcessor } from "../core/ImageProcessor";
 
 export class LightingAnalyzer implements ILightingAnalyzer {
   private imageProcessor: ImageProcessor;
@@ -18,24 +18,32 @@ export class LightingAnalyzer implements ILightingAnalyzer {
   /**
    * Analyze lighting conditions and return comprehensive metrics
    */
-  analyzeLighting(imageData: ImageData, options?: {
-    detailedHistogram?: boolean;
-    regionAnalysis?: boolean;
-    exposureAnalysis?: boolean;
-  }): LightingMetrics {
+  analyzeLighting(
+    imageData: ImageData,
+    options?: {
+      detailedHistogram?: boolean;
+      regionAnalysis?: boolean;
+      exposureAnalysis?: boolean;
+    }
+  ): LightingMetrics {
     const detailedHistogram = options?.detailedHistogram ?? true;
     const regionAnalysis = options?.regionAnalysis ?? false;
-    
+
     // Calculate basic histogram and brightness
-    const histogram = this.imageProcessor.calculateHistogram(imageData, 'luminance');
+    const histogram = this.imageProcessor.calculateHistogram(imageData, "luminance");
     const brightness = this.calculateAverageBrightness(imageData);
     const contrast = this.calculateContrast(histogram, brightness);
-    
+
     // Calculate pixel distribution ratios
     const { darkPixelRatio, brightPixelRatio } = this.calculatePixelRatios(histogram, imageData);
-    
+
     // Calculate overall lighting score
-    const score = this.calculateLightingScore(brightness, contrast, darkPixelRatio, brightPixelRatio);
+    const score = this.calculateLightingScore(
+      brightness,
+      contrast,
+      darkPixelRatio,
+      brightPixelRatio
+    );
 
     return {
       score,
@@ -43,7 +51,7 @@ export class LightingAnalyzer implements ILightingAnalyzer {
       contrast,
       histogram,
       darkPixelRatio,
-      brightPixelRatio
+      brightPixelRatio,
     };
   }
 
@@ -81,7 +89,7 @@ export class LightingAnalyzer implements ILightingAnalyzer {
     if (totalPixels === 0) return 0;
 
     const standardDeviation = Math.sqrt(variance / totalPixels);
-    
+
     // Normalize to 0-1 scale (128 is theoretical maximum std dev)
     return Math.min(standardDeviation / 128, 1);
   }
@@ -89,21 +97,24 @@ export class LightingAnalyzer implements ILightingAnalyzer {
   /**
    * Calculate ratios of dark and bright pixels
    */
-  private calculatePixelRatios(histogram: number[], imageData: ImageData): {
+  private calculatePixelRatios(
+    histogram: number[],
+    imageData: ImageData
+  ): {
     darkPixelRatio: number;
     brightPixelRatio: number;
   } {
     const totalPixels = imageData.width * imageData.height;
-    
+
     // Count dark pixels (0-50)
     const darkPixels = histogram.slice(0, 51).reduce((sum, count) => sum + count, 0);
-    
+
     // Count bright pixels (200-255)
     const brightPixels = histogram.slice(200, 256).reduce((sum, count) => sum + count, 0);
 
     return {
       darkPixelRatio: darkPixels / totalPixels,
-      brightPixelRatio: brightPixels / totalPixels
+      brightPixelRatio: brightPixels / totalPixels,
     };
   }
 
@@ -158,9 +169,16 @@ export class LightingAnalyzer implements ILightingAnalyzer {
   /**
    * Analyze lighting in specific regions of the image
    */
-  analyzeRegionalLighting(imageData: ImageData, regions: Array<{
-    x: number; y: number; width: number; height: number; name: string;
-  }>): Array<{
+  analyzeRegionalLighting(
+    imageData: ImageData,
+    regions: Array<{
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      name: string;
+    }>
+  ): Array<{
     region: string;
     brightness: number;
     contrast: number;
@@ -172,12 +190,12 @@ export class LightingAnalyzer implements ILightingAnalyzer {
       try {
         const regionData = this.imageProcessor.extractRegion(imageData, region);
         const regionMetrics = this.analyzeLighting(regionData);
-        
+
         results.push({
           region: region.name,
           brightness: regionMetrics.brightness,
           contrast: regionMetrics.contrast,
-          score: regionMetrics.score
+          score: regionMetrics.score,
         });
       } catch (error) {
         console.warn(`Failed to analyze region ${region.name}:`, error);
@@ -197,12 +215,12 @@ export class LightingAnalyzer implements ILightingAnalyzer {
     blockedShadows: number; // percentage
     exposureScore: number; // 0-1
   } {
-    const histogram = this.imageProcessor.calculateHistogram(imageData, 'luminance');
+    const histogram = this.imageProcessor.calculateHistogram(imageData, "luminance");
     const totalPixels = imageData.width * imageData.height;
 
     // Check for clipped highlights (pure white pixels)
     const clippedHighlights = (histogram[255] / totalPixels) * 100;
-    
+
     // Check for blocked shadows (pure black pixels)
     const blockedShadows = (histogram[0] / totalPixels) * 100;
 
@@ -219,19 +237,19 @@ export class LightingAnalyzer implements ILightingAnalyzer {
 
     // Calculate exposure score (1 = perfect, 0 = terrible)
     let exposureScore = 1.0;
-    
+
     if (clippedHighlights > 0) {
       exposureScore -= Math.min(0.3, clippedHighlights / 10);
     }
-    
+
     if (blockedShadows > 0) {
       exposureScore -= Math.min(0.3, blockedShadows / 10);
     }
-    
+
     if (overexposedRatio > 0.05) {
       exposureScore -= Math.min(0.2, (overexposedRatio - 0.05) * 4);
     }
-    
+
     if (underexposedRatio > 0.1) {
       exposureScore -= Math.min(0.2, (underexposedRatio - 0.1) * 2);
     }
@@ -241,7 +259,7 @@ export class LightingAnalyzer implements ILightingAnalyzer {
       underexposed,
       clippedHighlights,
       blockedShadows,
-      exposureScore: Math.max(0, exposureScore)
+      exposureScore: Math.max(0, exposureScore),
     };
   }
 
@@ -289,11 +307,13 @@ export class LightingAnalyzer implements ILightingAnalyzer {
    */
   estimateColorTemperature(imageData: ImageData): {
     temperature: number; // Kelvin
-    tint: 'warm' | 'neutral' | 'cool';
+    tint: "warm" | "neutral" | "cool";
     confidence: number;
   } {
     const { data } = imageData;
-    let totalR = 0, totalG = 0, totalB = 0;
+    let totalR = 0,
+      totalG = 0,
+      totalB = 0;
     const pixelCount = data.length / 4;
 
     for (let i = 0; i < data.length; i += 4) {
@@ -308,20 +328,20 @@ export class LightingAnalyzer implements ILightingAnalyzer {
 
     // Simple color temperature estimation based on R/B ratio
     const rbRatio = avgR / Math.max(avgB, 1);
-    
+
     // Rough mapping to color temperature
     let temperature: number;
-    let tint: 'warm' | 'neutral' | 'cool';
-    
+    let tint: "warm" | "neutral" | "cool";
+
     if (rbRatio > 1.2) {
       temperature = 2700 + (rbRatio - 1.2) * 1000; // Warm light
-      tint = 'warm';
+      tint = "warm";
     } else if (rbRatio < 0.8) {
       temperature = 6500 + (0.8 - rbRatio) * 2000; // Cool light
-      tint = 'cool';
+      tint = "cool";
     } else {
       temperature = 5500; // Neutral daylight
-      tint = 'neutral';
+      tint = "neutral";
     }
 
     // Confidence based on how distinct the color cast is
@@ -330,7 +350,7 @@ export class LightingAnalyzer implements ILightingAnalyzer {
     return {
       temperature: Math.round(temperature),
       tint,
-      confidence: Math.min(1, confidence)
+      confidence: Math.min(1, confidence),
     };
   }
 }

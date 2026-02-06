@@ -66,7 +66,9 @@ export function validateProfileCompleteness(profile: any): boolean {
 /**
  * Extracts basic info data from a profile
  */
-export function extractProfileData(profile: Record<string, unknown> | null | undefined): Partial<BasicInfoData> {
+export function extractProfileData(
+  profile: Record<string, unknown> | null | undefined
+): Partial<BasicInfoData> {
   if (!profile) return {};
   return {
     name: (profile.full_name as string) || "",
@@ -83,13 +85,7 @@ export function extractProfileData(profile: Record<string, unknown> | null | und
 export function useProfileCompleteness(
   options: UseProfileCompletenessOptions = {}
 ): UseProfileCompletenessResult {
-  const {
-    autoSkipToStep2 = true,
-    currentStep = 1,
-    onStepChange,
-    t,
-    patientsOnly = true,
-  } = options;
+  const { autoSkipToStep2 = true, currentStep = 1, onStepChange, t, patientsOnly = true } = options;
 
   const { user, profile, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -131,7 +127,7 @@ export function useProfileCompleteness(
         if (
           confirm(
             t.basicInfo?.lockedProfile?.profileIncomplete ||
-            "Your profile is incomplete. Please complete your details in the Patient Portal first."
+              "Your profile is incomplete. Please complete your details in the Patient Portal first."
           )
         ) {
           router.push("/patient");
@@ -166,4 +162,3 @@ export function useProfileCompleteness(
     checkProfile,
   };
 }
-

@@ -41,11 +41,7 @@ export function ReportHeader({
         <div className="flex items-center justify-center gap-4 text-sm text-stone-600 font-serif">
           <span>{t.report.basedOnFourPillars}</span>
           <span>•</span>
-          {includeTimestamp && timestamp && (
-            <span>
-              {new Date(timestamp).toLocaleDateString()}
-            </span>
-          )}
+          {includeTimestamp && timestamp && <span>{new Date(timestamp).toLocaleDateString()}</span>}
         </div>
         <div className="mt-4 flex justify-between items-end">
           <div className="text-left">
@@ -75,8 +71,7 @@ export function ReportHeader({
         </span>
         {hasSaved && (
           <span className="px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase border bg-emerald-100/80 border-emerald-200/50 text-emerald-800 flex items-center gap-1 backdrop-blur-sm">
-            <Check className="w-3 h-3" />{" "}
-            {t.report.actionAlerts?.saved || "Saved"}
+            <Check className="w-3 h-3" /> {t.report.actionAlerts?.saved || "Saved"}
           </span>
         )}
       </div>
@@ -93,7 +88,11 @@ export function ReportHeader({
         <div className="flex items-center justify-center gap-4">
           <p className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/50 rounded-lg text-xs font-medium text-stone-400 border border-stone-100">
             <Clock className="w-3 h-3" />
-            {new Date(timestamp).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+            {new Date(timestamp).toLocaleDateString(undefined, {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
           </p>
           <ShowPromptButton promptType="final" />
         </div>

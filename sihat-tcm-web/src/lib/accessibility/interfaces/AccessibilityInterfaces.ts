@@ -1,6 +1,6 @@
 /**
  * Accessibility System Interfaces
- * 
+ *
  * Comprehensive type definitions for the modular accessibility system.
  * Defines contracts for WCAG 2.1 AA compliance and accessibility features.
  */
@@ -250,7 +250,10 @@ export interface WCAGValidator {
   validateElement(element: HTMLElement): WCAGComplianceResult;
   validatePage(): WCAGComplianceResult;
   validateSection(container: HTMLElement): WCAGComplianceResult;
-  checkColorContrast(foreground: string, background: string): {
+  checkColorContrast(
+    foreground: string,
+    background: string
+  ): {
     ratio: number;
     passesAA: boolean;
     passesAAA: boolean;
@@ -298,8 +301,12 @@ export interface AccessibilityManager {
  */
 export type AccessibilityEventType =
   | "preference_changed"
+  | "preferences-updated"
   | "focus_changed"
+  | "focus-changed"
   | "announcement_made"
+  | "announcement-made"
+  | "group-changed"
   | "compliance_checked"
   | "error_detected"
   | "navigation_occurred";
@@ -310,8 +317,58 @@ export type AccessibilityEventType =
 export interface AccessibilityEvent {
   type: AccessibilityEventType;
   timestamp: number;
-  data: any;
-  source: string;
+  data?: any;
+  source?: string;
+  id?: string;
+}
+
+/**
+ * Accessibility event listener function
+ */
+export type AccessibilityEventListener = (event: AccessibilityEvent) => void;
+
+/**
+ * Skip link configuration
+ */
+export interface SkipLinkConfig {
+  targetId: string;
+  text: string;
+  className?: string;
+}
+
+/**
+ * ARIA attributes configuration
+ */
+export interface AriaAttributes {
+  role?: string;
+  label?: string;
+  labelledBy?: string;
+  describedBy?: string;
+  hidden?: boolean;
+  expanded?: boolean;
+  selected?: boolean;
+  checked?: boolean | "mixed";
+  disabled?: boolean;
+  required?: boolean;
+  invalid?: boolean | "grammar" | "spelling";
+  live?: "polite" | "assertive" | "off";
+  atomic?: boolean;
+  busy?: boolean;
+  controls?: string;
+  current?: boolean | "page" | "step" | "location" | "date" | "time";
+  hasPopup?: boolean | "menu" | "listbox" | "tree" | "grid" | "dialog";
+  level?: number;
+  multiLine?: boolean;
+  multiSelectable?: boolean;
+  orientation?: "horizontal" | "vertical";
+  placeholder?: string;
+  pressed?: boolean | "mixed";
+  readOnly?: boolean;
+  valueMax?: number;
+  valueMin?: number;
+  valueNow?: number;
+  valueText?: string;
+  [key: string]: unknown;
 }
 
 /**

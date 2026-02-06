@@ -1,6 +1,6 @@
 /**
  * Accessibility System - Main Export
- * 
+ *
  * Centralized export for the complete accessibility system with
  * WCAG 2.1 AA compliance and comprehensive accessibility features.
  */
@@ -10,27 +10,17 @@ export {
   AccessibilityOrchestrator,
   defaultAccessibilityOrchestrator,
   createAccessibilityOrchestrator,
-} from './core/AccessibilityOrchestrator';
+} from "./core/AccessibilityOrchestrator";
 
-export {
-  FocusManager,
-} from './core/FocusManager';
+export { FocusManager } from "./core/FocusManager";
 
-export {
-  PreferenceManager,
-} from './core/PreferenceManager';
+export { PreferenceManager } from "./core/PreferenceManager";
 
-export {
-  AnnouncementManager,
-} from './core/AnnouncementManager';
+export { AnnouncementManager } from "./core/AnnouncementManager";
 
-export {
-  KeyboardNavigationManager,
-} from './core/KeyboardNavigationManager';
+export { KeyboardNavigationManager } from "./core/KeyboardNavigationManager";
 
-export {
-  WCAGValidator,
-} from './core/WCAGValidator';
+export { WCAGValidator } from "./core/WCAGValidator";
 
 // Accessibility Interfaces and Types
 export type {
@@ -78,11 +68,11 @@ export type {
   AccessibilityEvent,
   AccessibilityEventType,
   AccessibilityMetrics,
-} from './interfaces/AccessibilityInterfaces';
+} from "./interfaces/AccessibilityInterfaces";
 
 // Convenience Functions
 export function initializeAccessibilitySystem(
-  config?: Partial<import('./interfaces/AccessibilityInterfaces').AccessibilityConfig>
+  config?: Partial<import("./interfaces/AccessibilityInterfaces").AccessibilityConfig>
 ): typeof defaultAccessibilityOrchestrator {
   defaultAccessibilityOrchestrator.initialize(config);
   return defaultAccessibilityOrchestrator;
@@ -92,10 +82,10 @@ export function initializeAccessibilitySystem(
  * Create a complete accessibility setup with all managers initialized
  */
 export function createCompleteAccessibilitySetup(
-  config?: Partial<import('./interfaces/AccessibilityInterfaces').AccessibilityConfig>
+  config?: Partial<import("./interfaces/AccessibilityInterfaces").AccessibilityConfig>
 ) {
   const orchestrator = createAccessibilityOrchestrator(config);
-  
+
   orchestrator.initialize();
 
   return {
@@ -119,9 +109,9 @@ export function quickAccessibilityCheck(element?: HTMLElement): {
 } {
   const validator = new WCAGValidator();
   const result = element ? validator.validateElement(element) : validator.validatePage();
-  
-  const criticalIssues = result.issues.filter(issue => issue.severity === 'critical').length;
-  const suggestions = result.suggestions.map(suggestion => suggestion.description);
+
+  const criticalIssues = result.issues.filter((issue) => issue.severity === "critical").length;
+  const suggestions = result.suggestions.map((suggestion) => suggestion.description);
 
   return {
     isCompliant: result.isCompliant,
@@ -135,7 +125,7 @@ export function quickAccessibilityCheck(element?: HTMLElement): {
  * Apply accessibility preferences to the current page
  */
 export function applyAccessibilityPreferences(
-  preferences: Partial<import('./interfaces/AccessibilityInterfaces').AccessibilityPreferences>
+  preferences: Partial<import("./interfaces/AccessibilityInterfaces").AccessibilityPreferences>
 ): void {
   defaultAccessibilityOrchestrator.applyPreferences(preferences);
 }
@@ -143,7 +133,7 @@ export function applyAccessibilityPreferences(
 /**
  * Get current accessibility metrics
  */
-export function getAccessibilityMetrics(): import('./interfaces/AccessibilityInterfaces').AccessibilityMetrics {
+export function getAccessibilityMetrics(): import("./interfaces/AccessibilityInterfaces").AccessibilityMetrics {
   return defaultAccessibilityOrchestrator.getMetrics();
 }
 
@@ -152,7 +142,7 @@ export function getAccessibilityMetrics(): import('./interfaces/AccessibilityInt
  */
 export function announce(
   message: string,
-  priority: 'polite' | 'assertive' = 'polite',
+  priority: "polite" | "assertive" = "polite",
   category?: string
 ): void {
   const announcementManager = defaultAccessibilityOrchestrator.getAnnouncementManager();
@@ -175,7 +165,7 @@ export function isAccessibilityInitialized(): boolean {
  */
 export function checkAccessibilitySystemHealth(): {
   isHealthy: boolean;
-  metrics: import('./interfaces/AccessibilityInterfaces').AccessibilityMetrics;
+  metrics: import("./interfaces/AccessibilityInterfaces").AccessibilityMetrics;
   issues: string[];
 } {
   const metrics = getAccessibilityMetrics();

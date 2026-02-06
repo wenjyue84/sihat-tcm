@@ -1,3 +1,4 @@
+import { NextRequest } from "next/server";
 import { streamText } from "ai";
 import { getGoogleProvider } from "@/lib/googleProvider";
 import { getGeminiApiKeyAsync } from "@/lib/settings";
@@ -8,13 +9,17 @@ import {
   prependLanguageInstruction,
   normalizeLanguage,
 } from "@/lib/translations/languageInstructions";
-import { createErrorResponse } from "@/lib/api/middleware/error-handler";
+import { createErrorResponse, withRateLimit } from "@/lib/api/middleware";
 import { getCorsHeaders } from "@/lib/cors";
 
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // SECURITY: Apply rate limiting
+  const rateLimitResponse = await withRateLimit(req, { securityLevel: 2 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await req.json();
 

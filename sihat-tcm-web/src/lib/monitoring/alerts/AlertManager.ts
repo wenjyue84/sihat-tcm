@@ -1,9 +1,9 @@
 /**
  * @fileoverview Alert Manager Orchestrator
- * 
+ *
  * Main orchestrator for the alert management system.
  * Coordinates metric collection, rule evaluation, notifications, and incident management.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 1.0
  */
@@ -13,13 +13,13 @@ import { MetricCollector } from "./core/MetricCollector";
 import { AlertRuleEngine } from "./core/AlertRuleEngine";
 import { NotificationDispatcher } from "./notifications/NotificationDispatcher";
 import { IncidentManager } from "./core/IncidentManager";
-import type { 
-  Alert, 
-  AlertRule, 
-  Incident, 
-  AlertSeverity, 
+import type {
+  Alert,
+  AlertRule,
+  Incident,
+  AlertSeverity,
   AlertStatistics,
-  AlertManagerConfig 
+  AlertManagerConfig,
 } from "./interfaces/AlertInterfaces";
 
 /**
@@ -73,7 +73,7 @@ export class AlertManager {
     if (!this.config.enabled) return;
 
     const timestamp = Date.now();
-    
+
     // Record the metric
     this.metricCollector.recordMetric(metric, value);
 
@@ -81,7 +81,7 @@ export class AlertManager {
     const triggeredAlerts = this.ruleEngine.checkRulesForMetric(metric, value, timestamp);
 
     // Process triggered alerts
-    triggeredAlerts.forEach(alert => {
+    triggeredAlerts.forEach((alert) => {
       this.processAlert(alert);
     });
   }
@@ -134,7 +134,7 @@ export class AlertManager {
         type: "slack",
         config: { channel: alert.severity === "critical" ? "#critical-alerts" : "#alerts" },
         enabled: true,
-      }
+      },
     ];
 
     // Create or update incident for error/critical alerts
@@ -144,11 +144,7 @@ export class AlertManager {
     }
 
     // Send notifications
-    await this.notificationDispatcher.sendNotifications(
-      alert, 
-      notificationChannels,
-      incident
-    );
+    await this.notificationDispatcher.sendNotifications(alert, notificationChannels, incident);
 
     // Schedule escalation if configured
     if (rule?.escalationDelay && rule.escalationDelay > 0) {
@@ -232,7 +228,7 @@ export class AlertManager {
    * Get active alerts
    */
   public getActiveAlerts(): Alert[] {
-    return Array.from(this.alerts.values()).filter(alert => !alert.resolved);
+    return Array.from(this.alerts.values()).filter((alert) => !alert.resolved);
   }
 
   /**
@@ -267,8 +263,8 @@ export class AlertManager {
    * Update incident status
    */
   public updateIncidentStatus(
-    incidentId: string, 
-    status: Incident['status'], 
+    incidentId: string,
+    status: Incident["status"],
     user?: string,
     notes?: string
   ): boolean {
@@ -322,15 +318,15 @@ export class AlertManager {
    */
   public getAlertStatistics(): AlertStatistics {
     const allAlerts = Array.from(this.alerts.values());
-    const activeAlerts = allAlerts.filter(alert => !alert.resolved);
-    const resolvedAlerts = allAlerts.filter(alert => alert.resolved);
-    const criticalAlerts = activeAlerts.filter(alert => alert.severity === "critical");
+    const activeAlerts = allAlerts.filter((alert) => !alert.resolved);
+    const resolvedAlerts = allAlerts.filter((alert) => alert.resolved);
+    const criticalAlerts = activeAlerts.filter((alert) => alert.severity === "critical");
     const openIncidents = this.incidentManager.getOpenIncidents();
 
     const alertsByCategory = {} as Record<string, number>;
     const alertsBySeverity = {} as Record<AlertSeverity, number>;
 
-    allAlerts.forEach(alert => {
+    allAlerts.forEach((alert) => {
       alertsByCategory[alert.category] = (alertsByCategory[alert.category] || 0) + 1;
       alertsBySeverity[alert.severity] = (alertsBySeverity[alert.severity] || 0) + 1;
     });
@@ -372,15 +368,15 @@ export class AlertManager {
       const startTime = Date.now();
       const healthResponse = await fetch("/api/health");
       const responseTime = Date.now() - startTime;
-      
+
       this.recordMetric("api_response_time", responseTime);
 
       if (healthResponse.ok) {
         const healthData = await healthResponse.json();
-        
+
         // Record database health
         this.recordMetric("database_health", healthData.database === "healthy" ? 1 : 0);
-        
+
         // Record other health metrics
         if (healthData.ai_service) {
           this.recordMetric("ai_success_rate", healthData.ai_service.success_rate || 0);
@@ -400,13 +396,13 @@ export class AlertManager {
    * Cleanup old alerts
    */
   private cleanupOldAlerts(): void {
-    const cutoffTime = Date.now() - (24 * 60 * 60 * 1000); // 24 hours ago
+    const cutoffTime = Date.now() - 24 * 60 * 60 * 1000; // 24 hours ago
     const initialCount = this.alerts.size;
 
     for (const [alertId, alert] of this.alerts.entries()) {
       if (alert.timestamp < cutoffTime) {
         this.alerts.delete(alertId);
-        
+
         // Cancel any pending escalation
         const escalationTimer = this.escalationTimers.get(alertId);
         if (escalationTimer) {
@@ -456,7 +452,7 @@ export class AlertManager {
     if (this.healthCheckTimer) {
       clearInterval(this.healthCheckTimer);
     }
-    
+
     if (this.cleanupTimer) {
       clearInterval(this.cleanupTimer);
     }

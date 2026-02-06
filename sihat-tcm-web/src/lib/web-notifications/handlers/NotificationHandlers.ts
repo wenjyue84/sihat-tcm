@@ -40,7 +40,7 @@ export class NotificationHandlers {
    */
   private handleMedicationNotification(data: any): void {
     console.log("[NotificationHandlers] Handling medication notification:", data);
-    
+
     // Navigate to medication tracking
     this.navigateToRoute("/dashboard/medications", {
       medicationId: data.medicationId,
@@ -53,7 +53,7 @@ export class NotificationHandlers {
    */
   private handleAppointmentNotification(data: any): void {
     console.log("[NotificationHandlers] Handling appointment notification:", data);
-    
+
     // Navigate to appointment details
     this.navigateToRoute("/dashboard/appointments", {
       appointmentId: data.appointmentId,
@@ -66,7 +66,7 @@ export class NotificationHandlers {
    */
   private handleExerciseNotification(data: any): void {
     console.log("[NotificationHandlers] Handling exercise notification:", data);
-    
+
     // Navigate to exercise screen
     this.navigateToRoute("/dashboard/exercise", {
       exerciseType: data.exerciseType,
@@ -79,7 +79,7 @@ export class NotificationHandlers {
    */
   private handleHealthAlertNotification(data: any): void {
     console.log("[NotificationHandlers] Handling health alert notification:", data);
-    
+
     // Navigate to health alerts with high priority
     this.navigateToRoute("/dashboard/health-alerts", {
       alertId: data.alertId,
@@ -92,7 +92,7 @@ export class NotificationHandlers {
    */
   private handleDietNotification(data: any): void {
     console.log("[NotificationHandlers] Handling diet notification:", data);
-    
+
     // Navigate to meal planner or diet tracking
     this.navigateToRoute("/dashboard/meal-planner", {
       mealType: data.mealType,
@@ -105,7 +105,7 @@ export class NotificationHandlers {
    */
   private handleSleepNotification(data: any): void {
     console.log("[NotificationHandlers] Handling sleep notification:", data);
-    
+
     // Navigate to sleep tracking
     this.navigateToRoute("/dashboard/sleep", {
       reminder: true,
@@ -118,7 +118,7 @@ export class NotificationHandlers {
    */
   private handleGenericNotification(data: any): void {
     console.log("[NotificationHandlers] Handling generic notification:", data);
-    
+
     // Navigate to dashboard or specific route if provided
     const route = data.route || "/dashboard";
     this.navigateToRoute(route, data.params || {});
@@ -131,7 +131,7 @@ export class NotificationHandlers {
     try {
       // Create URL with parameters
       const url = new URL(route, window.location.origin);
-      
+
       // Add parameters as search params
       Object.entries(params).forEach(([key, value]) => {
         url.searchParams.set(key, String(value));
@@ -143,7 +143,7 @@ export class NotificationHandlers {
       }
     } catch (error) {
       console.error("[NotificationHandlers] Navigation failed:", error);
-      
+
       // Fallback to simple navigation
       if (typeof window !== "undefined") {
         window.location.href = route;
@@ -188,21 +188,21 @@ export class NotificationHandlers {
           { action: "snooze", title: "Remind Later", icon: "/icons/snooze.png" }
         );
         break;
-      
+
       case "appointment":
         actions.push(
           { action: "confirm", title: "Confirm", icon: "/icons/check.png" },
           { action: "reschedule", title: "Reschedule", icon: "/icons/calendar.png" }
         );
         break;
-      
+
       case "exercise":
         actions.push(
           { action: "start", title: "Start Exercise", icon: "/icons/play.png" },
           { action: "skip", title: "Skip Today", icon: "/icons/skip.png" }
         );
         break;
-      
+
       default:
         actions.push(
           { action: "view", title: "View", icon: "/icons/view.png" },
@@ -255,7 +255,7 @@ export class NotificationHandlers {
         medicationId: data.medicationId,
         takenAt: new Date().toISOString(),
       }),
-    }).catch(error => {
+    }).catch((error) => {
       console.error("[NotificationHandlers] Failed to mark medication as taken:", error);
     });
   }
@@ -266,7 +266,7 @@ export class NotificationHandlers {
   private handleSnoozeReminder(data: any): void {
     // Schedule a new reminder in 15 minutes
     const snoozeTime = new Date(Date.now() + 15 * 60 * 1000);
-    
+
     // This would integrate with the notification scheduler
     console.log("[NotificationHandlers] Snoozing reminder until:", snoozeTime);
   }
@@ -282,7 +282,7 @@ export class NotificationHandlers {
         appointmentId: data.appointmentId,
         confirmedAt: new Date().toISOString(),
       }),
-    }).catch(error => {
+    }).catch((error) => {
       console.error("[NotificationHandlers] Failed to confirm appointment:", error);
     });
   }
@@ -318,7 +318,7 @@ export class NotificationHandlers {
         skippedAt: new Date().toISOString(),
         reason: "user_skip",
       }),
-    }).catch(error => {
+    }).catch((error) => {
       console.error("[NotificationHandlers] Failed to skip exercise:", error);
     });
   }

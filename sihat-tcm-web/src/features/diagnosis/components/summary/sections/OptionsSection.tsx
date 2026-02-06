@@ -105,9 +105,7 @@ export function OptionsSection({
           <Input
             placeholder={t.diagnosisSummary.placeholders.emergencyContact}
             value={additionalInfo.emergencyContact}
-            onChange={(e) =>
-              onAdditionalInfoChange("emergencyContact", e.target.value)
-            }
+            onChange={(e) => onAdditionalInfoChange("emergencyContact", e.target.value)}
             className="w-full h-9 text-sm bg-white"
           />
         </CheckboxOption>
@@ -297,6 +295,3 @@ export function OptionsSection({
     </div>
   );
 }
-
-
-

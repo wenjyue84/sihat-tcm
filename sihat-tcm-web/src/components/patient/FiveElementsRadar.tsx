@@ -310,11 +310,12 @@ export function FiveElementsRadar({
                 onClick={() => setSelectedElement(isSelected ? null : item.elementKey)}
                 className={`
                   p-3 rounded-xl border-2 transition-all text-left
-                  ${isSelected
-                    ? "border-amber-500 bg-amber-50 shadow-md"
-                    : isWeak
-                      ? "border-orange-200 bg-orange-50/50 hover:border-orange-300"
-                      : "border-slate-200 bg-white hover:border-slate-300"
+                  ${
+                    isSelected
+                      ? "border-amber-500 bg-amber-50 shadow-md"
+                      : isWeak
+                        ? "border-orange-200 bg-orange-50/50 hover:border-orange-300"
+                        : "border-slate-200 bg-white hover:border-slate-300"
                   }
                 `}
                 whileHover={{ scale: 1.02 }}
@@ -403,16 +404,21 @@ export function FiveElementsRadar({
                         // Extract specific justification if available
                         const justification =
                           diagnosisData?.analysis?.five_elements?.justifications?.[elementKey] ||
-                          diagnosisData?.full_report?.analysis?.five_elements?.justifications?.[elementKey];
+                          diagnosisData?.full_report?.analysis?.five_elements?.justifications?.[
+                            elementKey
+                          ];
 
-                        return getElementRecommendations(selectedElement, score, t, justification).map(
-                          (rec, idx) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <span className="text-amber-600 mt-0.5">•</span>
-                              <span>{rec}</span>
-                            </li>
-                          )
-                        );
+                        return getElementRecommendations(
+                          selectedElement,
+                          score,
+                          t,
+                          justification
+                        ).map((rec, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="text-amber-600 mt-0.5">•</span>
+                            <span>{rec}</span>
+                          </li>
+                        ));
                       })()}
                   </ul>
                 </div>
@@ -565,11 +571,11 @@ function getElementRecommendations(
     liver: {
       weak: [
         t.fiveElementsRadar?.tips?.liver?.weak1 ||
-        "Eat more green vegetables (spinach, broccoli, celery)",
+          "Eat more green vegetables (spinach, broccoli, celery)",
         t.fiveElementsRadar?.tips?.liver?.weak2 || "Practice gentle stretching and Tai Chi",
         t.fiveElementsRadar?.tips?.liver?.weak3 || "Manage stress and avoid anger",
         t.fiveElementsRadar?.tips?.liver?.weak4 ||
-        "Get adequate sleep (11pm-3am is Liver meridian time)",
+          "Get adequate sleep (11pm-3am is Liver meridian time)",
       ],
       normal: [
         t.fiveElementsRadar?.tips?.liver?.normal1 || "Continue eating green vegetables regularly",
@@ -580,7 +586,7 @@ function getElementRecommendations(
     heart: {
       weak: [
         t.fiveElementsRadar?.tips?.heart?.weak1 ||
-        "Eat red foods (red beans, goji berries, red dates)",
+          "Eat red foods (red beans, goji berries, red dates)",
         t.fiveElementsRadar?.tips?.heart?.weak2 || "Practice meditation and deep breathing",
         t.fiveElementsRadar?.tips?.heart?.weak3 || "Avoid excessive excitement or stress",
         t.fiveElementsRadar?.tips?.heart?.weak4 || "Ensure good quality sleep",
@@ -607,7 +613,7 @@ function getElementRecommendations(
     lung: {
       weak: [
         t.fiveElementsRadar?.tips?.lung?.weak1 ||
-        "Eat white foods (pear, lotus root, white fungus)",
+          "Eat white foods (pear, lotus root, white fungus)",
         t.fiveElementsRadar?.tips?.lung?.weak2 || "Practice deep breathing exercises",
         t.fiveElementsRadar?.tips?.lung?.weak3 || "Keep indoor air quality good",
         t.fiveElementsRadar?.tips?.lung?.weak4 || "Avoid cold and stay warm in autumn/winter",
@@ -621,7 +627,7 @@ function getElementRecommendations(
     kidney: {
       weak: [
         t.fiveElementsRadar?.tips?.kidney?.weak1 ||
-        "Eat black foods (black sesame, black beans, walnuts)",
+          "Eat black foods (black sesame, black beans, walnuts)",
         t.fiveElementsRadar?.tips?.kidney?.weak2 || "Avoid overwork and excessive sexual activity",
         t.fiveElementsRadar?.tips?.kidney?.weak3 || "Keep lower back and feet warm",
         t.fiveElementsRadar?.tips?.kidney?.weak4 || "Get adequate rest and sleep",
@@ -634,9 +640,7 @@ function getElementRecommendations(
     },
   };
 
-  const lookupRecs = isWeak
-    ? staticRecs[element]?.weak || []
-    : staticRecs[element]?.normal || [];
+  const lookupRecs = isWeak ? staticRecs[element]?.weak || [] : staticRecs[element]?.normal || [];
 
   return [...recommendations, ...lookupRecs];
 }

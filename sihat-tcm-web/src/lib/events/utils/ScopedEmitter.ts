@@ -2,8 +2,8 @@
  * Scoped event emitter for component-specific event handling
  */
 
-import { AppEvent, EventListener } from '../interfaces/EventInterfaces';
-import { EventEmitter } from '../core/EventEmitter';
+import { AppEvent, EventListener } from "../interfaces/EventInterfaces";
+import { EventEmitter } from "../core/EventEmitter";
 
 export class ScopedEmitter {
   private emitter: EventEmitter;
@@ -17,7 +17,7 @@ export class ScopedEmitter {
   /**
    * Emit event with automatic source assignment
    */
-  public emit<T extends AppEvent>(event: Omit<T, 'source' | 'timestamp'>): Promise<void> {
+  public emit<T extends AppEvent>(event: Omit<T, "source" | "timestamp">): Promise<void> {
     return this.emitter.emit({
       ...event,
       source: this.source,
@@ -29,7 +29,7 @@ export class ScopedEmitter {
    * Subscribe to events with automatic source assignment
    */
   public on<T extends AppEvent>(
-    eventType: T['type'],
+    eventType: T["type"],
     listener: EventListener<T>,
     options?: { once?: boolean; priority?: number }
   ): () => void {
@@ -40,7 +40,7 @@ export class ScopedEmitter {
    * Subscribe to event once with automatic source assignment
    */
   public once<T extends AppEvent>(
-    eventType: T['type'],
+    eventType: T["type"],
     listener: EventListener<T>,
     options?: { priority?: number }
   ): () => void {

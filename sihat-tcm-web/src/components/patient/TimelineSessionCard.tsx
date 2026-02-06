@@ -4,7 +4,16 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, ChevronDown, ChevronUp, Calendar, FileText, MoreVertical, EyeOff, Trash2 } from "lucide-react";
+import {
+  Eye,
+  ChevronDown,
+  ChevronUp,
+  Calendar,
+  FileText,
+  MoreVertical,
+  EyeOff,
+  Trash2,
+} from "lucide-react";
 import { deleteSession, hideSession } from "@/lib/actions";
 import type { DiagnosisSession } from "@/types/database";
 import { extractDiagnosisTitle, extractConstitutionType } from "@/lib/tcm-utils";
@@ -43,7 +52,7 @@ export function TimelineSessionCard({
   index,
   isFirst = false,
   isLast = false,
-  onRefresh
+  onRefresh,
 }: TimelineSessionCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -60,7 +69,7 @@ export function TimelineSessionCard({
     tongue: "Tongue",
     face: "Face",
     voice: "Voice",
-    pulse: "Pulse"
+    pulse: "Pulse",
   };
 
   const diagnosisTitle = extractDiagnosisTitle(session.primary_diagnosis);
@@ -79,7 +88,9 @@ export function TimelineSessionCard({
       setIsHiding(true);
       const result = await hideSession(session.id);
       if (result.success) {
-        toast.success(t?.patientDashboard?.messages?.sessionHidden || "Session hidden successfully");
+        toast.success(
+          t?.patientDashboard?.messages?.sessionHidden || "Session hidden successfully"
+        );
         onRefresh?.();
       } else {
         toast.error(result.error || "Failed to hide session");
@@ -98,7 +109,9 @@ export function TimelineSessionCard({
       setIsDeleting(true);
       const result = await deleteSession(session.id);
       if (result.success) {
-        toast.success(t?.patientDashboard?.messages?.sessionDeleted || "Session deleted successfully");
+        toast.success(
+          t?.patientDashboard?.messages?.sessionDeleted || "Session deleted successfully"
+        );
         onRefresh?.();
       } else {
         toast.error(result.error || "Failed to delete session");
@@ -144,7 +157,10 @@ export function TimelineSessionCard({
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0" />
               <time className="text-base sm:text-2xl font-light text-slate-800 tracking-tight truncate">
-                {formatDate(session.created_at, { language: language as "en" | "zh" | "ms", format: "full" })}
+                {formatDate(session.created_at, {
+                  language: language as "en" | "zh" | "ms",
+                  format: "full",
+                })}
               </time>
             </div>
 
@@ -228,34 +244,34 @@ export function TimelineSessionCard({
                     session.face_analysis ||
                     session.audio_analysis ||
                     session.pulse_data) && (
-                      <div className="flex flex-wrap gap-2">
-                        {session.inquiry_summary && (
-                          <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
-                            {cardT.inquiry}
-                          </span>
-                        )}
-                        {session.tongue_analysis && (
-                          <span className="px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-xs font-medium border border-red-200">
-                            {cardT.tongue}
-                          </span>
-                        )}
-                        {session.face_analysis && (
-                          <span className="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium border border-purple-200">
-                            {cardT.face}
-                          </span>
-                        )}
-                        {session.audio_analysis && (
-                          <span className="px-2.5 py-1 bg-teal-50 text-teal-700 rounded-full text-xs font-medium border border-teal-200">
-                            {cardT.voice}
-                          </span>
-                        )}
-                        {session.pulse_data && (
-                          <span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-full text-xs font-medium border border-rose-200">
-                            {cardT.pulse}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {session.inquiry_summary && (
+                        <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
+                          {cardT.inquiry}
+                        </span>
+                      )}
+                      {session.tongue_analysis && (
+                        <span className="px-2.5 py-1 bg-red-50 text-red-700 rounded-full text-xs font-medium border border-red-200">
+                          {cardT.tongue}
+                        </span>
+                      )}
+                      {session.face_analysis && (
+                        <span className="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium border border-purple-200">
+                          {cardT.face}
+                        </span>
+                      )}
+                      {session.audio_analysis && (
+                        <span className="px-2.5 py-1 bg-teal-50 text-teal-700 rounded-full text-xs font-medium border border-teal-200">
+                          {cardT.voice}
+                        </span>
+                      )}
+                      {session.pulse_data && (
+                        <span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-full text-xs font-medium border border-rose-200">
+                          {cardT.pulse}
+                        </span>
+                      )}
+                    </div>
+                  )}
 
                   {/* Notes preview */}
                   {session.notes && (
@@ -288,10 +304,7 @@ export function TimelineSessionCard({
 
           {/* Expand/collapse indicator */}
           <div className="mt-4 flex items-center justify-center">
-            <motion.div
-              animate={{ rotate: isExpanded ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
+            <motion.div animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
               <ChevronDown className="w-5 h-5 text-slate-400" />
             </motion.div>
           </div>
@@ -332,4 +345,3 @@ export function TimelineSessionCard({
     </motion.div>
   );
 }
-

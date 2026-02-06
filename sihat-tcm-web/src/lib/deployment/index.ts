@@ -4,20 +4,20 @@
  */
 
 // Core deployment components
-export { FeatureFlagManager } from '../feature-flags/FeatureFlagManager';
-export { DeploymentManager } from './DeploymentManager';
-export { StagingValidator } from './StagingValidator';
-export { ProductionTestSuite } from './ProductionTestSuite';
+export { FeatureFlagManager } from "../feature-flags/FeatureFlagManager";
+export { DeploymentManager } from "./DeploymentManager";
+export { StagingValidator } from "./StagingValidator";
+export { ProductionTestSuite } from "./ProductionTestSuite";
 
 // Feature flag configurations
-export { 
+export {
   REFACTORING_FLAGS,
   getFeatureFlagConfig,
   developmentConfig,
   stagingConfig,
   productionConfig,
-  rolloutSchedule
-} from '../feature-flags/RefactoringFlags';
+  rolloutSchedule,
+} from "../feature-flags/RefactoringFlags";
 
 // Production deployment configurations
 export {
@@ -25,43 +25,43 @@ export {
   PRODUCTION_HEALTH_CHECKS,
   DEPLOYMENT_TIMELINE,
   EMERGENCY_ROLLBACK_PROCEDURES,
-  SUCCESS_METRICS
-} from './ProductionDeployment';
+  SUCCESS_METRICS,
+} from "./ProductionDeployment";
 
 // Type definitions
 export type {
   FeatureFlag,
   FeatureFlagConfig,
   FeatureFlagContext,
-  RefactoringFlagKey
-} from '../feature-flags/FeatureFlagManager';
+  RefactoringFlagKey,
+} from "../feature-flags/FeatureFlagManager";
 
 export type {
   DeploymentPhase,
   RollbackTrigger,
   DeploymentMetrics,
-  HealthCheck
-} from './DeploymentManager';
+  HealthCheck,
+} from "./DeploymentManager";
 
 export type {
   ValidationSuite,
   ValidationTest,
   ValidationResult,
   ValidationReport,
-  ValidationSummary
-} from './StagingValidator';
+  ValidationSummary,
+} from "./StagingValidator";
 
 export type {
   ProductionTest,
   TestContext,
   TestResult,
-  TestSuiteResult
-} from './ProductionTestSuite';
+  TestSuiteResult,
+} from "./ProductionTestSuite";
 
 // Utility functions
-export { createDeploymentSystem } from './utils/DeploymentSystemFactory';
-export { validateDeploymentReadiness } from './utils/DeploymentValidator';
-export { generateDeploymentReport } from './utils/ReportGenerator';
+export { createDeploymentSystem } from "./utils/DeploymentSystemFactory";
+export { validateDeploymentReadiness } from "./utils/DeploymentValidator";
+export { generateDeploymentReport } from "./utils/ReportGenerator";
 
 // Constants
 export const DEPLOYMENT_CONSTANTS = {
@@ -72,7 +72,7 @@ export const DEPLOYMENT_CONSTANTS = {
   EMERGENCY_ROLLBACK_THRESHOLD: 10.0, // 10% error rate
   CRITICAL_RESPONSE_TIME_THRESHOLD: 5000, // 5 seconds
   MIN_USER_SATISFACTION_THRESHOLD: 70, // 70%
-  
+
   // Phase durations in minutes
   PHASE_DURATIONS: {
     MEDICAL_SAFETY: 120,
@@ -81,13 +81,13 @@ export const DEPLOYMENT_CONSTANTS = {
     PERSONALIZATION: 120,
     DEVICE_MOBILE: 180,
     ADVANCED: 150,
-    FULL_ROLLOUT: 240
+    FULL_ROLLOUT: 240,
   },
-  
+
   // Rollback timeframes in minutes
   ROLLBACK_TIMEFRAMES: {
     IMMEDIATE: 5,
     RAPID: 15,
-    CONTROLLED: 30
-  }
+    CONTROLLED: 30,
+  },
 } as const;

@@ -1,6 +1,6 @@
 /**
  * AI Model Interfaces - Strategy Pattern Implementation
- * 
+ *
  * This file defines the core interfaces for the AI model system,
  * implementing the Strategy pattern for better separation of concerns.
  */
@@ -121,11 +121,14 @@ export interface PerformanceAnalytics {
   totalRequests: number;
   successRate: number;
   averageResponseTime: number;
-  modelPerformance: Record<string, {
-    requests: number;
-    successRate: number;
-    averageResponseTime: number;
-  }>;
+  modelPerformance: Record<
+    string,
+    {
+      requests: number;
+      successRate: number;
+      averageResponseTime: number;
+    }
+  >;
   recentErrors: PerformanceMetrics[];
 }
 

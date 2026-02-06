@@ -31,7 +31,8 @@ const buttonVariants = {
   variant: {
     default: "bg-primary text-primary-foreground hover:brightness-105 shadow-depth-1",
     destructive: "bg-destructive text-destructive-foreground hover:brightness-105 shadow-depth-1",
-    outline: "border border-border bg-background hover:bg-accent hover:text-accent-foreground shadow-depth-1",
+    outline:
+      "border border-border bg-background hover:bg-accent hover:text-accent-foreground shadow-depth-1",
     secondary: "bg-secondary text-secondary-foreground hover:brightness-105 shadow-depth-1",
     ghost: "hover:bg-accent hover:text-accent-foreground",
     link: "text-primary underline-offset-4 hover:underline",

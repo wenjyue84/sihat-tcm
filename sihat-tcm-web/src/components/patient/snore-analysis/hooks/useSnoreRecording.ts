@@ -20,9 +20,9 @@ interface UseSnoreRecordingReturn {
   setError: (error: string | null) => void;
 }
 
-export function useSnoreRecording(
-  errorMessages: { microphoneDenied: string }
-): UseSnoreRecordingReturn {
+export function useSnoreRecording(errorMessages: {
+  microphoneDenied: string;
+}): UseSnoreRecordingReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);

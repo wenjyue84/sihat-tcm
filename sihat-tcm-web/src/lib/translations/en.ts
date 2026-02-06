@@ -119,14 +119,15 @@ export const en = {
       sessionPlural: "sessions",
       showingCount: "Showing {filtered} of {total} sessions",
       emptyTitle: "Begin Your Journey",
-      emptyDesc: "Your health journey begins with your first diagnosis. Start tracking your wellness today.",
+      emptyDesc:
+        "Your health journey begins with your first diagnosis. Start tracking your wellness today.",
       startButton: "Start First Diagnosis",
       originMarker: "Your journey began here",
       duration: {
         zero: "0 months",
         lessThanMonth: "Less than a month",
         oneMonth: "1 month",
-        months: "{count} months"
+        months: "{count} months",
       },
       filters: {
         all: "All",
@@ -137,7 +138,7 @@ export const en = {
         score: "Score",
         diagnosis: "Diagnosis",
         ascending: "Ascending",
-        descending: "Descending"
+        descending: "Descending",
       },
       card: {
         viewReport: "View Full Report",
@@ -145,10 +146,10 @@ export const en = {
         tongue: "Tongue",
         face: "Face",
         voice: "Voice",
-        pulse: "Pulse"
+        pulse: "Pulse",
       },
       cantFindData: "Can't find your data?",
-      restoreMockData: "Restore Data"
+      restoreMockData: "Restore Data",
     },
     historyTable: {
       good: "Good",
@@ -174,7 +175,8 @@ export const en = {
         frequency: "Frequency",
         notes: "Notes",
         active: "Currently taking",
-        noMedicines: "No medicines recorded. Add your current medications to improve your next diagnosis.",
+        noMedicines:
+          "No medicines recorded. Add your current medications to improve your next diagnosis.",
         saveMedicine: "Save Medicine",
         deleteConfirm: "Are you sure you want to remove this medicine?",
       },
@@ -191,8 +193,8 @@ export const en = {
       useInDiagnosis: {
         title: "Default for Diagnosis",
         description: "These details will be used as default for your next diagnosis assessment.",
-      }
-    }
+      },
+    },
   },
 
   // Login page
@@ -1122,7 +1124,8 @@ export const en = {
     },
     deleteDialog: {
       title: "Are you absolutely sure?",
-      description: "This action cannot be undone. This will permanently delete your session record from our servers.",
+      description:
+        "This action cannot be undone. This will permanently delete your session record from our servers.",
       cancel: "Cancel",
       confirm: "Delete",
     },
@@ -1194,14 +1197,15 @@ export const en = {
       sessionPlural: "sessions",
       showingCount: "Showing {filtered} of {total} sessions",
       emptyTitle: "Begin Your Journey",
-      emptyDesc: "Your health journey begins with your first diagnosis. Start tracking your wellness today.",
+      emptyDesc:
+        "Your health journey begins with your first diagnosis. Start tracking your wellness today.",
       startButton: "Start First Diagnosis",
       originMarker: "Your journey began here",
       duration: {
         zero: "0 months",
         lessThanMonth: "Less than a month",
         oneMonth: "1 month",
-        months: "{count} months"
+        months: "{count} months",
       },
       filters: {
         all: "All",
@@ -1212,7 +1216,7 @@ export const en = {
         score: "Score",
         diagnosis: "Diagnosis",
         ascending: "Ascending",
-        descending: "Descending"
+        descending: "Descending",
       },
       card: {
         viewReport: "View Full Report",
@@ -1220,10 +1224,10 @@ export const en = {
         tongue: "Tongue",
         face: "Face",
         voice: "Voice",
-        pulse: "Pulse"
+        pulse: "Pulse",
       },
       cantFindData: "Can't find your data?",
-      restoreMockData: "Restore Data"
+      restoreMockData: "Restore Data",
     },
 
     // Profile section
@@ -1287,7 +1291,8 @@ export const en = {
       stepPulse: "Pulse Measurement",
       stepDiagnosisSummary: "Diagnostic Summary",
       meridianClock: "Meridian Organ Clock",
-      meridianClockDesc: "Display the Meridian Organ Clock and seasonal solar terms on your dashboard. (Recommended for users in seasonal climates)",
+      meridianClockDesc:
+        "Display the Meridian Organ Clock and seasonal solar terms on your dashboard. (Recommended for users in seasonal climates)",
     },
 
     // Meal Planner / Dietary Therapy (食疗方案)
@@ -2112,7 +2117,8 @@ export const en = {
         frequency: "Frequency",
         notes: "Notes",
         active: "Currently taking",
-        noMedicines: "No medicines recorded. Add your current medications to improve your next diagnosis.",
+        noMedicines:
+          "No medicines recorded. Add your current medications to improve your next diagnosis.",
         saveMedicine: "Save Medicine",
         deleteConfirm: "Are you sure you want to remove this medicine?",
       },
@@ -2129,7 +2135,7 @@ export const en = {
       useInDiagnosis: {
         title: "Default for Diagnosis",
         description: "These details will be used as default for your next diagnosis assessment.",
-      }
+      },
     },
     circleOfHealth: {
       title: "Circle of Health",
@@ -2161,7 +2167,8 @@ export const en = {
     title: "Qi Dose",
     subtitle: "Micro-dose your vitality with 8-minute TCM routines",
     promoTitle: "Ready for your daily 8-minute movement?",
-    promoDesc: "Based on your TCM constitution, we've prepared a micro-dose of vitality to regulate your inner energy. No equipment needed.",
+    promoDesc:
+      "Based on your TCM constitution, we've prepared a micro-dose of vitality to regulate your inner energy. No equipment needed.",
     startFlow: "START FLOW",
     eightMinuteBrocade: "The 8-Minute Brocade",
     eightMinuteBrocadeDesc: "Bite-sized movements from Baduanjin to regulate your inner energy.",

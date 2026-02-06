@@ -1,6 +1,6 @@
 /**
  * Test Filters Component
- * 
+ *
  * Filter controls for test list
  */
 
@@ -47,10 +47,7 @@ export function TestFilters({
   totalCount,
 }: TestFiltersProps) {
   const hasActiveFilters =
-    statusFilter !== "all" ||
-    categoryFilter !== "all" ||
-    criticalOnly ||
-    searchQuery.trim() !== "";
+    statusFilter !== "all" || categoryFilter !== "all" || criticalOnly || searchQuery.trim() !== "";
 
   return (
     <Card className="bg-slate-900/50 border-slate-800 p-4">
@@ -175,6 +172,3 @@ export function TestFilters({
     </Card>
   );
 }
-
-
-

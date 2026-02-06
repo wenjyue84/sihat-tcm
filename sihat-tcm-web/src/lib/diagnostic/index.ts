@@ -1,13 +1,13 @@
 /**
  * Diagnostic System - Modular AI diagnostic engine
- * 
+ *
  * This module provides a comprehensive AI diagnostic system with modular architecture.
  * All components are designed to work together while maintaining clear separation of concerns.
- * 
+ *
  * @example Basic Usage
  * ```typescript
  * import { EnhancedAIDiagnosticEngine } from '@/lib/diagnostic';
- * 
+ *
  * const engine = new EnhancedAIDiagnosticEngine();
  * const result = await engine.processEnhancedDiagnosis({
  *   userId: 'user123',
@@ -15,40 +15,40 @@
  *   requiresPersonalization: true
  * });
  * ```
- * 
+ *
  * @example Advanced Usage with Custom Configuration
  * ```typescript
- * import { 
- *   EnhancedAIDiagnosticEngine, 
+ * import {
+ *   EnhancedAIDiagnosticEngine,
  *   DiagnosticOrchestrator,
- *   DiagnosticMonitor 
+ *   DiagnosticMonitor
  * } from '@/lib/diagnostic';
- * 
+ *
  * const engine = new EnhancedAIDiagnosticEngine('CustomEngine');
  * const stats = engine.getPerformanceStats();
  * ```
  */
 
 // Main engine
-export { 
+export {
   EnhancedAIDiagnosticEngine,
   defaultEnhancedAIDiagnosticEngine,
-  processEnhancedDiagnosis 
-} from './EnhancedAIDiagnosticEngine';
+  processEnhancedDiagnosis,
+} from "./EnhancedAIDiagnosticEngine";
 
 // Core components
-export { DiagnosticOrchestrator } from './core/DiagnosticOrchestrator';
-export { 
+export { DiagnosticOrchestrator } from "./core/DiagnosticOrchestrator";
+export {
   DiagnosisSessionManager,
   diagnosisSessionManager,
-  createDiagnosisSessionManager 
-} from './core/DiagnosisSessionManager';
+  createDiagnosisSessionManager,
+} from "./core/DiagnosisSessionManager";
 
 // Monitoring and analytics
-export { DiagnosticMonitor } from './monitoring/DiagnosticMonitor';
+export { DiagnosticMonitor } from "./monitoring/DiagnosticMonitor";
 
 // Learning and feedback
-export { FeedbackProcessor } from './learning/FeedbackProcessor';
+export { FeedbackProcessor } from "./learning/FeedbackProcessor";
 
 // Interfaces and types
 export type {
@@ -57,29 +57,29 @@ export type {
   EnhancedDiagnosticResponse,
   DiagnosticConfig,
   DiagnosticStats,
-  
+
   // Processing interfaces
   DiagnosticStep,
   ProcessingPipeline,
   DiagnosticContext,
-  
+
   // Monitoring interfaces
   DiagnosticMetrics,
   PerformanceAnalytics,
   DiagnosticHistory,
-  
+
   // Feedback interfaces
   DiagnosticFeedback,
   FeedbackAnalysis,
   UserFeedbackPattern,
-  FeedbackTrends
-} from './interfaces/DiagnosticInterfaces';
+  FeedbackTrends,
+} from "./interfaces/DiagnosticInterfaces";
 
 /**
  * Diagnostic system version and metadata
  */
-export const DIAGNOSTIC_SYSTEM_VERSION = '1.0.0';
-export const DIAGNOSTIC_SYSTEM_NAME = 'Enhanced AI Diagnostic Engine';
+export const DIAGNOSTIC_SYSTEM_VERSION = "1.0.0";
+export const DIAGNOSTIC_SYSTEM_NAME = "Enhanced AI Diagnostic Engine";
 
 /**
  * Quick start function for simple diagnostic requests
@@ -89,7 +89,7 @@ export async function quickDiagnosis(
   messages: any[],
   options?: {
     doctorLevel?: string;
-    language?: 'en' | 'zh' | 'ms';
+    language?: "en" | "zh" | "ms";
     requiresPersonalization?: boolean;
     requiresSafetyValidation?: boolean;
   }

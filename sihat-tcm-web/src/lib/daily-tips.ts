@@ -12,4 +12,9 @@
 export * from "./domain/tcm/daily-tips";
 
 // Re-export data for backward compatibility
-export { CONSTITUTION_DIET_TIPS, GENERAL_TIPS, ORGAN_CLOCK, SIMPLE_SOLAR_TERMS } from "@/data/tcm/daily-tips-data";
+export {
+  CONSTITUTION_DIET_TIPS,
+  GENERAL_TIPS,
+  ORGAN_CLOCK,
+  SIMPLE_SOLAR_TERMS,
+} from "@/data/tcm/daily-tips-data";

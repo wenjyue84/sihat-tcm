@@ -1,6 +1,6 @@
 /**
  * AI Request Types
- * 
+ *
  * Type definitions for AI model requests and responses
  * Used across AI model router, complexity analyzer, and API routes
  */
@@ -131,6 +131,3 @@ export interface ComplexityFactors {
   medicalComplexity: "low" | "medium" | "high";
   urgencyLevel: "low" | "normal" | "high" | "urgent";
 }
-
-
-

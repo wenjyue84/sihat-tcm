@@ -1,6 +1,6 @@
 /**
  * Accessibility Manager - Main Orchestrator
- * 
+ *
  * Coordinates all accessibility functionality including preferences,
  * focus management, announcements, keyboard navigation, and styling.
  */
@@ -11,7 +11,7 @@ import {
   AccessibilityEventType,
   AccessibilityEventListener,
   SkipLinkConfig,
-  AriaAttributes
+  AriaAttributes,
 } from "../interfaces/AccessibilityInterfaces";
 
 import { PreferenceManager } from "./PreferenceManager";
@@ -22,7 +22,7 @@ import { StyleManager } from "./StyleManager";
 
 export class AccessibilityManager {
   private context: string;
-  
+
   // Component managers
   private preferenceManager: PreferenceManager;
   private focusManager: FocusManager;
@@ -38,7 +38,7 @@ export class AccessibilityManager {
     initialPreferences?: Partial<AccessibilityPreferences>
   ) {
     this.context = context;
-    
+
     // Initialize managers
     this.preferenceManager = new PreferenceManager(initialPreferences);
     this.focusManager = new FocusManager();
@@ -62,17 +62,21 @@ export class AccessibilityManager {
    */
   private setupPreferenceUpdates(): void {
     // Listen for preference changes and update all managers
-    const originalUpdatePreferences = this.preferenceManager.updatePreferences.bind(this.preferenceManager);
-    
-    this.preferenceManager.updatePreferences = (newPreferences: Partial<AccessibilityPreferences>) => {
+    const originalUpdatePreferences = this.preferenceManager.updatePreferences.bind(
+      this.preferenceManager
+    );
+
+    this.preferenceManager.updatePreferences = (
+      newPreferences: Partial<AccessibilityPreferences>
+    ) => {
       originalUpdatePreferences(newPreferences);
-      
+
       const updatedPreferences = this.preferenceManager.getPreferences();
       this.styleManager.updatePreferences(updatedPreferences);
-      
+
       // Update keyboard navigation based on preferences
       this.keyboardNavigationManager.setFeatureEnabled(
-        "enableTabNavigation", 
+        "enableTabNavigation",
         updatedPreferences.keyboardNavigation
       );
 
@@ -86,13 +90,13 @@ export class AccessibilityManager {
    */
   private setupInitialState(): void {
     const preferences = this.preferenceManager.getPreferences();
-    
+
     // Apply initial styles
     this.styleManager.applyAccessibilityStyles();
-    
+
     // Setup announcements based on preferences
     this.announcementManager.setEnabled(preferences.announcements);
-    
+
     // Announce system ready
     if (preferences.announcements) {
       this.announcementManager.announce("Accessibility system initialized", "polite", 1000);
@@ -116,11 +120,7 @@ export class AccessibilityManager {
   /**
    * Register focusable elements for a group
    */
-  public registerFocusGroup(
-    groupId: string, 
-    elements: HTMLElement[], 
-    priorities?: number[]
-  ): void {
+  public registerFocusGroup(groupId: string, elements: HTMLElement[], priorities?: number[]): void {
     this.focusManager.registerFocusGroup(groupId, elements, priorities);
   }
 
@@ -137,12 +137,12 @@ export class AccessibilityManager {
    */
   public navigateFocus(direction: "next" | "previous" | "first" | "last"): boolean {
     const success = this.focusManager.navigate(direction);
-    
+
     if (success) {
       const currentFocus = this.focusManager.getCurrentFocus();
       this.emitEvent("focus-changed", currentFocus);
     }
-    
+
     return success;
   }
 
@@ -164,8 +164,8 @@ export class AccessibilityManager {
    * Make announcement to screen readers
    */
   public announce(
-    message: string, 
-    priority: "polite" | "assertive" = "polite", 
+    message: string,
+    priority: "polite" | "assertive" = "polite",
     delay: number = 0
   ): void {
     this.announcementManager.announce(message, priority, delay);
@@ -219,13 +219,13 @@ export class AccessibilityManager {
    */
   public addAriaAttributes(element: HTMLElement, attributes: AriaAttributes): void {
     const ariaMap: Record<string, string> = {};
-    
+
     Object.entries(attributes).forEach(([key, value]) => {
       if (value !== undefined) {
         ariaMap[key] = String(value);
       }
     });
-    
+
     this.styleManager.addAriaAttributes(element, ariaMap);
   }
 
@@ -240,8 +240,8 @@ export class AccessibilityManager {
    * Create live region for dynamic content
    */
   public createLiveRegion(
-    id: string, 
-    priority: "polite" | "assertive" = "polite", 
+    id: string,
+    priority: "polite" | "assertive" = "polite",
     atomic: boolean = true
   ): HTMLElement {
     return this.announcementManager.createLiveRegion(id, priority, atomic);
@@ -269,7 +269,7 @@ export class AccessibilityManager {
       focusInfo: this.focusManager.getCurrentFocus(),
       queueStatus: this.announcementManager.getQueueStatus(),
       shortcuts: this.keyboardNavigationManager.getShortcuts().size,
-      isInitialized: true
+      isInitialized: true,
     };
   }
 
@@ -290,7 +290,10 @@ export class AccessibilityManager {
   /**
    * Add event listener
    */
-  public addEventListener(type: AccessibilityEventType, listener: AccessibilityEventListener): void {
+  public addEventListener(
+    type: AccessibilityEventType,
+    listener: AccessibilityEventListener
+  ): void {
     if (!this.eventListeners.has(type)) {
       this.eventListeners.set(type, new Set());
     }
@@ -300,7 +303,10 @@ export class AccessibilityManager {
   /**
    * Remove event listener
    */
-  public removeEventListener(type: AccessibilityEventType, listener: AccessibilityEventListener): void {
+  public removeEventListener(
+    type: AccessibilityEventType,
+    listener: AccessibilityEventListener
+  ): void {
     const listeners = this.eventListeners.get(type);
     if (listeners) {
       listeners.delete(listener);
@@ -316,10 +322,10 @@ export class AccessibilityManager {
       const event: AccessibilityEvent = {
         type,
         data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
-      listeners.forEach(listener => {
+      listeners.forEach((listener) => {
         try {
           listener(event);
         } catch (error) {
@@ -341,8 +347,8 @@ export class AccessibilityManager {
       recommendations: [
         "Consider adding more ARIA labels",
         "Ensure all interactive elements are keyboard accessible",
-        "Verify color contrast ratios meet WCAG guidelines"
-      ]
+        "Verify color contrast ratios meet WCAG guidelines",
+      ],
     });
   }
 
@@ -354,10 +360,10 @@ export class AccessibilityManager {
     this.announcementManager.destroy();
     this.keyboardNavigationManager.destroy();
     this.styleManager.destroy();
-    
+
     // Clear event listeners
     this.eventListeners.clear();
-    
+
     // Announce cleanup
     if (this.preferenceManager.getPreferences().announcements) {
       // Create temporary announcer for final message
@@ -365,7 +371,7 @@ export class AccessibilityManager {
       tempAnnouncer.setAttribute("aria-live", "polite");
       tempAnnouncer.className = "sr-only";
       document.body.appendChild(tempAnnouncer);
-      
+
       setTimeout(() => {
         tempAnnouncer.textContent = "Accessibility system disabled";
         setTimeout(() => tempAnnouncer.remove(), 1000);

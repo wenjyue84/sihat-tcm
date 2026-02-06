@@ -1,11 +1,11 @@
 /**
  * Extended Model Interfaces
- * 
+ *
  * Additional interfaces for better organization and type safety
  * in the AI model system. These complement the core AIModel interfaces.
  */
 
-import type { AIRequest } from '@/types/ai-request';
+import type { AIRequest } from "@/types/ai-request";
 
 // Import core types from AIModel for use in this file
 import type {
@@ -21,7 +21,7 @@ import type {
   ModelSelectionStrategy,
   ComplexityAnalysisStrategy,
   PerformanceMonitor,
-} from './AIModel';
+} from "./AIModel";
 
 // Re-export core types from AIModel for convenience
 export type {
@@ -37,7 +37,7 @@ export type {
   ModelSelectionStrategy,
   ComplexityAnalysisStrategy,
   PerformanceMonitor,
-} from './AIModel';
+} from "./AIModel";
 
 // Type aliases for backward compatibility
 export type ModelPerformanceMetrics = PerformanceMetrics;
@@ -85,7 +85,7 @@ export interface RateLimitConfig {
   requestsPerMinute: number;
   requestsPerHour: number;
   burstLimit: number;
-  backoffStrategy: 'linear' | 'exponential' | 'fixed';
+  backoffStrategy: "linear" | "exponential" | "fixed";
   maxBackoffTime: number;
 }
 
@@ -96,7 +96,7 @@ export interface CacheConfig {
   enabled: boolean;
   maxSize: number;
   ttlSeconds: number;
-  strategy: 'lru' | 'fifo' | 'lfu';
+  strategy: "lru" | "fifo" | "lfu";
   persistToDisk?: boolean;
 }
 
@@ -117,8 +117,8 @@ export interface ModelHealthStatus {
  * Health issue details
  */
 export interface HealthIssue {
-  type: 'performance' | 'availability' | 'error_rate' | 'timeout';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "performance" | "availability" | "error_rate" | "timeout";
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   firstOccurred: Date;
   lastOccurred: Date;
@@ -142,10 +142,7 @@ export interface ModelRegistry {
  * Model load balancer interface
  */
 export interface ModelLoadBalancer {
-  selectModel(
-    availableModels: AIModel[],
-    criteria: LoadBalancingCriteria
-  ): AIModel;
+  selectModel(availableModels: AIModel[], criteria: LoadBalancingCriteria): AIModel;
 
   updateModelWeights(weights: Record<string, number>): void;
   getModelWeights(): Record<string, number>;
@@ -156,7 +153,7 @@ export interface ModelLoadBalancer {
  * Load balancing criteria
  */
 export interface LoadBalancingCriteria {
-  strategy: 'round_robin' | 'weighted' | 'least_connections' | 'performance_based';
+  strategy: "round_robin" | "weighted" | "least_connections" | "performance_based";
   preferredModels?: string[];
   excludedModels?: string[];
   maxLatency?: number;
@@ -192,9 +189,9 @@ export interface ModelVersion {
  * Version change details
  */
 export interface VersionChange {
-  type: 'feature' | 'improvement' | 'bugfix' | 'breaking_change';
+  type: "feature" | "improvement" | "bugfix" | "breaking_change";
   description: string;
-  impact: 'low' | 'medium' | 'high';
+  impact: "low" | "medium" | "high";
 }
 
 /**
@@ -277,10 +274,10 @@ export interface CostDataPoint {
  * Cost optimization suggestion
  */
 export interface CostOptimization {
-  type: 'model_selection' | 'request_batching' | 'caching' | 'rate_limiting';
+  type: "model_selection" | "request_batching" | "caching" | "rate_limiting";
   description: string;
   estimatedSavings: number;
-  implementationEffort: 'low' | 'medium' | 'high';
+  implementationEffort: "low" | "medium" | "high";
 }
 
 /**
@@ -300,7 +297,7 @@ export interface PerformanceTrend {
 export interface TimeRange {
   start: Date;
   end: Date;
-  granularity: 'minute' | 'hour' | 'day' | 'week' | 'month';
+  granularity: "minute" | "hour" | "day" | "week" | "month";
 }
 
 /**
@@ -313,7 +310,7 @@ export interface ReportOptions {
   includeCosts: boolean;
   includePerformance: boolean;
   includeRecommendations: boolean;
-  format: 'json' | 'csv' | 'pdf';
+  format: "json" | "csv" | "pdf";
 }
 
 /**
@@ -346,8 +343,8 @@ export interface ReportSummary {
  * Recommendation for optimization
  */
 export interface Recommendation {
-  type: 'performance' | 'cost' | 'reliability' | 'usage';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  type: "performance" | "cost" | "reliability" | "usage";
+  priority: "low" | "medium" | "high" | "critical";
   title: string;
   description: string;
   expectedImpact: string;
@@ -370,7 +367,7 @@ export interface ModelCircuitBreaker {
  * Circuit breaker state
  */
 export interface CircuitBreakerState {
-  state: 'closed' | 'open' | 'half_open';
+  state: "closed" | "open" | "half_open";
   failureCount: number;
   lastFailureTime?: Date;
   nextAttemptTime?: Date;
@@ -407,7 +404,7 @@ export interface ABExperiment {
   description: string;
   startDate: Date;
   endDate?: Date;
-  status: 'draft' | 'running' | 'paused' | 'completed';
+  status: "draft" | "running" | "paused" | "completed";
   variants: ABVariant[];
   trafficSplit: Record<string, number>; // variant ID -> percentage
   successMetrics: string[];

@@ -1,6 +1,6 @@
 /**
  * Batch Command Implementation
- * 
+ *
  * Command implementation for executing multiple commands as a batch
  * with different execution strategies and rollback support.
  */
@@ -15,17 +15,17 @@ import {
   ExecutionStep,
   CommandDependency,
   RiskAssessment,
-} from '../interfaces/CommandInterfaces';
+} from "../interfaces/CommandInterfaces";
 
-import { devLog, logError } from '../../systemLogger';
-import { ErrorFactory } from '../../errors/AppError';
+import { devLog, logError } from "../../systemLogger";
+import { ErrorFactory } from "../../errors/AppError";
 
 /**
  * Batch command implementation with advanced execution strategies
  */
 export class BatchCommandImpl implements BatchCommand {
   public readonly id: string;
-  public readonly type = 'batch:execute' as const;
+  public readonly type = "batch:execute" as const;
   public readonly description: string;
   public readonly timestamp: Date;
   public readonly metadata?: any;
@@ -40,8 +40,8 @@ export class BatchCommandImpl implements BatchCommand {
 
   constructor(
     commands: Command[] = [],
-    executionStrategy: BatchExecutionStrategy = 'sequential',
-    rollbackStrategy: BatchRollbackStrategy = 'all_or_nothing',
+    executionStrategy: BatchExecutionStrategy = "sequential",
+    rollbackStrategy: BatchRollbackStrategy = "all_or_nothing",
     commandExecutor: any,
     metadata?: any
   ) {
@@ -62,7 +62,7 @@ export class BatchCommandImpl implements BatchCommand {
     const startTime = Date.now();
 
     try {
-      devLog(`[BatchCommand] Executing batch with ${this.commands.length} commands`, {
+      devLog("debug", "BatchCommand", `Executing batch with ${this.commands.length} commands`, {
         batchId: this.id,
         strategy: this.executionStrategy,
         rollbackStrategy: this.rollbackStrategy,
@@ -79,8 +79,8 @@ export class BatchCommandImpl implements BatchCommand {
 
       // Generate execution plan
       const executionPlan = this.getExecutionPlan();
-      
-      devLog(`[BatchCommand] Execution plan generated`, {
+
+      devLog("debug", "BatchCommand", "Execution plan generated", {
         steps: executionPlan.steps.length,
         estimatedTime: executionPlan.estimatedTime,
         riskLevel: executionPlan.riskAssessment.riskLevel,
@@ -88,26 +88,26 @@ export class BatchCommandImpl implements BatchCommand {
 
       // Execute based on strategy
       let results: CommandResult[];
-      
+
       switch (this.executionStrategy) {
-        case 'parallel':
+        case "parallel":
           results = await this.executeParallel();
           break;
-        case 'pipeline':
+        case "pipeline":
           results = await this.executePipeline();
           break;
-        case 'conditional':
+        case "conditional":
           results = await this.executeConditional();
           break;
-        case 'sequential':
+        case "sequential":
         default:
           results = await this.executeSequential();
           break;
       }
 
       // Analyze results
-      const successfulCommands = results.filter(r => r.success).length;
-      const failedCommands = results.filter(r => !r.success).length;
+      const successfulCommands = results.filter((r) => r.success).length;
+      const failedCommands = results.filter((r) => !r.success).length;
       const allSuccessful = failedCommands === 0;
 
       // Handle rollback if needed
@@ -130,30 +130,30 @@ export class BatchCommandImpl implements BatchCommand {
         metadata: {
           batchId: this.id,
           strategy: this.executionStrategy,
-          rollbackExecuted: !allSuccessful && this.shouldRollback(failedCommands, successfulCommands),
+          rollbackExecuted:
+            !allSuccessful && this.shouldRollback(failedCommands, successfulCommands),
         },
         warnings: !allSuccessful ? [`${failedCommands} commands failed`] : undefined,
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
-      logError(`[BatchCommand] Batch execution failed`, error);
+
+      logError("BatchCommand", "Batch execution failed", { error: error instanceof Error ? error.message : String(error) });
 
       // Attempt rollback on critical failure
       try {
         await this.performRollback();
       } catch (rollbackError) {
-        logError(`[BatchCommand] Rollback also failed`, rollbackError);
+        logError("BatchCommand", "Rollback also failed", { error: rollbackError instanceof Error ? rollbackError.message : String(rollbackError) });
       }
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Batch execution failed',
+        error: error instanceof Error ? error.message : "Batch execution failed",
         executionTime,
         metadata: {
           batchId: this.id,
-          errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+          errorType: error instanceof Error ? error.constructor.name : "Unknown",
         },
       };
     }
@@ -166,13 +166,13 @@ export class BatchCommandImpl implements BatchCommand {
     const startTime = Date.now();
 
     try {
-      devLog(`[BatchCommand] Undoing batch execution`, { batchId: this.id });
+      devLog("debug", "BatchCommand", "Undoing batch execution", { batchId: this.id });
 
       const rollbackResults = await this.performRollback();
       const executionTime = Date.now() - startTime;
 
       return {
-        success: rollbackResults.every(r => r.success),
+        success: rollbackResults.every((r) => r.success),
         data: {
           rolledBackCommands: rollbackResults.length,
           rollbackResults,
@@ -180,21 +180,20 @@ export class BatchCommandImpl implements BatchCommand {
         executionTime,
         metadata: {
           batchId: this.id,
-          operation: 'undo',
+          operation: "undo",
         },
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Batch undo failed',
+        error: error instanceof Error ? error.message : "Batch undo failed",
         executionTime,
         metadata: {
           batchId: this.id,
-          operation: 'undo',
-          errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+          operation: "undo",
+          errorType: error instanceof Error ? error.constructor.name : "Unknown",
         },
       };
     }
@@ -204,8 +203,10 @@ export class BatchCommandImpl implements BatchCommand {
    * Check if batch can be undone
    */
   public canUndo(): boolean {
-    return this.executionResults.size > 0 && 
-           Array.from(this.executionResults.values()).some(result => result.success);
+    return (
+      this.executionResults.size > 0 &&
+      Array.from(this.executionResults.values()).some((result) => result.success)
+    );
   }
 
   /**
@@ -213,7 +214,7 @@ export class BatchCommandImpl implements BatchCommand {
    */
   public addCommand(command: Command): void {
     this.commands.push(command);
-    devLog(`[BatchCommand] Command added to batch`, {
+    devLog("debug", "BatchCommand", "Command added to batch", {
       batchId: this.id,
       commandId: command.id,
       totalCommands: this.commands.length,
@@ -225,17 +226,17 @@ export class BatchCommandImpl implements BatchCommand {
    */
   public removeCommand(commandId: string): boolean {
     const initialLength = this.commands.length;
-    this.commands = this.commands.filter(cmd => cmd.id !== commandId);
-    
+    this.commands = this.commands.filter((cmd) => cmd.id !== commandId);
+
     const removed = this.commands.length < initialLength;
     if (removed) {
-      devLog(`[BatchCommand] Command removed from batch`, {
+      devLog("debug", "BatchCommand", "Command removed from batch", {
         batchId: this.id,
         commandId,
         remainingCommands: this.commands.length,
       });
     }
-    
+
     return removed;
   }
 
@@ -279,21 +280,20 @@ export class BatchCommandImpl implements BatchCommand {
         results.push(result);
 
         // Stop on first failure if using all_or_nothing rollback
-        if (!result.success && this.rollbackStrategy === 'all_or_nothing') {
+        if (!result.success && this.rollbackStrategy === "all_or_nothing") {
           break;
         }
       } catch (error) {
         const errorResult: CommandResult = {
-          testId: command.id,
           success: false,
           executionTime: 0,
-          error: error instanceof Error ? error : new Error('Unknown error'),
+          error: error instanceof Error ? error.message : "Unknown error",
         };
-        
+
         this.executionResults.set(command.id, errorResult);
         results.push(errorResult);
-        
-        if (this.rollbackStrategy === 'all_or_nothing') {
+
+        if (this.rollbackStrategy === "all_or_nothing") {
           break;
         }
       }
@@ -314,12 +314,11 @@ export class BatchCommandImpl implements BatchCommand {
         return result;
       } catch (error) {
         const errorResult: CommandResult = {
-          testId: command.id,
           success: false,
           executionTime: 0,
-          error: error instanceof Error ? error : new Error('Unknown error'),
+          error: error instanceof Error ? error.message : "Unknown error",
         };
-        
+
         this.executionResults.set(command.id, errorResult);
         return errorResult;
       }
@@ -340,7 +339,7 @@ export class BatchCommandImpl implements BatchCommand {
         // Pass pipeline data to command if supported
         const contextWithPipeline = pipelineData ? { pipelineData } : {};
         const result = await this.commandExecutor.execute(command, contextWithPipeline);
-        
+
         this.executionResults.set(command.id, result);
         this.executionOrder.push(command.id);
         results.push(result);
@@ -356,12 +355,11 @@ export class BatchCommandImpl implements BatchCommand {
         }
       } catch (error) {
         const errorResult: CommandResult = {
-          testId: command.id,
           success: false,
           executionTime: 0,
-          error: error instanceof Error ? error : new Error('Unknown error'),
+          error: error instanceof Error ? error.message : "Unknown error",
         };
-        
+
         this.executionResults.set(command.id, errorResult);
         results.push(errorResult);
         break; // Stop pipeline on error
@@ -380,16 +378,15 @@ export class BatchCommandImpl implements BatchCommand {
     for (const command of this.commands) {
       // Check if command should execute based on previous results
       const shouldExecute = this.shouldExecuteCommand(command, results);
-      
+
       if (!shouldExecute) {
         // Skip this command
         const skippedResult: CommandResult = {
-          testId: command.id,
           success: true,
           executionTime: 0,
-          metadata: { skipped: true, reason: 'conditional_skip' },
+          metadata: { skipped: true, reason: "conditional_skip", commandId: command.id },
         };
-        
+
         results.push(skippedResult);
         continue;
       }
@@ -401,12 +398,11 @@ export class BatchCommandImpl implements BatchCommand {
         results.push(result);
       } catch (error) {
         const errorResult: CommandResult = {
-          testId: command.id,
           success: false,
           executionTime: 0,
-          error: error instanceof Error ? error : new Error('Unknown error'),
+          error: error instanceof Error ? error.message : "Unknown error",
         };
-        
+
         this.executionResults.set(command.id, errorResult);
         results.push(errorResult);
       }
@@ -422,50 +418,50 @@ export class BatchCommandImpl implements BatchCommand {
     const rollbackResults: CommandResult[] = [];
 
     switch (this.rollbackStrategy) {
-      case 'all_or_nothing':
+      case "all_or_nothing":
         // Rollback all successfully executed commands in reverse order
         for (const commandId of [...this.executionOrder].reverse()) {
-          const command = this.commands.find(cmd => cmd.id === commandId);
+          const command = this.commands.find((cmd) => cmd.id === commandId);
           if (command && command.undo && command.canUndo?.()) {
             try {
               const rollbackResult = await command.undo();
               rollbackResults.push(rollbackResult);
             } catch (error) {
               rollbackResults.push({
-                testId: commandId,
                 success: false,
                 executionTime: 0,
-                error: error instanceof Error ? error : new Error('Rollback failed'),
+                error: error instanceof Error ? error.message : "Rollback failed",
+                metadata: { commandId },
               });
             }
           }
         }
         break;
 
-      case 'best_effort':
+      case "best_effort":
         // Try to rollback as many as possible, continue on failures
         for (const commandId of [...this.executionOrder].reverse()) {
-          const command = this.commands.find(cmd => cmd.id === commandId);
+          const command = this.commands.find((cmd) => cmd.id === commandId);
           if (command && command.undo && command.canUndo?.()) {
             try {
               const rollbackResult = await command.undo();
               rollbackResults.push(rollbackResult);
             } catch (error) {
               // Log but continue with other rollbacks
-              logError(`[BatchCommand] Rollback failed for command ${commandId}`, error);
+              logError("BatchCommand", `Rollback failed for command ${commandId}`, { error: error instanceof Error ? error.message : String(error) });
               rollbackResults.push({
-                testId: commandId,
                 success: false,
                 executionTime: 0,
-                error: error instanceof Error ? error : new Error('Rollback failed'),
+                error: error instanceof Error ? error.message : "Rollback failed",
+                metadata: { commandId },
               });
             }
           }
         }
         break;
 
-      case 'manual':
-      case 'none':
+      case "manual":
+      case "none":
       default:
         // No automatic rollback
         break;
@@ -481,12 +477,12 @@ export class BatchCommandImpl implements BatchCommand {
    */
   private shouldRollback(failedCommands: number, successfulCommands: number): boolean {
     switch (this.rollbackStrategy) {
-      case 'all_or_nothing':
+      case "all_or_nothing":
         return failedCommands > 0;
-      case 'best_effort':
+      case "best_effort":
         return failedCommands > successfulCommands; // Rollback if more failures than successes
-      case 'manual':
-      case 'none':
+      case "manual":
+      case "none":
       default:
         return false;
     }
@@ -498,9 +494,10 @@ export class BatchCommandImpl implements BatchCommand {
   private shouldExecuteCommand(command: Command, previousResults: CommandResult[]): boolean {
     // Simple conditional logic - could be made more sophisticated
     // For now, execute if no previous failures or if command has high priority
-    const hasPreviousFailures = previousResults.some(r => !r.success);
-    const isHighPriority = command.metadata?.priority === 'high' || command.metadata?.priority === 'urgent';
-    
+    const hasPreviousFailures = previousResults.some((r) => !r.success);
+    const isHighPriority =
+      command.metadata?.priority === "high" || command.metadata?.priority === "urgent";
+
     return !hasPreviousFailures || isHighPriority;
   }
 
@@ -509,12 +506,14 @@ export class BatchCommandImpl implements BatchCommand {
    */
   private generateExecutionSteps(): ExecutionStep[] {
     // Simple implementation - could be made more sophisticated with dependency analysis
-    return [{
-      stepId: 'step-1',
-      commands: this.commands,
-      executionMode: this.executionStrategy === 'parallel' ? 'parallel' : 'sequential',
-      dependencies: [],
-    }];
+    return [
+      {
+        stepId: "step-1",
+        commands: this.commands,
+        executionMode: this.executionStrategy === "parallel" ? "parallel" : "sequential",
+        dependencies: [],
+      },
+    ];
   }
 
   /**
@@ -523,13 +522,13 @@ export class BatchCommandImpl implements BatchCommand {
   private estimateTotalExecutionTime(): number {
     const baseTime = 1000; // 1 second per command base time
     const commandCount = this.commands.length;
-    
+
     switch (this.executionStrategy) {
-      case 'parallel':
+      case "parallel":
         return baseTime * 2; // Parallel execution, but with overhead
-      case 'sequential':
-      case 'pipeline':
-      case 'conditional':
+      case "sequential":
+      case "pipeline":
+      case "conditional":
       default:
         return baseTime * commandCount;
     }
@@ -540,10 +539,10 @@ export class BatchCommandImpl implements BatchCommand {
    */
   private analyzeDependencies(): CommandDependency[] {
     // Simple implementation - in a real system, this would analyze actual dependencies
-    return this.commands.map(command => ({
+    return this.commands.map((command) => ({
       commandId: command.id,
       dependsOn: [],
-      dependencyType: 'soft',
+      dependencyType: "soft",
     }));
   }
 
@@ -552,37 +551,37 @@ export class BatchCommandImpl implements BatchCommand {
    */
   private assessRisk(): RiskAssessment {
     const commandCount = this.commands.length;
-    const hasUndoableCommands = this.commands.some(cmd => cmd.undo && cmd.canUndo?.());
-    
-    let riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    const hasUndoableCommands = this.commands.some((cmd) => cmd.undo && cmd.canUndo?.());
+
+    let riskLevel: "low" | "medium" | "high" | "critical";
     const riskFactors: string[] = [];
     const mitigations: string[] = [];
 
     if (commandCount > 10) {
-      riskLevel = 'high';
-      riskFactors.push('Large number of commands');
+      riskLevel = "high";
+      riskFactors.push("Large number of commands");
     } else if (commandCount > 5) {
-      riskLevel = 'medium';
-      riskFactors.push('Moderate number of commands');
+      riskLevel = "medium";
+      riskFactors.push("Moderate number of commands");
     } else {
-      riskLevel = 'low';
+      riskLevel = "low";
     }
 
     if (!hasUndoableCommands) {
-      riskFactors.push('Commands not undoable');
-      if (riskLevel === 'low') riskLevel = 'medium';
+      riskFactors.push("Commands not undoable");
+      if (riskLevel === "low") riskLevel = "medium";
     } else {
-      mitigations.push('Commands support undo operations');
+      mitigations.push("Commands support undo operations");
     }
 
-    if (this.rollbackStrategy === 'none') {
-      riskFactors.push('No rollback strategy');
-      if (riskLevel !== 'critical') riskLevel = 'high';
+    if (this.rollbackStrategy === "none") {
+      riskFactors.push("No rollback strategy");
+      if (riskLevel !== "critical") riskLevel = "high";
     } else {
       mitigations.push(`Rollback strategy: ${this.rollbackStrategy}`);
     }
 
-    const rollbackComplexity = hasUndoableCommands ? 'simple' : 'complex';
+    const rollbackComplexity = hasUndoableCommands ? "simple" : "complex";
 
     return {
       riskLevel,
@@ -598,8 +597,8 @@ export class BatchCommandImpl implements BatchCommand {
  */
 export function createBatchCommand(
   commands: Command[] = [],
-  executionStrategy: BatchExecutionStrategy = 'sequential',
-  rollbackStrategy: BatchRollbackStrategy = 'all_or_nothing',
+  executionStrategy: BatchExecutionStrategy = "sequential",
+  rollbackStrategy: BatchRollbackStrategy = "all_or_nothing",
   commandExecutor: any
 ): BatchCommand {
   return new BatchCommandImpl(commands, executionStrategy, rollbackStrategy, commandExecutor);

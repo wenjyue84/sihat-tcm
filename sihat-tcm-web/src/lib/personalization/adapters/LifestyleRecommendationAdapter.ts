@@ -1,15 +1,18 @@
 /**
  * Lifestyle Recommendation Adapter - Personalizes lifestyle recommendations
- * 
+ *
  * Adapts TCM lifestyle recommendations based on cultural context, user preferences,
  * and practical constraints while maintaining therapeutic benefits.
  */
 
-import { PersonalizationFactors, PersonalizedRecommendation } from '../interfaces/PersonalizationInterfaces';
-import { CulturalContextBuilder } from '../core/CulturalContextBuilder';
+import {
+  PersonalizationFactors,
+  PersonalizedRecommendation,
+} from "../interfaces/PersonalizationInterfaces";
+import { CulturalContextBuilder } from "../core/CulturalContextBuilder";
 
 export class LifestyleRecommendationAdapter {
-  private readonly context = 'LifestyleRecommendationAdapter';
+  private readonly context = "LifestyleRecommendationAdapter";
   private culturalBuilder: CulturalContextBuilder;
 
   constructor() {
@@ -144,7 +147,7 @@ export class LifestyleRecommendationAdapter {
     return {
       original_recommendation: recommendation,
       personalized_version,
-      personalization_factors: ['cultural_timing'],
+      personalization_factors: ["cultural_timing"],
       cultural_adaptations,
       dietary_modifications: [],
       confidence_score: 0.95,
@@ -244,7 +247,7 @@ export class LifestyleRecommendationAdapter {
     const alternatives: Record<string, string[]> = {
       chinese: ["brisk walking in parks", "Tai Chi forms", "dancing", "cycling"],
       southeast_asian: ["badminton", "swimming", "traditional dance", "walking"],
-      western: ["jogging", "cycling", "swimming", "gym cardio machines"]
+      western: ["jogging", "cycling", "swimming", "gym cardio machines"],
     };
 
     return alternatives[region] || alternatives["western"];
@@ -254,7 +257,7 @@ export class LifestyleRecommendationAdapter {
     const alternatives: Record<string, string[]> = {
       chinese: ["Qigong exercises", "martial arts training", "bodyweight exercises"],
       southeast_asian: ["calisthenics", "traditional martial arts", "functional movements"],
-      western: ["weight training", "resistance bands", "bodyweight exercises", "gym workouts"]
+      western: ["weight training", "resistance bands", "bodyweight exercises", "gym workouts"],
     };
 
     return alternatives[region] || alternatives["western"];
@@ -264,7 +267,7 @@ export class LifestyleRecommendationAdapter {
     const alternatives: Record<string, string[]> = {
       chinese: ["Tai Chi", "Qigong stretching", "traditional Chinese exercises"],
       southeast_asian: ["yoga", "traditional stretching", "martial arts flexibility"],
-      western: ["yoga", "Pilates", "stretching routines", "flexibility classes"]
+      western: ["yoga", "Pilates", "stretching routines", "flexibility classes"],
     };
 
     return alternatives[region] || alternatives["western"];
@@ -274,7 +277,7 @@ export class LifestyleRecommendationAdapter {
     const alternatives: Record<string, string[]> = {
       chinese: ["meditation", "Qigong meditation", "tea ceremony mindfulness"],
       southeast_asian: ["Buddhist meditation", "mindful walking", "breathing exercises"],
-      western: ["mindfulness meditation", "guided meditation apps", "breathing techniques"]
+      western: ["mindfulness meditation", "guided meditation apps", "breathing techniques"],
     };
 
     return alternatives[region] || alternatives["western"];
@@ -282,9 +285,11 @@ export class LifestyleRecommendationAdapter {
 
   private getWalkingSuggestions(region: string): string {
     const suggestions: Record<string, string> = {
-      chinese: "Try walking in parks during morning hours when many people practice exercises together.",
-      southeast_asian: "Consider walking in covered areas or malls during hot weather, or early morning/evening outdoors.",
-      western: "Use walking apps or join walking groups for motivation and social connection."
+      chinese:
+        "Try walking in parks during morning hours when many people practice exercises together.",
+      southeast_asian:
+        "Consider walking in covered areas or malls during hot weather, or early morning/evening outdoors.",
+      western: "Use walking apps or join walking groups for motivation and social connection.",
     };
 
     return suggestions[region] || suggestions["western"];
@@ -292,9 +297,12 @@ export class LifestyleRecommendationAdapter {
 
   private getSleepPractices(region: string): string {
     const practices: Record<string, string> = {
-      chinese: "Consider traditional practices like foot soaking before bed and maintaining room temperature for optimal Yin nourishment.",
-      southeast_asian: "Use natural ventilation when possible and consider traditional relaxation techniques before sleep.",
-      western: "Maintain consistent sleep schedule and consider sleep hygiene practices like limiting screen time before bed."
+      chinese:
+        "Consider traditional practices like foot soaking before bed and maintaining room temperature for optimal Yin nourishment.",
+      southeast_asian:
+        "Use natural ventilation when possible and consider traditional relaxation techniques before sleep.",
+      western:
+        "Maintain consistent sleep schedule and consider sleep hygiene practices like limiting screen time before bed.",
     };
 
     return practices[region] || practices["western"];
@@ -302,9 +310,12 @@ export class LifestyleRecommendationAdapter {
 
   private getStressTechniques(region: string): string {
     const techniques: Record<string, string> = {
-      chinese: "Try traditional techniques like Qigong breathing, tea meditation, or gentle self-massage.",
-      southeast_asian: "Consider community activities, traditional music, or spending time in nature for stress relief.",
-      western: "Use evidence-based techniques like progressive muscle relaxation, mindfulness apps, or regular exercise."
+      chinese:
+        "Try traditional techniques like Qigong breathing, tea meditation, or gentle self-massage.",
+      southeast_asian:
+        "Consider community activities, traditional music, or spending time in nature for stress relief.",
+      western:
+        "Use evidence-based techniques like progressive muscle relaxation, mindfulness apps, or regular exercise.",
     };
 
     return techniques[region] || techniques["western"];
@@ -312,9 +323,11 @@ export class LifestyleRecommendationAdapter {
 
   private getWorkLifeConsiderations(region: string): string {
     const considerations: Record<string, string> = {
-      chinese: "Consider integrating short Qigong breaks during work hours and maintaining harmony between work and rest.",
+      chinese:
+        "Consider integrating short Qigong breaks during work hours and maintaining harmony between work and rest.",
       southeast_asian: "Balance individual practice with family time and community activities.",
-      western: "Schedule specific times for health practices and treat them as important appointments."
+      western:
+        "Schedule specific times for health practices and treat them as important appointments.",
     };
 
     return considerations[region] || considerations["western"];

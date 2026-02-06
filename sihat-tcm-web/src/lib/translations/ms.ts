@@ -116,14 +116,15 @@ export const ms: TranslationKeys = {
       sessionPlural: "sesi",
       showingCount: "Menunjukkan {filtered} daripada {total} sesi",
       emptyTitle: "Mulakan Perjalanan Anda",
-      emptyDesc: "Perjalanan kesihatan anda bermula dengan diagnosis pertama anda. Mulakan menjejaki kesejahteraan anda hari ini.",
+      emptyDesc:
+        "Perjalanan kesihatan anda bermula dengan diagnosis pertama anda. Mulakan menjejaki kesejahteraan anda hari ini.",
       startButton: "Mulakan Diagnosis Pertama",
       originMarker: "Perjalanan anda bermula di sini",
       duration: {
         zero: "0 bulan",
         lessThanMonth: "Kurang dari sebulan",
         oneMonth: "1 bulan",
-        months: "{count} bulan"
+        months: "{count} bulan",
       },
       filters: {
         all: "Semua",
@@ -134,7 +135,7 @@ export const ms: TranslationKeys = {
         score: "Markah",
         diagnosis: "Diagnosis",
         ascending: "Menaik",
-        descending: "Menurun"
+        descending: "Menurun",
       },
       cantFindData: "Tidak dapat mencari data anda?",
       restoreMockData: "Pulihkan Data",
@@ -144,8 +145,8 @@ export const ms: TranslationKeys = {
         tongue: "Lidah",
         face: "Muka",
         voice: "Suara",
-        pulse: "Nadi"
-      }
+        pulse: "Nadi",
+      },
     },
     historyTable: {
       good: "Baik",
@@ -171,7 +172,8 @@ export const ms: TranslationKeys = {
         frequency: "Kekerapan",
         notes: "Nota",
         active: "Sedang diambil",
-        noMedicines: "Tiada rekod ubat. Tambah ubat anda sekarang bagi meningkatkan ketepatan diagnosis seterusnya.",
+        noMedicines:
+          "Tiada rekod ubat. Tambah ubat anda sekarang bagi meningkatkan ketepatan diagnosis seterusnya.",
         saveMedicine: "Simpan Ubat",
         deleteConfirm: "Adakah anda pasti ingin membuang ubat ini?",
       },
@@ -187,9 +189,10 @@ export const ms: TranslationKeys = {
       },
       useInDiagnosis: {
         title: "Default untuk Diagnosis",
-        description: "Butiran ini akan digunakan sebagai default untuk penilaian diagnosis anda yang seterusnya.",
-      }
-    }
+        description:
+          "Butiran ini akan digunakan sebagai default untuk penilaian diagnosis anda yang seterusnya.",
+      },
+    },
   },
   login: {
     title: "Sihat TCM",
@@ -1072,7 +1075,8 @@ export const ms: TranslationKeys = {
     },
     deleteDialog: {
       title: "Adakah anda pasti?",
-      description: "Tindakan ini tidak boleh dibatalkan. Ini akan memadam rekod sesi anda secara kekal dari pelayan kami.",
+      description:
+        "Tindakan ini tidak boleh dibatalkan. Ini akan memadam rekod sesi anda secara kekal dari pelayan kami.",
       cancel: "Batal",
       confirm: "Padam",
     },
@@ -1204,7 +1208,8 @@ export const ms: TranslationKeys = {
       stepPulse: "Pengukuran Nadi",
       stepDiagnosisSummary: "Ringkasan Diagnostik",
       meridianClock: "Jam Meridian Organ",
-      meridianClockDesc: "Paparkan Jam Meridian Organ dan musim solar pada papan pemuka anda. (Disyorkan untuk pengguna di negara bermusim)",
+      meridianClockDesc:
+        "Paparkan Jam Meridian Organ dan musim solar pada papan pemuka anda. (Disyorkan untuk pengguna di negara bermusim)",
     },
 
     // Meal Planner / Terapi Pemakanan
@@ -1998,7 +2003,8 @@ export const ms: TranslationKeys = {
     title: "Qi Dose",
     subtitle: "Mikro-dos kecergasan anda dengan rutin TCM 8 minit",
     promoTitle: "Bersedia untuk senaman 8 minit harian anda?",
-    promoDesc: "Berdasarkan konstitusi TCM anda, kami telah menyediakan dos mikro kecergasan untuk mengawal tenaga dalaman anda. Tiada peralatan diperlukan.",
+    promoDesc:
+      "Berdasarkan konstitusi TCM anda, kami telah menyediakan dos mikro kecergasan untuk mengawal tenaga dalaman anda. Tiada peralatan diperlukan.",
     startFlow: "MULA SENAMAN",
     eightMinuteBrocade: "Brocade 8-Minit",
     eightMinuteBrocadeDesc: "Pergerakan ringkas dari Baduanjin untuk mengawal tenaga dalaman anda.",

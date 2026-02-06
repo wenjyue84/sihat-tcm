@@ -79,7 +79,7 @@ export function WesternDoctorChat({
   useEffect(() => {
     setIsSpeechSupported(
       typeof window !== "undefined" &&
-      ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
+        ("SpeechRecognition" in window || "webkitSpeechRecognition" in window)
     );
   }, []);
 
@@ -291,7 +291,7 @@ export function WesternDoctorChat({
       }
     };
 
-    recognitionRef.current = recognition;
+    recognitionRef.current = recognition as SpeechRecognition;
     recognition.start();
   }, [isSpeechSupported, language]);
 
@@ -363,10 +363,11 @@ export function WesternDoctorChat({
 
       {/* Chat Window */}
       <Card
-        className={`relative flex flex-col bg-white shadow-2xl transition-all duration-300 ${isMaximized
-          ? "w-full h-full rounded-none"
-          : "w-full max-w-2xl h-[80vh] max-h-[700px] rounded-xl"
-          }`}
+        className={`relative flex flex-col bg-white shadow-2xl transition-all duration-300 ${
+          isMaximized
+            ? "w-full h-full rounded-none"
+            : "w-full max-w-2xl h-[80vh] max-h-[700px] rounded-xl"
+        }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-cyan-50 to-blue-50">
@@ -427,10 +428,11 @@ export function WesternDoctorChat({
               <div key={m.id}>
                 <div className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
-                    className={`max-w-[85%] p-3 rounded-lg whitespace-pre-wrap text-sm ${m.role === "user"
-                      ? "bg-cyan-600 text-white rounded-br-none"
-                      : "bg-stone-100 text-stone-800 rounded-bl-none"
-                      }`}
+                    className={`max-w-[85%] p-3 rounded-lg whitespace-pre-wrap text-sm ${
+                      m.role === "user"
+                        ? "bg-cyan-600 text-white rounded-br-none"
+                        : "bg-stone-100 text-stone-800 rounded-bl-none"
+                    }`}
                   >
                     {cleanContent}
                   </div>
@@ -461,18 +463,22 @@ export function WesternDoctorChat({
             <div className="flex justify-start">
               <div className="max-w-[85%]">
                 <ThinkingAnimation
-                  basicInfo={patientInfo ? {
-                    ...patientInfo,
-                    name: patientInfo.name || "Patient",
-                    age: String(patientInfo.age || "N/A"),
-                    gender: patientInfo.gender || "N/A",
-                    height: String(patientInfo.height || ""),
-                    weight: String(patientInfo.weight || ""),
-                    mainComplaint: patientInfo.symptoms || "",
-                    symptoms: patientInfo.symptoms || "",
-                    otherSymptoms: "",
-                    symptomDuration: ""
-                  } : undefined}
+                  basicInfo={
+                    patientInfo
+                      ? {
+                          ...patientInfo,
+                          name: patientInfo.name || "Patient",
+                          age: String(patientInfo.age || "N/A"),
+                          gender: patientInfo.gender || "N/A",
+                          height: String(patientInfo.height || ""),
+                          weight: String(patientInfo.weight || ""),
+                          mainComplaint: patientInfo.symptoms || "",
+                          symptoms: patientInfo.symptoms || "",
+                          otherSymptoms: "",
+                          symptomDuration: "",
+                        }
+                      : undefined
+                  }
                   variant="compact"
                 />
               </div>

@@ -23,11 +23,11 @@ import { createInquiriesService, type InquiriesService } from "./inquiriesServic
 import { createPractitionersService, type PractitionersService } from "./practitionersService";
 
 export interface ServerServices {
-    diagnosis: DiagnosisService;
-    profiles: ProfilesService;
-    patients: PatientsService;
-    inquiries: InquiriesService;
-    practitioners: PractitionersService;
+  diagnosis: DiagnosisService;
+  profiles: ProfilesService;
+  patients: PatientsService;
+  inquiries: InquiriesService;
+  practitioners: PractitionersService;
 }
 
 /**
@@ -35,13 +35,13 @@ export interface ServerServices {
  * Must be called inside an async function as it uses cookies.
  */
 export async function createServerServices(): Promise<ServerServices> {
-    const supabase = await createClient();
+  const supabase = await createClient();
 
-    return {
-        diagnosis: createDiagnosisService(supabase),
-        profiles: createProfilesService(supabase),
-        patients: createPatientsService(supabase),
-        inquiries: createInquiriesService(supabase),
-        practitioners: createPractitionersService(supabase),
-    };
+  return {
+    diagnosis: createDiagnosisService(supabase),
+    profiles: createProfilesService(supabase),
+    patients: createPatientsService(supabase),
+    inquiries: createInquiriesService(supabase),
+    practitioners: createPractitionersService(supabase),
+  };
 }

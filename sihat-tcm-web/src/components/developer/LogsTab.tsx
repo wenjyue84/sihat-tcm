@@ -89,9 +89,7 @@ export function LogsTab() {
                       <span className="text-gray-700">[{time}]</span>{" "}
                       <span className="text-gray-500">[{log.category}]</span> {log.message}
                       {log.metadata && Object.keys(log.metadata).length > 0 && (
-                        <span className="text-gray-600 ml-2">
-                          {JSON.stringify(log.metadata)}
-                        </span>
+                        <span className="text-gray-600 ml-2">{JSON.stringify(log.metadata)}</span>
                       )}
                     </p>
                   );
@@ -105,6 +103,3 @@ export function LogsTab() {
     </div>
   );
 }
-
-
-

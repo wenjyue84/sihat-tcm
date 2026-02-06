@@ -44,7 +44,14 @@ export function Sidebar({ t }: SidebarProps) {
               className="absolute inset-0 w-full h-full transform -rotate-90"
               viewBox="0 0 100 100"
             >
-              <circle cx="50" cy="50" r="45" fill="none" stroke="rgb(241 245 249)" strokeWidth="6" />
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke="rgb(241 245 249)"
+                strokeWidth="6"
+              />
               <motion.circle
                 cx="50"
                 cy="50"

@@ -11,10 +11,11 @@ import {
   AlertTriangle,
   Calendar,
   Pill,
-  ChefHat
+  ChefHat,
 } from "lucide-react";
 import { HerbalFormulasSection } from "../HerbalFormulasSection";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { pdfTranslations } from "./utils";
 import type { ViewMode } from "./ViewSwitcher";
 
 interface ReportRecommendationsProps {
@@ -38,8 +39,10 @@ export function ReportRecommendations({
   variants,
   viewMode = "modern",
 }: ReportRecommendationsProps) {
-  // @ts-ignore
-  const { t } = useLanguage();
+  const { t: globalT, language } = useLanguage();
+  const reportT = pdfTranslations[language as keyof typeof pdfTranslations] || pdfTranslations.en;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const t = { ...globalT, ...reportT } as any;
 
   if (viewMode === "classic") {
     return (
@@ -47,18 +50,28 @@ export function ReportRecommendations({
         {/* Diet */}
         {opts.includeDietary !== false && (
           <div>
-            <h3 className="text-lg font-bold uppercase mb-4 border-b border-stone-200">{t.dietaryRecommendations}</h3>
+            <h3 className="text-lg font-bold uppercase mb-4 border-b border-stone-200">
+              {t.dietaryRecommendations}
+            </h3>
             <div className="grid md:grid-cols-2 gap-6">
               {foodRecommendations.length > 0 && (
                 <div>
                   <h4 className="font-bold mb-2">{t.report.foodsToEat}</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">{foodRecommendations.map((f, i) => <li key={i}>{f}</li>)}</ul>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    {foodRecommendations.map((f, i) => (
+                      <li key={i}>{f}</li>
+                    ))}
+                  </ul>
                 </div>
               )}
               {foodsToAvoid.length > 0 && (
                 <div>
                   <h4 className="font-bold mb-2">{t.report.foodsToAvoid}</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm">{foodsToAvoid.map((f, i) => <li key={i}>{f}</li>)}</ul>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    {foodsToAvoid.map((f, i) => (
+                      <li key={i}>{f}</li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
@@ -67,25 +80,34 @@ export function ReportRecommendations({
         {/* Exercise & Lifestyle */}
         {opts.includeLifestyle !== false && data.recommendations?.lifestyle && (
           <div>
-            <h3 className="text-lg font-bold uppercase mb-4 border-b border-stone-200">{t.report.lifestyle}</h3>
-            <ul className="list-disc list-inside space-y-1 text-sm">{data.recommendations.lifestyle.map((l: string, i: number) => <li key={i}>{l}</li>)}</ul>
+            <h3 className="text-lg font-bold uppercase mb-4 border-b border-stone-200">
+              {t.report.lifestyle}
+            </h3>
+            <ul className="list-disc list-inside space-y-1 text-sm">
+              {data.recommendations.lifestyle.map((l: string, i: number) => (
+                <li key={i}>{l}</li>
+              ))}
+            </ul>
           </div>
         )}
         {/* Precautions - Classic */}
         {opts.includePrecautions && data.precautions && (
           <div className="border border-stone-300 p-4 bg-stone-50">
-            <h3 className="font-bold uppercase text-red-800 mb-2">{t.report.precautionsAndWarnings}</h3>
-            {data.precautions.warning_signs && <p className="text-sm">WARNING SIGNS: {data.precautions.warning_signs.join(", ")}</p>}
+            <h3 className="font-bold uppercase text-red-800 mb-2">
+              {t.report.precautionsAndWarnings}
+            </h3>
+            {data.precautions.warning_signs && (
+              <p className="text-sm">WARNING SIGNS: {data.precautions.warning_signs.join(", ")}</p>
+            )}
           </div>
         )}
       </motion.div>
-    )
+    );
   }
 
   // Modern View
   return (
     <motion.div variants={variants} className="space-y-6">
-
       {/* Diet Card Group */}
       {opts.includeDietary !== false && (
         <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-stone-100">
@@ -106,7 +128,10 @@ export function ReportRecommendations({
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {foodRecommendations.map((food, i) => (
-                    <span key={i} className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-lg border border-emerald-100">
+                    <span
+                      key={i}
+                      className="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-lg border border-emerald-100"
+                    >
                       {food}
                     </span>
                   ))}
@@ -123,7 +148,10 @@ export function ReportRecommendations({
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {foodsToAvoid.map((food, i) => (
-                    <span key={i} className="px-3 py-1.5 bg-red-50 text-red-700 text-sm font-medium rounded-lg border border-red-100">
+                    <span
+                      key={i}
+                      className="px-3 py-1.5 bg-red-50 text-red-700 text-sm font-medium rounded-lg border border-red-100"
+                    >
                       {food}
                     </span>
                   ))}
@@ -141,7 +169,10 @@ export function ReportRecommendations({
               </h4>
               <div className="grid gap-3">
                 {recipes.map((recipe, i) => (
-                  <div key={i} className="p-3 bg-amber-50/50 rounded-xl border border-amber-100 text-amber-900/80 text-sm font-medium">
+                  <div
+                    key={i}
+                    className="p-3 bg-amber-50/50 rounded-xl border border-amber-100 text-amber-900/80 text-sm font-medium"
+                  >
                     {recipe}
                   </div>
                 ))}
@@ -156,7 +187,12 @@ export function ReportRecommendations({
         {/* Lifestyle */}
         {opts.includeLifestyle !== false && data.recommendations?.lifestyle && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-stone-100">
-            <Header icon={Leaf} title={t.report.lifestyle} color="text-green-600" bg="bg-green-50" />
+            <Header
+              icon={Leaf}
+              title={t.report.lifestyle}
+              color="text-green-600"
+              bg="bg-green-50"
+            />
             <ul className="space-y-3 mt-4">
               {data.recommendations.lifestyle.map((tip: string, i: number) => (
                 <ListItem key={i} text={tip} bulletColor="bg-green-400" />
@@ -168,7 +204,12 @@ export function ReportRecommendations({
         {/* Exercise */}
         {opts.includeExercise !== false && data.recommendations?.exercise && (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-stone-100">
-            <Header icon={Dumbbell} title={t.report.exercise} color="text-blue-600" bg="bg-blue-50" />
+            <Header
+              icon={Dumbbell}
+              title={t.report.exercise}
+              color="text-blue-600"
+              bg="bg-blue-50"
+            />
             <ul className="space-y-3 mt-4">
               {data.recommendations.exercise.map((ex: string, i: number) => (
                 <ListItem key={i} text={ex} bulletColor="bg-blue-400" />
@@ -181,7 +222,12 @@ export function ReportRecommendations({
       {/* Acupoints & Herbal (Full Width if needed) */}
       {opts.includeAcupuncture !== false && data.recommendations?.acupoints && (
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-stone-100">
-          <Header icon={MapPin} title={t.report.acupressurePoints} color="text-indigo-600" bg="bg-indigo-50" />
+          <Header
+            icon={MapPin}
+            title={t.report.acupressurePoints}
+            color="text-indigo-600"
+            bg="bg-indigo-50"
+          />
           <div className="mt-4 grid md:grid-cols-2 gap-4">
             {data.recommendations.acupoints.map((point: string, i: number) => (
               <div key={i} className="flex items-start gap-3 p-3 bg-indigo-50/30 rounded-xl">
@@ -197,7 +243,12 @@ export function ReportRecommendations({
       {/* Herbal Formulas */}
       {opts.suggestMedicine && data.recommendations?.herbal_formulas && (
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-stone-100 overflow-hidden">
-          <Header icon={Pill} title={t.report.herbalFormulas} color="text-stone-600" bg="bg-stone-100" />
+          <Header
+            icon={Pill}
+            title={t.report.herbalFormulas}
+            color="text-stone-600"
+            bg="bg-stone-100"
+          />
           <div className="mt-4">
             <HerbalFormulasSection
               formulas={data.recommendations.herbal_formulas}
@@ -211,20 +262,30 @@ export function ReportRecommendations({
       {/* Precautions */}
       {opts.includePrecautions && data.precautions && (
         <div className="bg-rose-50 rounded-3xl p-6 shadow-sm border border-rose-100">
-          <Header icon={AlertTriangle} title={t.report.precautionsAndWarnings} color="text-rose-700" bg="bg-white" />
+          <Header
+            icon={AlertTriangle}
+            title={t.report.precautionsAndWarnings}
+            color="text-rose-700"
+            bg="bg-white"
+          />
           <div className="mt-4 space-y-4">
             {data.precautions.warning_signs && (
               <div>
-                <p className="text-xs font-bold text-rose-800 uppercase mb-2">{t.report.warningSigns}</p>
+                <p className="text-xs font-bold text-rose-800 uppercase mb-2">
+                  {t.report.warningSigns}
+                </p>
                 <ul className="space-y-1">
-                  {data.precautions.warning_signs.map((s: string, i: number) => <li key={i} className="text-rose-900/80 text-sm">• {s}</li>)}
+                  {data.precautions.warning_signs.map((s: string, i: number) => (
+                    <li key={i} className="text-rose-900/80 text-sm">
+                      • {s}
+                    </li>
+                  ))}
                 </ul>
               </div>
             )}
           </div>
         </div>
       )}
-
     </motion.div>
   );
 }

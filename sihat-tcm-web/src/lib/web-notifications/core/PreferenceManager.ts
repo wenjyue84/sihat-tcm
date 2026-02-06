@@ -3,7 +3,7 @@
  * Handles notification preferences and quiet hours logic
  */
 
-import { NotificationPreferences } from '../interfaces/WebNotificationInterfaces';
+import { NotificationPreferences } from "../interfaces/WebNotificationInterfaces";
 
 export class PreferenceManager {
   private preferences: NotificationPreferences;

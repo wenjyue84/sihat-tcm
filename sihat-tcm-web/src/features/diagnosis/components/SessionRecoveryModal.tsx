@@ -1,14 +1,14 @@
 /**
  * Session Recovery Modal
- * 
+ *
  * Modal component for displaying and managing recoverable diagnosis sessions.
  * Allows users to resume interrupted consultations.
  */
 
-import React from 'react';
-import { format } from 'date-fns';
-import { Clock, FileText, Play, Trash2, X } from 'lucide-react';
-import type { PendingResumeState } from '@/types/diagnosis';
+import React from "react";
+import { format } from "date-fns";
+import { Clock, FileText, Play, Trash2, X } from "lucide-react";
+import type { PendingResumeState } from "@/types/diagnosis";
 
 interface SessionRecoveryModalProps {
   isOpen: boolean;
@@ -25,58 +25,56 @@ export function SessionRecoveryModal({
   onClose,
   onResumeSession,
   onDeleteSession,
-  isLoading = false
+  isLoading = false,
 }: SessionRecoveryModalProps) {
   if (!isOpen) return null;
 
   const formatTimestamp = (timestamp: string) => {
     try {
-      return format(new Date(timestamp), 'MMM dd, yyyy HH:mm');
+      return format(new Date(timestamp), "MMM dd, yyyy HH:mm");
     } catch {
-      return 'Unknown date';
+      return "Unknown date";
     }
   };
 
   const getStepDisplayName = (step: string) => {
     const stepNames: Record<string, string> = {
-      'basic_info': 'Basic Information',
-      'wen_inquiry': 'Health Inquiry',
-      'wang_tongue': 'Tongue Analysis',
-      'wang_face': 'Face Analysis',
-      'wang_part': 'Body Analysis',
-      'wen_audio': 'Voice Analysis',
-      'qie': 'Pulse Reading',
-      'smart_connect': 'Device Connection',
-      'analysis': 'Analysis',
-      'results': 'Results'
+      basic_info: "Basic Information",
+      wen_inquiry: "Health Inquiry",
+      wang_tongue: "Tongue Analysis",
+      wang_face: "Face Analysis",
+      wang_part: "Body Analysis",
+      wen_audio: "Voice Analysis",
+      qie: "Pulse Reading",
+      smart_connect: "Device Connection",
+      analysis: "Analysis",
+      results: "Results",
     };
     return stepNames[step] || step;
   };
 
   const getCompletionColor = (percentage: number) => {
-    if (percentage >= 80) return 'text-green-600 bg-green-100';
-    if (percentage >= 50) return 'text-yellow-600 bg-yellow-100';
-    return 'text-blue-600 bg-blue-100';
+    if (percentage >= 80) return "text-green-600 bg-green-100";
+    if (percentage >= 50) return "text-yellow-600 bg-yellow-100";
+    return "text-blue-600 bg-blue-100";
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
       <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Resume Previous Session
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900">Resume Previous Session</h2>
             <p className="text-sm text-gray-600 mt-1">
-              We found {sessions.length} incomplete consultation{sessions.length !== 1 ? 's' : ''}. 
+              We found {sessions.length} incomplete consultation{sessions.length !== 1 ? "s" : ""}.
               Would you like to continue where you left off?
             </p>
           </div>
@@ -113,9 +111,11 @@ export function SessionRecoveryModal({
                             {formatTimestamp(session.timestamp)}
                           </span>
                         </div>
-                        
+
                         {session.completionPercentage !== undefined && (
-                          <div className={`px-2 py-1 rounded-full text-xs font-medium ${getCompletionColor(session.completionPercentage)}`}>
+                          <div
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getCompletionColor(session.completionPercentage)}`}
+                          >
                             {session.completionPercentage}% complete
                           </div>
                         )}
@@ -144,12 +144,18 @@ export function SessionRecoveryModal({
                       {session.data && Object.keys(session.data).length > 0 && (
                         <div className="text-xs text-gray-500">
                           <p>
-                            Data collected: {Object.keys(session.data).filter(key => {
-                              const value = (session.data as any)[key];
-                              return value && 
-                                typeof value === 'object' && 
-                                Object.keys(value).length > 0;
-                            }).length} sections
+                            Data collected:{" "}
+                            {
+                              Object.keys(session.data).filter((key) => {
+                                const value = (session.data as any)[key];
+                                return (
+                                  value &&
+                                  typeof value === "object" &&
+                                  Object.keys(value).length > 0
+                                );
+                              }).length
+                            }{" "}
+                            sections
                           </p>
                         </div>
                       )}
@@ -165,7 +171,7 @@ export function SessionRecoveryModal({
                         <Play className="w-4 h-4" />
                         Resume
                       </button>
-                      
+
                       {onDeleteSession && (
                         <button
                           onClick={() => onDeleteSession(session.sessionId!)}
@@ -189,7 +195,7 @@ export function SessionRecoveryModal({
           <p className="text-xs text-gray-500">
             Sessions are automatically saved and can be resumed within 24 hours.
           </p>
-          
+
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}

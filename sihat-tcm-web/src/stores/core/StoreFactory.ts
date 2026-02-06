@@ -1,6 +1,6 @@
 /**
  * Store Factory
- * 
+ *
  * Factory for creating and configuring application stores with
  * proper initialization, validation, and dependency injection.
  */
@@ -16,7 +16,7 @@ import type {
   StoreConfig,
   StoreFactoryConfig,
   StoreType,
-  StoreInstance
+  StoreInstance,
 } from "../interfaces/StoreInterfaces";
 
 /**
@@ -39,7 +39,7 @@ export class StoreFactory {
 
   constructor(options: StoreFactoryOptions = {}) {
     this.config = {
-      enableLogging: process.env.NODE_ENV === 'development',
+      enableLogging: process.env.NODE_ENV === "development",
       enableValidation: true,
       enableMetrics: true,
       ...options,
@@ -53,8 +53,8 @@ export class StoreFactory {
    */
   private initializeStoreConfigs(): void {
     // Auth Store Configuration
-    this.storeConfigs.set('auth', {
-      name: 'auth',
+    this.storeConfigs.set("auth", {
+      name: "auth",
       dependencies: [],
       initialState: {
         user: null,
@@ -63,46 +63,46 @@ export class StoreFactory {
         authLoading: true,
       },
       validation: {
-        required: ['user', 'session', 'profile', 'authLoading'],
+        required: ["user", "session", "profile", "authLoading"],
         types: {
-          user: ['object', 'null'],
-          session: ['object', 'null'],
-          profile: ['object', 'null'],
-          authLoading: 'boolean',
+          user: ["object", "null"],
+          session: ["object", "null"],
+          profile: ["object", "null"],
+          authLoading: "boolean",
         },
       },
       lifecycle: {
-        onInit: 'initializeAuth',
-        onDestroy: 'cleanup',
+        onInit: "initializeAuth",
+        onDestroy: "cleanup",
       },
     });
 
     // Language Store Configuration
-    this.storeConfigs.set('language', {
-      name: 'language',
-      dependencies: ['auth'],
+    this.storeConfigs.set("language", {
+      name: "language",
+      dependencies: ["auth"],
       initialState: {
-        language: 'en',
+        language: "en",
         languageLoaded: false,
       },
       validation: {
-        required: ['language', 'languageLoaded'],
+        required: ["language", "languageLoaded"],
         types: {
-          language: 'string',
-          languageLoaded: 'boolean',
+          language: "string",
+          languageLoaded: "boolean",
         },
         constraints: {
-          language: ['en', 'zh', 'ms'],
+          language: ["en", "zh", "ms"],
         },
       },
       lifecycle: {
-        onInit: 'initializeLanguage',
+        onInit: "initializeLanguage",
       },
     });
 
     // Diagnosis Progress Store Configuration
-    this.storeConfigs.set('diagnosisProgress', {
-      name: 'diagnosisProgress',
+    this.storeConfigs.set("diagnosisProgress", {
+      name: "diagnosisProgress",
       dependencies: [],
       initialState: {
         diagnosisProgress: 0,
@@ -111,12 +111,17 @@ export class StoreFactory {
         diagnosisNavigationState: {},
       },
       validation: {
-        required: ['diagnosisProgress', 'diagnosisStepIndex', 'diagnosisFormProgress', 'diagnosisNavigationState'],
+        required: [
+          "diagnosisProgress",
+          "diagnosisStepIndex",
+          "diagnosisFormProgress",
+          "diagnosisNavigationState",
+        ],
         types: {
-          diagnosisProgress: 'number',
-          diagnosisStepIndex: 'number',
-          diagnosisFormProgress: 'object',
-          diagnosisNavigationState: 'object',
+          diagnosisProgress: "number",
+          diagnosisStepIndex: "number",
+          diagnosisFormProgress: "object",
+          diagnosisNavigationState: "object",
         },
         constraints: {
           diagnosisProgress: { min: 0, max: 100 },
@@ -126,9 +131,9 @@ export class StoreFactory {
     });
 
     // Accessibility Store Configuration
-    this.storeConfigs.set('accessibility', {
-      name: 'accessibility',
-      dependencies: ['auth'],
+    this.storeConfigs.set("accessibility", {
+      name: "accessibility",
+      dependencies: ["auth"],
       initialState: {
         accessibilityManager: null,
         accessibilityPreferences: {
@@ -136,62 +141,62 @@ export class StoreFactory {
           reducedMotion: false,
           screenReaderEnabled: false,
           keyboardNavigation: true,
-          fontSize: 'medium',
-          focusIndicatorStyle: 'default',
+          fontSize: "medium",
+          focusIndicatorStyle: "default",
           announcements: true,
           colorBlindnessSupport: false,
           autoplayMedia: false,
-          animationSpeed: 'normal',
-          textSpacing: 'normal',
+          animationSpeed: "normal",
+          textSpacing: "normal",
         },
       },
       validation: {
-        required: ['accessibilityManager', 'accessibilityPreferences'],
+        required: ["accessibilityManager", "accessibilityPreferences"],
         types: {
-          accessibilityManager: ['object', 'null'],
-          accessibilityPreferences: 'object',
+          accessibilityManager: ["object", "null"],
+          accessibilityPreferences: "object",
         },
       },
       lifecycle: {
-        onInit: 'initializeAccessibility',
+        onInit: "initializeAccessibility",
       },
     });
 
     // Onboarding Store Configuration
-    this.storeConfigs.set('onboarding', {
-      name: 'onboarding',
-      dependencies: ['auth'],
+    this.storeConfigs.set("onboarding", {
+      name: "onboarding",
+      dependencies: ["auth"],
       initialState: {
         hasCompletedOnboarding: false,
         onboardingLoading: false,
       },
       validation: {
-        required: ['hasCompletedOnboarding', 'onboardingLoading'],
+        required: ["hasCompletedOnboarding", "onboardingLoading"],
         types: {
-          hasCompletedOnboarding: 'boolean',
-          onboardingLoading: 'boolean',
+          hasCompletedOnboarding: "boolean",
+          onboardingLoading: "boolean",
         },
       },
       lifecycle: {
-        onInit: 'initializeOnboarding',
+        onInit: "initializeOnboarding",
       },
     });
 
     // Developer Store Configuration
-    this.storeConfigs.set('developer', {
-      name: 'developer',
+    this.storeConfigs.set("developer", {
+      name: "developer",
       dependencies: [],
       initialState: {
         isDeveloperMode: false,
       },
       validation: {
-        required: ['isDeveloperMode'],
+        required: ["isDeveloperMode"],
         types: {
-          isDeveloperMode: 'boolean',
+          isDeveloperMode: "boolean",
         },
       },
       lifecycle: {
-        onInit: 'initializeDeveloper',
+        onInit: "initializeDeveloper",
       },
     });
   }
@@ -204,7 +209,7 @@ export class StoreFactory {
     customConfig?: Partial<StoreFactoryConfig>
   ): T {
     const storeId = `${type}-${Date.now()}`;
-    
+
     if (this.config.enableLogging) {
       logger.info("StoreFactory", "Creating store", { type, storeId });
     }
@@ -224,25 +229,25 @@ export class StoreFactory {
 
     // Create the store based on type
     let store: T;
-    
+
     try {
       switch (type) {
-        case 'auth':
+        case "auth":
           store = this.createAuthStore(config) as T;
           break;
-        case 'language':
+        case "language":
           store = this.createLanguageStore(config) as T;
           break;
-        case 'diagnosisProgress':
+        case "diagnosisProgress":
           store = this.createDiagnosisProgressStore(config) as T;
           break;
-        case 'accessibility':
+        case "accessibility":
           store = this.createAccessibilityStore(config) as T;
           break;
-        case 'onboarding':
+        case "onboarding":
           store = this.createOnboardingStore(config) as T;
           break;
-        case 'developer':
+        case "developer":
           store = this.createDeveloperStore(config) as T;
           break;
         default:
@@ -250,11 +255,14 @@ export class StoreFactory {
       }
 
       // Initialize the store if it has an initialization method
-      if (config.lifecycle?.onInit && typeof (store as any)[config.lifecycle.onInit] === 'function') {
+      if (
+        config.lifecycle?.onInit &&
+        typeof (store as any)[config.lifecycle.onInit] === "function"
+      ) {
         const initResult = (store as any)[config.lifecycle.onInit]();
-        
+
         // Handle async initialization
-        if (initResult && typeof initResult.then === 'function') {
+        if (initResult && typeof initResult.then === "function") {
           initResult.catch((error: Error) => {
             logger.error("StoreFactory", "Store initialization failed", {
               type,
@@ -293,7 +301,7 @@ export class StoreFactory {
   private createAuthStore(config: StoreFactoryConfig): AuthStore {
     // This would import and create the actual auth store
     // For now, we'll return a mock implementation
-    const { useAuthStore } = require('../auth/AuthStore');
+    const { useAuthStore } = require("../auth/AuthStore");
     return useAuthStore;
   }
 
@@ -301,7 +309,7 @@ export class StoreFactory {
    * Create language store
    */
   private createLanguageStore(config: StoreFactoryConfig): LanguageStore {
-    const { useLanguageStore } = require('../language/LanguageStore');
+    const { useLanguageStore } = require("../language/LanguageStore");
     return useLanguageStore;
   }
 
@@ -309,7 +317,7 @@ export class StoreFactory {
    * Create diagnosis progress store
    */
   private createDiagnosisProgressStore(config: StoreFactoryConfig): DiagnosisProgressStore {
-    const { useDiagnosisProgressStore } = require('../diagnosis/DiagnosisProgressStore');
+    const { useDiagnosisProgressStore } = require("../diagnosis/DiagnosisProgressStore");
     return useDiagnosisProgressStore;
   }
 
@@ -345,7 +353,7 @@ export class StoreFactory {
       throw new Error("Store configuration must have a name");
     }
 
-    if (!config.initialState || typeof config.initialState !== 'object') {
+    if (!config.initialState || typeof config.initialState !== "object") {
       throw new Error("Store configuration must have an initial state");
     }
 
@@ -371,11 +379,13 @@ export class StoreFactory {
     if (validation.types) {
       for (const [field, expectedType] of Object.entries(validation.types)) {
         const value = state[field];
-        const actualType = Array.isArray(value) ? 'array' : typeof value;
-        
+        const actualType = Array.isArray(value) ? "array" : typeof value;
+
         if (Array.isArray(expectedType)) {
           if (!expectedType.includes(actualType)) {
-            throw new Error(`Field '${field}' has type '${actualType}', expected one of: ${expectedType.join(', ')}`);
+            throw new Error(
+              `Field '${field}' has type '${actualType}', expected one of: ${expectedType.join(", ")}`
+            );
           }
         } else if (actualType !== expectedType) {
           throw new Error(`Field '${field}' has type '${actualType}', expected '${expectedType}'`);
@@ -387,16 +397,18 @@ export class StoreFactory {
     if (validation.constraints) {
       for (const [field, constraint] of Object.entries(validation.constraints)) {
         const value = state[field];
-        
+
         if (Array.isArray(constraint)) {
           // Enum constraint
           if (!constraint.includes(value)) {
-            throw new Error(`Field '${field}' has value '${value}', expected one of: ${constraint.join(', ')}`);
+            throw new Error(
+              `Field '${field}' has value '${value}', expected one of: ${constraint.join(", ")}`
+            );
           }
-        } else if (typeof constraint === 'object' && constraint !== null) {
+        } else if (typeof constraint === "object" && constraint !== null) {
           // Range constraint
           const { min, max } = constraint as any;
-          if (typeof value === 'number') {
+          if (typeof value === "number") {
             if (min !== undefined && value < min) {
               throw new Error(`Field '${field}' has value ${value}, expected >= ${min}`);
             }
@@ -428,7 +440,7 @@ export class StoreFactory {
    */
   public clearCache(): void {
     this.createdStores.clear();
-    
+
     if (this.config.enableLogging) {
       logger.info("StoreFactory", "Store cache cleared");
     }
@@ -454,7 +466,7 @@ export class StoreFactory {
  * Default store factory instance
  */
 export const defaultStoreFactory = new StoreFactory({
-  enableLogging: process.env.NODE_ENV === 'development',
+  enableLogging: process.env.NODE_ENV === "development",
   enableValidation: true,
   enableMetrics: true,
 });

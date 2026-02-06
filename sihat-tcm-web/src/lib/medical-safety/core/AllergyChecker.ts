@@ -1,6 +1,6 @@
 /**
  * Allergy Checker
- * 
+ *
  * Specialized component for checking allergies against recommendations.
  * Provides comprehensive allergy validation with cross-referencing.
  */
@@ -9,7 +9,7 @@ import { devLog } from "../../systemLogger";
 import {
   AllergyCheckResult,
   SafetyConcern,
-  ValidationContext
+  ValidationContext,
 } from "../interfaces/SafetyInterfaces";
 
 export class AllergyChecker {
@@ -29,7 +29,7 @@ export class AllergyChecker {
     try {
       devLog("info", this.context, "Checking allergies", {
         recommendationCount: recommendations.length,
-        allergyCount: validationContext.medical_history.allergies.length
+        allergyCount: validationContext.medical_history.allergies.length,
       });
 
       const concerns: SafetyConcern[] = [];
@@ -44,10 +44,7 @@ export class AllergyChecker {
       }
 
       // Check for cross-reactive allergies
-      const crossReactiveConcerns = this.checkCrossReactiveAllergies(
-        recommendations,
-        allergies
-      );
+      const crossReactiveConcerns = this.checkCrossReactiveAllergies(recommendations, allergies);
       concerns.push(...crossReactiveConcerns);
 
       return { concerns };
@@ -71,7 +68,7 @@ export class AllergyChecker {
 
     // Check for common allergen synonyms
     const allergenSynonyms = this.getAllergenSynonyms(allergyLower);
-    return allergenSynonyms.some(synonym => recLower.includes(synonym));
+    return allergenSynonyms.some((synonym) => recLower.includes(synonym));
   }
 
   /**
@@ -79,14 +76,14 @@ export class AllergyChecker {
    */
   private getAllergenSynonyms(allergy: string): string[] {
     const synonymMap: Record<string, string[]> = {
-      "shellfish": ["shrimp", "crab", "lobster", "prawns", "scallops", "oysters"],
-      "nuts": ["peanuts", "tree nuts", "almonds", "walnuts", "cashews"],
-      "dairy": ["milk", "cheese", "yogurt", "butter", "lactose"],
-      "eggs": ["egg", "albumin", "ovalbumin"],
-      "soy": ["soybean", "tofu", "miso", "tempeh"],
-      "wheat": ["gluten", "flour", "bread", "pasta"],
-      "fish": ["salmon", "tuna", "cod", "mackerel"],
-      "sesame": ["sesame seeds", "tahini", "sesame oil"]
+      shellfish: ["shrimp", "crab", "lobster", "prawns", "scallops", "oysters"],
+      nuts: ["peanuts", "tree nuts", "almonds", "walnuts", "cashews"],
+      dairy: ["milk", "cheese", "yogurt", "butter", "lactose"],
+      eggs: ["egg", "albumin", "ovalbumin"],
+      soy: ["soybean", "tofu", "miso", "tempeh"],
+      wheat: ["gluten", "flour", "bread", "pasta"],
+      fish: ["salmon", "tuna", "cod", "mackerel"],
+      sesame: ["sesame seeds", "tahini", "sesame oil"],
     };
 
     return synonymMap[allergy] || [];
@@ -103,11 +100,11 @@ export class AllergyChecker {
 
     // Cross-reactivity patterns
     const crossReactivity: Record<string, string[]> = {
-      "shellfish": ["iodine", "seaweed"],
-      "latex": ["banana", "avocado", "kiwi", "chestnut"],
+      shellfish: ["iodine", "seaweed"],
+      latex: ["banana", "avocado", "kiwi", "chestnut"],
       "birch pollen": ["apple", "cherry", "peach", "apricot"],
-      "ragweed": ["banana", "melon", "cucumber"],
-      "grass pollen": ["tomato", "orange", "melon"]
+      ragweed: ["banana", "melon", "cucumber"],
+      "grass pollen": ["tomato", "orange", "melon"],
     };
 
     for (const allergy of allergies) {
@@ -122,7 +119,7 @@ export class AllergyChecker {
                 description: `Potential cross-reactivity: ${crossReactant} may cause reaction in patients allergic to ${allergy}`,
                 affected_recommendation: recommendation,
                 evidence_level: "clinical_study",
-                action_required: "seek_medical_advice"
+                action_required: "seek_medical_advice",
               });
             }
           }
@@ -143,17 +140,14 @@ export class AllergyChecker {
       description: `Recommendation contains ${allergy} which user is allergic to`,
       affected_recommendation: recommendation,
       evidence_level: "clinical_study",
-      action_required: "avoid_completely"
+      action_required: "avoid_completely",
     };
   }
 
   /**
    * Validate specific allergen against recommendation
    */
-  async validateAllergen(
-    recommendation: string,
-    allergen: string
-  ): Promise<SafetyConcern | null> {
+  async validateAllergen(recommendation: string, allergen: string): Promise<SafetyConcern | null> {
     if (this.isAllergyMatch(recommendation, allergen)) {
       return this.createAllergyConcern(recommendation, allergen);
     }
@@ -169,12 +163,12 @@ export class AllergyChecker {
     severity: "mild" | "moderate" | "severe";
   } {
     const synonyms = this.getAllergenSynonyms(allergen.toLowerCase());
-    
+
     const crossReactivity: Record<string, string[]> = {
-      "shellfish": ["iodine", "seaweed"],
-      "latex": ["banana", "avocado", "kiwi", "chestnut"],
-      "nuts": ["tree pollen", "stone fruits"],
-      "dairy": ["beef", "goat milk"]
+      shellfish: ["iodine", "seaweed"],
+      latex: ["banana", "avocado", "kiwi", "chestnut"],
+      nuts: ["tree pollen", "stone fruits"],
+      dairy: ["beef", "goat milk"],
     };
 
     const crossReactants = crossReactivity[allergen.toLowerCase()] || [];
@@ -186,7 +180,7 @@ export class AllergyChecker {
     return {
       synonyms,
       crossReactants,
-      severity
+      severity,
     };
   }
 }

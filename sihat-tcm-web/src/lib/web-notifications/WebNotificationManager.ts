@@ -10,21 +10,21 @@ import {
   NotificationStats,
   InitializationResult,
   SyncResult,
-} from './interfaces/WebNotificationInterfaces';
+} from "./interfaces/WebNotificationInterfaces";
 
-import { PermissionManager } from './core/PermissionManager';
-import { PreferenceManager } from './core/PreferenceManager';
-import { NotificationScheduler } from './core/NotificationScheduler';
-import { NotificationDisplay } from './core/NotificationDisplay';
-import { NotificationHandlers } from './handlers/NotificationHandlers';
-import { SyncManager } from './sync/SyncManager';
+import { PermissionManager } from "./core/PermissionManager";
+import { PreferenceManager } from "./core/PreferenceManager";
+import { NotificationScheduler } from "./core/NotificationScheduler";
+import { NotificationDisplay } from "./core/NotificationDisplay";
+import { NotificationHandlers } from "./handlers/NotificationHandlers";
+import { SyncManager } from "./sync/SyncManager";
 
 /**
  * Enhanced Web Notification Manager with modular architecture
  */
 export class WebNotificationManager {
   private isInitialized = false;
-  
+
   // Core components
   private permissionManager: PermissionManager;
   private preferenceManager: PreferenceManager;
@@ -40,13 +40,9 @@ export class WebNotificationManager {
     this.scheduler = new NotificationScheduler();
     this.display = new NotificationDisplay();
     this.handlers = new NotificationHandlers();
-    
+
     // Initialize sync manager with dependencies
-    this.syncManager = new SyncManager(
-      this.preferenceManager,
-      this.scheduler,
-      this.display
-    );
+    this.syncManager = new SyncManager(this.preferenceManager, this.scheduler, this.display);
   }
 
   /**
@@ -71,7 +67,7 @@ export class WebNotificationManager {
 
       // Register service worker for background notifications
       await this.permissionManager.registerServiceWorker();
-      
+
       // Set service worker registration in scheduler
       const registration = this.permissionManager.getServiceWorkerRegistration();
       if (registration) {
@@ -118,8 +114,10 @@ export class WebNotificationManager {
    */
   async showNotification(options: NotificationOptions): Promise<void> {
     try {
-      if (!this.preferenceManager.areNotificationsEnabled() || 
-          !this.permissionManager.hasPermission()) {
+      if (
+        !this.preferenceManager.areNotificationsEnabled() ||
+        !this.permissionManager.hasPermission()
+      ) {
         console.log("[WebNotificationManager] Notifications disabled or no permission");
         return;
       }
@@ -161,7 +159,7 @@ export class WebNotificationManager {
       }
 
       const notificationId = await this.scheduler.scheduleNotification(options);
-      
+
       if (notificationId) {
         console.log("[WebNotificationManager] Notification scheduled:", notificationId);
       }
@@ -179,7 +177,7 @@ export class WebNotificationManager {
   async cancelNotification(notificationId: string): Promise<boolean> {
     try {
       const result = await this.scheduler.cancelNotification(notificationId);
-      
+
       if (result) {
         console.log("[WebNotificationManager] Notification cancelled:", notificationId);
       }
@@ -197,7 +195,7 @@ export class WebNotificationManager {
   async updatePreferences(newPreferences: Partial<NotificationPreferences>): Promise<boolean> {
     try {
       const result = await this.preferenceManager.updatePreferences(newPreferences);
-      
+
       if (result) {
         console.log("[WebNotificationManager] Preferences updated");
       }
@@ -236,7 +234,7 @@ export class WebNotificationManager {
   handleNotificationClick(notificationData: any): void {
     // Mark as clicked in display history
     this.display.markAsClicked(notificationData);
-    
+
     // Handle the click with appropriate routing
     this.handlers.handleNotificationClick(notificationData);
   }

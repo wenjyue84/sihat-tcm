@@ -1,6 +1,6 @@
 /**
  * AI Model Router - Modular Architecture
- * 
+ *
  * This is the new modular approach to AI model routing.
  * Use these exports for new code instead of the legacy aiModelRouter.ts
  */
@@ -13,15 +13,15 @@ export type {
   ComplexityFactors,
   ModelPerformanceMetrics,
   ModelCapabilities,
-  ModelRouterConfig
+  ModelRouterConfig,
 } from "./interfaces/ModelInterfaces";
 
 // Main router classes
 export { AIModelRouter } from "./ModelRouter";
-export { 
+export {
   EnhancedAIModelRouter,
   defaultEnhancedRouter,
-  createEnhancedRouter 
+  createEnhancedRouter,
 } from "./core/EnhancedAIModelRouter";
 
 // Specialized components
@@ -30,22 +30,16 @@ export { ModelSelectionStrategy } from "./selection/ModelSelectionStrategy";
 export { PerformanceMonitor } from "./monitoring/PerformanceMonitor";
 
 // Factory and utilities
-export { 
+export {
   ModelFactory,
   defaultModelRouter,
   highPerformanceRouter,
-  testingRouter
+  testingRouter,
 } from "./factories/ModelFactory";
 
-export { 
-  routeAIRequest,
-  createSelectionCriteria
-} from "./utils/RouterUtils";
+export { routeAIRequest, createSelectionCriteria } from "./utils/RouterUtils";
 
 // Convenience function for quick setup
-export function createAIRouter(
-  appName: string = "SihatTCM",
-  config?: Partial<ModelRouterConfig>
-) {
+export function createAIRouter(appName: string = "SihatTCM", config?: Partial<ModelRouterConfig>) {
   return ModelFactory.createCustomRouter(appName, config || {});
 }

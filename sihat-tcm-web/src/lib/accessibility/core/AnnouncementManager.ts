@@ -1,6 +1,6 @@
 /**
  * Announcement Manager
- * 
+ *
  * Manages screen reader announcements and accessibility notifications
  * with intelligent queuing and priority handling.
  */
@@ -9,7 +9,7 @@ import { logger } from "@/lib/clientLogger";
 import type {
   AnnouncementManager as IAnnouncementManager,
   AccessibilityAnnouncement,
-  ScreenReaderConfig
+  ScreenReaderConfig,
 } from "../interfaces/AccessibilityInterfaces";
 
 /**
@@ -27,7 +27,7 @@ export class AnnouncementManager implements IAnnouncementManager {
   constructor(config: Partial<ScreenReaderConfig> = {}) {
     this.config = {
       enabled: true,
-      verbosity: 'normal',
+      verbosity: "normal",
       announceChanges: true,
       announceNavigation: true,
       announceErrors: true,
@@ -48,7 +48,7 @@ export class AnnouncementManager implements IAnnouncementManager {
 
     this.createLiveRegions();
     this.setupSpeechSynthesis();
-    
+
     logger.info("AnnouncementManager", "Initialized successfully");
   }
 
@@ -59,10 +59,10 @@ export class AnnouncementManager implements IAnnouncementManager {
     if (typeof document === "undefined") return;
 
     // Create polite live region
-    this.politeRegion = document.createElement('div');
-    this.politeRegion.setAttribute('aria-live', 'polite');
-    this.politeRegion.setAttribute('aria-atomic', 'true');
-    this.politeRegion.setAttribute('class', 'sr-only');
+    this.politeRegion = document.createElement("div");
+    this.politeRegion.setAttribute("aria-live", "polite");
+    this.politeRegion.setAttribute("aria-atomic", "true");
+    this.politeRegion.setAttribute("class", "sr-only");
     this.politeRegion.style.cssText = `
       position: absolute !important;
       width: 1px !important;
@@ -77,10 +77,10 @@ export class AnnouncementManager implements IAnnouncementManager {
     document.body.appendChild(this.politeRegion);
 
     // Create assertive live region
-    this.assertiveRegion = document.createElement('div');
-    this.assertiveRegion.setAttribute('aria-live', 'assertive');
-    this.assertiveRegion.setAttribute('aria-atomic', 'true');
-    this.assertiveRegion.setAttribute('class', 'sr-only');
+    this.assertiveRegion = document.createElement("div");
+    this.assertiveRegion.setAttribute("aria-live", "assertive");
+    this.assertiveRegion.setAttribute("aria-atomic", "true");
+    this.assertiveRegion.setAttribute("class", "sr-only");
     this.assertiveRegion.style.cssText = this.politeRegion.style.cssText;
     document.body.appendChild(this.assertiveRegion);
 
@@ -91,7 +91,7 @@ export class AnnouncementManager implements IAnnouncementManager {
    * Setup speech synthesis if available
    */
   private setupSpeechSynthesis(): void {
-    if (typeof window === "undefined" || !('speechSynthesis' in window)) return;
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
 
     // Configure speech synthesis
     if (this.config.customVoice) {
@@ -137,8 +137,8 @@ export class AnnouncementManager implements IAnnouncementManager {
   public announceError(message: string, persistent: boolean = false): void {
     this.announce({
       message: `Error: ${message}`,
-      priority: 'assertive',
-      category: 'error',
+      priority: "assertive",
+      category: "error",
       persistent,
     });
   }
@@ -149,8 +149,8 @@ export class AnnouncementManager implements IAnnouncementManager {
   public announceSuccess(message: string): void {
     this.announce({
       message: `Success: ${message}`,
-      priority: 'polite',
-      category: 'success',
+      priority: "polite",
+      category: "success",
     });
   }
 
@@ -162,8 +162,8 @@ export class AnnouncementManager implements IAnnouncementManager {
 
     this.announce({
       message: `Navigated to: ${message}`,
-      priority: 'polite',
-      category: 'navigation',
+      priority: "polite",
+      category: "navigation",
     });
   }
 
@@ -178,7 +178,7 @@ export class AnnouncementManager implements IAnnouncementManager {
     try {
       while (this.announcementQueue.length > 0) {
         const announcement = this.announcementQueue.shift()!;
-        
+
         // Apply delay if specified
         if (announcement.delay) {
           await this.delay(announcement.delay);
@@ -214,14 +214,13 @@ export class AnnouncementManager implements IAnnouncementManager {
    * Announce to ARIA live region
    */
   private async announceToLiveRegion(announcement: AccessibilityAnnouncement): Promise<void> {
-    const targetRegion = announcement.priority === 'assertive' 
-      ? this.assertiveRegion 
-      : this.politeRegion;
+    const targetRegion =
+      announcement.priority === "assertive" ? this.assertiveRegion : this.politeRegion;
 
     if (!targetRegion) return;
 
     // Clear the region first
-    targetRegion.textContent = '';
+    targetRegion.textContent = "";
 
     // Small delay to ensure screen readers notice the change
     await this.delay(50);
@@ -238,12 +237,14 @@ export class AnnouncementManager implements IAnnouncementManager {
   /**
    * Announce with speech synthesis
    */
-  private async announceWithSpeechSynthesis(announcement: AccessibilityAnnouncement): Promise<void> {
-    if (typeof window === "undefined" || !('speechSynthesis' in window)) return;
+  private async announceWithSpeechSynthesis(
+    announcement: AccessibilityAnnouncement
+  ): Promise<void> {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
 
     return new Promise((resolve) => {
       const utterance = new SpeechSynthesisUtterance(announcement.message);
-      
+
       // Configure utterance
       utterance.rate = this.config.speechRate;
       utterance.pitch = this.config.speechPitch;
@@ -272,8 +273,8 @@ export class AnnouncementManager implements IAnnouncementManager {
   private shouldUseSpeechSynthesis(): boolean {
     return (
       typeof window !== "undefined" &&
-      'speechSynthesis' in window &&
-      this.config.verbosity !== 'minimal'
+      "speechSynthesis" in window &&
+      this.config.verbosity !== "minimal"
     );
   }
 
@@ -283,7 +284,7 @@ export class AnnouncementManager implements IAnnouncementManager {
   public clearAnnouncements(category?: string): void {
     if (category) {
       this.announcementQueue = this.announcementQueue.filter(
-        announcement => announcement.category !== category
+        (announcement) => announcement.category !== category
       );
     } else {
       this.announcementQueue = [];
@@ -291,14 +292,14 @@ export class AnnouncementManager implements IAnnouncementManager {
 
     // Clear live regions
     if (this.politeRegion) {
-      this.politeRegion.textContent = '';
+      this.politeRegion.textContent = "";
     }
     if (this.assertiveRegion) {
-      this.assertiveRegion.textContent = '';
+      this.assertiveRegion.textContent = "";
     }
 
     // Stop speech synthesis
-    if (typeof window !== "undefined" && 'speechSynthesis' in window) {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
 
@@ -310,7 +311,7 @@ export class AnnouncementManager implements IAnnouncementManager {
    */
   public setAnnouncementPreferences(config: Partial<ScreenReaderConfig>): void {
     this.config = { ...this.config, ...config };
-    
+
     logger.info("AnnouncementManager", "Preferences updated", { config });
   }
 
@@ -341,7 +342,7 @@ export class AnnouncementManager implements IAnnouncementManager {
    * Utility delay function
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -361,7 +362,7 @@ export class AnnouncementManager implements IAnnouncementManager {
     }
 
     // Stop speech synthesis
-    if (typeof window !== "undefined" && 'speechSynthesis' in window) {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
 

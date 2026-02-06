@@ -2,12 +2,12 @@
  * Event history management
  */
 
-import { AppEvent } from '../interfaces/EventInterfaces';
+import { AppEvent } from "../interfaces/EventInterfaces";
 
 export class EventHistory {
   private eventHistory: AppEvent[] = [];
   private readonly maxHistorySize: number;
-  private readonly context = 'EventHistory';
+  private readonly context = "EventHistory";
 
   constructor(maxHistorySize: number = 1000) {
     this.maxHistorySize = maxHistorySize;
@@ -28,14 +28,11 @@ export class EventHistory {
   /**
    * Get event history with optional filtering
    */
-  public getHistory(
-    eventType?: string,
-    limit?: number
-  ): AppEvent[] {
+  public getHistory(eventType?: string, limit?: number): AppEvent[] {
     let history = this.eventHistory;
 
     if (eventType) {
-      history = history.filter(event => event.type === eventType);
+      history = history.filter((event) => event.type === eventType);
     }
 
     if (limit) {
@@ -63,7 +60,7 @@ export class EventHistory {
     newestEvent?: Date;
   } {
     const eventsByType: Record<string, number> = {};
-    
+
     for (const event of this.eventHistory) {
       eventsByType[event.type] = (eventsByType[event.type] || 0) + 1;
     }
@@ -80,8 +77,8 @@ export class EventHistory {
    * Get events within time range
    */
   public getEventsByTimeRange(startTime: Date, endTime: Date): AppEvent[] {
-    return this.eventHistory.filter(event => 
-      event.timestamp >= startTime && event.timestamp <= endTime
+    return this.eventHistory.filter(
+      (event) => event.timestamp >= startTime && event.timestamp <= endTime
     );
   }
 
@@ -90,6 +87,6 @@ export class EventHistory {
    */
   public getRecentEvents(minutes: number = 60): AppEvent[] {
     const cutoffTime = new Date(Date.now() - minutes * 60 * 1000);
-    return this.eventHistory.filter(event => event.timestamp >= cutoffTime);
+    return this.eventHistory.filter((event) => event.timestamp >= cutoffTime);
   }
 }

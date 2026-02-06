@@ -16,6 +16,3 @@ export const TEST_CATEGORIES = [
   "Step 8: Report Generation",
   "System Health",
 ] as const;
-
-
-

@@ -1,6 +1,6 @@
 /**
  * App Store - Main Orchestrator
- * 
+ *
  * Coordinates all domain-specific stores and provides a unified interface
  * for the Sihat TCM application state management.
  */
@@ -53,18 +53,18 @@ export const useAppStoreOrchestrator = create<AppStore>()(
         logger.info("AppStore", "Starting application initialization");
 
         // Initialize stores in dependency order
-        
+
         // 1. Initialize basic stores first
         useLanguageStore.getState().initializeLanguage();
         useOnboardingStore.getState().initializeOnboarding();
         useAccessibilityStore.getState().initializeAccessibility();
-        
+
         // 2. Initialize auth (this may take time due to network calls)
         const authCleanup = useAuthStore.getState().initializeAuth();
-        
+
         // 3. Initialize doctor level (depends on network)
         await useDoctorLevelStore.getState().initializeDoctorLevel();
-        
+
         // 4. Initialize developer mode (should be done after auth to check role)
         useDeveloperStore.getState().initializeDeveloper();
 
@@ -74,10 +74,11 @@ export const useAppStoreOrchestrator = create<AppStore>()(
         set({ isInitialized: true, initializationError: null });
         logger.info("AppStore", "Application initialization completed successfully");
 
-        // Return cleanup function
-        return authCleanup;
+        // Store cleanup function (accessed via separate cleanup method)
+        void authCleanup;
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown initialization error";
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown initialization error";
         set({ isInitialized: false, initializationError: errorMessage });
         logger.error("AppStore", "Application initialization failed", error);
         throw error;
@@ -86,7 +87,7 @@ export const useAppStoreOrchestrator = create<AppStore>()(
 
     cleanup: () => {
       logger.info("AppStore", "Cleaning up application stores");
-      
+
       // Individual stores handle their own cleanup
       // This is mainly for any cross-store subscriptions
       set({ isInitialized: false, initializationError: null });
@@ -128,16 +129,16 @@ function setupCrossStoreSubscriptions() {
     (state) => state.profile?.role,
     (role) => {
       const developerState = useDeveloperStore.getState();
-      
+
       // Only allow developer mode if user has developer role
       if (role !== "developer" && developerState.isDeveloperMode) {
         // Force disable developer mode if user doesn't have developer role
         useDeveloperStore.setState({ isDeveloperMode: false });
-        
+
         if (typeof window !== "undefined") {
           localStorage.setItem("isDeveloperMode", "false");
         }
-        
+
         logger.info("AppStore", "Developer mode disabled - user role changed", { role });
       }
     }
@@ -220,7 +221,8 @@ export const useAppState = () => {
 
     // App
     isInitialized,
-    isLoading: authLoading || !languageLoaded || doctorLevelLoading || onboardingLoading || !isInitialized,
+    isLoading:
+      authLoading || !languageLoaded || doctorLevelLoading || onboardingLoading || !isInitialized,
   };
 };
 
@@ -266,18 +268,18 @@ export {
 export { useAuth } from "./auth/AuthStore";
 export { useLanguage, useTranslation, useT, useLanguageSwitcher } from "./language/LanguageStore";
 export { useDoctorLevel, useCurrentModel, useDoctorCapabilities } from "./doctor/DoctorLevelStore";
-export { 
-  useDiagnosisProgress, 
-  useDiagnosisProgressOptional, 
-  useStepProgress, 
-  useDiagnosisNavigation 
+export {
+  useDiagnosisProgress,
+  useDiagnosisProgressOptional,
+  useStepProgress,
+  useDiagnosisNavigation,
 } from "./diagnosis/DiagnosisProgressStore";
-export { 
-  useAccessibilityContext, 
-  useHighContrast, 
-  useReducedMotion, 
-  useFontSize, 
-  useScreenReader 
+export {
+  useAccessibilityContext,
+  useHighContrast,
+  useReducedMotion,
+  useFontSize,
+  useScreenReader,
 } from "./accessibility/AccessibilityStore";
 export { useOnboarding, useOnboardingFlow } from "./onboarding/OnboardingStore";
 export { useDeveloper, useDeveloperFeatures, useDevOnly } from "./developer/DeveloperStore";

@@ -1,6 +1,6 @@
 /**
  * Medical Safety Interfaces
- * 
+ *
  * Comprehensive type definitions for medical safety validation system.
  * Defines all interfaces, types, and enums used across safety components.
  */
@@ -186,7 +186,7 @@ export type SeverityLevel = "low" | "medium" | "high" | "critical";
 /**
  * Action required type
  */
-export type ActionRequired = 
+export type ActionRequired =
   | "monitor"
   | "modify_dosage"
   | "avoid_completely"
@@ -196,7 +196,7 @@ export type ActionRequired =
 /**
  * Evidence level type
  */
-export type EvidenceLevel = 
+export type EvidenceLevel =
   | "clinical_study"
   | "case_report"
   | "theoretical"

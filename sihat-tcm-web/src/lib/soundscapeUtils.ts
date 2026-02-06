@@ -27,18 +27,18 @@ export interface SoundscapeConfig {
 
 /**
  * Determine which sounds to play based on TCM diagnosis profile
- * 
+ *
  * Five Elements Theory:
  * - Wood (Liver) needs Metal (bells) to control it, or Water (rain) to nourish it
  * - Fire (Heart) needs Water to control it
  * - Earth (Spleen) needs steady, drum-like rhythms
  * - Metal (Lung) needs Fire to control it, or Earth to nourish it
  * - Water (Kidney) needs Earth to control it, or Metal to nourish it
- * 
+ *
  * TCM Sleep Connection:
- * - Water element (肾, Kidney) governs sleep and rest. Water sounds (flowing, rain) 
+ * - Water element (肾, Kidney) governs sleep and rest. Water sounds (flowing, rain)
  *   help calm the Shen (spirit) and promote deep, restorative sleep.
- * - Rain sounds create white noise that masks disturbances and aligns with Water's 
+ * - Rain sounds create white noise that masks disturbances and aligns with Water's
  *   cooling, calming nature in TCM theory.
  */
 export function determineSoundscape(diagnosis: DiagnosisSession | null): SoundscapeConfig {
@@ -58,7 +58,7 @@ export function determineSoundscape(diagnosis: DiagnosisSession | null): Soundsc
   const constitution = extractConstitutionType(diagnosis.constitution || "");
   const constitutionLower = constitution.toLowerCase();
   const diagnosisData = diagnosis.full_report?.diagnosis;
-  
+
   // Extract pattern from diagnosis data - can be DiagnosisPattern object or string
   let pattern = "";
   if (typeof diagnosisData === "object" && diagnosisData !== null) {
@@ -67,7 +67,7 @@ export function determineSoundscape(diagnosis: DiagnosisSession | null): Soundsc
   } else if (typeof diagnosisData === "string") {
     pattern = diagnosisData.toLowerCase();
   }
-  
+
   // Fallback to primary_diagnosis if pattern not found
   if (!pattern) {
     pattern = diagnosis.primary_diagnosis?.toLowerCase() || "";
@@ -134,11 +134,7 @@ export function determineSoundscape(diagnosis: DiagnosisSession | null): Soundsc
   }
 
   // Lung/Metal issues - need Fire to control, or Earth to nourish
-  if (
-    pattern.includes("lung") ||
-    pattern.includes("肺") ||
-    pattern.includes("metal")
-  ) {
+  if (pattern.includes("lung") || pattern.includes("肺") || pattern.includes("metal")) {
     return {
       primary: "fire",
       secondary: "earth",
@@ -237,7 +233,10 @@ export function getMeditationAudioPath(language: "en" | "zh" | "ms" = "en"): str
 /**
  * Get element description for UI
  */
-export function getElementDescription(element: ElementType, language: "en" | "zh" | "ms" = "en"): string {
+export function getElementDescription(
+  element: ElementType,
+  language: "en" | "zh" | "ms" = "en"
+): string {
   const descriptions: Record<ElementType, Record<"en" | "zh" | "ms", string>> = {
     wood: {
       en: "Wood Element - Bells & Chimes",
@@ -267,4 +266,3 @@ export function getElementDescription(element: ElementType, language: "en" | "zh
   };
   return descriptions[element][language];
 }
-

@@ -83,9 +83,8 @@ export function MobileTab({ uploadingApk, fileInputRef, handleApkUpload }: Mobil
             <Info className="w-5 h-5 shrink-0 text-amber-600" />
             <p>
               <strong>Note:</strong> We strictly maintain a single version policy for simplicity.
-              Uploading a new file will immediately replace the existing{" "}
-              <code>sihat-tcm.apk</code>. Please ensure you are uploading the correct build
-              (Production/Preview).
+              Uploading a new file will immediately replace the existing <code>sihat-tcm.apk</code>.
+              Please ensure you are uploading the correct build (Production/Preview).
             </p>
           </div>
         </CardContent>

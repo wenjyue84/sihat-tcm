@@ -1,21 +1,21 @@
 /**
  * @fileoverview Threat Analysis System
- * 
+ *
  * Analyzes security events and patterns to identify potential threats.
  * Provides risk assessment and threat intelligence capabilities.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 1.0
  */
 
 import { devLog } from "@/lib/systemLogger";
-import type { 
-  SecurityEvent, 
-  IPTrackingInfo, 
-  UserSecurityProfile, 
+import type {
+  SecurityEvent,
+  IPTrackingInfo,
+  UserSecurityProfile,
   ThreatAssessment,
   AttackPattern,
-  GeolocationInfo 
+  GeolocationInfo,
 } from "../interfaces/SecurityInterfaces";
 
 /**
@@ -41,14 +41,14 @@ export class ThreatAnalyzer {
         indicators: [
           "high_failed_login_rate",
           "sequential_username_attempts",
-          "dictionary_password_patterns"
+          "dictionary_password_patterns",
         ],
         severity: "high",
         mitigation: [
           "Implement account lockout policies",
           "Use CAPTCHA after failed attempts",
           "Enable multi-factor authentication",
-          "Monitor and block suspicious IPs"
+          "Monitor and block suspicious IPs",
         ],
       },
       {
@@ -58,14 +58,14 @@ export class ThreatAnalyzer {
         indicators: [
           "sql_keywords_in_payload",
           "union_select_patterns",
-          "comment_injection_attempts"
+          "comment_injection_attempts",
         ],
         severity: "critical",
         mitigation: [
           "Use parameterized queries",
           "Implement input validation",
           "Apply principle of least privilege",
-          "Regular security code reviews"
+          "Regular security code reviews",
         ],
       },
       {
@@ -75,31 +75,27 @@ export class ThreatAnalyzer {
         indicators: [
           "script_tags_in_input",
           "javascript_protocol_usage",
-          "event_handler_injection"
+          "event_handler_injection",
         ],
         severity: "high",
         mitigation: [
           "Implement Content Security Policy",
           "Sanitize user input",
           "Use output encoding",
-          "Validate all user inputs"
+          "Validate all user inputs",
         ],
       },
       {
         id: "ddos_attack",
         name: "Distributed Denial of Service",
         description: "Attempts to overwhelm system resources",
-        indicators: [
-          "high_request_volume",
-          "multiple_source_ips",
-          "resource_exhaustion_patterns"
-        ],
+        indicators: ["high_request_volume", "multiple_source_ips", "resource_exhaustion_patterns"],
         severity: "critical",
         mitigation: [
           "Implement rate limiting",
           "Use CDN and load balancers",
           "Deploy DDoS protection services",
-          "Monitor traffic patterns"
+          "Monitor traffic patterns",
         ],
       },
       {
@@ -109,19 +105,19 @@ export class ThreatAnalyzer {
         indicators: [
           "credential_stuffing_patterns",
           "session_hijacking_attempts",
-          "unusual_login_locations"
+          "unusual_login_locations",
         ],
         severity: "high",
         mitigation: [
           "Implement device fingerprinting",
           "Monitor login anomalies",
           "Use behavioral analytics",
-          "Require re-authentication for sensitive actions"
+          "Require re-authentication for sensitive actions",
         ],
       },
     ];
 
-    patterns.forEach(pattern => {
+    patterns.forEach((pattern) => {
       this.attackPatterns.set(pattern.id, pattern);
     });
 
@@ -142,7 +138,7 @@ export class ThreatAnalyzer {
       riskScore += 20;
       factors.push(`High failed login count: ${ipInfo.failedLogins}`);
       recommendations.push("Implement progressive delays for failed logins");
-      
+
       if (ipInfo.failedLogins > 20) {
         immediateActions.push("Block IP address immediately");
       }
@@ -153,21 +149,22 @@ export class ThreatAnalyzer {
       riskScore += 25;
       factors.push(`Multiple suspicious activities: ${ipInfo.suspiciousActivities}`);
       recommendations.push("Investigate IP address history and patterns");
-      
+
       if (ipInfo.suspiciousActivities > 10) {
         immediateActions.push("Add IP to high-risk monitoring list");
       }
     }
 
     // Analyze request patterns
-    const recentIPEvents = recentEvents.filter(e => e.ipAddress === ipInfo.ipAddress);
+    const recentIPEvents = recentEvents.filter((e) => e.ipAddress === ipInfo.ipAddress);
     const requestRate = this.calculateRequestRate(recentIPEvents);
-    
-    if (requestRate > 100) { // More than 100 requests per minute
+
+    if (requestRate > 100) {
+      // More than 100 requests per minute
       riskScore += 15;
       factors.push(`High request rate: ${requestRate} req/min`);
       recommendations.push("Implement rate limiting");
-      
+
       if (requestRate > 500) {
         immediateActions.push("Apply emergency rate limiting");
       }
@@ -177,7 +174,7 @@ export class ThreatAnalyzer {
     if (ipInfo.country) {
       const geoRisk = this.assessGeolocationRisk(ipInfo.country);
       riskScore += geoRisk;
-      
+
       if (geoRisk > 0) {
         factors.push(`Geographic risk factor: ${ipInfo.country}`);
         recommendations.push("Verify user identity for high-risk locations");
@@ -186,11 +183,11 @@ export class ThreatAnalyzer {
 
     // Analyze attack patterns
     const detectedPatterns = this.detectAttackPatterns(recentIPEvents);
-    detectedPatterns.forEach(pattern => {
+    detectedPatterns.forEach((pattern) => {
       riskScore += this.getPatternRiskScore(pattern);
       factors.push(`Detected attack pattern: ${pattern.name}`);
       recommendations.push(...pattern.mitigation);
-      
+
       if (pattern.severity === "critical") {
         immediateActions.push(`Respond to ${pattern.name} immediately`);
       }
@@ -211,7 +208,10 @@ export class ThreatAnalyzer {
   /**
    * Analyze threat level for a user
    */
-  public analyzeUserThreat(userProfile: UserSecurityProfile, recentEvents: SecurityEvent[]): ThreatAssessment {
+  public analyzeUserThreat(
+    userProfile: UserSecurityProfile,
+    recentEvents: SecurityEvent[]
+  ): ThreatAssessment {
     let riskScore = userProfile.riskScore;
     const factors: string[] = [];
     const recommendations: string[] = [];
@@ -222,7 +222,7 @@ export class ThreatAnalyzer {
       riskScore += 15;
       factors.push(`Recent failed login attempts: ${userProfile.failedLoginAttempts}`);
       recommendations.push("Enable account monitoring");
-      
+
       if (userProfile.failedLoginAttempts > 10) {
         immediateActions.push("Lock account temporarily");
       }
@@ -233,29 +233,29 @@ export class ThreatAnalyzer {
       riskScore += 20;
       factors.push(`Suspicious activities detected: ${userProfile.suspiciousActivities}`);
       recommendations.push("Require additional verification");
-      
+
       if (userProfile.suspiciousActivities > 8) {
         immediateActions.push("Flag account for manual review");
       }
     }
 
     // Analyze login patterns
-    const userEvents = recentEvents.filter(e => e.userId === userProfile.userId);
+    const userEvents = recentEvents.filter((e) => e.userId === userProfile.userId);
     const loginLocations = this.analyzeLoginLocations(userEvents, userProfile.knownIPs);
-    
+
     if (loginLocations.newLocations > 0) {
       riskScore += 10 * loginLocations.newLocations;
       factors.push(`Logins from ${loginLocations.newLocations} new locations`);
       recommendations.push("Verify identity for new login locations");
-      
+
       if (loginLocations.newLocations > 3) {
         immediateActions.push("Require multi-factor authentication");
       }
     }
 
     // Analyze security flags
-    const recentFlags = userProfile.securityFlags.filter(flag => {
-      const timestamp = parseInt(flag.split('_').pop() || '0');
+    const recentFlags = userProfile.securityFlags.filter((flag) => {
+      const timestamp = parseInt(flag.split("_").pop() || "0");
       return Date.now() - timestamp < 24 * 60 * 60 * 1000; // Last 24 hours
     });
 
@@ -268,7 +268,7 @@ export class ThreatAnalyzer {
 
     // Check for account compromise indicators
     const compromiseIndicators = this.detectCompromiseIndicators(userEvents);
-    compromiseIndicators.forEach(indicator => {
+    compromiseIndicators.forEach((indicator) => {
       riskScore += 30;
       factors.push(`Compromise indicator: ${indicator}`);
       recommendations.push("Force password reset");
@@ -302,8 +302,8 @@ export class ThreatAnalyzer {
 
     const now = Date.now();
     const oneMinuteAgo = now - 60000;
-    const recentEvents = events.filter(e => e.timestamp > oneMinuteAgo);
-    
+    const recentEvents = events.filter((e) => e.timestamp > oneMinuteAgo);
+
     return recentEvents.length;
   }
 
@@ -314,13 +314,13 @@ export class ThreatAnalyzer {
     // High-risk countries (this would typically come from threat intelligence feeds)
     const highRiskCountries = ["CN", "RU", "KP", "IR"];
     const mediumRiskCountries = ["PK", "BD", "NG", "ID"];
-    
+
     if (highRiskCountries.includes(country)) {
       return 20;
     } else if (mediumRiskCountries.includes(country)) {
       return 10;
     }
-    
+
     return 0;
   }
 
@@ -331,18 +331,18 @@ export class ThreatAnalyzer {
     const detectedPatterns: AttackPattern[] = [];
 
     // Check for brute force patterns
-    const loginFailures = events.filter(e => e.type === "login_failure");
+    const loginFailures = events.filter((e) => e.type === "login_failure");
     if (loginFailures.length > 10) {
       const pattern = this.attackPatterns.get("brute_force_login");
       if (pattern) detectedPatterns.push(pattern);
     }
 
     // Check for injection patterns
-    const injectionAttempts = events.filter(e => 
-      e.type === "injection_attempt" || e.type === "xss_attempt"
+    const injectionAttempts = events.filter(
+      (e) => e.type === "injection_attempt" || e.type === "xss_attempt"
     );
     if (injectionAttempts.length > 0) {
-      injectionAttempts.forEach(event => {
+      injectionAttempts.forEach((event) => {
         if (event.type === "injection_attempt") {
           const pattern = this.attackPatterns.get("sql_injection_attack");
           if (pattern) detectedPatterns.push(pattern);
@@ -354,7 +354,8 @@ export class ThreatAnalyzer {
     }
 
     // Check for DDoS patterns
-    if (events.length > 1000) { // High volume of events
+    if (events.length > 1000) {
+      // High volume of events
       const pattern = this.attackPatterns.get("ddos_attack");
       if (pattern) detectedPatterns.push(pattern);
     }
@@ -367,26 +368,32 @@ export class ThreatAnalyzer {
    */
   private getPatternRiskScore(pattern: AttackPattern): number {
     switch (pattern.severity) {
-      case "critical": return 40;
-      case "high": return 25;
-      case "medium": return 15;
-      case "low": return 5;
-      default: return 0;
+      case "critical":
+        return 40;
+      case "high":
+        return 25;
+      case "medium":
+        return 15;
+      case "low":
+        return 5;
+      default:
+        return 0;
     }
   }
 
   /**
    * Analyze login locations
    */
-  private analyzeLoginLocations(events: SecurityEvent[], knownIPs: string[]): {
+  private analyzeLoginLocations(
+    events: SecurityEvent[],
+    knownIPs: string[]
+  ): {
     newLocations: number;
     suspiciousPatterns: string[];
   } {
-    const loginEvents = events.filter(e => e.type === "login_success");
-    const newIPs = loginEvents
-      .map(e => e.ipAddress)
-      .filter(ip => !knownIPs.includes(ip));
-    
+    const loginEvents = events.filter((e) => e.type === "login_success");
+    const newIPs = loginEvents.map((e) => e.ipAddress).filter((ip) => !knownIPs.includes(ip));
+
     const uniqueNewIPs = [...new Set(newIPs)];
     const suspiciousPatterns: string[] = [];
 
@@ -402,8 +409,8 @@ export class ThreatAnalyzer {
       const timeDiffs = loginEvents
         .slice(1)
         .map((event, i) => event.timestamp - loginEvents[i].timestamp);
-      
-      const rapidLogins = timeDiffs.filter(diff => diff < 300000); // 5 minutes
+
+      const rapidLogins = timeDiffs.filter((diff) => diff < 300000); // 5 minutes
       if (rapidLogins.length > 0 && uniqueNewIPs.length > 1) {
         suspiciousPatterns.push("Impossible travel detected");
       }
@@ -422,19 +429,20 @@ export class ThreatAnalyzer {
     const indicators: string[] = [];
 
     // Check for privilege escalation attempts
-    const privEscalation = events.filter(e => e.type === "privilege_escalation");
+    const privEscalation = events.filter((e) => e.type === "privilege_escalation");
     if (privEscalation.length > 0) {
       indicators.push("Privilege escalation attempts");
     }
 
     // Check for data access anomalies
-    const dataAccess = events.filter(e => e.type === "data_access");
-    if (dataAccess.length > 50) { // Unusually high data access
+    const dataAccess = events.filter((e) => e.type === "data_access");
+    if (dataAccess.length > 50) {
+      // Unusually high data access
       indicators.push("Abnormal data access patterns");
     }
 
     // Check for suspicious API usage
-    const apiAbuse = events.filter(e => e.type === "api_abuse");
+    const apiAbuse = events.filter((e) => e.type === "api_abuse");
     if (apiAbuse.length > 0) {
       indicators.push("API abuse detected");
     }
@@ -473,23 +481,23 @@ export class ThreatAnalyzer {
     attackPatterns: AttackPattern[];
     recommendations: string[];
   } {
-    const ipAssessments = ipTracking.map(ip => ({
+    const ipAssessments = ipTracking.map((ip) => ({
       ip: ip.ipAddress,
       assessment: this.analyzeIPThreat(ip, events),
     }));
 
-    const userAssessments = userProfiles.map(user => ({
+    const userAssessments = userProfiles.map((user) => ({
       userId: user.userId,
       assessment: this.analyzeUserThreat(user, events),
     }));
 
-    const criticalIPs = ipAssessments.filter(a => a.assessment.riskLevel === "critical");
-    const criticalUsers = userAssessments.filter(a => a.assessment.riskLevel === "critical");
-    const highRiskIPs = ipAssessments.filter(a => 
-      a.assessment.riskLevel === "high" || a.assessment.riskLevel === "critical"
+    const criticalIPs = ipAssessments.filter((a) => a.assessment.riskLevel === "critical");
+    const criticalUsers = userAssessments.filter((a) => a.assessment.riskLevel === "critical");
+    const highRiskIPs = ipAssessments.filter(
+      (a) => a.assessment.riskLevel === "high" || a.assessment.riskLevel === "critical"
     );
-    const highRiskUsers = userAssessments.filter(a => 
-      a.assessment.riskLevel === "high" || a.assessment.riskLevel === "critical"
+    const highRiskUsers = userAssessments.filter(
+      (a) => a.assessment.riskLevel === "high" || a.assessment.riskLevel === "critical"
     );
 
     // Detect active attack patterns
@@ -497,8 +505,8 @@ export class ThreatAnalyzer {
 
     // Aggregate recommendations
     const allRecommendations = [
-      ...ipAssessments.flatMap(a => a.assessment.recommendations),
-      ...userAssessments.flatMap(a => a.assessment.recommendations),
+      ...ipAssessments.flatMap((a) => a.assessment.recommendations),
+      ...userAssessments.flatMap((a) => a.assessment.recommendations),
     ];
     const uniqueRecommendations = [...new Set(allRecommendations)];
 

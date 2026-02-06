@@ -354,11 +354,11 @@ export default function DiagnosisWizard() {
                 onConfirm={(summaries, options, additionalInfo) => {
                   setData((prev) => ({
                     ...prev,
-                    verified_summaries: summaries,
-                    report_options: options,
+                    verified_summaries: summaries as Record<string, string>,
+                    report_options: options as Record<string, unknown>,
                     basic_info: {
-                      ...(prev.basic_info as any),
-                      ...additionalInfo,
+                      ...prev.basic_info,
+                      ...(additionalInfo as Record<string, unknown>),
                     },
                   }));
                   nextStep("summary");

@@ -21,6 +21,3 @@ export type DashboardSection =
   | "five-elements"
   | "heart-companion"
   | "communication";
-
-
-

@@ -1,6 +1,6 @@
 /**
  * Voice Command Handler Interfaces
- * 
+ *
  * Comprehensive type definitions for voice recognition, synthesis,
  * and command handling in the Sihat TCM application.
  */

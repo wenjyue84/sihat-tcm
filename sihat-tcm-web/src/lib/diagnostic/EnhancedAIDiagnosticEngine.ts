@@ -1,19 +1,19 @@
 /**
  * Enhanced AI Diagnostic Engine - Main orchestrator for AI diagnostics
- * 
+ *
  * Integrates all diagnostic components into a unified, easy-to-use interface.
  * This is the new modular version that delegates to specialized components.
  */
 
-import { 
-  EnhancedDiagnosticRequest, 
-  EnhancedDiagnosticResponse, 
+import {
+  EnhancedDiagnosticRequest,
+  EnhancedDiagnosticResponse,
   DiagnosticConfig,
-  DiagnosticStats 
-} from './interfaces/DiagnosticInterfaces';
-import { DiagnosticOrchestrator } from './core/DiagnosticOrchestrator';
-import { DiagnosticMonitor } from './monitoring/DiagnosticMonitor';
-import { FeedbackProcessor, DiagnosticFeedback } from './learning/FeedbackProcessor';
+  DiagnosticStats,
+} from "./interfaces/DiagnosticInterfaces";
+import { DiagnosticOrchestrator } from "./core/DiagnosticOrchestrator";
+import { DiagnosticMonitor } from "./monitoring/DiagnosticMonitor";
+import { FeedbackProcessor, DiagnosticFeedback } from "./learning/FeedbackProcessor";
 import { devLog, logError, logInfo } from "../systemLogger";
 
 /**
@@ -21,7 +21,7 @@ import { devLog, logError, logInfo } from "../systemLogger";
  */
 export class EnhancedAIDiagnosticEngine {
   private context: string;
-  
+
   // Core components
   private orchestrator: DiagnosticOrchestrator;
   private monitor: DiagnosticMonitor;
@@ -29,7 +29,7 @@ export class EnhancedAIDiagnosticEngine {
 
   constructor(context: string = "EnhancedAIDiagnosticEngine") {
     this.context = context;
-    
+
     // Initialize components
     this.orchestrator = new DiagnosticOrchestrator(`${context}/Orchestrator`);
     this.monitor = new DiagnosticMonitor(`${context}/Monitor`);
@@ -56,7 +56,7 @@ export class EnhancedAIDiagnosticEngine {
       // Record completion in monitor
       const processingTime = Date.now() - startTime;
       const steps = this.orchestrator.getProcessingSteps();
-      
+
       this.monitor.recordDiagnosticCompletion(
         request.userId,
         response.modelUsed,
@@ -76,7 +76,7 @@ export class EnhancedAIDiagnosticEngine {
       // Record failure in monitor
       const processingTime = Date.now() - startTime;
       const steps = this.orchestrator.getProcessingSteps();
-      
+
       this.monitor.recordDiagnosticCompletion(
         request.userId,
         "unknown",
@@ -85,12 +85,12 @@ export class EnhancedAIDiagnosticEngine {
         steps
       );
 
-      logError(this.context, "Enhanced diagnosis failed", { 
-        error, 
+      logError(this.context, "Enhanced diagnosis failed", {
+        error,
         userId: request.userId,
-        processingTime 
+        processingTime,
       });
-      
+
       throw error;
     }
   }
@@ -101,7 +101,7 @@ export class EnhancedAIDiagnosticEngine {
   async updateLearningFromFeedback(feedback: DiagnosticFeedback): Promise<void> {
     try {
       await this.feedbackProcessor.processFeedback(feedback);
-      
+
       devLog("info", this.context, "Learning updated from feedback", {
         userId: feedback.userId,
         sessionId: feedback.sessionId,

@@ -126,8 +126,10 @@ export default async function BlogIndex(props: Props) {
     );
     posts = allPosts.filter(
       (post) =>
-        (post.title?.toLowerCase().includes(query) || false) ||
-        (post.excerpt?.toLowerCase().includes(query) || false)
+        post.title?.toLowerCase().includes(query) ||
+        false ||
+        post.excerpt?.toLowerCase().includes(query) ||
+        false
     );
   } else {
     // Normal paginated view

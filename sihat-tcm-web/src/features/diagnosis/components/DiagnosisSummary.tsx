@@ -16,11 +16,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useDiagnosisProgress } from "@/stores/useAppStore";
 
 // Extracted Sub-Components
-import {
-  ObservationsSection,
-  InquirySection,
-  OptionsSection,
-} from "./summary";
+import { ObservationsSection, InquirySection, OptionsSection } from "./summary";
 // Extracted utilities and hooks
 import { transformDiagnosisDataToSummaries } from "./summary/utils/summaryDataTransformers";
 import { useReportOptions, type ReportOptions } from "./summary/hooks/useReportOptions";
@@ -223,11 +219,7 @@ export function DiagnosisSummary({ data, onConfirm, onBack }: DiagnosisSummaryPr
               />
             )}
             {currentStep === "inquiry" && (
-              <InquirySection
-                summaries={summaries}
-                onSummaryChange={handleSummaryChange}
-                t={t}
-              />
+              <InquirySection summaries={summaries} onSummaryChange={handleSummaryChange} t={t} />
             )}
             {currentStep === "options" && (
               <OptionsSection

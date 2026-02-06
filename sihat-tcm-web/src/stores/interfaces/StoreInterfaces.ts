@@ -1,6 +1,6 @@
 /**
  * Store Interfaces
- * 
+ *
  * Shared type definitions for the modular store system
  * in the Sihat TCM application.
  */
@@ -231,7 +231,11 @@ export interface StoreOrchestrator {
   registerStore<T>(name: string, store: T, dependencies?: string[]): void;
   unregisterStore(name: string): void;
   getStore<T>(name: string): T | null;
-  subscribe(eventType: string, callback: (event: CrossStoreEvent) => void, storeName?: string): () => void;
+  subscribe(
+    eventType: string,
+    callback: (event: CrossStoreEvent) => void,
+    storeName?: string
+  ): () => void;
   emitEvent(event: Omit<CrossStoreEvent, "id">): void;
   getMetrics(): StoreMetrics;
   getEventHistory(limit?: number): CrossStoreEvent[];
@@ -246,15 +250,15 @@ export interface StoreOrchestrator {
 // STORE FACTORY INTERFACES
 // ============================================================================
 
-export type StoreType = 
-  | 'auth'
-  | 'language'
-  | 'diagnosisProgress'
-  | 'accessibility'
-  | 'onboarding'
-  | 'developer';
+export type StoreType =
+  | "auth"
+  | "language"
+  | "diagnosisProgress"
+  | "accessibility"
+  | "onboarding"
+  | "developer";
 
-export type StoreInstance = 
+export type StoreInstance =
   | AuthStore
   | LanguageStore
   | DiagnosisProgressStore

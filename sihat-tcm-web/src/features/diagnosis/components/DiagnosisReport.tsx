@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
@@ -6,7 +7,11 @@ import { Stethoscope, ArrowLeft } from "lucide-react";
 import { extractDiagnosisTitle, extractConstitutionType } from "@/lib/tcm-utils";
 import { useDiagnosisReportState } from "./report/hooks/useDiagnosisReportState";
 import { useDiagnosisReportActions } from "./report/hooks/useDiagnosisReportActions";
-import { getFoodRecommendations, getFoodsToAvoid, getRecipes } from "./report/utils/reportDataTransformers";
+import {
+  getFoodRecommendations,
+  getFoodsToAvoid,
+  getRecipes,
+} from "./report/utils/reportDataTransformers";
 
 // Sub-components
 import { ReportHeader } from "./report/ReportHeader";
@@ -33,6 +38,8 @@ interface DiagnosisReportProps {
   onRestart: () => void;
   saved?: boolean;
   isDoctorView?: boolean;
+  /** When true, sends a one-time Telegram notification when the report is first shown (e.g. at end of wizard). */
+  notifyOnFirstView?: boolean;
 }
 
 // Translations (Same as original)
@@ -110,9 +117,22 @@ export function DiagnosisReport({
   onRestart,
   saved,
   isDoctorView = false,
+  notifyOnFirstView = false,
 }: DiagnosisReportProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const reportViewedNotificationSent = useRef(false);
+
+  // Notify (e.g. Telegram) when user first sees the Comprehensive TCM Report — once per mount
+  useEffect(() => {
+    if (!notifyOnFirstView || reportViewedNotificationSent.current) return;
+    reportViewedNotificationSent.current = true;
+    fetch("/api/notifications/report-viewed", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isGuest: !user }),
+    }).catch(() => {});
+  }, [notifyOnFirstView, user]);
   const { getDoctorInfo } = useDoctorLevel();
   const doctorInfo = getDoctorInfo();
   // @ts-ignore
@@ -173,7 +193,7 @@ export function DiagnosisReport({
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { type: "spring" as const, stiffness: 220, damping: 20 }
+      transition: { type: "spring" as const, stiffness: 220, damping: 20 },
     },
   };
 
@@ -216,7 +236,9 @@ export function DiagnosisReport({
         </button>
       </div>
       <div className="mt-3 bg-stone-50 rounded-xl p-3 border border-stone-100">
-        <p className="text-xs text-stone-500 font-medium uppercase tracking-wider mb-1">{t.diagnosis}</p>
+        <p className="text-xs text-stone-500 font-medium uppercase tracking-wider mb-1">
+          {t.diagnosis}
+        </p>
         <p className="text-sm font-semibold text-slate-800 line-clamp-2">{diagnosisText}</p>
       </div>
     </div>
@@ -224,20 +246,26 @@ export function DiagnosisReport({
 
   const getBackgroundClass = () => {
     switch (viewMode) {
-      case "classic": return "bg-[#F9F7F5]"; // Paper-like
-      case "summary": return "bg-slate-50";
-      default: return "bg-[#F2F2F7]"; // iOS System Gray 6
+      case "classic":
+        return "bg-[#F9F7F5]"; // Paper-like
+      case "summary":
+        return "bg-slate-50";
+      default:
+        return "bg-[#F2F2F7]"; // iOS System Gray 6
     }
   };
 
   const getContainerClass = () => {
-    if (viewMode === "classic") return "max-w-4xl mx-auto bg-white shadow-sm border border-stone-200 min-h-screen my-4 md:my-8 p-6 md:p-12 print:p-0 print:m-0 print:border-none";
+    if (viewMode === "classic")
+      return "max-w-4xl mx-auto bg-white shadow-sm border border-stone-200 min-h-screen my-4 md:my-8 p-6 md:p-12 print:p-0 print:m-0 print:border-none";
     if (viewMode === "summary") return "max-w-xl mx-auto py-8";
     return "max-w-4xl mx-auto pb-24 md:pb-12"; // Modern usually has generous padding
   };
 
   const content = (
-    <div className={`min-h-screen transition-colors duration-500 ${getBackgroundClass()} ${isChatExpanded ? "fixed inset-0 z-50 flex flex-col md:flex-row overflow-hidden" : ""}`}>
+    <div
+      className={`min-h-screen transition-colors duration-500 ${getBackgroundClass()} ${isChatExpanded ? "fixed inset-0 z-50 flex flex-col md:flex-row overflow-hidden" : ""}`}
+    >
       {/* Expanded Chat View (Mobile Overlay or Side-by-Side) */}
       {isChatExpanded && (
         <div className="md:hidden">
@@ -246,8 +274,11 @@ export function DiagnosisReport({
       )}
 
       <div
-        className={`w-full px-4 md:px-6 ${getContainerClass()} ${isChatExpanded ? "hidden md:block md:w-1/2 h-full overflow-y-auto p-6 scrollbar-hide border-r border-stone-200 !m-0 !max-w-none" : ""
-          }`}
+        className={`w-full px-4 md:px-6 ${getContainerClass()} ${
+          isChatExpanded
+            ? "hidden md:block md:w-1/2 h-full overflow-y-auto p-6 scrollbar-hide border-r border-stone-200 !m-0 !max-w-none"
+            : ""
+        }`}
       >
         {!isChatExpanded && (
           <div className="py-6 flex justify-center sticky top-0 z-40 pointer-events-none">
@@ -275,7 +306,6 @@ export function DiagnosisReport({
           animate="show"
           className={`space-y-6 ${viewMode === "classic" ? "font-serif space-y-8" : ""}`}
         >
-
           <ReportHeader
             doctorInfo={doctorInfo}
             hasSaved={hasSaved}
@@ -320,7 +350,9 @@ export function DiagnosisReport({
           )}
 
           <motion.div variants={item}>
-            <div className={`rounded-xl p-5 md:p-6 text-center ${viewMode === "classic" ? "bg-transparent italic text-stone-600 border-t border-stone-200 rounded-none" : "bg-white/60 backdrop-blur-sm border border-white/40"}`}>
+            <div
+              className={`rounded-xl p-5 md:p-6 text-center ${viewMode === "classic" ? "bg-transparent italic text-stone-600 border-t border-stone-200 rounded-none" : "bg-white/60 backdrop-blur-sm border border-white/40"}`}
+            >
               <p className="text-stone-500 text-sm md:text-base leading-relaxed">
                 {data.disclaimer ||
                   "This report is generated by Sihat TCM AI Assistant for informational purposes only. It is not a substitute for professional medical advice. Please consult a licensed TCM practitioner for diagnosis and treatment."}
@@ -355,48 +387,44 @@ export function DiagnosisReport({
       </div>
 
       {/* CHAT WINDOW HANDLING */}
-      {
-        isChatExpanded && (
-          <div className="w-full md:w-1/2 flex-1 md:h-full bg-slate-50/50 backdrop-blur-3xl relative">
-            <ReportChatWindow
-              reportData={data}
-              patientInfo={patientInfo}
-              isOpen={true}
-              onClose={() => setIsChatExpanded(false)}
-              initialMessage={activeQuestion || undefined}
-              onMessageSent={() => setActiveQuestion(null)}
-              isExpanded={true}
-              onToggleExpand={() => setIsChatExpanded(false)}
-              messages={chatMessages}
-              onMessagesChange={setChatMessages}
-            />
-          </div>
-        )
-      }
+      {isChatExpanded && (
+        <div className="w-full md:w-1/2 flex-1 md:h-full bg-slate-50/50 backdrop-blur-3xl relative">
+          <ReportChatWindow
+            reportData={data}
+            patientInfo={patientInfo}
+            isOpen={true}
+            onClose={() => setIsChatExpanded(false)}
+            initialMessage={activeQuestion || undefined}
+            onMessageSent={() => setActiveQuestion(null)}
+            isExpanded={true}
+            onToggleExpand={() => setIsChatExpanded(false)}
+            messages={chatMessages}
+            onMessagesChange={setChatMessages}
+          />
+        </div>
+      )}
 
       {/* Floating Chat Bubble & Modal */}
-      {
-        !isChatExpanded && (
-          <>
-            <ReportChatButton onClick={() => setIsChatOpen(true)} />
-            <ReportChatWindow
-              reportData={data}
-              patientInfo={patientInfo}
-              isOpen={isChatOpen}
-              onClose={() => setIsChatOpen(false)}
-              initialMessage={activeQuestion || undefined}
-              onMessageSent={() => setActiveQuestion(null)}
-              isExpanded={false}
-              onToggleExpand={() => {
-                setIsChatOpen(false);
-                setIsChatExpanded(true);
-              }}
-              messages={chatMessages}
-              onMessagesChange={setChatMessages}
-            />
-          </>
-        )
-      }
+      {!isChatExpanded && (
+        <>
+          <ReportChatButton onClick={() => setIsChatOpen(true)} />
+          <ReportChatWindow
+            reportData={data}
+            patientInfo={patientInfo}
+            isOpen={isChatOpen}
+            onClose={() => setIsChatOpen(false)}
+            initialMessage={activeQuestion || undefined}
+            onMessageSent={() => setActiveQuestion(null)}
+            isExpanded={false}
+            onToggleExpand={() => {
+              setIsChatOpen(false);
+              setIsChatExpanded(true);
+            }}
+            messages={chatMessages}
+            onMessagesChange={setChatMessages}
+          />
+        </>
+      )}
 
       <InfographicsGenerator
         isOpen={isInfographicsOpen}
@@ -416,7 +444,7 @@ export function DiagnosisReport({
           gender: patientInfo?.gender,
         }}
       />
-    </div >
+    </div>
   );
 
   if (isChatExpanded && mounted) {

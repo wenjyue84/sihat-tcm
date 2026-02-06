@@ -71,5 +71,3 @@ export function getBMIPercentage(bmi: number): number {
     return Math.min(75 + ((bmi - 30) / 10) * 25, 100);
   }
 }
-
-

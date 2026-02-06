@@ -283,13 +283,13 @@ Return a ** valid JSON object only ** - NO markdown, NO code blocks:
  * Get the appropriate image analysis prompt based on image type
  */
 export function getImageAnalysisPrompt(imageType: "tongue" | "face" | "other"): {
-    system: string;
-    user: string;
+  system: string;
+  user: string;
 } {
-    const prompts = {
-        tongue: {
-            system: TONGUE_ANALYSIS_PROMPT,
-            user: `Analyze this TONGUE image according to TCM tongue diagnosis(舌诊). 
+  const prompts = {
+    tongue: {
+      system: TONGUE_ANALYSIS_PROMPT,
+      user: `Analyze this TONGUE image according to TCM tongue diagnosis(舌诊). 
 
 Provide detailed observations on:
 1. Tongue body color(舌色): pale, light red, red, deep red, purple, bluish
@@ -300,10 +300,10 @@ Provide detailed observations on:
 6. Any special features: spots, vessels, ulcers, trembling
 
 Provide your complete analysis in the exact JSON format specified in the system prompt.`,
-        },
-        face: {
-            system: FACE_ANALYSIS_PROMPT,
-            user: `Analyze this FACE image according to TCM face diagnosis(面诊).
+    },
+    face: {
+      system: FACE_ANALYSIS_PROMPT,
+      user: `Analyze this FACE image according to TCM face diagnosis(面诊).
 
 Provide detailed observations on:
 1. Overall complexion(面色): color, luster, brightness
@@ -314,10 +314,10 @@ Provide detailed observations on:
 6. Any specific marks, spots, or color variations
 
 Provide your complete analysis in the exact JSON format specified in the system prompt.`,
-        },
-        other: {
-            system: BODY_ANALYSIS_PROMPT,
-            user: `Analyze this BODY AREA image for TCM diagnostic purposes.
+    },
+    other: {
+      system: BODY_ANALYSIS_PROMPT,
+      user: `Analyze this BODY AREA image for TCM diagnostic purposes.
 
 Provide detailed observations on:
 1. Skin condition: color, texture, moisture
@@ -328,8 +328,8 @@ Provide detailed observations on:
 6. Any other clinically relevant features
 
 Provide your complete analysis in the exact JSON format specified in the system prompt.`,
-        },
-    };
+    },
+  };
 
-    return prompts[imageType];
+  return prompts[imageType];
 }

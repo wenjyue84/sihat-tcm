@@ -71,7 +71,11 @@ const getScoreTrend = (score?: number) => {
   return { icon: TrendingDown, color: "text-red-500", label: "Needs Attention" };
 };
 
-export const HistoryCard = React.memo(function HistoryCard({ session, onClick, index = 0 }: HistoryCardProps) {
+export const HistoryCard = React.memo(function HistoryCard({
+  session,
+  onClick,
+  index = 0,
+}: HistoryCardProps) {
   const diagnosisTitle = extractDiagnosisTitle(session.primary_diagnosis);
   const constitutionTitle = extractConstitutionType(session.constitution);
   const trend = getScoreTrend(session.overall_score ?? undefined);
@@ -120,12 +124,13 @@ export const HistoryCard = React.memo(function HistoryCard({ session, onClick, i
               <div className="shrink-0 ml-3">
                 <div className="flex flex-col items-center">
                   <div
-                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full ${session.overall_score >= 75
-                      ? "bg-emerald-100 text-emerald-700"
-                      : session.overall_score >= 50
-                        ? "bg-amber-100 text-amber-700"
-                        : "bg-red-100 text-red-700"
-                      }`}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-full ${
+                      session.overall_score >= 75
+                        ? "bg-emerald-100 text-emerald-700"
+                        : session.overall_score >= 50
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-red-100 text-red-700"
+                    }`}
                   >
                     {TrendIcon && <TrendIcon className="w-3.5 h-3.5" />}
                     <span className="text-sm font-bold">{session.overall_score}</span>
@@ -146,34 +151,34 @@ export const HistoryCard = React.memo(function HistoryCard({ session, onClick, i
             session.face_analysis ||
             session.audio_analysis ||
             session.pulse_data) && (
-              <div className="mb-3 flex flex-wrap gap-1.5">
-                {session.inquiry_summary && (
-                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[10px] font-medium">
-                    Inquiry
-                  </span>
-                )}
-                {session.tongue_analysis && (
-                  <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-[10px] font-medium">
-                    Tongue
-                  </span>
-                )}
-                {session.face_analysis && (
-                  <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-[10px] font-medium">
-                    Face
-                  </span>
-                )}
-                {session.audio_analysis && (
-                  <span className="px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full text-[10px] font-medium">
-                    Voice
-                  </span>
-                )}
-                {session.pulse_data && (
-                  <span className="px-2 py-0.5 bg-rose-100 text-rose-700 rounded-full text-[10px] font-medium">
-                    Pulse
-                  </span>
-                )}
-              </div>
-            )}
+            <div className="mb-3 flex flex-wrap gap-1.5">
+              {session.inquiry_summary && (
+                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[10px] font-medium">
+                  Inquiry
+                </span>
+              )}
+              {session.tongue_analysis && (
+                <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-[10px] font-medium">
+                  Tongue
+                </span>
+              )}
+              {session.face_analysis && (
+                <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-[10px] font-medium">
+                  Face
+                </span>
+              )}
+              {session.audio_analysis && (
+                <span className="px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full text-[10px] font-medium">
+                  Voice
+                </span>
+              )}
+              {session.pulse_data && (
+                <span className="px-2 py-0.5 bg-rose-100 text-rose-700 rounded-full text-[10px] font-medium">
+                  Pulse
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Notes Preview (if exists) */}
           {session.notes && (

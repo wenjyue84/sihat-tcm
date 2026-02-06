@@ -36,16 +36,12 @@ export function PractitionerList({ doctors, loading, variants }: PractitionerLis
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <h3 className="text-emerald-800 font-semibold mb-1">
-          {t.report.recommendedPractitioners}
-        </h3>
+        <h3 className="text-emerald-800 font-semibold mb-1">{t.report.recommendedPractitioners}</h3>
         <p className="text-stone-500 text-xs mb-4">{t.report.clickToViewDetails}</p>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {loading ? (
-          <div className="col-span-full text-center py-4 text-stone-500">
-            {t.common.loading}...
-          </div>
+          <div className="col-span-full text-center py-4 text-stone-500">{t.common.loading}...</div>
         ) : doctors.length > 0 ? (
           doctors.map((doctor) => (
             <button
@@ -97,7 +93,9 @@ export function PractitionerList({ doctors, loading, variants }: PractitionerLis
                   <p className="text-emerald-600 font-medium text-sm">
                     {selectedDoctor.clinicName}
                   </p>
-                  <p className="text-stone-500 text-xs">{selectedDoctor.experience} {t.report.experience}</p>
+                  <p className="text-stone-500 text-xs">
+                    {selectedDoctor.experience} {t.report.experience}
+                  </p>
                 </div>
               </div>
 

@@ -39,7 +39,8 @@ export function UnifiedDashboardHeader({
         <div>
           <h1 className="text-xl font-bold text-slate-800 line-clamp-1">{sectionTitle}</h1>
           <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-2 hidden sm:flex">
-            {(t.patientDashboard?.welcomeBack as string) || "Welcome back"}, {userName || userEmail || "Patient"}
+            {(t.patientDashboard?.welcomeBack as string) || "Welcome back"},{" "}
+            {userName || userEmail || "Patient"}
             {isDemoMode && (
               <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-[9px] font-black uppercase tracking-wider">
                 Demo Mode
@@ -76,6 +77,3 @@ export function UnifiedDashboardHeader({
     </header>
   );
 }
-
-
-

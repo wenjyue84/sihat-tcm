@@ -12,11 +12,7 @@ interface InquirySectionProps {
   t: any;
 }
 
-export function InquirySection({
-  summaries,
-  onSummaryChange,
-  t,
-}: InquirySectionProps) {
+export function InquirySection({ summaries, onSummaryChange, t }: InquirySectionProps) {
   const inquirySections = useMemo(
     () => [
       { id: "basic_info", title: t.diagnosisSummary.sections.basicInfo },
@@ -47,6 +43,3 @@ export function InquirySection({
     </div>
   );
 }
-
-
-

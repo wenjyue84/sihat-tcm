@@ -1,10 +1,13 @@
 /**
  * Enhanced Application Error System
- * 
+ *
  * Provides structured error handling with proper typing and context
  */
 
-import { ERROR_CODES, type ErrorCode } from '../constants';
+import { ERROR_CODES, type ErrorCode } from "../constants";
+
+// Re-export for consumers
+export { ERROR_CODES, type ErrorCode };
 
 export interface ErrorContext {
   userId?: string;
@@ -42,8 +45,8 @@ export class AppError extends Error {
     isOperational = true
   ) {
     super(message);
-    
-    this.name = 'AppError';
+
+    this.name = "AppError";
     this.code = code;
     this.context = context;
     this.originalError = originalError;
@@ -84,21 +87,21 @@ export class AppError extends Error {
   getUserMessage(): string {
     switch (this.code) {
       case ERROR_CODES.VALIDATION_ERROR:
-        return 'Please check your input and try again.';
+        return "Please check your input and try again.";
       case ERROR_CODES.AUTHENTICATION_ERROR:
-        return 'Please log in to continue.';
+        return "Please log in to continue.";
       case ERROR_CODES.AUTHORIZATION_ERROR:
-        return 'You do not have permission to perform this action.';
+        return "You do not have permission to perform this action.";
       case ERROR_CODES.NOT_FOUND:
-        return 'The requested resource was not found.';
+        return "The requested resource was not found.";
       case ERROR_CODES.RATE_LIMIT_EXCEEDED:
-        return 'Too many requests. Please try again later.';
+        return "Too many requests. Please try again later.";
       case ERROR_CODES.AI_MODEL_ERROR:
-        return 'AI service is temporarily unavailable. Please try again.';
+        return "AI service is temporarily unavailable. Please try again.";
       case ERROR_CODES.NETWORK_ERROR:
-        return 'Network connection error. Please check your internet connection.';
+        return "Network connection error. Please check your internet connection.";
       default:
-        return 'An unexpected error occurred. Please try again.';
+        return "An unexpected error occurred. Please try again.";
     }
   }
 }
@@ -109,7 +112,7 @@ export class AppError extends Error {
 export class ValidationError extends AppError {
   constructor(message: string, context?: ErrorContext, originalError?: Error) {
     super(ERROR_CODES.VALIDATION_ERROR, message, context, originalError);
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
   }
 }
 
@@ -119,7 +122,7 @@ export class ValidationError extends AppError {
 export class AuthenticationError extends AppError {
   constructor(message: string, context?: ErrorContext, originalError?: Error) {
     super(ERROR_CODES.AUTHENTICATION_ERROR, message, context, originalError);
-    this.name = 'AuthenticationError';
+    this.name = "AuthenticationError";
   }
 }
 
@@ -129,7 +132,7 @@ export class AuthenticationError extends AppError {
 export class AuthorizationError extends AppError {
   constructor(message: string, context?: ErrorContext, originalError?: Error) {
     super(ERROR_CODES.AUTHORIZATION_ERROR, message, context, originalError);
-    this.name = 'AuthorizationError';
+    this.name = "AuthorizationError";
   }
 }
 
@@ -139,7 +142,7 @@ export class AuthorizationError extends AppError {
 export class NotFoundError extends AppError {
   constructor(message: string, context?: ErrorContext, originalError?: Error) {
     super(ERROR_CODES.NOT_FOUND, message, context, originalError);
-    this.name = 'NotFoundError';
+    this.name = "NotFoundError";
   }
 }
 
@@ -149,7 +152,7 @@ export class NotFoundError extends AppError {
 export class AIModelError extends AppError {
   constructor(message: string, context?: ErrorContext, originalError?: Error) {
     super(ERROR_CODES.AI_MODEL_ERROR, message, context, originalError);
-    this.name = 'AIModelError';
+    this.name = "AIModelError";
   }
 }
 
@@ -159,7 +162,7 @@ export class AIModelError extends AppError {
 export class NetworkError extends AppError {
   constructor(message: string, context?: ErrorContext, originalError?: Error) {
     super(ERROR_CODES.NETWORK_ERROR, message, context, originalError);
-    this.name = 'NetworkError';
+    this.name = "NetworkError";
   }
 }
 
@@ -169,7 +172,7 @@ export class NetworkError extends AppError {
 export class RateLimitError extends AppError {
   constructor(message: string, context?: ErrorContext, originalError?: Error) {
     super(ERROR_CODES.RATE_LIMIT_EXCEEDED, message, context, originalError);
-    this.name = 'RateLimitError';
+    this.name = "RateLimitError";
   }
 }
 
@@ -206,7 +209,7 @@ export class ErrorFactory {
   static fromUnknownError(
     error: unknown,
     context?: ErrorContext,
-    defaultMessage = 'An unexpected error occurred'
+    defaultMessage = "An unexpected error occurred"
   ): AppError {
     if (error instanceof AppError) {
       return error;
@@ -221,11 +224,7 @@ export class ErrorFactory {
       );
     }
 
-    return new AppError(
-      ERROR_CODES.INTERNAL_ERROR,
-      defaultMessage,
-      context
-    );
+    return new AppError(ERROR_CODES.INTERNAL_ERROR, defaultMessage, context);
   }
 }
 
@@ -236,20 +235,19 @@ export class ErrorHandler {
   /**
    * Handle error with appropriate logging and user notification
    */
-  static handle(error: AppError, options?: {
-    showToUser?: boolean;
-    logToConsole?: boolean;
-    reportToService?: boolean;
-  }): void {
-    const {
-      showToUser = true,
-      logToConsole = true,
-      reportToService = true,
-    } = options || {};
+  static handle(
+    error: AppError,
+    options?: {
+      showToUser?: boolean;
+      logToConsole?: boolean;
+      reportToService?: boolean;
+    }
+  ): void {
+    const { showToUser = true, logToConsole = true, reportToService = true } = options || {};
 
     // Log to console in development
-    if (logToConsole && process.env.NODE_ENV === 'development') {
-      console.error('AppError:', error.toJSON());
+    if (logToConsole && process.env.NODE_ENV === "development") {
+      console.error("AppError:", error.toJSON());
     }
 
     // Report to error reporting service
@@ -268,7 +266,7 @@ export class ErrorHandler {
    */
   private static reportError(error: AppError): void {
     // In a real application, you would send this to your error reporting service
-    console.log('Reporting error to service:', error.toJSON());
+    console.log("Reporting error to service:", error.toJSON());
   }
 
   /**
@@ -276,7 +274,7 @@ export class ErrorHandler {
    */
   private static showUserError(error: AppError): void {
     // In a real application, you would show this via toast/notification system
-    console.log('User error message:', error.getUserMessage());
+    console.log("User error message:", error.getUserMessage());
   }
 }
 

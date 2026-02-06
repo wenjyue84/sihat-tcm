@@ -2,7 +2,13 @@
 
 export function PatientIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg
+      viewBox="0 0 24 24"
+      className="w-6 h-6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -14,7 +20,13 @@ export function PatientIcon() {
 
 export function DoctorIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg
+      viewBox="0 0 24 24"
+      className="w-6 h-6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -26,7 +38,13 @@ export function DoctorIcon() {
 
 export function AdminIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg
+      viewBox="0 0 24 24"
+      className="w-6 h-6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -39,7 +57,13 @@ export function AdminIcon() {
 
 export function DeveloperIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5">
+    <svg
+      viewBox="0 0 24 24"
+      className="w-6 h-6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"

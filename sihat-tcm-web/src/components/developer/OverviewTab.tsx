@@ -137,9 +137,7 @@ export function OverviewTab({ currentTime, isRefreshing, onRefresh }: OverviewTa
                   <Database className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-blue-100 group-hover:text-blue-50">
-                    Flush Cache
-                  </h4>
+                  <h4 className="font-bold text-blue-100 group-hover:text-blue-50">Flush Cache</h4>
                   <p className="text-xs text-blue-500/60 mt-1">Reload & Clear</p>
                 </div>
               </CardContent>
@@ -168,8 +166,8 @@ export function OverviewTab({ currentTime, isRefreshing, onRefresh }: OverviewTa
               <span className="text-sm font-bold text-white">Debugger Active</span>
             </div>
             <p className="text-xs text-gray-400 leading-relaxed">
-              System is capturing all network traffic and AI chain-of-thought. Exception
-              breakpoints are enabled.
+              System is capturing all network traffic and AI chain-of-thought. Exception breakpoints
+              are enabled.
             </p>
           </div>
         </div>
@@ -267,6 +265,3 @@ export function OverviewTab({ currentTime, isRefreshing, onRefresh }: OverviewTa
     </div>
   );
 }
-
-
-

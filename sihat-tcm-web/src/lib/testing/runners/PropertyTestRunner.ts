@@ -1,6 +1,6 @@
 /**
  * Property Test Runner Implementation
- * 
+ *
  * Advanced property-based testing with intelligent shrinking,
  * counterexample minimization, and comprehensive reporting.
  */
@@ -11,10 +11,25 @@ import {
   TestResult,
   DataGenerator,
   ShrinkingStrategy,
-} from '../interfaces/TestInterfaces';
+} from "../interfaces/TestInterfaces";
 
-import { devLog, logError } from '../../systemLogger';
-import { ErrorFactory } from '../../errors/AppError';
+import { ErrorFactory } from "../../errors/AppError";
+
+/** Local log helper to avoid server-only systemLogger import */
+function devLog(message: string, metadata?: Record<string, unknown>): void {
+  if (process.env.NODE_ENV === "development") {
+    if (metadata) {
+      console.log(message, metadata);
+    } else {
+      console.log(message);
+    }
+  }
+}
+
+/** Local error log helper */
+function logError(message: string, error?: unknown): void {
+  console.error(message, error);
+}
 
 /**
  * Enhanced property test runner with shrinking capabilities
@@ -23,7 +38,10 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
   private readonly context: string;
   private readonly config: PropertyTestRunnerConfig;
 
-  constructor(context: string = 'PropertyTestRunner', config: Partial<PropertyTestRunnerConfig> = {}) {
+  constructor(
+    context: string = "PropertyTestRunner",
+    config: Partial<PropertyTestRunnerConfig> = {}
+  ) {
     this.context = context;
     this.config = {
       defaultIterations: 100,
@@ -71,11 +89,11 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
           if (!propertyResult) {
             // Property failed - we found a counterexample
             counterExample = input;
-            
+
             devLog(`[${this.context}] Counterexample found at iteration ${i + 1}`, {
               counterExample: this.sanitizeForLogging(input),
             });
-            
+
             break;
           }
 
@@ -83,13 +101,12 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
 
           // Check postcondition if provided
           if (test.postcondition && !test.postcondition(input)) {
-            throw new Error('Postcondition failed');
+            throw new Error("Postcondition failed");
           }
-
         } catch (error) {
           // Property threw an exception - treat as counterexample
           counterExample = test.generator();
-          
+
           logError(`[${this.context}] Property test threw exception at iteration ${i + 1}`, error);
           break;
         }
@@ -115,12 +132,14 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
         metadata: {
           totalIterations: iterations,
           shrinkingEnabled: test.shrinkingEnabled !== false,
-          strategy: test.shrinkingStrategy || 'smart',
+          strategy: test.shrinkingStrategy || "smart",
         },
       };
 
       if (!success) {
-        result.error = new Error(`Property failed with counterexample: ${JSON.stringify(counterExample)}`);
+        result.error = new Error(
+          `Property failed with counterexample: ${JSON.stringify(counterExample)}`
+        );
       }
 
       devLog(`[${this.context}] Property test completed: ${test.name}`, {
@@ -131,17 +150,16 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
       });
 
       return result;
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
+
       return {
         testId: test.id,
         success: false,
         executionTime,
         error: ErrorFactory.fromUnknownError(error, {
           component: this.context,
-          action: 'runPropertyTest',
+          action: "runPropertyTest",
           metadata: { testName: test.name },
         }),
         iterations: 0,
@@ -152,11 +170,14 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
   /**
    * Shrink a counterexample to find the minimal failing case
    */
-  public async shrinkCounterExample(test: PropertyTest, counterExample: any): Promise<{ shrunkExample: any; steps: number }> {
-    const strategy = test.shrinkingStrategy || 'smart';
+  public async shrinkCounterExample(
+    test: PropertyTest,
+    counterExample: any
+  ): Promise<{ shrunkExample: any; steps: number }> {
+    const strategy = test.shrinkingStrategy || "smart";
     const maxAttempts = this.config.maxShrinkingAttempts;
     const timeout = this.config.shrinkingTimeout;
-    
+
     const startTime = Date.now();
     let currentExample = counterExample;
     let steps = 0;
@@ -166,7 +187,7 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
         originalExample: this.sanitizeForLogging(counterExample),
       });
 
-      while (steps < maxAttempts && (Date.now() - startTime) < timeout) {
+      while (steps < maxAttempts && Date.now() - startTime < timeout) {
         const candidates = this.generateShrinkingCandidates(currentExample, strategy);
         let foundSmallerExample = false;
 
@@ -174,20 +195,20 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
           try {
             // Check if the candidate still fails the property
             const propertyResult = await test.property(candidate);
-            
+
             if (!propertyResult) {
               // This candidate also fails, so it's a valid shrink
               if (this.isSmallerExample(candidate, currentExample)) {
                 currentExample = candidate;
                 foundSmallerExample = true;
                 steps++;
-                
+
                 if (this.config.enableDetailedLogging) {
                   devLog(`[${this.context}] Shrinking step ${steps}`, {
                     candidate: this.sanitizeForLogging(candidate),
                   });
                 }
-                
+
                 break; // Try shrinking this new example further
               }
             }
@@ -215,7 +236,6 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
       });
 
       return { shrunkExample: currentExample, steps };
-
     } catch (error) {
       logError(`[${this.context}] Error during shrinking`, error);
       return { shrunkExample: counterExample, steps };
@@ -227,7 +247,7 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
    */
   public generateTestData<T>(generator: DataGenerator<T>, count: number): T[] {
     const data: T[] = [];
-    
+
     for (let i = 0; i < count; i++) {
       try {
         data.push(generator());
@@ -236,7 +256,7 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
         // Continue with other generations
       }
     }
-    
+
     return data;
   }
 
@@ -247,13 +267,13 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
    */
   private generateShrinkingCandidates(example: any, strategy: ShrinkingStrategy): any[] {
     switch (strategy) {
-      case 'aggressive':
+      case "aggressive":
         return this.generateAggressiveCandidates(example);
-      case 'conservative':
+      case "conservative":
         return this.generateConservativeCandidates(example);
-      case 'smart':
+      case "smart":
         return this.generateSmartCandidates(example);
-      case 'none':
+      case "none":
       default:
         return [];
     }
@@ -265,17 +285,17 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
   private generateAggressiveCandidates(example: any): any[] {
     const candidates: any[] = [];
 
-    if (typeof example === 'number') {
+    if (typeof example === "number") {
       // For numbers, try smaller values
       if (example > 0) {
         candidates.push(0, Math.floor(example / 2), example - 1);
       } else if (example < 0) {
         candidates.push(0, Math.ceil(example / 2), example + 1);
       }
-    } else if (typeof example === 'string') {
+    } else if (typeof example === "string") {
       // For strings, try shorter versions
       if (example.length > 0) {
-        candidates.push('', example.slice(0, -1), example.slice(1));
+        candidates.push("", example.slice(0, -1), example.slice(1));
         if (example.length > 2) {
           candidates.push(example.slice(0, Math.floor(example.length / 2)));
         }
@@ -293,7 +313,7 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
           candidates.push([...example.slice(0, i), ...example.slice(i + 1)]);
         }
       }
-    } else if (typeof example === 'object' && example !== null) {
+    } else if (typeof example === "object" && example !== null) {
       // For objects, try removing properties
       const keys = Object.keys(example);
       if (keys.length > 0) {
@@ -315,21 +335,21 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
   private generateConservativeCandidates(example: any): any[] {
     const candidates: any[] = [];
 
-    if (typeof example === 'number') {
+    if (typeof example === "number") {
       if (example > 0) {
         candidates.push(0, example - 1);
       } else if (example < 0) {
         candidates.push(0, example + 1);
       }
-    } else if (typeof example === 'string') {
+    } else if (typeof example === "string") {
       if (example.length > 0) {
-        candidates.push('', example.slice(0, -1));
+        candidates.push("", example.slice(0, -1));
       }
     } else if (Array.isArray(example)) {
       if (example.length > 0) {
         candidates.push([], example.slice(0, -1));
       }
-    } else if (typeof example === 'object' && example !== null) {
+    } else if (typeof example === "object" && example !== null) {
       const keys = Object.keys(example);
       if (keys.length > 0) {
         candidates.push({});
@@ -345,7 +365,7 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
   private generateSmartCandidates(example: any): any[] {
     const candidates: any[] = [];
 
-    if (typeof example === 'number') {
+    if (typeof example === "number") {
       if (example > 0) {
         candidates.push(0);
         if (example > 1) {
@@ -357,9 +377,9 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
           candidates.push(-1, Math.ceil(example / 2), example + 1);
         }
       }
-    } else if (typeof example === 'string') {
+    } else if (typeof example === "string") {
       if (example.length > 0) {
-        candidates.push('');
+        candidates.push("");
         if (example.length > 1) {
           candidates.push(example.slice(0, -1));
           if (example.length > 4) {
@@ -377,7 +397,7 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
           }
         }
       }
-    } else if (typeof example === 'object' && example !== null) {
+    } else if (typeof example === "object" && example !== null) {
       const keys = Object.keys(example);
       if (keys.length > 0) {
         candidates.push({});
@@ -399,7 +419,7 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
     // Simple heuristic for "smaller" - could be made more sophisticated
     const candidateSize = this.getExampleSize(candidate);
     const currentSize = this.getExampleSize(current);
-    
+
     return candidateSize < currentSize;
   }
 
@@ -407,15 +427,17 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
    * Get a rough "size" measure for an example
    */
   private getExampleSize(example: any): number {
-    if (typeof example === 'number') {
+    if (typeof example === "number") {
       return Math.abs(example);
-    } else if (typeof example === 'string') {
+    } else if (typeof example === "string") {
       return example.length;
     } else if (Array.isArray(example)) {
       return example.length + example.reduce((sum, item) => sum + this.getExampleSize(item), 0);
-    } else if (typeof example === 'object' && example !== null) {
-      return Object.keys(example).length + 
-        Object.values(example).reduce((sum, value) => sum + this.getExampleSize(value), 0);
+    } else if (typeof example === "object" && example !== null) {
+      return (
+        Object.keys(example).length +
+        Object.values(example).reduce((sum: number, value: unknown) => sum + this.getExampleSize(value), 0)
+      );
     } else {
       return 1;
     }
@@ -428,11 +450,11 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
     try {
       const serialized = JSON.stringify(example);
       if (serialized.length > 1000) {
-        return serialized.substring(0, 1000) + '... [truncated]';
+        return serialized.substring(0, 1000) + "... [truncated]";
       }
       return example;
     } catch (error) {
-      return '[unserializable object]';
+      return "[unserializable object]";
     }
   }
 
@@ -443,7 +465,7 @@ export class EnhancedPropertyTestRunner implements PropertyTestRunner {
     // Simple seeded random implementation
     // In a real implementation, you might want to use a more sophisticated PRNG
     let currentSeed = seed;
-    
+
     Math.random = () => {
       currentSeed = (currentSeed * 9301 + 49297) % 233280;
       return currentSeed / 233280;

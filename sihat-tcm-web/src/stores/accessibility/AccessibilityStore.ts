@@ -1,6 +1,6 @@
 /**
  * Accessibility Store
- * 
+ *
  * Manages accessibility preferences and features
  * for the Sihat TCM application.
  */
@@ -13,10 +13,7 @@ import {
   getAccessibilityManager,
 } from "@/lib/accessibilityManager";
 import { logger } from "@/lib/clientLogger";
-import {
-  AccessibilityStore,
-  STORAGE_KEYS
-} from "../interfaces/StoreInterfaces";
+import { AccessibilityStore, STORAGE_KEYS } from "../interfaces/StoreInterfaces";
 
 export const useAccessibilityStore = create<AccessibilityStore>()(
   subscribeWithSelector((set, get) => ({
@@ -32,6 +29,10 @@ export const useAccessibilityStore = create<AccessibilityStore>()(
       fontSize: "medium",
       focusIndicatorStyle: "default",
       announcements: true,
+      colorBlindnessSupport: false,
+      autoplayMedia: true,
+      animationSpeed: "normal",
+      textSpacing: "normal",
     },
 
     // ============================================================================
@@ -39,17 +40,17 @@ export const useAccessibilityStore = create<AccessibilityStore>()(
     // ============================================================================
     updateAccessibilityPreferences: (newPreferences) => {
       const { accessibilityManager, accessibilityPreferences } = get();
-      
+
       if (!accessibilityManager) {
         logger.warn("AccessibilityStore", "Cannot update preferences: manager not initialized");
         return;
       }
 
       const updatedPreferences = { ...accessibilityPreferences, ...newPreferences };
-      
+
       // Update the manager
       accessibilityManager.updatePreferences(newPreferences);
-      
+
       // Update local state
       set({ accessibilityPreferences: updatedPreferences });
 
@@ -71,23 +72,19 @@ export const useAccessibilityStore = create<AccessibilityStore>()(
             return `${key.replace(/([A-Z])/g, " $1").toLowerCase()}: ${value}`;
           })
           .join(", ");
-        
-        accessibilityManager.announce(
-          `Accessibility settings updated: ${changes}`, 
-          "polite", 
-          500
-        );
+
+        accessibilityManager.announce(`Accessibility settings updated: ${changes}`, "polite", 500);
       }
 
-      logger.info("AccessibilityStore", "Accessibility preferences updated", { 
+      logger.info("AccessibilityStore", "Accessibility preferences updated", {
         newPreferences,
-        updatedPreferences 
+        updatedPreferences,
       });
     },
 
     announce: (message, priority = "polite", delay = 0) => {
       const { accessibilityManager } = get();
-      
+
       if (!accessibilityManager) {
         logger.warn("AccessibilityStore", "Cannot announce: manager not initialized");
         return;
@@ -99,14 +96,18 @@ export const useAccessibilityStore = create<AccessibilityStore>()(
 
     initializeAccessibility: () => {
       let savedPreferences: Partial<AccessibilityPreferences> = {};
-      
+
       // Load saved preferences from localStorage
       if (typeof window !== "undefined") {
         try {
           const saved = localStorage.getItem(STORAGE_KEYS.accessibility);
           if (saved) {
             savedPreferences = JSON.parse(saved);
-            logger.debug("AccessibilityStore", "Loaded preferences from localStorage", savedPreferences);
+            logger.debug(
+              "AccessibilityStore",
+              "Loaded preferences from localStorage",
+              savedPreferences
+            );
           }
         } catch (error) {
           logger.warn("AccessibilityStore", "Failed to load accessibility preferences", error);
@@ -122,15 +123,19 @@ export const useAccessibilityStore = create<AccessibilityStore>()(
         fontSize: "medium",
         focusIndicatorStyle: "default",
         announcements: true,
+        colorBlindnessSupport: false,
+        autoplayMedia: true,
+        animationSpeed: "normal",
+        textSpacing: "normal",
         ...savedPreferences,
       };
 
       // Initialize the accessibility manager
       const accessibilityManager = getAccessibilityManager(mergedPreferences);
-      
+
       set({
         accessibilityManager,
-        accessibilityPreferences: accessibilityManager.getPreferences(),
+        accessibilityPreferences: { ...mergedPreferences, ...accessibilityManager.getPreferences() },
       });
 
       // Load accessibility styles
@@ -142,13 +147,13 @@ export const useAccessibilityStore = create<AccessibilityStore>()(
           link.rel = "stylesheet";
           link.href = "/styles/accessibility.css";
           document.head.appendChild(link);
-          
+
           logger.debug("AccessibilityStore", "Accessibility styles loaded");
         }
       }
 
-      logger.info("AccessibilityStore", "Accessibility system initialized", { 
-        preferences: mergedPreferences 
+      logger.info("AccessibilityStore", "Accessibility system initialized", {
+        preferences: mergedPreferences,
       });
     },
   }))
@@ -187,9 +192,11 @@ export const useAccessibilityContext = () => {
  * Hook for high contrast mode
  */
 export const useHighContrast = () => {
-  const isHighContrast = useAccessibilityStore((state) => state.accessibilityPreferences.highContrast);
+  const isHighContrast = useAccessibilityStore(
+    (state) => state.accessibilityPreferences.highContrast
+  );
   const updatePreferences = useAccessibilityStore((state) => state.updateAccessibilityPreferences);
-  
+
   const toggleHighContrast = () => {
     updatePreferences({ highContrast: !isHighContrast });
   };
@@ -204,9 +211,11 @@ export const useHighContrast = () => {
  * Hook for reduced motion
  */
 export const useReducedMotion = () => {
-  const isReducedMotion = useAccessibilityStore((state) => state.accessibilityPreferences.reducedMotion);
+  const isReducedMotion = useAccessibilityStore(
+    (state) => state.accessibilityPreferences.reducedMotion
+  );
   const updatePreferences = useAccessibilityStore((state) => state.updateAccessibilityPreferences);
-  
+
   const toggleReducedMotion = () => {
     updatePreferences({ reducedMotion: !isReducedMotion });
   };
@@ -223,13 +232,18 @@ export const useReducedMotion = () => {
 export const useFontSize = () => {
   const fontSize = useAccessibilityStore((state) => state.accessibilityPreferences.fontSize);
   const updatePreferences = useAccessibilityStore((state) => state.updateAccessibilityPreferences);
-  
+
   const setFontSize = (size: AccessibilityPreferences["fontSize"]) => {
     updatePreferences({ fontSize: size });
   };
 
   const increaseFontSize = () => {
-    const sizes: AccessibilityPreferences["fontSize"][] = ["small", "medium", "large", "extra-large"];
+    const sizes: AccessibilityPreferences["fontSize"][] = [
+      "small",
+      "medium",
+      "large",
+      "extra-large",
+    ];
     const currentIndex = sizes.indexOf(fontSize);
     if (currentIndex < sizes.length - 1) {
       setFontSize(sizes[currentIndex + 1]);
@@ -237,7 +251,12 @@ export const useFontSize = () => {
   };
 
   const decreaseFontSize = () => {
-    const sizes: AccessibilityPreferences["fontSize"][] = ["small", "medium", "large", "extra-large"];
+    const sizes: AccessibilityPreferences["fontSize"][] = [
+      "small",
+      "medium",
+      "large",
+      "extra-large",
+    ];
     const currentIndex = sizes.indexOf(fontSize);
     if (currentIndex > 0) {
       setFontSize(sizes[currentIndex - 1]);
@@ -259,10 +278,18 @@ export const useFontSize = () => {
  */
 export const useScreenReader = () => {
   const announce = useAccessibilityStore((state) => state.announce);
-  const isScreenReaderEnabled = useAccessibilityStore((state) => state.accessibilityPreferences.screenReaderEnabled);
-  const announcements = useAccessibilityStore((state) => state.accessibilityPreferences.announcements);
-  
-  const announceIfEnabled = (message: string, priority: "polite" | "assertive" = "polite", delay = 0) => {
+  const isScreenReaderEnabled = useAccessibilityStore(
+    (state) => state.accessibilityPreferences.screenReaderEnabled
+  );
+  const announcements = useAccessibilityStore(
+    (state) => state.accessibilityPreferences.announcements
+  );
+
+  const announceIfEnabled = (
+    message: string,
+    priority: "polite" | "assertive" = "polite",
+    delay = 0
+  ) => {
     if (announcements) {
       announce(message, priority, delay);
     }

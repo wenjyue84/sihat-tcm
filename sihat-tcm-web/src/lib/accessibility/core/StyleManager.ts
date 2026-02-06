@@ -1,6 +1,6 @@
 /**
  * Style Manager
- * 
+ *
  * Manages accessibility-related styling including high contrast,
  * reduced motion, font sizes, and focus indicators.
  */
@@ -8,7 +8,7 @@
 import {
   AccessibilityPreferences,
   FontSize,
-  FocusIndicatorStyle
+  FocusIndicatorStyle,
 } from "../interfaces/AccessibilityInterfaces";
 
 export class StyleManager {
@@ -51,7 +51,7 @@ export class StyleManager {
 
     // Apply CSS classes
     this.applyRootClasses(root);
-    
+
     // Apply custom CSS
     this.applyCustomStyles();
   }
@@ -192,7 +192,7 @@ export class StyleManager {
       }
     `);
 
-    return styles.join('\n');
+    return styles.join("\n");
   }
 
   /**
@@ -203,7 +203,7 @@ export class StyleManager {
       small: "0.875rem",
       medium: "1rem",
       large: "1.125rem",
-      "extra-large": "1.25rem"
+      "extra-large": "1.25rem",
     };
 
     const fontSize = fontSizeMap[this.preferences.fontSize];
@@ -264,7 +264,7 @@ export class StyleManager {
           outline-offset: 3px;
           box-shadow: 0 0 0 2px #ffffff, 0 0 0 6px #0066cc;
         }
-      `
+      `,
     };
 
     return focusStyles[this.preferences.focusIndicatorStyle];
@@ -286,7 +286,7 @@ export class StyleManager {
     skipLink.href = `#${targetId}`;
     skipLink.textContent = text;
     skipLink.className = "skip-link sr-only-focusable";
-    
+
     // Apply skip link styles
     skipLink.style.cssText = `
       position: absolute;
@@ -364,9 +364,9 @@ export class StyleManager {
   ): { ratio: number; passes: boolean; level: "AA" | "AAA" | "fail" } {
     const fgLuminance = this.getLuminance(foreground);
     const bgLuminance = this.getLuminance(background);
-    
-    const ratio = (Math.max(fgLuminance, bgLuminance) + 0.05) / 
-                  (Math.min(fgLuminance, bgLuminance) + 0.05);
+
+    const ratio =
+      (Math.max(fgLuminance, bgLuminance) + 0.05) / (Math.min(fgLuminance, bgLuminance) + 0.05);
 
     let level: "AA" | "AAA" | "fail";
     let passes: boolean;
@@ -394,7 +394,7 @@ export class StyleManager {
     if (!rgb) return 0;
 
     // Convert to relative luminance
-    const [r, g, b] = [rgb.r, rgb.g, rgb.b].map(c => {
+    const [r, g, b] = [rgb.r, rgb.g, rgb.b].map((c) => {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
@@ -407,11 +407,13 @@ export class StyleManager {
    */
   private hexToRgb(hex: string): { r: number; g: number; b: number } | null {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
   }
 
   /**
@@ -426,8 +428,8 @@ export class StyleManager {
     // Remove accessibility classes
     if (typeof document !== "undefined") {
       const root = document.documentElement;
-      const accessibilityClasses = Array.from(root.classList).filter(
-        className => className.startsWith("accessibility-")
+      const accessibilityClasses = Array.from(root.classList).filter((className) =>
+        className.startsWith("accessibility-")
       );
       root.classList.remove(...accessibilityClasses);
     }

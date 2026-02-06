@@ -1,9 +1,9 @@
 /**
  * Client-safe System Logger
- * 
+ *
  * This module provides logging utilities that can be safely imported
  * in both client and server components.
- * 
+ *
  * For server-side logging with database persistence, use system-logger.ts instead.
  */
 
@@ -17,21 +17,19 @@ const isDev = process.env.NODE_ENV === "development";
  * Safe to use in both client and server components.
  */
 export function devLog(
-    level: LogLevel,
-    category: string,
-    message: string,
-    metadata?: Record<string, unknown>
+  level: LogLevel,
+  category: string,
+  message: string,
+  metadata?: Record<string, unknown>
 ): void {
-    if (!isDev && level !== "error") return;
+  if (!isDev && level !== "error") return;
 
-    const prefix = `[${level.toUpperCase()}] [${category}]`;
-    const consoleMethod = level === "debug" ? "log" : level;
+  const prefix = `[${level.toUpperCase()}] [${category}]`;
+  const consoleMethod = level === "debug" ? "log" : level;
 
-    if (metadata) {
-        console[consoleMethod](prefix, message, metadata);
-    } else {
-        console[consoleMethod](prefix, message);
-    }
+  if (metadata) {
+    console[consoleMethod](prefix, message, metadata);
+  } else {
+    console[consoleMethod](prefix, message);
+  }
 }
-
-

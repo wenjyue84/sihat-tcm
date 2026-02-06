@@ -1,16 +1,14 @@
 /**
  * Recommendation Generator
- * 
+ *
  * Generates alternative recommendations when original ones are flagged for safety concerns.
  * Uses TCM principles and personalization factors to create suitable alternatives.
  */
 
-import {
-  PersonalizationFactors,
-} from '../interfaces/PersonalizationInterfaces';
+import { PersonalizationFactors } from "../interfaces/PersonalizationInterfaces";
 
-import { devLog, logError } from '../../systemLogger';
-import { ErrorFactory } from '../../errors/AppError';
+import { devLog, logError } from "../../systemLogger";
+import { ErrorFactory } from "../../errors/AppError";
 
 /**
  * Enhanced recommendation generator for personalized alternatives
@@ -20,38 +18,38 @@ export class RecommendationGenerator {
   private readonly tcmAlternatives: Map<string, string[]>;
   private readonly therapeuticCategories: Map<string, string[]>;
 
-  constructor(context: string = 'RecommendationGenerator') {
+  constructor(context: string = "RecommendationGenerator") {
     this.context = context;
-    
+
     // Initialize TCM alternatives database
     this.tcmAlternatives = new Map([
       // Protein alternatives
-      ['meat', ['tofu', 'tempeh', 'lentils', 'black beans', 'quinoa']],
-      ['fish', ['seaweed', 'spirulina', 'hemp seeds', 'chia seeds']],
-      ['dairy', ['almond milk', 'coconut milk', 'oat milk', 'cashew cream']],
-      
+      ["meat", ["tofu", "tempeh", "lentils", "black beans", "quinoa"]],
+      ["fish", ["seaweed", "spirulina", "hemp seeds", "chia seeds"]],
+      ["dairy", ["almond milk", "coconut milk", "oat milk", "cashew cream"]],
+
       // Herb alternatives
-      ['ginseng', ['astragalus', 'codonopsis', 'schisandra']],
-      ['ginkgo', ['gotu kola', 'bacopa', 'rhodiola']],
-      ['licorice', ['marshmallow root', 'slippery elm', 'fennel']],
-      
+      ["ginseng", ["astragalus", "codonopsis", "schisandra"]],
+      ["ginkgo", ["gotu kola", "bacopa", "rhodiola"]],
+      ["licorice", ["marshmallow root", "slippery elm", "fennel"]],
+
       // Spice alternatives
-      ['garlic', ['onion', 'shallots', 'chives', 'asafoetida']],
-      ['ginger', ['turmeric', 'galangal', 'cardamom']],
-      
+      ["garlic", ["onion", "shallots", "chives", "asafoetida"]],
+      ["ginger", ["turmeric", "galangal", "cardamom"]],
+
       // Grain alternatives
-      ['wheat', ['rice', 'millet', 'buckwheat', 'amaranth']],
-      ['barley', ['oats', 'quinoa', 'brown rice']],
+      ["wheat", ["rice", "millet", "buckwheat", "amaranth"]],
+      ["barley", ["oats", "quinoa", "brown rice"]],
     ]);
 
     // Initialize therapeutic categories
     this.therapeuticCategories = new Map([
-      ['warming', ['ginger', 'cinnamon', 'cloves', 'fennel', 'cardamom']],
-      ['cooling', ['mint', 'chrysanthemum', 'green tea', 'cucumber', 'watermelon']],
-      ['tonifying', ['goji berries', 'dates', 'longan', 'astragalus', 'codonopsis']],
-      ['detoxifying', ['dandelion', 'burdock', 'milk thistle', 'green tea']],
-      ['digestive', ['fennel', 'cardamom', 'orange peel', 'hawthorn']],
-      ['calming', ['chamomile', 'lavender', 'passionflower', 'jujube dates']],
+      ["warming", ["ginger", "cinnamon", "cloves", "fennel", "cardamom"]],
+      ["cooling", ["mint", "chrysanthemum", "green tea", "cucumber", "watermelon"]],
+      ["tonifying", ["goji berries", "dates", "longan", "astragalus", "codonopsis"]],
+      ["detoxifying", ["dandelion", "burdock", "milk thistle", "green tea"]],
+      ["digestive", ["fennel", "cardamom", "orange peel", "hawthorn"]],
+      ["calming", ["chamomile", "lavender", "passionflower", "jujube dates"]],
     ]);
   }
 
@@ -68,7 +66,9 @@ export class RecommendationGenerator {
     maxAlternatives: number = 5
   ): Promise<string[]> {
     try {
-      devLog(`[${this.context}] Generating alternatives for ${flaggedRecommendations.length} flagged recommendations`);
+      devLog(
+        `[${this.context}] Generating alternatives for ${flaggedRecommendations.length} flagged recommendations`
+      );
 
       const alternatives: string[] = [];
 
@@ -78,9 +78,9 @@ export class RecommendationGenerator {
           flagged.concerns,
           factors
         );
-        
+
         alternatives.push(...itemAlternatives);
-        
+
         // Stop if we have enough alternatives
         if (alternatives.length >= maxAlternatives) {
           break;
@@ -90,14 +90,15 @@ export class RecommendationGenerator {
       // Remove duplicates and limit to max
       const uniqueAlternatives = [...new Set(alternatives)].slice(0, maxAlternatives);
 
-      devLog(`[${this.context}] Generated ${uniqueAlternatives.length} alternative recommendations`);
+      devLog(
+        `[${this.context}] Generated ${uniqueAlternatives.length} alternative recommendations`
+      );
 
       return uniqueAlternatives;
-
     } catch (error) {
       throw ErrorFactory.fromUnknownError(error, {
         component: this.context,
-        action: 'generateAlternatives',
+        action: "generateAlternatives",
       });
     }
   }
@@ -115,10 +116,10 @@ export class RecommendationGenerator {
 
       // Analyze the original recommendation to understand its therapeutic purpose
       const therapeuticPurpose = this.analyzeTherapeuticPurpose(originalRecommendation);
-      
+
       // Generate alternatives based on concerns
       for (const concern of concerns) {
-        if (concern.includes('allergic to')) {
+        if (concern.includes("allergic to")) {
           const allergen = this.extractAllergenFromConcern(concern);
           if (allergen) {
             const allergenAlternatives = this.generateAllergenAlternatives(
@@ -128,14 +129,14 @@ export class RecommendationGenerator {
             );
             alternatives.push(...allergenAlternatives);
           }
-        } else if (concern.includes('not suitable for')) {
+        } else if (concern.includes("not suitable for")) {
           const dietaryAlternatives = this.generateDietaryAlternatives(
             originalRecommendation,
             therapeuticPurpose,
             factors
           );
           alternatives.push(...dietaryAlternatives);
-        } else if (concern.includes('may interact with')) {
+        } else if (concern.includes("may interact with")) {
           const safeAlternatives = this.generateMedicationSafeAlternatives(
             originalRecommendation,
             therapeuticPurpose,
@@ -147,17 +148,16 @@ export class RecommendationGenerator {
 
       // If no specific alternatives found, generate general therapeutic alternatives
       if (alternatives.length === 0) {
-        const generalAlternatives = this.generateGeneralAlternatives(
-          therapeuticPurpose,
-          factors
-        );
+        const generalAlternatives = this.generateGeneralAlternatives(therapeuticPurpose, factors);
         alternatives.push(...generalAlternatives);
       }
 
       return alternatives.slice(0, 3); // Limit to 3 alternatives per item
-
     } catch (error) {
-      logError(`[${this.context}] Error generating alternatives for item`, error instanceof Error ? error.message : String(error));
+      logError(
+        `[${this.context}] Error generating alternatives for item`,
+        error instanceof Error ? error.message : String(error)
+      );
       return [];
     }
   }
@@ -170,34 +170,34 @@ export class RecommendationGenerator {
     const lowerRec = recommendation.toLowerCase();
 
     // Check for warming/cooling properties
-    if (this.containsAnyOf(lowerRec, ['ginger', 'cinnamon', 'warm', 'heat'])) {
-      purposes.push('warming');
+    if (this.containsAnyOf(lowerRec, ["ginger", "cinnamon", "warm", "heat"])) {
+      purposes.push("warming");
     }
-    if (this.containsAnyOf(lowerRec, ['mint', 'cool', 'cold', 'chrysanthemum'])) {
-      purposes.push('cooling');
+    if (this.containsAnyOf(lowerRec, ["mint", "cool", "cold", "chrysanthemum"])) {
+      purposes.push("cooling");
     }
 
     // Check for tonifying properties
-    if (this.containsAnyOf(lowerRec, ['strengthen', 'tonify', 'boost', 'energy'])) {
-      purposes.push('tonifying');
+    if (this.containsAnyOf(lowerRec, ["strengthen", "tonify", "boost", "energy"])) {
+      purposes.push("tonifying");
     }
 
     // Check for digestive properties
-    if (this.containsAnyOf(lowerRec, ['digest', 'stomach', 'spleen', 'appetite'])) {
-      purposes.push('digestive');
+    if (this.containsAnyOf(lowerRec, ["digest", "stomach", "spleen", "appetite"])) {
+      purposes.push("digestive");
     }
 
     // Check for calming properties
-    if (this.containsAnyOf(lowerRec, ['calm', 'relax', 'sleep', 'anxiety'])) {
-      purposes.push('calming');
+    if (this.containsAnyOf(lowerRec, ["calm", "relax", "sleep", "anxiety"])) {
+      purposes.push("calming");
     }
 
     // Check for detoxifying properties
-    if (this.containsAnyOf(lowerRec, ['detox', 'cleanse', 'liver', 'clear heat'])) {
-      purposes.push('detoxifying');
+    if (this.containsAnyOf(lowerRec, ["detox", "cleanse", "liver", "clear heat"])) {
+      purposes.push("detoxifying");
     }
 
-    return purposes.length > 0 ? purposes : ['general'];
+    return purposes.length > 0 ? purposes : ["general"];
   }
 
   /**
@@ -229,9 +229,8 @@ export class RecommendationGenerator {
       const therapeuticAlts = this.therapeuticCategories.get(purpose);
       if (therapeuticAlts) {
         // Filter out the allergen and add safe alternatives
-        const safeAlts = therapeuticAlts.filter(alt => 
-          !alt.toLowerCase().includes(allergen) &&
-          this.isSafeForUser(alt, factors)
+        const safeAlts = therapeuticAlts.filter(
+          (alt) => !alt.toLowerCase().includes(allergen) && this.isSafeForUser(alt, factors)
         );
         alternatives.push(...safeAlts);
       }
@@ -253,21 +252,21 @@ export class RecommendationGenerator {
 
     // Generate alternatives based on dietary type
     switch (dietaryType) {
-      case 'vegetarian':
+      case "vegetarian":
         alternatives.push(...this.getVegetarianAlternatives(therapeuticPurpose));
         break;
-      case 'vegan':
+      case "vegan":
         alternatives.push(...this.getVeganAlternatives(therapeuticPurpose));
         break;
-      case 'halal':
+      case "halal":
         alternatives.push(...this.getHalalAlternatives(therapeuticPurpose));
         break;
-      case 'kosher':
+      case "kosher":
         alternatives.push(...this.getKosherAlternatives(therapeuticPurpose));
         break;
     }
 
-    return alternatives.filter(alt => this.isSafeForUser(alt, factors));
+    return alternatives.filter((alt) => this.isSafeForUser(alt, factors));
   }
 
   /**
@@ -282,34 +281,34 @@ export class RecommendationGenerator {
 
     // Get gentle alternatives that are less likely to interact
     const gentleAlternatives = [
-      'chamomile tea',
-      'warm water with lemon',
-      'mild herbal teas',
-      'gentle stretching',
-      'deep breathing exercises',
-      'light walking',
+      "chamomile tea",
+      "warm water with lemon",
+      "mild herbal teas",
+      "gentle stretching",
+      "deep breathing exercises",
+      "light walking",
     ];
 
     // Add therapeutic alternatives that are generally safe
     for (const purpose of therapeuticPurpose) {
       switch (purpose) {
-        case 'digestive':
-          alternatives.push('fennel tea', 'warm water before meals', 'gentle abdominal massage');
+        case "digestive":
+          alternatives.push("fennel tea", "warm water before meals", "gentle abdominal massage");
           break;
-        case 'calming':
-          alternatives.push('lavender aromatherapy', 'meditation', 'gentle yoga');
+        case "calming":
+          alternatives.push("lavender aromatherapy", "meditation", "gentle yoga");
           break;
-        case 'warming':
-          alternatives.push('warm compress', 'gentle movement', 'warm clothing');
+        case "warming":
+          alternatives.push("warm compress", "gentle movement", "warm clothing");
           break;
-        case 'cooling':
-          alternatives.push('cool compress', 'rest in cool environment', 'light clothing');
+        case "cooling":
+          alternatives.push("cool compress", "rest in cool environment", "light clothing");
           break;
       }
     }
 
     alternatives.push(...gentleAlternatives);
-    return alternatives.filter(alt => this.isSafeForUser(alt, factors));
+    return alternatives.filter((alt) => this.isSafeForUser(alt, factors));
   }
 
   /**
@@ -330,14 +329,14 @@ export class RecommendationGenerator {
 
     // Add general TCM lifestyle recommendations
     alternatives.push(
-      'regular sleep schedule',
-      'moderate exercise',
-      'balanced meals',
-      'stress reduction techniques',
-      'adequate hydration'
+      "regular sleep schedule",
+      "moderate exercise",
+      "balanced meals",
+      "stress reduction techniques",
+      "adequate hydration"
     );
 
-    return alternatives.filter(alt => this.isSafeForUser(alt, factors));
+    return alternatives.filter((alt) => this.isSafeForUser(alt, factors));
   }
 
   /**
@@ -345,21 +344,21 @@ export class RecommendationGenerator {
    */
   private getVegetarianAlternatives(therapeuticPurpose: string[]): string[] {
     const alternatives = [
-      'tofu with herbs',
-      'lentil soup',
-      'vegetable broth',
-      'herbal teas',
-      'plant-based proteins',
+      "tofu with herbs",
+      "lentil soup",
+      "vegetable broth",
+      "herbal teas",
+      "plant-based proteins",
     ];
 
     // Add purpose-specific vegetarian options
     for (const purpose of therapeuticPurpose) {
       switch (purpose) {
-        case 'tonifying':
-          alternatives.push('black sesame seeds', 'walnuts', 'goji berries');
+        case "tonifying":
+          alternatives.push("black sesame seeds", "walnuts", "goji berries");
           break;
-        case 'warming':
-          alternatives.push('ginger tea', 'cinnamon', 'warm spices');
+        case "warming":
+          alternatives.push("ginger tea", "cinnamon", "warm spices");
           break;
       }
     }
@@ -372,21 +371,21 @@ export class RecommendationGenerator {
    */
   private getVeganAlternatives(therapeuticPurpose: string[]): string[] {
     const alternatives = [
-      'plant-based milk',
-      'nutritional yeast',
-      'tahini',
-      'coconut products',
-      'plant proteins',
+      "plant-based milk",
+      "nutritional yeast",
+      "tahini",
+      "coconut products",
+      "plant proteins",
     ];
 
     // Add purpose-specific vegan options
     for (const purpose of therapeuticPurpose) {
       switch (purpose) {
-        case 'tonifying':
-          alternatives.push('hemp seeds', 'chia seeds', 'spirulina');
+        case "tonifying":
+          alternatives.push("hemp seeds", "chia seeds", "spirulina");
           break;
-        case 'cooling':
-          alternatives.push('coconut water', 'cucumber', 'mint');
+        case "cooling":
+          alternatives.push("coconut water", "cucumber", "mint");
           break;
       }
     }
@@ -399,11 +398,11 @@ export class RecommendationGenerator {
    */
   private getHalalAlternatives(therapeuticPurpose: string[]): string[] {
     return [
-      'halal-certified herbs',
-      'vegetable-based options',
-      'fish alternatives',
-      'plant-based proteins',
-      'herbal teas',
+      "halal-certified herbs",
+      "vegetable-based options",
+      "fish alternatives",
+      "plant-based proteins",
+      "herbal teas",
     ];
   }
 
@@ -412,11 +411,11 @@ export class RecommendationGenerator {
    */
   private getKosherAlternatives(therapeuticPurpose: string[]): string[] {
     return [
-      'kosher-certified options',
-      'vegetarian alternatives',
-      'plant-based proteins',
-      'kosher fish options',
-      'herbal preparations',
+      "kosher-certified options",
+      "vegetarian alternatives",
+      "plant-based proteins",
+      "kosher fish options",
+      "herbal preparations",
     ];
   }
 
@@ -441,7 +440,7 @@ export class RecommendationGenerator {
    * Check if text contains any of the given terms
    */
   private containsAnyOf(text: string, terms: string[]): boolean {
-    return terms.some(term => text.includes(term));
+    return terms.some((term) => text.includes(term));
   }
 
   /**
@@ -468,10 +467,9 @@ export class RecommendationGenerator {
     therapeuticCategories: number;
     totalAlternatives: number;
   } {
-    const totalAlternatives = Array.from(this.tcmAlternatives.values())
-      .reduce((sum, alts) => sum + alts.length, 0) +
-      Array.from(this.therapeuticCategories.values())
-      .reduce((sum, items) => sum + items.length, 0);
+    const totalAlternatives =
+      Array.from(this.tcmAlternatives.values()).reduce((sum, alts) => sum + alts.length, 0) +
+      Array.from(this.therapeuticCategories.values()).reduce((sum, items) => sum + items.length, 0);
 
     return {
       tcmAlternatives: this.tcmAlternatives.size,

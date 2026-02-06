@@ -1,6 +1,6 @@
 /**
  * Platform Optimizer Interfaces
- * 
+ *
  * Comprehensive type definitions for platform detection, optimization,
  * and UI adaptation across different devices and browsers.
  */
@@ -105,12 +105,8 @@ export interface IPlatformStyler {
   applyPerformanceOptimizations(): void;
 }
 
-export interface IPlatformOptimizer extends 
-  IPlatformDetector,
-  IResponsiveManager,
-  IOptimizationProvider,
-  IPlatformStyler {
-  
+export interface IPlatformOptimizer
+  extends IPlatformDetector, IResponsiveManager, IOptimizationProvider, IPlatformStyler {
   getDeviceInfo(): DeviceInfo;
   supportsFeature(feature: keyof DeviceCapabilities): boolean;
   getOptimalDebounceDelay(inputType?: "search" | "resize" | "scroll" | "input"): number;

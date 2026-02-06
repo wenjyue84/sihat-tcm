@@ -1,6 +1,6 @@
 /**
  * Safety Validator
- * 
+ *
  * Main orchestrator for medical safety validation.
  * Coordinates all safety checking components and provides unified validation results.
  */
@@ -15,7 +15,7 @@ import {
   RecommendationsToValidate,
   SafetyGuidelines,
   SupportedLanguage,
-  RiskLevel
+  RiskLevel,
 } from "../interfaces/SafetyInterfaces";
 
 import { AllergyChecker } from "./AllergyChecker";
@@ -25,7 +25,7 @@ import { EmergencyDetector } from "./EmergencyDetector";
 
 export class SafetyValidator {
   private context: string;
-  
+
   // Component instances
   private allergyChecker: AllergyChecker;
   private drugInteractionAnalyzer: DrugInteractionAnalyzer;
@@ -34,7 +34,7 @@ export class SafetyValidator {
 
   constructor(context: string = "SafetyValidator") {
     this.context = context;
-    
+
     // Initialize components
     this.allergyChecker = new AllergyChecker(`${context}/Allergy`);
     this.drugInteractionAnalyzer = new DrugInteractionAnalyzer(`${context}/DrugInteraction`);
@@ -52,7 +52,7 @@ export class SafetyValidator {
     try {
       devLog("info", this.context, "Starting comprehensive safety validation", {
         recommendationTypes: Object.keys(recommendations),
-        hasHistory: Boolean(validationContext.medical_history)
+        hasHistory: Boolean(validationContext.medical_history),
       });
 
       const allRecommendations = this.flattenRecommendations(recommendations);
@@ -64,22 +64,17 @@ export class SafetyValidator {
         contraindicationResult,
         emergencyResult,
         pregnancyResult,
-        ageResult
+        ageResult,
       ] = await Promise.all([
         this.allergyChecker.checkAllergies(allRecommendations, validationContext),
         this.drugInteractionAnalyzer.checkDrugInteractions(
           recommendations.herbal || [],
           validationContext
         ),
-        this.contraindicationChecker.checkContraindications(
-          allRecommendations,
-          validationContext
-        ),
-        this.emergencyDetector.detectEmergencyConditions(
-          validationContext.diagnosis_report
-        ),
+        this.contraindicationChecker.checkContraindications(allRecommendations, validationContext),
+        this.emergencyDetector.detectEmergencyConditions(validationContext.diagnosis_report),
         this.checkPregnancySafety(allRecommendations, validationContext),
-        this.checkAgeAppropriate(allRecommendations, validationContext)
+        this.checkAgeAppropriate(allRecommendations, validationContext),
       ]);
 
       // Combine all concerns
@@ -89,7 +84,7 @@ export class SafetyValidator {
         ...contraindicationResult.concerns,
         ...emergencyResult.concerns,
         ...pregnancyResult.concerns,
-        ...ageResult.concerns
+        ...ageResult.concerns,
       ];
 
       // Calculate overall risk and generate result
@@ -109,13 +104,13 @@ export class SafetyValidator {
         emergency_flags: emergencyResult.emergency_flags,
         contraindications: contraindicationResult.contraindications,
         drug_interactions: drugInteractionResult.interactions,
-        alternative_suggestions: alternatives
+        alternative_suggestions: alternatives,
       };
 
       logInfo(this.context, "Safety validation completed", {
         is_safe: result.is_safe,
         risk_level: result.risk_level,
-        concern_count: allConcerns.length
+        concern_count: allConcerns.length,
       });
 
       return result;
@@ -154,14 +149,14 @@ export class SafetyValidator {
       const google = getGoogleProvider();
       const { text: responseText } = await generateText({
         model: google("gemini-2.5-pro"),
-        messages: [{ role: "user", content: prompt }]
+        messages: [{ role: "user", content: prompt }],
       });
 
       const cleanText = responseText
         .replace(/```json/g, "")
         .replace(/```/g, "")
         .trim();
-      
+
       return JSON.parse(cleanText);
     } catch (error) {
       logError(this.context, "Failed to get safety guidelines", { error, condition });
@@ -169,15 +164,15 @@ export class SafetyValidator {
       return {
         guidelines: [
           "Consult qualified TCM practitioner",
-          "Follow prescribed treatments carefully"
+          "Follow prescribed treatments carefully",
         ],
         warnings: ["Do not self-medicate", "Inform healthcare providers of all treatments"],
         emergency_signs: ["Severe symptoms", "Sudden worsening", "Difficulty breathing"],
         when_to_seek_help: [
           "Symptoms worsen",
           "New concerning symptoms appear",
-          "Uncertainty about treatment"
-        ]
+          "Uncertainty about treatment",
+        ],
       };
     }
   }
@@ -185,14 +180,19 @@ export class SafetyValidator {
   /**
    * Quick emergency symptom check
    */
-  async checkEmergencySymptoms(symptoms: string[]): Promise<SafetyValidationResult["emergency_flags"]> {
+  async checkEmergencySymptoms(
+    symptoms: string[]
+  ): Promise<SafetyValidationResult["emergency_flags"]> {
     return await this.emergencyDetector.validateEmergencySymptoms(symptoms);
   }
 
   /**
    * Check specific drug-herb interaction
    */
-  async checkSpecificInteraction(herb: string, medication: string): Promise<SafetyValidationResult["drug_interactions"][0] | null> {
+  async checkSpecificInteraction(
+    herb: string,
+    medication: string
+  ): Promise<SafetyValidationResult["drug_interactions"][0] | null> {
     return await this.drugInteractionAnalyzer.analyzeSpecificInteraction(herb, medication);
   }
 
@@ -204,7 +204,7 @@ export class SafetyValidator {
       ...(recommendations.dietary || []),
       ...(recommendations.herbal || []),
       ...(recommendations.lifestyle || []),
-      ...(recommendations.acupressure || [])
+      ...(recommendations.acupressure || []),
     ];
   }
 
@@ -226,7 +226,7 @@ export class SafetyValidator {
         "blood-moving",
         "cold nature",
         "purgative",
-        "stimulating"
+        "stimulating",
       ];
 
       for (const keyword of pregnancyUnsafeKeywords) {
@@ -238,7 +238,7 @@ export class SafetyValidator {
               description: `Recommendation may not be suitable during pregnancy/breastfeeding`,
               affected_recommendation: recommendation,
               evidence_level: "traditional_knowledge",
-              action_required: "seek_medical_advice"
+              action_required: "seek_medical_advice",
             });
           }
         }
@@ -270,7 +270,7 @@ export class SafetyValidator {
             description: "Strong herbs may not be appropriate for children",
             affected_recommendation: recommendation,
             evidence_level: "clinical_study",
-            action_required: "seek_medical_advice"
+            action_required: "seek_medical_advice",
           });
         }
       }
@@ -284,7 +284,7 @@ export class SafetyValidator {
             description: "Cooling herbs should be used cautiously in elderly patients",
             affected_recommendation: recommendation,
             evidence_level: "traditional_knowledge",
-            action_required: "monitor"
+            action_required: "monitor",
           });
         }
       }
@@ -297,9 +297,9 @@ export class SafetyValidator {
    * Calculate overall risk level
    */
   private calculateOverallRisk(concerns: SafetyConcern[]): RiskLevel {
-    if (concerns.some(c => c.severity === "critical")) return "critical";
-    if (concerns.some(c => c.severity === "high")) return "high";
-    if (concerns.some(c => c.severity === "medium")) return "medium";
+    if (concerns.some((c) => c.severity === "critical")) return "critical";
+    if (concerns.some((c) => c.severity === "high")) return "high";
+    if (concerns.some((c) => c.severity === "medium")) return "medium";
     return "low";
   }
 
@@ -307,8 +307,9 @@ export class SafetyValidator {
    * Determine overall safety
    */
   private determineOverallSafety(riskLevel: RiskLevel, concerns: SafetyConcern[]): boolean {
-    return riskLevel !== "critical" && 
-           concerns.filter(c => c.severity === "critical").length === 0;
+    return (
+      riskLevel !== "critical" && concerns.filter((c) => c.severity === "critical").length === 0
+    );
   }
 
   /**
@@ -317,23 +318,23 @@ export class SafetyValidator {
   private generateSafetyRecommendations(concerns: SafetyConcern[]): string[] {
     const recommendations: string[] = [];
 
-    if (concerns.some(c => c.action_required === "emergency_care")) {
+    if (concerns.some((c) => c.action_required === "emergency_care")) {
       recommendations.push("Seek immediate emergency medical care");
     }
 
-    if (concerns.some(c => c.action_required === "seek_medical_advice")) {
+    if (concerns.some((c) => c.action_required === "seek_medical_advice")) {
       recommendations.push("Consult healthcare provider before following recommendations");
     }
 
-    if (concerns.some(c => c.action_required === "avoid_completely")) {
+    if (concerns.some((c) => c.action_required === "avoid_completely")) {
       recommendations.push("Avoid flagged substances completely");
     }
 
-    if (concerns.some(c => c.action_required === "monitor")) {
+    if (concerns.some((c) => c.action_required === "monitor")) {
       recommendations.push("Monitor for any adverse reactions");
     }
 
-    if (concerns.some(c => c.action_required === "modify_dosage")) {
+    if (concerns.some((c) => c.action_required === "modify_dosage")) {
       recommendations.push("Consider dosage modifications under professional guidance");
     }
 
@@ -349,7 +350,7 @@ export class SafetyValidator {
     context: ValidationContext
   ): Promise<string[]> {
     const alternatives: string[] = [];
-    const flaggedRecommendations = concerns.map(c => c.affected_recommendation);
+    const flaggedRecommendations = concerns.map((c) => c.affected_recommendation);
 
     for (const flagged of flaggedRecommendations) {
       if (flagged !== "all") {
@@ -369,19 +370,21 @@ export class SafetyValidator {
     return {
       is_safe: false,
       risk_level: "high",
-      concerns: [{
-        type: "condition_specific",
-        severity: "high",
-        description: "Safety validation system error - please consult healthcare provider",
-        affected_recommendation: "all",
-        evidence_level: "clinical_study",
-        action_required: "seek_medical_advice"
-      }],
+      concerns: [
+        {
+          type: "condition_specific",
+          severity: "high",
+          description: "Safety validation system error - please consult healthcare provider",
+          affected_recommendation: "all",
+          evidence_level: "clinical_study",
+          action_required: "seek_medical_advice",
+        },
+      ],
       recommendations: ["Consult healthcare provider before following any recommendations"],
       emergency_flags: [],
       contraindications: [],
       drug_interactions: [],
-      alternative_suggestions: []
+      alternative_suggestions: [],
     };
   }
 
@@ -398,7 +401,7 @@ export class SafetyValidator {
       allergy: this.allergyChecker.getAllergenInfo("general"),
       drugInteraction: this.drugInteractionAnalyzer.getInteractionStats(),
       contraindication: this.contraindicationChecker.getContraindicationStats(),
-      emergency: this.emergencyDetector.getEmergencyStats()
+      emergency: this.emergencyDetector.getEmergencyStats(),
     };
   }
 }

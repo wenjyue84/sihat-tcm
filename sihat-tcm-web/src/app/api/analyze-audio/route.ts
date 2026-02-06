@@ -217,20 +217,15 @@ Provide your analysis in the specified JSON format with detailed observations fo
     );
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    return createErrorResponseWithStatus(
-      error,
-      "API/analyze-audio",
-      200,
-      {
-        overall_observation:
-          "Audio analysis encountered an issue. Your recording is saved for later review.",
-        voice_quality_analysis: null,
-        breathing_patterns: null,
-        speech_patterns: null,
-        cough_sounds: null,
-        status: "error",
-        error: errorMessage,
-      }
-    );
+    return createErrorResponseWithStatus(error, "API/analyze-audio", 200, {
+      overall_observation:
+        "Audio analysis encountered an issue. Your recording is saved for later review.",
+      voice_quality_analysis: null,
+      breathing_patterns: null,
+      speech_patterns: null,
+      cough_sounds: null,
+      status: "error",
+      error: errorMessage,
+    });
   }
 }

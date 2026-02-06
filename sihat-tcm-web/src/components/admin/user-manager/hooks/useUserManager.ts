@@ -159,10 +159,7 @@ export function useUserManager() {
   // Paginate filtered results
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
   const paginatedUsers = useMemo(() => {
-    return filteredUsers.slice(
-      (currentPage - 1) * ITEMS_PER_PAGE,
-      currentPage * ITEMS_PER_PAGE
-    );
+    return filteredUsers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
   }, [filteredUsers, currentPage]);
 
   // Stats

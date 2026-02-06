@@ -1,6 +1,6 @@
 /**
  * Speech Synthesis Manager
- * 
+ *
  * Handles text-to-speech functionality with queue management,
  * voice selection, and feedback control for the Sihat TCM application.
  */
@@ -9,8 +9,8 @@ import {
   VoiceSynthesisOptions,
   SpeechQueueItem,
   VoiceEvent,
-  VoiceEventListener
-} from '../interfaces/VoiceInterfaces';
+  VoiceEventListener,
+} from "../interfaces/VoiceInterfaces";
 
 export class SpeechSynthesisManager {
   private synthesis: SpeechSynthesis | null = null;
@@ -63,7 +63,7 @@ export class SpeechSynthesisManager {
           text,
           options,
           resolve,
-          reject
+          reject,
         });
         return;
       }
@@ -104,8 +104,8 @@ export class SpeechSynthesisManager {
     } else {
       // Try to find a voice for the specified language
       const voices = this.getAvailableVoices();
-      const matchingVoice = voices.find(voice => 
-        voice.lang.startsWith(synthOptions.language.split('-')[0])
+      const matchingVoice = voices.find((voice) =>
+        voice.lang.startsWith(synthOptions.language.split("-")[0])
       );
       if (matchingVoice) {
         utterance.voice = matchingVoice;
@@ -133,7 +133,7 @@ export class SpeechSynthesisManager {
       this.emitEvent("error", {
         error: "synthesis_error",
         message: "Speech synthesis failed",
-        originalEvent: event
+        originalEvent: event,
       });
       reject?.(event);
 
@@ -159,12 +159,7 @@ export class SpeechSynthesisManager {
   private processQueue(): void {
     if (this.feedbackQueue.length > 0 && !this.isSpeaking) {
       const nextItem = this.feedbackQueue.shift()!;
-      this.speakImmediate(
-        nextItem.text,
-        nextItem.options,
-        nextItem.resolve,
-        nextItem.reject
-      );
+      this.speakImmediate(nextItem.text, nextItem.options, nextItem.resolve, nextItem.reject);
     }
   }
 
@@ -175,11 +170,11 @@ export class SpeechSynthesisManager {
     if (this.synthesis) {
       this.synthesis.cancel();
     }
-    
+
     this.isSpeaking = false;
-    
+
     // Reject all queued items
-    this.feedbackQueue.forEach(item => {
+    this.feedbackQueue.forEach((item) => {
       item.reject(new Error("Speech cancelled"));
     });
     this.feedbackQueue.length = 0;
@@ -218,10 +213,10 @@ export class SpeechSynthesisManager {
    */
   public getVoicesForLanguage(language: string): SpeechSynthesisVoice[] {
     const voices = this.getAvailableVoices();
-    const langCode = language.split('-')[0]; // Get base language code
-    
-    return voices.filter(voice => 
-      voice.lang.startsWith(langCode) || voice.lang.startsWith(language)
+    const langCode = language.split("-")[0]; // Get base language code
+
+    return voices.filter(
+      (voice) => voice.lang.startsWith(langCode) || voice.lang.startsWith(language)
     );
   }
 
@@ -230,7 +225,7 @@ export class SpeechSynthesisManager {
    */
   public setVoiceForLanguage(language: string, voiceName?: string): boolean {
     const voices = this.getVoicesForLanguage(language);
-    
+
     if (voices.length === 0) {
       console.warn(`No voices available for language: ${language}`);
       return false;
@@ -239,10 +234,10 @@ export class SpeechSynthesisManager {
     let selectedVoice: SpeechSynthesisVoice;
 
     if (voiceName) {
-      selectedVoice = voices.find(voice => voice.name === voiceName) || voices[0];
+      selectedVoice = voices.find((voice) => voice.name === voiceName) || voices[0];
     } else {
       // Prefer local voices over remote ones
-      selectedVoice = voices.find(voice => voice.localService) || voices[0];
+      selectedVoice = voices.find((voice) => voice.localService) || voices[0];
     }
 
     this.options.voice = selectedVoice;
@@ -261,7 +256,7 @@ export class SpeechSynthesisManager {
    */
   public setLanguage(language: string): void {
     this.options.language = language;
-    
+
     // Try to set an appropriate voice for the language
     this.setVoiceForLanguage(language);
   }
@@ -291,7 +286,7 @@ export class SpeechSynthesisManager {
    * Clear speech queue without stopping current speech
    */
   public clearQueue(): void {
-    this.feedbackQueue.forEach(item => {
+    this.feedbackQueue.forEach((item) => {
       item.reject(new Error("Speech queue cleared"));
     });
     this.feedbackQueue.length = 0;

@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/stores/useAppStore";
 import { DiagnosisSession, MedicalReport } from "@/types/database";
-import {
-  getPatientHistory,
-  getHealthTrends,
-  getMedicalReports,
-} from "@/lib/actions";
+import { getPatientHistory, getHealthTrends, getMedicalReports } from "@/lib/actions";
 
 export type ViewType = "table" | "list" | "gallery";
 export type SortField = "date" | "score" | "diagnosis";
@@ -135,6 +131,3 @@ export function usePatientDashboardState() {
     setMealSubSection,
   };
 }
-
-
-

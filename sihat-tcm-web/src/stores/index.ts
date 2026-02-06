@@ -1,9 +1,25 @@
 /**
  * Store System - Main Export
- * 
+ *
  * Centralized export for the complete store management system
  * with orchestration, factory patterns, and cross-store synchronization.
  */
+
+// Local imports for convenience functions below
+import {
+  defaultStoreOrchestrator as _defaultStoreOrchestrator,
+  createStoreOrchestrator as _createStoreOrchestrator,
+  registerStore as _registerStore,
+  getStoreMetrics as _getStoreMetrics,
+} from "./core/StoreOrchestrator";
+import {
+  defaultStoreFactory as _defaultStoreFactory,
+  createStoreFactory as _createStoreFactory,
+} from "./core/StoreFactory";
+import { useAuthStore as _useAuthStore } from "./auth/AuthStore";
+import { useLanguageStore as _useLanguageStore } from "./language/LanguageStore";
+import { useDiagnosisProgressStore as _useDiagnosisProgressStore } from "./diagnosis/DiagnosisProgressStore";
+import type { StoreConfig as _StoreConfig } from "./interfaces/StoreInterfaces";
 
 // Core Store System
 export {
@@ -18,7 +34,7 @@ export {
   getStoreMetrics,
   getStoreEventHistory,
   resetAllStores,
-} from './core/StoreOrchestrator';
+} from "./core/StoreOrchestrator";
 
 export {
   StoreFactory,
@@ -27,7 +43,7 @@ export {
   createStore,
   getStoreConfig,
   getFactoryMetrics,
-} from './core/StoreFactory';
+} from "./core/StoreFactory";
 
 // Individual Stores
 export {
@@ -38,7 +54,7 @@ export {
   useIsDoctor,
   useIsPatient,
   useIsDeveloper,
-} from './auth/AuthStore';
+} from "./auth/AuthStore";
 
 export {
   useLanguageStore,
@@ -46,7 +62,7 @@ export {
   useTranslation,
   useT,
   useLanguageSwitcher,
-} from './language/LanguageStore';
+} from "./language/LanguageStore";
 
 export {
   useDiagnosisProgressStore,
@@ -54,13 +70,12 @@ export {
   useDiagnosisProgressOptional,
   useStepProgress,
   useDiagnosisNavigation,
-} from './diagnosis/DiagnosisProgressStore';
+} from "./diagnosis/DiagnosisProgressStore";
 
 // Store Interfaces and Types
 export type {
   // Core Interfaces
   StoreOrchestrator as IStoreOrchestrator,
-  StoreFactory as IStoreFactory,
   CrossStoreEvent,
   StoreSubscription,
   StoreMetrics,
@@ -98,7 +113,7 @@ export type {
   UIPreferences,
   Profile,
   NavigationState,
-} from './interfaces/StoreInterfaces';
+} from "./interfaces/StoreInterfaces";
 
 // Constants
 export {
@@ -106,39 +121,39 @@ export {
   STEP_WEIGHTS,
   STEP_BASE_PROGRESS,
   ADMIN_LEVEL_MAPPING,
-} from './interfaces/StoreInterfaces';
+} from "./interfaces/StoreInterfaces";
 
 // Convenience Functions
 export function initializeStoreSystem(): {
-  orchestrator: typeof defaultStoreOrchestrator;
-  factory: typeof defaultStoreFactory;
+  orchestrator: typeof _defaultStoreOrchestrator;
+  factory: typeof _defaultStoreFactory;
 } {
   // Register all stores with the orchestrator
-  registerStore('auth', useAuthStore, []);
-  registerStore('language', useLanguageStore, ['auth']);
-  registerStore('diagnosisProgress', useDiagnosisProgressStore, []);
+  _registerStore("auth", _useAuthStore, []);
+  _registerStore("language", _useLanguageStore, ["auth"]);
+  _registerStore("diagnosisProgress", _useDiagnosisProgressStore, []);
 
   return {
-    orchestrator: defaultStoreOrchestrator,
-    factory: defaultStoreFactory,
+    orchestrator: _defaultStoreOrchestrator,
+    factory: _defaultStoreFactory,
   };
 }
 
 /**
  * Create a complete store setup with all stores initialized
  */
-export function createCompleteStoreSetup(config?: Partial<StoreConfig>) {
-  const orchestrator = createStoreOrchestrator(config);
-  const factory = createStoreFactory();
+export function createCompleteStoreSetup(config?: Partial<_StoreConfig>) {
+  const orchestrator = _createStoreOrchestrator(config);
+  const factory = _createStoreFactory();
 
   // Create and register all stores
-  const authStore = factory.createStore('auth');
-  const languageStore = factory.createStore('language');
-  const diagnosisProgressStore = factory.createStore('diagnosisProgress');
+  const authStore = factory.createStore("auth");
+  const languageStore = factory.createStore("language");
+  const diagnosisProgressStore = factory.createStore("diagnosisProgress");
 
-  orchestrator.registerStore('auth', authStore, []);
-  orchestrator.registerStore('language', languageStore, ['auth']);
-  orchestrator.registerStore('diagnosisProgress', diagnosisProgressStore, []);
+  orchestrator.registerStore("auth", authStore, []);
+  orchestrator.registerStore("language", languageStore, ["auth"]);
+  orchestrator.registerStore("diagnosisProgress", diagnosisProgressStore, []);
 
   return {
     orchestrator,
@@ -156,10 +171,10 @@ export function createCompleteStoreSetup(config?: Partial<StoreConfig>) {
  */
 export function checkStoreSystemHealth(): {
   isHealthy: boolean;
-  metrics: ReturnType<typeof getStoreMetrics>;
+  metrics: ReturnType<typeof _getStoreMetrics>;
   issues: string[];
 } {
-  const metrics = getStoreMetrics();
+  const metrics = _getStoreMetrics();
   const issues: string[] = [];
 
   // Check for basic health indicators

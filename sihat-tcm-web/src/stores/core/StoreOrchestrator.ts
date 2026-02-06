@@ -1,6 +1,6 @@
 /**
  * Store Orchestrator
- * 
+ *
  * Central orchestrator for managing all application stores with
  * cross-store synchronization and lifecycle management.
  */
@@ -21,7 +21,7 @@ import type {
   CrossStoreEvent,
   StoreSubscription,
   StoreMetrics,
-  StoreConfig
+  StoreConfig,
 } from "../interfaces/StoreInterfaces";
 
 /**
@@ -47,7 +47,7 @@ export class StoreOrchestrator implements IStoreOrchestrator {
       enableMetrics: true,
       enableEventHistory: true,
       maxEventHistory: 1000,
-      enableDebugLogging: process.env.NODE_ENV === 'development',
+      enableDebugLogging: process.env.NODE_ENV === "development",
       ...config,
     };
 
@@ -75,11 +75,7 @@ export class StoreOrchestrator implements IStoreOrchestrator {
   /**
    * Register a store with the orchestrator
    */
-  public registerStore<T>(
-    name: string,
-    store: T,
-    dependencies: string[] = []
-  ): void {
+  public registerStore<T>(name: string, store: T, dependencies: string[] = []): void {
     if (this.stores.has(name)) {
       logger.warn("StoreOrchestrator", "Store already registered", { name });
       return;
@@ -122,7 +118,7 @@ export class StoreOrchestrator implements IStoreOrchestrator {
 
     // Clean up subscriptions
     const subscriptions = this.subscriptions.get(name) || [];
-    subscriptions.forEach(sub => {
+    subscriptions.forEach((sub) => {
       if (sub.unsubscribe) {
         sub.unsubscribe();
       }
@@ -189,8 +185,8 @@ export class StoreOrchestrator implements IStoreOrchestrator {
     // Return unsubscribe function
     return () => {
       const subscriptions = this.subscriptions.get(targetStore) || [];
-      const index = subscriptions.findIndex(sub => sub.id === subscription.id);
-      
+      const index = subscriptions.findIndex((sub) => sub.id === subscription.id);
+
       if (index !== -1) {
         subscriptions.splice(index, 1);
         this.subscriptions.set(targetStore, subscriptions);
@@ -210,7 +206,7 @@ export class StoreOrchestrator implements IStoreOrchestrator {
    */
   public emitEvent(event: Omit<CrossStoreEvent, "id">): void {
     const startTime = performance.now();
-    
+
     const fullEvent: CrossStoreEvent = {
       ...event,
       id: `event-${Date.now()}-${Math.random()}`,
@@ -219,7 +215,7 @@ export class StoreOrchestrator implements IStoreOrchestrator {
     // Add to event history if enabled
     if (this.config.enableEventHistory) {
       this.eventHistory.push(fullEvent);
-      
+
       // Trim history if it exceeds max size
       if (this.eventHistory.length > this.config.maxEventHistory) {
         this.eventHistory.shift();
@@ -240,8 +236,9 @@ export class StoreOrchestrator implements IStoreOrchestrator {
     const processingTime = performance.now() - startTime;
     this.metrics.eventsProcessed++;
     this.metrics.lastEventTime = Date.now();
-    this.metrics.averageEventProcessingTime = 
-      (this.metrics.averageEventProcessingTime * (this.metrics.eventsProcessed - 1) + processingTime) / 
+    this.metrics.averageEventProcessingTime =
+      (this.metrics.averageEventProcessingTime * (this.metrics.eventsProcessed - 1) +
+        processingTime) /
       this.metrics.eventsProcessed;
 
     if (this.config.enableDebugLogging) {
@@ -257,11 +254,8 @@ export class StoreOrchestrator implements IStoreOrchestrator {
   /**
    * Notify subscribers of an event
    */
-  private notifySubscribers(
-    subscriptions: StoreSubscription[],
-    event: CrossStoreEvent
-  ): void {
-    subscriptions.forEach(subscription => {
+  private notifySubscribers(subscriptions: StoreSubscription[], event: CrossStoreEvent): void {
+    subscriptions.forEach((subscription) => {
       if (subscription.eventType === "*" || subscription.eventType === event.type) {
         try {
           subscription.callback(event);
@@ -283,8 +277,8 @@ export class StoreOrchestrator implements IStoreOrchestrator {
   private setupCrossStoreSync(storeName: string, dependencies: string[]): void {
     // This would be implemented based on specific store synchronization needs
     // For now, we'll set up basic event forwarding
-    
-    dependencies.forEach(depName => {
+
+    dependencies.forEach((depName) => {
       const depStore = this.stores.get(depName);
       if (depStore && typeof depStore.subscribe === "function") {
         // Subscribe to dependency store changes
@@ -332,7 +326,7 @@ export class StoreOrchestrator implements IStoreOrchestrator {
    */
   public clearEventHistory(): void {
     this.eventHistory = [];
-    
+
     if (this.config.enableDebugLogging) {
       logger.info("StoreOrchestrator", "Event history cleared");
     }
@@ -360,7 +354,7 @@ export class StoreOrchestrator implements IStoreOrchestrator {
       if (store && typeof store.reset === "function") {
         try {
           store.reset();
-          
+
           this.emitEvent({
             type: "store:reset",
             storeName: name,
@@ -387,7 +381,7 @@ export class StoreOrchestrator implements IStoreOrchestrator {
   public cleanup(): void {
     // Unsubscribe from all subscriptions
     this.subscriptions.forEach((subscriptions, storeName) => {
-      subscriptions.forEach(sub => {
+      subscriptions.forEach((sub) => {
         if (sub.unsubscribe) {
           sub.unsubscribe();
         }
@@ -397,7 +391,7 @@ export class StoreOrchestrator implements IStoreOrchestrator {
     this.subscriptions.clear();
     this.stores.clear();
     this.eventHistory = [];
-    
+
     this.metrics = {
       totalStores: 0,
       activeSubscriptions: 0,
@@ -421,15 +415,13 @@ export const defaultStoreOrchestrator = new StoreOrchestrator({
   enableMetrics: true,
   enableEventHistory: true,
   maxEventHistory: 1000,
-  enableDebugLogging: process.env.NODE_ENV === 'development',
+  enableDebugLogging: process.env.NODE_ENV === "development",
 });
 
 /**
  * Create a new store orchestrator with custom configuration
  */
-export function createStoreOrchestrator(
-  config: Partial<StoreConfig> = {}
-): StoreOrchestrator {
+export function createStoreOrchestrator(config: Partial<StoreConfig> = {}): StoreOrchestrator {
   return new StoreOrchestrator(config);
 }
 
@@ -437,10 +429,14 @@ export function createStoreOrchestrator(
  * Convenience functions for the default orchestrator
  */
 export const registerStore = defaultStoreOrchestrator.registerStore.bind(defaultStoreOrchestrator);
-export const unregisterStore = defaultStoreOrchestrator.unregisterStore.bind(defaultStoreOrchestrator);
+export const unregisterStore =
+  defaultStoreOrchestrator.unregisterStore.bind(defaultStoreOrchestrator);
 export const getStore = defaultStoreOrchestrator.getStore.bind(defaultStoreOrchestrator);
-export const subscribeToStoreEvents = defaultStoreOrchestrator.subscribe.bind(defaultStoreOrchestrator);
+export const subscribeToStoreEvents =
+  defaultStoreOrchestrator.subscribe.bind(defaultStoreOrchestrator);
 export const emitStoreEvent = defaultStoreOrchestrator.emitEvent.bind(defaultStoreOrchestrator);
 export const getStoreMetrics = defaultStoreOrchestrator.getMetrics.bind(defaultStoreOrchestrator);
-export const getStoreEventHistory = defaultStoreOrchestrator.getEventHistory.bind(defaultStoreOrchestrator);
-export const resetAllStores = defaultStoreOrchestrator.resetAllStores.bind(defaultStoreOrchestrator);
+export const getStoreEventHistory =
+  defaultStoreOrchestrator.getEventHistory.bind(defaultStoreOrchestrator);
+export const resetAllStores =
+  defaultStoreOrchestrator.resetAllStores.bind(defaultStoreOrchestrator);

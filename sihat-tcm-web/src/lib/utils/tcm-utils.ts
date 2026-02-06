@@ -1,7 +1,7 @@
 /**
  * Utility functions for parsing and cleaning TCM data strings.
  * Helps prevent raw JSON or malformed text from displaying in the UI.
- * 
+ *
  * Moved from tcm-utils.ts for better organization
  */
 
@@ -29,12 +29,7 @@ export const extractDiagnosisTitle = (value: string | object | undefined | null)
   // If it's already an object, extract the primary_pattern directly
   if (typeof value === "object" && value !== null) {
     const obj = value as any;
-    return (
-      obj.primary_pattern || 
-      obj.pattern || 
-      obj.diagnosis || 
-      "TCM Health Assessment"
-    );
+    return obj.primary_pattern || obj.pattern || obj.diagnosis || "TCM Health Assessment";
   }
 
   // If it's a string that looks like JSON, try to parse and extract
@@ -63,7 +58,9 @@ export const extractDiagnosisTitle = (value: string | object | undefined | null)
 /**
  * Safely parses constitution data which might be a JSON string, a plain string, or an object.
  */
-export const parseConstitution = (value: string | object | undefined | null): ParsedConstitution => {
+export const parseConstitution = (
+  value: string | object | undefined | null
+): ParsedConstitution => {
   if (!value) return { type: "General" };
 
   // If it's already an object, extract the fields directly
@@ -114,5 +111,3 @@ export const parseConstitution = (value: string | object | undefined | null): Pa
 export const extractConstitutionType = (value: string | object | undefined | null): string => {
   return parseConstitution(value).type;
 };
-
-

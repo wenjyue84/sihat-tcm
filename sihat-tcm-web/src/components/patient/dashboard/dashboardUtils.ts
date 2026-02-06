@@ -56,10 +56,7 @@ export function sortSessions(
   });
 }
 
-export function getSectionTitle(
-  activeSection: string,
-  t: TranslationObject
-): string {
+export function getSectionTitle(activeSection: string, t: TranslationObject): string {
   switch (activeSection) {
     case "journey":
       return (t.patientDashboard?.tabs?.healthJourney as string) || "Health Journey";
@@ -99,6 +96,3 @@ export function getSectionTitle(
       return (t.patientDashboard?.tabs?.healthJourney as string) || "Health Journey";
   }
 }
-
-
-

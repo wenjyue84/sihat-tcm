@@ -39,7 +39,7 @@ import {
 import {
   getPatientSessionIds,
   translateDiagnosisSession,
-  translateUserProfile
+  translateUserProfile,
 } from "@/lib/actions";
 import { toast } from "sonner";
 
@@ -136,10 +136,9 @@ export function PatientSettings() {
       });
       refreshProfile();
       router.refresh();
-
     } catch (error) {
       toast.error("Translation incomplete", {
-        description: "Some items may not have been translated. Please try again."
+        description: "Some items may not have been translated. Please try again.",
       });
     } finally {
       setTranslating(false);
@@ -199,8 +198,9 @@ export function PatientSettings() {
                     <button
                       key={mode.id}
                       onClick={() => updatePreferences({ diagnosisMode: mode.id })}
-                      className={`relative flex flex-col items-start p-6 text-left transition-all hover:bg-slate-50 ${isSelected ? "bg-emerald-50/30" : ""
-                        }`}
+                      className={`relative flex flex-col items-start p-6 text-left transition-all hover:bg-slate-50 ${
+                        isSelected ? "bg-emerald-50/30" : ""
+                      }`}
                     >
                       <div className="flex items-center justify-between w-full mb-3">
                         <div
@@ -363,10 +363,11 @@ export function PatientSettings() {
                       key={lang.code}
                       onClick={() => handleLanguageChange(lang.code)}
                       disabled={savingLanguage}
-                      className={`relative flex items-center gap-3 p-3 rounded-lg border transition-all ${isActive
-                        ? "border-emerald-500 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-500 ring-offset-0"
-                        : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700"
-                        }`}
+                      className={`relative flex items-center gap-3 p-3 rounded-lg border transition-all ${
+                        isActive
+                          ? "border-emerald-500 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-500 ring-offset-0"
+                          : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700"
+                      }`}
                     >
                       <span className="text-xl shrink-0">{lang.flag}</span>
                       <span className="font-medium text-sm">{lang.name}</span>
@@ -458,7 +459,8 @@ export function PatientSettings() {
             <DialogDescription className="space-y-3 pt-2" asChild>
               <div>
                 <p>
-                  Would you like to translate all your saved diagnosis records and medical history to{" "}
+                  Would you like to translate all your saved diagnosis records and medical history
+                  to{" "}
                   <span className="font-semibold text-emerald-600">
                     {pendingLang ? languageNames[pendingLang].native : ""}
                   </span>
@@ -467,8 +469,8 @@ export function PatientSettings() {
                 <div className="bg-amber-50 text-amber-800 p-3 rounded-md text-sm border border-amber-100 flex items-start gap-2">
                   <span className="text-lg">⚠️</span>
                   <p>
-                    This action is <strong>irreversible</strong>. Translating back later may result in loss of
-                    nuance or information.
+                    This action is <strong>irreversible</strong>. Translating back later may result
+                    in loss of nuance or information.
                   </p>
                 </div>
               </div>
@@ -492,10 +494,7 @@ export function PatientSettings() {
 
           <DialogFooter className={translating ? "sm:justify-between items-center" : ""}>
             {!translating && (
-              <Button
-                variant="outline"
-                onClick={() => setShowTranslateDialog(false)}
-              >
+              <Button variant="outline" onClick={() => setShowTranslateDialog(false)}>
                 Skip
               </Button>
             )}

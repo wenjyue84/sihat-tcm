@@ -216,12 +216,13 @@ export default function HistoryViewerPage() {
               </div>
               {session.overall_score !== null && session.overall_score !== undefined && (
                 <div
-                  className={`px-4 py-2 rounded-full font-bold ${session.overall_score >= 75
-                    ? "bg-emerald-100 text-emerald-700"
-                    : session.overall_score >= 50
-                      ? "bg-amber-100 text-amber-700"
-                      : "bg-red-100 text-red-700"
-                    }`}
+                  className={`px-4 py-2 rounded-full font-bold ${
+                    session.overall_score >= 75
+                      ? "bg-emerald-100 text-emerald-700"
+                      : session.overall_score >= 50
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-red-100 text-red-700"
+                  }`}
                 >
                   Score: {session.overall_score}
                 </div>

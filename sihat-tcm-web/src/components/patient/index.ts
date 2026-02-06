@@ -54,6 +54,3 @@ export { DashboardGrid as DashboardWidgets } from "./DashboardWidgets";
 // Subdirectory exports
 // Note: Sleep and snore-analysis components can be imported directly from their paths
 export { SnoreAnalysisTab } from "./snore-analysis/SnoreAnalysisTab";
-
-
-

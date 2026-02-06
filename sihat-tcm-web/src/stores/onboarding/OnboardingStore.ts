@@ -1,6 +1,6 @@
 /**
  * Onboarding Store
- * 
+ *
  * Manages user onboarding state and progress
  * for the Sihat TCM application.
  */
@@ -8,10 +8,7 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { logger } from "@/lib/clientLogger";
-import {
-  OnboardingStore,
-  STORAGE_KEYS
-} from "../interfaces/StoreInterfaces";
+import { OnboardingStore, STORAGE_KEYS } from "../interfaces/StoreInterfaces";
 
 export const useOnboardingStore = create<OnboardingStore>()(
   subscribeWithSelector((set, get) => ({
@@ -26,7 +23,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
     // ============================================================================
     completeOnboarding: () => {
       set({ hasCompletedOnboarding: true });
-      
+
       // Save to localStorage
       if (typeof window !== "undefined") {
         localStorage.setItem(STORAGE_KEYS.onboarding, "true");
@@ -36,7 +33,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
 
     resetOnboarding: () => {
       set({ hasCompletedOnboarding: false });
-      
+
       // Remove from localStorage
       if (typeof window !== "undefined") {
         localStorage.removeItem(STORAGE_KEYS.onboarding);
@@ -48,15 +45,15 @@ export const useOnboardingStore = create<OnboardingStore>()(
       if (typeof window !== "undefined") {
         const completed = localStorage.getItem(STORAGE_KEYS.onboarding);
         const hasCompleted = completed === "true";
-        
-        set({ 
-          hasCompletedOnboarding: hasCompleted, 
-          onboardingLoading: false 
+
+        set({
+          hasCompletedOnboarding: hasCompleted,
+          onboardingLoading: false,
         });
-        
-        logger.info("OnboardingStore", "Onboarding initialized", { 
+
+        logger.info("OnboardingStore", "Onboarding initialized", {
           hasCompleted,
-          fromStorage: !!completed 
+          fromStorage: !!completed,
         });
       } else {
         // Server-side: just mark as loaded
@@ -96,7 +93,7 @@ export const useOnboarding = () => {
  */
 export const useOnboardingFlow = () => {
   const { hasCompletedOnboarding, completeOnboarding, isLoading } = useOnboarding();
-  
+
   // Define onboarding steps
   const steps = [
     {
@@ -156,7 +153,7 @@ export const useOnboardingFlow = () => {
  */
 export const useOnboardingNavigation = () => {
   const { steps } = useOnboardingFlow();
-  
+
   // This could be enhanced with actual step state management
   // For now, it provides the structure for step navigation
   const getStepByIndex = (index: number) => {
@@ -164,11 +161,11 @@ export const useOnboardingNavigation = () => {
   };
 
   const getStepById = (id: string) => {
-    return steps.find(step => step.id === id) || null;
+    return steps.find((step) => step.id === id) || null;
   };
 
   const getStepIndex = (id: string) => {
-    return steps.findIndex(step => step.id === id);
+    return steps.findIndex((step) => step.id === id);
   };
 
   const isFirstStep = (index: number) => index === 0;

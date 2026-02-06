@@ -25,6 +25,3 @@ export * from "./hooks";
 export * from "./schedule";
 export * from "./treatment";
 export * from "./reports";
-
-
-

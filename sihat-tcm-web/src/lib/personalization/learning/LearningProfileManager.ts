@@ -1,15 +1,15 @@
 /**
  * Learning Profile Manager - Manages user learning profiles and feedback
- * 
+ *
  * Tracks user preferences, treatment outcomes, and feedback to continuously
  * improve personalization accuracy and recommendation effectiveness.
  */
 
-import { LearningProfile, FeedbackData } from '../interfaces/PersonalizationInterfaces';
-import { devLog, logError } from '../../systemLogger';
+import { LearningProfile, FeedbackData } from "../interfaces/PersonalizationInterfaces";
+import { devLog, logError } from "../../systemLogger";
 
 export class LearningProfileManager {
-  private readonly context = 'LearningProfileManager';
+  private readonly context = "LearningProfileManager";
   private learningProfiles: Map<string, LearningProfile> = new Map();
 
   /**
@@ -29,10 +29,7 @@ export class LearningProfileManager {
   /**
    * Update learning profile based on user feedback
    */
-  public async updateLearningProfile(
-    userId: string,
-    feedback: FeedbackData
-  ): Promise<void> {
+  public async updateLearningProfile(userId: string, feedback: FeedbackData): Promise<void> {
     try {
       let profile = await this.getLearningProfile(userId);
 
@@ -62,7 +59,7 @@ export class LearningProfileManager {
    */
   public getPersonalizedWeights(userId: string): Promise<Record<string, number>> {
     const profile = this.learningProfiles.get(userId);
-    
+
     if (!profile) {
       return Promise.resolve(this.getDefaultWeights());
     }
@@ -95,19 +92,19 @@ export class LearningProfileManager {
     effective_types: string[];
   } {
     const profile = this.learningProfiles.get(userId);
-    
+
     if (!profile) {
       return {
         style: "balanced",
         complexity_level: "intermediate",
-        effective_types: []
+        effective_types: [],
       };
     }
 
     return {
       style: profile.response_patterns.preferred_communication_style,
       complexity_level: profile.response_patterns.optimal_complexity_level,
-      effective_types: profile.response_patterns.effective_recommendation_types
+      effective_types: profile.response_patterns.effective_recommendation_types,
     };
   }
 
@@ -121,13 +118,13 @@ export class LearningProfileManager {
     communication_preferences: Record<string, number>;
   } {
     const all_profiles = Array.from(this.learningProfiles.values());
-    
+
     if (all_profiles.length === 0) {
       return {
         most_effective_categories: [],
         common_successful_patterns: [],
         common_avoided_patterns: [],
-        communication_preferences: {}
+        communication_preferences: {},
       };
     }
 
@@ -145,14 +142,14 @@ export class LearningProfileManager {
     const most_effective_categories = Object.entries(category_scores)
       .map(([category, scores]) => ({
         category,
-        success_rate: scores.reduce((sum, score) => sum + score, 0) / scores.length
+        success_rate: scores.reduce((sum, score) => sum + score, 0) / scores.length,
       }))
       .sort((a, b) => b.success_rate - a.success_rate)
       .slice(0, 5);
 
     // Find common patterns
-    const all_successful = all_profiles.flatMap(p => p.successful_patterns);
-    const all_avoided = all_profiles.flatMap(p => p.avoided_recommendations);
+    const all_successful = all_profiles.flatMap((p) => p.successful_patterns);
+    const all_avoided = all_profiles.flatMap((p) => p.avoided_recommendations);
 
     const common_successful_patterns = this.findCommonPatterns(all_successful);
     const common_avoided_patterns = this.findCommonPatterns(all_avoided);
@@ -168,7 +165,7 @@ export class LearningProfileManager {
       most_effective_categories,
       common_successful_patterns,
       common_avoided_patterns,
-      communication_preferences: communication_counts
+      communication_preferences: communication_counts,
     };
   }
 
@@ -219,7 +216,7 @@ export class LearningProfileManager {
       exercise: 0.0,
       sleep: 0.0,
       stress_management: 0.0,
-      seasonal: 0.0
+      seasonal: 0.0,
     };
   }
 
@@ -230,22 +227,19 @@ export class LearningProfileManager {
     for (const [recommendation, rating] of Object.entries(effectiveness_ratings)) {
       const category = this.categorizeRecommendation(recommendation);
       const weight_change = (rating - 3) * 0.1; // Scale: 1-5, neutral = 3
-      
-      profile.preference_weights[category] = 
+
+      profile.preference_weights[category] =
         (profile.preference_weights[category] || 0) + weight_change;
-      
+
       // Keep weights within reasonable bounds
       profile.preference_weights[category] = Math.max(
-        -2.0, 
+        -2.0,
         Math.min(2.0, profile.preference_weights[category])
       );
     }
   }
 
-  private trackSuccessfulPatterns(
-    profile: LearningProfile,
-    feedback: FeedbackData
-  ): void {
+  private trackSuccessfulPatterns(profile: LearningProfile, feedback: FeedbackData): void {
     const highly_rated = Object.entries(feedback.effectiveness_ratings)
       .filter(([_, rating]) => rating >= 4)
       .map(([rec, _]) => rec);
@@ -263,10 +257,7 @@ export class LearningProfileManager {
     }
   }
 
-  private trackAvoidedRecommendations(
-    profile: LearningProfile,
-    feedback: FeedbackData
-  ): void {
+  private trackAvoidedRecommendations(profile: LearningProfile, feedback: FeedbackData): void {
     const poorly_rated = Object.entries(feedback.effectiveness_ratings)
       .filter(([_, rating]) => rating <= 2)
       .map(([rec, _]) => rec);
@@ -284,10 +275,7 @@ export class LearningProfileManager {
     }
   }
 
-  private updateResponsePatterns(
-    profile: LearningProfile,
-    feedback: FeedbackData
-  ): void {
+  private updateResponsePatterns(profile: LearningProfile, feedback: FeedbackData): void {
     // Update effective recommendation types
     const effective_types = Object.entries(feedback.effectiveness_ratings)
       .filter(([_, rating]) => rating >= 4)
@@ -301,7 +289,7 @@ export class LearningProfileManager {
 
     // Limit tracked types
     if (profile.response_patterns.effective_recommendation_types.length > 10) {
-      profile.response_patterns.effective_recommendation_types = 
+      profile.response_patterns.effective_recommendation_types =
         profile.response_patterns.effective_recommendation_types.slice(-10);
     }
 
@@ -309,10 +297,7 @@ export class LearningProfileManager {
     this.updateCommunicationStyle(profile, feedback);
   }
 
-  private updateCommunicationStyle(
-    profile: LearningProfile,
-    feedback: FeedbackData
-  ): void {
+  private updateCommunicationStyle(profile: LearningProfile, feedback: FeedbackData): void {
     // Analyze feedback patterns to infer communication preferences
     const total_ratings = Object.values(feedback.effectiveness_ratings);
     const avg_rating = total_ratings.reduce((sum, r) => sum + r, 0) / total_ratings.length;
@@ -346,7 +331,7 @@ export class LearningProfileManager {
 
   private findCommonPatterns(patterns: string[]): string[] {
     const pattern_counts: Record<string, number> = {};
-    
+
     for (const pattern of patterns) {
       pattern_counts[pattern] = (pattern_counts[pattern] || 0) + 1;
     }

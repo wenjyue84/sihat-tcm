@@ -1,6 +1,6 @@
 /**
  * Command Queue Core Implementation
- * 
+ *
  * High-performance command queue with priority support, filtering,
  * and comprehensive monitoring capabilities.
  */
@@ -13,10 +13,10 @@ import {
   QueuedCommandStatus,
   QueueStatus,
   CommandPriority,
-} from '../interfaces/CommandInterfaces';
+} from "../interfaces/CommandInterfaces";
 
-import { devLog, logError } from '../../systemLogger';
-import { ErrorFactory } from '../../errors/AppError';
+import { devLog, logError } from "../../systemLogger";
+import { ErrorFactory } from "../../errors/AppError";
 
 /**
  * Enhanced command queue implementation
@@ -27,7 +27,7 @@ export class EnhancedCommandQueue implements CommandQueue {
   private queueIdCounter = 0;
   private readonly context: string;
   private readonly config: CommandQueueConfig;
-  
+
   // Statistics tracking
   private stats = {
     totalEnqueued: 0,
@@ -39,7 +39,7 @@ export class EnhancedCommandQueue implements CommandQueue {
     processingTimes: [] as number[],
   };
 
-  constructor(context: string = 'CommandQueue', config: Partial<CommandQueueConfig> = {}) {
+  constructor(context: string = "CommandQueue", config: Partial<CommandQueueConfig> = {}) {
     this.context = context;
     this.config = {
       maxSize: 1000,
@@ -51,8 +51,8 @@ export class EnhancedCommandQueue implements CommandQueue {
 
     // Initialize priority queues
     if (this.config.enablePriorityQueues) {
-      const priorities: CommandPriority[] = ['urgent', 'high', 'normal', 'low'];
-      priorities.forEach(priority => {
+      const priorities: CommandPriority[] = ["urgent", "high", "normal", "low"];
+      priorities.forEach((priority) => {
         this.priorityQueues.set(priority, []);
       });
     }
@@ -72,8 +72,8 @@ export class EnhancedCommandQueue implements CommandQueue {
       }
 
       const commandContext: CommandContext = {
-        source: 'unknown',
-        priority: 'normal',
+        source: "unknown",
+        priority: "normal",
         timeout: this.config.defaultTimeout,
         retryAttempts: 0,
         dryRun: false,
@@ -87,7 +87,7 @@ export class EnhancedCommandQueue implements CommandQueue {
         context: commandContext,
         enqueuedAt: new Date(),
         attempts: 0,
-        status: 'pending',
+        status: "pending",
       };
 
       // Add to main queue
@@ -105,7 +105,7 @@ export class EnhancedCommandQueue implements CommandQueue {
       if (this.config.enableStatistics) {
         this.stats.totalEnqueued++;
         this.stats.enqueueTimes.push(Date.now() - startTime);
-        
+
         // Keep only last 1000 times for memory efficiency
         if (this.stats.enqueueTimes.length > 1000) {
           this.stats.enqueueTimes = this.stats.enqueueTimes.slice(-1000);
@@ -119,11 +119,10 @@ export class EnhancedCommandQueue implements CommandQueue {
       });
 
       return queueId;
-
     } catch (error) {
       throw ErrorFactory.fromUnknownError(error, {
         component: this.context,
-        action: 'enqueue',
+        action: "enqueue",
         metadata: { commandId: command.id },
       });
     }
@@ -138,8 +137,8 @@ export class EnhancedCommandQueue implements CommandQueue {
 
       if (this.config.enablePriorityQueues) {
         // Get from highest priority queue first
-        const priorities: CommandPriority[] = ['urgent', 'high', 'normal', 'low'];
-        
+        const priorities: CommandPriority[] = ["urgent", "high", "normal", "low"];
+
         for (const priority of priorities) {
           const priorityQueue = this.priorityQueues.get(priority);
           if (priorityQueue && priorityQueue.length > 0) {
@@ -150,7 +149,7 @@ export class EnhancedCommandQueue implements CommandQueue {
       } else {
         // Get first available command
         const queueIds = Array.from(this.queue.keys());
-        queueId = queueIds.find(id => this.queue.get(id)?.status === 'pending');
+        queueId = queueIds.find((id) => this.queue.get(id)?.status === "pending");
       }
 
       if (!queueId) {
@@ -163,7 +162,7 @@ export class EnhancedCommandQueue implements CommandQueue {
       }
 
       // Update status
-      queuedCommand.status = 'processing';
+      queuedCommand.status = "processing";
       queuedCommand.attempts++;
       queuedCommand.lastAttempt = new Date();
 
@@ -178,7 +177,6 @@ export class EnhancedCommandQueue implements CommandQueue {
       });
 
       return queuedCommand;
-
     } catch (error) {
       logError(`[${this.context}] Error dequeuing command`, error);
       return null;
@@ -191,8 +189,8 @@ export class EnhancedCommandQueue implements CommandQueue {
   public async peek(): Promise<QueuedCommand | null> {
     try {
       if (this.config.enablePriorityQueues) {
-        const priorities: CommandPriority[] = ['urgent', 'high', 'normal', 'low'];
-        
+        const priorities: CommandPriority[] = ["urgent", "high", "normal", "low"];
+
         for (const priority of priorities) {
           const priorityQueue = this.priorityQueues.get(priority);
           if (priorityQueue && priorityQueue.length > 0) {
@@ -202,7 +200,7 @@ export class EnhancedCommandQueue implements CommandQueue {
         }
       } else {
         const queueIds = Array.from(this.queue.keys());
-        const queueId = queueIds.find(id => this.queue.get(id)?.status === 'pending');
+        const queueId = queueIds.find((id) => this.queue.get(id)?.status === "pending");
         return queueId ? this.queue.get(queueId) || null : null;
       }
 
@@ -232,11 +230,11 @@ export class EnhancedCommandQueue implements CommandQueue {
    */
   public async clear(): Promise<number> {
     const clearedCount = this.queue.size;
-    
+
     this.queue.clear();
-    
+
     if (this.config.enablePriorityQueues) {
-      this.priorityQueues.forEach(queue => queue.length = 0);
+      this.priorityQueues.forEach((queue) => (queue.length = 0));
     }
 
     devLog(`[${this.context}] Queue cleared`, { clearedCount });
@@ -261,7 +259,7 @@ export class EnhancedCommandQueue implements CommandQueue {
     if (!this.config.enablePriorityQueues) {
       // Filter by priority if priority queues are disabled
       return Array.from(this.queue.values()).filter(
-        queuedCommand => queuedCommand.context.priority === priority
+        (queuedCommand) => queuedCommand.context.priority === priority
       );
     }
 
@@ -271,7 +269,7 @@ export class EnhancedCommandQueue implements CommandQueue {
     }
 
     return priorityQueue
-      .map(queueId => this.queue.get(queueId))
+      .map((queueId) => this.queue.get(queueId))
       .filter((queuedCommand): queuedCommand is QueuedCommand => queuedCommand !== undefined);
   }
 
@@ -280,18 +278,20 @@ export class EnhancedCommandQueue implements CommandQueue {
    */
   public getQueueStatus(): QueueStatus {
     const commands = Array.from(this.queue.values());
-    
+
     const totalCommands = commands.length;
-    const pendingCommands = commands.filter(cmd => cmd.status === 'pending').length;
-    const processingCommands = commands.filter(cmd => cmd.status === 'processing').length;
-    const completedCommands = commands.filter(cmd => cmd.status === 'completed').length;
-    const failedCommands = commands.filter(cmd => cmd.status === 'failed').length;
+    const pendingCommands = commands.filter((cmd) => cmd.status === "pending").length;
+    const processingCommands = commands.filter((cmd) => cmd.status === "processing").length;
+    const completedCommands = commands.filter((cmd) => cmd.status === "completed").length;
+    const failedCommands = commands.filter((cmd) => cmd.status === "failed").length;
 
     // Calculate average times
     const averageWaitTime = this.calculateAverageWaitTime(commands);
-    const averageExecutionTime = this.stats.processingTimes.length > 0
-      ? this.stats.processingTimes.reduce((sum, time) => sum + time, 0) / this.stats.processingTimes.length
-      : 0;
+    const averageExecutionTime =
+      this.stats.processingTimes.length > 0
+        ? this.stats.processingTimes.reduce((sum, time) => sum + time, 0) /
+          this.stats.processingTimes.length
+        : 0;
 
     // Calculate throughput (commands per minute)
     const throughput = this.calculateThroughput();
@@ -329,20 +329,20 @@ export class EnhancedCommandQueue implements CommandQueue {
     // Update statistics
     if (this.config.enableStatistics) {
       switch (status) {
-        case 'completed':
+        case "completed":
           this.stats.totalCompleted++;
           break;
-        case 'failed':
+        case "failed":
           this.stats.totalFailed++;
           break;
-        case 'cancelled':
+        case "cancelled":
           this.stats.totalCancelled++;
           break;
       }
     }
 
     // Remove completed/failed/cancelled commands after a delay
-    if (['completed', 'failed', 'cancelled'].includes(status)) {
+    if (["completed", "failed", "cancelled"].includes(status)) {
       setTimeout(() => {
         this.queue.delete(queueId);
       }, 60000); // Keep for 1 minute for debugging
@@ -356,7 +356,7 @@ export class EnhancedCommandQueue implements CommandQueue {
    */
   public cancelCommand(queueId: string): boolean {
     const queuedCommand = this.queue.get(queueId);
-    if (!queuedCommand || queuedCommand.status !== 'pending') {
+    if (!queuedCommand || queuedCommand.status !== "pending") {
       return false;
     }
 
@@ -371,9 +371,11 @@ export class EnhancedCommandQueue implements CommandQueue {
       }
     }
 
-    this.updateCommandStatus(queueId, 'cancelled');
-    
-    devLog(`[${this.context}] Command cancelled: ${queuedCommand.command.description}`, { queueId });
+    this.updateCommandStatus(queueId, "cancelled");
+
+    devLog(`[${this.context}] Command cancelled: ${queuedCommand.command.description}`, {
+      queueId,
+    });
     return true;
   }
 
@@ -381,13 +383,17 @@ export class EnhancedCommandQueue implements CommandQueue {
    * Get queue statistics
    */
   public getStatistics(): QueueStatistics {
-    const averageEnqueueTime = this.stats.enqueueTimes.length > 0
-      ? this.stats.enqueueTimes.reduce((sum, time) => sum + time, 0) / this.stats.enqueueTimes.length
-      : 0;
+    const averageEnqueueTime =
+      this.stats.enqueueTimes.length > 0
+        ? this.stats.enqueueTimes.reduce((sum, time) => sum + time, 0) /
+          this.stats.enqueueTimes.length
+        : 0;
 
-    const averageProcessingTime = this.stats.processingTimes.length > 0
-      ? this.stats.processingTimes.reduce((sum, time) => sum + time, 0) / this.stats.processingTimes.length
-      : 0;
+    const averageProcessingTime =
+      this.stats.processingTimes.length > 0
+        ? this.stats.processingTimes.reduce((sum, time) => sum + time, 0) /
+          this.stats.processingTimes.length
+        : 0;
 
     return {
       totalEnqueued: this.stats.totalEnqueued,
@@ -416,8 +422,8 @@ export class EnhancedCommandQueue implements CommandQueue {
    */
   private calculateAverageWaitTime(commands: QueuedCommand[]): number {
     const waitTimes = commands
-      .filter(cmd => cmd.lastAttempt)
-      .map(cmd => cmd.lastAttempt!.getTime() - cmd.enqueuedAt.getTime());
+      .filter((cmd) => cmd.lastAttempt)
+      .map((cmd) => cmd.lastAttempt!.getTime() - cmd.enqueuedAt.getTime());
 
     return waitTimes.length > 0
       ? waitTimes.reduce((sum, time) => sum + time, 0) / waitTimes.length
@@ -431,7 +437,7 @@ export class EnhancedCommandQueue implements CommandQueue {
     // Simple throughput calculation based on recent completions
     const recentCompletions = this.stats.totalCompleted;
     const timeWindow = 60000; // 1 minute in milliseconds
-    
+
     // This is a simplified calculation - in a real implementation,
     // you'd track completions over time windows
     return recentCompletions;

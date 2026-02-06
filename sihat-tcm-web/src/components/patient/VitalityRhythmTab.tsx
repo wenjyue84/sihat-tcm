@@ -194,16 +194,17 @@ export function VitalityRhythmTab({ sessions }: VitalityRhythmTabProps) {
                       </h3>
                       <div className="flex items-center gap-2 mb-4">
                         <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${elementType === "Wood"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : elementType === "Fire"
-                              ? "bg-orange-100 text-orange-700"
-                              : elementType === "Earth"
-                                ? "bg-amber-100 text-amber-700"
-                                : elementType === "Metal"
-                                  ? "bg-slate-100 text-slate-700"
-                                  : "bg-blue-100 text-blue-700"
-                            }`}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                            elementType === "Wood"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : elementType === "Fire"
+                                ? "bg-orange-100 text-orange-700"
+                                : elementType === "Earth"
+                                  ? "bg-amber-100 text-amber-700"
+                                  : elementType === "Metal"
+                                    ? "bg-slate-100 text-slate-700"
+                                    : "bg-blue-100 text-blue-700"
+                          }`}
                         >
                           {vitalityT.element}: {currentOrgan.element}
                         </span>

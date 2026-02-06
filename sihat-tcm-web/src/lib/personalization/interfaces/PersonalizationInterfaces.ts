@@ -1,6 +1,6 @@
 /**
  * Personalization Interfaces - Core type definitions for personalization system
- * 
+ *
  * Defines all interfaces and types used throughout the personalization engine
  * for consistent type safety and clear contracts between components.
  */

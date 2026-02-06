@@ -3,9 +3,9 @@
  * Manages deployment phases, monitoring, and rollback capabilities
  */
 
-import { AppError, ErrorCode } from '../errors/AppError';
-import { EventSystem } from '../events/EventSystem';
-import { FeatureFlagManager } from '../feature-flags/FeatureFlagManager';
+import { AppError, ERROR_CODES } from "../errors/AppError";
+import { EventSystem } from "../events/EventSystem";
+import { FeatureFlagManager } from "../feature-flags/FeatureFlagManager";
 
 export interface DeploymentPhase {
   id: string;
@@ -17,7 +17,7 @@ export interface DeploymentPhase {
   healthChecks: string[];
   rollbackTriggers: RollbackTrigger[];
   estimatedDuration: number; // in minutes
-  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'rolled_back';
+  status: "pending" | "in_progress" | "completed" | "failed" | "rolled_back";
   startedAt?: Date;
   completedAt?: Date;
 }
@@ -25,7 +25,7 @@ export interface DeploymentPhase {
 export interface RollbackTrigger {
   metric: string;
   threshold: number;
-  operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';
+  operator: "gt" | "lt" | "eq" | "gte" | "lte";
   description: string;
 }
 
@@ -57,14 +57,28 @@ export class DeploymentManager {
   private metrics: DeploymentMetrics | null = null;
   private rollbackInProgress = false;
 
-  constructor(
-    eventSystem: EventSystem,
-    featureFlagManager: FeatureFlagManager
-  ) {
+  constructor(eventSystem: EventSystem, featureFlagManager: FeatureFlagManager) {
     this.eventSystem = eventSystem;
     this.featureFlagManager = featureFlagManager;
     this.initializeHealthChecks();
     this.setupEventListeners();
+  }
+
+  /**
+   * Emit event helper
+   */
+  private emitEvent(type: string, data?: Record<string, unknown>): void {
+    this.eventSystem
+      .emit({
+        type,
+        timestamp: new Date(),
+        source: "DeploymentManager",
+        id: `dm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        data,
+      })
+      .catch(() => {
+        /* fire-and-forget */
+      });
   }
 
   /**
@@ -73,7 +87,7 @@ export class DeploymentManager {
   private initializeHealthChecks(): void {
     const healthChecks: HealthCheck[] = [
       {
-        name: 'ai_model_router_health',
+        name: "ai_model_router_health",
         function: async () => {
           // Check AI model router health
           try {
@@ -85,10 +99,10 @@ export class DeploymentManager {
         },
         timeout: 5000,
         retries: 3,
-        description: 'AI Model Router health check'
+        description: "AI Model Router health check",
       },
       {
-        name: 'database_connectivity',
+        name: "database_connectivity",
         function: async () => {
           // Check database connectivity
           try {
@@ -100,14 +114,14 @@ export class DeploymentManager {
         },
         timeout: 3000,
         retries: 2,
-        description: 'Database connectivity check'
+        description: "Database connectivity check",
       },
       {
-        name: 'event_system_health',
+        name: "event_system_health",
         function: async () => {
           // Check event system health
           try {
-            this.eventSystem.emit('health:check', { timestamp: new Date() });
+            this.emitEvent("health:check", { timestamp: new Date() });
             return true;
           } catch {
             return false;
@@ -115,11 +129,11 @@ export class DeploymentManager {
         },
         timeout: 2000,
         retries: 2,
-        description: 'Event system health check'
-      }
+        description: "Event system health check",
+      },
     ];
 
-    healthChecks.forEach(check => {
+    healthChecks.forEach((check) => {
       this.healthChecks.set(check.name, check);
     });
   }
@@ -128,13 +142,18 @@ export class DeploymentManager {
    * Setup event listeners for monitoring
    */
   private setupEventListeners(): void {
-    this.eventSystem.on('deployment:metricsUpdated', (data) => {
-      this.metrics = data.metrics;
+    this.eventSystem.on("deployment:metricsUpdated", (event) => {
+      if (event.data?.metrics) {
+        this.metrics = event.data.metrics as DeploymentMetrics;
+      }
       this.checkRollbackTriggers();
     });
 
-    this.eventSystem.on('deployment:healthCheckFailed', (data) => {
-      this.handleHealthCheckFailure(data.checkName, data.error);
+    this.eventSystem.on("deployment:healthCheckFailed", (event) => {
+      this.handleHealthCheckFailure(
+        event.data?.checkName as string,
+        event.data?.error as string
+      );
     });
   }
 
@@ -145,22 +164,22 @@ export class DeploymentManager {
     try {
       if (this.phases.has(phase.id)) {
         throw new AppError(
-          `Deployment phase '${phase.id}' already exists`,
-          ErrorCode.ALREADY_EXISTS
+          ERROR_CODES.ALREADY_EXISTS,
+          `Deployment phase '${phase.id}' already exists`
         );
       }
 
       this.phases.set(phase.id, {
         ...phase,
-        status: 'pending'
+        status: "pending",
       });
 
-      this.eventSystem.emit('deployment:phaseAdded', { phase });
+      this.emitEvent("deployment:phaseAdded", { phase });
     } catch (error) {
       throw new AppError(
+        ERROR_CODES.OPERATION_FAILED,
         `Failed to add deployment phase '${phase.id}'`,
-        ErrorCode.OPERATION_FAILED,
-        { error: error instanceof Error ? error.message : 'Unknown error' }
+        { metadata: { error: error instanceof Error ? error.message : "Unknown error" } }
       );
     }
   }
@@ -172,16 +191,13 @@ export class DeploymentManager {
     try {
       const phase = this.phases.get(phaseId);
       if (!phase) {
-        throw new AppError(
-          `Deployment phase '${phaseId}' not found`,
-          ErrorCode.NOT_FOUND
-        );
+        throw new AppError(ERROR_CODES.NOT_FOUND, `Deployment phase '${phaseId}' not found`);
       }
 
-      if (phase.status !== 'pending') {
+      if (phase.status !== "pending") {
         throw new AppError(
-          `Cannot start phase '${phaseId}' with status '${phase.status}'`,
-          ErrorCode.INVALID_STATE
+          ERROR_CODES.INVALID_STATE,
+          `Cannot start phase '${phaseId}' with status '${phase.status}'`
         );
       }
 
@@ -192,31 +208,30 @@ export class DeploymentManager {
       await this.runHealthChecks(phase.healthChecks);
 
       // Update phase status
-      phase.status = 'in_progress';
+      phase.status = "in_progress";
       phase.startedAt = new Date();
       this.currentPhase = phaseId;
 
       // Update feature flags
       await this.updateFeatureFlags(phase);
 
-      this.eventSystem.emit('deployment:phaseStarted', {
+      this.emitEvent("deployment:phaseStarted", {
         phaseId,
         phase,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Start monitoring
       this.startPhaseMonitoring(phase);
-
     } catch (error) {
       const phase = this.phases.get(phaseId);
       if (phase) {
-        phase.status = 'failed';
+        phase.status = "failed";
       }
 
-      this.eventSystem.emit('deployment:phaseFailed', {
+      this.emitEvent("deployment:phaseFailed", {
         phaseId,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
 
       throw error;
@@ -230,16 +245,13 @@ export class DeploymentManager {
     try {
       const phase = this.phases.get(phaseId);
       if (!phase) {
-        throw new AppError(
-          `Deployment phase '${phaseId}' not found`,
-          ErrorCode.NOT_FOUND
-        );
+        throw new AppError(ERROR_CODES.NOT_FOUND, `Deployment phase '${phaseId}' not found`);
       }
 
-      if (phase.status !== 'in_progress') {
+      if (phase.status !== "in_progress") {
         throw new AppError(
-          `Cannot complete phase '${phaseId}' with status '${phase.status}'`,
-          ErrorCode.INVALID_STATE
+          ERROR_CODES.INVALID_STATE,
+          `Cannot complete phase '${phaseId}' with status '${phase.status}'`
         );
       }
 
@@ -250,21 +262,20 @@ export class DeploymentManager {
       await this.validatePhaseMetrics(phase);
 
       // Update phase status
-      phase.status = 'completed';
+      phase.status = "completed";
       phase.completedAt = new Date();
 
       if (this.currentPhase === phaseId) {
         this.currentPhase = null;
       }
 
-      this.eventSystem.emit('deployment:phaseCompleted', {
+      this.emitEvent("deployment:phaseCompleted", {
         phaseId,
         phase,
-        duration: phase.completedAt.getTime() - (phase.startedAt?.getTime() || 0)
+        duration: phase.completedAt.getTime() - (phase.startedAt?.getTime() || 0),
       });
-
     } catch (error) {
-      await this.rollbackPhase(phaseId, 'Validation failed during completion');
+      await this.rollbackPhase(phaseId, "Validation failed during completion");
       throw error;
     }
   }
@@ -275,55 +286,48 @@ export class DeploymentManager {
   async rollbackPhase(phaseId: string, reason: string): Promise<void> {
     try {
       if (this.rollbackInProgress) {
-        throw new AppError(
-          'Rollback already in progress',
-          ErrorCode.INVALID_STATE
-        );
+        throw new AppError(ERROR_CODES.INVALID_STATE, "Rollback already in progress");
       }
 
       this.rollbackInProgress = true;
 
       const phase = this.phases.get(phaseId);
       if (!phase) {
-        throw new AppError(
-          `Deployment phase '${phaseId}' not found`,
-          ErrorCode.NOT_FOUND
-        );
+        throw new AppError(ERROR_CODES.NOT_FOUND, `Deployment phase '${phaseId}' not found`);
       }
 
-      this.eventSystem.emit('deployment:rollbackStarted', {
+      this.emitEvent("deployment:rollbackStarted", {
         phaseId,
         reason,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       // Disable all flags for this phase
       for (const flagKey of phase.flags) {
         this.featureFlagManager.updateFlag(flagKey, {
           enabled: false,
-          rolloutPercentage: 0
+          rolloutPercentage: 0,
         });
       }
 
       // Update phase status
-      phase.status = 'rolled_back';
+      phase.status = "rolled_back";
       phase.completedAt = new Date();
 
       if (this.currentPhase === phaseId) {
         this.currentPhase = null;
       }
 
-      this.eventSystem.emit('deployment:rollbackCompleted', {
+      this.emitEvent("deployment:rollbackCompleted", {
         phaseId,
         reason,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
-
     } catch (error) {
-      this.eventSystem.emit('deployment:rollbackFailed', {
+      this.emitEvent("deployment:rollbackFailed", {
         phaseId,
         reason,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
       throw error;
     } finally {
@@ -337,10 +341,10 @@ export class DeploymentManager {
   private async checkPrerequisites(phase: DeploymentPhase): Promise<void> {
     for (const prerequisiteId of phase.prerequisites) {
       const prerequisite = this.phases.get(prerequisiteId);
-      if (!prerequisite || prerequisite.status !== 'completed') {
+      if (!prerequisite || prerequisite.status !== "completed") {
         throw new AppError(
-          `Prerequisite phase '${prerequisiteId}' not completed`,
-          ErrorCode.PREREQUISITE_NOT_MET
+          ERROR_CODES.PREREQUISITE_NOT_MET,
+          `Prerequisite phase '${prerequisiteId}' not completed`
         );
       }
     }
@@ -351,23 +355,19 @@ export class DeploymentManager {
    */
   private async runHealthChecks(checkNames: string[]): Promise<void> {
     const results = await Promise.allSettled(
-      checkNames.map(name => this.runSingleHealthCheck(name))
+      checkNames.map((name) => this.runSingleHealthCheck(name))
     );
 
     const failures = results
       .map((result, index) => ({ result, name: checkNames[index] }))
-      .filter(({ result }) => result.status === 'rejected')
+      .filter(({ result }) => result.status === "rejected")
       .map(({ name, result }) => ({
         name,
-        error: result.status === 'rejected' ? result.reason : 'Unknown error'
+        error: result.status === "rejected" ? result.reason : "Unknown error",
       }));
 
     if (failures.length > 0) {
-      throw new AppError(
-        'Health checks failed',
-        ErrorCode.HEALTH_CHECK_FAILED,
-        { failures }
-      );
+      throw new AppError(ERROR_CODES.HEALTH_CHECK_FAILED, "Health checks failed", { metadata: { failures } });
     }
   }
 
@@ -377,10 +377,7 @@ export class DeploymentManager {
   private async runSingleHealthCheck(checkName: string): Promise<void> {
     const check = this.healthChecks.get(checkName);
     if (!check) {
-      throw new AppError(
-        `Health check '${checkName}' not found`,
-        ErrorCode.NOT_FOUND
-      );
+      throw new AppError(ERROR_CODES.NOT_FOUND, `Health check '${checkName}' not found`);
     }
 
     let lastError: Error | null = null;
@@ -388,41 +385,37 @@ export class DeploymentManager {
     for (let attempt = 0; attempt <= check.retries; attempt++) {
       try {
         const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('Health check timeout')), check.timeout);
+          setTimeout(() => reject(new Error("Health check timeout")), check.timeout);
         });
 
         if (check.function) {
-          const result = await Promise.race([
-            check.function(),
-            timeoutPromise
-          ]);
+          const result = await Promise.race([check.function(), timeoutPromise]);
 
           if (result) {
-            this.eventSystem.emit('deployment:healthCheckPassed', {
+            this.emitEvent("deployment:healthCheckPassed", {
               checkName,
-              attempt: attempt + 1
+              attempt: attempt + 1,
             });
             return;
           }
         }
 
-        throw new Error('Health check returned false');
-
+        throw new Error("Health check returned false");
       } catch (error) {
-        lastError = error instanceof Error ? error : new Error('Unknown error');
-        
+        lastError = error instanceof Error ? error : new Error("Unknown error");
+
         if (attempt < check.retries) {
-          await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
+          await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
         }
       }
     }
 
-    this.eventSystem.emit('deployment:healthCheckFailed', {
+    this.emitEvent("deployment:healthCheckFailed", {
       checkName,
-      error: lastError?.message || 'Unknown error'
+      error: lastError?.message || "Unknown error",
     });
 
-    throw lastError || new Error('Health check failed');
+    throw lastError || new Error("Health check failed");
   }
 
   /**
@@ -432,16 +425,14 @@ export class DeploymentManager {
     try {
       this.featureFlagManager.updateRolloutPercentages(phase.rolloutPercentages);
 
-      this.eventSystem.emit('deployment:featureFlagsUpdated', {
+      this.emitEvent("deployment:featureFlagsUpdated", {
         phaseId: phase.id,
-        rolloutPercentages: phase.rolloutPercentages
+        rolloutPercentages: phase.rolloutPercentages,
       });
     } catch (error) {
-      throw new AppError(
-        'Failed to update feature flags',
-        ErrorCode.OPERATION_FAILED,
-        { error: error instanceof Error ? error.message : 'Unknown error' }
-      );
+      throw new AppError(ERROR_CODES.OPERATION_FAILED, "Failed to update feature flags", {
+        metadata: { error: error instanceof Error ? error.message : "Unknown error" },
+      });
     }
   }
 
@@ -457,9 +448,12 @@ export class DeploymentManager {
     (phase as any).monitoringInterval = monitoringInterval;
 
     // Auto-cleanup after estimated duration + buffer
-    setTimeout(() => {
-      clearInterval(monitoringInterval);
-    }, (phase.estimatedDuration + 30) * 60 * 1000);
+    setTimeout(
+      () => {
+        clearInterval(monitoringInterval);
+      },
+      (phase.estimatedDuration + 30) * 60 * 1000
+    );
   }
 
   /**
@@ -471,18 +465,18 @@ export class DeploymentManager {
     }
 
     const phase = this.phases.get(this.currentPhase);
-    if (!phase || phase.status !== 'in_progress') {
+    if (!phase || phase.status !== "in_progress") {
       return;
     }
 
     for (const trigger of phase.rollbackTriggers) {
       const metricValue = this.getMetricValue(trigger.metric);
       if (metricValue !== null && this.evaluateTrigger(metricValue, trigger)) {
-        this.eventSystem.emit('deployment:rollbackTriggered', {
+        this.emitEvent("deployment:rollbackTriggered", {
           phaseId: this.currentPhase,
           trigger,
           metricValue,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
 
         // Automatic rollback
@@ -499,17 +493,17 @@ export class DeploymentManager {
     if (!this.metrics) return null;
 
     switch (metricName) {
-      case 'errorRate':
+      case "errorRate":
         return this.metrics.errorRate;
-      case 'responseTime':
+      case "responseTime":
         return this.metrics.responseTime;
-      case 'throughput':
+      case "throughput":
         return this.metrics.throughput;
-      case 'memoryUsage':
+      case "memoryUsage":
         return this.metrics.memoryUsage;
-      case 'cpuUsage':
+      case "cpuUsage":
         return this.metrics.cpuUsage;
-      case 'userSatisfaction':
+      case "userSatisfaction":
         return this.metrics.userSatisfaction;
       default:
         return null;
@@ -521,15 +515,15 @@ export class DeploymentManager {
    */
   private evaluateTrigger(value: number, trigger: RollbackTrigger): boolean {
     switch (trigger.operator) {
-      case 'gt':
+      case "gt":
         return value > trigger.threshold;
-      case 'gte':
+      case "gte":
         return value >= trigger.threshold;
-      case 'lt':
+      case "lt":
         return value < trigger.threshold;
-      case 'lte':
+      case "lte":
         return value <= trigger.threshold;
-      case 'eq':
+      case "eq":
         return value === trigger.threshold;
       default:
         return false;
@@ -541,10 +535,7 @@ export class DeploymentManager {
    */
   private async validatePhaseMetrics(phase: DeploymentPhase): Promise<void> {
     if (!this.metrics) {
-      throw new AppError(
-        'No metrics available for validation',
-        ErrorCode.VALIDATION_ERROR
-      );
+      throw new AppError(ERROR_CODES.VALIDATION_ERROR, "No metrics available for validation");
     }
 
     // Define acceptable thresholds
@@ -552,7 +543,7 @@ export class DeploymentManager {
       errorRate: 5.0, // Max 5% error rate
       responseTime: 2000, // Max 2 second response time
       memoryUsage: 80, // Max 80% memory usage
-      cpuUsage: 70 // Max 70% CPU usage
+      cpuUsage: 70, // Max 70% CPU usage
     };
 
     const violations: string[] = [];
@@ -574,11 +565,9 @@ export class DeploymentManager {
     }
 
     if (violations.length > 0) {
-      throw new AppError(
-        'Phase metrics validation failed',
-        ErrorCode.VALIDATION_ERROR,
-        { violations }
-      );
+      throw new AppError(ERROR_CODES.VALIDATION_ERROR, "Phase metrics validation failed", {
+        metadata: { violations },
+      });
     }
   }
 
@@ -602,7 +591,7 @@ export class DeploymentManager {
     return {
       currentPhase: this.currentPhase,
       phases: Array.from(this.phases.values()),
-      metrics: this.metrics
+      metrics: this.metrics,
     };
   }
 
@@ -611,9 +600,9 @@ export class DeploymentManager {
    */
   updateMetrics(metrics: DeploymentMetrics): void {
     this.metrics = metrics;
-    this.eventSystem.emit('deployment:metricsUpdated', {
+    this.emitEvent("deployment:metricsUpdated", {
       metrics,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 }

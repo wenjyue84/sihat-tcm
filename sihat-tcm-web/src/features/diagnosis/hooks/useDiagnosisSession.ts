@@ -1,26 +1,26 @@
 /**
  * useDiagnosisSession Hook
- * 
+ *
  * React hook for managing diagnosis session state with auto-save functionality.
  * Provides seamless session management for the diagnosis wizard.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import type { User } from '@supabase/supabase-js';
-import { 
-  DiagnosisSessionManager, 
+import { useState, useEffect, useCallback, useRef } from "react";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
+import {
+  DiagnosisSessionManager,
   diagnosisSessionManager,
   type SessionMetadata,
   type SessionSaveResult,
-  type SessionRecoveryOptions 
-} from '@/lib/diagnostic/core/DiagnosisSessionManager';
-import type { 
-  DiagnosisWizardData, 
+  type SessionRecoveryOptions,
+} from "@/lib/diagnostic/core/DiagnosisSessionManager";
+import type {
+  DiagnosisWizardData,
   PendingResumeState,
-  SaveDiagnosisInput 
-} from '@/types/diagnosis';
-import { logger } from '@/lib/logger';
+} from "@/types/diagnosis";
+import type { SaveDiagnosisInput } from "@/types/database";
+import { logger } from "@/lib/clientLogger";
 
 export interface UseDiagnosisSessionOptions {
   autoSaveEnabled?: boolean;
@@ -37,19 +37,19 @@ export interface DiagnosisSessionState {
   isLoading: boolean;
   isSaving: boolean;
   lastSaved?: Date;
-  
+
   // Progress tracking
   currentStep: string;
   completionPercentage: number;
   estimatedTimeRemaining?: number;
-  
+
   // Session data
   data: Partial<DiagnosisWizardData>;
-  
+
   // Recovery
   availableSessions: PendingResumeState[];
   hasRecoverableSessions: boolean;
-  
+
   // Error handling
   error?: string;
   saveError?: string;
@@ -59,16 +59,19 @@ export interface DiagnosisSessionActions {
   // Session lifecycle
   initializeSession: (initialData?: Partial<DiagnosisWizardData>) => Promise<void>;
   saveSession: (data: Partial<DiagnosisWizardData>) => Promise<SessionSaveResult>;
-  completeSession: (finalData: DiagnosisWizardData, diagnosisResult: SaveDiagnosisInput) => Promise<{ success: boolean; diagnosisId?: string; error?: string }>;
-  
+  completeSession: (
+    finalData: DiagnosisWizardData,
+    diagnosisResult: SaveDiagnosisInput
+  ) => Promise<{ success: boolean; diagnosisId?: string; error?: string }>;
+
   // Data management
   updateData: (updates: Partial<DiagnosisWizardData>) => void;
   updateProgress: (step: string, percentage: number, estimatedTime?: number) => void;
-  
+
   // Recovery
   loadAvailableSessions: () => Promise<void>;
   resumeSession: (sessionId: string) => Promise<void>;
-  
+
   // Cleanup
   clearSession: () => void;
   clearError: () => void;
@@ -77,7 +80,6 @@ export interface DiagnosisSessionActions {
 export function useDiagnosisSession(
   options: UseDiagnosisSessionOptions = {}
 ): [DiagnosisSessionState, DiagnosisSessionActions] {
-
   const [user, setUser] = useState<User | null>(null);
 
   // Get user from Supabase on mount
@@ -90,7 +92,9 @@ export function useDiagnosisSession(
     });
 
     // Subscribe to auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
@@ -102,7 +106,7 @@ export function useDiagnosisSession(
     autoSaveInterval = 30000,
     enableRecovery = true,
     maxRecoveryAge = 24,
-    guestToken
+    guestToken,
   } = options;
 
   // State
@@ -110,138 +114,146 @@ export function useDiagnosisSession(
     isInitialized: false,
     isLoading: false,
     isSaving: false,
-    currentStep: 'basic_info',
+    currentStep: "basic_info",
     completionPercentage: 0,
     data: {},
     availableSessions: [],
-    hasRecoverableSessions: false
+    hasRecoverableSessions: false,
   });
 
   // Refs for managing auto-save
-  const autoSaveTimerRef = useRef<NodeJS.Timeout>();
+  const autoSaveTimerRef = useRef<NodeJS.Timeout>(undefined);
   const sessionManagerRef = useRef<DiagnosisSessionManager>(diagnosisSessionManager);
   const pendingDataRef = useRef<Partial<DiagnosisWizardData>>({});
 
   // Initialize session
-  const initializeSession = useCallback(async (initialData?: Partial<DiagnosisWizardData>) => {
-    try {
-      setState(prev => ({ ...prev, isLoading: true, error: undefined }));
+  const initializeSession = useCallback(
+    async (initialData?: Partial<DiagnosisWizardData>) => {
+      try {
+        setState((prev) => ({ ...prev, isLoading: true, error: undefined }));
 
-      const metadata = await sessionManagerRef.current.initializeSession(
-        user?.id,
-        guestToken,
-        initialData
-      );
+        const metadata = await sessionManagerRef.current.initializeSession(
+          user?.id,
+          guestToken,
+          initialData
+        );
 
-      setState(prev => ({
-        ...prev,
-        sessionId: metadata.sessionId,
-        isInitialized: true,
-        isLoading: false,
-        currentStep: metadata.currentStep,
-        completionPercentage: metadata.completionPercentage,
-        lastSaved: metadata.lastSaved,
-        data: initialData || {}
-      }));
+        setState((prev) => ({
+          ...prev,
+          sessionId: metadata.sessionId,
+          isInitialized: true,
+          isLoading: false,
+          currentStep: metadata.currentStep,
+          completionPercentage: metadata.completionPercentage,
+          lastSaved: metadata.lastSaved,
+          data: initialData || {},
+        }));
 
-      if (initialData) {
-        pendingDataRef.current = initialData;
+        if (initialData) {
+          pendingDataRef.current = initialData;
+        }
+
+        logger.info("DiagnosisSession", "Session initialized via hook", { sessionId: metadata.sessionId });
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to initialize session";
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: errorMessage,
+        }));
+        logger.error("DiagnosisSession", "Failed to initialize session via hook", error);
       }
-
-      logger.info('Diagnosis session initialized via hook', { sessionId: metadata.sessionId });
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to initialize session';
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: errorMessage 
-      }));
-      logger.error('Failed to initialize session via hook', { error });
-    }
-  }, [user?.id, guestToken]);
+    },
+    [user?.id, guestToken]
+  );
 
   // Save session data
-  const saveSession = useCallback(async (data: Partial<DiagnosisWizardData>): Promise<SessionSaveResult> => {
-    if (!state.sessionId || !state.isInitialized) {
-      throw new Error('Session not initialized');
-    }
-
-    try {
-      setState(prev => ({ ...prev, isSaving: true, saveError: undefined }));
-
-      const currentSession = sessionManagerRef.current.getCurrentSession();
-      if (!currentSession) {
-        throw new Error('No active session found');
+  const saveSession = useCallback(
+    async (data: Partial<DiagnosisWizardData>): Promise<SessionSaveResult> => {
+      if (!state.sessionId || !state.isInitialized) {
+        throw new Error("Session not initialized");
       }
 
-      const result = await sessionManagerRef.current.saveSessionData(
-        state.sessionId,
-        data,
-        currentSession
-      );
+      try {
+        setState((prev) => ({ ...prev, isSaving: true, saveError: undefined }));
 
-      setState(prev => ({
-        ...prev,
-        isSaving: false,
-        lastSaved: result.timestamp,
-        data: { ...prev.data, ...data },
-        saveError: result.success ? undefined : result.error
-      }));
+        const currentSession = sessionManagerRef.current.getCurrentSession();
+        if (!currentSession) {
+          throw new Error("No active session found");
+        }
 
-      if (result.success) {
-        pendingDataRef.current = {};
+        const result = await sessionManagerRef.current.saveSessionData(
+          state.sessionId,
+          data,
+          currentSession
+        );
+
+        setState((prev) => ({
+          ...prev,
+          isSaving: false,
+          lastSaved: result.timestamp,
+          data: { ...prev.data, ...data },
+          saveError: result.success ? undefined : result.error,
+        }));
+
+        if (result.success) {
+          pendingDataRef.current = {};
+        }
+
+        return result;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Failed to save session";
+        setState((prev) => ({
+          ...prev,
+          isSaving: false,
+          saveError: errorMessage,
+        }));
+
+        return {
+          success: false,
+          error: errorMessage,
+          timestamp: new Date(),
+        };
       }
-
-      return result;
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to save session';
-      setState(prev => ({ 
-        ...prev, 
-        isSaving: false, 
-        saveError: errorMessage 
-      }));
-      
-      return {
-        success: false,
-        error: errorMessage,
-        timestamp: new Date()
-      };
-    }
-  }, [state.sessionId, state.isInitialized]);
+    },
+    [state.sessionId, state.isInitialized]
+  );
 
   // Update data with auto-save
-  const updateData = useCallback((updates: Partial<DiagnosisWizardData>) => {
-    setState(prev => ({
-      ...prev,
-      data: { ...prev.data, ...updates }
-    }));
+  const updateData = useCallback(
+    (updates: Partial<DiagnosisWizardData>) => {
+      setState((prev) => ({
+        ...prev,
+        data: { ...prev.data, ...updates },
+      }));
 
-    // Merge with pending data for auto-save
-    pendingDataRef.current = { ...pendingDataRef.current, ...updates };
+      // Merge with pending data for auto-save
+      pendingDataRef.current = { ...pendingDataRef.current, ...updates };
 
-    // Trigger auto-save if enabled
-    if (autoSaveEnabled && state.isInitialized) {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-      
-      autoSaveTimerRef.current = setTimeout(() => {
-        if (Object.keys(pendingDataRef.current).length > 0) {
-          saveSession(pendingDataRef.current);
+      // Trigger auto-save if enabled
+      if (autoSaveEnabled && state.isInitialized) {
+        if (autoSaveTimerRef.current) {
+          clearTimeout(autoSaveTimerRef.current);
         }
-      }, 2000); // Debounce auto-save by 2 seconds
-    }
-  }, [autoSaveEnabled, state.isInitialized, saveSession]);
+
+        autoSaveTimerRef.current = setTimeout(() => {
+          if (Object.keys(pendingDataRef.current).length > 0) {
+            saveSession(pendingDataRef.current);
+          }
+        }, 2000); // Debounce auto-save by 2 seconds
+      }
+    },
+    [autoSaveEnabled, state.isInitialized, saveSession]
+  );
 
   // Update progress
   const updateProgress = useCallback((step: string, percentage: number, estimatedTime?: number) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       currentStep: step,
       completionPercentage: percentage,
-      estimatedTimeRemaining: estimatedTime
+      estimatedTimeRemaining: estimatedTime,
     }));
 
     sessionManagerRef.current.updateProgress(step, percentage, estimatedTime);
@@ -256,31 +268,30 @@ export function useDiagnosisSession(
         includeIncomplete: true,
         maxAge: maxRecoveryAge,
         userId: user?.id,
-        guestToken
+        guestToken,
       };
 
       const sessions = await sessionManagerRef.current.recoverSessions(recoveryOptions);
-      
-      setState(prev => ({
+
+      setState((prev) => ({
         ...prev,
         availableSessions: sessions,
-        hasRecoverableSessions: sessions.length > 0
+        hasRecoverableSessions: sessions.length > 0,
       }));
-
     } catch (error) {
-      logger.error('Failed to load available sessions', { error });
+      logger.error("DiagnosisSession", "Failed to load available sessions", error);
     }
   }, [enableRecovery, maxRecoveryAge, user?.id, guestToken]);
 
   // Resume a specific session
   const resumeSession = useCallback(async (sessionId: string) => {
     try {
-      setState(prev => ({ ...prev, isLoading: true, error: undefined }));
+      setState((prev) => ({ ...prev, isLoading: true, error: undefined }));
 
       const result = await sessionManagerRef.current.resumeSession(sessionId);
-      
+
       if (result) {
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           sessionId: result.metadata.sessionId,
           isInitialized: true,
@@ -289,84 +300,82 @@ export function useDiagnosisSession(
           completionPercentage: result.metadata.completionPercentage,
           estimatedTimeRemaining: result.metadata.estimatedTimeRemaining,
           lastSaved: result.metadata.lastSaved,
-          data: result.data
+          data: result.data,
         }));
 
         pendingDataRef.current = {};
-        
-        logger.info('Session resumed via hook', { sessionId });
-      } else {
-        throw new Error('Failed to resume session');
-      }
 
+        logger.info("DiagnosisSession", "Session resumed via hook", { sessionId });
+      } else {
+        throw new Error("Failed to resume session");
+      }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to resume session';
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: errorMessage 
+      const errorMessage = error instanceof Error ? error.message : "Failed to resume session";
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: errorMessage,
       }));
     }
   }, []);
 
   // Complete session
-  const completeSession = useCallback(async (
-    finalData: DiagnosisWizardData, 
-    diagnosisResult: SaveDiagnosisInput
-  ) => {
-    if (!state.sessionId) {
-      throw new Error('No active session to complete');
-    }
-
-    try {
-      setState(prev => ({ ...prev, isSaving: true }));
-
-      const result = await sessionManagerRef.current.completeSession(
-        state.sessionId,
-        finalData,
-        diagnosisResult
-      );
-
-      if (result.success) {
-        setState(prev => ({
-          ...prev,
-          isSaving: false,
-          completionPercentage: 100
-        }));
+  const completeSession = useCallback(
+    async (finalData: DiagnosisWizardData, diagnosisResult: SaveDiagnosisInput) => {
+      if (!state.sessionId) {
+        throw new Error("No active session to complete");
       }
 
-      return result;
+      try {
+        setState((prev) => ({ ...prev, isSaving: true }));
 
-    } catch (error) {
-      setState(prev => ({ ...prev, isSaving: false }));
-      throw error;
-    }
-  }, [state.sessionId]);
+        const result = await sessionManagerRef.current.completeSession(
+          state.sessionId,
+          finalData,
+          diagnosisResult
+        );
+
+        if (result.success) {
+          setState((prev) => ({
+            ...prev,
+            isSaving: false,
+            completionPercentage: 100,
+          }));
+        }
+
+        return result;
+      } catch (error) {
+        setState((prev) => ({ ...prev, isSaving: false }));
+        throw error;
+      }
+    },
+    [state.sessionId]
+  );
 
   // Clear session
   const clearSession = useCallback(() => {
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current);
     }
-    
+
     sessionManagerRef.current.destroy();
     pendingDataRef.current = {};
-    
+
     setState({
       isInitialized: false,
       isLoading: false,
       isSaving: false,
-      currentStep: 'basic_info',
+      currentStep: "basic_info",
       completionPercentage: 0,
       data: {},
       availableSessions: [],
-      hasRecoverableSessions: false
+      hasRecoverableSessions: false,
     });
   }, []);
 
   // Clear errors
   const clearError = useCallback(() => {
-    setState(prev => ({ ...prev, error: undefined, saveError: undefined }));
+    setState((prev) => ({ ...prev, error: undefined, saveError: undefined }));
   }, []);
 
   // Auto-save effect
@@ -407,7 +416,7 @@ export function useDiagnosisSession(
     loadAvailableSessions,
     resumeSession,
     clearSession,
-    clearError
+    clearError,
   };
 
   return [state, actions];

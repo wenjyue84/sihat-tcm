@@ -3,7 +3,7 @@
  * Handles browser notification permissions and service worker registration
  */
 
-import { PermissionResult } from '../interfaces/WebNotificationInterfaces';
+import { PermissionResult } from "../interfaces/WebNotificationInterfaces";
 
 export class PermissionManager {
   private permission: NotificationPermission = "default";

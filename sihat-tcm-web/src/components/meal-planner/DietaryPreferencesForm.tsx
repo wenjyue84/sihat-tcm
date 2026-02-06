@@ -167,14 +167,10 @@ export function DietaryPreferencesForm({
                   >
                     <div
                       className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                        isSelected
-                          ? "border-blue-500 bg-blue-500"
-                          : "border-slate-300 bg-white"
+                        isSelected ? "border-blue-500 bg-blue-500" : "border-slate-300 bg-white"
                       }`}
                     >
-                      {isSelected && (
-                        <div className="w-2 h-2 rounded-full bg-white" />
-                      )}
+                      {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                     </div>
                     <span
                       className={`text-sm font-medium ${
@@ -203,9 +199,7 @@ export function DietaryPreferencesForm({
               onChange={(e) => setDislikedInput(e.target.value)}
               className="h-12 text-base border-slate-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl"
             />
-            <p className="text-xs text-slate-500 font-light">
-              Separate multiple items with commas
-            </p>
+            <p className="text-xs text-slate-500 font-light">Separate multiple items with commas</p>
           </div>
 
           {/* Divider */}

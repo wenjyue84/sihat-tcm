@@ -9,7 +9,11 @@ import {
   StreamCallOptions,
   GenerateCallOptions,
 } from "../modelFallback";
-import { ModelSelectionCriteria, ModelRouterConfig, AnalysisRequestDTO } from "./interfaces/ModelInterfaces";
+import {
+  ModelSelectionCriteria,
+  ModelRouterConfig,
+  AnalysisRequestDTO,
+} from "./interfaces/ModelInterfaces";
 import { ComplexityAnalyzer } from "./analysis/ComplexityAnalyzer";
 import { ModelSelectionStrategy } from "./selection/ModelSelectionStrategy";
 import { PerformanceMonitor } from "./monitoring/PerformanceMonitor";
@@ -111,15 +115,15 @@ export class AIModelRouter {
           requestType: criteria.complexity.type,
           responseTime: Date.now() - startTime,
           success: false,
-          errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+          errorType: error instanceof Error ? error.constructor.name : "Unknown",
           timestamp: new Date(),
           retryCount,
         });
       }
 
       throw ErrorFactory.fromUnknownError(error, {
-        component: 'AIModelRouter',
-        action: 'generateWithRouting',
+        component: "AIModelRouter",
+        action: "generateWithRouting",
         metadata: { criteria, selectedModel, retryCount },
       });
     }
@@ -176,15 +180,15 @@ export class AIModelRouter {
           requestType: criteria.complexity.type,
           responseTime: Date.now() - startTime,
           success: false,
-          errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+          errorType: error instanceof Error ? error.constructor.name : "Unknown",
           timestamp: new Date(),
           retryCount,
         });
       }
 
       throw ErrorFactory.fromUnknownError(error, {
-        component: 'AIModelRouter',
-        action: 'streamWithRouting',
+        component: "AIModelRouter",
+        action: "streamWithRouting",
         metadata: { criteria, selectedModel, retryCount },
       });
     }

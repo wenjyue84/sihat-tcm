@@ -6,7 +6,7 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 import { generateMockTestData } from "@/data/mockTestData";
 import type { DiagnosisWizardData, AnalysisResult } from "@/types/diagnosis";
-import type { DiagnosisStep } from "@/hooks/useDiagnosisWizard";
+import type { DiagnosisStep } from "@/features/diagnosis/hooks/diagnosisTypes";
 
 interface UseTestDataHandlersOptions {
   setData: (fn: (prev: DiagnosisWizardData) => DiagnosisWizardData) => void;
@@ -41,7 +41,7 @@ export function useTestDataHandlers({
         wang_tongue: mockData.wang_tongue,
         wang_face: mockData.wang_face,
         wang_part: mockData.wang_part,
-        wen_audio: mockData.wen_audio,
+        wen_audio: mockData.wen_audio as never,
         wen_chat: mockData.wen_inquiry.chatHistory.map((msg, idx) => ({
           id: `mock-${idx}`,
           role: msg.role as "user" | "assistant" | "system",
@@ -89,5 +89,3 @@ export function useTestDataHandlers({
     };
   }, [setData, setStep, setAnalysisResult, setCompletion]);
 }
-
-

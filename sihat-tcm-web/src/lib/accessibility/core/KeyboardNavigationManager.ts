@@ -1,6 +1,6 @@
 /**
  * Keyboard Navigation Manager
- * 
+ *
  * Manages keyboard navigation, skip links, and keyboard accessibility
  * with comprehensive keyboard event handling and navigation patterns.
  */
@@ -9,7 +9,7 @@ import { logger } from "@/lib/clientLogger";
 import type {
   KeyboardNavigationManager as IKeyboardNavigationManager,
   KeyboardNavigationConfig,
-  KeyboardHandler
+  KeyboardHandler,
 } from "../interfaces/AccessibilityInterfaces";
 
 /**
@@ -52,7 +52,7 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
       this.setupKeyboardEventListeners();
       this.setupDefaultKeyBindings();
       this.setupCustomKeyBindings();
-      
+
       if (this.config.skipLinks) {
         this.enableSkipLinks();
       }
@@ -76,11 +76,11 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
     if (typeof document === "undefined") return;
 
     // Global keydown handler
-    document.addEventListener('keydown', this.handleGlobalKeyDown.bind(this));
+    document.addEventListener("keydown", this.handleGlobalKeyDown.bind(this));
 
     // Focus tracking for focus-visible
-    document.addEventListener('mousedown', this.handleMouseDown.bind(this));
-    document.addEventListener('keydown', this.handleKeyDownForFocus.bind(this));
+    document.addEventListener("mousedown", this.handleMouseDown.bind(this));
+    document.addEventListener("keydown", this.handleKeyDownForFocus.bind(this));
 
     logger.debug("KeyboardNavigationManager", "Event listeners setup");
   }
@@ -91,30 +91,30 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
   private setupDefaultKeyBindings(): void {
     // Escape key - close modals, cancel operations
     this.addKeyBinding({
-      keys: ['Escape'],
+      keys: ["Escape"],
       handler: this.handleEscapeKey.bind(this),
-      description: 'Close modals and cancel operations',
+      description: "Close modals and cancel operations",
     });
 
     // Arrow keys for navigation
     this.addKeyBinding({
-      keys: ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'],
+      keys: ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"],
       handler: this.handleArrowKeys.bind(this),
-      description: 'Navigate with arrow keys',
+      description: "Navigate with arrow keys",
     });
 
     // Enter and Space for activation
     this.addKeyBinding({
-      keys: ['Enter', ' '],
+      keys: ["Enter", " "],
       handler: this.handleActivationKeys.bind(this),
-      description: 'Activate buttons and links',
+      description: "Activate buttons and links",
     });
 
     // Home and End keys
     this.addKeyBinding({
-      keys: ['Home', 'End'],
+      keys: ["Home", "End"],
       handler: this.handleHomeEndKeys.bind(this),
-      description: 'Navigate to start/end',
+      description: "Navigate to start/end",
     });
 
     logger.debug("KeyboardNavigationManager", "Default key bindings setup");
@@ -139,7 +139,7 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
    * Add a key binding
    */
   public addKeyBinding(binding: KeyboardHandler): void {
-    const keyString = binding.keys.join('+');
+    const keyString = binding.keys.join("+");
     this.keyBindings.set(keyString, binding);
 
     logger.debug("KeyboardNavigationManager", "Key binding added", {
@@ -152,7 +152,7 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
    * Remove a key binding
    */
   public removeKeyBinding(keys: string[]): void {
-    const keyString = keys.join('+');
+    const keyString = keys.join("+");
     const removed = this.keyBindings.delete(keyString);
 
     if (removed) {
@@ -167,10 +167,10 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
     const key = event.key;
     const modifiers = [];
 
-    if (event.ctrlKey) modifiers.push('Ctrl');
-    if (event.altKey) modifiers.push('Alt');
-    if (event.shiftKey) modifiers.push('Shift');
-    if (event.metaKey) modifiers.push('Meta');
+    if (event.ctrlKey) modifiers.push("Ctrl");
+    if (event.altKey) modifiers.push("Alt");
+    if (event.shiftKey) modifiers.push("Shift");
+    if (event.metaKey) modifiers.push("Meta");
 
     // Check for exact key match first
     const exactMatch = this.keyBindings.get(key);
@@ -180,7 +180,7 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
     }
 
     // Check for key with modifiers
-    const keyWithModifiers = [...modifiers, key].join('+');
+    const keyWithModifiers = [...modifiers, key].join("+");
     const modifierMatch = this.keyBindings.get(keyWithModifiers);
     if (modifierMatch) {
       this.executeKeyBinding(modifierMatch, event);
@@ -226,8 +226,10 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
     const modals = document.querySelectorAll('[role="dialog"][aria-modal="true"]');
     if (modals.length > 0) {
       const lastModal = modals[modals.length - 1] as HTMLElement;
-      const closeButton = lastModal.querySelector('[aria-label*="close"], [aria-label*="Close"], .close-button') as HTMLElement;
-      
+      const closeButton = lastModal.querySelector(
+        '[aria-label*="close"], [aria-label*="Close"], .close-button'
+      ) as HTMLElement;
+
       if (closeButton) {
         closeButton.click();
         event.preventDefault();
@@ -247,13 +249,13 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
    */
   private handleArrowKeys(event: KeyboardEvent): void {
     const target = event.target as HTMLElement;
-    
+
     // Handle arrow key navigation in specific contexts
-    if (target.getAttribute('role') === 'tablist') {
+    if (target.getAttribute("role") === "tablist") {
       this.handleTabListNavigation(event);
-    } else if (target.getAttribute('role') === 'menu' || target.closest('[role="menu"]')) {
+    } else if (target.getAttribute("role") === "menu" || target.closest('[role="menu"]')) {
       this.handleMenuNavigation(event);
-    } else if (target.getAttribute('role') === 'grid' || target.closest('[role="grid"]')) {
+    } else if (target.getAttribute("role") === "grid" || target.closest('[role="grid"]')) {
       this.handleGridNavigation(event);
     }
   }
@@ -263,17 +265,18 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
    */
   private handleActivationKeys(event: KeyboardEvent): void {
     const target = event.target as HTMLElement;
-    
+
     // Only handle if the element is not naturally activatable
-    if (target.tagName === 'BUTTON' || target.tagName === 'A') {
+    if (target.tagName === "BUTTON" || target.tagName === "A") {
       return; // Let browser handle naturally
     }
 
     // Handle custom interactive elements
-    if (target.getAttribute('role') === 'button' || 
-        target.getAttribute('tabindex') === '0' ||
-        target.classList.contains('clickable')) {
-      
+    if (
+      target.getAttribute("role") === "button" ||
+      target.getAttribute("tabindex") === "0" ||
+      target.classList.contains("clickable")
+    ) {
       target.click();
       event.preventDefault();
     }
@@ -285,14 +288,14 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
   private handleHomeEndKeys(event: KeyboardEvent): void {
     const target = event.target as HTMLElement;
     const container = target.closest('[role="tablist"], [role="menu"], [role="grid"]');
-    
+
     if (container) {
       const focusableElements = this.getFocusableElements(container as HTMLElement);
-      
+
       if (focusableElements.length > 0) {
-        if (event.key === 'Home') {
+        if (event.key === "Home") {
           focusableElements[0].focus();
-        } else if (event.key === 'End') {
+        } else if (event.key === "End") {
           focusableElements[focusableElements.length - 1].focus();
         }
         event.preventDefault();
@@ -307,14 +310,14 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
     const tabList = event.target as HTMLElement;
     const tabs = Array.from(tabList.querySelectorAll('[role="tab"]')) as HTMLElement[];
     const currentIndex = tabs.indexOf(event.target as HTMLElement);
-    
+
     if (currentIndex === -1) return;
 
     let nextIndex = currentIndex;
-    
-    if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+
+    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
       nextIndex = currentIndex > 0 ? currentIndex - 1 : tabs.length - 1;
-    } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+    } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
       nextIndex = currentIndex < tabs.length - 1 ? currentIndex + 1 : 0;
     }
 
@@ -333,14 +336,14 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
 
     const menuItems = Array.from(menu.querySelectorAll('[role="menuitem"]')) as HTMLElement[];
     const currentIndex = menuItems.indexOf(event.target as HTMLElement);
-    
+
     if (currentIndex === -1) return;
 
     let nextIndex = currentIndex;
-    
-    if (event.key === 'ArrowUp') {
+
+    if (event.key === "ArrowUp") {
       nextIndex = currentIndex > 0 ? currentIndex - 1 : menuItems.length - 1;
-    } else if (event.key === 'ArrowDown') {
+    } else if (event.key === "ArrowDown") {
       nextIndex = currentIndex < menuItems.length - 1 ? currentIndex + 1 : 0;
     }
 
@@ -364,7 +367,7 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
    */
   private handleMouseDown(): void {
     if (typeof document !== "undefined") {
-      document.body.classList.add('using-mouse');
+      document.body.classList.add("using-mouse");
     }
   }
 
@@ -372,9 +375,9 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
    * Handle key down for focus-visible
    */
   private handleKeyDownForFocus(event: KeyboardEvent): void {
-    if (event.key === 'Tab') {
+    if (event.key === "Tab") {
       if (typeof document !== "undefined") {
-        document.body.classList.remove('using-mouse');
+        document.body.classList.remove("using-mouse");
       }
     }
   }
@@ -386,11 +389,11 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
     if (typeof document === "undefined") return;
 
     // Create main content skip link if it doesn't exist
-    const existingSkipLink = document.querySelector('.skip-link');
+    const existingSkipLink = document.querySelector(".skip-link");
     if (!existingSkipLink) {
       const mainContent = document.querySelector('main, #main, [role="main"]');
       if (mainContent) {
-        const skipLink = this.createSkipLink('main', 'Skip to main content');
+        const skipLink = this.createSkipLink("main", "Skip to main content");
         document.body.insertBefore(skipLink, document.body.firstChild);
       }
     }
@@ -402,7 +405,7 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
    * Disable skip links
    */
   public disableSkipLinks(): void {
-    this.skipLinks.forEach(link => {
+    this.skipLinks.forEach((link) => {
       if (link.parentNode) {
         link.parentNode.removeChild(link);
       }
@@ -416,11 +419,11 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
    * Create a skip link
    */
   public createSkipLink(targetId: string, text: string): HTMLElement {
-    const skipLink = document.createElement('a');
+    const skipLink = document.createElement("a");
     skipLink.href = `#${targetId}`;
     skipLink.textContent = text;
-    skipLink.className = 'skip-link';
-    
+    skipLink.className = "skip-link";
+
     // Style the skip link
     skipLink.style.cssText = `
       position: absolute;
@@ -436,12 +439,12 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
     `;
 
     // Show on focus
-    skipLink.addEventListener('focus', () => {
-      skipLink.style.top = '6px';
+    skipLink.addEventListener("focus", () => {
+      skipLink.style.top = "6px";
     });
 
-    skipLink.addEventListener('blur', () => {
-      skipLink.style.top = '-40px';
+    skipLink.addEventListener("blur", () => {
+      skipLink.style.top = "-40px";
     });
 
     this.skipLinks.push(skipLink);
@@ -455,23 +458,26 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
     this.trapContainers.set(container, enabled);
 
     if (enabled) {
-      container.addEventListener('keydown', this.handleTabTrapKeyDown.bind(this));
+      container.addEventListener("keydown", this.handleTabTrapKeyDown.bind(this));
     } else {
-      container.removeEventListener('keydown', this.handleTabTrapKeyDown.bind(this));
+      container.removeEventListener("keydown", this.handleTabTrapKeyDown.bind(this));
     }
 
-    logger.debug("KeyboardNavigationManager", "Tab trap", { enabled, container: container.tagName });
+    logger.debug("KeyboardNavigationManager", "Tab trap", {
+      enabled,
+      container: container.tagName,
+    });
   }
 
   /**
    * Handle tab trap keydown
    */
   private handleTabTrapKeyDown(event: KeyboardEvent): void {
-    if (event.key !== 'Tab') return;
+    if (event.key !== "Tab") return;
 
     const container = event.currentTarget as HTMLElement;
     const focusableElements = this.getFocusableElements(container);
-    
+
     if (focusableElements.length === 0) return;
 
     const firstElement = focusableElements[0];
@@ -497,23 +503,21 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
    */
   private getFocusableElements(container: HTMLElement): HTMLElement[] {
     const focusableSelectors = [
-      'button:not([disabled])',
-      '[href]',
-      'input:not([disabled])',
-      'select:not([disabled])',
-      'textarea:not([disabled])',
+      "button:not([disabled])",
+      "[href]",
+      "input:not([disabled])",
+      "select:not([disabled])",
+      "textarea:not([disabled])",
       '[tabindex]:not([tabindex="-1"])',
-      '[contenteditable="true"]'
-    ].join(', ');
+      '[contenteditable="true"]',
+    ].join(", ");
 
     const elements = Array.from(container.querySelectorAll(focusableSelectors)) as HTMLElement[];
-    
-    return elements.filter(element => {
+
+    return elements.filter((element) => {
       const style = window.getComputedStyle(element);
       return (
-        style.display !== 'none' &&
-        style.visibility !== 'hidden' &&
-        element.offsetParent !== null
+        style.display !== "none" && style.visibility !== "hidden" && element.offsetParent !== null
       );
     });
   }
@@ -525,7 +529,7 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
     if (typeof document === "undefined") return;
 
     // Add CSS for focus-visible
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
       .using-mouse *:focus {
         outline: none;
@@ -549,7 +553,7 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
         outline-offset: 3px;
       }
     `;
-    
+
     document.head.appendChild(style);
 
     logger.debug("KeyboardNavigationManager", "Focus-visible enabled");
@@ -577,9 +581,9 @@ export class KeyboardNavigationManager implements IKeyboardNavigationManager {
 
     // Remove event listeners
     if (typeof document !== "undefined") {
-      document.removeEventListener('keydown', this.handleGlobalKeyDown.bind(this));
-      document.removeEventListener('mousedown', this.handleMouseDown.bind(this));
-      document.removeEventListener('keydown', this.handleKeyDownForFocus.bind(this));
+      document.removeEventListener("keydown", this.handleGlobalKeyDown.bind(this));
+      document.removeEventListener("mousedown", this.handleMouseDown.bind(this));
+      document.removeEventListener("keydown", this.handleKeyDownForFocus.bind(this));
     }
 
     // Clear key bindings

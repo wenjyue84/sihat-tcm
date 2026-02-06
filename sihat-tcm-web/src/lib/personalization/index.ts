@@ -1,6 +1,6 @@
 /**
  * Personalization System - Main Exports
- * 
+ *
  * Centralized exports for the personalization system components.
  * Provides clean interfaces for personalized TCM recommendations.
  */
@@ -10,39 +10,39 @@ export {
   PersonalizationOrchestrator,
   createPersonalizationOrchestrator,
   defaultPersonalizationOrchestrator,
-} from './core/PersonalizationOrchestrator';
+} from "./core/PersonalizationOrchestrator";
 
 // Safety validation
 export {
   SafetyValidator,
   createSafetyValidator,
   defaultSafetyValidator,
-} from './core/SafetyValidator';
+} from "./core/SafetyValidator";
 
 // Recommendation generation
 export {
   RecommendationGenerator,
   createRecommendationGenerator,
   defaultRecommendationGenerator,
-} from './core/RecommendationGenerator';
+} from "./core/RecommendationGenerator";
 
 // Legacy engine (for backward compatibility)
 export {
   PersonalizationEngine,
   defaultPersonalizationEngine,
   getPersonalizedRecommendations,
-} from './PersonalizationEngine';
+} from "./PersonalizationEngine";
 
 // Core components
-export { CulturalContextBuilder } from './core/CulturalContextBuilder';
-export { HealthHistoryAnalyzer } from './core/HealthHistoryAnalyzer';
+export { CulturalContextBuilder } from "./core/CulturalContextBuilder";
+export { HealthHistoryAnalyzer } from "./core/HealthHistoryAnalyzer";
 
 // Adapters
-export { DietaryRecommendationAdapter } from './adapters/DietaryRecommendationAdapter';
-export { LifestyleRecommendationAdapter } from './adapters/LifestyleRecommendationAdapter';
+export { DietaryRecommendationAdapter } from "./adapters/DietaryRecommendationAdapter";
+export { LifestyleRecommendationAdapter } from "./adapters/LifestyleRecommendationAdapter";
 
 // Learning system
-export { LearningProfileManager } from './learning/LearningProfileManager';
+export { LearningProfileManager } from "./learning/LearningProfileManager";
 
 // Type definitions
 export type {
@@ -55,21 +55,21 @@ export type {
   SafetyCheck,
   FeedbackData,
   PersonalizationConfig,
-  
+
   // Cultural context
   CulturalContext,
   CommunicationStyle,
-  
+
   // Health data
   HealthHistory,
   DietaryRestrictions,
   UserPreferences,
-  
+
   // Learning system
   LearningProfile,
   CommunicationPreferences,
   LearningTrends,
-} from './interfaces/PersonalizationInterfaces';
+} from "./interfaces/PersonalizationInterfaces";
 
 /**
  * Quick setup function for personalization system
@@ -81,17 +81,19 @@ export function setupPersonalizationSystem(config?: {
   maxAlternativeSuggestions?: number;
   confidenceThreshold?: number;
 }) {
-  const orchestrator = createPersonalizationOrchestrator('QuickSetup');
-  
+  const orchestrator = createPersonalizationOrchestrator("QuickSetup");
+
   if (config) {
     orchestrator.updateConfiguration(config);
   }
-  
+
   return {
     orchestrator,
     getPersonalizationFactors: orchestrator.getPersonalizationFactors.bind(orchestrator),
-    personalizeDietaryRecommendations: orchestrator.personalizeDietaryRecommendations.bind(orchestrator),
-    personalizeLifestyleRecommendations: orchestrator.personalizeLifestyleRecommendations.bind(orchestrator),
+    personalizeDietaryRecommendations:
+      orchestrator.personalizeDietaryRecommendations.bind(orchestrator),
+    personalizeLifestyleRecommendations:
+      orchestrator.personalizeLifestyleRecommendations.bind(orchestrator),
     validateRecommendationSafety: orchestrator.validateRecommendationSafety.bind(orchestrator),
     updateLearningProfile: orchestrator.updateLearningProfile.bind(orchestrator),
   };
@@ -133,7 +135,7 @@ export async function getComprehensivePersonalizedRecommendations(
       ...(originalRecommendations.lifestyle || []),
       ...(originalRecommendations.herbal || []),
     ];
-    
+
     safetyCheck = await orchestrator.validateRecommendationSafety(allRecommendations, factors);
   }
 

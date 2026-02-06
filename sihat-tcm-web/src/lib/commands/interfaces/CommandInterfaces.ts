@@ -1,6 +1,6 @@
 /**
  * Command System Interfaces
- * 
+ *
  * Core interfaces for the command system implementing the Command pattern
  * with support for undo/redo, queuing, validation, and batch operations.
  */
@@ -14,12 +14,12 @@ export interface Command {
   readonly description: string;
   readonly timestamp: Date;
   readonly metadata?: CommandMetadata;
-  
+
   execute(): Promise<CommandResult>;
   undo?(): Promise<CommandResult>;
   canUndo?(): boolean;
   validate?(): Promise<ValidationResult>;
-  
+
   // Lifecycle hooks
   beforeExecute?(): Promise<void>;
   afterExecute?(result: CommandResult): Promise<void>;
@@ -43,7 +43,7 @@ export interface CommandMetadata {
 /**
  * Command priority levels
  */
-export type CommandPriority = 'low' | 'normal' | 'high' | 'urgent';
+export type CommandPriority = "low" | "normal" | "high" | "urgent";
 
 /**
  * Command execution result
@@ -98,7 +98,7 @@ export interface CommandContext {
  */
 export interface RetryPolicy {
   maxAttempts: number;
-  backoffStrategy: 'linear' | 'exponential' | 'fixed';
+  backoffStrategy: "linear" | "exponential" | "fixed";
   baseDelay: number;
   maxDelay: number;
   jitter?: boolean;
@@ -110,7 +110,11 @@ export interface RetryPolicy {
  */
 export interface CommandExecutor {
   execute(command: Command, context?: Partial<CommandContext>): Promise<CommandResult>;
-  executeWithRetry(command: Command, retryPolicy: RetryPolicy, context?: Partial<CommandContext>): Promise<CommandResult>;
+  executeWithRetry(
+    command: Command,
+    retryPolicy: RetryPolicy,
+    context?: Partial<CommandContext>
+  ): Promise<CommandResult>;
   canExecute(command: Command): Promise<boolean>;
   estimateExecutionTime(command: Command): Promise<number>;
 }
@@ -122,16 +126,20 @@ export interface CommandQueue {
   enqueue(command: Command, context?: Partial<CommandContext>): Promise<string>; // Returns queue ID
   dequeue(): Promise<QueuedCommand | null>;
   peek(): Promise<QueuedCommand | null>;
-  
+
   // Queue management
   size(): number;
   isEmpty(): boolean;
   clear(): Promise<number>;
-  
+
   // Priority and filtering
-  enqueuePriority(command: Command, priority: CommandPriority, context?: Partial<CommandContext>): Promise<string>;
+  enqueuePriority(
+    command: Command,
+    priority: CommandPriority,
+    context?: Partial<CommandContext>
+  ): Promise<string>;
   getByPriority(priority: CommandPriority): Promise<QueuedCommand[]>;
-  
+
   // Status and monitoring
   getQueueStatus(): QueueStatus;
   getQueuedCommands(): Promise<QueuedCommand[]>;
@@ -153,7 +161,7 @@ export interface QueuedCommand {
 /**
  * Queued command status
  */
-export type QueuedCommandStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+export type QueuedCommandStatus = "pending" | "processing" | "completed" | "failed" | "cancelled";
 
 /**
  * Queue status information
@@ -176,15 +184,15 @@ export interface CommandHistory {
   record(command: Command, result: CommandResult, context: CommandContext): Promise<void>;
   getHistory(filter?: CommandHistoryFilter): Promise<CommandHistoryEntry[]>;
   getCommand(commandId: string): Promise<CommandHistoryEntry | null>;
-  
+
   // Undo/Redo support
   getUndoableCommands(): Promise<CommandHistoryEntry[]>;
   getRedoableCommands(): Promise<CommandHistoryEntry[]>;
-  
+
   // Analytics
   getStatistics(timeRange?: TimeRange): Promise<CommandStatistics>;
   getCommandsByType(commandType: string): Promise<CommandHistoryEntry[]>;
-  
+
   // Cleanup
   clearHistory(olderThan?: Date): Promise<number>;
   archiveHistory(olderThan: Date): Promise<number>;
@@ -257,7 +265,7 @@ export interface BatchCommand extends Command {
   commands: Command[];
   executionStrategy: BatchExecutionStrategy;
   rollbackStrategy: BatchRollbackStrategy;
-  
+
   // Batch-specific methods
   addCommand(command: Command): void;
   removeCommand(commandId: string): boolean;
@@ -268,12 +276,12 @@ export interface BatchCommand extends Command {
 /**
  * Batch execution strategies
  */
-export type BatchExecutionStrategy = 'sequential' | 'parallel' | 'pipeline' | 'conditional';
+export type BatchExecutionStrategy = "sequential" | "parallel" | "pipeline" | "conditional";
 
 /**
  * Batch rollback strategies
  */
-export type BatchRollbackStrategy = 'all_or_nothing' | 'best_effort' | 'manual' | 'none';
+export type BatchRollbackStrategy = "all_or_nothing" | "best_effort" | "manual" | "none";
 
 /**
  * Execution plan for batch commands
@@ -291,7 +299,7 @@ export interface ExecutionPlan {
 export interface ExecutionStep {
   stepId: string;
   commands: Command[];
-  executionMode: 'sequential' | 'parallel';
+  executionMode: "sequential" | "parallel";
   dependencies: string[];
   timeout?: number;
 }
@@ -302,17 +310,17 @@ export interface ExecutionStep {
 export interface CommandDependency {
   commandId: string;
   dependsOn: string[];
-  dependencyType: 'hard' | 'soft';
+  dependencyType: "hard" | "soft";
 }
 
 /**
  * Risk assessment for batch execution
  */
 export interface RiskAssessment {
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  riskLevel: "low" | "medium" | "high" | "critical";
   riskFactors: string[];
   mitigations: string[];
-  rollbackComplexity: 'simple' | 'moderate' | 'complex';
+  rollbackComplexity: "simple" | "moderate" | "complex";
 }
 
 /**
@@ -321,11 +329,11 @@ export interface RiskAssessment {
 export interface CommandScheduler {
   schedule(command: Command, schedule: CommandSchedule): Promise<string>; // Returns schedule ID
   unschedule(scheduleId: string): Promise<boolean>;
-  
+
   // Schedule management
   getScheduledCommands(): Promise<ScheduledCommand[]>;
   getUpcomingCommands(timeWindow: number): Promise<ScheduledCommand[]>;
-  
+
   // Execution
   start(): Promise<void>;
   stop(): Promise<void>;
@@ -336,7 +344,7 @@ export interface CommandScheduler {
  * Command schedule configuration
  */
 export interface CommandSchedule {
-  type: 'once' | 'recurring';
+  type: "once" | "recurring";
   executeAt?: Date;
   cronExpression?: string;
   interval?: number;
@@ -355,7 +363,7 @@ export interface ScheduledCommand {
   nextExecution?: Date;
   lastExecution?: Date;
   executionCount: number;
-  status: 'active' | 'paused' | 'completed' | 'failed';
+  status: "active" | "paused" | "completed" | "failed";
 }
 
 /**
@@ -364,7 +372,7 @@ export interface ScheduledCommand {
 export interface CommandInterceptor {
   name: string;
   priority: number;
-  
+
   beforeExecute?(command: Command, context: CommandContext): Promise<InterceptorResult>;
   afterExecute?(command: Command, result: CommandResult, context: CommandContext): Promise<void>;
   onError?(command: Command, error: Error, context: CommandContext): Promise<InterceptorResult>;
@@ -387,28 +395,28 @@ export interface CommandBus {
   // Core execution
   execute(command: Command, context?: Partial<CommandContext>): Promise<CommandResult>;
   executeAsync(command: Command, context?: Partial<CommandContext>): Promise<string>; // Returns execution ID
-  
+
   // Queue operations
   enqueue(command: Command, context?: Partial<CommandContext>): Promise<string>;
-  
+
   // Batch operations
   executeBatch(commands: Command[], strategy?: BatchExecutionStrategy): Promise<BatchResult>;
-  
+
   // Undo/Redo
   undo(commandId?: string): Promise<CommandResult>;
   redo(commandId?: string): Promise<CommandResult>;
-  
+
   // Scheduling
   schedule(command: Command, schedule: CommandSchedule): Promise<string>;
-  
+
   // Interceptors
   addInterceptor(interceptor: CommandInterceptor): void;
   removeInterceptor(interceptorName: string): boolean;
-  
+
   // Monitoring
   getStatistics(): Promise<CommandStatistics>;
   getHistory(filter?: CommandHistoryFilter): Promise<CommandHistoryEntry[]>;
-  
+
   // Lifecycle
   start(): Promise<void>;
   stop(): Promise<void>;
@@ -449,7 +457,7 @@ export interface CommandBusConfig {
 export interface QueueConfig {
   maxSize: number;
   priorityLevels: CommandPriority[];
-  processingMode: 'fifo' | 'lifo' | 'priority';
+  processingMode: "fifo" | "lifo" | "priority";
   batchSize: number;
   processingInterval: number;
 }
@@ -460,7 +468,7 @@ export interface QueueConfig {
 
 // AI Model Commands
 export interface SelectAIModelCommand extends Command {
-  type: 'ai:select-model';
+  type: "ai:select-model";
   data: {
     modelId: string;
     criteria: any;
@@ -469,7 +477,7 @@ export interface SelectAIModelCommand extends Command {
 }
 
 export interface UpdateModelConfigCommand extends Command {
-  type: 'ai:update-config';
+  type: "ai:update-config";
   data: {
     modelId: string;
     configuration: any;
@@ -479,7 +487,7 @@ export interface UpdateModelConfigCommand extends Command {
 
 // Notification Commands
 export interface ScheduleNotificationCommand extends Command {
-  type: 'notification:schedule';
+  type: "notification:schedule";
   data: {
     notificationRequest: any;
     scheduledNotificationId?: string;
@@ -487,7 +495,7 @@ export interface ScheduleNotificationCommand extends Command {
 }
 
 export interface UpdateNotificationPreferencesCommand extends Command {
-  type: 'notification:update-preferences';
+  type: "notification:update-preferences";
   data: {
     preferences: any;
     previousPreferences?: any;
@@ -496,7 +504,7 @@ export interface UpdateNotificationPreferencesCommand extends Command {
 
 // System Commands
 export interface SystemConfigurationCommand extends Command {
-  type: 'system:configure';
+  type: "system:configure";
   data: {
     component: string;
     configuration: any;
@@ -506,7 +514,7 @@ export interface SystemConfigurationCommand extends Command {
 
 // TCM-specific Commands
 export interface StartDiagnosisCommand extends Command {
-  type: 'tcm:start-diagnosis';
+  type: "tcm:start-diagnosis";
   data: {
     patientId: string;
     diagnosticType: string;
@@ -515,7 +523,7 @@ export interface StartDiagnosisCommand extends Command {
 }
 
 export interface SaveDiagnosisResultCommand extends Command {
-  type: 'tcm:save-diagnosis';
+  type: "tcm:save-diagnosis";
   data: {
     sessionId: string;
     results: any;
@@ -526,7 +534,7 @@ export interface SaveDiagnosisResultCommand extends Command {
 /**
  * Union type for all domain commands
  */
-export type DomainCommand = 
+export type DomainCommand =
   | SelectAIModelCommand
   | UpdateModelConfigCommand
   | ScheduleNotificationCommand

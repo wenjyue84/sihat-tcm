@@ -2,7 +2,12 @@
  * Request complexity analysis module
  */
 
-import { RequestComplexity, RequestComplexityType, ComplexityFactors, AnalysisRequestDTO } from "../interfaces/ModelInterfaces";
+import {
+  RequestComplexity,
+  RequestComplexityType,
+  ComplexityFactors,
+  AnalysisRequestDTO,
+} from "../interfaces/ModelInterfaces";
 import { COMPLEXITY_SCORING, AI_MODELS } from "../../constants";
 
 export class ComplexityAnalyzer {
@@ -68,10 +73,16 @@ export class ComplexityAnalyzer {
     if (factors.requiresPersonalization) score += COMPLEXITY_SCORING.PERSONALIZATION_BONUS;
 
     // Medical complexity
-    score += COMPLEXITY_SCORING.MEDICAL_COMPLEXITY[factors.medicalComplexity.toUpperCase() as keyof typeof COMPLEXITY_SCORING.MEDICAL_COMPLEXITY] || 0;
+    score +=
+      COMPLEXITY_SCORING.MEDICAL_COMPLEXITY[
+        factors.medicalComplexity.toUpperCase() as keyof typeof COMPLEXITY_SCORING.MEDICAL_COMPLEXITY
+      ] || 0;
 
     // Urgency
-    score += COMPLEXITY_SCORING.URGENCY_LEVELS[factors.urgencyLevel.toUpperCase() as keyof typeof COMPLEXITY_SCORING.URGENCY_LEVELS] || 0;
+    score +=
+      COMPLEXITY_SCORING.URGENCY_LEVELS[
+        factors.urgencyLevel.toUpperCase() as keyof typeof COMPLEXITY_SCORING.URGENCY_LEVELS
+      ] || 0;
 
     return Math.min(score, COMPLEXITY_SCORING.MAX_SCORE);
   }
@@ -99,7 +110,10 @@ export class ComplexityAnalyzer {
     return reasoning;
   }
 
-  private getModelRecommendations(type: RequestComplexityType, factors: ComplexityFactors): {
+  private getModelRecommendations(
+    type: RequestComplexityType,
+    factors: ComplexityFactors
+  ): {
     recommendedModel: string;
     fallbackModels: string[];
   } {

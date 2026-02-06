@@ -1,6 +1,6 @@
 /**
  * Hook for diagnosis wizard navigation logic
- * 
+ *
  * Handles next/previous step navigation with mode-aware routing
  */
 
@@ -122,6 +122,3 @@ export function useDiagnosisNavigation({
 
   return { nextStep, prevStep };
 }
-
-
-

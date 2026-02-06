@@ -49,7 +49,8 @@ export function SmartHealthMetrics({
             <div className="bg-white/60 rounded-lg p-3 col-span-2 md:col-span-1">
               <p className="text-xs text-purple-600 font-medium">{t.smartConnect.pulseRate}</p>
               <p className="text-xl font-bold text-purple-900">
-                {smartConnectData.pulseRate} <span className="text-sm font-normal">{t.pulse.bpm}</span>
+                {smartConnectData.pulseRate}{" "}
+                <span className="text-sm font-normal">{t.pulse.bpm}</span>
               </p>
               {/* ECG Animation - 心电图 */}
               {bpmValue && bpmValue > 0 && (

@@ -20,11 +20,9 @@ export const modelSchema = z
 // Base64 data URI pattern (for images/audio)
 const dataUriRegex = /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9.+-]+);base64,[A-Za-z0-9+/]+=*$/;
 
-export const base64DataUriSchema = z
-  .string()
-  .refine((val) => dataUriRegex.test(val), {
-    message: "Invalid data URI format - expected base64 encoded data",
-  });
+export const base64DataUriSchema = z.string().refine((val) => dataUriRegex.test(val), {
+  message: "Invalid data URI format - expected base64 encoded data",
+});
 
 // ============================================================================
 // CHAT MESSAGE SCHEMAS
@@ -209,5 +207,3 @@ export function validationErrorResponse(error: string, details?: z.ZodError["iss
     }
   );
 }
-
-

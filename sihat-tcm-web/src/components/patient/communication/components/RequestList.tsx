@@ -43,10 +43,11 @@ export function RequestList({
               <div
                 key={req.id}
                 onClick={() => onSelectRequest(req)}
-                className={`p-3 rounded-lg cursor-pointer border transition-colors ${activeRequest?.id === req.id
+                className={`p-3 rounded-lg cursor-pointer border transition-colors ${
+                  activeRequest?.id === req.id
                     ? "bg-emerald-50 border-emerald-200"
                     : "bg-white hover:bg-gray-50 border-gray-100"
-                  }`}
+                }`}
               >
                 <div className="flex justify-between items-center mb-1">
                   <span className="font-semibold text-sm text-gray-700 truncate max-w-[140px]">
@@ -58,10 +59,11 @@ export function RequestList({
                 </div>
                 <div className="flex justify-between items-center">
                   <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${req.status === "active"
+                    className={`text-xs px-2 py-0.5 rounded-full ${
+                      req.status === "active"
                         ? "bg-green-100 text-green-700"
                         : "bg-yellow-100 text-yellow-700"
-                      }`}
+                    }`}
                   >
                     {req.status === "active" ? "Active" : "Pending"}
                   </span>
@@ -90,6 +92,3 @@ export function RequestList({
     </div>
   );
 }
-
-
-

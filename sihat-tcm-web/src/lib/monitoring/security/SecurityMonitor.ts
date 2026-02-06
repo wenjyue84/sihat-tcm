@@ -1,9 +1,9 @@
 /**
  * @fileoverview Security Monitor Orchestrator
- * 
+ *
  * Main orchestrator for the security monitoring system.
  * Coordinates event tracking, rule evaluation, threat analysis, and response actions.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 1.0
  */
@@ -12,14 +12,14 @@ import { devLog } from "@/lib/systemLogger";
 import { EventTracker } from "./core/EventTracker";
 import { SecurityRuleEngine } from "./core/SecurityRuleEngine";
 import { ThreatAnalyzer } from "./analysis/ThreatAnalyzer";
-import type { 
-  SecurityEvent, 
-  SecurityEventType, 
-  SecurityContext, 
+import type {
+  SecurityEvent,
+  SecurityEventType,
+  SecurityContext,
   SecurityStatistics,
   SecurityConfig,
   ThreatAssessment,
-  SecurityAlert 
+  SecurityAlert,
 } from "./interfaces/SecurityInterfaces";
 
 /**
@@ -85,7 +85,7 @@ export class SecurityMonitor {
     const context = this.buildSecurityContext();
 
     // Evaluate security rules
-    this.ruleEngine.evaluateRules(securityEvent, context).catch(error => {
+    this.ruleEngine.evaluateRules(securityEvent, context).catch((error) => {
       devLog("error", "SecurityMonitor", "Error evaluating security rules", { error });
     });
 
@@ -107,7 +107,7 @@ export class SecurityMonitor {
     const lockedUsers = new Set<string>();
 
     // Populate IP tracking
-    this.eventTracker.getAllIPInfo().forEach(ip => {
+    this.eventTracker.getAllIPInfo().forEach((ip) => {
       ipTracking.set(ip.ipAddress, ip);
       if (ip.isBlocked) {
         blockedIPs.add(ip.ipAddress);
@@ -115,7 +115,7 @@ export class SecurityMonitor {
     });
 
     // Populate user profiles
-    this.eventTracker.getAllUserProfiles().forEach(user => {
+    this.eventTracker.getAllUserProfiles().forEach((user) => {
       userProfiles.set(user.userId, user);
       if (user.isLocked) {
         lockedUsers.add(user.userId);
@@ -197,20 +197,16 @@ export class SecurityMonitor {
     const allIPInfo = this.eventTracker.getAllIPInfo();
     const allUserProfiles = this.eventTracker.getAllUserProfiles();
 
-    const topRiskyIPs = allIPInfo
-      .sort((a, b) => b.riskScore - a.riskScore)
-      .slice(0, 10);
+    const topRiskyIPs = allIPInfo.sort((a, b) => b.riskScore - a.riskScore).slice(0, 10);
 
-    const topRiskyUsers = allUserProfiles
-      .sort((a, b) => b.riskScore - a.riskScore)
-      .slice(0, 10);
+    const topRiskyUsers = allUserProfiles.sort((a, b) => b.riskScore - a.riskScore).slice(0, 10);
 
     return {
       totalEvents: eventStats.totalEvents,
       eventsByType: eventStats.eventsByType,
       eventsBySeverity: eventStats.eventsBySeverity,
-      blockedIPs: allIPInfo.filter(ip => ip.isBlocked).length,
-      lockedUsers: allUserProfiles.filter(user => user.isLocked).length,
+      blockedIPs: allIPInfo.filter((ip) => ip.isBlocked).length,
+      lockedUsers: allUserProfiles.filter((user) => user.isLocked).length,
       recentEvents: this.eventTracker.getRecentEvents(50),
       topRiskyIPs,
       topRiskyUsers,
@@ -407,7 +403,7 @@ export const securityMonitor = SecurityMonitor.getInstance();
 export function createSecurityMiddleware() {
   return (req: any, res: any, next: any) => {
     const clientIP = req.ip || req.connection.remoteAddress || "unknown";
-    
+
     // Check if IP is blocked
     if (securityMonitor.isIPBlocked(clientIP)) {
       return res.status(403).json({ error: "IP address is blocked" });

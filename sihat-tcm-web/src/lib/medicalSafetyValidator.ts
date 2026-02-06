@@ -1,9 +1,9 @@
 /**
  * Medical Safety Validator - Legacy Wrapper
- * 
+ *
  * @deprecated This file is maintained for backward compatibility.
  * Use the new modular system: import { SafetyValidator } from './medical-safety'
- * 
+ *
  * The new system provides:
  * - Modular architecture with focused components
  * - Better separation of concerns
@@ -23,8 +23,8 @@ import {
   type SafetyConcern,
   type EmergencyFlag,
   type Contraindication,
-  type DrugInteraction
-} from './medical-safety';
+  type DrugInteraction,
+} from "./medical-safety";
 
 import { DietaryPreferences } from "@/app/actions/meal-planner";
 import { DiagnosisReport } from "@/types/database";
@@ -37,7 +37,7 @@ export type {
   EmergencyFlag,
   Contraindication,
   DrugInteraction,
-  ValidationContext
+  ValidationContext,
 };
 
 /**
@@ -47,7 +47,9 @@ export class MedicalSafetyValidator {
   private validator: ModularSafetyValidator;
 
   constructor(context: string = "MedicalSafetyValidator") {
-    console.warn('[MedicalSafetyValidator] Using deprecated API. Please migrate to the new modular system.');
+    console.warn(
+      "[MedicalSafetyValidator] Using deprecated API. Please migrate to the new modular system."
+    );
     this.validator = new ModularSafetyValidator(`${context}_Legacy`);
   }
 
@@ -63,7 +65,9 @@ export class MedicalSafetyValidator {
     },
     validationContext: ValidationContext
   ): Promise<SafetyValidationResult> {
-    console.warn('[MedicalSafetyValidator] Using deprecated API. Please migrate to the new modular system.');
+    console.warn(
+      "[MedicalSafetyValidator] Using deprecated API. Please migrate to the new modular system."
+    );
     return await this.validator.validateRecommendations(recommendations, validationContext);
   }
 
@@ -75,7 +79,9 @@ export class MedicalSafetyValidator {
     medication: string,
     context?: ValidationContext
   ): Promise<DrugInteraction | null> {
-    console.warn('[MedicalSafetyValidator] Using deprecated API. Please migrate to the new modular system.');
+    console.warn(
+      "[MedicalSafetyValidator] Using deprecated API. Please migrate to the new modular system."
+    );
     return await this.validator.checkSpecificInteraction(herb, medication);
   }
 
@@ -83,7 +89,9 @@ export class MedicalSafetyValidator {
    * @deprecated Use validator.checkEmergencySymptoms() from the new modular system
    */
   async validateEmergencySymptoms(symptoms: string[]): Promise<EmergencyFlag[]> {
-    console.warn('[MedicalSafetyValidator] Using deprecated API. Please migrate to the new modular system.');
+    console.warn(
+      "[MedicalSafetyValidator] Using deprecated API. Please migrate to the new modular system."
+    );
     return await this.validator.checkEmergencySymptoms(symptoms);
   }
 
@@ -99,7 +107,9 @@ export class MedicalSafetyValidator {
     emergency_signs: string[];
     when_to_seek_help: string[];
   }> {
-    console.warn('[MedicalSafetyValidator] Using deprecated API. Please migrate to the new modular system.');
+    console.warn(
+      "[MedicalSafetyValidator] Using deprecated API. Please migrate to the new modular system."
+    );
     return await this.validator.getSafetyGuidelines(condition, language);
   }
 }
@@ -122,7 +132,9 @@ export async function validateMedicalSafety(
   },
   context: ValidationContext
 ): Promise<SafetyValidationResult> {
-  console.warn('[validateMedicalSafety] Using deprecated API. Please migrate to the new modular system.');
+  console.warn(
+    "[validateMedicalSafety] Using deprecated API. Please migrate to the new modular system."
+  );
   return validateMedicalSafetyModular(recommendations, context);
 }
 
@@ -131,6 +143,8 @@ export async function validateMedicalSafety(
  * @deprecated Use checkEmergencySymptoms from './medical-safety'
  */
 export async function checkEmergencySymptoms(symptoms: string[]): Promise<EmergencyFlag[]> {
-  console.warn('[checkEmergencySymptoms] Using deprecated API. Please migrate to the new modular system.');
+  console.warn(
+    "[checkEmergencySymptoms] Using deprecated API. Please migrate to the new modular system."
+  );
   return checkEmergencySymptomsModular(symptoms);
 }

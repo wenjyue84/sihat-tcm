@@ -51,4 +51,3 @@ export function useSystemLogs(logLevelFilter: string = "all") {
     fetchLogs,
   };
 }
-

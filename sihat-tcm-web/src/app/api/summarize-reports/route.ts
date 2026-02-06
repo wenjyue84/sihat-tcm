@@ -154,14 +154,9 @@ Format the response as a clear, paragraph-based summary suitable for medical rec
     );
   } catch (error: unknown) {
     const duration = Date.now() - startTime;
-    return createErrorResponseWithStatus(
-      error,
-      "API/summarize-reports",
-      500,
-      {
-        code: "GENERATION_FAILED",
-        duration: duration,
-      }
-    );
+    return createErrorResponseWithStatus(error, "API/summarize-reports", 500, {
+      code: "GENERATION_FAILED",
+      duration: duration,
+    });
   }
 }

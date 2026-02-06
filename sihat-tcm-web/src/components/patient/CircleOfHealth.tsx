@@ -36,10 +36,10 @@ export function CircleOfHealth({ userConstitution }: CircleOfHealthProps) {
       "qi-deficiency": "Qi Vitality Circle",
       "yang-deficiency": "Yang Warming Tribe",
       "yin-deficiency": "Yin Nourishing Community",
-      "dampness": "Dampness Clearing Squad",
+      dampness: "Dampness Clearing Squad",
       "blood-stasis": "Flow & Harmony Group",
       "qi-stagnation": "Emotional Balance Circle",
-      "balanced": "Maintenance & Longevity",
+      balanced: "Maintenance & Longevity",
       "special-care": "Special Care Group",
     };
     return circleMap[constitution] || "Health Support Circle";

@@ -78,7 +78,9 @@ export function PersonalDetailsCard({
                   <Mail className="w-4 h-4" />
                   <span className="hidden sm:inline">Email:</span>
                 </span>
-                <span className="text-sm sm:text-lg font-semibold text-slate-900 truncate">{email}</span>
+                <span className="text-sm sm:text-lg font-semibold text-slate-900 truncate">
+                  {email}
+                </span>
               </div>
             )}
 
@@ -100,10 +102,7 @@ export function PersonalDetailsCard({
             <div className="flex justify-between items-center py-2 border-t border-slate-100">
               <span className="text-sm font-medium text-slate-600">Gender:</span>
               {editing ? (
-                <Select
-                  value={gender || ""}
-                  onValueChange={(value) => handleSave("gender", value)}
-                >
+                <Select value={gender || ""} onValueChange={(value) => handleSave("gender", value)}>
                   <SelectTrigger className="w-32 h-8">
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
@@ -125,4 +124,3 @@ export function PersonalDetailsCard({
     </motion.div>
   );
 }
-

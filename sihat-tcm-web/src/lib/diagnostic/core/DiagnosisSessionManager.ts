@@ -1,19 +1,19 @@
 /**
  * Diagnosis Session Manager
- * 
+ *
  * Handles automatic session persistence, recovery, and cleanup for diagnosis consultations.
  * Provides seamless user experience with auto-save and resume functionality.
  */
 
-import { createClient } from '@/lib/supabase/client';
-import type { 
-  DiagnosisWizardData, 
+import { createClient } from "@/lib/supabase/client";
+import type {
+  DiagnosisWizardData,
   PendingResumeState,
   DiagnosisSession,
-  SaveDiagnosisInput 
-} from '@/types/diagnosis';
-import type { Database } from '@/types/database';
-import { logger } from '@/lib/logger';
+  SaveDiagnosisInput,
+} from "@/types/diagnosis";
+import type { Database } from "@/types/database";
+import { logger } from "@/lib/logger";
 
 export interface SessionManagerConfig {
   autoSaveInterval: number; // milliseconds
@@ -65,7 +65,7 @@ export class DiagnosisSessionManager {
       maxRetries: 3,
       sessionTimeout: 3600000, // 1 hour
       enableLocalBackup: true,
-      ...config
+      ...config,
     };
   }
 
@@ -73,14 +73,14 @@ export class DiagnosisSessionManager {
    * Initialize a new diagnosis session
    */
   async initializeSession(
-    userId?: string, 
+    userId?: string,
     guestToken?: string,
     initialData?: Partial<DiagnosisWizardData>
   ): Promise<SessionMetadata> {
     try {
       const sessionId = this.generateSessionId();
       const isGuest = !userId;
-      
+
       const metadata: SessionMetadata = {
         sessionId,
         userId,
@@ -88,8 +88,8 @@ export class DiagnosisSessionManager {
         isGuest,
         startTime: new Date(),
         lastSaved: new Date(),
-        currentStep: 'basic_info',
-        completionPercentage: 0
+        currentStep: "basic_info",
+        completionPercentage: 0,
       };
 
       // Save initial session state
@@ -100,16 +100,16 @@ export class DiagnosisSessionManager {
       this.currentSession = metadata;
       this.startAutoSave();
 
-      logger.info('Diagnosis session initialized', { 
-        sessionId, 
-        userId, 
-        isGuest 
+      logger.info("Diagnosis session initialized", {
+        sessionId,
+        userId,
+        isGuest,
       });
 
       return metadata;
     } catch (error) {
-      logger.error('Failed to initialize session', { error, userId });
-      throw new Error('Failed to initialize diagnosis session');
+      logger.error("Failed to initialize session", { error, userId });
+      throw new Error("Failed to initialize diagnosis session");
     }
   }
 
@@ -123,7 +123,7 @@ export class DiagnosisSessionManager {
   ): Promise<SessionSaveResult> {
     try {
       const timestamp = new Date();
-      
+
       // Prepare session data for storage
       const sessionData = {
         session_id: sessionId,
@@ -135,19 +135,17 @@ export class DiagnosisSessionManager {
           completionPercentage: metadata.completionPercentage,
           startTime: metadata.startTime.toISOString(),
           lastSaved: timestamp.toISOString(),
-          estimatedTimeRemaining: metadata.estimatedTimeRemaining
+          estimatedTimeRemaining: metadata.estimatedTimeRemaining,
         },
         created_at: timestamp.toISOString(),
-        updated_at: timestamp.toISOString()
+        updated_at: timestamp.toISOString(),
       };
 
       // Save to database
-      const { error } = await this.supabase
-        .from('diagnosis_session_drafts')
-        .upsert(sessionData, { 
-          onConflict: 'session_id',
-          ignoreDuplicates: false 
-        });
+      const { error } = await this.supabase.from("diagnosis_session_drafts").upsert(sessionData, {
+        onConflict: "session_id",
+        ignoreDuplicates: false,
+      });
 
       if (error) {
         throw error;
@@ -160,24 +158,23 @@ export class DiagnosisSessionManager {
 
       this.pendingChanges = false;
       this.retryCount = 0;
-      
+
       if (this.currentSession) {
         this.currentSession.lastSaved = timestamp;
       }
 
-      logger.debug('Session data saved successfully', { sessionId });
+      logger.debug("Session data saved successfully", { sessionId });
 
       return {
         success: true,
         sessionId,
-        timestamp
+        timestamp,
       };
-
     } catch (error) {
-      logger.error('Failed to save session data', { 
-        error, 
-        sessionId, 
-        retryCount: this.retryCount 
+      logger.error("Failed to save session data", {
+        error,
+        sessionId,
+        retryCount: this.retryCount,
       });
 
       // Retry logic
@@ -189,8 +186,8 @@ export class DiagnosisSessionManager {
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        error: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date(),
       };
     }
   }
@@ -204,16 +201,16 @@ export class DiagnosisSessionManager {
       maxAgeDate.setHours(maxAgeDate.getHours() - options.maxAge);
 
       let query = this.supabase
-        .from('diagnosis_session_drafts')
-        .select('*')
-        .gte('updated_at', maxAgeDate.toISOString())
-        .order('updated_at', { ascending: false });
+        .from("diagnosis_session_drafts")
+        .select("*")
+        .gte("updated_at", maxAgeDate.toISOString())
+        .order("updated_at", { ascending: false });
 
       // Filter by user or guest
       if (options.userId) {
-        query = query.eq('user_id', options.userId);
+        query = query.eq("user_id", options.userId);
       } else if (options.guestToken) {
-        query = query.eq('guest_token', options.guestToken);
+        query = query.eq("guest_token", options.guestToken);
       }
 
       const { data, error } = await query;
@@ -223,37 +220,36 @@ export class DiagnosisSessionManager {
       }
 
       const sessions: PendingResumeState[] = (data || [])
-        .filter(session => {
+        .filter((session) => {
           // Filter incomplete sessions if requested
           if (!options.includeIncomplete) {
             return session.metadata?.completionPercentage === 100;
           }
           return true;
         })
-        .map(session => ({
-          step: session.metadata?.currentStep || 'basic_info',
+        .map((session) => ({
+          step: session.metadata?.currentStep || "basic_info",
           data: session.data || {},
           timestamp: session.updated_at,
           sessionId: session.session_id,
-          completionPercentage: session.metadata?.completionPercentage || 0
+          completionPercentage: session.metadata?.completionPercentage || 0,
         }));
 
-      logger.info('Sessions recovered', { 
-        count: sessions.length, 
+      logger.info("Sessions recovered", {
+        count: sessions.length,
         userId: options.userId,
-        guestToken: options.guestToken 
+        guestToken: options.guestToken,
       });
 
       return sessions;
-
     } catch (error) {
-      logger.error('Failed to recover sessions', { error, options });
-      
+      logger.error("Failed to recover sessions", { error, options });
+
       // Fallback to local storage if available
       if (this.config.enableLocalBackup) {
         return this.recoverFromLocalBackup(options);
       }
-      
+
       return [];
     }
   }
@@ -261,16 +257,18 @@ export class DiagnosisSessionManager {
   /**
    * Resume a specific session
    */
-  async resumeSession(sessionId: string): Promise<{ data: DiagnosisWizardData; metadata: SessionMetadata } | null> {
+  async resumeSession(
+    sessionId: string
+  ): Promise<{ data: DiagnosisWizardData; metadata: SessionMetadata } | null> {
     try {
       const { data, error } = await this.supabase
-        .from('diagnosis_session_drafts')
-        .select('*')
-        .eq('session_id', sessionId)
+        .from("diagnosis_session_drafts")
+        .select("*")
+        .eq("session_id", sessionId)
         .single();
 
       if (error || !data) {
-        logger.warn('Session not found for resume', { sessionId, error });
+        logger.warn("Session not found for resume", { sessionId, error });
         return null;
       }
 
@@ -281,23 +279,22 @@ export class DiagnosisSessionManager {
         isGuest: !data.user_id,
         startTime: new Date(data.metadata?.startTime || data.created_at),
         lastSaved: new Date(data.updated_at),
-        currentStep: data.metadata?.currentStep || 'basic_info',
+        currentStep: data.metadata?.currentStep || "basic_info",
         completionPercentage: data.metadata?.completionPercentage || 0,
-        estimatedTimeRemaining: data.metadata?.estimatedTimeRemaining
+        estimatedTimeRemaining: data.metadata?.estimatedTimeRemaining,
       };
 
       this.currentSession = metadata;
       this.startAutoSave();
 
-      logger.info('Session resumed successfully', { sessionId });
+      logger.info("Session resumed successfully", { sessionId });
 
       return {
         data: data.data || {},
-        metadata
+        metadata,
       };
-
     } catch (error) {
-      logger.error('Failed to resume session', { error, sessionId });
+      logger.error("Failed to resume session", { error, sessionId });
       return null;
     }
   }
@@ -313,9 +310,9 @@ export class DiagnosisSessionManager {
     try {
       // Save final diagnosis to main table
       const { data: diagnosis, error: diagnosisError } = await this.supabase
-        .from('diagnosis_sessions')
+        .from("diagnosis_sessions")
         .insert(diagnosisResult)
-        .select('id')
+        .select("id")
         .single();
 
       if (diagnosisError) {
@@ -329,21 +326,20 @@ export class DiagnosisSessionManager {
       this.stopAutoSave();
       this.currentSession = undefined;
 
-      logger.info('Session completed successfully', { 
-        sessionId, 
-        diagnosisId: diagnosis.id 
+      logger.info("Session completed successfully", {
+        sessionId,
+        diagnosisId: diagnosis.id,
       });
 
       return {
         success: true,
-        diagnosisId: diagnosis.id
+        diagnosisId: diagnosis.id,
       };
-
     } catch (error) {
-      logger.error('Failed to complete session', { error, sessionId });
+      logger.error("Failed to complete session", { error, sessionId });
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
@@ -355,12 +351,12 @@ export class DiagnosisSessionManager {
     try {
       // Remove from database
       const { error } = await this.supabase
-        .from('diagnosis_session_drafts')
+        .from("diagnosis_session_drafts")
         .delete()
-        .eq('session_id', sessionId);
+        .eq("session_id", sessionId);
 
       if (error) {
-        logger.warn('Failed to cleanup session from database', { error, sessionId });
+        logger.warn("Failed to cleanup session from database", { error, sessionId });
       }
 
       // Remove local backup
@@ -368,10 +364,9 @@ export class DiagnosisSessionManager {
         this.removeLocalBackup(sessionId);
       }
 
-      logger.debug('Session cleaned up', { sessionId });
-
+      logger.debug("Session cleaned up", { sessionId });
     } catch (error) {
-      logger.error('Failed to cleanup session', { error, sessionId });
+      logger.error("Failed to cleanup session", { error, sessionId });
     }
   }
 
@@ -384,23 +379,22 @@ export class DiagnosisSessionManager {
       expiredDate.setTime(expiredDate.getTime() - this.config.sessionTimeout);
 
       const { data, error } = await this.supabase
-        .from('diagnosis_session_drafts')
+        .from("diagnosis_session_drafts")
         .delete()
-        .lt('updated_at', expiredDate.toISOString())
-        .select('session_id');
+        .lt("updated_at", expiredDate.toISOString())
+        .select("session_id");
 
       if (error) {
         throw error;
       }
 
       const cleanedCount = data?.length || 0;
-      
-      logger.info('Expired sessions cleaned up', { count: cleanedCount });
-      
-      return cleanedCount;
 
+      logger.info("Expired sessions cleaned up", { count: cleanedCount });
+
+      return cleanedCount;
     } catch (error) {
-      logger.error('Failed to cleanup expired sessions', { error });
+      logger.error("Failed to cleanup expired sessions", { error });
       return 0;
     }
   }
@@ -408,7 +402,11 @@ export class DiagnosisSessionManager {
   /**
    * Update session progress
    */
-  updateProgress(step: string, completionPercentage: number, estimatedTimeRemaining?: number): void {
+  updateProgress(
+    step: string,
+    completionPercentage: number,
+    estimatedTimeRemaining?: number
+  ): void {
     if (this.currentSession) {
       this.currentSession.currentStep = step;
       this.currentSession.completionPercentage = completionPercentage;
@@ -429,12 +427,12 @@ export class DiagnosisSessionManager {
    */
   private startAutoSave(): void {
     this.stopAutoSave(); // Clear any existing timer
-    
+
     this.autoSaveTimer = setInterval(() => {
       if (this.pendingChanges && this.currentSession) {
         // Auto-save will be triggered by the component using this manager
-        logger.debug('Auto-save triggered', { 
-          sessionId: this.currentSession.sessionId 
+        logger.debug("Auto-save triggered", {
+          sessionId: this.currentSession.sessionId,
         });
       }
     }, this.config.autoSaveInterval);
@@ -462,11 +460,11 @@ export class DiagnosisSessionManager {
    */
   private saveLocalBackup(sessionId: string, data: any): void {
     try {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         localStorage.setItem(`diagnosis_session_${sessionId}`, JSON.stringify(data));
       }
     } catch (error) {
-      logger.warn('Failed to save local backup', { error, sessionId });
+      logger.warn("Failed to save local backup", { error, sessionId });
     }
   }
 
@@ -475,11 +473,11 @@ export class DiagnosisSessionManager {
    */
   private removeLocalBackup(sessionId: string): void {
     try {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         localStorage.removeItem(`diagnosis_session_${sessionId}`);
       }
     } catch (error) {
-      logger.warn('Failed to remove local backup', { error, sessionId });
+      logger.warn("Failed to remove local backup", { error, sessionId });
     }
   }
 
@@ -488,40 +486,40 @@ export class DiagnosisSessionManager {
    */
   private recoverFromLocalBackup(options: SessionRecoveryOptions): PendingResumeState[] {
     try {
-      if (typeof window === 'undefined') {
+      if (typeof window === "undefined") {
         return [];
       }
 
       const sessions: PendingResumeState[] = [];
-      
+
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key?.startsWith('diagnosis_session_')) {
+        if (key?.startsWith("diagnosis_session_")) {
           const data = localStorage.getItem(key);
           if (data) {
             try {
               const sessionData = JSON.parse(data);
               const sessionAge = Date.now() - new Date(sessionData.updated_at).getTime();
-              
-              if (sessionAge <= options.maxAge * 3600000) { // Convert hours to ms
+
+              if (sessionAge <= options.maxAge * 3600000) {
+                // Convert hours to ms
                 sessions.push({
-                  step: sessionData.metadata?.currentStep || 'basic_info',
+                  step: sessionData.metadata?.currentStep || "basic_info",
                   data: sessionData.data || {},
                   timestamp: sessionData.updated_at,
-                  sessionId: sessionData.session_id
+                  sessionId: sessionData.session_id,
                 });
               }
             } catch (parseError) {
-              logger.warn('Failed to parse local backup', { parseError, key });
+              logger.warn("Failed to parse local backup", { parseError, key });
             }
           }
         }
       }
 
       return sessions;
-
     } catch (error) {
-      logger.error('Failed to recover from local backup', { error });
+      logger.error("Failed to recover from local backup", { error });
       return [];
     }
   }
@@ -530,7 +528,7 @@ export class DiagnosisSessionManager {
    * Utility delay function
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -548,6 +546,8 @@ export class DiagnosisSessionManager {
 export const diagnosisSessionManager = new DiagnosisSessionManager();
 
 // Export factory function for custom configurations
-export function createDiagnosisSessionManager(config?: Partial<SessionManagerConfig>): DiagnosisSessionManager {
+export function createDiagnosisSessionManager(
+  config?: Partial<SessionManagerConfig>
+): DiagnosisSessionManager {
   return new DiagnosisSessionManager(config);
 }

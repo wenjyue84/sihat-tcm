@@ -35,6 +35,11 @@ interface CaptureResult {
   [key: string]: unknown;
 }
 
+interface CameraCaptureData {
+  image?: string;
+  quality?: unknown;
+}
+
 interface ImageAnalysisStepRendererProps {
   /** Type of image analysis: tongue, face, or body part */
   type: "tongue" | "face" | "part";
@@ -51,7 +56,7 @@ interface ImageAnalysisStepRendererProps {
   /** Existing data from previous capture */
   existingData: ImageData | null;
   /** Callback when image is captured */
-  onCapture: (result: CaptureResult) => void;
+  onCapture: (result: CaptureResult | CameraCaptureData) => void;
   /** Callback to retake photo */
   onRetake: () => void;
   /** Callback to continue to next step */

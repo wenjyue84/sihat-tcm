@@ -24,15 +24,14 @@ export function generateTestData(): DiagnosisWizardData {
     wang_tongue: mockData.wang_tongue,
     wang_face: mockData.wang_face,
     wang_part: mockData.wang_part,
-    wen_audio: mockData.wen_audio,
-    wen_chat: {
-      chat: mockData.wen_inquiry.chatHistory.map((msg, idx) => ({
+    wen_audio: mockData.wen_audio as never,
+    wen_chat: mockData.wen_inquiry.chatHistory?.map(
+      (msg: { role: string; content: string }, idx: number) => ({
         id: `mock-${idx}`,
         role: msg.role as "user" | "assistant" | "system",
         content: msg.content,
-        timestamp: new Date().toISOString(),
-      })),
-    },
+      })
+    ) || [],
     qie: mockData.qie,
     smart_connect: mockData.smart_connect,
   };
@@ -43,27 +42,14 @@ export function generateTestData(): DiagnosisWizardData {
  */
 export function clearTestData(): Partial<DiagnosisWizardData> {
   return {
-    basic_info: {
-      name: "anonymous",
-      age: "",
-      gender: "",
-      weight: "",
-      height: "",
-      mainComplaint: "",
-      otherSymptoms: "",
-      symptoms: "",
-      symptomDuration: "",
-    },
-    wen_inquiry: undefined,
-    wang_tongue: undefined,
-    wang_face: undefined,
-    wang_part: undefined,
-    wen_audio: undefined,
-    wen_chat: undefined,
-    qie: undefined,
-    smart_connect: undefined,
+    basic_info: null,
+    wen_inquiry: null,
+    wang_tongue: null,
+    wang_face: null,
+    wang_part: null,
+    wen_audio: null,
+    wen_chat: [],
+    qie: null,
+    smart_connect: null,
   };
 }
-
-
-

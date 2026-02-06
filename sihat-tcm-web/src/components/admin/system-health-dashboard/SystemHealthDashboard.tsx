@@ -176,9 +176,7 @@ export function SystemHealthDashboard() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Low</span>
-                  <Badge className="bg-blue-100 text-blue-800">
-                    {error_statistics.low_errors}
-                  </Badge>
+                  <Badge className="bg-blue-100 text-blue-800">{error_statistics.low_errors}</Badge>
                 </div>
                 <hr />
                 <div className="flex justify-between items-center">
@@ -330,15 +328,11 @@ export function SystemHealthDashboard() {
                     </div>
                     <div className="flex justify-between">
                       <span>Heap Used</span>
-                      <span>
-                        {Math.round(system_info.memory_usage.heapUsed / 1024 / 1024)} MB
-                      </span>
+                      <span>{Math.round(system_info.memory_usage.heapUsed / 1024 / 1024)} MB</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Heap Total</span>
-                      <span>
-                        {Math.round(system_info.memory_usage.heapTotal / 1024 / 1024)} MB
-                      </span>
+                      <span>{Math.round(system_info.memory_usage.heapTotal / 1024 / 1024)} MB</span>
                     </div>
                   </div>
                 </div>

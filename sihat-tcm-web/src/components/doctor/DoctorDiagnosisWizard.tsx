@@ -22,390 +22,449 @@ import { QuickSelectInquiry } from "./QuickSelectInquiry";
 
 // Section Components
 import {
-    PatientInfoSection,
-    SymptomsSection,
-    ImageCaptureSection,
-    ReportsSection,
-    MedicinesSection,
-    ClinicalNotesSection,
+  PatientInfoSection,
+  SymptomsSection,
+  ImageCaptureSection,
+  ReportsSection,
+  MedicinesSection,
+  ClinicalNotesSection,
 } from "./sections";
 
-// Section configuration
+// Section configuration (order defines step sequence)
 const SECTIONS = [
-    { id: "patient-info" as const, title: "Patient Information", icon: User },
-    { id: "symptoms" as const, title: "Symptoms & Chief Complaints", icon: Stethoscope },
-    { id: "tongue" as const, title: "Tongue Analysis", icon: Camera },
-    { id: "face" as const, title: "Face Analysis", icon: Camera },
-    { id: "tcm-inquiry" as const, title: "TCM Inquiry", icon: MessageSquare },
-    { id: "reports" as const, title: "Upload Reports", icon: FileText },
-    { id: "medicines" as const, title: "Current Medicines", icon: Pill },
-    { id: "clinical-notes" as const, title: "Clinical Notes & Treatment", icon: FileText },
+  { id: "patient-info" as const, title: "Patient Information", icon: User },
+  { id: "symptoms" as const, title: "Symptoms & Chief Complaints", icon: Stethoscope },
+  { id: "tongue" as const, title: "Tongue Analysis", icon: Camera },
+  { id: "face" as const, title: "Face Analysis", icon: Camera },
+  { id: "tcm-inquiry" as const, title: "TCM Inquiry", icon: MessageSquare },
+  { id: "reports" as const, title: "Upload Reports", icon: FileText },
+  { id: "medicines" as const, title: "Current Medicines", icon: Pill },
+  { id: "clinical-notes" as const, title: "Clinical Notes & Treatment", icon: FileText },
 ];
 
+const VALID_STEP_IDS = new Set(SECTIONS.map((s) => s.id));
+const DEFAULT_STEP: SectionId = "patient-info";
+
 export function DoctorDiagnosisWizard() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const patientId = searchParams.get('patientId');
-    const supabase = createClient();
-    const { t } = useLanguage();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const patientId = searchParams.get("patientId");
+  const stepParam = searchParams.get("step");
+  const currentStep: SectionId = (VALID_STEP_IDS.has(stepParam as SectionId)
+    ? stepParam
+    : DEFAULT_STEP) as SectionId;
+  const stepIndex = SECTIONS.findIndex((s) => s.id === currentStep);
+  const supabase = createClient();
+  const { t } = useLanguage();
 
-    // Form data state
-    const { data, setData, clearDraft, hasSavedDraft, isInitialized } = useDoctorDiagnosis();
-    const [patient, setPatient] = useState<any>(null);
+  // Normalize URL when step is missing or invalid (keeps patientId)
+  useEffect(() => {
+    if (stepParam !== currentStep) {
+      const q = new URLSearchParams(searchParams.toString());
+      q.set("step", currentStep);
+      router.replace(`/doctor/diagnose?${q.toString()}`, { scroll: false });
+    }
+  }, [currentStep, stepParam, searchParams, router]);
 
-    // Custom hooks for wizard functionality
-    const wizardState = useWizardState({ data });
-    const fileUpload = useFileUpload({ setData });
-    const medicineChips = useMedicineChips({
-        currentMedicines: data.currentMedicines,
-        setData
-    });
-    const { submitDiagnosis, isSubmitting } = useDiagnosisSubmission();
+  const goToStep = useCallback(
+    (stepId: SectionId) => {
+      const q = new URLSearchParams(searchParams.toString());
+      q.set("step", stepId);
+      if (patientId) q.set("patientId", patientId);
+      router.push(`/doctor/diagnose?${q.toString()}`, { scroll: false });
+    },
+    [patientId, searchParams, router]
+  );
 
-    // Fetch patient data if patientId is present
-    useEffect(() => {
-        const fetchPatientData = async () => {
-            if (!patientId || !isInitialized) return;
+  // Form data state
+  const { data, setData, clearDraft, hasSavedDraft, isInitialized } = useDoctorDiagnosis();
+  const [patient, setPatient] = useState<any>(null);
 
-            try {
-                const { data: patientData, error } = await supabase
-                    .from('patients')
-                    .select('*')
-                    .eq('id', patientId)
-                    .single();
+  // Custom hooks for wizard functionality
+  const wizardState = useWizardState({ data });
+  const fileUpload = useFileUpload({ setData });
+  const medicineChips = useMedicineChips({
+    currentMedicines: data.currentMedicines,
+    setData,
+  });
+  const { submitDiagnosis, isSubmitting } = useDiagnosisSubmission();
 
-                if (error) {
-                    console.error('Error fetching patient:', error);
-                    return;
-                }
+  // Fetch patient data if patientId is present
+  useEffect(() => {
+    const fetchPatientData = async () => {
+      if (!patientId || !isInitialized) return;
 
-                if (patientData) {
-                    setPatient(patientData);
-                    const age = patientData.birth_date
-                        ? differenceInYears(new Date(), new Date(patientData.birth_date)).toString()
-                        : "";
-                    const newName = `${patientData.first_name} ${patientData.last_name || ''}`.trim();
-                    const newGender = patientData.gender || "";
+      try {
+        const { data: patientData, error } = await supabase
+          .from("patients")
+          .select("*")
+          .eq("id", patientId)
+          .single();
 
-                    setData((prev: DoctorDiagnosisData) => {
-                        // If we have data for a different patient, clear it and start fresh
-                        if (prev.patientInfo.name && prev.patientInfo.name !== newName) {
-                            return {
-                                ...initialData,
-                                patientInfo: {
-                                    ...initialData.patientInfo,
-                                    name: newName,
-                                    age: age,
-                                    gender: newGender,
-                                }
-                            };
-                        }
+        if (error) {
+          console.error("Error fetching patient:", error);
+          return;
+        }
 
-                        return {
-                            ...prev,
-                            patientInfo: {
-                                ...prev.patientInfo,
-                                name: newName,
-                                age: age,
-                                gender: newGender || prev.patientInfo.gender,
-                            }
-                        };
-                    });
+        if (patientData) {
+          setPatient(patientData);
+          const age = patientData.birth_date
+            ? differenceInYears(new Date(), new Date(patientData.birth_date)).toString()
+            : "";
+          const newName = `${patientData.first_name} ${patientData.last_name || ""}`.trim();
+          const newGender = patientData.gender || "";
 
-                    toast.success(`Loaded profile: ${patientData.first_name}`);
-                }
-            } catch (err) {
-                console.error('Error loading patient data:', err);
+          setData((prev: DoctorDiagnosisData) => {
+            // If we have data for a different patient, clear it and start fresh
+            if (prev.patientInfo.name && prev.patientInfo.name !== newName) {
+              return {
+                ...initialData,
+                patientInfo: {
+                  ...initialData.patientInfo,
+                  name: newName,
+                  age: age,
+                  gender: newGender,
+                },
+              };
             }
-        };
 
-        fetchPatientData();
-    }, [patientId, supabase, setData, isInitialized]);
+            return {
+              ...prev,
+              patientInfo: {
+                ...prev.patientInfo,
+                name: newName,
+                age: age,
+                gender: newGender || prev.patientInfo.gender,
+              },
+            };
+          });
 
-    // Update handlers
-    const updatePatientInfo = useCallback((field: keyof DoctorDiagnosisData["patientInfo"], value: string) => {
-        setData((prev: DoctorDiagnosisData) => ({
-            ...prev,
-            patientInfo: { ...prev.patientInfo, [field]: value },
-        }));
-    }, [setData]);
-
-    const toggleSymptom = useCallback((symptom: string) => {
-        setData((prev: DoctorDiagnosisData) => {
-            const symptoms = prev.selectedSymptoms.includes(symptom)
-                ? prev.selectedSymptoms.filter((s: string) => s !== symptom)
-                : [...prev.selectedSymptoms, symptom];
-            return { ...prev, selectedSymptoms: symptoms };
-        });
-    }, [setData]);
-
-    const handleTongueCapture = useCallback((result: { image?: string }) => {
-        if (result.image) {
-            setData((prev: DoctorDiagnosisData) => ({ ...prev, tongueImage: result.image || "" }));
-            wizardState.setShowTongueCamera(false);
-            toast.success("Tongue image captured");
+          toast.success(`Loaded profile: ${patientData.first_name}`);
         }
-    }, [setData, wizardState]);
-
-    const handleFaceCapture = useCallback((result: { image?: string }) => {
-        if (result.image) {
-            setData((prev: DoctorDiagnosisData) => ({ ...prev, faceImage: result.image || "" }));
-            wizardState.setShowFaceCamera(false);
-            toast.success("Face image captured");
-        }
-    }, [setData, wizardState]);
-
-    const handleInquiryUpdate = useCallback((answers: Record<string, string[]>) => {
-        setData((prev: DoctorDiagnosisData) => ({ ...prev, inquiryAnswers: answers }));
-    }, [setData]);
-
-    // Fill test data
-    const handleFillTestData = useCallback(() => {
-        setData({
-            patientInfo: {
-                name: "Test Patient",
-                age: "45",
-                gender: "male",
-                height: "170",
-                weight: "70",
-            },
-            selectedSymptoms: ["Headache", "Fatigue", "Insomnia"],
-            otherSymptoms: "Occasional dizziness when standing up quickly",
-            tongueImage: "",
-            faceImage: "",
-            inquiryAnswers: {},
-            uploadedReports: [],
-            currentMedicines: "Vitamin C, Omega-3",
-            clinicalNotes: "Patient presents with classic Spleen Qi deficiency. Pulse is weak and thready. Tongue is pale with tooth marks.",
-            treatmentPlan: "Herbal formula: Si Jun Zi Tang. Acupuncture: ST36, SP6, CV12. Avoid cold foods.",
-        });
-        toast.success("Test data filled");
-    }, [setData]);
-
-    // Clear all data
-    const handleClearData = useCallback(() => {
-        clearDraft();
-        toast.success("Form cleared");
-    }, [clearDraft]);
-
-    // Submit diagnosis
-    const handleSubmit = useCallback(async () => {
-        // Validation - expand relevant section for better UX
-        if (!data.patientInfo.name || !data.patientInfo.age || !data.patientInfo.gender) {
-            wizardState.expandSection("patient-info");
-        } else if (data.selectedSymptoms.length === 0 && !data.otherSymptoms) {
-            wizardState.expandSection("symptoms");
-        }
-
-        await submitDiagnosis(
-            data,
-            patient ? { id: patient.id, user_id: patient.user_id } : undefined,
-            {
-                onClearDraft: clearDraft,
-                redirectPath: "/doctor"
-            }
-        );
-    }, [data, patient, clearDraft, submitDiagnosis, wizardState]);
-
-    // Helper function to get completion status for sections
-    const getSectionStatus = (sectionId: SectionId): "complete" | "incomplete" | "partial" => {
-        switch (sectionId) {
-            case "patient-info":
-                return data.patientInfo.name && data.patientInfo.age && data.patientInfo.gender
-                    ? "complete" : "incomplete";
-            case "symptoms":
-                return data.selectedSymptoms.length > 0 || data.otherSymptoms
-                    ? "complete" : "incomplete";
-            case "tongue":
-                return data.tongueImage ? "complete" : "incomplete";
-            case "face":
-                return data.faceImage ? "complete" : "incomplete";
-            case "tcm-inquiry":
-                return Object.keys(data.inquiryAnswers).length > 0 ? "complete" : "incomplete";
-            case "reports":
-                return data.uploadedReports.length > 0 ? "complete" : "incomplete";
-            case "medicines":
-                return data.currentMedicines ? "complete" : "incomplete";
-            case "clinical-notes":
-                return data.clinicalNotes || data.treatmentPlan ? "complete" : "incomplete";
-            default:
-                return "incomplete";
-        }
+      } catch (err) {
+        console.error("Error loading patient data:", err);
+      }
     };
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-            <WizardHeader
-                completionPercentage={wizardState.getCompletionPercentage()}
-                onFillTestData={handleFillTestData}
-                onClearData={handleClearData}
-            />
+    fetchPatientData();
+  }, [patientId, supabase, setData, isInitialized]);
 
-            <SavedDraftNotice show={hasSavedDraft} />
+  // Update handlers
+  const updatePatientInfo = useCallback(
+    (field: keyof DoctorDiagnosisData["patientInfo"], value: string) => {
+      setData((prev: DoctorDiagnosisData) => ({
+        ...prev,
+        patientInfo: { ...prev.patientInfo, [field]: value },
+      }));
+    },
+    [setData]
+  );
 
-            {/* Main Content */}
-            <main className="max-w-4xl mx-auto px-3 md:px-4 py-4 md:py-6 space-y-3 md:space-y-4">
-                {/* Patient Information Section */}
-                <CollapsibleSection
-                    id="patient-info"
-                    title="Patient Information"
-                    icon={User}
-                    isExpanded={wizardState.expandedSections.has("patient-info")}
-                    onToggle={() => wizardState.toggleSection("patient-info")}
-                    completionStatus={getSectionStatus("patient-info")}
-                >
-                    <PatientInfoSection
-                        patientInfo={data.patientInfo}
-                        onUpdateField={updatePatientInfo}
-                    />
-                </CollapsibleSection>
+  const toggleSymptom = useCallback(
+    (symptom: string) => {
+      setData((prev: DoctorDiagnosisData) => {
+        const symptoms = prev.selectedSymptoms.includes(symptom)
+          ? prev.selectedSymptoms.filter((s: string) => s !== symptom)
+          : [...prev.selectedSymptoms, symptom];
+        return { ...prev, selectedSymptoms: symptoms };
+      });
+    },
+    [setData]
+  );
 
-                {/* Symptoms Section */}
-                <CollapsibleSection
-                    id="symptoms"
-                    title="Symptoms & Chief Complaints"
-                    icon={Stethoscope}
-                    isExpanded={wizardState.expandedSections.has("symptoms")}
-                    onToggle={() => wizardState.toggleSection("symptoms")}
-                    completionStatus={getSectionStatus("symptoms")}
-                >
-                    <SymptomsSection
-                        selectedSymptoms={data.selectedSymptoms}
-                        otherSymptoms={data.otherSymptoms}
-                        onToggleSymptom={toggleSymptom}
-                        onOtherSymptomsChange={(value) =>
-                            setData((prev: DoctorDiagnosisData) => ({ ...prev, otherSymptoms: value }))
-                        }
-                    />
-                </CollapsibleSection>
+  const handleTongueCapture = useCallback(
+    (result: { image?: string }) => {
+      if (result.image) {
+        setData((prev: DoctorDiagnosisData) => ({ ...prev, tongueImage: result.image || "" }));
+        wizardState.setShowTongueCamera(false);
+        toast.success("Tongue image captured");
+      }
+    },
+    [setData, wizardState]
+  );
 
-                {/* Tongue Analysis Section */}
-                <CollapsibleSection
-                    id="tongue"
-                    title="Tongue Analysis"
-                    icon={Camera}
-                    isExpanded={wizardState.expandedSections.has("tongue")}
-                    onToggle={() => wizardState.toggleSection("tongue")}
-                    completionStatus={getSectionStatus("tongue")}
-                >
-                    <ImageCaptureSection
-                        type="tongue"
-                        image={data.tongueImage}
-                        showCamera={wizardState.showTongueCamera}
-                        onShowCamera={wizardState.setShowTongueCamera}
-                        onCapture={handleTongueCapture}
-                        onClear={() => setData((prev: DoctorDiagnosisData) => ({ ...prev, tongueImage: "" }))}
-                    />
-                </CollapsibleSection>
+  const handleFaceCapture = useCallback(
+    (result: { image?: string }) => {
+      if (result.image) {
+        setData((prev: DoctorDiagnosisData) => ({ ...prev, faceImage: result.image || "" }));
+        wizardState.setShowFaceCamera(false);
+        toast.success("Face image captured");
+      }
+    },
+    [setData, wizardState]
+  );
 
-                {/* Face Analysis Section */}
-                <CollapsibleSection
-                    id="face"
-                    title="Face Analysis"
-                    icon={Camera}
-                    isExpanded={wizardState.expandedSections.has("face")}
-                    onToggle={() => wizardState.toggleSection("face")}
-                    completionStatus={getSectionStatus("face")}
-                >
-                    <ImageCaptureSection
-                        type="face"
-                        image={data.faceImage}
-                        showCamera={wizardState.showFaceCamera}
-                        onShowCamera={wizardState.setShowFaceCamera}
-                        onCapture={handleFaceCapture}
-                        onClear={() => setData((prev: DoctorDiagnosisData) => ({ ...prev, faceImage: "" }))}
-                    />
-                </CollapsibleSection>
+  const handleInquiryUpdate = useCallback(
+    (answers: Record<string, string[]>) => {
+      setData((prev: DoctorDiagnosisData) => ({ ...prev, inquiryAnswers: answers }));
+    },
+    [setData]
+  );
 
-                {/* TCM Inquiry Section */}
-                <CollapsibleSection
-                    id="tcm-inquiry"
-                    title="TCM Inquiry"
-                    icon={MessageSquare}
-                    isExpanded={wizardState.expandedSections.has("tcm-inquiry")}
-                    onToggle={() => wizardState.toggleSection("tcm-inquiry")}
-                    completionStatus={getSectionStatus("tcm-inquiry")}
-                >
-                    <QuickSelectInquiry
-                        patientInfo={data.patientInfo}
-                        symptoms={[...data.selectedSymptoms, data.otherSymptoms].filter(Boolean).join(", ")}
-                        answers={data.inquiryAnswers}
-                        onAnswersChange={handleInquiryUpdate}
-                    />
-                </CollapsibleSection>
+  // Fill test data
+  const handleFillTestData = useCallback(() => {
+    setData({
+      patientInfo: {
+        name: "Test Patient",
+        age: "45",
+        gender: "male",
+        height: "170",
+        weight: "70",
+      },
+      selectedSymptoms: ["Headache", "Fatigue", "Insomnia"],
+      otherSymptoms: "Occasional dizziness when standing up quickly",
+      tongueImage: "",
+      faceImage: "",
+      inquiryAnswers: {},
+      uploadedReports: [],
+      currentMedicines: "Vitamin C, Omega-3",
+      clinicalNotes:
+        "Patient presents with classic Spleen Qi deficiency. Pulse is weak and thready. Tongue is pale with tooth marks.",
+      treatmentPlan:
+        "Herbal formula: Si Jun Zi Tang. Acupuncture: ST36, SP6, CV12. Avoid cold foods.",
+    });
+    toast.success("Test data filled");
+  }, [setData]);
 
-                {/* Upload Reports Section */}
-                <CollapsibleSection
-                    id="reports"
-                    title="Upload Reports"
-                    icon={FileText}
-                    isExpanded={wizardState.expandedSections.has("reports")}
-                    onToggle={() => wizardState.toggleSection("reports")}
-                    completionStatus={getSectionStatus("reports")}
-                >
-                    <ReportsSection
-                        uploadedReports={data.uploadedReports}
-                        extractingFiles={fileUpload.extractingFiles}
-                        onFileChange={fileUpload.handleFileChange}
-                        onRemoveReport={fileUpload.removeReport}
-                        onViewReport={wizardState.setViewingReport}
-                    />
-                </CollapsibleSection>
+  // Clear all data
+  const handleClearData = useCallback(() => {
+    clearDraft();
+    toast.success("Form cleared");
+  }, [clearDraft]);
 
-                {/* Current Medicines Section */}
-                <CollapsibleSection
-                    id="medicines"
-                    title="Current Medicines"
-                    icon={Pill}
-                    isExpanded={wizardState.expandedSections.has("medicines")}
-                    onToggle={() => wizardState.toggleSection("medicines")}
-                    completionStatus={getSectionStatus("medicines")}
-                >
-                    <MedicinesSection
-                        currentMedicines={data.currentMedicines}
-                        medicineInput={medicineChips.medicineInput}
-                        onMedicineInputChange={medicineChips.setMedicineInput}
-                        onAddMedicine={medicineChips.addMedicine}
-                        onRemoveMedicine={medicineChips.removeMedicine}
-                        onCurrentMedicinesChange={(value) =>
-                            setData((prev: DoctorDiagnosisData) => ({ ...prev, currentMedicines: value }))
-                        }
-                    />
-                </CollapsibleSection>
+  // Submit diagnosis
+  const handleSubmit = useCallback(async () => {
+    // Validation - navigate to first incomplete section
+    if (!data.patientInfo.name || !data.patientInfo.age || !data.patientInfo.gender) {
+      goToStep("patient-info");
+      return;
+    }
+    if (data.selectedSymptoms.length === 0 && !data.otherSymptoms) {
+      goToStep("symptoms");
+      return;
+    }
 
-                {/* Clinical Notes & Treatment Plan */}
-                <CollapsibleSection
-                    id="clinical-notes"
-                    title="Clinical Notes & Treatment"
-                    icon={FileText}
-                    isExpanded={wizardState.expandedSections.has("clinical-notes")}
-                    onToggle={() => wizardState.toggleSection("clinical-notes")}
-                    completionStatus={getSectionStatus("clinical-notes")}
-                >
-                    <ClinicalNotesSection
-                        clinicalNotes={data.clinicalNotes}
-                        treatmentPlan={data.treatmentPlan}
-                        onClinicalNotesChange={(value) =>
-                            setData((prev: DoctorDiagnosisData) => ({ ...prev, clinicalNotes: value }))
-                        }
-                        onTreatmentPlanChange={(value) =>
-                            setData((prev: DoctorDiagnosisData) => ({ ...prev, treatmentPlan: value }))
-                        }
-                    />
-                </CollapsibleSection>
-
-                {/* Submit Button */}
-                <SubmitButton
-                    isSubmitting={isSubmitting}
-                    onClick={handleSubmit}
-                />
-            </main>
-
-            {/* Report Viewer Dialog */}
-            <ReportViewerDialog
-                report={wizardState.viewingReport}
-                onClose={() => wizardState.setViewingReport(null)}
-            />
-        </div>
+    await submitDiagnosis(
+      data,
+      patient ? { id: patient.id, user_id: patient.user_id } : undefined,
+      {
+        onClearDraft: clearDraft,
+        redirectPath: "/doctor",
+      }
     );
+  }, [data, patient, clearDraft, submitDiagnosis, goToStep]);
+
+  // Helper function to get completion status for sections
+  const getSectionStatus = (sectionId: SectionId): "complete" | "incomplete" | "partial" => {
+    switch (sectionId) {
+      case "patient-info":
+        return data.patientInfo.name && data.patientInfo.age && data.patientInfo.gender
+          ? "complete"
+          : "incomplete";
+      case "symptoms":
+        return data.selectedSymptoms.length > 0 || data.otherSymptoms ? "complete" : "incomplete";
+      case "tongue":
+        return data.tongueImage ? "complete" : "incomplete";
+      case "face":
+        return data.faceImage ? "complete" : "incomplete";
+      case "tcm-inquiry":
+        return Object.keys(data.inquiryAnswers).length > 0 ? "complete" : "incomplete";
+      case "reports":
+        return data.uploadedReports.length > 0 ? "complete" : "incomplete";
+      case "medicines":
+        return data.currentMedicines ? "complete" : "incomplete";
+      case "clinical-notes":
+        return data.clinicalNotes || data.treatmentPlan ? "complete" : "incomplete";
+      default:
+        return "incomplete";
+    }
+  };
+
+  const handleBack = useCallback(() => {
+    if (stepIndex > 0) {
+      goToStep(SECTIONS[stepIndex - 1].id);
+    } else {
+      router.push("/doctor");
+    }
+  }, [stepIndex, goToStep, router]);
+
+  const handleNext = useCallback(() => {
+    if (stepIndex < SECTIONS.length - 1) {
+      goToStep(SECTIONS[stepIndex + 1].id);
+    }
+  }, [stepIndex, goToStep]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <WizardHeader
+        completionPercentage={wizardState.getCompletionPercentage()}
+        currentStepIndex={stepIndex}
+        totalSteps={SECTIONS.length}
+        onBack={handleBack}
+        onNext={stepIndex < SECTIONS.length - 1 ? handleNext : undefined}
+        onFillTestData={handleFillTestData}
+        onClearData={handleClearData}
+      />
+
+      <SavedDraftNotice show={hasSavedDraft} />
+
+      {/* Main Content */}
+      <main className="max-w-4xl mx-auto px-3 md:px-4 py-4 md:py-6 space-y-3 md:space-y-4">
+        {/* Patient Information Section */}
+        <CollapsibleSection
+          id="patient-info"
+          title="Patient Information"
+          icon={User}
+          isExpanded={currentStep === "patient-info"}
+          onToggle={() => goToStep("patient-info")}
+          completionStatus={getSectionStatus("patient-info")}
+        >
+          <PatientInfoSection patientInfo={data.patientInfo} onUpdateField={updatePatientInfo} />
+        </CollapsibleSection>
+
+        {/* Symptoms Section */}
+        <CollapsibleSection
+          id="symptoms"
+          title="Symptoms & Chief Complaints"
+          icon={Stethoscope}
+          isExpanded={currentStep === "symptoms"}
+          onToggle={() => goToStep("symptoms")}
+          completionStatus={getSectionStatus("symptoms")}
+        >
+          <SymptomsSection
+            selectedSymptoms={data.selectedSymptoms}
+            otherSymptoms={data.otherSymptoms}
+            onToggleSymptom={toggleSymptom}
+            onOtherSymptomsChange={(value) =>
+              setData((prev: DoctorDiagnosisData) => ({ ...prev, otherSymptoms: value }))
+            }
+          />
+        </CollapsibleSection>
+
+        {/* Tongue Analysis Section */}
+        <CollapsibleSection
+          id="tongue"
+          title="Tongue Analysis"
+          icon={Camera}
+          isExpanded={currentStep === "tongue"}
+          onToggle={() => goToStep("tongue")}
+          completionStatus={getSectionStatus("tongue")}
+        >
+          <ImageCaptureSection
+            type="tongue"
+            image={data.tongueImage}
+            showCamera={wizardState.showTongueCamera}
+            onShowCamera={wizardState.setShowTongueCamera}
+            onCapture={handleTongueCapture}
+            onClear={() => setData((prev: DoctorDiagnosisData) => ({ ...prev, tongueImage: "" }))}
+          />
+        </CollapsibleSection>
+
+        {/* Face Analysis Section */}
+        <CollapsibleSection
+          id="face"
+          title="Face Analysis"
+          icon={Camera}
+          isExpanded={currentStep === "face"}
+          onToggle={() => goToStep("face")}
+          completionStatus={getSectionStatus("face")}
+        >
+          <ImageCaptureSection
+            type="face"
+            image={data.faceImage}
+            showCamera={wizardState.showFaceCamera}
+            onShowCamera={wizardState.setShowFaceCamera}
+            onCapture={handleFaceCapture}
+            onClear={() => setData((prev: DoctorDiagnosisData) => ({ ...prev, faceImage: "" }))}
+          />
+        </CollapsibleSection>
+
+        {/* TCM Inquiry Section */}
+        <CollapsibleSection
+          id="tcm-inquiry"
+          title="TCM Inquiry"
+          icon={MessageSquare}
+          isExpanded={currentStep === "tcm-inquiry"}
+          onToggle={() => goToStep("tcm-inquiry")}
+          completionStatus={getSectionStatus("tcm-inquiry")}
+        >
+          <QuickSelectInquiry
+            patientInfo={data.patientInfo}
+            symptoms={[...data.selectedSymptoms, data.otherSymptoms].filter(Boolean).join(", ")}
+            answers={data.inquiryAnswers}
+            onAnswersChange={handleInquiryUpdate}
+          />
+        </CollapsibleSection>
+
+        {/* Upload Reports Section */}
+        <CollapsibleSection
+          id="reports"
+          title="Upload Reports"
+          icon={FileText}
+          isExpanded={currentStep === "reports"}
+          onToggle={() => goToStep("reports")}
+          completionStatus={getSectionStatus("reports")}
+        >
+          <ReportsSection
+            uploadedReports={data.uploadedReports}
+            extractingFiles={fileUpload.extractingFiles}
+            onFileChange={fileUpload.handleFileChange}
+            onRemoveReport={fileUpload.removeReport}
+            onViewReport={wizardState.setViewingReport}
+          />
+        </CollapsibleSection>
+
+        {/* Current Medicines Section */}
+        <CollapsibleSection
+          id="medicines"
+          title="Current Medicines"
+          icon={Pill}
+          isExpanded={currentStep === "medicines"}
+          onToggle={() => goToStep("medicines")}
+          completionStatus={getSectionStatus("medicines")}
+        >
+          <MedicinesSection
+            currentMedicines={data.currentMedicines}
+            medicineInput={medicineChips.medicineInput}
+            onMedicineInputChange={medicineChips.setMedicineInput}
+            onAddMedicine={medicineChips.addMedicine}
+            onRemoveMedicine={medicineChips.removeMedicine}
+            onCurrentMedicinesChange={(value) =>
+              setData((prev: DoctorDiagnosisData) => ({ ...prev, currentMedicines: value }))
+            }
+          />
+        </CollapsibleSection>
+
+        {/* Clinical Notes & Treatment Plan */}
+        <CollapsibleSection
+          id="clinical-notes"
+          title="Clinical Notes & Treatment"
+          icon={FileText}
+          isExpanded={currentStep === "clinical-notes"}
+          onToggle={() => goToStep("clinical-notes")}
+          completionStatus={getSectionStatus("clinical-notes")}
+        >
+          <ClinicalNotesSection
+            clinicalNotes={data.clinicalNotes}
+            treatmentPlan={data.treatmentPlan}
+            onClinicalNotesChange={(value) =>
+              setData((prev: DoctorDiagnosisData) => ({ ...prev, clinicalNotes: value }))
+            }
+            onTreatmentPlanChange={(value) =>
+              setData((prev: DoctorDiagnosisData) => ({ ...prev, treatmentPlan: value }))
+            }
+          />
+        </CollapsibleSection>
+
+        {/* Submit Button */}
+        <SubmitButton isSubmitting={isSubmitting} onClick={handleSubmit} />
+      </main>
+
+      {/* Report Viewer Dialog */}
+      <ReportViewerDialog
+        report={wizardState.viewingReport}
+        onClose={() => wizardState.setViewingReport(null)}
+      />
+    </div>
+  );
 }

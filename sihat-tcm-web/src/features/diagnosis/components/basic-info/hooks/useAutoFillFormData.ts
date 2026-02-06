@@ -56,9 +56,7 @@ export function useAutoFillFormData(
 ): UseAutoFillFormDataResult {
   const { initialData, profileData, loadFromLocalStorage = true } = options;
 
-  const [formData, setFormData] = useState<BasicInfoData>(
-    initialData || DEFAULT_FORM_DATA
-  );
+  const [formData, setFormData] = useState<BasicInfoData>(initialData || DEFAULT_FORM_DATA);
 
   const resetFormData = useCallback(() => {
     setFormData(DEFAULT_FORM_DATA);
@@ -123,6 +121,3 @@ export function useAutoFillFormData(
     resetFormData,
   };
 }
-
-
-

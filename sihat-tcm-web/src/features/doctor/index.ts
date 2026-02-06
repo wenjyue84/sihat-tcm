@@ -1,2 +1,2 @@
-export * from './hooks/useDoctorDiagnosis';
-export * from './hooks/useDiagnosisSubmission';
+export * from "./hooks/useDoctorDiagnosis";
+export * from "./hooks/useDiagnosisSubmission";

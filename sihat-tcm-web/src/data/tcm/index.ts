@@ -1,6 +1,6 @@
 /**
  * TCM Data
- * 
+ *
  * Centralized exports for TCM static data files.
  * These are pure data (nouns), not utilities (verbs).
  */

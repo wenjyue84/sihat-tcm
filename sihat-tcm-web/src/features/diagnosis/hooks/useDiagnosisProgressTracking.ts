@@ -1,6 +1,6 @@
 /**
  * Hook for tracking diagnosis wizard progress
- * 
+ *
  * Manages progress percentage and max step reached for UI indicators
  */
 
@@ -44,6 +44,3 @@ export function useDiagnosisProgressTracking({
     }
   }, [step, setGlobalProgress, activeStepsConfig, maxStepReached, setMaxStepReached]);
 }
-
-
-

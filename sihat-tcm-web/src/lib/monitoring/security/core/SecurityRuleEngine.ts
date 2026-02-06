@@ -1,20 +1,20 @@
 /**
  * @fileoverview Security Rule Engine
- * 
+ *
  * Manages security rules, evaluates threats, and triggers appropriate responses.
  * Provides real-time threat detection and automated security responses.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 1.0
  */
 
 import { devLog } from "@/lib/systemLogger";
-import type { 
-  SecurityRule, 
-  SecurityEvent, 
-  SecurityContext, 
+import type {
+  SecurityRule,
+  SecurityEvent,
+  SecurityContext,
   SecurityAlert,
-  SecurityEventType 
+  SecurityEventType,
 } from "../interfaces/SecurityInterfaces";
 
 /**
@@ -45,8 +45,12 @@ export class SecurityRuleEngine {
         },
         action: async (event, context) => {
           await this.blockIP(event.ipAddress, context);
-          await this.createAlert("multiple_failed_logins", event, "high", 
-            `Blocked IP ${event.ipAddress} after ${context.ipTracking.get(event.ipAddress)?.failedLogins} failed login attempts`);
+          await this.createAlert(
+            "multiple_failed_logins",
+            event,
+            "high",
+            `Blocked IP ${event.ipAddress} after ${context.ipTracking.get(event.ipAddress)?.failedLogins} failed login attempts`
+          );
         },
         enabled: true,
         severity: "high",
@@ -63,8 +67,12 @@ export class SecurityRuleEngine {
           return userProfile ? !userProfile.knownIPs.includes(event.ipAddress) : false;
         },
         action: async (event, context) => {
-          await this.createAlert("suspicious_login_location", event, "medium",
-            `User ${event.userId} logged in from new location: ${event.ipAddress}`);
+          await this.createAlert(
+            "suspicious_login_location",
+            event,
+            "medium",
+            `User ${event.userId} logged in from new location: ${event.ipAddress}`
+          );
         },
         enabled: true,
         severity: "medium",
@@ -77,15 +85,18 @@ export class SecurityRuleEngine {
         type: "api_abuse",
         condition: (event, context) => {
           const recentEvents = context.recentEvents.filter(
-            e => e.ipAddress === event.ipAddress && 
-                 e.timestamp > Date.now() - 60000 // Last minute
+            (e) => e.ipAddress === event.ipAddress && e.timestamp > Date.now() - 60000 // Last minute
           );
           return recentEvents.length > 100; // More than 100 requests per minute
         },
         action: async (event, context) => {
           await this.blockIP(event.ipAddress, context, 1800000); // 30 minutes
-          await this.createAlert("rapid_requests", event, "high",
-            `Blocked IP ${event.ipAddress} for API abuse - ${context.recentEvents.filter(e => e.ipAddress === event.ipAddress).length} requests in last minute`);
+          await this.createAlert(
+            "rapid_requests",
+            event,
+            "high",
+            `Blocked IP ${event.ipAddress} for API abuse - ${context.recentEvents.filter((e) => e.ipAddress === event.ipAddress).length} requests in last minute`
+          );
         },
         enabled: true,
         severity: "high",
@@ -101,17 +112,31 @@ export class SecurityRuleEngine {
 
           const payload = JSON.stringify(event.payload).toLowerCase();
           const sqlPatterns = [
-            "union select", "drop table", "insert into", "delete from",
-            "update set", "-- ", "; --", "xp_cmdshell", "sp_executesql",
-            "' or '1'='1", "' or 1=1", "admin'--", "' union select"
+            "union select",
+            "drop table",
+            "insert into",
+            "delete from",
+            "update set",
+            "-- ",
+            "; --",
+            "xp_cmdshell",
+            "sp_executesql",
+            "' or '1'='1",
+            "' or 1=1",
+            "admin'--",
+            "' union select",
           ];
 
-          return sqlPatterns.some(pattern => payload.includes(pattern));
+          return sqlPatterns.some((pattern) => payload.includes(pattern));
         },
         action: async (event, context) => {
           await this.blockIP(event.ipAddress, context, 7200000); // 2 hours
-          await this.createAlert("sql_injection_attempt", event, "critical",
-            `Critical: SQL injection attempt detected from ${event.ipAddress}`);
+          await this.createAlert(
+            "sql_injection_attempt",
+            event,
+            "critical",
+            `Critical: SQL injection attempt detected from ${event.ipAddress}`
+          );
         },
         enabled: true,
         severity: "critical",
@@ -127,17 +152,30 @@ export class SecurityRuleEngine {
 
           const payload = JSON.stringify(event.payload).toLowerCase();
           const xssPatterns = [
-            "<script", "javascript:", "onload=", "onerror=", "onclick=",
-            "eval(", "alert(", "document.cookie", "window.location",
-            "<iframe", "<object", "<embed"
+            "<script",
+            "javascript:",
+            "onload=",
+            "onerror=",
+            "onclick=",
+            "eval(",
+            "alert(",
+            "document.cookie",
+            "window.location",
+            "<iframe",
+            "<object",
+            "<embed",
           ];
 
-          return xssPatterns.some(pattern => payload.includes(pattern));
+          return xssPatterns.some((pattern) => payload.includes(pattern));
         },
         action: async (event, context) => {
           await this.blockIP(event.ipAddress, context, 3600000); // 1 hour
-          await this.createAlert("xss_attempt", event, "high",
-            `XSS attempt detected from ${event.ipAddress}`);
+          await this.createAlert(
+            "xss_attempt",
+            event,
+            "high",
+            `XSS attempt detected from ${event.ipAddress}`
+          );
         },
         enabled: true,
         severity: "high",
@@ -149,12 +187,17 @@ export class SecurityRuleEngine {
         description: "Detect attempts to access admin endpoints without proper authorization",
         type: "privilege_escalation",
         condition: (event, context) => {
-          return !!(event.endpoint?.startsWith("/api/admin") && 
-                   event.metadata?.userRole !== "admin");
+          return !!(
+            event.endpoint?.startsWith("/api/admin") && event.metadata?.userRole !== "admin"
+          );
         },
         action: async (event, context) => {
-          await this.createAlert("privilege_escalation", event, "high",
-            `Privilege escalation attempt: User ${event.userId || 'anonymous'} tried to access ${event.endpoint}`);
+          await this.createAlert(
+            "privilege_escalation",
+            event,
+            "high",
+            `Privilege escalation attempt: User ${event.userId || "anonymous"} tried to access ${event.endpoint}`
+          );
         },
         enabled: true,
         severity: "high",
@@ -167,19 +210,24 @@ export class SecurityRuleEngine {
         type: "login_failure",
         condition: (event, context) => {
           const recentFailures = context.recentEvents.filter(
-            e => e.type === "login_failure" && 
-                 e.ipAddress === event.ipAddress &&
-                 e.timestamp > Date.now() - 300000 // Last 5 minutes
+            (e) =>
+              e.type === "login_failure" &&
+              e.ipAddress === event.ipAddress &&
+              e.timestamp > Date.now() - 300000 // Last 5 minutes
           );
-          
+
           // Check for different usernames from same IP
-          const uniqueUsers = new Set(recentFailures.map(e => e.userId).filter(Boolean));
+          const uniqueUsers = new Set(recentFailures.map((e) => e.userId).filter(Boolean));
           return uniqueUsers.size >= 10; // 10 different usernames in 5 minutes
         },
         action: async (event, context) => {
           await this.blockIP(event.ipAddress, context, 3600000); // 1 hour
-          await this.createAlert("account_enumeration", event, "high",
-            `Account enumeration detected from ${event.ipAddress}`);
+          await this.createAlert(
+            "account_enumeration",
+            event,
+            "high",
+            `Account enumeration detected from ${event.ipAddress}`
+          );
         },
         enabled: true,
         severity: "high",
@@ -187,11 +235,15 @@ export class SecurityRuleEngine {
       },
     ];
 
-    defaultRules.forEach(rule => {
+    defaultRules.forEach((rule) => {
       this.rules.set(rule.id, rule);
     });
 
-    devLog("info", "SecurityRuleEngine", `Initialized ${defaultRules.length} default security rules`);
+    devLog(
+      "info",
+      "SecurityRuleEngine",
+      `Initialized ${defaultRules.length} default security rules`
+    );
   }
 
   /**
@@ -234,7 +286,7 @@ export class SecurityRuleEngine {
     const rule = this.rules.get(ruleId);
     if (rule) {
       rule.enabled = enabled;
-      devLog("info", "SecurityRuleEngine", `Rule ${ruleId} ${enabled ? 'enabled' : 'disabled'}`);
+      devLog("info", "SecurityRuleEngine", `Rule ${ruleId} ${enabled ? "enabled" : "disabled"}`);
       return true;
     }
     return false;
@@ -243,12 +295,15 @@ export class SecurityRuleEngine {
   /**
    * Evaluate security rules for an event
    */
-  public async evaluateRules(event: SecurityEvent, context: SecurityContext): Promise<SecurityAlert[]> {
+  public async evaluateRules(
+    event: SecurityEvent,
+    context: SecurityContext
+  ): Promise<SecurityAlert[]> {
     const triggeredAlerts: SecurityAlert[] = [];
 
     // Get rules sorted by priority (lower number = higher priority)
     const sortedRules = Array.from(this.rules.values())
-      .filter(rule => rule.enabled)
+      .filter((rule) => rule.enabled)
       .sort((a, b) => a.priority - b.priority);
 
     for (const rule of sortedRules) {
@@ -268,7 +323,9 @@ export class SecurityRuleEngine {
           await rule.action(event, context);
         }
       } catch (error) {
-        devLog("error", "SecurityRuleEngine", `Error evaluating security rule: ${rule.id}`, { error });
+        devLog("error", "SecurityRuleEngine", `Error evaluating security rule: ${rule.id}`, {
+          error,
+        });
       }
     }
 
@@ -279,8 +336,8 @@ export class SecurityRuleEngine {
    * Block IP address
    */
   private async blockIP(
-    ipAddress: string, 
-    context: SecurityContext, 
+    ipAddress: string,
+    context: SecurityContext,
     duration: number = 3600000 // 1 hour default
   ): Promise<void> {
     const ipInfo = context.ipTracking.get(ipAddress);
@@ -433,16 +490,16 @@ export class SecurityRuleEngine {
 
     if (criteria) {
       if (criteria.severity) {
-        alerts = alerts.filter(alert => alert.severity === criteria.severity);
+        alerts = alerts.filter((alert) => alert.severity === criteria.severity);
       }
       if (criteria.ruleId) {
-        alerts = alerts.filter(alert => alert.ruleId === criteria.ruleId);
+        alerts = alerts.filter((alert) => alert.ruleId === criteria.ruleId);
       }
       if (criteria.acknowledged !== undefined) {
-        alerts = alerts.filter(alert => alert.acknowledged === criteria.acknowledged);
+        alerts = alerts.filter((alert) => alert.acknowledged === criteria.acknowledged);
       }
       if (criteria.resolved !== undefined) {
-        alerts = alerts.filter(alert => alert.resolved === criteria.resolved);
+        alerts = alerts.filter((alert) => alert.resolved === criteria.resolved);
       }
       if (criteria.limit) {
         alerts = alerts.slice(-criteria.limit);
@@ -461,7 +518,7 @@ export class SecurityRuleEngine {
       alert.acknowledged = true;
       alert.acknowledgedBy = acknowledgedBy;
       alert.acknowledgedAt = Date.now();
-      
+
       devLog("info", "SecurityRuleEngine", `Alert acknowledged: ${alertId}`, { acknowledgedBy });
       return true;
     }
@@ -477,7 +534,7 @@ export class SecurityRuleEngine {
       alert.resolved = true;
       alert.resolvedBy = resolvedBy;
       alert.resolvedAt = Date.now();
-      
+
       devLog("info", "SecurityRuleEngine", `Alert resolved: ${alertId}`, { resolvedBy });
       return true;
     }
@@ -496,18 +553,18 @@ export class SecurityRuleEngine {
     alertsByRule: Record<string, number>;
   } {
     const allRules = Array.from(this.rules.values());
-    const enabledRules = allRules.filter(rule => rule.enabled);
-    
+    const enabledRules = allRules.filter((rule) => rule.enabled);
+
     const rulesByType = {} as Record<SecurityEventType, number>;
     const rulesBySeverity = {} as Record<string, number>;
     const alertsByRule = {} as Record<string, number>;
 
-    allRules.forEach(rule => {
+    allRules.forEach((rule) => {
       rulesByType[rule.type] = (rulesByType[rule.type] || 0) + 1;
       rulesBySeverity[rule.severity] = (rulesBySeverity[rule.severity] || 0) + 1;
     });
 
-    Array.from(this.alerts.values()).forEach(alert => {
+    Array.from(this.alerts.values()).forEach((alert) => {
       alertsByRule[alert.ruleId] = (alertsByRule[alert.ruleId] || 0) + 1;
     });
 
@@ -525,7 +582,7 @@ export class SecurityRuleEngine {
    * Cleanup old alerts
    */
   private cleanupOldAlerts(): void {
-    const cutoffTime = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days ago
+    const cutoffTime = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days ago
     const initialCount = this.alerts.size;
 
     for (const [alertId, alert] of this.alerts.entries()) {

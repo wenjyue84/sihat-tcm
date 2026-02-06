@@ -65,9 +65,7 @@ export function ChatArea({
                 Doctor
               </CardTitle>
               <CardDescription>
-                {activeRequest.status === "pending"
-                  ? "Waiting for doctor response..."
-                  : "Online"}
+                {activeRequest.status === "pending" ? "Waiting for doctor response..." : "Online"}
               </CardDescription>
             </div>
             {activeRequest.status === "active" && (
@@ -127,9 +125,7 @@ export function ChatArea({
               value={newMessage}
               onChange={(e) => onMessageChange(e.target.value)}
               placeholder={
-                activeRequest.status === "pending"
-                  ? "Waiting for response..."
-                  : "Type a message..."
+                activeRequest.status === "pending" ? "Waiting for response..." : "Type a message..."
               }
               disabled={activeRequest.status === "pending" || sending}
               onKeyDown={(e) => e.key === "Enter" && onSendMessage()}
@@ -148,6 +144,3 @@ export function ChatArea({
     </div>
   );
 }
-
-
-

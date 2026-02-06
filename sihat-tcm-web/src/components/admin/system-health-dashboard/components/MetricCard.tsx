@@ -21,9 +21,7 @@ export function MetricCard({ title, value, icon: Icon, trend, status }: MetricCa
                 <TrendingUp
                   className={`w-3 h-3 ${trend.isPositive ? "text-green-500" : "text-red-500"}`}
                 />
-                <span
-                  className={`text-xs ${trend.isPositive ? "text-green-600" : "text-red-600"}`}
-                >
+                <span className={`text-xs ${trend.isPositive ? "text-green-600" : "text-red-600"}`}>
                   {trend.value}%
                 </span>
               </div>

@@ -58,10 +58,11 @@ export function ChatMessages({
                 className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[85%] md:max-w-[80%] p-3 rounded-lg whitespace-pre-wrap text-sm md:text-base ${m.role === "user"
+                  className={`max-w-[85%] md:max-w-[80%] p-3 rounded-lg whitespace-pre-wrap text-sm md:text-base ${
+                    m.role === "user"
                       ? "bg-emerald-600 text-white rounded-br-none"
                       : "bg-stone-100 text-stone-800 rounded-bl-none"
-                    }`}
+                  }`}
                 >
                   {cleanContent}
                 </div>

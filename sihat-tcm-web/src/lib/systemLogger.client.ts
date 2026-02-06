@@ -1,9 +1,9 @@
 /**
  * Client-safe System Logger - Legacy Re-export
- * 
+ *
  * @deprecated This file is maintained for backward compatibility.
  * Use the organized logging utilities from './logging' instead:
- * 
+ *
  * import { devLog } from '@/lib/logging';
  */
 

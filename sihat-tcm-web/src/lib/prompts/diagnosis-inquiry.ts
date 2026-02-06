@@ -298,10 +298,7 @@ export function buildChatPromptWithContext(basicInfo?: {
   if (basicInfo) {
     const height = basicInfo.height ? Number(basicInfo.height) : null;
     const weight = basicInfo.weight ? Number(basicInfo.weight) : null;
-    const bmi =
-      height && weight && height > 0
-        ? (weight / (height / 100) ** 2).toFixed(1)
-        : null;
+    const bmi = height && weight && height > 0 ? (weight / (height / 100) ** 2).toFixed(1) : null;
 
     prompt += `
 

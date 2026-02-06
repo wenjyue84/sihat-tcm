@@ -50,10 +50,7 @@ export function useProfileManagement() {
       if (profileData.medical_history !== undefined)
         updates.medical_history = profileData.medical_history;
 
-      const { error } = await supabase
-        .from("profiles")
-        .update(updates)
-        .eq("id", profile.id);
+      const { error } = await supabase.from("profiles").update(updates).eq("id", profile.id);
 
       if (error) throw error;
 
@@ -84,10 +81,7 @@ export function useProfileManagement() {
           updates[field] = value ? parseFloat(value) || null : null;
         }
 
-        const { error } = await supabase
-          .from("profiles")
-          .update(updates)
-          .eq("id", profile.id);
+        const { error } = await supabase.from("profiles").update(updates).eq("id", profile.id);
 
         if (error) throw error;
         await refreshProfile();
@@ -109,4 +103,3 @@ export function useProfileManagement() {
     handleUpdateProfileField,
   };
 }
-

@@ -227,4 +227,3 @@ describe("Phase 1: Diagnosis Input Data Schema", () => {
     });
   });
 });
-

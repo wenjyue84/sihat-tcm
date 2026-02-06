@@ -123,5 +123,3 @@ export function useDiagnosisReportState(
     setHasSaved,
   };
 }
-
-

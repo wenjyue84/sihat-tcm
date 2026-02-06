@@ -34,11 +34,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import {
-  SystemHealthDashboardData,
-  SystemError,
-  ErrorSeverity,
-} from "@/types/monitoring";
+import { SystemHealthDashboardData, SystemError, ErrorSeverity } from "@/types/monitoring";
 import { formatDistanceToNow } from "date-fns";
 
 /**
@@ -66,9 +62,7 @@ const StatusIndicator: React.FC<{
   return (
     <div className={`flex items-center gap-2 px-2 py-1 rounded-full ${config.bg}`}>
       <Icon className={`${sizeClasses[size]} ${config.color}`} />
-      <span className={`text-sm font-medium capitalize ${config.color}`}>
-        {status}
-      </span>
+      <span className={`text-sm font-medium capitalize ${config.color}`}>{status}</span>
     </div>
   );
 };
@@ -86,11 +80,7 @@ const SeverityBadge: React.FC<{ severity: ErrorSeverity }> = ({ severity }) => {
 
   const config = severityConfig[severity];
 
-  return (
-    <Badge className={`${config.color} text-xs`}>
-      {config.label}
-    </Badge>
-  );
+  return <Badge className={`${config.color} text-xs`}>{config.label}</Badge>;
 };
 
 /**
@@ -119,15 +109,9 @@ const MetricCard: React.FC<{
             {trend && (
               <div className="flex items-center gap-1 mt-1">
                 <TrendingUp
-                  className={`w-3 h-3 ${
-                    trend.isPositive ? "text-green-500" : "text-red-500"
-                  }`}
+                  className={`w-3 h-3 ${trend.isPositive ? "text-green-500" : "text-red-500"}`}
                 />
-                <span
-                  className={`text-xs ${
-                    trend.isPositive ? "text-green-600" : "text-red-600"
-                  }`}
-                >
+                <span className={`text-xs ${trend.isPositive ? "text-green-600" : "text-red-600"}`}>
                   {trend.value}%
                 </span>
               </div>
@@ -153,15 +137,13 @@ const ErrorList: React.FC<{
   const [showStackTrace, setShowStackTrace] = useState<Record<string, boolean>>({});
 
   const toggleStackTrace = (errorId: string) => {
-    setShowStackTrace(prev => ({
+    setShowStackTrace((prev) => ({
       ...prev,
       [errorId]: !prev[errorId],
     }));
   };
 
-  const filteredErrors = showResolved 
-    ? errors 
-    : errors.filter(error => !error.resolved);
+  const filteredErrors = showResolved ? errors : errors.filter((error) => !error.resolved);
 
   if (filteredErrors.length === 0) {
     return (
@@ -190,16 +172,12 @@ const ErrorList: React.FC<{
                     </Badge>
                   )}
                   {error.resolved && (
-                    <Badge className="bg-green-100 text-green-800 text-xs">
-                      Resolved
-                    </Badge>
+                    <Badge className="bg-green-100 text-green-800 text-xs">Resolved</Badge>
                   )}
                 </div>
-                
-                <p className="text-sm font-medium text-gray-900 mb-1">
-                  {error.message}
-                </p>
-                
+
+                <p className="text-sm font-medium text-gray-900 mb-1">{error.message}</p>
+
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
@@ -239,7 +217,7 @@ const ErrorList: React.FC<{
                         </>
                       )}
                     </Button>
-                    
+
                     {showStackTrace[error.id] && (
                       <pre className="mt-2 p-3 bg-gray-50 rounded text-xs overflow-x-auto">
                         {error.stack_trace}
@@ -287,7 +265,7 @@ export const SystemHealthDashboard: React.FC = () => {
     try {
       setRefreshing(true);
       const response = await fetch("/api/admin/system-health");
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -377,26 +355,17 @@ export const SystemHealthDashboard: React.FC = () => {
             Monitor system performance, errors, and health metrics
           </p>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <StatusIndicator status={dashboardData.overall_status} size="lg" />
-          
+
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAutoRefresh(!autoRefresh)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setAutoRefresh(!autoRefresh)}>
               <Activity className={`w-4 h-4 mr-2 ${autoRefresh ? "text-green-500" : ""}`} />
               Auto Refresh
             </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              disabled={refreshing}
-            >
+
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing}>
               <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? "animate-spin" : ""}`} />
               Refresh
             </Button>
@@ -410,30 +379,40 @@ export const SystemHealthDashboard: React.FC = () => {
           title="Total Errors (24h)"
           value={error_statistics.total_errors}
           icon={AlertTriangle}
-          status={error_statistics.total_errors === 0 ? "healthy" : 
-                  error_statistics.total_errors < 10 ? "degraded" : "unhealthy"}
+          status={
+            error_statistics.total_errors === 0
+              ? "healthy"
+              : error_statistics.total_errors < 10
+                ? "degraded"
+                : "unhealthy"
+          }
         />
-        
+
         <MetricCard
           title="Critical Errors"
           value={error_statistics.critical_errors}
           icon={XCircle}
           status={error_statistics.critical_errors === 0 ? "healthy" : "unhealthy"}
         />
-        
+
         <MetricCard
           title="Database Response"
           value={`${health_metrics.database.response_time}ms`}
           icon={Database}
           status={health_metrics.database.status}
         />
-        
+
         <MetricCard
           title="Memory Usage"
           value={`${health_metrics.memory.usage_percentage}%`}
           icon={MemoryStick}
-          status={health_metrics.memory.usage_percentage < 75 ? "healthy" : 
-                  health_metrics.memory.usage_percentage < 90 ? "degraded" : "unhealthy"}
+          status={
+            health_metrics.memory.usage_percentage < 75
+              ? "healthy"
+              : health_metrics.memory.usage_percentage < 90
+                ? "degraded"
+                : "unhealthy"
+          }
         />
       </div>
 
@@ -475,9 +454,7 @@ export const SystemHealthDashboard: React.FC = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Low</span>
-                  <Badge className="bg-blue-100 text-blue-800">
-                    {error_statistics.low_errors}
-                  </Badge>
+                  <Badge className="bg-blue-100 text-blue-800">{error_statistics.low_errors}</Badge>
                 </div>
                 <hr />
                 <div className="flex justify-between items-center">
@@ -627,7 +604,7 @@ export const SystemHealthDashboard: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-medium mb-2">Runtime</h4>
                   <div className="space-y-1 text-sm">

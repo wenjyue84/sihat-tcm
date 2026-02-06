@@ -8,9 +8,11 @@ export interface MealPlanWizardProps {
 export interface DiagnosisData {
   id?: string;
   session_id?: string;
-  constitution?: {
-    name?: string;
-  } | string;
+  constitution?:
+    | {
+        name?: string;
+      }
+    | string;
   progress?: number;
 }
 

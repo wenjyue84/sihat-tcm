@@ -1,11 +1,11 @@
 /**
  * Test Data Generators
- * 
+ *
  * Comprehensive collection of data generators for property-based testing
  * with domain-specific generators for Sihat TCM application.
  */
 
-import { DataGenerator } from '../interfaces/TestInterfaces';
+import { DataGenerator } from "../interfaces/TestInterfaces";
 
 /**
  * Basic primitive generators
@@ -43,13 +43,13 @@ export class PrimitiveGenerators {
    * Generate strings with configurable length and character set
    */
   static string(
-    minLength: number = 0, 
-    maxLength: number = 100, 
-    charset: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    minLength: number = 0,
+    maxLength: number = 100,
+    charset: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
   ): DataGenerator<string> {
     return () => {
       const length = Math.floor(Math.random() * (maxLength - minLength + 1)) + minLength;
-      let result = '';
+      let result = "";
       for (let i = 0; i < length; i++) {
         result += charset.charAt(Math.floor(Math.random() * charset.length));
       }
@@ -61,21 +61,29 @@ export class PrimitiveGenerators {
    * Generate alphanumeric strings
    */
   static alphanumeric(minLength: number = 1, maxLength: number = 50): DataGenerator<string> {
-    return PrimitiveGenerators.string(minLength, maxLength, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789');
+    return PrimitiveGenerators.string(
+      minLength,
+      maxLength,
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    );
   }
 
   /**
    * Generate alphabetic strings
    */
   static alphabetic(minLength: number = 1, maxLength: number = 50): DataGenerator<string> {
-    return PrimitiveGenerators.string(minLength, maxLength, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz');
+    return PrimitiveGenerators.string(
+      minLength,
+      maxLength,
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    );
   }
 
   /**
    * Generate numeric strings
    */
   static numeric(minLength: number = 1, maxLength: number = 10): DataGenerator<string> {
-    return PrimitiveGenerators.string(minLength, maxLength, '0123456789');
+    return PrimitiveGenerators.string(minLength, maxLength, "0123456789");
   }
 
   /**
@@ -84,7 +92,7 @@ export class PrimitiveGenerators {
   static date(start?: Date, end?: Date): DataGenerator<Date> {
     const startTime = start ? start.getTime() : Date.now() - 365 * 24 * 60 * 60 * 1000; // 1 year ago
     const endTime = end ? end.getTime() : Date.now() + 365 * 24 * 60 * 60 * 1000; // 1 year from now
-    
+
     return () => new Date(startTime + Math.random() * (endTime - startTime));
   }
 
@@ -93,9 +101,9 @@ export class PrimitiveGenerators {
    */
   static uuid(): DataGenerator<string> {
     return () => {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === "x" ? r : (r & 0x3) | 0x8;
         return v.toString(16);
       });
     };
@@ -105,7 +113,7 @@ export class PrimitiveGenerators {
    * Generate email addresses
    */
   static email(): DataGenerator<string> {
-    const domains = ['example.com', 'test.org', 'demo.net', 'sample.io'];
+    const domains = ["example.com", "test.org", "demo.net", "sample.io"];
     return () => {
       const username = PrimitiveGenerators.alphanumeric(3, 15)();
       const domain = domains[Math.floor(Math.random() * domains.length)];
@@ -117,10 +125,10 @@ export class PrimitiveGenerators {
    * Generate URLs
    */
   static url(): DataGenerator<string> {
-    const protocols = ['http', 'https'];
-    const domains = ['example.com', 'test.org', 'demo.net'];
-    const paths = ['', '/api', '/v1', '/users', '/data'];
-    
+    const protocols = ["http", "https"];
+    const domains = ["example.com", "test.org", "demo.net"];
+    const paths = ["", "/api", "/v1", "/users", "/data"];
+
     return () => {
       const protocol = protocols[Math.floor(Math.random() * protocols.length)];
       const domain = domains[Math.floor(Math.random() * domains.length)];
@@ -138,8 +146,8 @@ export class CollectionGenerators {
    * Generate arrays with configurable element generator
    */
   static array<T>(
-    elementGenerator: DataGenerator<T>, 
-    minLength: number = 0, 
+    elementGenerator: DataGenerator<T>,
+    minLength: number = 0,
     maxLength: number = 10
   ): DataGenerator<T[]> {
     return () => {
@@ -152,7 +160,7 @@ export class CollectionGenerators {
    * Generate non-empty arrays
    */
   static nonEmptyArray<T>(
-    elementGenerator: DataGenerator<T>, 
+    elementGenerator: DataGenerator<T>,
     maxLength: number = 10
   ): DataGenerator<T[]> {
     return CollectionGenerators.array(elementGenerator, 1, maxLength);
@@ -161,9 +169,9 @@ export class CollectionGenerators {
   /**
    * Generate objects with specified schema
    */
-  static object<T extends Record<string, any>>(
-    schema: { [K in keyof T]: DataGenerator<T[K]> }
-  ): DataGenerator<T> {
+  static object<T extends Record<string, any>>(schema: {
+    [K in keyof T]: DataGenerator<T[K]>;
+  }): DataGenerator<T> {
     return () => {
       const result = {} as T;
       for (const [key, generator] of Object.entries(schema)) {
@@ -223,12 +231,12 @@ export class CollectionGenerators {
       const set = new Set<T>();
       let attempts = 0;
       const maxAttempts = targetSize * 10; // Prevent infinite loops
-      
+
       while (set.size < targetSize && attempts < maxAttempts) {
         set.add(elementGenerator());
         attempts++;
       }
-      
+
       return set;
     };
   }
@@ -255,7 +263,7 @@ export class CombinatorialGenerators {
     weightedGenerators: Array<{ weight: number; generator: DataGenerator<T> }>
   ): DataGenerator<T> {
     const totalWeight = weightedGenerators.reduce((sum, wg) => sum + wg.weight, 0);
-    
+
     return () => {
       let random = Math.random() * totalWeight;
       for (const { weight, generator } of weightedGenerators) {
@@ -275,21 +283,27 @@ export class CombinatorialGenerators {
   static tuple<T extends readonly unknown[]>(
     ...generators: { [K in keyof T]: DataGenerator<T[K]> }
   ): DataGenerator<T> {
-    return () => generators.map(gen => gen()) as T;
+    return () => generators.map((gen) => gen()) as T;
   }
 
   /**
    * Generate optional values (may be undefined)
    */
-  static optional<T>(generator: DataGenerator<T>, probability: number = 0.5): DataGenerator<T | undefined> {
-    return () => Math.random() < probability ? generator() : undefined;
+  static optional<T>(
+    generator: DataGenerator<T>,
+    probability: number = 0.5
+  ): DataGenerator<T | undefined> {
+    return () => (Math.random() < probability ? generator() : undefined);
   }
 
   /**
    * Generate nullable values (may be null)
    */
-  static nullable<T>(generator: DataGenerator<T>, probability: number = 0.1): DataGenerator<T | null> {
-    return () => Math.random() < probability ? null : generator();
+  static nullable<T>(
+    generator: DataGenerator<T>,
+    probability: number = 0.1
+  ): DataGenerator<T | null> {
+    return () => (Math.random() < probability ? null : generator());
   }
 
   /**
@@ -304,12 +318,9 @@ export class CombinatorialGenerators {
       if (depth >= maxDepth) {
         return baseGenerator;
       }
-      return CombinatorialGenerators.oneOf(
-        baseGenerator,
-        recursiveGenerator(generate(depth + 1))
-      );
+      return CombinatorialGenerators.oneOf(baseGenerator, recursiveGenerator(generate(depth + 1)));
     };
-    
+
     return generate(0);
   }
 }
@@ -326,9 +337,9 @@ export class TCMGenerators {
       messages: CollectionGenerators.array(
         CollectionGenerators.object({
           role: CombinatorialGenerators.oneOf(
-            () => 'user',
-            () => 'assistant',
-            () => 'system'
+            () => "user",
+            () => "assistant",
+            () => "system"
           ),
           content: PrimitiveGenerators.string(10, 500),
         }),
@@ -340,10 +351,10 @@ export class TCMGenerators {
           CollectionGenerators.object({
             url: PrimitiveGenerators.url(),
             type: CombinatorialGenerators.oneOf(
-              () => 'tongue',
-              () => 'face',
-              () => 'pulse',
-              () => 'general'
+              () => "tongue",
+              () => "face",
+              () => "pulse",
+              () => "general"
             ),
           }),
           1,
@@ -353,19 +364,17 @@ export class TCMGenerators {
       requiresAnalysis: PrimitiveGenerators.boolean(),
       requiresPersonalization: PrimitiveGenerators.boolean(),
       urgency: CombinatorialGenerators.oneOf(
-        () => 'low',
-        () => 'normal',
-        () => 'high',
-        () => 'urgent'
+        () => "low",
+        () => "normal",
+        () => "high",
+        () => "urgent"
       ),
       language: CombinatorialGenerators.oneOf(
-        () => 'en',
-        () => 'zh',
-        () => 'ms'
+        () => "en",
+        () => "zh",
+        () => "ms"
       ),
-      medicalSpecialty: CombinatorialGenerators.optional(
-        () => 'tcm'
-      ),
+      medicalSpecialty: CombinatorialGenerators.optional(() => "tcm"),
     });
   }
 
@@ -377,19 +386,19 @@ export class TCMGenerators {
       title: PrimitiveGenerators.string(5, 100),
       body: PrimitiveGenerators.string(10, 500),
       category: CombinatorialGenerators.oneOf(
-        () => 'health',
-        () => 'medication',
-        () => 'exercise',
-        () => 'diet',
-        () => 'sleep',
-        () => 'appointments',
-        () => 'general'
+        () => "health",
+        () => "medication",
+        () => "exercise",
+        () => "diet",
+        () => "sleep",
+        () => "appointments",
+        () => "general"
       ),
       priority: CombinatorialGenerators.oneOf(
-        () => 'low',
-        () => 'normal',
-        () => 'high',
-        () => 'urgent'
+        () => "low",
+        () => "normal",
+        () => "high",
+        () => "urgent"
       ),
       data: CombinatorialGenerators.optional(
         CollectionGenerators.object({
@@ -398,7 +407,7 @@ export class TCMGenerators {
           metadata: CombinatorialGenerators.optional(
             CollectionGenerators.object({
               source: PrimitiveGenerators.alphanumeric(3, 15),
-              version: PrimitiveGenerators.string(1, 10, '0123456789.'),
+              version: PrimitiveGenerators.string(1, 10, "0123456789."),
             })
           ),
         })
@@ -411,21 +420,17 @@ export class TCMGenerators {
    */
   static medicalHistory(): DataGenerator<any> {
     return CollectionGenerators.object({
-      conditions: CollectionGenerators.array(
-        PrimitiveGenerators.string(5, 50),
-        0,
-        8
-      ),
+      conditions: CollectionGenerators.array(PrimitiveGenerators.string(5, 50), 0, 8),
       medications: CollectionGenerators.array(
         CollectionGenerators.object({
           name: PrimitiveGenerators.string(5, 30),
           dosage: PrimitiveGenerators.string(3, 15),
           frequency: CombinatorialGenerators.oneOf(
-            () => 'daily',
-            () => 'twice daily',
-            () => 'three times daily',
-            () => 'weekly',
-            () => 'as needed'
+            () => "daily",
+            () => "twice daily",
+            () => "three times daily",
+            () => "weekly",
+            () => "as needed"
           ),
           startDate: PrimitiveGenerators.date(
             new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
@@ -435,11 +440,7 @@ export class TCMGenerators {
         0,
         10
       ),
-      allergies: CollectionGenerators.array(
-        PrimitiveGenerators.string(3, 25),
-        0,
-        5
-      ),
+      allergies: CollectionGenerators.array(PrimitiveGenerators.string(3, 25), 0, 5),
       symptoms: CollectionGenerators.array(
         CollectionGenerators.object({
           name: PrimitiveGenerators.string(5, 40),
@@ -457,11 +458,11 @@ export class TCMGenerators {
         CollectionGenerators.array(
           CollectionGenerators.object({
             relation: CombinatorialGenerators.oneOf(
-              () => 'parent',
-              () => 'sibling',
-              () => 'grandparent',
-              () => 'aunt/uncle',
-              () => 'cousin'
+              () => "parent",
+              () => "sibling",
+              () => "grandparent",
+              () => "aunt/uncle",
+              () => "cousin"
             ),
             condition: PrimitiveGenerators.string(5, 30),
           }),
@@ -477,35 +478,36 @@ export class TCMGenerators {
    */
   static tcmConstitution(): DataGenerator<any> {
     const constitutions = [
-      'balanced', 'qi_deficiency', 'yang_deficiency', 'yin_deficiency',
-      'phlegm_dampness', 'damp_heat', 'blood_stasis', 'qi_stagnation', 'special_diathesis'
+      "balanced",
+      "qi_deficiency",
+      "yang_deficiency",
+      "yin_deficiency",
+      "phlegm_dampness",
+      "damp_heat",
+      "blood_stasis",
+      "qi_stagnation",
+      "special_diathesis",
     ];
-    
+
     return CollectionGenerators.object({
-      constitution: CombinatorialGenerators.oneOf(
-        ...constitutions.map(c => () => c)
-      ),
+      constitution: CombinatorialGenerators.oneOf(...constitutions.map((c) => () => c)),
       score: PrimitiveGenerators.integer(1, 100),
       confidence: PrimitiveGenerators.float(0, 1),
-      symptoms: CollectionGenerators.array(
-        PrimitiveGenerators.string(5, 30),
-        1,
-        10
-      ),
+      symptoms: CollectionGenerators.array(PrimitiveGenerators.string(5, 30), 1, 10),
       recommendations: CollectionGenerators.array(
         CollectionGenerators.object({
           type: CombinatorialGenerators.oneOf(
-            () => 'diet',
-            () => 'exercise',
-            () => 'lifestyle',
-            () => 'herbal',
-            () => 'acupuncture'
+            () => "diet",
+            () => "exercise",
+            () => "lifestyle",
+            () => "herbal",
+            () => "acupuncture"
           ),
           description: PrimitiveGenerators.string(10, 100),
           priority: CombinatorialGenerators.oneOf(
-            () => 'low',
-            () => 'medium',
-            () => 'high'
+            () => "low",
+            () => "medium",
+            () => "high"
           ),
         }),
         1,
@@ -514,10 +516,10 @@ export class TCMGenerators {
       seasonalAdvice: CombinatorialGenerators.optional(
         CollectionGenerators.object({
           season: CombinatorialGenerators.oneOf(
-            () => 'spring',
-            () => 'summer',
-            () => 'autumn',
-            () => 'winter'
+            () => "spring",
+            () => "summer",
+            () => "autumn",
+            () => "winter"
           ),
           advice: PrimitiveGenerators.string(20, 200),
         })
@@ -538,39 +540,39 @@ export class TCMGenerators {
         new Date()
       ),
       diagnosticType: CombinatorialGenerators.oneOf(
-        () => 'observation',
-        () => 'listening',
-        () => 'inquiry',
-        () => 'palpation',
-        () => 'comprehensive'
+        () => "observation",
+        () => "listening",
+        () => "inquiry",
+        () => "palpation",
+        () => "comprehensive"
       ),
       observations: CombinatorialGenerators.optional(
         CollectionGenerators.object({
           tongue: CollectionGenerators.object({
             color: CombinatorialGenerators.oneOf(
-              () => 'pale',
-              () => 'red',
-              () => 'dark_red',
-              () => 'purple'
+              () => "pale",
+              () => "red",
+              () => "dark_red",
+              () => "purple"
             ),
             coating: CombinatorialGenerators.oneOf(
-              () => 'thin_white',
-              () => 'thick_white',
-              () => 'yellow',
-              () => 'greasy'
+              () => "thin_white",
+              () => "thick_white",
+              () => "yellow",
+              () => "greasy"
             ),
             texture: CombinatorialGenerators.oneOf(
-              () => 'normal',
-              () => 'swollen',
-              () => 'thin',
-              () => 'cracked'
+              () => "normal",
+              () => "swollen",
+              () => "thin",
+              () => "cracked"
             ),
           }),
           complexion: CombinatorialGenerators.oneOf(
-            () => 'bright',
-            () => 'pale',
-            () => 'sallow',
-            () => 'flushed'
+            () => "bright",
+            () => "pale",
+            () => "sallow",
+            () => "flushed"
           ),
         })
       ),
@@ -578,30 +580,30 @@ export class TCMGenerators {
         CollectionGenerators.object({
           rate: PrimitiveGenerators.integer(50, 120),
           rhythm: CombinatorialGenerators.oneOf(
-            () => 'regular',
-            () => 'irregular',
-            () => 'intermittent'
+            () => "regular",
+            () => "irregular",
+            () => "intermittent"
           ),
           strength: CombinatorialGenerators.oneOf(
-            () => 'weak',
-            () => 'normal',
-            () => 'strong',
-            () => 'bounding'
+            () => "weak",
+            () => "normal",
+            () => "strong",
+            () => "bounding"
           ),
           quality: CombinatorialGenerators.oneOf(
-            () => 'floating',
-            () => 'deep',
-            () => 'rapid',
-            () => 'slow',
-            () => 'slippery',
-            () => 'wiry'
+            () => "floating",
+            () => "deep",
+            () => "rapid",
+            () => "slow",
+            () => "slippery",
+            () => "wiry"
           ),
         })
       ),
       status: CombinatorialGenerators.oneOf(
-        () => 'in_progress',
-        () => 'completed',
-        () => 'cancelled'
+        () => "in_progress",
+        () => "completed",
+        () => "cancelled"
       ),
     });
   }
@@ -613,30 +615,24 @@ export class TCMGenerators {
     return CollectionGenerators.object({
       modelId: PrimitiveGenerators.alphanumeric(5, 20),
       requestType: CombinatorialGenerators.oneOf(
-        () => 'simple',
-        () => 'moderate',
-        () => 'complex',
-        () => 'advanced'
+        () => "simple",
+        () => "moderate",
+        () => "complex",
+        () => "advanced"
       ),
       responseTime: PrimitiveGenerators.integer(100, 10000),
       success: PrimitiveGenerators.boolean(),
       timestamp: PrimitiveGenerators.date(),
-      tokenCount: CombinatorialGenerators.optional(
-        PrimitiveGenerators.integer(10, 5000)
-      ),
-      costEstimate: CombinatorialGenerators.optional(
-        PrimitiveGenerators.float(0.001, 1.0)
-      ),
-      retryCount: CombinatorialGenerators.optional(
-        PrimitiveGenerators.integer(0, 3)
-      ),
+      tokenCount: CombinatorialGenerators.optional(PrimitiveGenerators.integer(10, 5000)),
+      costEstimate: CombinatorialGenerators.optional(PrimitiveGenerators.float(0.001, 1.0)),
+      retryCount: CombinatorialGenerators.optional(PrimitiveGenerators.integer(0, 3)),
       errorType: CombinatorialGenerators.optional(
         CombinatorialGenerators.oneOf(
-          () => 'timeout',
-          () => 'rate_limit',
-          () => 'network_error',
-          () => 'validation_error',
-          () => 'server_error'
+          () => "timeout",
+          () => "rate_limit",
+          () => "network_error",
+          () => "validation_error",
+          () => "server_error"
         )
       ),
     });
@@ -672,7 +668,7 @@ export class GeneratorUtils {
    * Create a generator that filters another generator's output
    */
   static filter<T>(
-    generator: DataGenerator<T>, 
+    generator: DataGenerator<T>,
     predicate: (value: T) => boolean,
     maxAttempts: number = 100
   ): DataGenerator<T> {
@@ -691,7 +687,7 @@ export class GeneratorUtils {
    * Create a generator that combines multiple generators
    */
   static combine<T>(...generators: DataGenerator<T>[]): DataGenerator<T[]> {
-    return () => generators.map(gen => gen());
+    return () => generators.map((gen) => gen());
   }
 
   /**
@@ -703,15 +699,21 @@ export class GeneratorUtils {
     boolean: () => DataGenerator<boolean>;
   } {
     let currentSeed = seed;
-    
+
     const random = () => {
       currentSeed = (currentSeed * 9301 + 49297) % 233280;
       return currentSeed / 233280;
     };
 
     return {
-      integer: (min = -1000, max = 1000) => () => Math.floor(random() * (max - min + 1)) + min,
-      float: (min = -1000, max = 1000) => () => random() * (max - min) + min,
+      integer:
+        (min = -1000, max = 1000) =>
+        () =>
+          Math.floor(random() * (max - min + 1)) + min,
+      float:
+        (min = -1000, max = 1000) =>
+        () =>
+          random() * (max - min) + min,
       boolean: () => () => random() > 0.5,
     };
   }

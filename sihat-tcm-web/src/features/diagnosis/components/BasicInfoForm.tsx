@@ -288,10 +288,10 @@ export function BasicInfoForm({
       onBack:
         currentStep > 1
           ? () => {
-            setStepError(null);
-            setDirection(-1);
-            setCurrentStep((prev) => Math.max(prev - 1, 1));
-          }
+              setStepError(null);
+              setDirection(-1);
+              setCurrentStep((prev) => Math.max(prev - 1, 1));
+            }
           : undefined,
       showNext: true,
       showBack: true,

@@ -3,19 +3,14 @@
 /**
  * Legacy wrapper for backward compatibility
  * This file maintains the original API while using the new modular store system
- * 
+ *
  * All the actual state management is handled by domain-specific stores.
  * This file re-exports everything needed for backward compatibility.
  */
 
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
-import {
-  Language,
-  TranslationKeys,
-  translations,
-  languageNames
-} from "@/lib/translations";
+import { Language, TranslationKeys, translations, languageNames } from "@/lib/translations";
 
 // Import domain stores
 import { useAuthStore } from "./auth/AuthStore";
@@ -78,7 +73,11 @@ interface UnifiedAppState {
   setDiagnosisProgress: (progress: number) => void;
   incrementDiagnosisProgress: (delta: number) => void;
   setDiagnosisStepIndex: (index: number) => void;
-  updateDiagnosisFormProgress: (stepId: string, completedFields: number, totalFields: number) => void;
+  updateDiagnosisFormProgress: (
+    stepId: string,
+    completedFields: number,
+    totalFields: number
+  ) => void;
   resetDiagnosisProgress: () => void;
   setDiagnosisNavigationState: (state: NavigationState) => void;
 
@@ -155,7 +154,9 @@ function createUnifiedStoreHook() {
     const accessibilityState = {
       accessibilityManager: useAccessibilityStore((s) => s.accessibilityManager),
       accessibilityPreferences: useAccessibilityStore((s) => s.accessibilityPreferences),
-      updateAccessibilityPreferences: useAccessibilityStore((s) => s.updateAccessibilityPreferences),
+      updateAccessibilityPreferences: useAccessibilityStore(
+        (s) => s.updateAccessibilityPreferences
+      ),
       announce: useAccessibilityStore((s) => s.announce),
     };
 
@@ -265,10 +266,14 @@ export const useDiagnosisProgress = () => {
   const incrementProgress = useDiagnosisProgressStore((state) => state.incrementDiagnosisProgress);
   const currentStepIndex = useDiagnosisProgressStore((state) => state.diagnosisStepIndex);
   const setCurrentStepIndex = useDiagnosisProgressStore((state) => state.setDiagnosisStepIndex);
-  const updateFormProgress = useDiagnosisProgressStore((state) => state.updateDiagnosisFormProgress);
+  const updateFormProgress = useDiagnosisProgressStore(
+    (state) => state.updateDiagnosisFormProgress
+  );
   const resetProgress = useDiagnosisProgressStore((state) => state.resetDiagnosisProgress);
   const navigationState = useDiagnosisProgressStore((state) => state.diagnosisNavigationState);
-  const setNavigationState = useDiagnosisProgressStore((state) => state.setDiagnosisNavigationState);
+  const setNavigationState = useDiagnosisProgressStore(
+    (state) => state.setDiagnosisNavigationState
+  );
 
   return {
     progress,

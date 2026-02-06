@@ -44,7 +44,7 @@ export function TimelineFilters({
     score: "Score",
     diagnosis: "Diagnosis",
     ascending: "Ascending",
-    descending: "Descending"
+    descending: "Descending",
   };
 
   return (
@@ -53,28 +53,31 @@ export function TimelineFilters({
       <div className="flex items-center bg-white rounded-lg border border-slate-200 p-1 shadow-sm">
         <button
           onClick={() => onDateRangeChange("all")}
-          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${dateRange === "all"
-            ? "bg-emerald-100 text-emerald-700 shadow-sm"
-            : "text-slate-600 hover:text-slate-800 hover:bg-slate-50"
-            }`}
+          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+            dateRange === "all"
+              ? "bg-emerald-100 text-emerald-700 shadow-sm"
+              : "text-slate-600 hover:text-slate-800 hover:bg-slate-50"
+          }`}
         >
           {filtersT.all}
         </button>
         <button
           onClick={() => onDateRangeChange("year")}
-          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${dateRange === "year"
-            ? "bg-emerald-100 text-emerald-700 shadow-sm"
-            : "text-slate-600 hover:text-slate-800 hover:bg-slate-50"
-            }`}
+          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+            dateRange === "year"
+              ? "bg-emerald-100 text-emerald-700 shadow-sm"
+              : "text-slate-600 hover:text-slate-800 hover:bg-slate-50"
+          }`}
         >
           {filtersT.thisYear}
         </button>
         <button
           onClick={() => onDateRangeChange("month")}
-          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${dateRange === "month"
-            ? "bg-emerald-100 text-emerald-700 shadow-sm"
-            : "text-slate-600 hover:text-slate-800 hover:bg-slate-50"
-            }`}
+          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
+            dateRange === "month"
+              ? "bg-emerald-100 text-emerald-700 shadow-sm"
+              : "text-slate-600 hover:text-slate-800 hover:bg-slate-50"
+          }`}
         >
           {filtersT.thisMonth}
         </button>
@@ -110,5 +113,3 @@ export function TimelineFilters({
     </div>
   );
 }
-
-

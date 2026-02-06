@@ -1,20 +1,20 @@
 /**
  * @fileoverview Incident Management System
- * 
+ *
  * Manages incidents, escalation, timeline tracking, and incident lifecycle.
  * Groups related alerts into incidents for better incident response.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 1.0
  */
 
 import { devLog } from "@/lib/systemLogger";
-import type { 
-  Alert, 
-  Incident, 
-  IncidentTimelineEntry, 
+import type {
+  Alert,
+  Incident,
+  IncidentTimelineEntry,
   AlertSeverity,
-  AlertCategory 
+  AlertCategory,
 } from "../interfaces/AlertInterfaces";
 
 /**
@@ -43,13 +43,13 @@ export class IncidentManager {
    */
   private findRelatedIncident(alert: Alert): Incident | null {
     // Look for open incidents in the same category within the last hour
-    const oneHourAgo = Date.now() - (60 * 60 * 1000);
-    
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+
     for (const incident of this.incidents.values()) {
       if (
         incident.status === "open" &&
         incident.createdAt > oneHourAgo &&
-        incident.alerts.some(a => a.category === alert.category)
+        incident.alerts.some((a) => a.category === alert.category)
       ) {
         return incident;
       }
@@ -63,7 +63,7 @@ export class IncidentManager {
    */
   private createNewIncident(alert: Alert): Incident {
     const incidentId = `incident_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const incident: Incident = {
       id: incidentId,
       title: `${alert.category} - ${alert.title}`,
@@ -114,19 +114,23 @@ export class IncidentManager {
     if (this.getSeverityLevel(alert.severity) > this.getSeverityLevel(incident.severity)) {
       const previousSeverity = incident.severity;
       incident.severity = alert.severity;
-      
+
       incident.timeline.push({
         timestamp: Date.now(),
         action: "severity_escalated",
         description: `Incident severity escalated from ${previousSeverity} to ${alert.severity}`,
-        metadata: { 
-          previousSeverity, 
+        metadata: {
+          previousSeverity,
           newSeverity: alert.severity,
-          triggeringAlertId: alert.id 
+          triggeringAlertId: alert.id,
         },
       });
 
-      devLog("warn", "IncidentManager", `Incident ${incident.id} severity escalated to ${alert.severity}`);
+      devLog(
+        "warn",
+        "IncidentManager",
+        `Incident ${incident.id} severity escalated to ${alert.severity}`
+      );
     }
 
     return incident;
@@ -136,8 +140,8 @@ export class IncidentManager {
    * Update incident status
    */
   public updateIncidentStatus(
-    incidentId: string, 
-    status: Incident['status'], 
+    incidentId: string,
+    status: Incident["status"],
     user?: string,
     notes?: string
   ): boolean {
@@ -156,7 +160,7 @@ export class IncidentManager {
     incident.timeline.push({
       timestamp: Date.now(),
       action: "status_changed",
-      description: `Status changed from ${previousStatus} to ${status}${notes ? `: ${notes}` : ''}`,
+      description: `Status changed from ${previousStatus} to ${status}${notes ? `: ${notes}` : ""}`,
       user,
       metadata: { previousStatus, newStatus: status },
     });
@@ -183,7 +187,7 @@ export class IncidentManager {
     incident.timeline.push({
       timestamp: Date.now(),
       action: "assigned",
-      description: `Incident assigned to ${assignee}${previousAssignee ? ` (previously: ${previousAssignee})` : ''}`,
+      description: `Incident assigned to ${assignee}${previousAssignee ? ` (previously: ${previousAssignee})` : ""}`,
       user,
       metadata: { assignee, previousAssignee },
     });
@@ -196,11 +200,7 @@ export class IncidentManager {
   /**
    * Add note to incident
    */
-  public addIncidentNote(
-    incidentId: string, 
-    note: string, 
-    user?: string
-  ): boolean {
+  public addIncidentNote(incidentId: string, note: string, user?: string): boolean {
     const incident = this.incidents.get(incidentId);
     if (!incident) return false;
 
@@ -236,7 +236,7 @@ export class IncidentManager {
    */
   public getOpenIncidents(): Incident[] {
     return Array.from(this.incidents.values()).filter(
-      incident => incident.status === "open" || incident.status === "investigating"
+      (incident) => incident.status === "open" || incident.status === "investigating"
     );
   }
 
@@ -244,17 +244,15 @@ export class IncidentManager {
    * Get incidents by severity
    */
   public getIncidentsBySeverity(severity: AlertSeverity): Incident[] {
-    return Array.from(this.incidents.values()).filter(
-      incident => incident.severity === severity
-    );
+    return Array.from(this.incidents.values()).filter((incident) => incident.severity === severity);
   }
 
   /**
    * Get incidents by category
    */
   public getIncidentsByCategory(category: AlertCategory): Incident[] {
-    return Array.from(this.incidents.values()).filter(
-      incident => incident.alerts.some(alert => alert.category === category)
+    return Array.from(this.incidents.values()).filter((incident) =>
+      incident.alerts.some((alert) => alert.category === category)
     );
   }
 
@@ -262,9 +260,7 @@ export class IncidentManager {
    * Get incidents assigned to user
    */
   public getIncidentsByAssignee(assignee: string): Incident[] {
-    return Array.from(this.incidents.values()).filter(
-      incident => incident.assignee === assignee
-    );
+    return Array.from(this.incidents.values()).filter((incident) => incident.assignee === assignee);
   }
 
   /**
@@ -275,16 +271,8 @@ export class IncidentManager {
     let resolvedCount = 0;
 
     for (const incident of this.incidents.values()) {
-      if (
-        incident.status === "open" &&
-        now - incident.createdAt > maxAge
-      ) {
-        this.updateIncidentStatus(
-          incident.id, 
-          "resolved", 
-          "system", 
-          "Auto-resolved due to age"
-        );
+      if (incident.status === "open" && now - incident.createdAt > maxAge) {
+        this.updateIncidentStatus(incident.id, "resolved", "system", "Auto-resolved due to age");
         resolvedCount++;
       }
     }
@@ -310,37 +298,36 @@ export class IncidentManager {
     averageResolutionTime: number;
   } {
     const allIncidents = Array.from(this.incidents.values());
-    const resolvedIncidents = allIncidents.filter(i => i.resolvedAt);
-    
+    const resolvedIncidents = allIncidents.filter((i) => i.resolvedAt);
+
     const bySeverity = {} as Record<AlertSeverity, number>;
     const byCategory = {} as Record<string, number>;
 
-    allIncidents.forEach(incident => {
+    allIncidents.forEach((incident) => {
       bySeverity[incident.severity] = (bySeverity[incident.severity] || 0) + 1;
-      
-      incident.alerts.forEach(alert => {
+
+      incident.alerts.forEach((alert) => {
         byCategory[alert.category] = (byCategory[alert.category] || 0) + 1;
       });
     });
 
     // Calculate average resolution time
     let totalResolutionTime = 0;
-    resolvedIncidents.forEach(incident => {
+    resolvedIncidents.forEach((incident) => {
       if (incident.resolvedAt) {
         totalResolutionTime += incident.resolvedAt - incident.createdAt;
       }
     });
-    
-    const averageResolutionTime = resolvedIncidents.length > 0 
-      ? totalResolutionTime / resolvedIncidents.length 
-      : 0;
+
+    const averageResolutionTime =
+      resolvedIncidents.length > 0 ? totalResolutionTime / resolvedIncidents.length : 0;
 
     return {
       total: allIncidents.length,
-      open: allIncidents.filter(i => i.status === "open").length,
-      investigating: allIncidents.filter(i => i.status === "investigating").length,
-      resolved: allIncidents.filter(i => i.status === "resolved").length,
-      closed: allIncidents.filter(i => i.status === "closed").length,
+      open: allIncidents.filter((i) => i.status === "open").length,
+      investigating: allIncidents.filter((i) => i.status === "investigating").length,
+      resolved: allIncidents.filter((i) => i.status === "resolved").length,
+      closed: allIncidents.filter((i) => i.status === "closed").length,
       bySeverity,
       byCategory,
       averageResolutionTime,
@@ -383,13 +370,14 @@ export class IncidentManager {
 
     // Also enforce memory limit
     if (this.incidents.size > this.maxIncidentsInMemory) {
-      const sortedIncidents = Array.from(this.incidents.entries())
-        .sort(([, a], [, b]) => b.updatedAt - a.updatedAt);
-      
+      const sortedIncidents = Array.from(this.incidents.entries()).sort(
+        ([, a], [, b]) => b.updatedAt - a.updatedAt
+      );
+
       // Keep only the most recent incidents
       const toKeep = sortedIncidents.slice(0, this.maxIncidentsInMemory);
       this.incidents.clear();
-      
+
       toKeep.forEach(([id, incident]) => {
         this.incidents.set(id, incident);
       });
@@ -414,7 +402,7 @@ export class IncidentManager {
    * Import incidents
    */
   public importIncidents(incidents: Incident[]): number {
-    incidents.forEach(incident => {
+    incidents.forEach((incident) => {
       this.incidents.set(incident.id, incident);
     });
 

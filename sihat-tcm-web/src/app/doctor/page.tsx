@@ -66,7 +66,9 @@ export default function DoctorDashboard() {
       <header className="h-14 md:h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
         <div>
           <h1 className="text-lg md:text-xl font-bold text-slate-800">Dashboard</h1>
-          <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">Patient History & Records Management</p>
+          <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">
+            Patient History & Records Management
+          </p>
         </div>
       </header>
 
@@ -117,10 +119,7 @@ export default function DoctorDashboard() {
             ))}
 
             {filteredInquiries.length === 0 && (
-              <EmptyState
-                hasActiveFilters={hasActiveFilters}
-                clearFilters={clearFilters}
-              />
+              <EmptyState hasActiveFilters={hasActiveFilters} clearFilters={clearFilters} />
             )}
           </div>
         </div>

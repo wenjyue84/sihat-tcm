@@ -44,84 +44,82 @@ export function usePatientCommunication(): UsePatientCommunicationResult {
   const [activeRequest, setActiveRequest] = useState<VerificationRequest | null>(null);
   const [sending, setSending] = useState(false);
 
-  const fetchRequests = useCallback(async (isInitial = false) => {
-    if (!user) return;
+  const fetchRequests = useCallback(
+    async (isInitial = false) => {
+      if (!user) return;
 
-    try {
-      if (isInitial) setLoading(true);
+      try {
+        if (isInitial) setLoading(true);
 
-      const [inquiriesResult, sessionsResult] = await Promise.all([
-        supabase
-          .from("inquiries")
-          .select("*")
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("diagnosis_sessions")
-          .select("id, created_at, primary_diagnosis, full_report, symptoms, notes")
-          .order("created_at", { ascending: false })
-      ]);
+        const [inquiriesResult, sessionsResult] = await Promise.all([
+          supabase.from("inquiries").select("*").order("created_at", { ascending: false }),
+          supabase
+            .from("diagnosis_sessions")
+            .select("id, created_at, primary_diagnosis, full_report, symptoms, notes")
+            .order("created_at", { ascending: false }),
+        ]);
 
-      const { data: inquiriesData, error: inquiriesError } = inquiriesResult;
-      const { data: sessionsData, error: sessionsError } = sessionsResult;
+        const { data: inquiriesData, error: inquiriesError } = inquiriesResult;
+        const { data: sessionsData, error: sessionsError } = sessionsResult;
 
-      if (inquiriesError) console.error("Error fetching inquiries:", inquiriesError);
-      if (sessionsError) console.error("Error fetching sessions:", sessionsError);
+        if (inquiriesError) console.error("Error fetching inquiries:", inquiriesError);
+        if (sessionsError) console.error("Error fetching sessions:", sessionsError);
 
-      const parsedInquiries = (inquiriesData || []).map((req: any) => ({
-        id: req.id,
-        created_at: req.created_at,
-        status: req.diagnosis_report?.status || "pending",
-        messages: Array.isArray(req.diagnosis_report?.messages)
-          ? req.diagnosis_report.messages
-          : [],
-        summary: req.symptoms || "General Inquiry",
-        table: "inquiries" as const
-      }));
-
-      // Filter sessions that have 'Request for Verification' or have active chats
-      const parsedSessions = (sessionsData || [])
-        .filter((s: any) => {
-          // Check if it's a verification request OR has messages
-          const isVerification = s.primary_diagnosis === "Request for Verification" ||
-            (s.symptoms && s.symptoms.includes("Request for Verification"));
-          const hasMessages = s.full_report?.messages && s.full_report.messages.length > 0;
-          return isVerification || hasMessages;
-        })
-        .map((req: any) => ({
+        const parsedInquiries = (inquiriesData || []).map((req: any) => ({
           id: req.id,
           created_at: req.created_at,
-          status: req.full_report?.status || "pending",
-          messages: Array.isArray(req.full_report?.messages)
-            ? req.full_report.messages
+          status: req.diagnosis_report?.status || "pending",
+          messages: Array.isArray(req.diagnosis_report?.messages)
+            ? req.diagnosis_report.messages
             : [],
-          summary: req.primary_diagnosis || "Diagnosis Session",
-          table: "diagnosis_sessions" as const
+          summary: req.symptoms || "General Inquiry",
+          table: "inquiries" as const,
         }));
 
-      const allRequests = [...parsedInquiries, ...parsedSessions].sort((a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+        // Filter sessions that have 'Request for Verification' or have active chats
+        const parsedSessions = (sessionsData || [])
+          .filter((s: any) => {
+            // Check if it's a verification request OR has messages
+            const isVerification =
+              s.primary_diagnosis === "Request for Verification" ||
+              (s.symptoms && s.symptoms.includes("Request for Verification"));
+            const hasMessages = s.full_report?.messages && s.full_report.messages.length > 0;
+            return isVerification || hasMessages;
+          })
+          .map((req: any) => ({
+            id: req.id,
+            created_at: req.created_at,
+            status: req.full_report?.status || "pending",
+            messages: Array.isArray(req.full_report?.messages) ? req.full_report.messages : [],
+            summary: req.primary_diagnosis || "Diagnosis Session",
+            table: "diagnosis_sessions" as const,
+          }));
 
-      setRequests(allRequests);
+        const allRequests = [...parsedInquiries, ...parsedSessions].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
 
-      // Stable update for activeRequest without adding it to dependencies
-      setActiveRequest((current) => {
-        if (!current && allRequests.length > 0) {
-          return allRequests[0];
-        }
-        if (current) {
-          const updated = allRequests.find(r => r.id === current.id);
-          return updated || current;
-        }
-        return null;
-      });
+        setRequests(allRequests);
 
-    } catch (error) {
-      console.error("Error fetching requests:", error);
-    } finally {
-      if (isInitial) setLoading(false);
-    }
-  }, [user]);
+        // Stable update for activeRequest without adding it to dependencies
+        setActiveRequest((current) => {
+          if (!current && allRequests.length > 0) {
+            return allRequests[0];
+          }
+          if (current) {
+            const updated = allRequests.find((r) => r.id === current.id);
+            return updated || current;
+          }
+          return null;
+        });
+      } catch (error) {
+        console.error("Error fetching requests:", error);
+      } finally {
+        if (isInitial) setLoading(false);
+      }
+    },
+    [user]
+  );
 
   const createRequest = useCallback(async () => {
     if (!user) return;
@@ -156,9 +154,9 @@ export function usePatientCommunication(): UsePatientCommunicationResult {
         };
 
         const updatedMessages = [...activeRequest.messages, newMsg];
-        const targetTable = activeRequest.table || 'inquiries';
+        const targetTable = activeRequest.table || "inquiries";
 
-        if (targetTable === 'inquiries') {
+        if (targetTable === "inquiries") {
           const { error } = await supabase
             .from("inquiries")
             .update({
@@ -194,13 +192,13 @@ export function usePatientCommunication(): UsePatientCommunicationResult {
           const currentReport = currentData?.full_report || {};
           const newReport = {
             ...currentReport,
-            messages: updatedMessages
+            messages: updatedMessages,
           };
 
           const { error } = await supabase
             .from("diagnosis_sessions")
             .update({
-              full_report: newReport
+              full_report: newReport,
             })
             .eq("id", requestId);
 
@@ -210,9 +208,7 @@ export function usePatientCommunication(): UsePatientCommunicationResult {
         // Optimistic update
         const updatedRequest = { ...activeRequest, messages: updatedMessages };
         setActiveRequest(updatedRequest);
-        setRequests((prev) =>
-          prev.map((r) => (r.id === requestId ? updatedRequest : r))
-        );
+        setRequests((prev) => prev.map((r) => (r.id === requestId ? updatedRequest : r)));
       } catch (error) {
         console.error("Error sending message:", error);
         throw error;
@@ -230,13 +226,13 @@ export function usePatientCommunication(): UsePatientCommunicationResult {
 
       // Realtime subscription for doctor replies
       const channel = supabase
-        .channel('patient-inquiries')
+        .channel("patient-inquiries")
         .on(
-          'postgres_changes',
+          "postgres_changes",
           {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'inquiries',
+            event: "UPDATE",
+            schema: "public",
+            table: "inquiries",
             filter: `user_id=eq.${user.id}`,
           },
           (payload) => {
@@ -245,20 +241,22 @@ export function usePatientCommunication(): UsePatientCommunicationResult {
             const newMessages = newData.diagnosis_report?.messages || [];
             if (newMessages.length > 0) {
               const lastMsg = newMessages[newMessages.length - 1];
-              if (lastMsg.role === 'doctor') {
-                window.dispatchEvent(new CustomEvent('doctor-reply', {
-                  detail: { message: lastMsg.content, requestId: newData.id }
-                }));
+              if (lastMsg.role === "doctor") {
+                window.dispatchEvent(
+                  new CustomEvent("doctor-reply", {
+                    detail: { message: lastMsg.content, requestId: newData.id },
+                  })
+                );
               }
             }
           }
         )
         .on(
-          'postgres_changes',
+          "postgres_changes",
           {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'diagnosis_sessions',
+            event: "UPDATE",
+            schema: "public",
+            table: "diagnosis_sessions",
             filter: `user_id=eq.${user.id}`,
           },
           (payload) => {
@@ -267,10 +265,12 @@ export function usePatientCommunication(): UsePatientCommunicationResult {
             const newMessages = newData.full_report?.messages || [];
             if (newMessages.length > 0) {
               const lastMsg = newMessages[newMessages.length - 1];
-              if (lastMsg.role === 'doctor') {
-                window.dispatchEvent(new CustomEvent('doctor-reply', {
-                  detail: { message: lastMsg.content, requestId: newData.id }
-                }));
+              if (lastMsg.role === "doctor") {
+                window.dispatchEvent(
+                  new CustomEvent("doctor-reply", {
+                    detail: { message: lastMsg.content, requestId: newData.id },
+                  })
+                );
               }
             }
           }
@@ -294,6 +294,3 @@ export function usePatientCommunication(): UsePatientCommunicationResult {
     sendMessage,
   };
 }
-
-
-

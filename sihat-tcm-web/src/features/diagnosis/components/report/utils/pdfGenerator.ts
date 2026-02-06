@@ -47,7 +47,7 @@ export async function generateDiagnosisPDF({
   const addWrappedText = (text: string, fontSize: number, isBold = false) => {
     doc.setFontSize(fontSize);
     // Use the determined font based on whether Chinese font loaded successfully
-    const fontStyle = chineseFontLoaded ? "normal" : (isBold ? "bold" : "normal");
+    const fontStyle = chineseFontLoaded ? "normal" : isBold ? "bold" : "normal";
     doc.setFont(fontName, fontStyle);
     const lines = doc.splitTextToSize(text, contentWidth);
     if (yPos + lines.length * fontSize * 0.5 > 280) {
@@ -103,5 +103,3 @@ export async function generateDiagnosisPDF({
   const isoDate = new Date().toISOString().split("T")[0];
   doc.save(`${tPdf.fileName}_${isoDate}.pdf`);
 }
-
-

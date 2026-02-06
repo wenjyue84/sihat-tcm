@@ -94,7 +94,7 @@ export const downloadPDF = async (
   const addWrappedText = (text: string, fontSize: number, isBold = false) => {
     doc.setFontSize(fontSize);
     // Use the determined font based on whether Chinese font loaded successfully
-    const fontStyle = chineseFontLoaded ? "normal" : (isBold ? "bold" : "normal");
+    const fontStyle = chineseFontLoaded ? "normal" : isBold ? "bold" : "normal";
     doc.setFont(fontName, fontStyle);
     const lines = doc.splitTextToSize(text, contentWidth);
 

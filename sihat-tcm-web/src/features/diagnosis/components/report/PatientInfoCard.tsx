@@ -50,7 +50,9 @@ export function PatientInfoCard({ patientInfo, reportOptions }: PatientInfoCardP
             {reportOptions.includePatientAge !== false && patientInfo.age && (
               <div>
                 <p className="text-xs text-blue-600 font-medium">{t.report.age}</p>
-                <p className="text-blue-900 font-semibold">{patientInfo.age} {t.analysisLoading.yearsOld}</p>
+                <p className="text-blue-900 font-semibold">
+                  {patientInfo.age} {t.analysisLoading.yearsOld}
+                </p>
               </div>
             )}
             {reportOptions.includePatientGender !== false && patientInfo.gender && (
@@ -62,7 +64,9 @@ export function PatientInfoCard({ patientInfo, reportOptions }: PatientInfoCardP
             {reportOptions.includeBMI !== false && patientInfo.height && patientInfo.weight && (
               <>
                 <div>
-                  <p className="text-xs text-blue-600 font-medium">{t.report.height} / {t.report.weight}</p>
+                  <p className="text-xs text-blue-600 font-medium">
+                    {t.report.height} / {t.report.weight}
+                  </p>
                   <p className="text-blue-900 font-semibold">
                     {patientInfo.height}cm / {patientInfo.weight}kg
                   </p>
@@ -77,13 +81,17 @@ export function PatientInfoCard({ patientInfo, reportOptions }: PatientInfoCardP
             )}
             {reportOptions.includePatientContact && patientInfo.contact && (
               <div className="col-span-2 md:col-span-1">
-                <p className="text-xs text-blue-600 font-medium">{t.patientDashboard.settings.accountInfo}</p>
+                <p className="text-xs text-blue-600 font-medium">
+                  {t.patientDashboard.settings.accountInfo}
+                </p>
                 <p className="text-blue-900 font-semibold">{patientInfo.contact}</p>
               </div>
             )}
             {reportOptions.includePatientAddress && patientInfo.address && (
               <div className="col-span-2">
-                <p className="text-xs text-blue-600 font-medium">{t.patientDashboard.profile.personalInfo}</p>
+                <p className="text-xs text-blue-600 font-medium">
+                  {t.patientDashboard.profile.personalInfo}
+                </p>
                 <p className="text-blue-900 font-semibold">{patientInfo.address}</p>
               </div>
             )}

@@ -1,6 +1,6 @@
 /**
  * Logging Utilities
- * 
+ *
  * Barrel export for all logging utilities
  */
 
@@ -18,5 +18,3 @@ export * from "./client-logger";
 
 // Client-safe logger (universal dev logging)
 export * from "./client-safe";
-
-

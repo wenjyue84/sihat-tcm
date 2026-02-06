@@ -6,7 +6,11 @@ import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { parseMedicalHistory, groupConditionsByCategory, MedicalCondition } from "@/lib/medicalHistoryParser";
+import {
+  parseMedicalHistory,
+  groupConditionsByCategory,
+  MedicalCondition,
+} from "@/lib/medicalHistoryParser";
 
 interface MedicalHistoryTagsProps {
   medicalHistory: string | null | undefined;
@@ -96,11 +100,7 @@ export function MedicalHistoryTags({
               onClick={() => setIsExpanded(!isExpanded)}
               className="text-slate-600"
             >
-              {isExpanded ? (
-                <ChevronUp className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
+              {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </Button>
           </div>
 
@@ -160,5 +160,3 @@ export function MedicalHistoryTags({
     </motion.div>
   );
 }
-
-

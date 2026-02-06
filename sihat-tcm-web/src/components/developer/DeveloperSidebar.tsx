@@ -19,10 +19,7 @@ interface DeveloperSidebarProps {
   onMobileMenuClose: () => void;
 }
 
-export function DeveloperSidebar({
-  isMobileMenuOpen,
-  onMobileMenuClose,
-}: DeveloperSidebarProps) {
+export function DeveloperSidebar({ isMobileMenuOpen, onMobileMenuClose }: DeveloperSidebarProps) {
   const { signOut } = useAuth();
   const router = useRouter();
 
@@ -44,10 +41,7 @@ export function DeveloperSidebar({
       >
         <div className="flex items-center justify-between md:hidden mb-4 px-2">
           <span className="font-bold text-white">Menu</span>
-          <button
-            onClick={onMobileMenuClose}
-            className="text-gray-400 hover:text-white"
-          >
+          <button onClick={onMobileMenuClose} className="text-gray-400 hover:text-white">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -138,6 +132,3 @@ export function DeveloperSidebar({
     </>
   );
 }
-
-
-

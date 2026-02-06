@@ -52,14 +52,18 @@ export function HealthMetricsCard({
       <Card className="border-none shadow-sm bg-white hover:shadow-md transition-shadow duration-300">
         <div className="p-4 sm:p-6">
           {/* Header */}
-          <h2 className="text-lg sm:text-2xl font-semibold text-slate-900 mb-4 sm:mb-6">Health Metrics</h2>
+          <h2 className="text-lg sm:text-2xl font-semibold text-slate-900 mb-4 sm:mb-6">
+            Health Metrics
+          </h2>
 
           {/* Metrics Grid */}
           <div className="grid grid-cols-3 gap-2 sm:gap-6">
             {/* Height */}
             <div className="flex flex-col items-center p-2 sm:p-4 bg-slate-50 rounded-lg sm:rounded-xl">
               <Ruler className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 mb-1 sm:mb-2" />
-              <div className="text-[10px] sm:text-sm font-medium text-slate-600 mb-0.5 sm:mb-1">Height</div>
+              <div className="text-[10px] sm:text-sm font-medium text-slate-600 mb-0.5 sm:mb-1">
+                Height
+              </div>
               {editing ? (
                 <div className="flex flex-col items-center gap-1">
                   <Input
@@ -79,7 +83,14 @@ export function HealthMetricsCard({
                 </div>
               ) : (
                 <div className="text-base sm:text-2xl font-bold text-slate-900">
-                  {height ? <><span>{height}</span> <span className="text-[10px] sm:text-sm font-medium text-slate-500">cm</span></> : "—"}
+                  {height ? (
+                    <>
+                      <span>{height}</span>{" "}
+                      <span className="text-[10px] sm:text-sm font-medium text-slate-500">cm</span>
+                    </>
+                  ) : (
+                    "—"
+                  )}
                 </div>
               )}
             </div>
@@ -87,7 +98,9 @@ export function HealthMetricsCard({
             {/* Weight */}
             <div className="flex flex-col items-center p-2 sm:p-4 bg-slate-50 rounded-lg sm:rounded-xl">
               <Weight className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 mb-1 sm:mb-2" />
-              <div className="text-[10px] sm:text-sm font-medium text-slate-600 mb-0.5 sm:mb-1">Weight</div>
+              <div className="text-[10px] sm:text-sm font-medium text-slate-600 mb-0.5 sm:mb-1">
+                Weight
+              </div>
               {editing ? (
                 <div className="flex flex-col items-center gap-1">
                   <Input
@@ -107,7 +120,14 @@ export function HealthMetricsCard({
                 </div>
               ) : (
                 <div className="text-base sm:text-2xl font-bold text-slate-900">
-                  {weight ? <><span>{weight}</span> <span className="text-[10px] sm:text-sm font-medium text-slate-500">kg</span></> : "—"}
+                  {weight ? (
+                    <>
+                      <span>{weight}</span>{" "}
+                      <span className="text-[10px] sm:text-sm font-medium text-slate-500">kg</span>
+                    </>
+                  ) : (
+                    "—"
+                  )}
                 </div>
               )}
             </div>
@@ -115,7 +135,9 @@ export function HealthMetricsCard({
             {/* BMI */}
             <div className="flex flex-col items-center p-2 sm:p-4 bg-slate-50 rounded-lg sm:rounded-xl">
               <Activity className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 mb-1 sm:mb-2" />
-              <div className="text-[10px] sm:text-sm font-medium text-slate-600 mb-0.5 sm:mb-1">BMI</div>
+              <div className="text-[10px] sm:text-sm font-medium text-slate-600 mb-0.5 sm:mb-1">
+                BMI
+              </div>
               {bmiResult ? (
                 <div className="scale-75 sm:scale-100 origin-center">
                   <BMIIndicator bmi={bmiResult} size={64} showLabel={true} />
@@ -130,4 +152,3 @@ export function HealthMetricsCard({
     </motion.div>
   );
 }
-

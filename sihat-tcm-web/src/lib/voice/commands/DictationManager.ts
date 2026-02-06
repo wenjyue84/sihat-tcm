@@ -1,6 +1,6 @@
 /**
  * Dictation Manager
- * 
+ *
  * Handles voice dictation mode for text input in the Sihat TCM application.
  * Provides seamless switching between command mode and dictation mode.
  */
@@ -8,8 +8,8 @@
 import {
   VoiceRecognitionResult,
   VoiceEvent,
-  VoiceEventListener
-} from '../interfaces/VoiceInterfaces';
+  VoiceEventListener,
+} from "../interfaces/VoiceInterfaces";
 
 export interface DictationOptions {
   autoCapitalize: boolean;
@@ -41,7 +41,7 @@ export class DictationManager {
     autoPunctuation: true,
     language: "en-US",
     maxLength: 1000,
-    stopWords: ["stop dictation", "end dictation", "finish dictation"]
+    stopWords: ["stop dictation", "end dictation", "finish dictation"],
   };
 
   constructor(options: Partial<DictationOptions> = {}) {
@@ -65,7 +65,7 @@ export class DictationManager {
     this.emitEvent("dictation", {
       action: "start",
       text: this.currentText,
-      timestamp: this.dictationStartTime
+      timestamp: this.dictationStartTime,
     });
 
     console.log("[DictationManager] Dictation mode started");
@@ -81,13 +81,13 @@ export class DictationManager {
     }
 
     const result = this.createDictationResult(this.currentText, 1.0, true);
-    
+
     this.isDictationMode = false;
-    
+
     this.emitEvent("dictation", {
       action: "stop",
       result,
-      duration: Date.now() - this.dictationStartTime
+      duration: Date.now() - this.dictationStartTime,
     });
 
     console.log("[DictationManager] Dictation mode stopped");
@@ -109,7 +109,7 @@ export class DictationManager {
 
     // Process the transcript
     const processedText = this.processTranscript(result.transcript);
-    
+
     if (result.isFinal) {
       // Add to current text
       this.currentText = this.appendText(this.currentText, processedText);
@@ -131,7 +131,7 @@ export class DictationManager {
     this.emitEvent("dictation", {
       action: "update",
       result: dictationResult,
-      isInterim: !result.isFinal
+      isInterim: !result.isFinal,
     });
 
     return dictationResult;
@@ -179,20 +179,20 @@ export class DictationManager {
 
     // Common punctuation replacements
     const punctuationMap: Record<string, string> = {
-      'period': '.',
-      'comma': ',',
-      'question mark': '?',
-      'exclamation mark': '!',
-      'exclamation point': '!',
-      'semicolon': ';',
-      'colon': ':',
-      'new line': '\n',
-      'new paragraph': '\n\n'
+      period: ".",
+      comma: ",",
+      "question mark": "?",
+      "exclamation mark": "!",
+      "exclamation point": "!",
+      semicolon: ";",
+      colon: ":",
+      "new line": "\n",
+      "new paragraph": "\n\n",
     };
 
     // Replace spoken punctuation
     Object.entries(punctuationMap).forEach(([spoken, symbol]) => {
-      const regex = new RegExp(`\\b${spoken}\\b`, 'gi');
+      const regex = new RegExp(`\\b${spoken}\\b`, "gi");
       result = result.replace(regex, symbol);
     });
 
@@ -207,12 +207,13 @@ export class DictationManager {
     if (!newText) return currentText;
 
     // Check if we need a space
-    const needsSpace = !currentText.endsWith(' ') && 
-                     !currentText.endsWith('\n') && 
-                     !newText.startsWith(' ') &&
-                     !/^[.!?,:;]/.test(newText);
+    const needsSpace =
+      !currentText.endsWith(" ") &&
+      !currentText.endsWith("\n") &&
+      !newText.startsWith(" ") &&
+      !/^[.!?,:;]/.test(newText);
 
-    return currentText + (needsSpace ? ' ' : '') + newText;
+    return currentText + (needsSpace ? " " : "") + newText;
   }
 
   /**
@@ -222,7 +223,7 @@ export class DictationManager {
     if (!this.options.stopWords) return false;
 
     const lowerTranscript = transcript.toLowerCase();
-    return this.options.stopWords.some(stopWord => 
+    return this.options.stopWords.some((stopWord) =>
       lowerTranscript.includes(stopWord.toLowerCase())
     );
   }
@@ -230,13 +231,20 @@ export class DictationManager {
   /**
    * Create dictation result object
    */
-  private createDictationResult(text: string, confidence: number, isFinal: boolean): DictationResult {
+  private createDictationResult(
+    text: string,
+    confidence: number,
+    isFinal: boolean
+  ): DictationResult {
     return {
       text,
       confidence,
       isFinal,
-      wordCount: text.trim().split(/\s+/).filter(word => word.length > 0).length,
-      timestamp: Date.now()
+      wordCount: text
+        .trim()
+        .split(/\s+/)
+        .filter((word) => word.length > 0).length,
+      timestamp: Date.now(),
     };
   }
 
@@ -249,7 +257,7 @@ export class DictationManager {
       confidence: 0,
       isFinal: true,
       wordCount: 0,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 
@@ -260,7 +268,7 @@ export class DictationManager {
     this.currentText = "";
     this.emitEvent("dictation", {
       action: "clear",
-      text: this.currentText
+      text: this.currentText,
     });
   }
 
@@ -271,7 +279,7 @@ export class DictationManager {
     this.currentText = text;
     this.emitEvent("dictation", {
       action: "set",
-      text: this.currentText
+      text: this.currentText,
     });
   }
 
@@ -309,9 +317,12 @@ export class DictationManager {
     return {
       isActive: this.isDictationMode,
       currentLength: this.currentText.length,
-      wordCount: this.currentText.trim().split(/\s+/).filter(word => word.length > 0).length,
+      wordCount: this.currentText
+        .trim()
+        .split(/\s+/)
+        .filter((word) => word.length > 0).length,
       duration: this.isDictationMode ? Date.now() - this.dictationStartTime : 0,
-      lastUpdate: this.lastUpdateTime
+      lastUpdate: this.lastUpdateTime,
     };
   }
 

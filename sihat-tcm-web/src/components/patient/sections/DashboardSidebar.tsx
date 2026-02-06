@@ -205,7 +205,9 @@ export function DashboardSidebar({
                   }`}
                 >
                   <Heart className="w-4 h-4" />
-                  {t.patientDashboard.tabs.heartCompanion || t.heartCompanion?.title || "Heart Companion"}
+                  {t.patientDashboard.tabs.heartCompanion ||
+                    t.heartCompanion?.title ||
+                    "Heart Companion"}
                 </button>
                 <button
                   onClick={() => handleSectionClick("communication")}
@@ -258,4 +260,3 @@ export function DashboardSidebar({
     </>
   );
 }
-

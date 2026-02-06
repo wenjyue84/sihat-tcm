@@ -1,6 +1,6 @@
 /**
  * Preference Manager
- * 
+ *
  * Manages accessibility preferences including system detection,
  * user customization, and preference persistence.
  */
@@ -8,7 +8,7 @@
 import {
   AccessibilityPreferences,
   SystemAccessibilityPreferences,
-  ScreenReaderDetection
+  ScreenReaderDetection,
 } from "../interfaces/AccessibilityInterfaces";
 
 export class PreferenceManager {
@@ -34,13 +34,13 @@ export class PreferenceManager {
       autoplayMedia: true,
       animationSpeed: "normal",
       textSpacing: "normal",
-      ...initialPreferences
+      ...initialPreferences,
     };
 
     this.systemPreferences = {
       prefersReducedMotion: false,
       prefersHighContrast: false,
-      prefersColorScheme: "no-preference"
+      prefersColorScheme: "no-preference",
     };
 
     this.initialize();
@@ -137,11 +137,19 @@ export class PreferenceManager {
     // Check for common screen reader user agents
     const userAgent = navigator.userAgent.toLowerCase();
     const screenReaderIndicators = [
-      "nvda", "jaws", "dragon", "zoomtext", "magic", "supernova",
-      "narrator", "voiceover", "talkback", "orca"
+      "nvda",
+      "jaws",
+      "dragon",
+      "zoomtext",
+      "magic",
+      "supernova",
+      "narrator",
+      "voiceover",
+      "talkback",
+      "orca",
     ];
 
-    const hasScreenReaderUA = screenReaderIndicators.some(indicator =>
+    const hasScreenReaderUA = screenReaderIndicators.some((indicator) =>
       userAgent.includes(indicator)
     );
 
@@ -157,8 +165,8 @@ export class PreferenceManager {
     }
 
     // Heuristic detection based on navigation patterns
-    const hasHighTabIndex = document.querySelectorAll('[tabindex]').length > 10;
-    const hasAriaLabels = document.querySelectorAll('[aria-label]').length > 5;
+    const hasHighTabIndex = document.querySelectorAll("[tabindex]").length > 10;
+    const hasAriaLabels = document.querySelectorAll("[aria-label]").length > 5;
 
     if (hasHighTabIndex && hasAriaLabels) {
       return { isDetected: true, detectionMethod: "heuristic", confidence: "low" };
@@ -256,7 +264,7 @@ export class PreferenceManager {
       autoplayMedia: true,
       animationSpeed: "normal",
       textSpacing: "normal",
-      ...this.initialPreferences
+      ...this.initialPreferences,
     };
 
     this.applySystemPreferences();
@@ -272,7 +280,7 @@ export class PreferenceManager {
 
     // Return unsubscribe function
     return () => {
-      this.listeners = this.listeners.filter(l => l !== callback);
+      this.listeners = this.listeners.filter((l) => l !== callback);
     };
   }
 
@@ -280,7 +288,7 @@ export class PreferenceManager {
    * Notify all listeners of preference changes
    */
   private notifyListeners(): void {
-    this.listeners.forEach(listener => {
+    this.listeners.forEach((listener) => {
       try {
         listener(this.getPreferences());
       } catch (error) {
@@ -299,7 +307,9 @@ export class PreferenceManager {
   /**
    * Get preference source information
    */
-  public getPreferenceSource(preference: keyof AccessibilityPreferences): "user" | "system" | "default" {
+  public getPreferenceSource(
+    preference: keyof AccessibilityPreferences
+  ): "user" | "system" | "default" {
     if (preference in this.initialPreferences) {
       return "user";
     }
@@ -308,10 +318,12 @@ export class PreferenceManager {
     switch (preference) {
       case "reducedMotion":
         return this.preferences.reducedMotion === this.systemPreferences.prefersReducedMotion
-          ? "system" : "default";
+          ? "system"
+          : "default";
       case "highContrast":
         return this.preferences.highContrast === this.systemPreferences.prefersHighContrast
-          ? "system" : "default";
+          ? "system"
+          : "default";
       default:
         return "default";
     }
@@ -324,7 +336,7 @@ export class PreferenceManager {
     return JSON.stringify({
       preferences: this.preferences,
       timestamp: Date.now(),
-      version: "1.0"
+      version: "1.0",
     });
   }
 

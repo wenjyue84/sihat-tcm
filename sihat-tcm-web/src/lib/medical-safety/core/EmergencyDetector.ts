@@ -1,6 +1,6 @@
 /**
  * Emergency Detector
- * 
+ *
  * Specialized component for detecting emergency conditions and symptoms.
  * Provides rapid identification of conditions requiring immediate medical attention.
  */
@@ -13,7 +13,7 @@ import {
   EmergencyFlag,
   SafetyConcern,
   ValidationContext,
-  SupportedLanguage
+  SupportedLanguage,
 } from "../interfaces/SafetyInterfaces";
 import { DiagnosisReport } from "@/types/database";
 
@@ -35,7 +35,7 @@ export class EmergencyDetector {
   ): Promise<EmergencyCheckResult> {
     try {
       devLog("info", this.context, "Detecting emergency conditions", {
-        hasDiagnosis: Boolean(diagnosisReport)
+        hasDiagnosis: Boolean(diagnosisReport),
       });
 
       const concerns: SafetyConcern[] = [];
@@ -122,14 +122,14 @@ export class EmergencyDetector {
       const google = getGoogleProvider();
       const { text: responseText } = await generateText({
         model: google("gemini-2.5-pro"),
-        messages: [{ role: "user", content: prompt }]
+        messages: [{ role: "user", content: prompt }],
       });
 
       const cleanText = responseText
         .replace(/```json/g, "")
         .replace(/```/g, "")
         .trim();
-      
+
       return JSON.parse(cleanText);
     } catch (error) {
       logError(this.context, "Failed to get emergency guidelines", { error, condition });
@@ -137,22 +137,15 @@ export class EmergencyDetector {
       return {
         immediate_actions: [
           "Stay calm and assess the situation",
-          "Call emergency services if condition is severe"
+          "Call emergency services if condition is severe",
         ],
-        warning_signs: [
-          "Worsening symptoms",
-          "Difficulty breathing",
-          "Loss of consciousness"
-        ],
+        warning_signs: ["Worsening symptoms", "Difficulty breathing", "Loss of consciousness"],
         when_to_call_911: [
           "Life-threatening symptoms",
           "Severe pain or distress",
-          "Unconsciousness"
+          "Unconsciousness",
         ],
-        emergency_contacts: [
-          "Emergency Services: 999",
-          "Poison Control: 1-800-222-1222"
-        ]
+        emergency_contacts: ["Emergency Services: 999", "Poison Control: 1-800-222-1222"],
       };
     }
   }
@@ -227,22 +220,22 @@ export class EmergencyDetector {
       const google = getGoogleProvider();
       const { text: responseText } = await generateText({
         model: google("gemini-2.5-pro"),
-        messages: [{ role: "user", content: prompt }]
+        messages: [{ role: "user", content: prompt }],
       });
 
       const cleanText = responseText
         .replace(/```json/g, "")
         .replace(/```/g, "")
         .trim();
-      
+
       const analysis = JSON.parse(cleanText);
-      
+
       return analysis.emergencies_detected.map((emergency: any) => ({
         condition: emergency.condition,
         symptoms: emergency.symptoms,
         urgency: emergency.urgency,
         recommended_action: emergency.recommended_action,
-        emergency_contacts: ["Emergency Services: 999", "Hospital Emergency Department"]
+        emergency_contacts: ["Emergency Services: 999", "Hospital Emergency Department"],
       }));
     } catch (error) {
       logError(this.context, "AI emergency detection failed", { error });
@@ -255,9 +248,7 @@ export class EmergencyDetector {
    */
   private isEmergencySymptom(symptom: string): boolean {
     const symptomLower = symptom.toLowerCase();
-    return Array.from(this.emergencyKeywords).some(keyword =>
-      symptomLower.includes(keyword)
-    );
+    return Array.from(this.emergencyKeywords).some((keyword) => symptomLower.includes(keyword));
   }
 
   /**
@@ -268,38 +259,44 @@ export class EmergencyDetector {
     const symptomText = symptoms.join(" ").toLowerCase();
 
     // Heart attack indicators
-    if (symptomText.includes("chest pain") && 
-        (symptomText.includes("shortness of breath") || symptomText.includes("nausea"))) {
+    if (
+      symptomText.includes("chest pain") &&
+      (symptomText.includes("shortness of breath") || symptomText.includes("nausea"))
+    ) {
       emergencyFlags.push({
         condition: "Possible Heart Attack",
         symptoms: ["chest pain", "shortness of breath", "nausea"],
         urgency: "immediate",
         recommended_action: "Call 999 immediately, chew aspirin if not allergic",
-        emergency_contacts: ["Emergency Services: 999"]
+        emergency_contacts: ["Emergency Services: 999"],
       });
     }
 
     // Stroke indicators
-    if ((symptomText.includes("facial drooping") || symptomText.includes("arm weakness")) &&
-        symptomText.includes("speech difficulty")) {
+    if (
+      (symptomText.includes("facial drooping") || symptomText.includes("arm weakness")) &&
+      symptomText.includes("speech difficulty")
+    ) {
       emergencyFlags.push({
         condition: "Possible Stroke",
         symptoms: ["facial drooping", "arm weakness", "speech difficulty"],
         urgency: "immediate",
         recommended_action: "Call 999 immediately, note time of symptom onset",
-        emergency_contacts: ["Emergency Services: 999"]
+        emergency_contacts: ["Emergency Services: 999"],
       });
     }
 
     // Severe allergic reaction
-    if (symptomText.includes("difficulty breathing") && 
-        (symptomText.includes("swelling") || symptomText.includes("rash"))) {
+    if (
+      symptomText.includes("difficulty breathing") &&
+      (symptomText.includes("swelling") || symptomText.includes("rash"))
+    ) {
       emergencyFlags.push({
         condition: "Possible Anaphylaxis",
         symptoms: ["difficulty breathing", "swelling", "rash"],
         urgency: "immediate",
         recommended_action: "Call 999, use EpiPen if available",
-        emergency_contacts: ["Emergency Services: 999"]
+        emergency_contacts: ["Emergency Services: 999"],
       });
     }
 
@@ -315,7 +312,7 @@ export class EmergencyDetector {
       symptoms: [symptom],
       urgency: "immediate",
       recommended_action: "Seek immediate emergency medical care",
-      emergency_contacts: ["Emergency Services: 999", "Hospital Emergency Department"]
+      emergency_contacts: ["Emergency Services: 999", "Hospital Emergency Department"],
     };
   }
 
@@ -329,7 +326,7 @@ export class EmergencyDetector {
       description: `Emergency condition detected: ${emergency.condition}`,
       affected_recommendation: "all",
       evidence_level: "clinical_study",
-      action_required: "emergency_care"
+      action_required: "emergency_care",
     };
   }
 
@@ -358,7 +355,7 @@ export class EmergencyDetector {
       "severe trauma",
       "overdose",
       "severe dehydration",
-      "diabetic emergency"
+      "diabetic emergency",
     ]);
 
     // Pre-defined critical symptoms with detailed flags
@@ -367,7 +364,7 @@ export class EmergencyDetector {
       symptoms: ["chest pain", "pressure", "tightness"],
       urgency: "immediate",
       recommended_action: "Call 999 immediately, may indicate heart attack",
-      emergency_contacts: ["Emergency Services: 999"]
+      emergency_contacts: ["Emergency Services: 999"],
     });
 
     this.criticalSymptoms.set("difficulty breathing", {
@@ -375,7 +372,7 @@ export class EmergencyDetector {
       symptoms: ["difficulty breathing", "shortness of breath", "wheezing"],
       urgency: "immediate",
       recommended_action: "Call 999, ensure airway is clear",
-      emergency_contacts: ["Emergency Services: 999"]
+      emergency_contacts: ["Emergency Services: 999"],
     });
 
     this.criticalSymptoms.set("loss of consciousness", {
@@ -383,7 +380,7 @@ export class EmergencyDetector {
       symptoms: ["loss of consciousness", "fainting", "unresponsive"],
       urgency: "immediate",
       recommended_action: "Call 999, check breathing and pulse",
-      emergency_contacts: ["Emergency Services: 999"]
+      emergency_contacts: ["Emergency Services: 999"],
     });
 
     this.criticalSymptoms.set("severe bleeding", {
@@ -391,7 +388,7 @@ export class EmergencyDetector {
       symptoms: ["severe bleeding", "heavy blood loss", "hemorrhage"],
       urgency: "immediate",
       recommended_action: "Call 999, apply direct pressure to wound",
-      emergency_contacts: ["Emergency Services: 999"]
+      emergency_contacts: ["Emergency Services: 999"],
     });
   }
 
@@ -400,7 +397,7 @@ export class EmergencyDetector {
    */
   addEmergencyKeyword(keyword: string, flag?: EmergencyFlag): void {
     this.emergencyKeywords.add(keyword.toLowerCase());
-    
+
     if (flag) {
       this.criticalSymptoms.set(keyword.toLowerCase(), flag);
     }
@@ -417,7 +414,7 @@ export class EmergencyDetector {
     const urgencyBreakdown: Record<string, number> = {
       immediate: 0,
       urgent: 0,
-      semi_urgent: 0
+      semi_urgent: 0,
     };
 
     for (const flag of this.criticalSymptoms.values()) {
@@ -427,7 +424,7 @@ export class EmergencyDetector {
     return {
       totalKeywords: this.emergencyKeywords.size,
       totalCriticalSymptoms: this.criticalSymptoms.size,
-      urgencyBreakdown
+      urgencyBreakdown,
     };
   }
 }

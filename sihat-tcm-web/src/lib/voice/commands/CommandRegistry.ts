@@ -1,6 +1,6 @@
 /**
  * Command Registry
- * 
+ *
  * Manages voice command registration, matching, and execution
  * for the Sihat TCM voice command system.
  */
@@ -11,8 +11,8 @@ import {
   CommandProcessingContext,
   CommandExecutionContext,
   VoiceEvent,
-  VoiceEventListener
-} from '../interfaces/VoiceInterfaces';
+  VoiceEventListener,
+} from "../interfaces/VoiceInterfaces";
 
 export class CommandRegistry {
   private commands: Map<string, VoiceCommand> = new Map();
@@ -60,15 +60,15 @@ export class CommandRegistry {
    * Get enabled commands
    */
   public getEnabledCommands(): VoiceCommand[] {
-    return Array.from(this.commands.values()).filter(cmd => cmd.enabled);
+    return Array.from(this.commands.values()).filter((cmd) => cmd.enabled);
   }
 
   /**
    * Get commands by category
    */
-  public getCommandsByCategory(category: VoiceCommand['category']): VoiceCommand[] {
-    return Array.from(this.commands.values()).filter(cmd => 
-      cmd.category === category && cmd.enabled
+  public getCommandsByCategory(category: VoiceCommand["category"]): VoiceCommand[] {
+    return Array.from(this.commands.values()).filter(
+      (cmd) => cmd.category === category && cmd.enabled
     );
   }
 
@@ -169,11 +169,13 @@ export class CommandRegistry {
     // Word-based matching
     const transcriptWords = transcript.split(/\s+/);
     const patternWords = pattern.split(/\s+/);
-    
-    const matchingWords = patternWords.filter(word => 
-      transcriptWords.some(tWord => 
-        tWord.includes(word) || word.includes(tWord) || 
-        this.calculateSimilarity(tWord, word) > 0.8
+
+    const matchingWords = patternWords.filter((word) =>
+      transcriptWords.some(
+        (tWord) =>
+          tWord.includes(word) ||
+          word.includes(tWord) ||
+          this.calculateSimilarity(tWord, word) > 0.8
       )
     );
 
@@ -237,18 +239,20 @@ export class CommandRegistry {
     // Extract quoted strings
     const quotes = transcript.match(/"([^"]+)"/g);
     if (quotes) {
-      parameters.quotes = quotes.map(q => q.slice(1, -1));
+      parameters.quotes = quotes.map((q) => q.slice(1, -1));
     }
 
     // Extract words that differ from pattern
     const transcriptWords = transcript.split(/\s+/);
     const patternWords = pattern.split(/\s+/);
-    
-    const extraWords = transcriptWords.filter(word => 
-      !patternWords.some(pWord => 
-        word.toLowerCase().includes(pWord.toLowerCase()) ||
-        pWord.toLowerCase().includes(word.toLowerCase())
-      )
+
+    const extraWords = transcriptWords.filter(
+      (word) =>
+        !patternWords.some(
+          (pWord) =>
+            word.toLowerCase().includes(pWord.toLowerCase()) ||
+            pWord.toLowerCase().includes(word.toLowerCase())
+        )
     );
 
     if (extraWords.length > 0) {
@@ -410,12 +414,15 @@ export class CommandRegistry {
     commandsByCategory: Record<string, number>;
   } {
     const commands = Array.from(this.commands.values());
-    const enabled = commands.filter(cmd => cmd.enabled);
-    
-    const byCategory = commands.reduce((acc, cmd) => {
-      acc[cmd.category] = (acc[cmd.category] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const enabled = commands.filter((cmd) => cmd.enabled);
+
+    const byCategory = commands.reduce(
+      (acc, cmd) => {
+        acc[cmd.category] = (acc[cmd.category] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     return {
       totalCommands: commands.length,

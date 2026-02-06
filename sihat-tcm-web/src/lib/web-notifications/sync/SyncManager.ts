@@ -3,10 +3,10 @@
  * Handles synchronization with server for notifications and preferences
  */
 
-import { SyncData, SyncResult } from '../interfaces/WebNotificationInterfaces';
-import { PreferenceManager } from '../core/PreferenceManager';
-import { NotificationScheduler } from '../core/NotificationScheduler';
-import { NotificationDisplay } from '../core/NotificationDisplay';
+import { SyncData, SyncResult } from "../interfaces/WebNotificationInterfaces";
+import { PreferenceManager } from "../core/PreferenceManager";
+import { NotificationScheduler } from "../core/NotificationScheduler";
+import { NotificationDisplay } from "../core/NotificationDisplay";
 
 export class SyncManager {
   private preferenceManager: PreferenceManager;
@@ -128,7 +128,7 @@ export class SyncManager {
       }
 
       const result = await response.json();
-      
+
       if (result.success) {
         console.log("[SyncManager] Local data uploaded successfully");
         return { success: true };
@@ -154,7 +154,7 @@ export class SyncManager {
 
       // Then download server changes
       const downloadResult = await this.syncWithServer();
-      
+
       return downloadResult;
     } catch (error) {
       console.error("[SyncManager] Full sync failed:", error);
@@ -187,7 +187,7 @@ export class SyncManager {
       }
 
       const result = await response.json();
-      
+
       return {
         lastSync: result.lastSync ? new Date(result.lastSync) : null,
         pendingChanges: result.pendingChanges || 0,
@@ -211,12 +211,15 @@ export class SyncManager {
     this.clearAutoSync();
 
     // Set up new interval
-    const intervalId = setInterval(async () => {
-      const syncResult = await this.syncWithServer();
-      if (!syncResult.success) {
-        console.warn("[SyncManager] Auto-sync failed:", syncResult.error);
-      }
-    }, intervalMinutes * 60 * 1000);
+    const intervalId = setInterval(
+      async () => {
+        const syncResult = await this.syncWithServer();
+        if (!syncResult.success) {
+          console.warn("[SyncManager] Auto-sync failed:", syncResult.error);
+        }
+      },
+      intervalMinutes * 60 * 1000
+    );
 
     // Store interval ID for cleanup
     (this as any)._autoSyncInterval = intervalId;

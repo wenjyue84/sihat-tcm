@@ -32,9 +32,7 @@ export function DiagnosticsTab({ testSuites }: DiagnosticsTabProps) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-white">System Diagnostics</h2>
-          <p className="text-sm text-gray-400 mt-1">
-            Automated test suites and system validation
-          </p>
+          <p className="text-sm text-gray-400 mt-1">Automated test suites and system validation</p>
         </div>
         <div className="flex items-center gap-3">
           <Button
@@ -100,9 +98,7 @@ export function DiagnosticsTab({ testSuites }: DiagnosticsTabProps) {
                     if (!result)
                       return <div key={test.id} className="w-2 h-2 bg-gray-600 rounded-full" />;
                     if (result.status === "passed")
-                      return (
-                        <div key={test.id} className="w-2 h-2 bg-emerald-500 rounded-full" />
-                      );
+                      return <div key={test.id} className="w-2 h-2 bg-emerald-500 rounded-full" />;
                     if (result.status === "failed" || result.status === "error")
                       return <div key={test.id} className="w-2 h-2 bg-red-500 rounded-full" />;
                     return <div key={test.id} className="w-2 h-2 bg-gray-600 rounded-full" />;
@@ -143,9 +139,7 @@ export function DiagnosticsTab({ testSuites }: DiagnosticsTabProps) {
                                         : "text-gray-400"
                                 }`}
                               >
-                                {result.status === "passed" && (
-                                  <CheckCircle2 className="w-3 h-3" />
-                                )}
+                                {result.status === "passed" && <CheckCircle2 className="w-3 h-3" />}
                                 {(result.status === "failed" || result.status === "error") && (
                                   <Bug className="w-3 h-3" />
                                 )}
@@ -255,10 +249,7 @@ export function DiagnosticsTab({ testSuites }: DiagnosticsTabProps) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div className="text-center">
                 <div className="text-2xl font-bold text-emerald-400">
-                  {
-                    Object.values(diagnosticsResults).filter((r) => r.status === "passed")
-                      .length
-                  }
+                  {Object.values(diagnosticsResults).filter((r) => r.status === "passed").length}
                 </div>
                 <div className="text-xs text-gray-400">Passed</div>
               </div>
@@ -274,10 +265,7 @@ export function DiagnosticsTab({ testSuites }: DiagnosticsTabProps) {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-gray-300">
-                  {Object.values(diagnosticsResults).reduce(
-                    (acc, r) => acc + (r.passed || 0),
-                    0
-                  )}
+                  {Object.values(diagnosticsResults).reduce((acc, r) => acc + (r.passed || 0), 0)}
                 </div>
                 <div className="text-xs text-gray-400">Total Tests</div>
               </div>
@@ -303,4 +291,3 @@ export function DiagnosticsTab({ testSuites }: DiagnosticsTabProps) {
     </div>
   );
 }
-

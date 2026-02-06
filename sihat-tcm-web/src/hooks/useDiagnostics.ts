@@ -65,6 +65,3 @@ export function useDiagnostics(testSuites: TestSuite[]) {
     runAllTests,
   };
 }
-
-
-

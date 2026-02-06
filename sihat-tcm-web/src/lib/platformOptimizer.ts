@@ -9,14 +9,14 @@
  * - With `import { defaultPlatformOptimizer } from './platform'`
  */
 
-import { 
+import {
   PlatformOptimizer as NewPlatformOptimizer,
   defaultPlatformOptimizer,
   type DeviceInfo,
   type ResponsiveBreakpoints,
   type PlatformOptimizations,
-  type UIAdaptations
-} from './platform';
+  type UIAdaptations,
+} from "./platform";
 
 // Re-export types for backward compatibility
 export type { DeviceInfo, ResponsiveBreakpoints, PlatformOptimizations, UIAdaptations };
@@ -28,7 +28,9 @@ class PlatformOptimizer {
   private newOptimizer: NewPlatformOptimizer;
 
   constructor() {
-    console.warn('PlatformOptimizer: This class is deprecated. Use defaultPlatformOptimizer from "./platform" instead.');
+    console.warn(
+      'PlatformOptimizer: This class is deprecated. Use defaultPlatformOptimizer from "./platform" instead.'
+    );
     this.newOptimizer = defaultPlatformOptimizer;
   }
 
@@ -100,6 +102,6 @@ class PlatformOptimizer {
 export const platformOptimizer = new PlatformOptimizer();
 
 // Re-export the new system for migration
-export { defaultPlatformOptimizer } from './platform';
+export { defaultPlatformOptimizer } from "./platform";
 
 export default platformOptimizer;

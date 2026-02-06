@@ -117,9 +117,9 @@ export function useDiagnosisSubmission({ data, setData }: UseDiagnosisSubmission
         primary_diagnosis: primaryDiagnosis,
         constitution: constitution,
         full_report: report as DiagnosisReport,
-        // user_id handled by server action typically or passed in
         inquiry_summary: data.wen_inquiry?.inquiryText,
         symptoms: data.basic_info?.symptoms ? [data.basic_info.symptoms] : [],
+        guest_name: data.basic_info?.name || undefined,
       });
     },
     [data]

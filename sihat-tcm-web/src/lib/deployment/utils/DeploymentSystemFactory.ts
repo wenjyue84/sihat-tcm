@@ -3,17 +3,17 @@
  * Creates and configures the complete deployment system
  */
 
-import { EventSystem } from '../../events/EventSystem';
-import { TestFramework } from '../../testing/TestFramework';
-import { FeatureFlagManager } from '../../feature-flags/FeatureFlagManager';
-import { DeploymentManager } from '../DeploymentManager';
-import { StagingValidator } from '../StagingValidator';
-import { ProductionTestSuite } from '../ProductionTestSuite';
-import { getFeatureFlagConfig } from '../../feature-flags/RefactoringFlags';
-import { PRODUCTION_DEPLOYMENT_PHASES } from '../ProductionDeployment';
+import { EventSystem } from "../../events/EventSystem";
+import { TestFramework } from "../../testing/TestFramework";
+import { FeatureFlagManager } from "../../feature-flags/FeatureFlagManager";
+import { DeploymentManager } from "../DeploymentManager";
+import { StagingValidator } from "../StagingValidator";
+import { ProductionTestSuite } from "../ProductionTestSuite";
+import { getFeatureFlagConfig } from "../../feature-flags/RefactoringFlags";
+import { PRODUCTION_DEPLOYMENT_PHASES } from "../ProductionDeployment";
 
 export interface DeploymentSystemConfig {
-  environment: 'development' | 'staging' | 'production';
+  environment: "development" | "staging" | "production";
   enableMonitoring: boolean;
   enableAutomaticRollback: boolean;
   customHealthChecks?: Record<string, any>;
@@ -36,44 +36,48 @@ export function createDeploymentSystem(config: DeploymentSystemConfig): Deployme
   // Initialize core systems
   const eventSystem = new EventSystem();
   const testFramework = new TestFramework();
-  
+
   // Configure feature flags for environment
   const flagConfig = getFeatureFlagConfig();
   const featureFlagManager = new FeatureFlagManager(flagConfig, eventSystem);
-  
+
   // Initialize deployment manager
   const deploymentManager = new DeploymentManager(eventSystem, featureFlagManager);
-  
+
   // Add production deployment phases
   const phases = config.customPhases || PRODUCTION_DEPLOYMENT_PHASES;
-  phases.forEach(phase => {
+  phases.forEach((phase) => {
     deploymentManager.addPhase(phase);
   });
-  
+
   // Initialize validators and test suites
   const stagingValidator = new StagingValidator(eventSystem, testFramework);
-  const productionTestSuite = new ProductionTestSuite(eventSystem, testFramework, featureFlagManager);
-  
+  const productionTestSuite = new ProductionTestSuite(
+    eventSystem,
+    testFramework,
+    featureFlagManager
+  );
+
   // Configure monitoring if enabled
   if (config.enableMonitoring) {
     setupMonitoring(eventSystem, config.environment);
   }
-  
+
   // Configure automatic rollback if enabled
   if (config.enableAutomaticRollback) {
     setupAutomaticRollback(deploymentManager, eventSystem);
   }
-  
+
   // Setup event listeners for system integration
   setupSystemIntegration(eventSystem, deploymentManager, stagingValidator, productionTestSuite);
-  
+
   return {
     featureFlagManager,
     deploymentManager,
     stagingValidator,
     productionTestSuite,
     eventSystem,
-    testFramework
+    testFramework,
   };
 }
 
@@ -82,34 +86,37 @@ export function createDeploymentSystem(config: DeploymentSystemConfig): Deployme
  */
 function setupMonitoring(eventSystem: EventSystem, environment: string): void {
   // Listen to deployment events
-  eventSystem.on('deployment:phaseStarted', (data) => {
-    console.log(`[${environment}] Deployment phase started:`, data.phaseId);
+  eventSystem.on("deployment:phaseStarted", (event) => {
+    console.log(`[${environment}] Deployment phase started:`, event.data?.phaseId);
     // Send to monitoring system
   });
-  
-  eventSystem.on('deployment:phaseCompleted', (data) => {
-    console.log(`[${environment}] Deployment phase completed:`, data.phaseId);
+
+  eventSystem.on("deployment:phaseCompleted", (event) => {
+    console.log(`[${environment}] Deployment phase completed:`, event.data?.phaseId);
     // Send to monitoring system
   });
-  
-  eventSystem.on('deployment:rollbackTriggered', (data) => {
-    console.error(`[${environment}] Rollback triggered:`, data.trigger.description);
+
+  eventSystem.on("deployment:rollbackTriggered", (event) => {
+    console.error(`[${environment}] Rollback triggered:`, event.data?.trigger?.description);
     // Send alert to monitoring system
   });
-  
-  eventSystem.on('featureFlags:updated', (data) => {
-    console.log(`[${environment}] Feature flag updated:`, data.flagKey);
+
+  eventSystem.on("featureFlags:updated", (event) => {
+    console.log(`[${environment}] Feature flag updated:`, event.data?.flagKey);
     // Log to monitoring system
   });
-  
+
   // Listen to validation events
-  eventSystem.on('staging:validationCompleted', (data) => {
-    console.log(`[${environment}] Staging validation completed:`, data.report.overallStatus);
+  eventSystem.on("staging:validationCompleted", (event) => {
+    console.log(`[${environment}] Staging validation completed:`, event.data?.report?.overallStatus);
     // Send to monitoring system
   });
-  
-  eventSystem.on('production:testSuiteCompleted', (data) => {
-    console.log(`[${environment}] Production test suite completed:`, data.suiteResult.overallStatus);
+
+  eventSystem.on("production:testSuiteCompleted", (event) => {
+    console.log(
+      `[${environment}] Production test suite completed:`,
+      event.data?.suiteResult?.overallStatus
+    );
     // Send to monitoring system
   });
 }
@@ -117,31 +124,37 @@ function setupMonitoring(eventSystem: EventSystem, environment: string): void {
 /**
  * Setup automatic rollback based on system events
  */
-function setupAutomaticRollback(deploymentManager: DeploymentManager, eventSystem: EventSystem): void {
-  eventSystem.on('deployment:criticalFailure', async (data) => {
-    console.error('Critical failure detected, initiating automatic rollback:', data);
-    
+function setupAutomaticRollback(
+  deploymentManager: DeploymentManager,
+  eventSystem: EventSystem
+): void {
+  eventSystem.on("deployment:criticalFailure", async (data) => {
+    console.error("Critical failure detected, initiating automatic rollback:", data);
+
     try {
-      await deploymentManager.rollbackPhase(data.phaseId, `Critical failure: ${data.result.message}`);
+      await deploymentManager.rollbackPhase(
+        data.phaseId,
+        `Critical failure: ${data.result.message}`
+      );
     } catch (error) {
-      console.error('Automatic rollback failed:', error);
+      console.error("Automatic rollback failed:", error);
       // Escalate to manual intervention
-      eventSystem.emit('deployment:escalateToManual', {
+      eventSystem.emit("deployment:escalateToManual", {
         phaseId: data.phaseId,
-        reason: 'Automatic rollback failed',
+        reason: "Automatic rollback failed",
         originalFailure: data,
-        rollbackError: error
+        rollbackError: error,
       });
     }
   });
-  
-  eventSystem.on('staging:criticalFailure', async (data) => {
-    console.error('Critical staging failure detected:', data);
-    
+
+  eventSystem.on("staging:criticalFailure", async (data) => {
+    console.error("Critical staging failure detected:", data);
+
     // Block deployment progression
-    eventSystem.emit('deployment:blockProgression', {
-      reason: 'Critical staging validation failure',
-      details: data
+    eventSystem.emit("deployment:blockProgression", {
+      reason: "Critical staging validation failure",
+      details: data,
     });
   });
 }
@@ -156,60 +169,60 @@ function setupSystemIntegration(
   productionTestSuite: ProductionTestSuite
 ): void {
   // Auto-run staging validation before deployment phases
-  eventSystem.on('deployment:phaseStarted', async (data) => {
+  eventSystem.on("deployment:phaseStarted", async (data) => {
     try {
       console.log(`Running staging validation for phase: ${data.phaseId}`);
       const validationResult = await stagingValidator.runValidation(`staging_${data.phaseId}`);
-      
-      if (validationResult.overallStatus === 'failed') {
-        eventSystem.emit('deployment:validationFailed', {
+
+      if (validationResult.overallStatus === "failed") {
+        eventSystem.emit("deployment:validationFailed", {
           phaseId: data.phaseId,
-          validationResult
+          validationResult,
         });
-        
+
         // Trigger rollback if validation fails
-        await deploymentManager.rollbackPhase(data.phaseId, 'Staging validation failed');
+        await deploymentManager.rollbackPhase(data.phaseId, "Staging validation failed");
       }
     } catch (error) {
-      console.error('Staging validation error:', error);
-      eventSystem.emit('deployment:validationError', {
+      console.error("Staging validation error:", error);
+      eventSystem.emit("deployment:validationError", {
         phaseId: data.phaseId,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
-  
+
   // Auto-run production tests during deployment
-  eventSystem.on('deployment:phaseStarted', async (data) => {
+  eventSystem.on("deployment:phaseStarted", async (data) => {
     try {
       console.log(`Running production tests for phase: ${data.phaseId}`);
-      const testResult = await productionTestSuite.runTestSuite(data.phaseId, 'production');
-      
-      if (testResult.overallStatus === 'failed' || testResult.criticalFailures > 0) {
-        eventSystem.emit('deployment:testsFailed', {
+      const testResult = await productionTestSuite.runTestSuite(data.phaseId, "production");
+
+      if (testResult.overallStatus === "failed" || testResult.criticalFailures > 0) {
+        eventSystem.emit("deployment:testsFailed", {
           phaseId: data.phaseId,
-          testResult
+          testResult,
         });
-        
+
         // Trigger rollback if critical tests fail
-        await deploymentManager.rollbackPhase(data.phaseId, 'Production tests failed');
+        await deploymentManager.rollbackPhase(data.phaseId, "Production tests failed");
       }
     } catch (error) {
-      console.error('Production test error:', error);
-      eventSystem.emit('deployment:testError', {
+      console.error("Production test error:", error);
+      eventSystem.emit("deployment:testError", {
         phaseId: data.phaseId,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
-  
+
   // Feature flag synchronization
-  eventSystem.on('featureFlags:updated', (data) => {
+  eventSystem.on("featureFlags:updated", (data) => {
     // Notify all components of flag changes
-    eventSystem.emit('system:featureFlagChanged', {
+    eventSystem.emit("system:featureFlagChanged", {
       flagKey: data.flagKey,
       previousFlag: data.previousFlag,
-      updatedFlag: data.updatedFlag
+      updatedFlag: data.updatedFlag,
     });
   });
 }
@@ -217,13 +230,15 @@ function setupSystemIntegration(
 /**
  * Create deployment system with default configuration
  */
-export function createDefaultDeploymentSystem(environment: 'development' | 'staging' | 'production'): DeploymentSystem {
+export function createDefaultDeploymentSystem(
+  environment: "development" | "staging" | "production"
+): DeploymentSystem {
   const config: DeploymentSystemConfig = {
     environment,
-    enableMonitoring: environment !== 'development',
-    enableAutomaticRollback: environment === 'production'
+    enableMonitoring: environment !== "development",
+    enableAutomaticRollback: environment === "production",
   };
-  
+
   return createDeploymentSystem(config);
 }
 
@@ -232,10 +247,10 @@ export function createDefaultDeploymentSystem(environment: 'development' | 'stag
  */
 export function createTestDeploymentSystem(): DeploymentSystem {
   const config: DeploymentSystemConfig = {
-    environment: 'development',
+    environment: "development",
     enableMonitoring: false,
-    enableAutomaticRollback: false
+    enableAutomaticRollback: false,
   };
-  
+
   return createDeploymentSystem(config);
 }

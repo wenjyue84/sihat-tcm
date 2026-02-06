@@ -32,4 +32,3 @@ export function getFoodsToAvoid(data: DiagnosisReport | PDFGenerationData): stri
 export function getRecipes(data: DiagnosisReport | PDFGenerationData): any[] {
   return data.recommendations?.food_therapy?.recipes || [];
 }
-

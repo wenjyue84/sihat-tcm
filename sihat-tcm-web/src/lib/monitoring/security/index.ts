@@ -1,9 +1,9 @@
 /**
  * @fileoverview Security Monitoring System Exports
- * 
+ *
  * Central export point for the modular security monitoring system.
  * Provides clean API access to all security system components.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 1.0
  */

@@ -10,14 +10,7 @@ import { UserManager } from "@/components/admin/UserManager";
 import { AdminAIChatbot } from "@/components/admin/AdminAIChatbot";
 
 import { useAdminDashboard } from "./hooks/useAdminDashboard";
-import {
-  AdminSidebar,
-  AdminHeader,
-  PromptsTab,
-  ConfigTab,
-  BlogTab,
-  MobileTab,
-} from "./components";
+import { AdminSidebar, AdminHeader, PromptsTab, ConfigTab, BlogTab, MobileTab } from "./components";
 
 function LoadingState() {
   return (

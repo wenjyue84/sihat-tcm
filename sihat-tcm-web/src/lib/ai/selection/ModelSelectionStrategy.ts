@@ -44,9 +44,9 @@ export class ModelSelectionStrategy {
     reasoning: string[];
   } {
     const { complexity, doctorLevel, requiresVision, requiresStreaming } = criteria;
-    
+
     // Filter models based on requirements
-    const eligibleModels = Array.from(this.modelCapabilities.values()).filter(model => {
+    const eligibleModels = Array.from(this.modelCapabilities.values()).filter((model) => {
       if (requiresVision && !model.supportsVision) return false;
       if (requiresStreaming && !model.supportsStreaming) return false;
       if (!model.complexityRating.includes(complexity.type)) return false;
@@ -59,7 +59,7 @@ export class ModelSelectionStrategy {
     }
 
     // Score models based on criteria
-    const scoredModels = eligibleModels.map(model => ({
+    const scoredModels = eligibleModels.map((model) => ({
       model,
       score: this.scoreModel(model, criteria),
     }));
@@ -68,14 +68,14 @@ export class ModelSelectionStrategy {
     scoredModels.sort((a, b) => b.score - a.score);
 
     const primaryModel = scoredModels[0].model.id;
-    const fallbackModels = scoredModels.slice(1, 4).map(sm => sm.model.id);
-    
+    const fallbackModels = scoredModels.slice(1, 4).map((sm) => sm.model.id);
+
     const reasoning = [
       `Selected ${scoredModels[0].model.name} as primary model`,
       `Complexity: ${complexity.type} (score: ${complexity.score})`,
-      `Doctor level: ${doctorLevel || 'not specified'}`,
-      `Vision required: ${requiresVision ? 'yes' : 'no'}`,
-      `Streaming required: ${requiresStreaming ? 'yes' : 'no'}`,
+      `Doctor level: ${doctorLevel || "not specified"}`,
+      `Vision required: ${requiresVision ? "yes" : "no"}`,
+      `Streaming required: ${requiresStreaming ? "yes" : "no"}`,
     ];
 
     return {
@@ -88,7 +88,7 @@ export class ModelSelectionStrategy {
   private getModelDisplayName(modelId: string): string {
     const displayNames: Record<string, string> = {
       [AI_MODELS.GEMINI_2_FLASH]: "Gemini 2.0 Flash",
-      [AI_MODELS.GEMINI_2_5_PRO]: "Gemini 2.5 Pro", 
+      [AI_MODELS.GEMINI_2_5_PRO]: "Gemini 2.5 Pro",
       [AI_MODELS.GEMINI_3_PRO_PREVIEW]: "Gemini 3.0 Pro Preview",
     };
     return displayNames[modelId] || modelId;
@@ -96,31 +96,31 @@ export class ModelSelectionStrategy {
 
   private scoreModel(model: ModelCapabilities, criteria: ModelSelectionCriteria): number {
     let score = 0;
-    
+
     // Base quality score
     score += model.qualityScore * 40;
-    
+
     // Medical accuracy for medical applications
     score += model.medicalAccuracy * 30;
-    
+
     // Latency preference (lower is better)
-    const latencyScore = Math.max(0, 20 - (model.averageLatency / 100));
+    const latencyScore = Math.max(0, 20 - model.averageLatency / 100);
     score += latencyScore;
-    
+
     // Cost efficiency (lower cost is better)
-    const costScore = Math.max(0, 10 - (model.costPerToken * 1000000));
+    const costScore = Math.max(0, 10 - model.costPerToken * 1000000);
     score += costScore;
-    
+
     // Preferred models bonus
     if (criteria.preferredModels?.includes(model.id)) {
       score += 20;
     }
-    
+
     // Language support
     if (criteria.language && model.supportedLanguages.includes(criteria.language)) {
       score += 10;
     }
-    
+
     return score;
   }
 }

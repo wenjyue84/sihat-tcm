@@ -55,13 +55,17 @@ export function useAccessibility(options: UseAccessibilityOptions = {}): UseAcce
     fontSize: "medium",
     focusIndicatorStyle: "default",
     announcements: true,
+    colorBlindnessSupport: false,
+    autoplayMedia: true,
+    animationSpeed: "normal",
+    textSpacing: "normal",
   });
 
   // Initialize accessibility manager
   useEffect(() => {
     if (!managerRef.current) {
       managerRef.current = getAccessibilityManager();
-      setPreferences(managerRef.current.getPreferences());
+      setPreferences((prev) => ({ ...prev, ...managerRef.current!.getPreferences() }));
     }
   }, []);
 
@@ -111,7 +115,7 @@ export function useAccessibility(options: UseAccessibilityOptions = {}): UseAcce
     (newPreferences: Partial<AccessibilityPreferences>) => {
       if (managerRef.current) {
         managerRef.current.updatePreferences(newPreferences);
-        setPreferences(managerRef.current.getPreferences());
+        setPreferences((prev) => ({ ...prev, ...managerRef.current!.getPreferences() }));
 
         if (announceChanges) {
           const changes = Object.keys(newPreferences).join(", ");
@@ -177,14 +181,15 @@ export function useAccessibility(options: UseAccessibilityOptions = {}): UseAcce
   );
 
   // WCAG compliance validation callback
-  const validateWCAGCompliance = useCallback((element: HTMLElement) => {
-    return (
-      managerRef.current?.validateWCAGCompliance(element) ?? {
-        isCompliant: false,
-        issues: ["Accessibility manager not initialized"],
-        suggestions: [],
-      }
-    );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const validateWCAGCompliance = useCallback((_element: HTMLElement) => {
+    // AccessibilityManager doesn't expose validateWCAGCompliance directly
+    // Use performAudit for full validation or validateColorContrast for specific checks
+    return {
+      isCompliant: false,
+      issues: ["Use performAudit() for full WCAG validation"],
+      suggestions: [],
+    };
   }, []);
 
   return {

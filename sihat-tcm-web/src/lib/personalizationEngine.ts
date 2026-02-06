@@ -1,24 +1,24 @@
 /**
  * Personalization Engine - Legacy compatibility layer
- * 
+ *
  * This file maintains backward compatibility while delegating to the new modular architecture.
  * New code should use the modular components directly from ./personalization/ directory.
- * 
+ *
  * @deprecated Use PersonalizationEngine from ./personalization/PersonalizationEngine.ts instead
  */
 
 import { PersonalizationEngine } from "./personalization/PersonalizationEngine";
-import { 
+import {
   getPersonalizedRecommendations as getPersonalizedRecommendationsNew,
-  defaultPersonalizationEngine
+  defaultPersonalizationEngine,
 } from "./personalization";
-import { 
-  PersonalizationFactors, 
+import {
+  PersonalizationFactors,
   PersonalizedRecommendation,
   TreatmentOutcome,
   UserProfile,
   CulturalContext,
-  LearningProfile
+  LearningProfile,
 } from "./personalization/interfaces/PersonalizationInterfaces";
 import { DietaryPreferences } from "@/app/actions/meal-planner";
 import { DiagnosisReport, DiagnosisSession } from "@/types/database";
@@ -30,7 +30,7 @@ export type {
   TreatmentOutcome,
   UserProfile,
   CulturalContext,
-  LearningProfile
+  LearningProfile,
 };
 
 // Re-export main class
@@ -46,6 +46,8 @@ export { defaultPersonalizationEngine };
 export class LegacyPersonalizationEngine extends PersonalizationEngine {
   constructor(context: string = "LegacyPersonalizationEngine") {
     super(context);
-    console.warn("LegacyPersonalizationEngine is deprecated. Use PersonalizationEngine from ./personalization/PersonalizationEngine.ts instead");
+    console.warn(
+      "LegacyPersonalizationEngine is deprecated. Use PersonalizationEngine from ./personalization/PersonalizationEngine.ts instead"
+    );
   }
 }

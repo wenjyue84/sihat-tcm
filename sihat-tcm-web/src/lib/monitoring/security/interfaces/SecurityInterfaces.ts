@@ -1,9 +1,9 @@
 /**
  * @fileoverview Security Monitoring Interfaces
- * 
+ *
  * Core interfaces and types for the security monitoring system.
  * Defines structures for security events, tracking, and analysis.
- * 
+ *
  * @author Sihat TCM Development Team
  * @version 1.0
  */

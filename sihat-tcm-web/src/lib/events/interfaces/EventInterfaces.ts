@@ -1,6 +1,6 @@
 /**
  * Event System Interfaces
- * 
+ *
  * Core interfaces for the event system following clean architecture principles.
  * These interfaces define contracts for event handling, emission, and management.
  */
@@ -101,7 +101,9 @@ export type EventFilter<T extends BaseEvent = BaseEvent> = (event: T) => boolean
 /**
  * Event transformer function
  */
-export type EventTransformer<T extends BaseEvent = BaseEvent, R extends BaseEvent = BaseEvent> = (event: T) => R;
+export type EventTransformer<T extends BaseEvent = BaseEvent, R extends BaseEvent = BaseEvent> = (
+  event: T
+) => R;
 
 /**
  * Event validator function
@@ -146,20 +148,20 @@ export interface EventStatistics {
 export interface EventEmitter {
   emit<T extends BaseEvent>(event: T, options?: EventEmissionOptions): Promise<EventEmissionResult>;
   on<T extends BaseEvent>(
-    eventType: T['type'],
+    eventType: T["type"],
     listener: EventListener<T>,
     config?: EventListenerConfig
   ): string; // Returns listener ID
-  
+
   once<T extends BaseEvent>(
-    eventType: T['type'],
+    eventType: T["type"],
     listener: EventListener<T>,
-    config?: Omit<EventListenerConfig, 'once'>
+    config?: Omit<EventListenerConfig, "once">
   ): string;
-  
+
   off(eventType: string, listenerId?: string): boolean;
   removeAllListeners(eventType?: string): number;
-  
+
   hasListeners(eventType: string): boolean;
   getListenerCount(eventType: string): number;
   getListeners(eventType: string): EventListenerEntry[];
@@ -173,7 +175,7 @@ export interface EventHistoryManager {
   getHistory(filter?: EventHistoryFilter): Promise<EventHistoryEntry[]>;
   clearHistory(olderThan?: Date): Promise<number>;
   getStatistics(timeRange?: TimeRange): Promise<EventStatistics>;
-  exportHistory(format: 'json' | 'csv', filter?: EventHistoryFilter): Promise<string>;
+  exportHistory(format: "json" | "csv", filter?: EventHistoryFilter): Promise<string>;
 }
 
 /**
@@ -216,31 +218,31 @@ export interface EventBus {
   // Core functionality
   emit<T extends BaseEvent>(event: T, options?: EventEmissionOptions): Promise<EventEmissionResult>;
   subscribe<T extends BaseEvent>(
-    eventType: T['type'],
+    eventType: T["type"],
     listener: EventListener<T>,
     config?: EventListenerConfig
   ): string;
-  
+
   unsubscribe(eventType: string, listenerId?: string): boolean;
-  
+
   // Advanced features
   addMiddleware(middleware: EventMiddleware): void;
   removeMiddleware(middlewareName: string): boolean;
-  
-  addFilter<T extends BaseEvent>(eventType: T['type'], filter: EventFilter<T>): string;
+
+  addFilter<T extends BaseEvent>(eventType: T["type"], filter: EventFilter<T>): string;
   removeFilter(eventType: string, filterId: string): boolean;
-  
+
   addTransformer<T extends BaseEvent, R extends BaseEvent>(
-    eventType: T['type'],
+    eventType: T["type"],
     transformer: EventTransformer<T, R>
   ): string;
   removeTransformer(eventType: string, transformerId: string): boolean;
-  
+
   // Management
   getStatistics(): EventStatistics;
   getHistory(filter?: EventHistoryFilter): Promise<EventHistoryEntry[]>;
   clearHistory(olderThan?: Date): Promise<number>;
-  
+
   // Lifecycle
   start(): Promise<void>;
   stop(): Promise<void>;
@@ -256,7 +258,7 @@ export interface EventBusConfig {
   enableHistory: boolean;
   enableStatistics: boolean;
   enableMiddleware: boolean;
-  errorHandling: 'throw' | 'log' | 'ignore';
+  errorHandling: "throw" | "log" | "ignore";
   asyncByDefault: boolean;
   validateEvents: boolean;
 }
@@ -266,24 +268,24 @@ export interface EventBusConfig {
  */
 export interface ScopedEventEmitter {
   readonly source: string;
-  
+
   emit<T extends BaseEvent>(
-    event: Omit<T, 'source' | 'timestamp' | 'id'>,
+    event: Omit<T, "source" | "timestamp" | "id">,
     options?: EventEmissionOptions
   ): Promise<EventEmissionResult>;
-  
+
   on<T extends BaseEvent>(
-    eventType: T['type'],
+    eventType: T["type"],
     listener: EventListener<T>,
     config?: EventListenerConfig
   ): string;
-  
+
   once<T extends BaseEvent>(
-    eventType: T['type'],
+    eventType: T["type"],
     listener: EventListener<T>,
-    config?: Omit<EventListenerConfig, 'once'>
+    config?: Omit<EventListenerConfig, "once">
   ): string;
-  
+
   off(eventType: string, listenerId?: string): boolean;
 }
 
@@ -297,14 +299,14 @@ export interface EventAggregator {
     correlationFn: (events: T) => boolean,
     timeWindow: number
   ): Promise<T>;
-  
+
   // Saga patterns
   saga<T extends BaseEvent>(
     sagaId: string,
     steps: SagaStep<T>[],
     compensations?: CompensationStep<T>[]
   ): Promise<SagaResult>;
-  
+
   // Event sourcing
   replay(eventTypes: string[], fromTimestamp?: Date): AsyncIterableIterator<BaseEvent>;
   snapshot(aggregateId: string): Promise<EventSnapshot>;
@@ -314,7 +316,7 @@ export interface EventAggregator {
  * Saga step definition
  */
 export interface SagaStep<T extends BaseEvent> {
-  eventType: T['type'];
+  eventType: T["type"];
   handler: (event: T) => Promise<BaseEvent | null>;
   timeout?: number;
   retryPolicy?: RetryPolicy;
@@ -324,7 +326,7 @@ export interface SagaStep<T extends BaseEvent> {
  * Compensation step for saga rollback
  */
 export interface CompensationStep<T extends BaseEvent> {
-  eventType: T['type'];
+  eventType: T["type"];
   compensate: (event: T) => Promise<BaseEvent | null>;
 }
 
@@ -346,7 +348,7 @@ export interface SagaResult {
  */
 export interface RetryPolicy {
   maxAttempts: number;
-  backoffStrategy: 'linear' | 'exponential' | 'fixed';
+  backoffStrategy: "linear" | "exponential" | "fixed";
   baseDelay: number;
   maxDelay: number;
   jitter?: boolean;
@@ -369,7 +371,7 @@ export interface EventSnapshot {
 
 // AI Events
 export interface AIModelSelectedEvent extends BaseEvent {
-  type: 'ai:model:selected';
+  type: "ai:model:selected";
   data: {
     modelId: string;
     complexity: string;
@@ -379,7 +381,7 @@ export interface AIModelSelectedEvent extends BaseEvent {
 }
 
 export interface AIRequestStartedEvent extends BaseEvent {
-  type: 'ai:request:started';
+  type: "ai:request:started";
   data: {
     requestId: string;
     modelId: string;
@@ -389,7 +391,7 @@ export interface AIRequestStartedEvent extends BaseEvent {
 }
 
 export interface AIRequestCompletedEvent extends BaseEvent {
-  type: 'ai:request:completed';
+  type: "ai:request:completed";
   data: {
     requestId: string;
     modelId: string;
@@ -403,7 +405,7 @@ export interface AIRequestCompletedEvent extends BaseEvent {
 
 // Notification Events
 export interface NotificationScheduledEvent extends BaseEvent {
-  type: 'notification:scheduled';
+  type: "notification:scheduled";
   data: {
     notificationId: string;
     category: string;
@@ -413,7 +415,7 @@ export interface NotificationScheduledEvent extends BaseEvent {
 }
 
 export interface NotificationDeliveredEvent extends BaseEvent {
-  type: 'notification:delivered';
+  type: "notification:delivered";
   data: {
     notificationId: string;
     deliveredAt: Date;
@@ -423,39 +425,39 @@ export interface NotificationDeliveredEvent extends BaseEvent {
 
 // System Events
 export interface SystemErrorEvent extends BaseEvent {
-  type: 'system:error';
+  type: "system:error";
   data: {
     error: Error;
     component: string;
     action: string;
-    severity: 'low' | 'medium' | 'high' | 'critical';
+    severity: "low" | "medium" | "high" | "critical";
     context?: Record<string, any>;
   };
 }
 
 export interface SystemPerformanceEvent extends BaseEvent {
-  type: 'system:performance';
+  type: "system:performance";
   data: {
     metric: string;
     value: number;
     threshold?: number;
-    status: 'normal' | 'warning' | 'critical';
+    status: "normal" | "warning" | "critical";
     component: string;
   };
 }
 
 // TCM-specific Events
 export interface DiagnosisStartedEvent extends BaseEvent {
-  type: 'tcm:diagnosis:started';
+  type: "tcm:diagnosis:started";
   data: {
     sessionId: string;
     patientId: string;
-    diagnosticType: 'observation' | 'listening' | 'inquiry' | 'palpation';
+    diagnosticType: "observation" | "listening" | "inquiry" | "palpation";
   };
 }
 
 export interface DiagnosisCompletedEvent extends BaseEvent {
-  type: 'tcm:diagnosis:completed';
+  type: "tcm:diagnosis:completed";
   data: {
     sessionId: string;
     patientId: string;
@@ -471,7 +473,7 @@ export interface DiagnosisCompletedEvent extends BaseEvent {
 /**
  * Union type for all domain events
  */
-export type DomainEvent = 
+export type DomainEvent =
   | AIModelSelectedEvent
   | AIRequestStartedEvent
   | AIRequestCompletedEvent
@@ -481,3 +483,18 @@ export type DomainEvent =
   | SystemPerformanceEvent
   | DiagnosisStartedEvent
   | DiagnosisCompletedEvent;
+
+/**
+ * Generic application event - alias for BaseEvent used by EventSystem
+ */
+export type AppEvent = BaseEvent;
+
+/**
+ * Event system statistics
+ */
+export interface EventSystemStats {
+  totalListeners: number;
+  eventTypes: number;
+  listenersByType: Record<string, number>;
+  historySize: number;
+}

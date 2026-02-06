@@ -263,18 +263,13 @@ export async function POST(req: Request) {
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logError("ImageProc", `Image analysis failed: ${errorMessage}`, { error: errorMessage });
-    return createErrorResponseWithStatus(
-      error,
-      "API/analyze-image",
-      200,
-      {
-        observation: `Analysis encountered an issue. Please continue and we'll review the image later.`,
-        potential_issues: [],
-        modelUsed: 0,
-        status: "error",
-        error: errorMessage,
-      }
-    );
+    return createErrorResponseWithStatus(error, "API/analyze-image", 200, {
+      observation: `Analysis encountered an issue. Please continue and we'll review the image later.`,
+      potential_issues: [],
+      modelUsed: 0,
+      status: "error",
+      error: errorMessage,
+    });
   }
 }
 

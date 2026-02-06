@@ -1,10 +1,4 @@
-import {
-  MessageSquare,
-  Eye,
-  Mic,
-  FileText,
-  ClipboardList,
-} from "lucide-react";
+import { MessageSquare, Eye, Mic, FileText, ClipboardList } from "lucide-react";
 import {
   INTERACTIVE_CHAT_PROMPT,
   TONGUE_ANALYSIS_PROMPT,

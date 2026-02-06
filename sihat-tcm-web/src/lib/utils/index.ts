@@ -1,6 +1,6 @@
 /**
  * General Utilities
- * 
+ *
  * Barrel export for all general utility functions
  */
 
@@ -36,4 +36,3 @@ export * from "./bmi";
 
 // Chat message parsing utilities
 export * from "./chatMessageParser";
-

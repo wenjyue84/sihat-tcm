@@ -51,7 +51,7 @@ const filterByDateRange = (sessions: DiagnosisSession[], range: DateRange): Diag
     cutoff.setMonth(now.getMonth() - 1);
   }
 
-  return sessions.filter(session => new Date(session.created_at) >= cutoff);
+  return sessions.filter((session) => new Date(session.created_at) >= cutoff);
 };
 
 const sortSessions = (
@@ -87,7 +87,7 @@ export function HealthJourneyTimeline({
   loading = false,
   onStartDiagnosis,
   onRefresh,
-  onRestoreData
+  onRestoreData,
 }: HealthJourneyTimelineProps) {
   const router = useRouter();
   const { t } = useLanguage();
@@ -105,7 +105,7 @@ export function HealthJourneyTimeline({
     emptyTitle: "Begin Your Journey",
     emptyDesc: "Your health journey begins with your first diagnosis.",
     startButton: "Start First Diagnosis",
-    originMarker: "Your journey began here"
+    originMarker: "Your journey began here",
   };
 
   const filteredAndSortedSessions = useMemo(() => {
@@ -126,11 +126,14 @@ export function HealthJourneyTimeline({
     if (validSessions.length === 0) return null;
 
     const scores = validSessions.map((s: DiagnosisSession) => s.overall_score as number);
-    const averageScore = Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length);
+    const averageScore = Math.round(
+      scores.reduce((a: number, b: number) => a + b, 0) / scores.length
+    );
 
     // Calculate improvement (latest - first)
     const sortedByDate = [...validSessions].sort(
-      (a: DiagnosisSession, b: DiagnosisSession) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      (a: DiagnosisSession, b: DiagnosisSession) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
     const firstScore = sortedByDate[0]?.overall_score || 0;
     const lastScore = sortedByDate[sortedByDate.length - 1]?.overall_score || 0;
@@ -184,11 +187,14 @@ export function HealthJourneyTimeline({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <TrendWidget trendData={trendData} loading={loading} sessions={sessions} journeyDuration={journeyDuration} />
+          <TrendWidget
+            trendData={trendData}
+            loading={loading}
+            sessions={sessions}
+            journeyDuration={journeyDuration}
+          />
         </motion.div>
       )}
-
-
 
       {/* Filters */}
       {sessions.length > 0 && (
@@ -253,7 +259,10 @@ export function HealthJourneyTimeline({
                 onClick={onRestoreData}
                 className="text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 mt-2"
               >
-                {t.patientDashboard_v1?.healthJourney?.cantFindData || "Can't find your data?"} <span className="underline ml-1">{t.patientDashboard_v1?.healthJourney?.restoreMockData || "Restore Data"}</span>
+                {t.patientDashboard_v1?.healthJourney?.cantFindData || "Can't find your data?"}{" "}
+                <span className="underline ml-1">
+                  {t.patientDashboard_v1?.healthJourney?.restoreMockData || "Restore Data"}
+                </span>
               </Button>
             )}
           </div>
@@ -288,9 +297,7 @@ export function HealthJourneyTimeline({
             >
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                <p className="text-sm font-medium text-slate-700">
-                  {journeyT.originMarker}
-                </p>
+                <p className="text-sm font-medium text-slate-700">{journeyT.originMarker}</p>
               </div>
             </motion.div>
           )}
@@ -299,5 +306,3 @@ export function HealthJourneyTimeline({
     </div>
   );
 }
-
-

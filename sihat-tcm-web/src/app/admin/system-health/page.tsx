@@ -25,18 +25,17 @@ export const metadata: Metadata = {
 export default async function SystemHealthPage() {
   // Verify admin access
   const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
 
   if (authError || !user) {
     redirect("/login?redirect=/admin/system-health");
   }
 
   // Check if user is admin
-  const { data: profile } = await supabase
-    .from("users")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  const { data: profile } = await supabase.from("users").select("role").eq("id", user.id).single();
 
   if (profile?.role !== "admin") {
     redirect("/dashboard?error=access_denied");
@@ -84,9 +83,7 @@ export default async function SystemHealthPage() {
                     >
                       <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                     </svg>
-                    <span className="ml-4 text-sm font-medium text-gray-500">
-                      System Health
-                    </span>
+                    <span className="ml-4 text-sm font-medium text-gray-500">System Health</span>
                   </div>
                 </li>
               </ol>

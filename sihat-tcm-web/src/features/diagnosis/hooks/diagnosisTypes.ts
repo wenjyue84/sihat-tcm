@@ -1,6 +1,6 @@
 /**
  * Diagnosis Wizard Type Definitions
- * 
+ *
  * Type definitions specific to the diagnosis wizard hook
  */
 
@@ -18,6 +18,3 @@ export type DiagnosisStep =
   | "report";
 
 export type AnalysisType = "tongue" | "face" | "part";
-
-
-

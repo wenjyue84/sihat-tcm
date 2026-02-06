@@ -21,11 +21,8 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
         <div className="hidden lg:block shrink-0">
           <DoctorTopBar />
         </div>
-        <div className="flex-1 overflow-y-auto flex flex-col">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto flex flex-col">{children}</div>
       </main>
     </div>
   );
 }
-

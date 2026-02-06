@@ -1,15 +1,18 @@
 /**
  * Dietary Recommendation Adapter - Personalizes dietary recommendations
- * 
+ *
  * Adapts TCM dietary recommendations based on user preferences, cultural context,
  * allergies, and dietary restrictions while maintaining therapeutic effectiveness.
  */
 
-import { PersonalizationFactors, PersonalizedRecommendation } from '../interfaces/PersonalizationInterfaces';
-import { CulturalContextBuilder } from '../core/CulturalContextBuilder';
+import {
+  PersonalizationFactors,
+  PersonalizedRecommendation,
+} from "../interfaces/PersonalizationInterfaces";
+import { CulturalContextBuilder } from "../core/CulturalContextBuilder";
 
 export class DietaryRecommendationAdapter {
-  private readonly context = 'DietaryRecommendationAdapter';
+  private readonly context = "DietaryRecommendationAdapter";
   private culturalBuilder: CulturalContextBuilder;
 
   constructor() {
@@ -92,10 +95,10 @@ export class DietaryRecommendationAdapter {
     factors: PersonalizationFactors
   ): string[] {
     const alternatives: string[] = [];
-    
+
     // Get culturally appropriate alternatives
     const cultural_alternatives = this.getCulturalAlternatives(
-      restricted_food, 
+      restricted_food,
       factors.cultural_context
     );
     alternatives.push(...cultural_alternatives);
@@ -108,18 +111,13 @@ export class DietaryRecommendationAdapter {
     alternatives.push(...therapeutic_alternatives);
 
     // Filter out any that conflict with restrictions
-    return alternatives.filter(alt => 
-      this.isCompatibleWithRestrictions(alt, factors)
-    );
+    return alternatives.filter((alt) => this.isCompatibleWithRestrictions(alt, factors));
   }
 
   /**
    * Validate food compatibility with restrictions
    */
-  public isCompatibleWithRestrictions(
-    food: string,
-    factors: PersonalizationFactors
-  ): boolean {
+  public isCompatibleWithRestrictions(food: string, factors: PersonalizationFactors): boolean {
     const { dietary_restrictions } = factors;
 
     // Check allergies
@@ -131,10 +129,10 @@ export class DietaryRecommendationAdapter {
 
     // Check dietary type
     const dietary_type = dietary_restrictions.dietary_type;
-    if (dietary_type === 'vegetarian' && this.isAnimalProduct(food)) {
+    if (dietary_type === "vegetarian" && this.isAnimalProduct(food)) {
       return false;
     }
-    if (dietary_type === 'vegan' && (this.isAnimalProduct(food) || this.isDairyProduct(food))) {
+    if (dietary_type === "vegan" && (this.isAnimalProduct(food) || this.isDairyProduct(food))) {
       return false;
     }
 
@@ -180,22 +178,22 @@ export class DietaryRecommendationAdapter {
 
     const dietary_type = factors.dietary_restrictions.dietary_type;
 
-    if (dietary_type === 'vegetarian' && /meat|fish|chicken|beef|pork|seafood/i.test(text)) {
+    if (dietary_type === "vegetarian" && /meat|fish|chicken|beef|pork|seafood/i.test(text)) {
       // Replace animal products with plant-based alternatives
-      text = text.replace(/meat|beef|pork/gi, 'plant protein');
-      text = text.replace(/fish|seafood/gi, 'seaweed or algae');
-      text = text.replace(/chicken/gi, 'tofu or tempeh');
-      modifications.push('Replaced animal products with vegetarian alternatives');
+      text = text.replace(/meat|beef|pork/gi, "plant protein");
+      text = text.replace(/fish|seafood/gi, "seaweed or algae");
+      text = text.replace(/chicken/gi, "tofu or tempeh");
+      modifications.push("Replaced animal products with vegetarian alternatives");
       modified = true;
     }
 
-    if (dietary_type === 'vegan' && /dairy|milk|cheese|yogurt|butter|eggs/i.test(text)) {
-      text = text.replace(/dairy|milk/gi, 'plant milk');
-      text = text.replace(/cheese/gi, 'nutritional yeast');
-      text = text.replace(/yogurt/gi, 'plant-based yogurt');
-      text = text.replace(/butter/gi, 'plant-based spread');
-      text = text.replace(/eggs/gi, 'flax eggs');
-      modifications.push('Replaced dairy and eggs with vegan alternatives');
+    if (dietary_type === "vegan" && /dairy|milk|cheese|yogurt|butter|eggs/i.test(text)) {
+      text = text.replace(/dairy|milk/gi, "plant milk");
+      text = text.replace(/cheese/gi, "nutritional yeast");
+      text = text.replace(/yogurt/gi, "plant-based yogurt");
+      text = text.replace(/butter/gi, "plant-based spread");
+      text = text.replace(/eggs/gi, "flax eggs");
+      modifications.push("Replaced dairy and eggs with vegan alternatives");
       modified = true;
     }
 
@@ -231,10 +229,10 @@ export class DietaryRecommendationAdapter {
     const adaptations: string[] = [];
 
     // Add cooking method suggestions based on cultural context
-    if (text.includes('prepare') || text.includes('cook')) {
+    if (text.includes("prepare") || text.includes("cook")) {
       const methods = factors.cultural_context.food_culture.cooking_methods.slice(0, 2);
-      text += ` Consider ${methods.join(' or ')} methods.`;
-      adaptations.push(`Added culturally familiar cooking methods: ${methods.join(', ')}`);
+      text += ` Consider ${methods.join(" or ")} methods.`;
+      adaptations.push(`Added culturally familiar cooking methods: ${methods.join(", ")}`);
       modified = true;
     }
 
@@ -250,7 +248,7 @@ export class DietaryRecommendationAdapter {
       soy: "other legumes (lentils, chickpeas)",
       gluten: "gluten-free grains (rice, quinoa)",
       fish: "seaweed or plant-based omega-3 sources",
-      sesame: "tahini alternatives (sunflower seed butter)"
+      sesame: "tahini alternatives (sunflower seed butter)",
     };
 
     return alternatives[allergy.toLowerCase()] || "suitable alternative";
@@ -265,60 +263,54 @@ export class DietaryRecommendationAdapter {
       spicy: "mild herbs (basil, oregano)",
       mushrooms: "other umami-rich foods",
       onions: "leeks or shallots",
-      garlic: "garlic powder or asafoetida"
+      garlic: "garlic powder or asafoetida",
     };
 
     return alternatives[disliked.toLowerCase()] || "preferred alternative";
   }
 
-  private getCulturalAlternatives(
-    food: string,
-    cultural_context: any
-  ): string[] {
+  private getCulturalAlternatives(food: string, cultural_context: any): string[] {
     const cultural_alternatives: Record<string, Record<string, string[]>> = {
       chinese: {
         rice: ["congee", "rice noodles", "glutinous rice"],
         vegetables: ["bok choy", "Chinese cabbage", "winter melon"],
-        protein: ["tofu", "tempeh", "seitan"]
+        protein: ["tofu", "tempeh", "seitan"],
       },
       southeast_asian: {
         rice: ["coconut rice", "pandan rice", "rice noodles"],
         vegetables: ["kangkung", "long beans", "okra"],
-        protein: ["tempeh", "fish", "chicken"]
+        protein: ["tempeh", "fish", "chicken"],
       },
       western: {
         rice: ["quinoa", "barley", "bulgur"],
         vegetables: ["broccoli", "spinach", "carrots"],
-        protein: ["chicken", "fish", "legumes"]
-      }
+        protein: ["chicken", "fish", "legumes"],
+      },
     };
 
     const region = cultural_context.region;
     const category = this.categorizeFood(food);
-    
+
     return cultural_alternatives[region]?.[category] || [];
   }
 
-  private getTherapeuticAlternatives(
-    food: string,
-    therapeutic_purpose: string
-  ): string[] {
+  private getTherapeuticAlternatives(food: string, therapeutic_purpose: string): string[] {
     const therapeutic_alternatives: Record<string, string[]> = {
       warming: ["ginger", "cinnamon", "cloves", "fennel"],
       cooling: ["cucumber", "watermelon", "mint", "green tea"],
       nourishing: ["dates", "goji berries", "black sesame", "walnuts"],
       detoxifying: ["green leafy vegetables", "burdock root", "dandelion"],
-      digestive: ["fennel", "cardamom", "orange peel", "hawthorn"]
+      digestive: ["fennel", "cardamom", "orange peel", "hawthorn"],
     };
 
     return therapeutic_alternatives[therapeutic_purpose.toLowerCase()] || [];
   }
 
   private categorizeFood(food: string): string {
-    if (/rice|grain|wheat|oat/i.test(food)) return 'rice';
-    if (/vegetable|green|leaf/i.test(food)) return 'vegetables';
-    if (/meat|fish|protein|tofu/i.test(food)) return 'protein';
-    return 'other';
+    if (/rice|grain|wheat|oat/i.test(food)) return "rice";
+    if (/vegetable|green|leaf/i.test(food)) return "vegetables";
+    if (/meat|fish|protein|tofu/i.test(food)) return "protein";
+    return "other";
   }
 
   private isAnimalProduct(food: string): boolean {

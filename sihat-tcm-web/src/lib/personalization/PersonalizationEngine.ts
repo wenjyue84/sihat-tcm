@@ -1,10 +1,10 @@
 /**
  * PersonalizationEngine - Advanced User Preference Learning and Adaptation
- * 
+ *
  * This engine learns from user interactions, preferences, and outcomes to provide
  * increasingly personalized TCM recommendations. It considers cultural context,
  * dietary restrictions, allergies, and treatment effectiveness.
- * 
+ *
  * Features:
  * - Machine learning-based preference detection
  * - Cultural context adaptation
@@ -13,7 +13,7 @@
  * - Adaptive recommendation generation
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 // Core interfaces
 export interface UserPreferences {
@@ -30,22 +30,30 @@ export interface DietaryPreferences {
   allergies: Allergy[];
   cuisinePreferences: string[];
   mealTiming: MealTimingPreference;
-  cookingSkillLevel: 'beginner' | 'intermediate' | 'advanced';
-  budgetRange: 'low' | 'medium' | 'high';
+  cookingSkillLevel: "beginner" | "intermediate" | "advanced";
+  budgetRange: "low" | "medium" | "high";
   localIngredients: boolean;
 }
 
 export interface DietaryRestriction {
-  type: 'vegetarian' | 'vegan' | 'halal' | 'kosher' | 'gluten-free' | 'dairy-free' | 'nut-free' | 'custom';
-  severity: 'preference' | 'strict' | 'medical';
+  type:
+    | "vegetarian"
+    | "vegan"
+    | "halal"
+    | "kosher"
+    | "gluten-free"
+    | "dairy-free"
+    | "nut-free"
+    | "custom";
+  severity: "preference" | "strict" | "medical";
   customDescription?: string;
 }
 
 export interface Allergy {
   allergen: string;
-  severity: 'mild' | 'moderate' | 'severe' | 'anaphylactic';
+  severity: "mild" | "moderate" | "severe" | "anaphylactic";
   symptoms: string[];
-  confirmedBy: 'self-reported' | 'medical-test' | 'practitioner';
+  confirmedBy: "self-reported" | "medical-test" | "practitioner";
 }
 
 export interface CulturalContext {
@@ -53,18 +61,18 @@ export interface CulturalContext {
   languages: string[];
   religiousConsiderations: string[];
   traditionalPractices: string[];
-  familyStructure: 'individual' | 'nuclear' | 'extended' | 'multi-generational';
+  familyStructure: "individual" | "nuclear" | "extended" | "multi-generational";
   healthBeliefs: HealthBelief[];
 }
 
 export interface HealthBelief {
-  category: 'prevention' | 'treatment' | 'wellness' | 'spiritual';
+  category: "prevention" | "treatment" | "wellness" | "spiritual";
   belief: string;
   importance: number; // 1-10 scale
 }
 
 export interface LifestylePreferences {
-  activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | 'very-active';
+  activityLevel: "sedentary" | "light" | "moderate" | "active" | "very-active";
   sleepSchedule: SleepSchedule;
   stressLevel: number; // 1-10 scale
   workSchedule: WorkSchedule;
@@ -80,7 +88,7 @@ export interface SleepSchedule {
 }
 
 export interface WorkSchedule {
-  type: 'regular' | 'shift' | 'flexible' | 'remote' | 'irregular';
+  type: "regular" | "shift" | "flexible" | "remote" | "irregular";
   hoursPerWeek: number;
   stressLevel: number; // 1-10 scale
 }
@@ -89,7 +97,7 @@ export interface ExercisePreference {
   type: string;
   frequency: number; // times per week
   duration: number; // minutes
-  intensity: 'low' | 'moderate' | 'high';
+  intensity: "low" | "moderate" | "high";
 }
 
 export interface SocialSupportLevel {
@@ -101,24 +109,24 @@ export interface SocialSupportLevel {
 
 export interface CommunicationPreferences {
   language: string;
-  complexity: 'simple' | 'moderate' | 'technical';
-  format: ('text' | 'audio' | 'visual' | 'interactive')[];
-  frequency: 'minimal' | 'regular' | 'frequent';
-  channels: ('app' | 'email' | 'sms' | 'push')[];
+  complexity: "simple" | "moderate" | "technical";
+  format: ("text" | "audio" | "visual" | "interactive")[];
+  frequency: "minimal" | "regular" | "frequent";
+  channels: ("app" | "email" | "sms" | "push")[];
 }
 
 export interface TreatmentPreferences {
   approaches: TreatmentApproach[];
   timeCommitment: TimeCommitment;
   costSensitivity: number; // 1-10 scale
-  invasiveness: 'non-invasive' | 'minimally-invasive' | 'any';
-  evidenceRequirement: 'traditional' | 'modern' | 'both';
+  invasiveness: "non-invasive" | "minimally-invasive" | "any";
+  evidenceRequirement: "traditional" | "modern" | "both";
 }
 
 export interface TreatmentApproach {
-  type: 'dietary' | 'herbal' | 'acupressure' | 'lifestyle' | 'exercise' | 'meditation';
+  type: "dietary" | "herbal" | "acupressure" | "lifestyle" | "exercise" | "meditation";
   preference: number; // 1-10 scale
-  experience: 'none' | 'beginner' | 'experienced' | 'expert';
+  experience: "none" | "beginner" | "experienced" | "expert";
 }
 
 export interface TimeCommitment {
@@ -135,32 +143,32 @@ export interface AccessibilityPreferences {
 }
 
 export interface VisualAccessibility {
-  level: 'none' | 'mild' | 'moderate' | 'severe' | 'blind';
+  level: "none" | "mild" | "moderate" | "severe" | "blind";
   screenReader: boolean;
   highContrast: boolean;
-  fontSize: 'small' | 'medium' | 'large' | 'extra-large';
+  fontSize: "small" | "medium" | "large" | "extra-large";
   colorBlindness: string[];
 }
 
 export interface HearingAccessibility {
-  level: 'none' | 'mild' | 'moderate' | 'severe' | 'deaf';
+  level: "none" | "mild" | "moderate" | "severe" | "deaf";
   hearingAid: boolean;
   captionsRequired: boolean;
   signLanguage: string[];
 }
 
 export interface MotorAccessibility {
-  level: 'none' | 'mild' | 'moderate' | 'severe';
+  level: "none" | "mild" | "moderate" | "severe";
   assistiveDevices: string[];
   keyboardOnly: boolean;
   voiceControl: boolean;
 }
 
 export interface CognitiveAccessibility {
-  level: 'none' | 'mild' | 'moderate' | 'severe';
+  level: "none" | "mild" | "moderate" | "severe";
   memorySupport: boolean;
   simplifiedInterface: boolean;
-  reminderFrequency: 'none' | 'low' | 'medium' | 'high';
+  reminderFrequency: "none" | "low" | "medium" | "high";
 }
 
 // Learning and adaptation interfaces
@@ -176,8 +184,14 @@ export interface LearningProfile {
 
 export interface UserInteraction {
   timestamp: Date;
-  type: 'recommendation_view' | 'recommendation_accept' | 'recommendation_reject' | 
-        'feedback_positive' | 'feedback_negative' | 'treatment_complete' | 'treatment_abandon';
+  type:
+    | "recommendation_view"
+    | "recommendation_accept"
+    | "recommendation_reject"
+    | "feedback_positive"
+    | "feedback_negative"
+    | "treatment_complete"
+    | "treatment_abandon";
   context: InteractionContext;
   outcome?: InteractionOutcome;
 }
@@ -226,7 +240,7 @@ export interface OutcomeCorrelation {
 // Recommendation interfaces
 export interface PersonalizedRecommendation {
   id: string;
-  type: 'dietary' | 'herbal' | 'lifestyle' | 'exercise' | 'mindfulness';
+  type: "dietary" | "herbal" | "lifestyle" | "exercise" | "mindfulness";
   title: string;
   description: string;
   rationale: string;
@@ -246,7 +260,7 @@ export interface CulturalAdaptation {
 }
 
 export interface LanguageAdaptation {
-  complexity: 'simple' | 'moderate' | 'technical';
+  complexity: "simple" | "moderate" | "technical";
   culturalTerms: Record<string, string>;
   localExamples: string[];
 }
@@ -255,14 +269,14 @@ export interface SafetyValidation {
   allergyCheck: AllergyCheckResult;
   restrictionCheck: RestrictionCheckResult;
   contraindicationCheck: ContraindicationCheckResult;
-  overallSafety: 'safe' | 'caution' | 'unsafe';
+  overallSafety: "safe" | "caution" | "unsafe";
   warnings: string[];
 }
 
 export interface AllergyCheckResult {
   hasConflicts: boolean;
   conflictingAllergens: string[];
-  severity: 'none' | 'mild' | 'moderate' | 'severe';
+  severity: "none" | "mild" | "moderate" | "severe";
   alternatives: string[];
 }
 
@@ -276,7 +290,7 @@ export interface RestrictionCheckResult {
 export interface ContraindicationCheckResult {
   hasContraindications: boolean;
   contraindications: string[];
-  riskLevel: 'low' | 'medium' | 'high';
+  riskLevel: "low" | "medium" | "high";
   precautions: string[];
 }
 
@@ -300,12 +314,12 @@ export interface ImplementationStep {
   title: string;
   description: string;
   duration: string;
-  difficulty: 'easy' | 'moderate' | 'challenging';
+  difficulty: "easy" | "moderate" | "challenging";
   prerequisites: string[];
 }
 
 export interface Resource {
-  type: 'article' | 'video' | 'app' | 'product' | 'service';
+  type: "article" | "video" | "app" | "product" | "service";
   title: string;
   url?: string;
   description: string;
@@ -331,11 +345,11 @@ export interface PersonalizationConfig {
 }
 
 export interface PersonalizationEngineEvents {
-  'preference-learned': { userId: string; preference: string; confidence: number };
-  'recommendation-generated': { userId: string; recommendation: PersonalizedRecommendation };
-  'safety-warning': { userId: string; warning: string; severity: string };
-  'adaptation-updated': { userId: string; metrics: AdaptationMetrics };
-  'outcome-recorded': { userId: string; outcome: InteractionOutcome };
+  "preference-learned": { userId: string; preference: string; confidence: number };
+  "recommendation-generated": { userId: string; recommendation: PersonalizedRecommendation };
+  "safety-warning": { userId: string; warning: string; severity: string };
+  "adaptation-updated": { userId: string; metrics: AdaptationMetrics };
+  "outcome-recorded": { userId: string; outcome: InteractionOutcome };
 }
 
 /**
@@ -349,7 +363,7 @@ export class PersonalizationEngine extends EventEmitter {
 
   constructor(config: Partial<PersonalizationConfig> = {}) {
     super();
-    
+
     this.config = {
       learningRate: 0.1,
       adaptationThreshold: 0.7,
@@ -358,7 +372,7 @@ export class PersonalizationEngine extends EventEmitter {
       culturalWeighting: 0.3,
       safetyPriority: 0.9,
       diversityFactor: 0.2,
-      ...config
+      ...config,
     };
 
     this.safetyValidator = new SafetyValidator();
@@ -369,7 +383,7 @@ export class PersonalizationEngine extends EventEmitter {
    * Initialize user learning profile
    */
   async initializeUserProfile(
-    userId: string, 
+    userId: string,
     preferences: UserPreferences
   ): Promise<LearningProfile> {
     const profile: LearningProfile = {
@@ -383,9 +397,9 @@ export class PersonalizationEngine extends EventEmitter {
         confidenceLevel: 0.5,
         adaptationSpeed: 0.5,
         stabilityScore: 1.0,
-        diversityIndex: 0.5
+        diversityIndex: 0.5,
       },
-      outcomeCorrelations: []
+      outcomeCorrelations: [],
     };
 
     this.learningProfiles.set(userId, profile);
@@ -406,12 +420,9 @@ export class PersonalizationEngine extends EventEmitter {
 
     // Analyze current context and preferences
     const contextAnalysis = await this.analyzeContext(context, profile);
-    
+
     // Generate base recommendations
-    const baseRecommendations = await this.generateBaseRecommendations(
-      contextAnalysis, 
-      profile
-    );
+    const baseRecommendations = await this.generateBaseRecommendations(contextAnalysis, profile);
 
     // Apply cultural adaptations
     const culturallyAdapted = await this.applyCulturalAdaptations(
@@ -421,11 +432,7 @@ export class PersonalizationEngine extends EventEmitter {
     );
 
     // Validate safety
-    const safeRecommendations = await this.validateSafety(
-      culturallyAdapted,
-      profile,
-      context
-    );
+    const safeRecommendations = await this.validateSafety(culturallyAdapted, profile, context);
 
     // Apply personalization scoring
     const personalizedRecommendations = await this.applyPersonalizationScoring(
@@ -441,12 +448,11 @@ export class PersonalizationEngine extends EventEmitter {
     );
 
     // Limit to max recommendations
-    const finalRecommendations = diverseRecommendations
-      .slice(0, this.config.maxRecommendations);
+    const finalRecommendations = diverseRecommendations.slice(0, this.config.maxRecommendations);
 
     // Emit event
-    finalRecommendations.forEach(rec => {
-      this.emit('recommendation-generated', { userId, recommendation: rec });
+    finalRecommendations.forEach((rec) => {
+      this.emit("recommendation-generated", { userId, recommendation: rec });
     });
 
     return finalRecommendations;
@@ -455,10 +461,7 @@ export class PersonalizationEngine extends EventEmitter {
   /**
    * Record user interaction for learning
    */
-  async recordInteraction(
-    userId: string,
-    interaction: UserInteraction
-  ): Promise<void> {
+  async recordInteraction(userId: string, interaction: UserInteraction): Promise<void> {
     const profile = this.learningProfiles.get(userId);
     if (!profile) {
       throw new Error(`No learning profile found for user ${userId}`);
@@ -472,10 +475,10 @@ export class PersonalizationEngine extends EventEmitter {
     await this.updateLearning(profile, interaction);
 
     // Emit learning event
-    this.emit('preference-learned', {
+    this.emit("preference-learned", {
       userId,
       preference: interaction.type,
-      confidence: profile.adaptationMetrics.confidenceLevel
+      confidence: profile.adaptationMetrics.confidenceLevel,
     });
   }
 
@@ -494,7 +497,7 @@ export class PersonalizationEngine extends EventEmitter {
 
     // Find the corresponding interaction
     const interaction = profile.interactionHistory.find(
-      i => i.context.recommendationType === recommendationId
+      (i) => i.context.recommendationType === recommendationId
     );
 
     if (interaction) {
@@ -505,7 +508,7 @@ export class PersonalizationEngine extends EventEmitter {
     await this.updateOutcomeCorrelations(profile, outcome);
 
     // Emit outcome event
-    this.emit('outcome-recorded', { userId, outcome });
+    this.emit("outcome-recorded", { userId, outcome });
   }
 
   /**
@@ -532,10 +535,10 @@ export class PersonalizationEngine extends EventEmitter {
 
   private initializeCulturalAdapters(): void {
     // Initialize cultural adapters for different cultures
-    this.culturalAdapters.set('chinese', new ChineseCulturalAdapter());
-    this.culturalAdapters.set('malay', new MalayCulturalAdapter());
-    this.culturalAdapters.set('indian', new IndianCulturalAdapter());
-    this.culturalAdapters.set('western', new WesternCulturalAdapter());
+    this.culturalAdapters.set("chinese", new ChineseCulturalAdapter());
+    this.culturalAdapters.set("malay", new MalayCulturalAdapter());
+    this.culturalAdapters.set("indian", new IndianCulturalAdapter());
+    this.culturalAdapters.set("western", new WesternCulturalAdapter());
   }
 
   private calculateInitialWeights(preferences: UserPreferences): PreferenceWeights {
@@ -545,7 +548,7 @@ export class PersonalizationEngine extends EventEmitter {
       lifestyle: 0.2,
       treatment: 0.15,
       accessibility: 0.1,
-      temporal: 0.1
+      temporal: 0.1,
     };
   }
 
@@ -558,7 +561,7 @@ export class PersonalizationEngine extends EventEmitter {
       temporalFactors: this.analyzeTemporalFactors(context, profile),
       healthFactors: this.analyzeHealthFactors(context, profile),
       environmentalFactors: this.analyzeEnvironmentalFactors(context, profile),
-      personalFactors: this.analyzePersonalFactors(context, profile)
+      personalFactors: this.analyzePersonalFactors(context, profile),
     };
   }
 
@@ -570,16 +573,16 @@ export class PersonalizationEngine extends EventEmitter {
     const recommendations: BaseRecommendation[] = [];
 
     // Dietary recommendations
-    recommendations.push(...await this.generateDietaryRecommendations(analysis, profile));
+    recommendations.push(...(await this.generateDietaryRecommendations(analysis, profile)));
 
     // Lifestyle recommendations
-    recommendations.push(...await this.generateLifestyleRecommendations(analysis, profile));
+    recommendations.push(...(await this.generateLifestyleRecommendations(analysis, profile)));
 
     // Herbal recommendations
-    recommendations.push(...await this.generateHerbalRecommendations(analysis, profile));
+    recommendations.push(...(await this.generateHerbalRecommendations(analysis, profile)));
 
     // Exercise recommendations
-    recommendations.push(...await this.generateExerciseRecommendations(analysis, profile));
+    recommendations.push(...(await this.generateExerciseRecommendations(analysis, profile)));
 
     return recommendations;
   }
@@ -590,11 +593,12 @@ export class PersonalizationEngine extends EventEmitter {
     context: RecommendationContext
   ): Promise<PersonalizedRecommendation[]> {
     const culturalContext = this.extractCulturalContext(profile);
-    const adapter = this.culturalAdapters.get(culturalContext.primaryCulture) ||
-                   this.culturalAdapters.get('western');
+    const adapter =
+      this.culturalAdapters.get(culturalContext.primaryCulture) ||
+      this.culturalAdapters.get("western");
 
     return Promise.all(
-      recommendations.map(rec => adapter!.adaptRecommendation(rec, culturalContext))
+      recommendations.map((rec) => adapter!.adaptRecommendation(rec, culturalContext))
     );
   }
 
@@ -614,13 +618,13 @@ export class PersonalizationEngine extends EventEmitter {
 
       recommendation.safetyValidation = safetyValidation;
 
-      if (safetyValidation.overallSafety !== 'unsafe') {
+      if (safetyValidation.overallSafety !== "unsafe") {
         safeRecommendations.push(recommendation);
       } else {
-        this.emit('safety-warning', {
+        this.emit("safety-warning", {
           userId: profile.userId,
           warning: `Unsafe recommendation filtered: ${recommendation.title}`,
-          severity: 'high'
+          severity: "high",
         });
       }
     }
@@ -633,16 +637,18 @@ export class PersonalizationEngine extends EventEmitter {
     profile: LearningProfile,
     context: RecommendationContext
   ): Promise<PersonalizedRecommendation[]> {
-    return recommendations.map(rec => {
-      const personalizationScore = this.calculatePersonalizationScore(rec, profile, context);
-      const confidenceScore = this.calculateConfidenceScore(rec, profile);
+    return recommendations
+      .map((rec) => {
+        const personalizationScore = this.calculatePersonalizationScore(rec, profile, context);
+        const confidenceScore = this.calculateConfidenceScore(rec, profile);
 
-      return {
-        ...rec,
-        personalizationScore,
-        confidenceScore
-      };
-    }).sort((a, b) => b.personalizationScore - a.personalizationScore);
+        return {
+          ...rec,
+          personalizationScore,
+          confidenceScore,
+        };
+      })
+      .sort((a, b) => b.personalizationScore - a.personalizationScore);
   }
 
   private ensureDiversity(
@@ -674,43 +680,40 @@ export class PersonalizationEngine extends EventEmitter {
     this.updateAdaptationMetrics(profile, interaction);
 
     // Emit adaptation update
-    this.emit('adaptation-updated', {
+    this.emit("adaptation-updated", {
       userId: profile.userId,
-      metrics: profile.adaptationMetrics
+      metrics: profile.adaptationMetrics,
     });
   }
 
-  private updatePreferenceWeights(
-    profile: LearningProfile,
-    interaction: UserInteraction
-  ): void {
+  private updatePreferenceWeights(profile: LearningProfile, interaction: UserInteraction): void {
     const learningRate = profile.adaptationMetrics.learningRate;
-    
+
     // Adjust weights based on positive/negative feedback
-    if (interaction.type === 'feedback_positive' || interaction.type === 'recommendation_accept') {
+    if (interaction.type === "feedback_positive" || interaction.type === "recommendation_accept") {
       // Increase weights for factors that led to positive outcome
       this.reinforcePositiveFactors(profile, interaction, learningRate);
-    } else if (interaction.type === 'feedback_negative' || interaction.type === 'recommendation_reject') {
+    } else if (
+      interaction.type === "feedback_negative" ||
+      interaction.type === "recommendation_reject"
+    ) {
       // Decrease weights for factors that led to negative outcome
       this.adjustNegativeFactors(profile, interaction, learningRate);
     }
   }
 
-  private updateAdaptationMetrics(
-    profile: LearningProfile,
-    interaction: UserInteraction
-  ): void {
+  private updateAdaptationMetrics(profile: LearningProfile, interaction: UserInteraction): void {
     const metrics = profile.adaptationMetrics;
-    
+
     // Update confidence based on interaction consistency
     metrics.confidenceLevel = this.calculateConfidenceLevel(profile);
-    
+
     // Update adaptation speed based on learning rate
     metrics.adaptationSpeed = this.calculateAdaptationSpeed(profile);
-    
+
     // Update stability score
     metrics.stabilityScore = this.calculateStabilityScore(profile);
-    
+
     // Update diversity index
     metrics.diversityIndex = this.calculateDiversityIndex(profile);
   }
@@ -722,7 +725,7 @@ export class PersonalizationEngine extends EventEmitter {
     // Analyze correlations between factors and outcomes
     // This would involve statistical analysis of historical data
     // For now, we'll implement a simplified version
-    
+
     const correlations = this.calculateOutcomeCorrelations(profile, outcome);
     profile.outcomeCorrelations = correlations;
   }
@@ -737,7 +740,8 @@ export class PersonalizationEngine extends EventEmitter {
     let score = 0;
 
     // Cultural relevance
-    score += recommendation.culturalAdaptation.culturalRelevance * profile.preferenceWeights.cultural;
+    score +=
+      recommendation.culturalAdaptation.culturalRelevance * profile.preferenceWeights.cultural;
 
     // Historical preference alignment
     score += this.calculateHistoricalAlignment(recommendation, profile) * 0.3;
@@ -746,7 +750,8 @@ export class PersonalizationEngine extends EventEmitter {
     score += this.calculateContextualFit(recommendation, context) * 0.2;
 
     // Safety score
-    score += this.calculateSafetyScore(recommendation.safetyValidation) * this.config.safetyPriority;
+    score +=
+      this.calculateSafetyScore(recommendation.safetyValidation) * this.config.safetyPriority;
 
     return Math.min(1, Math.max(0, score));
   }
@@ -761,8 +766,8 @@ export class PersonalizationEngine extends EventEmitter {
     const sampleSize = profile.interactionHistory.length;
 
     const sampleSizeWeight = Math.min(1, sampleSize / 50); // Normalize to 50 interactions
-    
-    return (dataQuality * 0.4 + historicalAccuracy * 0.4 + sampleSizeWeight * 0.2);
+
+    return dataQuality * 0.4 + historicalAccuracy * 0.4 + sampleSizeWeight * 0.2;
   }
 
   // Additional helper methods would be implemented here...
@@ -776,7 +781,10 @@ export class PersonalizationEngine extends EventEmitter {
     return {};
   }
 
-  private analyzeEnvironmentalFactors(context: RecommendationContext, profile: LearningProfile): any {
+  private analyzeEnvironmentalFactors(
+    context: RecommendationContext,
+    profile: LearningProfile
+  ): any {
     // Implementation for environmental analysis
     return {};
   }
@@ -786,22 +794,34 @@ export class PersonalizationEngine extends EventEmitter {
     return {};
   }
 
-  private async generateDietaryRecommendations(analysis: ContextAnalysis, profile: LearningProfile): Promise<BaseRecommendation[]> {
+  private async generateDietaryRecommendations(
+    analysis: ContextAnalysis,
+    profile: LearningProfile
+  ): Promise<BaseRecommendation[]> {
     // Implementation for dietary recommendations
     return [];
   }
 
-  private async generateLifestyleRecommendations(analysis: ContextAnalysis, profile: LearningProfile): Promise<BaseRecommendation[]> {
+  private async generateLifestyleRecommendations(
+    analysis: ContextAnalysis,
+    profile: LearningProfile
+  ): Promise<BaseRecommendation[]> {
     // Implementation for lifestyle recommendations
     return [];
   }
 
-  private async generateHerbalRecommendations(analysis: ContextAnalysis, profile: LearningProfile): Promise<BaseRecommendation[]> {
+  private async generateHerbalRecommendations(
+    analysis: ContextAnalysis,
+    profile: LearningProfile
+  ): Promise<BaseRecommendation[]> {
     // Implementation for herbal recommendations
     return [];
   }
 
-  private async generateExerciseRecommendations(analysis: ContextAnalysis, profile: LearningProfile): Promise<BaseRecommendation[]> {
+  private async generateExerciseRecommendations(
+    analysis: ContextAnalysis,
+    profile: LearningProfile
+  ): Promise<BaseRecommendation[]> {
     // Implementation for exercise recommendations
     return [];
   }
@@ -809,12 +829,12 @@ export class PersonalizationEngine extends EventEmitter {
   private extractCulturalContext(profile: LearningProfile): CulturalContext {
     // Extract cultural context from profile
     return {
-      primaryCulture: 'western',
-      languages: ['en'],
+      primaryCulture: "western",
+      languages: ["en"],
       religiousConsiderations: [],
       traditionalPractices: [],
-      familyStructure: 'nuclear',
-      healthBeliefs: []
+      familyStructure: "nuclear",
+      healthBeliefs: [],
     };
   }
 
@@ -823,11 +843,19 @@ export class PersonalizationEngine extends EventEmitter {
     return {} as UserPreferences;
   }
 
-  private reinforcePositiveFactors(profile: LearningProfile, interaction: UserInteraction, learningRate: number): void {
+  private reinforcePositiveFactors(
+    profile: LearningProfile,
+    interaction: UserInteraction,
+    learningRate: number
+  ): void {
     // Implementation for reinforcing positive factors
   }
 
-  private adjustNegativeFactors(profile: LearningProfile, interaction: UserInteraction, learningRate: number): void {
+  private adjustNegativeFactors(
+    profile: LearningProfile,
+    interaction: UserInteraction,
+    learningRate: number
+  ): void {
     // Implementation for adjusting negative factors
   }
 
@@ -851,17 +879,26 @@ export class PersonalizationEngine extends EventEmitter {
     return 0.5;
   }
 
-  private calculateOutcomeCorrelations(profile: LearningProfile, outcome: InteractionOutcome): OutcomeCorrelation[] {
+  private calculateOutcomeCorrelations(
+    profile: LearningProfile,
+    outcome: InteractionOutcome
+  ): OutcomeCorrelation[] {
     // Implementation for outcome correlation calculation
     return [];
   }
 
-  private calculateHistoricalAlignment(recommendation: PersonalizedRecommendation, profile: LearningProfile): number {
+  private calculateHistoricalAlignment(
+    recommendation: PersonalizedRecommendation,
+    profile: LearningProfile
+  ): number {
     // Implementation for historical alignment calculation
     return 0.5;
   }
 
-  private calculateContextualFit(recommendation: PersonalizedRecommendation, context: RecommendationContext): number {
+  private calculateContextualFit(
+    recommendation: PersonalizedRecommendation,
+    context: RecommendationContext
+  ): number {
     // Implementation for contextual fit calculation
     return 0.5;
   }
@@ -869,10 +906,14 @@ export class PersonalizationEngine extends EventEmitter {
   private calculateSafetyScore(validation: SafetyValidation): number {
     // Implementation for safety score calculation
     switch (validation.overallSafety) {
-      case 'safe': return 1.0;
-      case 'caution': return 0.7;
-      case 'unsafe': return 0.0;
-      default: return 0.5;
+      case "safe":
+        return 1.0;
+      case "caution":
+        return 0.7;
+      case "unsafe":
+        return 0.0;
+      default:
+        return 0.5;
     }
   }
 
@@ -895,7 +936,7 @@ interface RecommendationContext {
   timeOfDay: string;
   season: string;
   location: string;
-  urgency: 'low' | 'medium' | 'high';
+  urgency: "low" | "medium" | "high";
 }
 
 interface ContextAnalysis {
@@ -943,18 +984,18 @@ class ChineseCulturalAdapter extends CulturalAdapter {
       culturalAdaptation: {
         culturalRelevance: 0.9,
         languageAdaptation: {
-          complexity: 'moderate',
+          complexity: "moderate",
           culturalTerms: {},
-          localExamples: []
+          localExamples: [],
         },
         culturalModifications: [],
-        respectfulConsiderations: []
+        respectfulConsiderations: [],
       },
       safetyValidation: {} as SafetyValidation,
       personalizationScore: 0,
       confidenceScore: 0,
       expectedOutcome: {} as ExpectedOutcome,
-      implementation: {} as ImplementationGuide
+      implementation: {} as ImplementationGuide,
     };
   }
 }
@@ -977,18 +1018,18 @@ class MalayCulturalAdapter extends CulturalAdapter {
       culturalAdaptation: {
         culturalRelevance: 0.8,
         languageAdaptation: {
-          complexity: 'simple',
+          complexity: "simple",
           culturalTerms: {},
-          localExamples: []
+          localExamples: [],
         },
         culturalModifications: [],
-        respectfulConsiderations: []
+        respectfulConsiderations: [],
       },
       safetyValidation: {} as SafetyValidation,
       personalizationScore: 0,
       confidenceScore: 0,
       expectedOutcome: {} as ExpectedOutcome,
-      implementation: {} as ImplementationGuide
+      implementation: {} as ImplementationGuide,
     };
   }
 }
@@ -1011,18 +1052,18 @@ class IndianCulturalAdapter extends CulturalAdapter {
       culturalAdaptation: {
         culturalRelevance: 0.85,
         languageAdaptation: {
-          complexity: 'moderate',
+          complexity: "moderate",
           culturalTerms: {},
-          localExamples: []
+          localExamples: [],
         },
         culturalModifications: [],
-        respectfulConsiderations: []
+        respectfulConsiderations: [],
       },
       safetyValidation: {} as SafetyValidation,
       personalizationScore: 0,
       confidenceScore: 0,
       expectedOutcome: {} as ExpectedOutcome,
-      implementation: {} as ImplementationGuide
+      implementation: {} as ImplementationGuide,
     };
   }
 }
@@ -1045,18 +1086,18 @@ class WesternCulturalAdapter extends CulturalAdapter {
       culturalAdaptation: {
         culturalRelevance: 0.7,
         languageAdaptation: {
-          complexity: 'technical',
+          complexity: "technical",
           culturalTerms: {},
-          localExamples: []
+          localExamples: [],
         },
         culturalModifications: [],
-        respectfulConsiderations: []
+        respectfulConsiderations: [],
       },
       safetyValidation: {} as SafetyValidation,
       personalizationScore: 0,
       confidenceScore: 0,
       expectedOutcome: {} as ExpectedOutcome,
-      implementation: {} as ImplementationGuide
+      implementation: {} as ImplementationGuide,
     };
   }
 }
@@ -1075,23 +1116,23 @@ class SafetyValidator {
       allergyCheck: {
         hasConflicts: false,
         conflictingAllergens: [],
-        severity: 'none',
-        alternatives: []
+        severity: "none",
+        alternatives: [],
       },
       restrictionCheck: {
         hasViolations: false,
         violatedRestrictions: [],
         modifications: [],
-        alternatives: []
+        alternatives: [],
       },
       contraindicationCheck: {
         hasContraindications: false,
         contraindications: [],
-        riskLevel: 'low',
-        precautions: []
+        riskLevel: "low",
+        precautions: [],
       },
-      overallSafety: 'safe',
-      warnings: []
+      overallSafety: "safe",
+      warnings: [],
     };
   }
 }

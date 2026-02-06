@@ -1,6 +1,6 @@
 /**
  * Command History Core Implementation
- * 
+ *
  * Comprehensive command history management with undo/redo support,
  * analytics, and advanced filtering capabilities.
  */
@@ -15,10 +15,10 @@ import {
   CommandStatistics,
   TimeRange,
   PerformanceTrend,
-} from '../interfaces/CommandInterfaces';
+} from "../interfaces/CommandInterfaces";
 
-import { devLog, logError } from '../../systemLogger';
-import { ErrorFactory } from '../../errors/AppError';
+import { devLog, logError } from "../../systemLogger";
+import { ErrorFactory } from "../../errors/AppError";
 
 /**
  * Enhanced command history implementation
@@ -29,11 +29,11 @@ export class EnhancedCommandHistory implements CommandHistory {
   private redoStack: string[] = [];
   private readonly context: string;
   private readonly config: CommandHistoryConfig;
-  
+
   // Performance tracking
   private performanceData: PerformanceTrend[] = [];
 
-  constructor(context: string = 'CommandHistory', config: Partial<CommandHistoryConfig> = {}) {
+  constructor(context: string = "CommandHistory", config: Partial<CommandHistoryConfig> = {}) {
     this.context = context;
     this.config = {
       maxHistorySize: 10000,
@@ -55,7 +55,11 @@ export class EnhancedCommandHistory implements CommandHistory {
   /**
    * Record a command execution in history
    */
-  public async record(command: Command, result: CommandResult, context: CommandContext): Promise<void> {
+  public async record(
+    command: Command,
+    result: CommandResult,
+    context: CommandContext
+  ): Promise<void> {
     try {
       const entry: CommandHistoryEntry = {
         command,
@@ -71,12 +75,12 @@ export class EnhancedCommandHistory implements CommandHistory {
       // Add to undo stack if undoable
       if (entry.undoable && result.success) {
         this.undoStack.push(command.id);
-        
+
         // Limit undo stack size
         if (this.undoStack.length > this.config.maxUndoStackSize) {
           this.undoStack = this.undoStack.slice(-this.config.maxUndoStackSize);
         }
-        
+
         // Clear redo stack when new command is executed
         this.redoStack = [];
       }
@@ -97,11 +101,10 @@ export class EnhancedCommandHistory implements CommandHistory {
         undoable: entry.undoable,
         historySize: this.history.size,
       });
-
     } catch (error) {
       throw ErrorFactory.fromUnknownError(error, {
         component: this.context,
-        action: 'record',
+        action: "record",
         metadata: { commandId: command.id },
       });
     }
@@ -125,13 +128,12 @@ export class EnhancedCommandHistory implements CommandHistory {
       if (filter?.offset) {
         entries = entries.slice(filter.offset);
       }
-      
+
       if (filter?.limit) {
         entries = entries.slice(0, filter.limit);
       }
 
       return entries;
-
     } catch (error) {
       logError(`[${this.context}] Error getting history`, error);
       return [];
@@ -189,7 +191,7 @@ export class EnhancedCommandHistory implements CommandHistory {
     }
 
     entry.undoneAt = new Date();
-    
+
     // Move from undo stack to redo stack
     const undoIndex = this.undoStack.indexOf(commandId);
     if (undoIndex !== -1) {
@@ -197,7 +199,9 @@ export class EnhancedCommandHistory implements CommandHistory {
       this.redoStack.push(commandId);
     }
 
-    devLog(`[${this.context}] Command marked as undone: ${entry.command.description}`, { commandId });
+    devLog(`[${this.context}] Command marked as undone: ${entry.command.description}`, {
+      commandId,
+    });
     return true;
   }
 
@@ -212,7 +216,7 @@ export class EnhancedCommandHistory implements CommandHistory {
 
     entry.redoneAt = new Date();
     entry.undoneAt = undefined; // Clear undo timestamp
-    
+
     // Move from redo stack to undo stack
     const redoIndex = this.redoStack.indexOf(commandId);
     if (redoIndex !== -1) {
@@ -220,7 +224,9 @@ export class EnhancedCommandHistory implements CommandHistory {
       this.undoStack.push(commandId);
     }
 
-    devLog(`[${this.context}] Command marked as redone: ${entry.command.description}`, { commandId });
+    devLog(`[${this.context}] Command marked as redone: ${entry.command.description}`, {
+      commandId,
+    });
     return true;
   }
 
@@ -233,45 +239,46 @@ export class EnhancedCommandHistory implements CommandHistory {
 
       // Apply time range filter if provided
       if (timeRange) {
-        entries = entries.filter(entry => 
-          entry.executedAt >= timeRange.start && entry.executedAt <= timeRange.end
+        entries = entries.filter(
+          (entry) => entry.executedAt >= timeRange.start && entry.executedAt <= timeRange.end
         );
       }
 
       const totalCommands = entries.length;
-      const successfulCommands = entries.filter(entry => entry.result.success).length;
+      const successfulCommands = entries.filter((entry) => entry.result.success).length;
       const failedCommands = totalCommands - successfulCommands;
 
       // Calculate average execution time
-      const executionTimes = entries.map(entry => entry.result.executionTime);
-      const averageExecutionTime = executionTimes.length > 0
-        ? executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length
-        : 0;
+      const executionTimes = entries.map((entry) => entry.result.executionTime);
+      const averageExecutionTime =
+        executionTimes.length > 0
+          ? executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length
+          : 0;
 
       // Group by command type
       const commandsByType: Record<string, number> = {};
-      entries.forEach(entry => {
+      entries.forEach((entry) => {
         commandsByType[entry.command.type] = (commandsByType[entry.command.type] || 0) + 1;
       });
 
       // Group by user
       const commandsByUser: Record<string, number> = {};
-      entries.forEach(entry => {
-        const userId = entry.context.userId || 'unknown';
+      entries.forEach((entry) => {
+        const userId = entry.context.userId || "unknown";
         commandsByUser[userId] = (commandsByUser[userId] || 0) + 1;
       });
 
       // Group errors by type
       const errorsByType: Record<string, number> = {};
       entries
-        .filter(entry => !entry.result.success && entry.result.error)
-        .forEach(entry => {
+        .filter((entry) => !entry.result.success && entry.result.error)
+        .forEach((entry) => {
           const errorType = this.extractErrorType(entry.result.error!);
           errorsByType[errorType] = (errorsByType[errorType] || 0) + 1;
         });
 
       // Get performance trends
-      const performanceTrends = timeRange 
+      const performanceTrends = timeRange
         ? this.getPerformanceTrends(timeRange)
         : this.performanceData.slice(-100); // Last 100 data points
 
@@ -285,12 +292,11 @@ export class EnhancedCommandHistory implements CommandHistory {
         errorsByType,
         performanceTrends,
       };
-
     } catch (error) {
       logError(`[${this.context}] Error getting statistics`, error);
       throw ErrorFactory.fromUnknownError(error, {
         component: this.context,
-        action: 'getStatistics',
+        action: "getStatistics",
       });
     }
   }
@@ -300,7 +306,7 @@ export class EnhancedCommandHistory implements CommandHistory {
    */
   public async getCommandsByType(commandType: string): Promise<CommandHistoryEntry[]> {
     return Array.from(this.history.values())
-      .filter(entry => entry.command.type === commandType)
+      .filter((entry) => entry.command.type === commandType)
       .sort((a, b) => b.executedAt.getTime() - a.executedAt.getTime());
   }
 
@@ -314,18 +320,18 @@ export class EnhancedCommandHistory implements CommandHistory {
     for (const [commandId, entry] of this.history) {
       if (entry.executedAt < cutoffDate) {
         this.history.delete(commandId);
-        
+
         // Remove from undo/redo stacks
         const undoIndex = this.undoStack.indexOf(commandId);
         if (undoIndex !== -1) {
           this.undoStack.splice(undoIndex, 1);
         }
-        
+
         const redoIndex = this.redoStack.indexOf(commandId);
         if (redoIndex !== -1) {
           this.redoStack.splice(redoIndex, 1);
         }
-        
+
         clearedCount++;
       }
     }
@@ -390,38 +396,41 @@ export class EnhancedCommandHistory implements CommandHistory {
   /**
    * Apply filter to history entries
    */
-  private applyFilter(entries: CommandHistoryEntry[], filter: CommandHistoryFilter): CommandHistoryEntry[] {
+  private applyFilter(
+    entries: CommandHistoryEntry[],
+    filter: CommandHistoryFilter
+  ): CommandHistoryEntry[] {
     let filtered = entries;
 
     if (filter.commandTypes) {
-      filtered = filtered.filter(entry => filter.commandTypes!.includes(entry.command.type));
+      filtered = filtered.filter((entry) => filter.commandTypes!.includes(entry.command.type));
     }
 
     if (filter.userIds) {
-      filtered = filtered.filter(entry => 
-        entry.context.userId && filter.userIds!.includes(entry.context.userId)
+      filtered = filtered.filter(
+        (entry) => entry.context.userId && filter.userIds!.includes(entry.context.userId)
       );
     }
 
     if (filter.sessionIds) {
-      filtered = filtered.filter(entry => 
-        entry.context.sessionId && filter.sessionIds!.includes(entry.context.sessionId)
+      filtered = filtered.filter(
+        (entry) => entry.context.sessionId && filter.sessionIds!.includes(entry.context.sessionId)
       );
     }
 
     if (filter.timeRange) {
-      filtered = filtered.filter(entry => 
-        entry.executedAt >= filter.timeRange!.start && 
-        entry.executedAt <= filter.timeRange!.end
+      filtered = filtered.filter(
+        (entry) =>
+          entry.executedAt >= filter.timeRange!.start && entry.executedAt <= filter.timeRange!.end
       );
     }
 
     if (filter.success !== undefined) {
-      filtered = filtered.filter(entry => entry.result.success === filter.success);
+      filtered = filtered.filter((entry) => entry.result.success === filter.success);
     }
 
     if (filter.undoable !== undefined) {
-      filtered = filtered.filter(entry => entry.undoable === filter.undoable);
+      filtered = filtered.filter((entry) => entry.undoable === filter.undoable);
     }
 
     return filtered;
@@ -432,13 +441,13 @@ export class EnhancedCommandHistory implements CommandHistory {
    */
   private recordPerformanceData(entry: CommandHistoryEntry): void {
     const now = new Date();
-    
+
     // Find or create performance data for current time window (1 minute)
     const timeWindow = Math.floor(now.getTime() / 60000) * 60000; // Round to minute
     const windowDate = new Date(timeWindow);
-    
-    let dataPoint = this.performanceData.find(p => p.timestamp.getTime() === timeWindow);
-    
+
+    let dataPoint = this.performanceData.find((p) => p.timestamp.getTime() === timeWindow);
+
     if (!dataPoint) {
       dataPoint = {
         timestamp: windowDate,
@@ -452,9 +461,13 @@ export class EnhancedCommandHistory implements CommandHistory {
 
     // Update data point
     const totalCommands = dataPoint.commandCount + 1;
-    const newExecutionTime = (dataPoint.averageExecutionTime * dataPoint.commandCount + entry.result.executionTime) / totalCommands;
-    const successCount = dataPoint.successRate * dataPoint.commandCount + (entry.result.success ? 1 : 0);
-    const errorCount = dataPoint.errorRate * dataPoint.commandCount + (entry.result.success ? 0 : 1);
+    const newExecutionTime =
+      (dataPoint.averageExecutionTime * dataPoint.commandCount + entry.result.executionTime) /
+      totalCommands;
+    const successCount =
+      dataPoint.successRate * dataPoint.commandCount + (entry.result.success ? 1 : 0);
+    const errorCount =
+      dataPoint.errorRate * dataPoint.commandCount + (entry.result.success ? 0 : 1);
 
     dataPoint.commandCount = totalCommands;
     dataPoint.averageExecutionTime = newExecutionTime;
@@ -471,8 +484,8 @@ export class EnhancedCommandHistory implements CommandHistory {
    * Get performance trends for time range
    */
   private getPerformanceTrends(timeRange: TimeRange): PerformanceTrend[] {
-    return this.performanceData.filter(trend => 
-      trend.timestamp >= timeRange.start && trend.timestamp <= timeRange.end
+    return this.performanceData.filter(
+      (trend) => trend.timestamp >= timeRange.start && trend.timestamp <= timeRange.end
     );
   }
 
@@ -482,11 +495,11 @@ export class EnhancedCommandHistory implements CommandHistory {
   private extractErrorType(errorMessage: string): string {
     // Simple error type extraction - in a real implementation,
     // you might have more sophisticated error categorization
-    if (errorMessage.toLowerCase().includes('timeout')) return 'timeout';
-    if (errorMessage.toLowerCase().includes('network')) return 'network';
-    if (errorMessage.toLowerCase().includes('validation')) return 'validation';
-    if (errorMessage.toLowerCase().includes('permission')) return 'permission';
-    return 'unknown';
+    if (errorMessage.toLowerCase().includes("timeout")) return "timeout";
+    if (errorMessage.toLowerCase().includes("network")) return "network";
+    if (errorMessage.toLowerCase().includes("validation")) return "validation";
+    if (errorMessage.toLowerCase().includes("permission")) return "permission";
+    return "unknown";
   }
 
   /**
@@ -497,16 +510,16 @@ export class EnhancedCommandHistory implements CommandHistory {
     entries.sort((a, b) => a[1].executedAt.getTime() - b[1].executedAt.getTime());
 
     const entriesToRemove = entries.slice(0, entries.length - this.config.maxHistorySize);
-    
+
     for (const [commandId] of entriesToRemove) {
       this.history.delete(commandId);
-      
+
       // Remove from stacks
       const undoIndex = this.undoStack.indexOf(commandId);
       if (undoIndex !== -1) {
         this.undoStack.splice(undoIndex, 1);
       }
-      
+
       const redoIndex = this.redoStack.indexOf(commandId);
       if (redoIndex !== -1) {
         this.redoStack.splice(redoIndex, 1);
@@ -523,7 +536,7 @@ export class EnhancedCommandHistory implements CommandHistory {
     try {
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const clearedCount = await this.clearHistory(thirtyDaysAgo);
-      
+
       if (clearedCount > 0) {
         devLog(`[${this.context}] Auto cleanup cleared ${clearedCount} entries`);
       }

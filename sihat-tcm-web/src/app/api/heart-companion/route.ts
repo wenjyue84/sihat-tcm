@@ -19,16 +19,13 @@ export async function POST(req: Request) {
     const { messages, language: rawLanguage, model, profile } = body;
 
     if (!messages || !Array.isArray(messages)) {
-      return new Response(
-        JSON.stringify({ error: "Messages array is required" }),
-        {
-          status: 400,
-          headers: {
-            ...getCorsHeaders(req),
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      return new Response(JSON.stringify({ error: "Messages array is required" }), {
+        status: 400,
+        headers: {
+          ...getCorsHeaders(req),
+          "Content-Type": "application/json",
+        },
+      });
     }
 
     const language = normalizeLanguage(rawLanguage || "en");
@@ -85,7 +82,11 @@ ${profile.gender ? `Gender: ${profile.gender}` : ""}
         messages: filteredMessages,
         temperature: 0.8, // Slightly higher for more natural, friendly responses
         onFinish: (completion) => {
-          devLog("info", "API/heart-companion", `Stream finished. Text length: ${completion.text.length}`);
+          devLog(
+            "info",
+            "API/heart-companion",
+            `Stream finished. Text length: ${completion.text.length}`
+          );
         },
         onError: (error) => {
           devLog("error", "API/heart-companion", "Stream error (primary)", { error });
@@ -141,5 +142,3 @@ export async function OPTIONS(req: Request) {
     headers: getCorsHeaders(req),
   });
 }
-
-

@@ -1,6 +1,6 @@
 /**
  * Enhanced Progress Stepper Component
- * 
+ *
  * Enhanced version of the diagnosis progress stepper with:
  * - Estimated completion time calculation
  * - Step-by-step guidance tooltips
@@ -13,24 +13,24 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Check, 
-  User, 
-  MessageCircle, 
-  Camera, 
-  Mic, 
-  Activity, 
-  FileText, 
+import {
+  Check,
+  User,
+  MessageCircle,
+  Camera,
+  Mic,
+  Activity,
+  FileText,
   Wifi,
   Clock,
   HelpCircle,
   ChevronRight,
   Save,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useDiagnosisSession } from "@/hooks/useDiagnosisSession";
+import { useDiagnosisSession } from "@/features/diagnosis/hooks/useDiagnosisSession";
 import { useAccessibilityContext } from "@/stores/useAppStore";
 import { AccessibleButton } from "@/components/ui/AccessibleButton";
 import { Progress } from "@/components/ui/progress";
@@ -70,29 +70,30 @@ export function EnhancedProgressStepper({
   showAutoSaveStatus = true,
   className,
   variant = "default",
-  enableKeyboardNavigation = true
+  enableKeyboardNavigation = true,
 }: EnhancedProgressStepperProps) {
-  
   const [sessionState] = useDiagnosisSession();
   const { announce, manager } = useAccessibilityContext();
   const [showGuidanceTooltip, setShowGuidanceTooltip] = useState<string | null>(null);
   const [focusedStepIndex, setFocusedStepIndex] = useState<number>(-1);
 
   // Calculate progress and time estimates
-  const currentStepIndex = steps.findIndex(s => s.id === currentStep);
+  const currentStepIndex = steps.findIndex((s) => s.id === currentStep);
   const completedSteps = currentStepIndex >= 0 ? currentStepIndex : 0;
   const progressPercentage = ((completedSteps + 1) / steps.length) * 100;
-  
+
   const timeEstimates = useMemo(() => {
     const totalTime = steps.reduce((sum, step) => sum + step.estimatedDuration, 0);
-    const completedTime = steps.slice(0, completedSteps).reduce((sum, step) => sum + step.estimatedDuration, 0);
+    const completedTime = steps
+      .slice(0, completedSteps)
+      .reduce((sum, step) => sum + step.estimatedDuration, 0);
     const remainingTime = totalTime - completedTime;
-    
+
     return {
       total: totalTime,
       completed: completedTime,
       remaining: remainingTime,
-      currentStepTime: steps[currentStepIndex]?.estimatedDuration || 0
+      currentStepTime: steps[currentStepIndex]?.estimatedDuration || 0,
     };
   }, [steps, completedSteps, currentStepIndex]);
 
@@ -108,15 +109,14 @@ export function EnhancedProgressStepper({
   // Get step icon
   const getStepIcon = useCallback((stepId: string, isCompleted: boolean, isCurrent: boolean) => {
     const iconProps = {
-      className: cn(
-        "transition-all duration-200",
-        isCurrent ? "w-5 h-5" : "w-4 h-4"
-      ),
-      "aria-hidden": "true"
+      className: cn("transition-all duration-200", isCurrent ? "w-5 h-5" : "w-4 h-4"),
+      "aria-hidden": true as const,
     };
 
     if (isCompleted) {
-      return <CheckCircle2 {...iconProps} className={cn(iconProps.className, "text-emerald-600")} />;
+      return (
+        <CheckCircle2 {...iconProps} className={cn(iconProps.className, "text-emerald-600")} />
+      );
     }
 
     switch (stepId) {
@@ -140,56 +140,65 @@ export function EnhancedProgressStepper({
   }, []);
 
   // Handle step navigation
-  const handleStepClick = useCallback((stepId: string, index: number) => {
-    if (index <= completedSteps && onStepClick) {
-      onStepClick(stepId);
-      announce(`Navigating to ${steps[index].label}`, "polite");
-    }
-  }, [completedSteps, onStepClick, announce, steps]);
+  const handleStepClick = useCallback(
+    (stepId: string, index: number) => {
+      if (index <= completedSteps && onStepClick) {
+        onStepClick(stepId);
+        announce(`Navigating to ${steps[index].label}`, "polite");
+      }
+    },
+    [completedSteps, onStepClick, announce, steps]
+  );
 
   // Keyboard navigation
-  const handleKeyDown = useCallback((event: React.KeyboardEvent, stepId: string, index: number) => {
-    if (!enableKeyboardNavigation) return;
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent, stepId: string, index: number) => {
+      if (!enableKeyboardNavigation) return;
 
-    switch (event.key) {
-      case "Enter":
-      case " ":
-        event.preventDefault();
-        handleStepClick(stepId, index);
-        break;
-      case "ArrowRight":
-      case "ArrowDown":
-        event.preventDefault();
-        if (index < steps.length - 1) {
-          setFocusedStepIndex(index + 1);
-        }
-        break;
-      case "ArrowLeft":
-      case "ArrowUp":
-        event.preventDefault();
-        if (index > 0) {
-          setFocusedStepIndex(index - 1);
-        }
-        break;
-      case "Home":
-        event.preventDefault();
-        setFocusedStepIndex(0);
-        break;
-      case "End":
-        event.preventDefault();
-        setFocusedStepIndex(steps.length - 1);
-        break;
-    }
-  }, [enableKeyboardNavigation, handleStepClick, steps.length]);
+      switch (event.key) {
+        case "Enter":
+        case " ":
+          event.preventDefault();
+          handleStepClick(stepId, index);
+          break;
+        case "ArrowRight":
+        case "ArrowDown":
+          event.preventDefault();
+          if (index < steps.length - 1) {
+            setFocusedStepIndex(index + 1);
+          }
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          event.preventDefault();
+          if (index > 0) {
+            setFocusedStepIndex(index - 1);
+          }
+          break;
+        case "Home":
+          event.preventDefault();
+          setFocusedStepIndex(0);
+          break;
+        case "End":
+          event.preventDefault();
+          setFocusedStepIndex(steps.length - 1);
+          break;
+      }
+    },
+    [enableKeyboardNavigation, handleStepClick, steps.length]
+  );
 
   // Show guidance tooltip
-  const handleShowGuidance = useCallback((stepId: string) => {
-    setShowGuidanceTooltip(stepId);
-    const step = steps.find(s => s.id === stepId);
-    if (step?.guidance) {
-      announce(`Guidance for ${step.label}: ${step.guidance.content}`, "polite");
-    }
-  }, [steps, announce]);
+  const handleShowGuidance = useCallback(
+    (stepId: string) => {
+      setShowGuidanceTooltip(stepId);
+      const step = steps.find((s) => s.id === stepId);
+      if (step?.guidance) {
+        announce(`Guidance for ${step.label}: ${step.guidance.content}`, "polite");
+      }
+    },
+    [steps, announce]
+  );
 
   // Auto-save status component
   const AutoSaveStatus = () => {
@@ -208,7 +217,7 @@ export function EnhancedProgressStepper({
             <span>Saved {sessionState.lastSaved.toLocaleTimeString()}</span>
           </>
         ) : null}
-        
+
         {sessionState.saveError && (
           <div className="flex items-center gap-1 text-red-600">
             <AlertCircle className="w-3 h-3" />
@@ -227,10 +236,9 @@ export function EnhancedProgressStepper({
       <div className="flex items-center gap-2 text-xs text-gray-600">
         <Clock className="w-3 h-3" />
         <span>
-          {timeEstimates.remaining > 0 
+          {timeEstimates.remaining > 0
             ? `${formatTime(timeEstimates.remaining)} remaining`
-            : "Complete"
-          }
+            : "Complete"}
         </span>
       </div>
     );
@@ -245,17 +253,15 @@ export function EnhancedProgressStepper({
             <span className="text-sm font-medium text-gray-900">
               Step {currentStepIndex + 1} of {steps.length}
             </span>
-            <span className="text-sm text-gray-600">
-              {steps[currentStepIndex]?.label}
-            </span>
+            <span className="text-sm text-gray-600">{steps[currentStepIndex]?.label}</span>
           </div>
           <div className="flex items-center gap-3">
             <TimeEstimate />
             <AutoSaveStatus />
           </div>
         </div>
-        <Progress 
-          value={progressPercentage} 
+        <Progress
+          value={progressPercentage}
           className="h-2"
           aria-label={`Progress: ${Math.round(progressPercentage)}% complete`}
         />
@@ -268,14 +274,12 @@ export function EnhancedProgressStepper({
       {/* Header with progress info */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Diagnosis Progress
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-900">Diagnosis Progress</h2>
           <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-sm font-medium rounded-full">
             {Math.round(progressPercentage)}%
           </span>
         </div>
-        
+
         <div className="flex items-center gap-4">
           <TimeEstimate />
           <AutoSaveStatus />
@@ -284,28 +288,24 @@ export function EnhancedProgressStepper({
 
       {/* Progress bar */}
       <div className="mb-6">
-        <Progress 
-          value={progressPercentage} 
+        <Progress
+          value={progressPercentage}
           className="h-3"
           aria-label={`Diagnosis progress: ${Math.round(progressPercentage)}% complete`}
         />
       </div>
 
       {/* Steps */}
-      <div 
-        className="relative"
-        role="tablist"
-        aria-label="Diagnosis steps"
-      >
+      <div className="relative" role="tablist" aria-label="Diagnosis steps">
         {/* Background line */}
         <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200" />
-        
+
         {/* Active line */}
         <motion.div
           className="absolute left-6 top-0 w-0.5 bg-emerald-500"
           initial={{ height: "0%" }}
-          animate={{ 
-            height: `${(completedSteps / (steps.length - 1)) * 100}%` 
+          animate={{
+            height: `${(completedSteps / (steps.length - 1)) * 100}%`,
           }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
         />
@@ -356,16 +356,18 @@ export function EnhancedProgressStepper({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <h3 className={cn(
-                      "font-medium transition-colors",
-                      isCurrent ? "text-emerald-700" : "text-gray-900"
-                    )}>
+                    <h3
+                      className={cn(
+                        "font-medium transition-colors",
+                        isCurrent ? "text-emerald-700" : "text-gray-900"
+                      )}
+                    >
                       {step.label}
                       {step.isOptional && (
                         <span className="ml-2 text-xs text-gray-500">(Optional)</span>
                       )}
                     </h3>
-                    
+
                     {showGuidance && step.guidance && (
                       <AccessibleButton
                         variant="ghost"
@@ -393,9 +395,7 @@ export function EnhancedProgressStepper({
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-600 mt-1">
-                  {step.description}
-                </p>
+                <p className="text-sm text-gray-600 mt-1">{step.description}</p>
 
                 {/* Prerequisites */}
                 {step.prerequisites && step.prerequisites.length > 0 && (
@@ -424,7 +424,7 @@ export function EnhancedProgressStepper({
               onClick={(e) => e.stopPropagation()}
             >
               {(() => {
-                const step = steps.find(s => s.id === showGuidanceTooltip);
+                const step = steps.find((s) => s.id === showGuidanceTooltip);
                 if (!step?.guidance) return null;
 
                 return (
@@ -432,9 +432,7 @@ export function EnhancedProgressStepper({
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
                       {step.guidance.title}
                     </h3>
-                    <p className="text-gray-700 mb-4">
-                      {step.guidance.content}
-                    </p>
+                    <p className="text-gray-700 mb-4">{step.guidance.content}</p>
                     {step.guidance.tips && (
                       <div className="mb-4">
                         <h4 className="font-medium text-gray-900 mb-2">Tips:</h4>

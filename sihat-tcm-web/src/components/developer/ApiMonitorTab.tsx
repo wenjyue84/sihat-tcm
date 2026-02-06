@@ -20,9 +20,7 @@ export function ApiMonitorTab({ initialGroups }: ApiMonitorTabProps) {
           <select
             className="bg-[#0f0f11] border border-white/10 rounded-lg px-2 py-1 text-xs text-gray-300 focus:outline-none focus:border-violet-500"
             value={
-              sortConfig.key === "default"
-                ? "default"
-                : `${sortConfig.key}-${sortConfig.direction}`
+              sortConfig.key === "default" ? "default" : `${sortConfig.key}-${sortConfig.direction}`
             }
             onChange={(e) => {
               const val = e.target.value;
@@ -129,6 +127,3 @@ export function ApiMonitorTab({ initialGroups }: ApiMonitorTabProps) {
     </div>
   );
 }
-
-
-

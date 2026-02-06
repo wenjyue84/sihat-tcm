@@ -104,7 +104,9 @@ export function MainPlayerCard({
             icon={<Music className="w-4 h-4 text-slate-500" />}
             label={getElementDescription(config.primary, language as "en" | "zh" | "ms")}
             sublabel={
-              config.primary === "water" ? "Nourishes Kidney Yin, calms spirit for sleep" : undefined
+              config.primary === "water"
+                ? "Nourishes Kidney Yin, calms spirit for sleep"
+                : undefined
             }
             value={volumes.primary}
             onChange={(v) => onUpdateVolume("primary", v)}

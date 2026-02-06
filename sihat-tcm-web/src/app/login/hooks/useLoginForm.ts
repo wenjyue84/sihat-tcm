@@ -58,11 +58,7 @@ export function useLoginForm() {
   );
 
   const handleQuickSignup = useCallback(
-    async (
-      role: "patient" | "doctor" | "admin" | "developer",
-      email: string,
-      password: string
-    ) => {
+    async (role: "patient" | "doctor" | "admin" | "developer", email: string, password: string) => {
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,

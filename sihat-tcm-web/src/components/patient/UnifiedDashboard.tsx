@@ -1,6 +1,6 @@
 /**
  * UnifiedDashboard - Refactored Version
- * 
+ *
  * This file has been split into smaller, focused modules:
  * - dashboard/useUnifiedDashboardData.ts - Data fetching
  * - dashboard/useUnifiedDashboardReports.ts - Reports management
@@ -45,7 +45,11 @@ export function UnifiedDashboard() {
   // Data hooks
   const { sessions, loadingSessions } = useUnifiedDashboardData(user?.id);
   const reportsHook = useUnifiedDashboardReports(user?.id);
-  const profileHook = useUnifiedDashboardProfile(user?.id, profile as Record<string, unknown> | null, refreshProfile);
+  const profileHook = useUnifiedDashboardProfile(
+    user?.id,
+    profile as Record<string, unknown> | null,
+    refreshProfile
+  );
 
   // State management
   const state = useUnifiedDashboardState({
@@ -59,10 +63,7 @@ export function UnifiedDashboard() {
   return (
     <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
       {/* Mobile Header - Fixed top bar for navigation on mobile */}
-      <UnifiedDashboardMobileHeader
-        onMenuOpen={() => state.setIsMobileMenuOpen(true)}
-        t={t}
-      />
+      <UnifiedDashboardMobileHeader onMenuOpen={() => state.setIsMobileMenuOpen(true)} t={t} />
 
       {/* Sidebar */}
       <UnifiedDashboardSidebar

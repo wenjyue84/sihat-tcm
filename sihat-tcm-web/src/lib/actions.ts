@@ -21,49 +21,42 @@
 // Re-export all actions from modular files
 // Note: Each domain file has its own "use server" directive
 export {
-    saveDiagnosis,
-    migrateGuestSessionToUser,
-    getSessionById,
-    updateSessionNotes,
-    deleteSession,
-    hideSession,
-    seedPatientHistory,
+  saveDiagnosis,
+  migrateGuestSessionToUser,
+  getSessionById,
+  updateSessionNotes,
+  deleteSession,
+  hideSession,
+  seedPatientHistory,
 } from "./actions/diagnosis";
 
 export {
-    getPatientHistory,
-    getHealthTrends,
-    getLastSymptoms,
-    getLastMedicines,
+  getPatientHistory,
+  getHealthTrends,
+  getLastSymptoms,
+  getLastMedicines,
 } from "./actions/patient-history";
 
 export {
-    getMedicalReports,
-    saveMedicalReport,
-    deleteMedicalReport,
-    seedMedicalReports,
+  getMedicalReports,
+  saveMedicalReport,
+  deleteMedicalReport,
+  seedMedicalReports,
 } from "./actions/medical-reports";
 
 export {
-    getPatientMedicines,
-    savePatientMedicine,
-    deletePatientMedicine,
+  getPatientMedicines,
+  savePatientMedicine,
+  deletePatientMedicine,
 } from "./actions/patient-medicines";
 
-export {
-    getFamilyMembers,
-    addFamilyMember,
-    deleteFamilyMember,
-} from "./actions/family";
+export { getFamilyMembers, addFamilyMember, deleteFamilyMember } from "./actions/family";
 
 export {
-    translatePatientRecords,
-    getPatientSessionIds,
-    translateUserProfile,
-    translateDiagnosisSession,
+  translatePatientRecords,
+  getPatientSessionIds,
+  translateUserProfile,
+  translateDiagnosisSession,
 } from "./actions/translation";
 
-export {
-    getMockSymptomsForDiagnosis,
-    getMockMedicinesForDiagnosis,
-} from "./actions/shared";
+export { getMockSymptomsForDiagnosis, getMockMedicinesForDiagnosis } from "./actions/shared";

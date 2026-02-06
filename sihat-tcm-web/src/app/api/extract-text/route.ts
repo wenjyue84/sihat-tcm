@@ -96,17 +96,17 @@ RESPOND IN STRICT JSON FORMAT:
     // Build the content based on file type - PDFs and images require different formats
     const fileContent = isPdf
       ? {
-        // PDFs require 'file' type with 'mediaType' property
-        type: "file" as const,
-        data: base64Data,
-        mediaType: "application/pdf" as const,
-      }
+          // PDFs require 'file' type with 'mediaType' property
+          type: "file" as const,
+          data: base64Data,
+          mediaType: "application/pdf" as const,
+        }
       : {
-        // Images require 'image' type with 'mimeType' property
-        type: "image" as const,
-        image: base64Data,
-        mimeType: mimeType as "image/png" | "image/jpeg" | "image/gif" | "image/webp",
-      };
+          // Images require 'image' type with 'mimeType' property
+          type: "image" as const,
+          image: base64Data,
+          mimeType: mimeType as "image/png" | "image/jpeg" | "image/gif" | "image/webp",
+        };
 
     const google = getGoogleProvider();
 
@@ -115,7 +115,10 @@ RESPOND IN STRICT JSON FORMAT:
     if (!apiKey) {
       console.error("Gemini API key is not configured");
       return Response.json(
-        { error: "Gemini API key is not configured. Please set GEMINI_API_KEY in your environment variables." },
+        {
+          error:
+            "Gemini API key is not configured. Please set GEMINI_API_KEY in your environment variables.",
+        },
         { status: 500 }
       );
     }

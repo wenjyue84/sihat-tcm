@@ -1,6 +1,6 @@
 /**
  * AI Model Command Implementations
- * 
+ *
  * Command implementations for AI model operations with undo/redo support
  * and comprehensive validation.
  */
@@ -10,17 +10,17 @@ import {
   CommandResult,
   SelectAIModelCommand,
   UpdateModelConfigCommand,
-} from '../interfaces/CommandInterfaces';
+} from "../interfaces/CommandInterfaces";
 
-import { devLog, logError } from '../../systemLogger';
-import { ErrorFactory } from '../../errors/AppError';
+import { devLog, logError } from "../../systemLogger";
+import { ErrorFactory } from "../../errors/AppError";
 
 /**
  * Command to select an AI model with fallback support
  */
 export class SelectAIModelCommandImpl implements SelectAIModelCommand {
   public readonly id: string;
-  public readonly type = 'ai:select-model' as const;
+  public readonly type = "ai:select-model" as const;
   public readonly description: string;
   public readonly timestamp: Date;
   public readonly metadata?: any;
@@ -52,7 +52,7 @@ export class SelectAIModelCommandImpl implements SelectAIModelCommand {
     const startTime = Date.now();
 
     try {
-      devLog(`[SelectAIModelCommand] Executing model selection: ${this.data.modelId}`, {
+      devLog("debug", "SelectAIModelCommand", `Executing model selection: ${this.data.modelId}`, {
         commandId: this.id,
         criteria: this.data.criteria,
       });
@@ -92,20 +92,19 @@ export class SelectAIModelCommandImpl implements SelectAIModelCommand {
           modelId: this.data.modelId,
         },
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
-      logError(`[SelectAIModelCommand] Model selection failed`, error);
+
+      logError("SelectAIModelCommand", "Model selection failed", { error: error instanceof Error ? error.message : String(error) });
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         executionTime,
         metadata: {
           commandType: this.type,
           modelId: this.data.modelId,
-          errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+          errorType: error instanceof Error ? error.constructor.name : "Unknown",
         },
       };
     }
@@ -119,18 +118,17 @@ export class SelectAIModelCommandImpl implements SelectAIModelCommand {
 
     try {
       if (!this.previousModelId) {
-        throw new Error('No previous model to restore');
+        throw new Error("No previous model to restore");
       }
 
-      devLog(`[SelectAIModelCommand] Undoing model selection, restoring: ${this.previousModelId}`, {
+      devLog("debug", "SelectAIModelCommand", `Undoing model selection, restoring: ${this.previousModelId}`, {
         commandId: this.id,
       });
 
       // Restore previous model
-      const restoreResult = await this.modelRouter.selectModel(
-        this.previousModelId,
-        { reason: 'undo_operation' }
-      );
+      const restoreResult = await this.modelRouter.selectModel(this.previousModelId, {
+        reason: "undo_operation",
+      });
 
       if (!restoreResult.success) {
         throw new Error(`Failed to restore previous model: ${restoreResult.error}`);
@@ -147,23 +145,22 @@ export class SelectAIModelCommandImpl implements SelectAIModelCommand {
         executionTime,
         metadata: {
           commandType: this.type,
-          operation: 'undo',
+          operation: "undo",
         },
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
-      logError(`[SelectAIModelCommand] Undo failed`, error);
+
+      logError("SelectAIModelCommand", "Undo failed", { error: error instanceof Error ? error.message : String(error) });
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Undo failed',
+        error: error instanceof Error ? error.message : "Undo failed",
         executionTime,
         metadata: {
           commandType: this.type,
-          operation: 'undo',
-          errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+          operation: "undo",
+          errorType: error instanceof Error ? error.constructor.name : "Unknown",
         },
       };
     }
@@ -184,8 +181,8 @@ export class SelectAIModelCommandImpl implements SelectAIModelCommand {
     const warnings: string[] = [];
 
     // Validate model ID
-    if (!this.data.modelId || typeof this.data.modelId !== 'string') {
-      errors.push('Model ID is required and must be a string');
+    if (!this.data.modelId || typeof this.data.modelId !== "string") {
+      errors.push("Model ID is required and must be a string");
     }
 
     // Validate model exists
@@ -194,13 +191,13 @@ export class SelectAIModelCommandImpl implements SelectAIModelCommand {
     }
 
     // Validate criteria
-    if (!this.data.criteria || typeof this.data.criteria !== 'object') {
-      warnings.push('Selection criteria not provided or invalid');
+    if (!this.data.criteria || typeof this.data.criteria !== "object") {
+      warnings.push("Selection criteria not provided or invalid");
     }
 
     // Check if model is already selected
     if (this.modelRouter.getCurrentModel?.()?.id === this.data.modelId) {
-      warnings.push('Model is already selected');
+      warnings.push("Model is already selected");
     }
 
     return {
@@ -214,8 +211,8 @@ export class SelectAIModelCommandImpl implements SelectAIModelCommand {
    * Before execute hook
    */
   public async beforeExecute(): Promise<void> {
-    devLog(`[SelectAIModelCommand] Preparing to select model: ${this.data.modelId}`);
-    
+    devLog("debug", "SelectAIModelCommand", `Preparing to select model: ${this.data.modelId}`);
+
     // Could perform additional setup here
     // e.g., warm up the model, check resources, etc.
   }
@@ -225,12 +222,12 @@ export class SelectAIModelCommandImpl implements SelectAIModelCommand {
    */
   public async afterExecute(result: CommandResult): Promise<void> {
     if (result.success) {
-      devLog(`[SelectAIModelCommand] Model selection completed successfully: ${this.data.modelId}`);
-      
+      devLog("debug", "SelectAIModelCommand", `Model selection completed successfully: ${this.data.modelId}`);
+
       // Could trigger events, update metrics, etc.
       // this.eventEmitter.emit('ai:model:selected', { modelId: this.data.modelId });
     } else {
-      logError(`[SelectAIModelCommand] Model selection failed: ${result.error}`);
+      logError("SelectAIModelCommand", `Model selection failed: ${result.error}`);
     }
   }
 
@@ -238,8 +235,8 @@ export class SelectAIModelCommandImpl implements SelectAIModelCommand {
    * Error handler
    */
   public async onError(error: Error): Promise<void> {
-    logError(`[SelectAIModelCommand] Command error occurred`, error);
-    
+    logError("SelectAIModelCommand", "Command error occurred", { error: error.message });
+
     // Could implement error recovery, notifications, etc.
     // this.notificationService.notifyError('Model selection failed', error.message);
   }
@@ -250,7 +247,7 @@ export class SelectAIModelCommandImpl implements SelectAIModelCommand {
  */
 export class UpdateModelConfigCommandImpl implements UpdateModelConfigCommand {
   public readonly id: string;
-  public readonly type = 'ai:update-config' as const;
+  public readonly type = "ai:update-config" as const;
   public readonly description: string;
   public readonly timestamp: Date;
   public readonly metadata?: any;
@@ -282,7 +279,7 @@ export class UpdateModelConfigCommandImpl implements UpdateModelConfigCommand {
     const startTime = Date.now();
 
     try {
-      devLog(`[UpdateModelConfigCommand] Updating configuration for model: ${this.data.modelId}`, {
+      devLog("debug", "UpdateModelConfigCommand", `Updating configuration for model: ${this.data.modelId}`, {
         commandId: this.id,
       });
 
@@ -293,7 +290,9 @@ export class UpdateModelConfigCommandImpl implements UpdateModelConfigCommand {
 
       // Get current configuration for undo
       if (!this.previousConfiguration) {
-        this.previousConfiguration = await this.modelRouter.getModelConfiguration(this.data.modelId);
+        this.previousConfiguration = await this.modelRouter.getModelConfiguration(
+          this.data.modelId
+        );
       }
 
       // Update configuration
@@ -321,20 +320,19 @@ export class UpdateModelConfigCommandImpl implements UpdateModelConfigCommand {
           modelId: this.data.modelId,
         },
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
-      logError(`[UpdateModelConfigCommand] Configuration update failed`, error);
+
+      logError("UpdateModelConfigCommand", "Configuration update failed", { error: error instanceof Error ? error.message : String(error) });
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         executionTime,
         metadata: {
           commandType: this.type,
           modelId: this.data.modelId,
-          errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+          errorType: error instanceof Error ? error.constructor.name : "Unknown",
         },
       };
     }
@@ -348,12 +346,17 @@ export class UpdateModelConfigCommandImpl implements UpdateModelConfigCommand {
 
     try {
       if (!this.previousConfiguration) {
-        throw new Error('No previous configuration to restore');
+        throw new Error("No previous configuration to restore");
       }
 
-      devLog(`[UpdateModelConfigCommand] Undoing configuration update for model: ${this.data.modelId}`, {
-        commandId: this.id,
-      });
+      devLog(
+        "debug",
+        "UpdateModelConfigCommand",
+        `Undoing configuration update for model: ${this.data.modelId}`,
+        {
+          commandId: this.id,
+        }
+      );
 
       // Restore previous configuration
       const restoreResult = await this.modelRouter.updateModelConfiguration(
@@ -376,23 +379,22 @@ export class UpdateModelConfigCommandImpl implements UpdateModelConfigCommand {
         executionTime,
         metadata: {
           commandType: this.type,
-          operation: 'undo',
+          operation: "undo",
         },
       };
-
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      
-      logError(`[UpdateModelConfigCommand] Undo failed`, error);
+
+      logError("UpdateModelConfigCommand", "Undo failed", { error: error instanceof Error ? error.message : String(error) });
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Undo failed',
+        error: error instanceof Error ? error.message : "Undo failed",
         executionTime,
         metadata: {
           commandType: this.type,
-          operation: 'undo',
-          errorType: error instanceof Error ? error.constructor.name : 'Unknown',
+          operation: "undo",
+          errorType: error instanceof Error ? error.constructor.name : "Unknown",
         },
       };
     }
@@ -413,8 +415,8 @@ export class UpdateModelConfigCommandImpl implements UpdateModelConfigCommand {
     const warnings: string[] = [];
 
     // Validate model ID
-    if (!this.data.modelId || typeof this.data.modelId !== 'string') {
-      errors.push('Model ID is required and must be a string');
+    if (!this.data.modelId || typeof this.data.modelId !== "string") {
+      errors.push("Model ID is required and must be a string");
     }
 
     // Validate model exists
@@ -423,17 +425,17 @@ export class UpdateModelConfigCommandImpl implements UpdateModelConfigCommand {
     }
 
     // Validate configuration
-    if (!this.data.configuration || typeof this.data.configuration !== 'object') {
-      errors.push('Configuration is required and must be an object');
+    if (!this.data.configuration || typeof this.data.configuration !== "object") {
+      errors.push("Configuration is required and must be an object");
     }
 
     // Validate configuration structure (basic check)
     if (this.data.configuration) {
-      const requiredFields = ['timeout', 'maxTokens']; // Example required fields
-      const missingFields = requiredFields.filter(field => !(field in this.data.configuration));
-      
+      const requiredFields = ["timeout", "maxTokens"]; // Example required fields
+      const missingFields = requiredFields.filter((field) => !(field in this.data.configuration));
+
       if (missingFields.length > 0) {
-        warnings.push(`Missing recommended configuration fields: ${missingFields.join(', ')}`);
+        warnings.push(`Missing recommended configuration fields: ${missingFields.join(", ")}`);
       }
     }
 
@@ -458,10 +460,7 @@ export const AIModelCommandFactory = {
     modelRouter: any,
     previousModelId?: string
   ): SelectAIModelCommandImpl => {
-    return new SelectAIModelCommandImpl(
-      { modelId, criteria, previousModelId },
-      modelRouter
-    );
+    return new SelectAIModelCommandImpl({ modelId, criteria, previousModelId }, modelRouter);
   },
 
   /**

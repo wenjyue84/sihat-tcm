@@ -27,11 +27,11 @@ import { createInquiriesService, type InquiriesService } from "./inquiriesServic
 import { createPractitionersService, type PractitionersService } from "./practitionersService";
 
 export interface ClientServices {
-    diagnosis: DiagnosisService;
-    profiles: ProfilesService;
-    patients: PatientsService;
-    inquiries: InquiriesService;
-    practitioners: PractitionersService;
+  diagnosis: DiagnosisService;
+  profiles: ProfilesService;
+  patients: PatientsService;
+  inquiries: InquiriesService;
+  practitioners: PractitionersService;
 }
 
 /**
@@ -39,15 +39,15 @@ export interface ClientServices {
  * Call this inside hooks or components (not at module level for tree-shaking).
  */
 export function createClientServices(): ClientServices {
-    const supabase = createClient();
+  const supabase = createClient();
 
-    return {
-        diagnosis: createDiagnosisService(supabase),
-        profiles: createProfilesService(supabase),
-        patients: createPatientsService(supabase),
-        inquiries: createInquiriesService(supabase),
-        practitioners: createPractitionersService(supabase),
-    };
+  return {
+    diagnosis: createDiagnosisService(supabase),
+    profiles: createProfilesService(supabase),
+    patients: createPatientsService(supabase),
+    inquiries: createInquiriesService(supabase),
+    practitioners: createPractitionersService(supabase),
+  };
 }
 
 /**
@@ -57,8 +57,8 @@ export function createClientServices(): ClientServices {
 let _clientServices: ClientServices | null = null;
 
 export function getClientServices(): ClientServices {
-    if (!_clientServices) {
-        _clientServices = createClientServices();
-    }
-    return _clientServices;
+  if (!_clientServices) {
+    _clientServices = createClientServices();
+  }
+  return _clientServices;
 }

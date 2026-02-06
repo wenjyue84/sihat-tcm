@@ -7,12 +7,7 @@ import { useLanguage } from "@/stores/useAppStore";
 import { LanguageSelector } from "@/components/ui/LanguageSelector";
 
 import { useLoginForm } from "./hooks";
-import {
-  QuickAccessRoles,
-  EmailAuthForm,
-  SignupBenefits,
-  GuestWarningDialog,
-} from "./components";
+import { QuickAccessRoles, EmailAuthForm, SignupBenefits, GuestWarningDialog } from "./components";
 
 function LoginFormContent() {
   const { t } = useLanguage();
@@ -143,10 +138,19 @@ function LoginFormContent() {
               translations={{
                 quickAccess: t.login.quickAccess,
                 roles: {
-                  patient: { title: t.login.roles.patient.title, titleZh: t.login.roles.patient.titleZh },
-                  doctor: { title: t.login.roles.doctor.title, titleZh: t.login.roles.doctor.titleZh },
+                  patient: {
+                    title: t.login.roles.patient.title,
+                    titleZh: t.login.roles.patient.titleZh,
+                  },
+                  doctor: {
+                    title: t.login.roles.doctor.title,
+                    titleZh: t.login.roles.doctor.titleZh,
+                  },
                   admin: { title: t.login.roles.admin.title, titleZh: t.login.roles.admin.titleZh },
-                  developer: { title: t.login.roles.developer.title, titleZh: t.login.roles.developer.titleZh },
+                  developer: {
+                    title: t.login.roles.developer.title,
+                    titleZh: t.login.roles.developer.titleZh,
+                  },
                 },
               }}
             />

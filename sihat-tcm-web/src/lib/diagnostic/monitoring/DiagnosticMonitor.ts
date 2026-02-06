@@ -1,11 +1,11 @@
 /**
  * Diagnostic Monitor - Performance and usage monitoring for diagnostic system
- * 
+ *
  * Tracks diagnostic performance, usage patterns, and system health
  * to provide insights for optimization and troubleshooting.
  */
 
-import { DiagnosticStats, DiagnosticProcessingStep } from '../interfaces/DiagnosticInterfaces';
+import { DiagnosticStats, DiagnosticProcessingStep } from "../interfaces/DiagnosticInterfaces";
 import { devLog, logError } from "../../systemLogger";
 
 export class DiagnosticMonitor {
@@ -53,11 +53,14 @@ export class DiagnosticMonitor {
       this.stats.modelUsageStats[modelUsed] = (this.stats.modelUsageStats[modelUsed] || 0) + 1;
 
       // Update average processing time
-      const totalTime = this.stats.averageProcessingTime * (this.stats.totalRequests - 1) + processingTime;
+      const totalTime =
+        this.stats.averageProcessingTime * (this.stats.totalRequests - 1) + processingTime;
       this.stats.averageProcessingTime = totalTime / this.stats.totalRequests;
 
       // Update error rate
-      this.stats.errorRate = ((this.stats.totalRequests - this.stats.successfulRequests) / this.stats.totalRequests) * 100;
+      this.stats.errorRate =
+        ((this.stats.totalRequests - this.stats.successfulRequests) / this.stats.totalRequests) *
+        100;
 
       // Update last processed time
       this.stats.lastProcessedAt = new Date();
@@ -102,14 +105,17 @@ export class DiagnosticMonitor {
   getPerformanceAnalytics(): {
     averageProcessingTimeByModel: Record<string, number>;
     successRateByModel: Record<string, number>;
-    stepPerformance: Record<string, {
-      averageTime: number;
-      successRate: number;
-      totalExecutions: number;
-    }>;
+    stepPerformance: Record<
+      string,
+      {
+        averageTime: number;
+        successRate: number;
+        totalExecutions: number;
+      }
+    >;
     recentTrends: {
-      processingTimetrend: 'improving' | 'stable' | 'degrading';
-      errorRatetrend: 'improving' | 'stable' | 'degrading';
+      processingTimetrend: "improving" | "stable" | "degrading";
+      errorRatetrend: "improving" | "stable" | "degrading";
     };
   } {
     const analytics = {
@@ -117,19 +123,19 @@ export class DiagnosticMonitor {
       successRateByModel: {} as Record<string, number>,
       stepPerformance: {} as Record<string, any>,
       recentTrends: {
-        processingTimetrend: 'stable' as const,
-        errorRatetrend: 'stable' as const,
+        processingTimetrend: "stable" as const,
+        errorRatetrend: "stable" as const,
       },
     };
 
     // Calculate model-specific metrics
     const modelMetrics: Record<string, { times: number[]; successes: number; total: number }> = {};
-    
+
     for (const record of this.processingHistory) {
       if (!modelMetrics[record.modelUsed]) {
         modelMetrics[record.modelUsed] = { times: [], successes: 0, total: 0 };
       }
-      
+
       modelMetrics[record.modelUsed].times.push(record.processingTime);
       modelMetrics[record.modelUsed].total++;
       if (record.success) {
@@ -139,21 +145,20 @@ export class DiagnosticMonitor {
 
     // Calculate averages and success rates
     for (const [model, metrics] of Object.entries(modelMetrics)) {
-      analytics.averageProcessingTimeByModel[model] = 
+      analytics.averageProcessingTimeByModel[model] =
         metrics.times.reduce((sum, time) => sum + time, 0) / metrics.times.length;
-      analytics.successRateByModel[model] = 
-        (metrics.successes / metrics.total) * 100;
+      analytics.successRateByModel[model] = (metrics.successes / metrics.total) * 100;
     }
 
     // Calculate step performance
     const stepMetrics: Record<string, { times: number[]; successes: number; total: number }> = {};
-    
+
     for (const record of this.processingHistory) {
       for (const step of record.steps) {
         if (!stepMetrics[step.name]) {
           stepMetrics[step.name] = { times: [], successes: 0, total: 0 };
         }
-        
+
         if (step.endTime) {
           stepMetrics[step.name].times.push(step.endTime - step.startTime);
         }
@@ -166,9 +171,10 @@ export class DiagnosticMonitor {
 
     for (const [stepName, metrics] of Object.entries(stepMetrics)) {
       analytics.stepPerformance[stepName] = {
-        averageTime: metrics.times.length > 0 
-          ? metrics.times.reduce((sum, time) => sum + time, 0) / metrics.times.length 
-          : 0,
+        averageTime:
+          metrics.times.length > 0
+            ? metrics.times.reduce((sum, time) => sum + time, 0) / metrics.times.length
+            : 0,
         successRate: (metrics.successes / metrics.total) * 100,
         totalExecutions: metrics.total,
       };
@@ -178,24 +184,24 @@ export class DiagnosticMonitor {
     if (this.processingHistory.length >= 10) {
       const recent = this.processingHistory.slice(-10);
       const older = this.processingHistory.slice(-20, -10);
-      
+
       if (older.length > 0) {
         const recentAvgTime = recent.reduce((sum, r) => sum + r.processingTime, 0) / recent.length;
         const olderAvgTime = older.reduce((sum, r) => sum + r.processingTime, 0) / older.length;
-        
+
         if (recentAvgTime < olderAvgTime * 0.9) {
-          analytics.recentTrends.processingTimetrend = 'improving';
+          analytics.recentTrends.processingTimetrend = "improving";
         } else if (recentAvgTime > olderAvgTime * 1.1) {
-          analytics.recentTrends.processingTimetrend = 'degrading';
+          analytics.recentTrends.processingTimetrend = "degrading";
         }
 
-        const recentErrorRate = (recent.filter(r => !r.success).length / recent.length) * 100;
-        const olderErrorRate = (older.filter(r => !r.success).length / older.length) * 100;
-        
+        const recentErrorRate = (recent.filter((r) => !r.success).length / recent.length) * 100;
+        const olderErrorRate = (older.filter((r) => !r.success).length / older.length) * 100;
+
         if (recentErrorRate < olderErrorRate * 0.8) {
-          analytics.recentTrends.errorRatetrend = 'improving';
+          analytics.recentTrends.errorRatetrend = "improving";
         } else if (recentErrorRate > olderErrorRate * 1.2) {
-          analytics.recentTrends.errorRatetrend = 'degrading';
+          analytics.recentTrends.errorRatetrend = "degrading";
         }
       }
     }
@@ -214,16 +220,14 @@ export class DiagnosticMonitor {
     success: boolean;
     stepCount: number;
   }> {
-    return this.processingHistory
-      .slice(-limit)
-      .map(record => ({
-        timestamp: record.timestamp,
-        userId: record.userId,
-        processingTime: record.processingTime,
-        modelUsed: record.modelUsed,
-        success: record.success,
-        stepCount: record.steps.length,
-      }));
+    return this.processingHistory.slice(-limit).map((record) => ({
+      timestamp: record.timestamp,
+      userId: record.userId,
+      processingTime: record.processingTime,
+      modelUsed: record.modelUsed,
+      success: record.success,
+      stepCount: record.steps.length,
+    }));
   }
 
   /**
@@ -231,9 +235,9 @@ export class DiagnosticMonitor {
    */
   getStepAnalysis(userId: string, timestamp: Date): DiagnosticProcessingStep[] | null {
     const record = this.processingHistory.find(
-      r => r.userId === userId && r.timestamp.getTime() === timestamp.getTime()
+      (r) => r.userId === userId && r.timestamp.getTime() === timestamp.getTime()
     );
-    
+
     return record ? record.steps : null;
   }
 

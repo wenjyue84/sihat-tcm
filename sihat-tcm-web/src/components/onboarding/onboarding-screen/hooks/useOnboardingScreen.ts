@@ -11,7 +11,8 @@ export function useOnboardingScreen() {
   const { completeOnboarding } = useOnboarding();
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const t: OnboardingTranslations = ONBOARDING_TEXT[language as SupportedLanguage] || ONBOARDING_TEXT.en;
+  const t: OnboardingTranslations =
+    ONBOARDING_TEXT[language as SupportedLanguage] || ONBOARDING_TEXT.en;
   const isLastSlide = currentIndex === SLIDES.length - 1;
 
   const handleNext = useCallback(() => {

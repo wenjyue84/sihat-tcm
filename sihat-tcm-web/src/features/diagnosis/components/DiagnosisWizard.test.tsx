@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@/test-utils";
 import DiagnosisWizard from "./DiagnosisWizard";
-import { useDiagnosisWizard } from "@/hooks/useDiagnosisWizard";
+import { useDiagnosisWizard } from "@/features/diagnosis/hooks/useDiagnosisWizard";
 import { useDeveloper } from "@/stores/useAppStore";
 
 // Mock the hooks
-vi.mock("@/hooks/useDiagnosisWizard", () => ({
+vi.mock("@/features/diagnosis/hooks/useDiagnosisWizard", () => ({
   useDiagnosisWizard: vi.fn(),
 }));
 
@@ -139,8 +139,33 @@ describe("DiagnosisWizard - Responsive Layout", () => {
 
   it("handles null data gracefully", () => {
     mockUseDiagnosisWizard.mockReturnValue({
-      ...mockUseDiagnosisWizard(),
+      step: "basic_info",
+      setStep: vi.fn(),
       data: null,
+      setData: vi.fn(),
+      isAnalyzing: false,
+      analysisResult: null,
+      setAnalysisResult: vi.fn(),
+      completion: "",
+      setCompletion: vi.fn(),
+      isLoading: false,
+      error: null,
+      isSaved: false,
+      setIsSaved: vi.fn(),
+      maxStepReached: 0,
+      celebrationPhase: null,
+      setCelebrationPhase: vi.fn(),
+      pendingResumeState: null,
+      handleResumeProgress: vi.fn(),
+      handleStartNew: vi.fn(),
+      nextStep: vi.fn(),
+      prevStep: vi.fn(),
+      analyzeImage: vi.fn(),
+      handleSkipAnalysis: vi.fn(),
+      submitConsultation: vi.fn(),
+      STEPS: [],
+      t: {},
+      language: "en",
     });
 
     const { container } = render(<DiagnosisWizard />);
