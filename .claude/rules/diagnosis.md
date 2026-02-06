@@ -190,3 +190,14 @@ const model = selectModel({
 - Test session recovery scenarios
 - Verify data persistence at each step
 - Test IoT connection failures and recovery
+
+## Related Notes
+
+**Task-specific learnings** (updated after each PR):
+- [IoT Connection Wizard](./../notes/diagnosis/iot-connection-wizard.md) - Common mistakes, platform detection, device validation
+- [Session Recovery](./../notes/diagnosis/session-recovery.md) - Draft management, edge cases
+- [4-Examination Flow](./../notes/diagnosis/4-examination-flow.md) - Wizard navigation patterns
+
+**Cross-cutting patterns:**
+- [Error Handling](./../notes/patterns/error-handling.md) - AppError usage in diagnosis flows
+- [Type Safety](./../notes/patterns/type-safety.md) - Zero `any` enforcement

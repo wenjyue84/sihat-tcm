@@ -30,7 +30,18 @@
     "monitor:production": "bash scripts/monitor-deployment.sh production",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "node -e \"if (!process.env.CI) try { require('child_process').execSync('husky', {stdio: 'inherit'}) } catch (e) {}\""
+    "prepare": "node -e \"if (!process.env.CI) try { require('child_process').execSync('husky', {stdio: 'inherit'}) } catch (e) {}\"",
+    "version:beta": "npm version prerelease --preid=beta",
+    "version:alpha": "npm version prerelease --preid=alpha",
+    "release:beta": "npm run version:beta && git push && git push --tags",
+    "release:stable": "npm version patch --preid='' && git push && git push --tags",
+    "release:patch": "npm version patch && git push && git push --tags",
+    "release:minor": "npm version minor && git push && git push --tags",
+    "release:major": "npm version major && git push && git push --tags",
+    "release:promote": "node scripts/promote-release.js",
+    "notes:update": "echo \"📝 Opening notes index...\" && code ../.claude/notes/INDEX.md",
+    "notes:create": "echo \"📝 Create new note in .claude/notes/ directory\"",
+    "notes:index": "echo \"📝 Notes system ready at .claude/notes/INDEX.md\""
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.1",
@@ -88,6 +99,8 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.4.0",
+    "@commitlint/config-conventional": "^20.4.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

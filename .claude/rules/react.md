@@ -152,3 +152,11 @@ const styles = { color: "red" };
 - Test user behavior, not implementation
 - Use React Testing Library
 - Mock API calls, not components
+
+## Related Notes
+
+**Error handling in React:**
+- [Error Handling](./../notes/patterns/error-handling.md) - Error Boundary patterns, async error handling in useEffect
+
+**Component-specific learnings:**
+- [IoT Connection Wizard](./../notes/diagnosis/iot-connection-wizard.md) - Default export pattern, platform detection, state management

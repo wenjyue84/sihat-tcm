@@ -79,6 +79,48 @@ npm run ios           # iOS development
 - Tab width: 2 spaces
 - Semicolons: required
 
+### Git Commit Conventions (Atomic Commits)
+
+**Enforced via git hooks (Husky + commitlint)**
+
+Each commit must be:
+- **Self-contained** — one logical change per commit
+- **Complete** — codebase works after each commit
+- **Focused** — no mixing unrelated changes
+
+**Commit message format (Conventional Commits):**
+```
+<type>(<scope>): <subject>
+
+[optional body]
+```
+
+**Types:**
+| Type | Use for |
+|------|---------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation only |
+| `style` | Formatting, no code change |
+| `refactor` | Code change, no new feature or fix |
+| `perf` | Performance improvement |
+| `test` | Adding/updating tests |
+| `chore` | Maintenance tasks |
+| `ci` | CI/CD changes |
+| `build` | Build system changes |
+
+**Examples:**
+```bash
+git commit -m "feat(diagnosis): add pulse waveform visualization"
+git commit -m "fix(auth): resolve token refresh on session timeout"
+git commit -m "refactor(iot): extract device connection logic"
+```
+
+**Pre-commit checks (automatic):**
+1. `lint-staged` — Prettier + ESLint on staged files
+2. `type-check` — Full TypeScript validation
+3. `commitlint` — Validates commit message format
+
 ## Key Components
 
 ### Diagnosis System (4-Examination Model)
@@ -141,6 +183,9 @@ Centralized in:
 
 ## Common Issues & Solutions
 
+**See `.claude/notes/INDEX.md` for comprehensive learnings updated after each PR.**
+
+Quick reference:
 | Issue | Solution |
 |-------|----------|
 | DiagnosisWizard import error | Use default import, not named |

@@ -30,11 +30,12 @@ Sihat TCM provides AI-powered TCM diagnostics using the 4-Examination Model (四
 ## HOW — How to work
 
 1. **Follow AGENTS.md** first (scan order, memory, safety).
-2. **Full context:** See `.claude/CLAUDE.md` for architecture, commands, conventions.
-3. **Verify:**
+2. **Check learnings:** `.claude/notes/INDEX.md` for task-specific notes (mistakes, patterns, decisions).
+3. **Full context:** See `.claude/CLAUDE.md` for architecture, commands, conventions.
+4. **Verify:**
    - Web: `cd sihat-tcm-web && npm run lint && npm run type-check && npm run test:run`
    - Mobile: `cd sihat-tcm-mobile && npm test`
-4. **Memory:** "Remember this" → MEMORY.md or MEMORY/YYYY-MM-DD.md.
+5. **Memory:** "Remember this" → MEMORY.md or MEMORY/YYYY-MM-DD.md.
 </how-work>
 
 <progressive-disclosure>
@@ -43,6 +44,7 @@ Sihat TCM provides AI-powered TCM diagnostics using the 4-Examination Model (四
 | Doc/skill | When |
 |-----------|------|
 | AGENTS.md | Always first |
+| `.claude/notes/INDEX.md` | Task-specific learnings (updated after PRs) |
 | `.claude/CLAUDE.md` | Full project context, dev commands |
 | `.claude/rules/*` | Domain-specific rules |
 | meta-skill | Governance, structure |

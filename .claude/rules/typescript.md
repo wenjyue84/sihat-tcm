@@ -111,3 +111,15 @@ try {
 ```typescript
 import { AI_PERFORMANCE_THRESHOLDS } from "@/lib/constants";
 ```
+
+## Related Notes
+
+**Comprehensive type safety patterns:**
+- [Type Safety Patterns](./../notes/patterns/type-safety.md) - Common mistakes, fixes, best practices, real-world examples
+
+See this note for:
+- Avoiding `any` types
+- Handling magic numbers
+- Type guard patterns
+- Discriminated unions
+- Const assertions
