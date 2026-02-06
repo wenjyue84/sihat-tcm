@@ -470,8 +470,8 @@ export interface UpdateFamilyMemberInput extends Partial<SaveFamilyMemberInput> 
 // Patients (patients table)
 // ============================================================================
 
-export type PatientStatus = 'active' | 'archived' | 'pending_invite';
-export type PatientType = 'managed' | 'registered' | 'guest';
+export type PatientStatus = "active" | "archived" | "pending_invite";
+export type PatientType = "managed" | "registered" | "guest";
 
 export interface Patient {
   id: string;
@@ -496,9 +496,7 @@ export interface Patient {
   flag?: PatientFlag | null;
 }
 
-export type PatientFlag = 'Critical' | 'High Priority' | 'Watch' | 'Normal' | null;
-
-
+export type PatientFlag = "Critical" | "High Priority" | "Watch" | "Normal" | null;
 
 // ============================================================================
 // Appointments
@@ -558,4 +556,38 @@ export interface SystemError {
   metadata?: Record<string, any> | null;
   created_at: string;
   updated_at: string;
+}
+
+// ============================================================================
+// Symptom Logs (symptom_logs table)
+// ============================================================================
+
+/**
+ * Patient-reported symptom log for tracking wellness over time
+ * Supports trend analysis and correlation with diagnosis sessions
+ */
+export interface SymptomLog {
+  id: string;
+  user_id?: string | null;
+  diagnosis_session_id?: string | null;
+  symptom: string;
+  severity: number; // 1-10 scale
+  notes?: string | null;
+  metadata?: Record<string, any> | null;
+  logged_at: string; // When symptom was experienced
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Input type for saving a symptom log
+ * Used by QuickSymptomTracker component
+ */
+export interface SaveSymptomLogInput {
+  symptom: string;
+  severity: number; // 1-10 scale
+  notes?: string;
+  metadata?: Record<string, any>;
+  logged_at?: string; // Defaults to now() if not provided
+  diagnosis_session_id?: string; // Optional link to diagnosis
 }

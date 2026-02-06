@@ -11,68 +11,73 @@
 // DIAGNOSIS ACTIONS
 // ============================================================================
 export {
-    saveDiagnosis,
-    migrateGuestSessionToUser,
-    getSessionById,
-    updateSessionNotes,
-    deleteSession,
-    hideSession,
-    seedPatientHistory,
+  saveDiagnosis,
+  migrateGuestSessionToUser,
+  getSessionById,
+  updateSessionNotes,
+  deleteSession,
+  hideSession,
+  seedPatientHistory,
 } from "./diagnosis";
 
 // ============================================================================
 // PATIENT HISTORY ACTIONS
 // ============================================================================
 export {
-    getPatientHistory,
-    getHealthTrends,
-    getLastSymptoms,
-    getLastMedicines,
+  getPatientHistory,
+  getHealthTrends,
+  getLastSymptoms,
+  getLastMedicines,
 } from "./patient-history";
 
 // ============================================================================
 // MEDICAL REPORTS ACTIONS
 // ============================================================================
 export {
-    getMedicalReports,
-    saveMedicalReport,
-    deleteMedicalReport,
-    seedMedicalReports,
+  getMedicalReports,
+  saveMedicalReport,
+  deleteMedicalReport,
+  seedMedicalReports,
 } from "./medical-reports";
 
 // ============================================================================
 // PATIENT MEDICINES ACTIONS
 // ============================================================================
 export {
-    getPatientMedicines,
-    savePatientMedicine,
-    deletePatientMedicine,
+  getPatientMedicines,
+  savePatientMedicine,
+  deletePatientMedicine,
 } from "./patient-medicines";
 
 // ============================================================================
 // FAMILY CARE ACTIONS
 // ============================================================================
-export {
-    getFamilyMembers,
-    addFamilyMember,
-    deleteFamilyMember,
-} from "./family";
+export { getFamilyMembers, addFamilyMember, deleteFamilyMember } from "./family";
 
 // ============================================================================
 // TRANSLATION ACTIONS
 // ============================================================================
 export {
-    translatePatientRecords,
-    getPatientSessionIds,
-    translateUserProfile,
-    translateDiagnosisSession,
+  translatePatientRecords,
+  getPatientSessionIds,
+  translateUserProfile,
+  translateDiagnosisSession,
 } from "./translation";
+
+// ============================================================================
+// SYMPTOM LOGS ACTIONS (PLACEHOLDER)
+// ============================================================================
+export {
+  saveSymptomLog,
+  getSymptomLogs,
+  getSymptomLogById,
+  getSymptomTrends,
+  updateSymptomLog,
+  deleteSymptomLog,
+} from "./symptom-logs";
 
 // ============================================================================
 // SHARED UTILITIES
 // Re-export for any code that imports these from actions
 // ============================================================================
-export {
-    getMockSymptomsForDiagnosis,
-    getMockMedicinesForDiagnosis,
-} from "./shared";
+export { getMockSymptomsForDiagnosis, getMockMedicinesForDiagnosis } from "./shared";
