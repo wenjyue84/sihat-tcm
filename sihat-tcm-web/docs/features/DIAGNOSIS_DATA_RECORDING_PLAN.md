@@ -962,4 +962,3 @@ export async function migrateGuestSessionToUser(
 2. **Token Storage:** Should guest tokens be stored in localStorage (persistent) or sessionStorage (temporary)?
 3. **Migration Prompt:** When should we prompt guests to sign up? (Immediately after diagnosis? After viewing report?)
 4. **Data Export:** Should users be able to export their complete diagnosis data?
-

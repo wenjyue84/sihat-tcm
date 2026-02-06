@@ -425,4 +425,3 @@ export const logger = {
 3. Set up staging environment for testing
 4. Begin with Error Boundaries (lowest risk)
 5. Monitor and iterate based on production feedback
-

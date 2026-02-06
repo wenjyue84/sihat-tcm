@@ -95,4 +95,3 @@ This migration uses `IF NOT EXISTS` clauses, so:
 - ✅ Won't duplicate columns if already exists
 - ✅ Can be run multiple times safely
 - ✅ Only adds missing columns
-

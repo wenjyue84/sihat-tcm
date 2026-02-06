@@ -78,6 +78,7 @@ Phase 8 implements **automated quality gates** for the Sihat TCM medical applica
 #### New Workflow: `.github/workflows/ci.yml`
 
 **Triggers:**
+
 - Push to `main`, `develop`, `staging` branches
 - Pull requests to `main`, `develop` branches
 
@@ -93,6 +94,7 @@ Phase 8 implements **automated quality gates** for the Sihat TCM medical applica
 8. **Status Check** - Final job that reports overall pass/fail status
 
 **Behavior:**
+
 - All checks must pass for the workflow to succeed
 - Security audit failures are logged but don't block (continue-on-error: true)
 - Failed workflows prevent merging (if branch protection is enabled)
@@ -233,11 +235,13 @@ Files will be formatted automatically when you commit them. No action needed.
 **Trigger:** Every time you run `git commit`
 
 **Checks:**
+
 1. ✅ **Prettier** - Auto-formats code (spacing, quotes, semicolons)
 2. ✅ **ESLint** - Checks code quality and fixes auto-fixable issues
 3. ✅ **TypeScript** - Checks for type errors (`tsc --noEmit`)
 
 **Result:**
+
 - All checks pass → Commit succeeds ✅
 - Any check fails → Commit blocked ❌
 
@@ -248,6 +252,7 @@ Files will be formatted automatically when you commit them. No action needed.
 **Trigger:** Every push to `main`, `develop`, `staging` or any Pull Request
 
 **Checks:**
+
 1. ✅ **Checkout code** - Gets latest code
 2. ✅ **Install dependencies** - Runs `npm ci`
 3. ✅ **ESLint** - `npm run lint`
@@ -256,6 +261,7 @@ Files will be formatted automatically when you commit them. No action needed.
 6. ✅ **Security Audit** - `npm audit --audit-level=moderate`
 
 **Result:**
+
 - All checks pass → Green checkmark ✅
 - Any check fails → Red X, blocks merge ❌
 
@@ -406,13 +412,8 @@ Files will be formatted automatically when you commit them. No action needed.
 
 ```json
 {
-  "*.{ts,tsx,js,jsx}": [
-    "prettier --write",
-    "eslint --fix"
-  ],
-  "*.{json,md,yml,yaml}": [
-    "prettier --write"
-  ]
+  "*.{ts,tsx,js,jsx}": ["prettier --write", "eslint --fix"],
+  "*.{json,md,yml,yaml}": ["prettier --write"]
 }
 ```
 
@@ -429,6 +430,7 @@ npm run type-check
 ### GitHub Actions Workflow (`.github/workflows/ci.yml`)
 
 The workflow includes:
+
 - Node.js setup with caching
 - Dependency installation
 - ESLint check
@@ -504,6 +506,7 @@ npm audit
 **Problem:** Hooks don't run when committing
 
 **Solutions:**
+
 1. Verify Husky is installed: `ls .husky`
 2. Reinstall Husky: `npm run prepare`
 3. Check file permissions: Ensure `.husky/pre-commit` is executable
@@ -513,6 +516,7 @@ npm audit
 **Problem:** Type errors prevent commits
 
 **Solutions:**
+
 1. Fix type errors: `npm run type-check` to see all errors
 2. Use `// @ts-ignore` sparingly (only when necessary)
 3. Fix types properly for better code quality
@@ -522,6 +526,7 @@ npm audit
 **Problem:** Files not formatting correctly
 
 **Solutions:**
+
 1. Check `.prettierrc.json` configuration
 2. Verify file is not in `.prettierignore`
 3. Run manually: `npx prettier --write <file>`
@@ -531,6 +536,7 @@ npm audit
 **Problem:** GitHub Actions workflow fails
 
 **Solutions:**
+
 1. Check workflow logs in GitHub Actions tab
 2. Run checks locally first: `npm run lint && npm run type-check && npm run build`
 3. Fix errors before pushing
@@ -540,6 +546,7 @@ npm audit
 **Problem:** Commits take too long
 
 **Solutions:**
+
 1. This is normal for the first run (~20 seconds)
 2. Subsequent commits are faster (~7 seconds)
 3. TypeScript check runs on entire project (necessary for safety)
@@ -593,6 +600,3 @@ npm audit
 
 **Last Updated**: December 2024  
 **Version**: 1.0
-
-
-

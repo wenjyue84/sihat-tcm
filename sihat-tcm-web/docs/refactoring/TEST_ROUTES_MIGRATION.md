@@ -69,6 +69,7 @@ done
 ## Verification
 
 After migration, verify:
+
 - [ ] All test pages load at `/dev/test-*` routes
 - [ ] No broken imports
 - [ ] Developer dashboard still works
@@ -81,6 +82,3 @@ If needed, move files back to `src/app/test-*/` directories.
 ---
 
 **Status**: Documented - Ready for manual execution or script automation
-
-
-

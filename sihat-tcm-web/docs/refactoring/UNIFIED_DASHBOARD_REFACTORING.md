@@ -54,6 +54,7 @@ Created three custom hooks to manage state:
 ### Phase 4: Refactor Main Component
 
 Update `UnifiedDashboard.tsx` to:
+
 - Use custom hooks
 - Use extracted components
 - Focus on orchestration only
@@ -105,6 +106,3 @@ src/components/patient/
 - No breaking changes to props or behavior
 - Maintain backward compatibility
 - Test each section after extraction
-
-
-

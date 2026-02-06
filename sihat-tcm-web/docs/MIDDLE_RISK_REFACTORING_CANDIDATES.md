@@ -105,6 +105,7 @@ This document identifies **middle-risk** refactoring opportunities - files that 
 ### Refactoring Pattern
 
 **Before:**
+
 ```typescript
 } catch (error: any) {
   devLog("error", "API/route", "Error message", { error });
@@ -116,6 +117,7 @@ This document identifies **middle-risk** refactoring opportunities - files that 
 ```
 
 **After:**
+
 ```typescript
 import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
@@ -125,6 +127,7 @@ import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 ```
 
 **Benefits:**
+
 - Consistent error handling
 - Better type safety (`unknown` vs `any`)
 - Reduced code duplication (~20 lines → 1 line per route)
@@ -141,24 +144,24 @@ import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 ### `extractString` Function Duplication
 
 **Found in:**
+
 1. `src/components/diagnosis/report/utils.ts` (web)
 2. `sihat-tcm-mobile/screens/diagnosis/ResultsStep.js` (mobile)
 
 **Issue**: Same function logic duplicated across web and mobile codebases.
 
 **Refactoring:**
+
 - Create shared utility: `src/lib/utils/data-extraction.ts`
 - Export `extractString` with proper TypeScript types
 - Update both web and mobile to use shared utility
 - Consider creating a shared package if mobile uses TypeScript
 
 **Code:**
+
 ```typescript
 // src/lib/utils/data-extraction.ts
-export function extractString(
-  val: unknown,
-  fallback: string = ""
-): string {
+export function extractString(val: unknown, fallback: string = ""): string {
   if (!val) return fallback;
   if (typeof val === "string") return val;
   if (typeof val === "object" && val !== null) {
@@ -188,12 +191,14 @@ export function extractString(
 ### File: `src/components/diagnosis/report/utils.ts` (243 lines)
 
 **Issues:**
+
 - Large `downloadPDF` function (150+ lines)
 - Mixed concerns: PDF generation, formatting, translations
 - Hard to test individual parts
 - `any` types used for data parameters
 
 **Refactoring Strategy:**
+
 ```
 src/components/diagnosis/report/
 ├── utils.ts (keep translations and small helpers)
@@ -205,6 +210,7 @@ src/components/diagnosis/report/
 ```
 
 **Benefits:**
+
 - Better separation of concerns
 - Easier to test
 - Better type safety
@@ -221,16 +227,19 @@ src/components/diagnosis/report/
 ### File: `src/lib/aiModelRouter.ts` (576 lines)
 
 **Issues:**
+
 - `getRouterStats()` method uses `any[]` for `recentPerformance`
 - Performance tracking logic could be extracted
 - Some methods are quite long (50+ lines)
 
 **Refactoring:**
+
 - Extract performance tracking to separate class: `ModelPerformanceTracker`
 - Create proper types for performance metrics
 - Split large methods into smaller, focused methods
 
 **Suggested Structure:**
+
 ```
 src/lib/ai/
 ├── aiModelRouter.ts (main routing logic)
@@ -266,6 +275,7 @@ export { DiagnosisReport } from "./DiagnosisReport";
 ```
 
 **Benefits:**
+
 - Cleaner imports: `import { DiagnosisWizard } from "@/components/diagnosis"`
 - Better tree-shaking
 - Easier refactoring (change internal structure without breaking imports)
@@ -279,6 +289,7 @@ export { DiagnosisReport } from "./DiagnosisReport";
 **Effort**: Medium (3-4 hours)
 
 ### Current State
+
 - 68+ files in `src/lib/` root
 - Some organization exists (`api/`, `translations/`, `monitoring/`)
 - Many utility files scattered
@@ -286,6 +297,7 @@ export { DiagnosisReport } from "./DiagnosisReport";
 ### Files to Organize
 
 **AI-related utilities** (should be in `lib/ai/`):
+
 - `aiModelRouter.ts` (576 lines)
 - `enhancedAIDiagnosticEngine.ts` (448 lines)
 - `personalizationEngine.ts`
@@ -293,22 +305,26 @@ export { DiagnosisReport } from "./DiagnosisReport";
 - `modelFallback.ts`
 
 **TCM-specific utilities** (should be in `lib/tcm/`):
+
 - `tcm-utils.ts`
 - `fiveElementsScoreCalculator.ts`
 - `medicalHistoryParser.ts`
 - `enhancedTonguePrompt.ts`
 
 **General utilities** (should be in `lib/utils/`):
+
 - `validations.ts`
 - `errorUtils.ts`
 - `healthMetrics.ts`
 - `soundscapeUtils.ts`
 
 **Constants** (should be in `lib/constants/`):
+
 - `doctorLevels.ts`
 - `systemPrompts.ts`
 
 **Migration Strategy:**
+
 1. Create new directories
 2. Move files incrementally (one category at a time)
 3. Update imports using find/replace
@@ -331,6 +347,7 @@ export { DiagnosisReport } from "./DiagnosisReport";
 4. **Component Props** - Some components may have loose types
 
 **Action Items:**
+
 - Replace `error: any` with `error: unknown` in API routes
 - Create proper interfaces for PDF data
 - Type performance metrics properly
@@ -352,6 +369,7 @@ export { DiagnosisReport } from "./DiagnosisReport";
 **Issue**: These are one-time migration scripts that shouldn't be API routes.
 
 **Refactoring:**
+
 - Move to `scripts/migrations/` directory
 - Convert to standalone scripts (`.mjs` or `.ts`)
 - Remove from API routes
@@ -371,6 +389,7 @@ export { DiagnosisReport } from "./DiagnosisReport";
 2. `src/app/api/test-image/route.ts`
 
 **Refactoring:**
+
 - Move to `src/app/(dev)/api/test-*/route.ts`
 - Or convert to proper test files
 - Add route group protection (optional)
@@ -380,16 +399,19 @@ export { DiagnosisReport } from "./DiagnosisReport";
 ## Priority Recommendations
 
 ### Week 1: Quick Wins (5-6 hours)
+
 1. ✅ Migrate 4-6 API routes to use error middleware
 2. ✅ Create component index files for major directories
 3. ✅ Extract `extractString` to shared utility
 
 ### Week 2: Medium Effort (6-8 hours)
+
 4. ✅ Migrate remaining API routes
 5. ✅ Refactor PDF generation utility
 6. ✅ Organize lib directory (AI utilities)
 
 ### Week 3: Polish (4-5 hours)
+
 7. ✅ Move migration scripts out of API routes
 8. ✅ Move test routes to `/dev`
 9. ✅ Type safety improvements
@@ -417,6 +439,3 @@ export { DiagnosisReport } from "./DiagnosisReport";
 
 **Last Updated**: January 2025  
 **Status**: Ready for Implementation
-
-
-

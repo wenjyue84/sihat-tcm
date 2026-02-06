@@ -8,17 +8,20 @@
 Your web app has **significant refactoring opportunities** across multiple areas. While some infrastructure has been created (API middleware), it's **not being used yet**. Here's what can be improved:
 
 ### Quick Wins (Can Do Today)
+
 - ✅ **18 API routes** still use `catch (error: any)` - can use existing middleware
 - ✅ **19 test pages** in production - should move to `/dev` route group
 - ✅ **0 routes** using `createErrorResponse` - middleware exists but unused
 - ✅ **Component index files** missing - cleaner imports needed
 
 ### Medium Effort (This Week)
+
 - 🔄 **Large files** need splitting (3 files >1000 lines)
 - 🔄 **Component organization** - create index files
 - 🔄 **Lib directory** - better organization
 
 ### Long Term (This Month)
+
 - 📋 **Context consolidation** - 7 contexts may overlap
 - 📋 **Type safety improvements** - eliminate remaining `any` types
 - 📋 **Test infrastructure** - proper test organization
@@ -28,6 +31,7 @@ Your web app has **significant refactoring opportunities** across multiple areas
 ## 1. API Route Refactoring (HIGH PRIORITY)
 
 ### Current State
+
 - ✅ **Middleware created**: `src/lib/api/middleware/error-handler.ts` exists
 - ❌ **Not being used**: 0 routes use `createErrorResponse`
 - ❌ **18 routes** still use `catch (error: any)` pattern
@@ -36,6 +40,7 @@ Your web app has **significant refactoring opportunities** across multiple areas
 ### Files Needing Refactoring
 
 #### Routes with `catch (error: any)` (18 files):
+
 1. `src/app/api/chat/route.ts`
 2. `src/app/api/analyze-image/route.ts`
 3. `src/app/api/analyze-audio/route.ts`
@@ -58,6 +63,7 @@ Your web app has **significant refactoring opportunities** across multiple areas
 ### Refactoring Pattern
 
 **Before:**
+
 ```typescript
 } catch (error: any) {
   devLog("error", "API/chat", "Request error", { error });
@@ -80,6 +86,7 @@ Your web app has **significant refactoring opportunities** across multiple areas
 ```
 
 **After:**
+
 ```typescript
 import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 
@@ -88,7 +95,8 @@ import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 }
 ```
 
-**Impact**: 
+**Impact**:
+
 - Reduces ~20 lines to 1 line per route
 - 18 routes × ~20 lines = **~360 lines of code eliminated**
 - Better type safety (`unknown` instead of `any`)
@@ -115,6 +123,7 @@ import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 ## 2. Test Routes Cleanup (MEDIUM PRIORITY)
 
 ### Current State
+
 - ❌ **19 test pages** in production routes
 - ❌ Located in `src/app/test-*/page.tsx`
 - ❌ Should be in `src/app/(dev)/test-*/page.tsx`
@@ -157,12 +166,15 @@ import { createErrorResponse } from "@/lib/api/middleware/error-handler";
 ### Files Over 1000 Lines
 
 #### 1. `src/app/developer/page.tsx` - **1657 lines**
+
 **Issues**:
+
 - Massive component with multiple concerns
 - Mixing UI, state, and logic
 - Hard to maintain and test
 
 **Refactoring Strategy**:
+
 ```
 src/app/developer/
 ├── page.tsx (main orchestrator, ~200 lines)
@@ -180,12 +192,15 @@ src/app/developer/
 ```
 
 #### 2. `src/components/patient/UnifiedDashboard.tsx` - **1367 lines**
+
 **Issues**:
+
 - Too many responsibilities
 - Complex state management
 - Many imported sub-components already exist
 
 **Refactoring Strategy**:
+
 ```
 src/components/patient/
 ├── UnifiedDashboard.tsx (main, ~300 lines)
@@ -202,12 +217,15 @@ src/components/patient/
 ```
 
 #### 3. `src/hooks/useDiagnosisWizard.ts` - **834 lines**
+
 **Issues**:
+
 - Very large hook
 - Multiple concerns mixed
 - Hard to test individual parts
 
 **Refactoring Strategy**:
+
 ```
 src/hooks/diagnosis/
 ├── useDiagnosisWizard.ts (main orchestrator, ~200 lines)
@@ -222,11 +240,14 @@ src/hooks/diagnosis/
 ```
 
 #### 4. `src/app/test-runner/page.tsx` - **3232 lines** ⚠️
+
 **Issues**:
+
 - Extremely large test page
 - Should be split or moved to proper test infrastructure
 
-**Recommendation**: 
+**Recommendation**:
+
 - Move to `(dev)/test-runner/`
 - Split into multiple test suites
 - Consider using proper testing framework instead
@@ -240,6 +261,7 @@ src/hooks/diagnosis/
 Create `index.ts` files for cleaner imports:
 
 #### Priority 1: Major Component Directories
+
 ```
 src/components/
 ├── diagnosis/
@@ -255,6 +277,7 @@ src/components/
 ```
 
 **Example `diagnosis/index.ts`:**
+
 ```typescript
 export { DiagnosisWizard } from "./DiagnosisWizard";
 export { BasicInfoForm } from "./BasicInfoForm";
@@ -264,6 +287,7 @@ export { DiagnosisReport } from "./DiagnosisReport";
 ```
 
 **Benefits**:
+
 - Cleaner imports: `import { DiagnosisWizard } from "@/components/diagnosis"`
 - Better tree-shaking
 - Easier refactoring (change internal structure without breaking imports)
@@ -273,6 +297,7 @@ export { DiagnosisReport } from "./DiagnosisReport";
 ## 5. Lib Directory Organization (LOW PRIORITY)
 
 ### Current State
+
 - 68+ files in `src/lib/`
 - Some organization exists (`api/`, `supabase/`, `translations/`)
 - Many utility files in root
@@ -308,6 +333,7 @@ src/lib/
 ```
 
 **Migration Strategy**:
+
 1. Create new directories
 2. Move files incrementally
 3. Update imports (use find/replace)
@@ -356,6 +382,7 @@ src/lib/
 ## Implementation Priority
 
 ### Week 1: Quick Wins
+
 1. ✅ Migrate 4 API routes to use error middleware (2 hours)
 2. ✅ Move test routes to `(dev)` group (1 hour)
 3. ✅ Create component index files (2 hours)
@@ -363,6 +390,7 @@ src/lib/
 **Total**: ~5 hours, **~400 lines eliminated**
 
 ### Week 2: Medium Effort
+
 1. ✅ Migrate remaining 14 API routes (3 hours)
 2. ✅ Split `UnifiedDashboard.tsx` (4 hours)
 3. ✅ Split `useDiagnosisWizard.ts` (4 hours)
@@ -370,6 +398,7 @@ src/lib/
 **Total**: ~11 hours, **better maintainability**
 
 ### Week 3-4: Larger Refactors
+
 1. ✅ Split `developer/page.tsx` (6 hours)
 2. ✅ Organize lib directory (4 hours)
 3. ✅ Type safety audit (4 hours)
@@ -381,17 +410,20 @@ src/lib/
 ## Success Metrics
 
 ### Code Quality
+
 - [ ] API route code reduced by 40%+ (less duplication)
 - [ ] All routes use consistent error handling
 - [ ] No files over 1000 lines
 - [ ] Component index files created
 
 ### Developer Experience
+
 - [ ] New routes can be added in <30 minutes
 - [ ] Code review time reduced
 - [ ] Easier to find and understand code
 
 ### Maintainability
+
 - [ ] Changes to error handling affect all routes automatically
 - [ ] Clear file organization
 - [ ] Better type safety
@@ -417,6 +449,3 @@ src/lib/
 
 **Last Updated**: January 2025  
 **Status**: Ready for Implementation
-
-
-

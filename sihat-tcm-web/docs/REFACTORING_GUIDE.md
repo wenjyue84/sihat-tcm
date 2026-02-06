@@ -81,14 +81,16 @@
 ### Can Do Right Now (30 minutes - 2 hours each)
 
 #### 1. Fix Error Type Safety (30 min)
+
 **Files**: All API routes with `catch (error: any)`
 
 **Change**:
+
 ```typescript
 // Before
 catch (error: any) {
 
-// After  
+// After
 catch (error: unknown) {
   const errorMessage = error instanceof Error ? error.message : String(error);
 ```
@@ -96,9 +98,11 @@ catch (error: unknown) {
 **Impact**: Better type safety, ~20 files
 
 #### 2. Use Existing Error Handler (1 hour)
+
 **Files**: `chat/route.ts`, `heart-companion/route.ts`, `analyze-image/route.ts`, `western-chat/route.ts`
 
 **Change**:
+
 ```typescript
 // Before
 catch (error: any) {
@@ -118,9 +122,11 @@ catch (error: unknown) {
 **Impact**: 4 routes, ~60 lines saved per route
 
 #### 3. Create Component Index Files (2 hours)
+
 **Files**: Create `index.ts` in major component directories
 
 **Example**:
+
 ```typescript
 // components/diagnosis/index.ts
 export { DiagnosisWizard } from "./DiagnosisWizard";
@@ -129,6 +135,7 @@ export { InquiryWizard } from "./InquiryWizard";
 ```
 
 **Directories to create**:
+
 - `components/diagnosis/index.ts`
 - `components/patient/index.ts`
 - `components/doctor/index.ts`
@@ -137,9 +144,11 @@ export { InquiryWizard } from "./InquiryWizard";
 **Impact**: Cleaner imports, better tree-shaking
 
 #### 4. Move Test Routes (1 hour)
+
 **Action**: Move test routes to `/dev` route group
 
 **Files to move**:
+
 - `app/test-chat/page.tsx` → `app/(dev)/test-chat/page.tsx`
 - `app/test-gemini/page.tsx` → `app/(dev)/test-gemini/page.tsx`
 - And 10+ more...
@@ -147,6 +156,7 @@ export { InquiryWizard } from "./InquiryWizard";
 **Impact**: Cleaner production code structure
 
 #### 5. Extract Shared OPTIONS Handler (30 min)
+
 **Create**: `src/lib/api/middleware/cors-handler.ts`
 
 ```typescript
@@ -173,6 +183,7 @@ export function createOptionsHandler() {
 #### 1.1 Create API Middleware Layer
 
 **New Structure**:
+
 ```
 src/lib/api/
 ├── middleware/
@@ -189,12 +200,14 @@ src/lib/api/
 ```
 
 **Benefits**:
+
 - Reduce code duplication by ~60%
 - Consistent error handling
 - Easier to add new routes
 - Better type safety
 
 **Migration Strategy**:
+
 1. Create middleware utilities (non-breaking) ✅
 2. Update one route at a time (chat, consult, analyze-image)
 3. Test each route after migration
@@ -205,6 +218,7 @@ src/lib/api/
 **Goal**: Organize utility functions into logical directories.
 
 **New Structure**:
+
 ```
 src/lib/
 ├── api/              # API utilities (already started)
@@ -219,6 +233,7 @@ src/lib/
 **Goal**: Improve component structure and reduce duplication.
 
 **Actions**:
+
 - Create component index files
 - Move test routes to `/dev` group
 - Split large components (UnifiedDashboard, useDiagnosisWizard)
@@ -277,6 +292,7 @@ export async function POST(req: Request) {
 ```
 
 **Benefits**:
+
 - Reduced from ~20 lines to 1 line for error handling
 - Consistent error format across all routes
 - Better type safety
@@ -362,6 +378,3 @@ export async function POST(req: Request) {
 **Last Updated**: December 2024  
 **Status**: Phase 1 Started - API Middleware Created  
 **Next Milestone**: Migrate first route to use new middleware
-
-
-

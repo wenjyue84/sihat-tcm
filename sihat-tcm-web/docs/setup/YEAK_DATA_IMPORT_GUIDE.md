@@ -1,19 +1,22 @@
 # Populating Patient Data for Yeak Kiew Ai (yeak@gmail.com)
 
 ## Overview
+
 This guide explains how to populate comprehensive health data for patient Yeak Kiew Ai into the Sihat TCM database.
 
 ## Data Populated
 
 ### Profile Information
+
 - **Full Name**: Yeak Kiew Ai (叶巧爱)
 - **Age**: 78 years old
-- **Gender**: Female  
+- **Gender**: Female
 - **Height**: 155 cm
 - **Weight**: 64 kg (increased from 48-54kg range)
 - **Role**: Patient
 
 ### Medical Conditions
+
 1. **Chronic Kidney Disease Stage 4** (CRITICAL)
    - eGFR: 27 mL/min/1.73m²
    - Creatinine: 167 µmol/L
@@ -45,6 +48,7 @@ This guide explains how to populate comprehensive health data for patient Yeak K
    - Hearing loss (45%)
 
 ### Current Medications
+
 - Valsartan/Amlodipine (BP)
 - Atenolol (BP)
 - Rabeprazole (acid reflux)
@@ -55,12 +59,15 @@ This guide explains how to populate comprehensive health data for patient Yeak K
 - Paracetamol only (NO NSAIDs due to CKD)
 
 ### Recent Progress (December 10-11, 2025)
+
 **Successful interventions by Jay (primary caregiver):**
+
 - ✅ Stopped problematic medication
 - ✅ Implemented strict diet (thin porridge + steamed egg)
 - ✅ Stopped prolonged AC exposure
 
 **Results:**
+
 - ✅ Hand tremors RESOLVED
 - ✅ Stomach bloating reducing
 - ✅ Mood significantly improved
@@ -68,6 +75,7 @@ This guide explains how to populate comprehensive health data for patient Yeak K
 - ✅ Expressed desire to go out
 
 ### Family Care Team
+
 - **Jay**: Primary caregiver, medical coordinator
 - **Niko**: Medical support, monitoring at shop
 - **Bin**: Daily meal preparation, backup support
@@ -130,18 +138,21 @@ node seed-yeak-data.mjs
 ## Files Created
 
 ### 1. `supabase/seed_yeak_patient_data.sql`
+
 - **Full comprehensive SQL script** with all medical history
 - Uses PL/pgSQL `DO` block
 - Automatically finds user by email
 - ~450 lines of detailed medical data
 
 ### 2. `supabase/seed_yeak_simple.sql`
+
 - **Simplified version** for manual execution
 - Requires manual user_id replacement
 - Suitable for Supabase SQL Editor
 - ~200 lines, more concise
 
 ### 3. `seed-yeak-data.mjs`
+
 - Node.js script using Supabase client
 - Uses service role key
 - Has fallback method
@@ -154,24 +165,26 @@ node seed-yeak-data.mjs
 After execution, you can verify the data was populated:
 
 ### Check Profile:
+
 ```sql
-SELECT full_name, age, gender, weight, medical_history 
-FROM profiles 
+SELECT full_name, age, gender, weight, medical_history
+FROM profiles
 WHERE id IN (
     SELECT id FROM auth.users WHERE email = 'yeak@gmail.com'
 );
 ```
 
 ### Check Diagnosis Session:
+
 ```sql
-SELECT 
-    primary_diagnosis, 
-    constitution, 
+SELECT
+    primary_diagnosis,
+    constitution,
     overall_score,
     array_length(symptoms, 1) as symptom_count,
     array_length(medicines, 1) as medicine_count,
     created_at
-FROM diagnosis_sessions 
+FROM diagnosis_sessions
 WHERE user_id IN (
     SELECT id FROM auth.users WHERE email = 'yeak@gmail.com'
 );
@@ -182,17 +195,20 @@ WHERE user_id IN (
 ## Critical Information Captured
 
 ### ⚠️ Medical Safety Alerts
+
 - **NO NSAIDs** allowed (will worsen kidney function)
 - **Soft foods ONLY** (hiatal hernia risk)
 - **Avoid high-potassium foods** (sweet potato, etc.) - dangerous for CKD
 - **Avoid prolonged AC** (causes hand tremors)
 
 ### ✅ Proven Effective Diet (Dec 10-11, 2025)
+
 - Very thin rice porridge (mostly water) ~300ml
 - Steamed egg
 - Keep environment warm
 
 ### 📅 Follow-ups
+
 - Nephrology: December 4, 2025 @ Regency Specialist Hospital
 - Monitor daily: swelling, energy, pain, appetite
 
@@ -201,15 +217,18 @@ WHERE user_id IN (
 ## Troubleshooting
 
 ### If "User not found" error:
+
 1. Verify the user `yeak@gmail.com` exists in Supabase Auth
 2. If not, create the user first in **Authentication** → **Add user**
 3. Then run the SQL script again
 
 ### If network errors:
+
 - Use **Option 1 (Manual Execution)** via Supabase Dashboard
 - This bypasses all network/connectivity issues
 
 ### If permission errors:
+
 - Ensure you're logged in with admin/service role credentials
 - Check that RLS policies allow the operation
 

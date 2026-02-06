@@ -141,4 +141,3 @@ Both issues have been resolved:
 2. ✅ **Navigation bar added** - Sticky top nav for easy navigation
 
 The meal planner is now fully functional and easy to navigate to!
-

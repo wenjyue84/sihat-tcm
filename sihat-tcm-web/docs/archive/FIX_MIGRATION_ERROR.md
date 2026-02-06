@@ -90,4 +90,3 @@ The migration creates:
 1. Restart your dev server
 2. Try completing a diagnosis again
 3. Error should be gone ✅
-

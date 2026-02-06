@@ -21,11 +21,13 @@ The proposed Redis caching implementation introduces significant infrastructure 
 **Risk**: Vercel serverless functions are stateless and ephemeral. Each function invocation may run in a different container.
 
 **Issues**:
+
 - Redis connection pooling doesn't work the same way in serverless
 - Connection overhead per invocation could negate performance benefits
 - Need connection reuse strategies (e.g., `ioredis` with connection pooling or Upstash Redis REST API)
 
-**Impact**: 
+**Impact**:
+
 - **Severity**: High
 - **Likelihood**: High
 - **Mitigation**: Use Upstash Redis (REST API) or implement connection pooling with `ioredis` and connection reuse
@@ -35,12 +37,14 @@ The proposed Redis caching implementation introduces significant infrastructure 
 **Risk**: Adding Redis creates a new critical dependency.
 
 **Issues**:
+
 - Additional service to monitor and maintain
 - Cost implications (managed Redis services)
 - Single point of failure if Redis goes down
 - No Redis dependency currently in `package.json`
 
 **Impact**:
+
 - **Severity**: Medium
 - **Likelihood**: Medium
 - **Mitigation**: Implement graceful fallback to direct database queries when Redis is unavailable
@@ -50,11 +54,13 @@ The proposed Redis caching implementation introduces significant infrastructure 
 **Risk**: The code doesn't specify runtime compatibility.
 
 **Issues**:
+
 - `ioredis` may not work in Edge Runtime
 - Need to verify Node.js runtime vs Edge Runtime compatibility
 - Current API routes may use Edge Runtime
 
 **Impact**:
+
 - **Severity**: Medium
 - **Likelihood**: Medium
 - **Mitigation**: Use Upstash Redis REST API for Edge compatibility, or ensure Node.js runtime
@@ -68,12 +74,13 @@ The proposed Redis caching implementation introduces significant infrastructure 
 **Risk**: The proposed code has zero error handling.
 
 **Issues**:
+
 ```typescript
 // Current code - NO error handling
 async getOrSet<T>(key: string, factory: () => Promise<T>, ttl: number = 3600): Promise<T> {
   const cached = await this.redis.get(key);  // ❌ What if Redis is down?
   if (cached) return JSON.parse(cached);     // ❌ What if JSON is malformed?
-  
+
   const result = await factory();            // ❌ What if factory throws?
   await this.redis.setex(key, ttl, JSON.stringify(result)); // ❌ What if setex fails?
   return result;
@@ -81,6 +88,7 @@ async getOrSet<T>(key: string, factory: () => Promise<T>, ttl: number = 3600): P
 ```
 
 **Potential Failures**:
+
 1. Redis connection timeout/refused
 2. JSON parsing errors (corrupted cache)
 3. Factory function exceptions
@@ -88,6 +96,7 @@ async getOrSet<T>(key: string, factory: () => Promise<T>, ttl: number = 3600): P
 5. Network partitions
 
 **Impact**:
+
 - **Severity**: High
 - **Likelihood**: Medium
 - **Mitigation**: Wrap all Redis operations in try-catch, implement fallback logic
@@ -97,11 +106,13 @@ async getOrSet<T>(key: string, factory: () => Promise<T>, ttl: number = 3600): P
 **Risk**: Multiple concurrent requests could hit cache miss simultaneously.
 
 **Issues**:
+
 - All requests call `factory()` in parallel
 - Wastes resources (multiple AI API calls for same query)
 - No locking mechanism (e.g., Redis SETNX for distributed locks)
 
 **Impact**:
+
 - **Severity**: Medium
 - **Likelihood**: Medium (depends on traffic patterns)
 - **Mitigation**: Implement distributed locking or request deduplication
@@ -111,11 +122,13 @@ async getOrSet<T>(key: string, factory: () => Promise<T>, ttl: number = 3600): P
 **Risk**: Generic `<T>` has no constraints.
 
 **Issues**:
+
 - No validation that cached data matches expected type
 - Could return wrong type if cache key collision occurs
 - No schema validation for cached data
 
 **Impact**:
+
 - **Severity**: Low-Medium
 - **Likelihood**: Low
 - **Mitigation**: Add runtime type validation or use Zod schemas
@@ -129,6 +142,7 @@ async getOrSet<T>(key: string, factory: () => Promise<T>, ttl: number = 3600): P
 **Risk**: Caching medical/patient data in Redis without proper safeguards.
 
 **Issues**:
+
 - Patient diagnosis data may be cached
 - Medical images/audio analysis results
 - No encryption at rest mentioned
@@ -136,14 +150,16 @@ async getOrSet<T>(key: string, factory: () => Promise<T>, ttl: number = 3600): P
 - HIPAA/privacy compliance concerns
 
 **Current Medical Data Handling**:
+
 - Diagnosis sessions stored in Supabase with RLS
 - Medical reports with strict access controls
 - Audit trails required for data access
 
 **Impact**:
+
 - **Severity**: High
 - **Likelihood**: High (if caching patient data)
-- **Mitigation**: 
+- **Mitigation**:
   - Only cache non-sensitive data (AI model responses, not patient-specific results)
   - Implement cache key namespacing (e.g., `ai:response:{hash}` not `patient:{id}`)
   - Add encryption for sensitive cached data
@@ -154,14 +170,16 @@ async getOrSet<T>(key: string, factory: () => Promise<T>, ttl: number = 3600): P
 **Risk**: Stale cached data could show outdated medical information.
 
 **Issues**:
+
 - Patient updates diagnosis → cache still shows old data
 - No cache invalidation strategy
 - TTL-based expiration may be too long for medical data
 
 **Impact**:
+
 - **Severity**: Medium-High
 - **Likelihood**: Medium
-- **Mitigation**: 
+- **Mitigation**:
   - Shorter TTL for patient-specific data (15 minutes vs 1 hour)
   - Event-based cache invalidation
   - Version keys for cache entries
@@ -175,14 +193,16 @@ async getOrSet<T>(key: string, factory: () => Promise<T>, ttl: number = 3600): P
 **Risk**: JSON.stringify/parse on every cache hit/miss.
 
 **Issues**:
+
 - Large objects (AI responses, diagnosis reports) are expensive to serialize
 - Could be slower than direct database query for small data
 - No compression mentioned
 
 **Impact**:
+
 - **Severity**: Low-Medium
 - **Likelihood**: Medium
-- **Mitigation**: 
+- **Mitigation**:
   - Benchmark before/after
   - Use compression for large values
   - Consider caching only expensive operations (AI API calls)
@@ -192,14 +212,16 @@ async getOrSet<T>(key: string, factory: () => Promise<T>, ttl: number = 3600): P
 **Risk**: No strategy for key naming, collisions, or cleanup.
 
 **Issues**:
+
 - Key collisions if naming is inconsistent
 - Memory growth if keys aren't cleaned up
 - No key expiration monitoring
 
 **Impact**:
+
 - **Severity**: Low-Medium
 - **Likelihood**: Low
-- **Mitigation**: 
+- **Mitigation**:
   - Use namespaced keys (e.g., `ai:response:{hash}`)
   - Implement key pattern cleanup
   - Monitor Redis memory usage
@@ -213,6 +235,7 @@ async getOrSet<T>(key: string, factory: () => Promise<T>, ttl: number = 3600): P
 **Risk**: Current codebase uses in-memory Maps for rate limiting.
 
 **Current State**:
+
 ```typescript
 // src/lib/rateLimit.ts - Line 42
 // In-memory rate limit store (for serverless, consider using Redis/Upstash in production)
@@ -221,11 +244,13 @@ const dailyStore = new Map<string, DailyLimitEntry>();
 ```
 
 **Issues**:
+
 - In-memory Maps don't work across serverless instances
 - Rate limiting already needs Redis (documented but not implemented)
 - CacheManager should integrate with existing rate limiting needs
 
 **Impact**:
+
 - **Severity**: Low
 - **Likelihood**: High
 - **Mitigation**: Implement Redis for both caching AND rate limiting together
@@ -235,11 +260,13 @@ const dailyStore = new Map<string, DailyLimitEntry>();
 **Risk**: Redis connection not initialized or managed.
 
 **Issues**:
+
 - No singleton pattern for Redis client
 - No connection health checks
 - No reconnection logic
 
 **Impact**:
+
 - **Severity**: Medium
 - **Likelihood**: Medium
 - **Mitigation**: Implement Redis client singleton with health checks
@@ -313,7 +340,7 @@ export class CacheManager {
 
       // Cache miss: call factory
       const result = await factory();
-      
+
       // Store in cache (fire and forget to avoid blocking)
       this.redis.setex(key, ttl, JSON.stringify(result)).catch((error) => {
         console.warn(`[CacheManager] Failed to cache key: ${key}`, error);
@@ -330,7 +357,7 @@ export class CacheManager {
 
   async invalidate(pattern: string): Promise<void> {
     if (!this.isEnabled || !this.redis) return;
-    
+
     try {
       const keys = await this.redis.keys(pattern);
       if (keys.length > 0) {
@@ -343,7 +370,7 @@ export class CacheManager {
 
   async healthCheck(): Promise<boolean> {
     if (!this.isEnabled || !this.redis) return false;
-    
+
     try {
       await this.redis.ping();
       return true;
@@ -367,8 +394,8 @@ const aiResponse = await cacheManager.getOrSet(
   3600, // 1 hour TTL
   {
     validateCache: (data): data is AIResponse => {
-      return data && typeof data === 'object' && 'content' in data;
-    }
+      return data && typeof data === "object" && "content" in data;
+    },
   }
 );
 
@@ -376,7 +403,7 @@ const aiResponse = await cacheManager.getOrSet(
 const diagnosis = await cacheManager.getOrSet(
   `diagnosis:${patientId}:${sessionId}`,
   async () => await fetchDiagnosis(sessionId),
-  900, // 15 minutes TTL (shorter for medical data)
+  900 // 15 minutes TTL (shorter for medical data)
 );
 ```
 
@@ -415,34 +442,40 @@ const diagnosis = await cacheManager.getOrSet(
 ### Option 1: Upstash Redis (Recommended for Vercel)
 
 **Pros**:
+
 - REST API (works in Edge Runtime)
 - Serverless-friendly
 - Free tier available
 - Built for Vercel
 
 **Cons**:
+
 - Slightly higher latency than direct Redis
 - REST API overhead
 
 ### Option 2: Vercel KV (Vercel's Redis)
 
 **Pros**:
+
 - Native Vercel integration
 - Edge-compatible
 - Simple setup
 
 **Cons**:
+
 - Vendor lock-in
 - May have cost implications
 
 ### Option 3: Keep In-Memory + Database Query Optimization
 
 **Pros**:
+
 - No new infrastructure
 - Simpler architecture
 - No additional costs
 
 **Cons**:
+
 - Rate limiting won't work across serverless instances
 - Slower for repeated queries
 
@@ -450,15 +483,16 @@ const diagnosis = await cacheManager.getOrSet(
 
 ## 9. Decision Matrix
 
-| Factor | Risk Level | Mitigation Effort | Recommendation |
-|--------|-----------|-------------------|----------------|
-| Infrastructure | 🟡 Medium | Medium | Use Upstash Redis |
-| Error Handling | 🔴 High | Low | Implement fallback logic |
-| Medical Data | 🔴 High | High | Only cache non-sensitive data |
-| Performance | 🟡 Medium | Low | Benchmark first |
-| Serverless | 🔴 High | Medium | Use REST API (Upstash) |
+| Factor         | Risk Level | Mitigation Effort | Recommendation                |
+| -------------- | ---------- | ----------------- | ----------------------------- |
+| Infrastructure | 🟡 Medium  | Medium            | Use Upstash Redis             |
+| Error Handling | 🔴 High    | Low               | Implement fallback logic      |
+| Medical Data   | 🔴 High    | High              | Only cache non-sensitive data |
+| Performance    | 🟡 Medium  | Low               | Benchmark first               |
+| Serverless     | 🔴 High    | Medium            | Use REST API (Upstash)        |
 
-**Overall Recommendation**: 
+**Overall Recommendation**:
+
 - ✅ **Proceed with caution** - Implement Redis caching but:
   1. Use Upstash Redis (REST API) for serverless compatibility
   2. Implement comprehensive error handling
@@ -478,11 +512,10 @@ const diagnosis = await cacheManager.getOrSet(
 ---
 
 **Next Steps**:
+
 1. Review this assessment with the team
 2. Choose Redis provider (recommend Upstash)
 3. Implement safe version with error handling
 4. Test in staging environment
 5. Monitor performance and errors
 6. Gradually roll out to production
-
-

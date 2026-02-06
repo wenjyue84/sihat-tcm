@@ -42,6 +42,7 @@
 ### Phase 4: Refactor Main Component ⏳
 
 Update `DoctorDiagnosisWizard.tsx` to:
+
 - Use custom hooks
 - Use extracted section components
 - Focus on orchestration only
@@ -91,6 +92,3 @@ src/components/doctor/
 - No breaking changes to props or behavior
 - Maintain backward compatibility
 - Test each section after extraction
-
-
-

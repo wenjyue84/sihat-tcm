@@ -18,12 +18,14 @@ This document identifies **middle-risk files** (300-800 lines) that would benefi
 ### 1. `src/components/diagnosis/DiagnosisSummary.tsx` - **699 lines**
 
 **Issues**:
+
 - Multiple responsibilities: summary display, options management, wizard navigation
 - Complex state management with many useState hooks
 - Large component with nested conditionals
 - Mixed concerns: UI rendering, state management, and data transformation
 
 **Refactoring Opportunities**:
+
 - Extract options management into `useReportOptions` hook
 - Split into sub-components:
   - `SummaryObservationsSection.tsx`
@@ -39,12 +41,14 @@ This document identifies **middle-risk files** (300-800 lines) that would benefi
 ### 2. `src/components/diagnosis/BasicInfoForm.tsx` - **540 lines**
 
 **Issues**:
+
 - Multi-step wizard with complex state transitions
 - Profile completeness check logic mixed with form logic
 - Auto-fill logic embedded in component
 - Multiple useEffect hooks with complex dependencies
 
 **Refactoring Opportunities**:
+
 - Extract profile completeness check into `useProfileCompleteness` hook
 - Extract auto-fill logic into `useAutoFillFormData` hook
 - Simplify step navigation with a dedicated hook
@@ -57,12 +61,14 @@ This document identifies **middle-risk files** (300-800 lines) that would benefi
 ### 3. `src/components/diagnosis/DiagnosisWizard.tsx` - **658 lines**
 
 **Issues**:
+
 - Orchestrates multiple wizard steps
 - Complex conditional rendering based on step state
 - Test data filling logic embedded
 - Multiple concerns: routing, state management, UI rendering
 
 **Refactoring Opportunities**:
+
 - Extract step rendering logic into `WizardStepRenderer` component
 - Move test data logic to a separate utility or hook
 - Simplify step transitions with a state machine pattern
@@ -75,12 +81,14 @@ This document identifies **middle-risk files** (300-800 lines) that would benefi
 ### 4. `src/components/patient/PatientCommunication.tsx` - **297 lines**
 
 **Issues**:
+
 - Mixes data fetching, state management, and UI rendering
 - Direct Supabase calls in component
 - Message handling logic could be extracted
 - No separation of concerns between data layer and UI
 
 **Refactoring Opportunities**:
+
 - Extract data fetching into `usePatientCommunication` hook
 - Move Supabase operations to server actions or API routes
 - Extract message sending logic into separate function
@@ -95,12 +103,14 @@ This document identifies **middle-risk files** (300-800 lines) that would benefi
 ### 5. `src/app/api/consult/route.ts` - **678 lines**
 
 **Issues**:
+
 - Very large API route with extensive documentation
 - Complex prompt building logic
 - Multiple responsibilities: validation, prompt construction, streaming
 - Error handling could use the existing middleware
 
 **Refactoring Opportunities**:
+
 - Extract prompt building into `buildConsultationPrompt()` utility
 - Use existing `createErrorResponse` middleware (currently uses `catch (error: any)`)
 - Split validation logic into separate function
@@ -119,12 +129,14 @@ This document identifies **middle-risk files** (300-800 lines) that would benefi
 **Note**: This file is actually **high-risk** (over 2000 lines), but it's worth mentioning here as it's a critical refactoring target.
 
 **Issues**:
+
 - Massive file with many server actions
 - Multiple concerns mixed together
 - Hard to navigate and maintain
 - Difficult to test individual functions
 
 **Refactoring Opportunities**:
+
 - Split into feature-based modules:
   - `actions/diagnosis.ts`
   - `actions/patient.ts`
@@ -144,12 +156,14 @@ This document identifies **middle-risk files** (300-800 lines) that would benefi
 **Note**: Just over 1000 lines, but still manageable.
 
 **Issues**:
+
 - Very large component with multiple sections
 - Complex state management
 - File upload and extraction logic embedded
 - Multiple responsibilities
 
 **Refactoring Opportunities**:
+
 - Split into section-based components:
   - `PatientInfoSection.tsx`
   - `SymptomsSection.tsx`
@@ -169,15 +183,18 @@ This document identifies **middle-risk files** (300-800 lines) that would benefi
 ## Refactoring Priority
 
 ### High Priority (Do First)
+
 1. **DiagnosisSummary.tsx** - Most complex, most benefit
 2. **BasicInfoForm.tsx** - Frequently used, affects user experience
 3. **consult/route.ts** - Can use existing middleware, quick win
 
 ### Medium Priority
+
 4. **DiagnosisWizard.tsx** - Good refactoring opportunity
 5. **PatientCommunication.tsx** - Simpler, good practice
 
 ### Lower Priority (But Still Important)
+
 6. **actions.ts** - Large but critical, needs careful planning
 7. **DoctorDiagnosisWizard.tsx** - Large but less frequently used
 
@@ -211,6 +228,7 @@ This document identifies **middle-risk files** (300-800 lines) that would benefi
 ## Success Metrics
 
 After refactoring, each file should:
+
 - ✅ Be under 400 lines (ideally under 300)
 - ✅ Have single responsibility
 - ✅ Be easily testable
@@ -312,9 +330,10 @@ After refactoring, each file should:
    - Improved modularity
 
 10. **`IoTConnectionWizard.tsx`** - Extracted device configuration
-   - ✅ Created `iot/utils/deviceConfig.ts` - Device configuration
-   - ✅ Updated component to use extracted config
-   - Improved maintainability
+
+- ✅ Created `iot/utils/deviceConfig.ts` - Device configuration
+- ✅ Updated component to use extracted config
+- Improved maintainability
 
 ### 📋 Remaining
 

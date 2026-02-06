@@ -20,6 +20,7 @@ Create an ADR when you make a decision that:
 5. **Requires team alignment** (e.g., coding standards, deployment strategy)
 
 ### Examples for Sihat TCM
+
 - ✅ Choosing Next.js vs Remix
 - ✅ Using Supabase vs building custom backend
 - ✅ Implementing AI streaming with Edge Runtime
@@ -30,19 +31,23 @@ Create an ADR when you make a decision that:
 ## How to Write an ADR
 
 ### Step 1: Copy the Template
+
 ```bash
 # From the sihat-tcm directory
 cp docs/adr/0000-template.md docs/adr/XXXX-your-decision-title.md
 ```
 
 ### Step 2: Number Your ADR
+
 Use sequential numbering: `0001`, `0002`, `0003`, etc.
 The number should be the next available number in the directory.
 
 ### Step 3: Fill in the Template
+
 See `0000-template.md` for guidance on each section.
 
 **Tips**:
+
 - Write for future you and new team members
 - Be specific and concise
 - Include diagrams if helpful
@@ -50,6 +55,7 @@ See `0000-template.md` for guidance on each section.
 - Don't be afraid to list cons and risks
 
 ### Step 4: Review and Merge
+
 - Share the ADR with the team for feedback
 - Update based on discussions
 - Merge when consensus is reached
@@ -73,8 +79,10 @@ ADRs are **immutable** after acceptance. If a decision changes:
 3. **Preserve history** - never delete old ADRs
 
 Example:
+
 ```markdown
 # In ADR-0001
+
 - **Status**: Superseded by [ADR-0015](./0015-migration-to-remix.md)
 ```
 
@@ -105,6 +113,7 @@ When writing ADRs for medical software, always consider:
 ### Include These Sections
 
 For every ADR:
+
 - ✅ **Testing Strategy**: How will we validate the decision?
 - ✅ **Monitoring**: How will we know if it's working?
 - ✅ **Risks & Mitigation**: What could go wrong?
@@ -113,6 +122,7 @@ For every ADR:
 ### Tag Your ADRs
 
 Use consistent tags to make ADRs searchable:
+
 - `architecture` - System structure decisions
 - `security` - Security and privacy decisions
 - `performance` - Performance optimization decisions
@@ -124,10 +134,10 @@ Use consistent tags to make ADRs searchable:
 
 ## Quick Reference Table
 
-| ADR # | Title | Status | Date | Tags |
-|-------|-------|--------|------|------|
+| ADR #                               | Title                     | Status   | Date       | Tags                   |
+| ----------------------------------- | ------------------------- | -------- | ---------- | ---------------------- |
 | [0001](./0001-nextjs-app-router.md) | Use Next.js 16 App Router | Accepted | 2025-12-01 | architecture, frontend |
-| 0002 | Your next ADR... | Proposed | | |
+| 0002                                | Your next ADR...          | Proposed |            |                        |
 
 ## Resources
 
@@ -138,6 +148,7 @@ Use consistent tags to make ADRs searchable:
 ## Questions?
 
 If you're unsure whether something needs an ADR, ask yourself:
+
 > "Will future me or my teammates wonder why we made this choice?"
 
 If yes → Write an ADR ✅  

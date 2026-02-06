@@ -5,6 +5,7 @@ This directory contains comprehensive documentation for the Sihat TCM web applic
 ## 📁 Directory Structure
 
 ### Core Documentation
+
 - **`DEVELOPER_GUIDE.md`** - Comprehensive developer guide (consolidated from DEVELOPER_MANUAL + DEVELOPER_DOCUMENTATION)
 - **`USER_GUIDE.md`** - Complete user documentation (consolidated from USER_MANUAL + USER_GUIDES)
 - **`SYSTEM_DESCRIPTION.md`** - System overview and product intent
@@ -14,6 +15,7 @@ This directory contains comprehensive documentation for the Sihat TCM web applic
 - **`INLINE_CODE_DOCUMENTATION_GUIDE.md`** - Code documentation standards
 
 ### Testing
+
 - **`COMPREHENSIVE_TESTING_GUIDE.md`** - Complete testing guide
 - **`ACCESSIBILITY_TESTING_GUIDE.md`** - Accessibility testing guidelines
 - **`testing/`** - Feature-specific testing guides
@@ -22,11 +24,13 @@ This directory contains comprehensive documentation for the Sihat TCM web applic
   - `HEALTH_PASSPORT_TESTING_GUIDE.md` - Health Passport testing
 
 ### Implementation
+
 - **`implementation/`** - Implementation guides
   - `PHASE8_QUALITY_GATES.md` - Development workflow and quality gates (consolidated)
   - Historical phase summaries (PHASE1, PHASE2, PHASE3, PHASE5)
 
 ### Features
+
 - **`features/`** - Feature-specific documentation
   - **`DOCTOR_PORTAL.md`** - Doctor Portal navigation and features (consolidated)
   - **Health Passport**: `HEALTH_PASSPORT.md`
@@ -37,6 +41,7 @@ This directory contains comprehensive documentation for the Sihat TCM web applic
   - **Soundscape**: `SOUNDSCAPE_AUDIO_FILES.md`
 
 ### Fixes & Troubleshooting
+
 - **`fixes/`** - Bug fixes and troubleshooting guides
   - `FIX_MIGRATION_ERROR.md`
   - `FIX_MEDICINES_COLUMN.md`
@@ -46,6 +51,7 @@ This directory contains comprehensive documentation for the Sihat TCM web applic
   - `FACE_API_TEST_FIX.md`
 
 ### Setup & Configuration
+
 - **`setup/`** - Setup guides and configuration
   - `SETUP_TUTORIAL.md` - Initial setup guide
   - `GIT_HOOK_SETUP.md` - Git hooks configuration
@@ -55,30 +61,36 @@ This directory contains comprehensive documentation for the Sihat TCM web applic
   - `PORT_3100_NOTES.md` - Port configuration notes
 
 ### Migrations
+
 - **`migrations/`** - Database migration guides
   - `MIGRATION_GUIDE.md` - Database migration instructions (consolidated)
 
 ### UI/UX
+
 - **`ui-ux/`** - Design and user experience documentation
   - `UI_UX_DESIGN_GUIDELINES.md`
   - `MOBILE_LAYOUT_OPTIMIZATION_PLAN.md`
   - `MOBILE_READABILITY_RECOMMENDATIONS.md`
 
 ### Guidelines
+
 - **`guidelines/`** - Code quality and security guidelines
   - `CODE_REVIEW_GUIDELINES.md`
   - `API_KEY_SECURITY.md`
   - `REDIS_CACHING_RISK_ASSESSMENT.md`
 
 ### Refactoring
+
 - **`REFACTORING_GUIDE.md`** - Comprehensive refactoring guide (consolidated)
 
 ### Architecture Decision Records (ADR)
+
 - **`adr/`** - Architecture decision records
   - `0000-template.md` - ADR template
   - `0001-nextjs-app-router.md` - Next.js App Router decision
 
 ### System Health
+
 - **`SYSTEM_HEALTH_MONITORING.md`** - System monitoring and health checks
 
 ## 🔍 Quick Navigation
@@ -107,4 +119,3 @@ This directory contains comprehensive documentation for the Sihat TCM web applic
 - Original files have been archived in `archive/` for reference
 - For mobile app documentation, see `../sihat-tcm-mobile/docs/`
 - For project-wide AI integration docs, see `../../docs/ai-integration/`
-

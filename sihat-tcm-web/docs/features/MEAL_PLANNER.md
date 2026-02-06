@@ -434,4 +434,3 @@ The TCM AI Meal Planner is now **fully integrated** into the Sihat TCM platform!
 ---
 
 **Built with** ❤️ using Next.js 16, Gemini AI, Supabase, Framer Motion, and shadcn/ui.
-

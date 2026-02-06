@@ -14,6 +14,7 @@
 ## Files Created
 
 ### 1. `wizard/StepRenderer.tsx`
+
 - **Purpose**: Centralized step rendering logic
 - **Benefits**:
   - Single responsibility: renders steps based on current step
@@ -22,6 +23,7 @@
   - Reusable step rendering logic
 
 ### 2. `wizard/utils/testDataHelpers.ts`
+
 - **Purpose**: Test data generation and clearing utilities
 - **Benefits**:
   - Separated test data logic from main component
@@ -33,16 +35,19 @@
 ## Refactoring Steps
 
 ### Step 1: Extract Step Rendering ✅
+
 - Created `StepRenderer.tsx` component
 - Handles all step rendering logic
 - Maps step types to appropriate components
 
 ### Step 2: Extract Test Data Helpers ✅
+
 - Created `testDataHelpers.ts` utilities
 - `generateTestData()` - Generates mock data for all steps
 - `clearTestData()` - Clears all diagnosis data
 
 ### Step 3: Update DiagnosisWizard.tsx (TODO)
+
 - Replace inline step rendering with `<StepRenderer />`
 - Replace test data generation with `generateTestData()`
 - Replace test data clearing with `clearTestData()`
@@ -74,6 +79,3 @@
 ---
 
 **Last Updated**: January 2025
-
-
-

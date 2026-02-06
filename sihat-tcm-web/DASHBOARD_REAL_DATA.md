@@ -3,9 +3,11 @@
 ## Summary of Changes
 
 ### 1. Dashboard Data Source Updated
+
 The Doctor Dashboard (`/doctor/page.tsx`) now fetches **real diagnosis data** from the `diagnosis_sessions` table instead of using mock data from the old `inquiries` table.
 
 **Key Changes:**
+
 - **Table**: Changed from `inquiries` → `diagnosis_sessions`
 - **Query**: Now fetches `primary_diagnosis`, `full_report`, and `symptoms` (array)
 - **Join**: Uses `profiles:user_id` to get patient information and flag status
@@ -14,9 +16,11 @@ The Doctor Dashboard (`/doctor/page.tsx`) now fetches **real diagnosis data** fr
 - **Fallback**: Only shows mock data if no real data exists in the database
 
 ### 2. Added SQL Seed Script
+
 Created `seed_100_diagnosis_sessions.sql` to populate your database with 100 realistic diagnosis records.
 
 **Features:**
+
 - ✅ 20 different realistic TCM symptoms
 - ✅ 20 TCM diagnosis patterns (both English and Chinese)
 - ✅ 9 constitution types
@@ -30,6 +34,7 @@ Created `seed_100_diagnosis_sessions.sql` to populate your database with 100 rea
 ## How to Run the SQL Script
 
 ### Option 1: Supabase Dashboard (Recommended)
+
 1. Go to your Supabase project dashboard
 2. Navigate to **SQL Editor**
 3. Click **New Query**
@@ -38,12 +43,14 @@ Created `seed_100_diagnosis_sessions.sql` to populate your database with 100 rea
 6. Check the results - you should see confirmation messages
 
 ### Option 2: Command Line (psql)
+
 ```bash
 # From your project directory
 psql -h <your-supabase-host> -U postgres -d postgres -f seed_100_diagnosis_sessions.sql
 ```
 
 ### Option 3: Using Supabase CLI
+
 ```bash
 # From your project directory
 supabase db execute < seed_100_diagnosis_sessions.sql
@@ -61,6 +68,7 @@ supabase db execute < seed_100_diagnosis_sessions.sql
 ## Expected Output
 
 After running the script, you should see:
+
 ```
 NOTICE: Starting to seed 100 diagnosis sessions...
 NOTICE: Found X patient users
@@ -82,11 +90,13 @@ NOTICE: Diagnosis sessions are distributed across X patient users
 After seeding, you can verify in several ways:
 
 ### 1. Check in Supabase Dashboard
+
 Go to **Table Editor** → `diagnosis_sessions` and browse the records
 
 ### 2. SQL Query
+
 ```sql
-SELECT 
+SELECT
     ds.id,
     ds.created_at,
     ds.primary_diagnosis,
@@ -99,7 +109,9 @@ LIMIT 20;
 ```
 
 ### 3. Doctor Portal Dashboard
+
 Simply navigate to `/doctor` in your application and you should see:
+
 - ✅ Real patient names instead of mock data
 - ✅ Actual diagnosis records
 - ✅ Working flag updates
@@ -109,6 +121,7 @@ Simply navigate to `/doctor` in your application and you should see:
 ## Database Schema Reference
 
 The `diagnosis_sessions` table structure:
+
 ```sql
 - id (uuid) - Primary key
 - user_id (uuid) - References profiles.id
@@ -133,9 +146,11 @@ The `diagnosis_sessions` table structure:
 ## Troubleshooting
 
 ### No patients found
+
 **Error**: `NOTICE: No patient users found. Please create at least one patient user first.`
 
 **Solution**: Create at least one user with role='patient' in the profiles table:
+
 ```sql
 -- Check existing patients
 SELECT id, full_name, role FROM profiles WHERE role = 'patient';
@@ -145,12 +160,15 @@ SELECT id, full_name, role FROM profiles WHERE role = 'patient';
 ```
 
 ### Permission errors
+
 If you get permission errors, make sure:
+
 1. You're running as a superuser or database owner
 2. RLS policies allow the operation
 3. You're connected to the correct database
 
 ### Data not showing in dashboard
+
 1. Check browser console for errors
 2. Verify the fetch query completed successfully
 3. Ensure profiles have the `flag` column (should be added via migration)
@@ -159,6 +177,7 @@ If you get permission errors, make sure:
 ## Need More Data?
 
 To generate additional sessions, simply:
+
 1. Change the loop limit in the SQL script: `FOR i IN 1..100` → `FOR i IN 1..200`
 2. Run the script again
 3. It will add the new records to existing ones
@@ -166,11 +185,12 @@ To generate additional sessions, simply:
 ## Cleaning Up Test Data
 
 If you want to remove the seeded data later:
+
 ```sql
 -- BE CAREFUL - This deletes data!
 -- Only do this if you're sure you want to remove all diagnosis sessions
 
-DELETE FROM diagnosis_sessions 
+DELETE FROM diagnosis_sessions
 WHERE created_at >= NOW() - INTERVAL '180 days';
 ```
 

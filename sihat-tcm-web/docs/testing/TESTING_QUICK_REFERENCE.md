@@ -196,15 +196,15 @@ curl "http://localhost:3100/api/developer/test-report?format=json"
 
 ### Common Issues
 
-| Issue                 | Solution                             |
-| --------------------- | ------------------------------------ |
-| Property test timeout | Reduce `numRuns` or optimize logic   |
-| Generator errors      | Use `fc.record()` for nested objects |
-| Memory issues         | Reduce test data size                |
-| Flaky tests           | Check for race conditions            |
-| "Column does not exist" | Run the migration SQL file         |
-| Input data not showing | Check browser console, verify DB    |
-| Guest session not saving | Check RLS policies                |
+| Issue                    | Solution                             |
+| ------------------------ | ------------------------------------ |
+| Property test timeout    | Reduce `numRuns` or optimize logic   |
+| Generator errors         | Use `fc.record()` for nested objects |
+| Memory issues            | Reduce test data size                |
+| Flaky tests              | Check for race conditions            |
+| "Column does not exist"  | Run the migration SQL file           |
+| Input data not showing   | Check browser console, verify DB     |
+| Guest session not saving | Check RLS policies                   |
 
 ### Debug Commands
 
@@ -240,4 +240,3 @@ npm test -- propertyTestFramework.test.ts --verbose
 ---
 
 **💡 Pro Tip**: Use the Developer Portal Testing Suite for interactive test management and real-time monitoring!
-

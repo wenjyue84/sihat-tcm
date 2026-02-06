@@ -32,6 +32,7 @@ public/
 ### Five Elements Audio Files
 
 Each element audio file should be:
+
 - **Format**: MP3 (recommended) or other browser-supported formats (OGG, WAV)
 - **Duration**: 2-5 minutes (will loop automatically)
 - **Volume**: Normalized to prevent clipping
@@ -99,6 +100,7 @@ Body scan meditation audio files in three languages:
 3. **Malay**: `meditation/body-scan-ms.mp3`
 
 **Requirements**:
+
 - **Duration**: 10-20 minutes (does not loop)
 - **Content**: Guided body scan meditation
 - **Voice**: Calm, soothing voice
@@ -132,6 +134,7 @@ After adding audio files:
 ## Fallback Behavior
 
 If audio files are missing:
+
 - The component will display an error message
 - Users will see: "Failed to load audio files. Please ensure audio files are available."
 - The component remains functional but audio won't play
@@ -156,6 +159,7 @@ If audio files are missing:
 ## Implementation Notes
 
 The soundscape generator:
+
 - Mixes multiple audio layers simultaneously
 - Allows individual volume control for each layer
 - Automatically determines which sounds to play based on TCM diagnosis
@@ -170,5 +174,3 @@ The soundscape generator:
 - **Kidney Deficiency**: Earth (primary) + Metal (secondary) + Water (ambient)
 
 See `src/lib/soundscapeUtils.ts` for the complete mapping logic.
-
-

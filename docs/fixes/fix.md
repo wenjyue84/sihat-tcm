@@ -247,3 +247,59 @@ node run-migration.mjs
 2.  **Workflow**: Use `/run-sql-migration` for guided migration steps.
 3.  **Documentation**: This capability is documented in `claude.md`, `GEMINI.md`, and `DEVELOPER_GUIDE.md`.
 
+---
+
+# Fix: Vercel Build Failure - NEXT_MISSING_LAMBDA for /patient/sleep
+
+**Date:** 2026-01-30
+**Issue:** Vercel deployment failed with the error: `Unable to find lambda for route: /patient/sleep` (error code: `NEXT_MISSING_LAMBDA`).
+
+## Root Causes
+
+1.  **Client-Only Page Without Dynamic Export**:
+    -   The `/patient/sleep` page was a `'use client'` component but didn't have an explicit `dynamic` export.
+    -   Vercel's build process couldn't determine how to create a serverless function for this route.
+    -   This is a known issue with Next.js App Router pages that are purely client-side.
+
+2.  **Vercel Build Process**:
+    -   Vercel attempts to create serverless lambdas for routes during build.
+    -   Without explicit configuration, it can fail for certain client-only pages in nested directories.
+
+## The Fix
+
+### `src/app/patient/sleep/page.tsx`
+
+Added the `dynamic` export to force Next.js to always render this route dynamically:
+
+```typescript
+'use client';
+
+// Force dynamic rendering to fix NEXT_MISSING_LAMBDA error on Vercel
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect } from "react";
+// ... rest of component
+```
+
+## How to Find This Error
+
+The error is stored in `.vercel/output/builds.json` after running `vercel build` locally:
+
+```json
+{
+  "error": {
+    "message": "Unable to find lambda for route: /patient/sleep",
+    "code": "NEXT_MISSING_LAMBDA"
+  }
+}
+```
+
+## Future Reference & Rules
+
+1.  **Client-Only Pages**: When a page uses `'use client'` and doesn't need server-side data, consider adding `export const dynamic = 'force-dynamic'` to prevent Vercel lambda issues.
+2.  **Vercel Build Debugging**: Run `vercel build` locally and check `.vercel/output/builds.json` for detailed error information when deployments fail.
+3.  **Nested Routes**: Pay special attention to client-only pages in nested route directories (e.g., `/patient/sleep`), as they may need explicit dynamic configuration.
+4.  **Alternative Solutions**:
+    -   `export const runtime = 'edge'` - Use Edge Runtime instead of Node.js
+    -   `export const dynamic = 'force-static'` - Force static generation (if no dynamic data needed)
+

@@ -157,4 +157,3 @@ SELECT EXISTS (
   AND table_name = 'guest_diagnosis_sessions'
 );
 ```
-

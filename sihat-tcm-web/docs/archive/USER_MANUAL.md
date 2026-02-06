@@ -1424,4 +1424,3 @@ _This manual is regularly updated. Check back for new features and improvements.
 
 _Last Updated: December 2024_
 _Version: 3.0_
-

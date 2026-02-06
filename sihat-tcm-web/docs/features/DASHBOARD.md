@@ -228,7 +228,7 @@ psql $DATABASE_URL < supabase/migrations/20251224_migrate_inquiries_to_sessions.
 
 ```sql
 -- Check migration results
-SELECT 
+SELECT
   (SELECT COUNT(*) FROM inquiries) as old_count,
   (SELECT COUNT(*) FROM diagnosis_sessions) as new_count,
   (SELECT COUNT(*) FROM inquiries_unified) as unified_count;
@@ -296,17 +296,19 @@ The dashboard merge is **complete** and provides:
 ## Related Files
 
 **Migration:**
+
 - `supabase/migrations/20251224_migrate_inquiries_to_sessions.sql`
 
 **Components:**
+
 - `src/components/patient/UnifiedDashboard.tsx`
 - `src/app/patient/page.tsx`
 
 **Server Actions:**
+
 - `src/lib/actions.ts`
 
 ---
 
 **Implemented**: December 2024  
 **Status**: Complete and tested
-

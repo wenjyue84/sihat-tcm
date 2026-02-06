@@ -6,6 +6,7 @@
 ## ✅ Files Removed
 
 ### Migration Scripts (One-Time Use)
+
 1. ✅ `src/app/api/migrate-music/route.ts` - **Deleted** (94 lines)
 2. ✅ `src/app/api/migrate-medical-history/route.ts` - **Deleted** (103 lines)
 
@@ -65,6 +66,7 @@ src/app/test-*/page.tsx → src/app/(dev)/test-*/page.tsx
 These refactoring docs can be consolidated:
 
 **In `docs/refactoring/`:**
+
 - `COMPLETED_REFACTORINGS.md` - Can merge into main summary
 - `FINAL_REFACTORING_REPORT.md` - Can merge into main summary
 - `REFACTORING_PROGRESS.md` - Can merge into main summary
@@ -79,6 +81,7 @@ These refactoring docs can be consolidated:
 - `DIAGNOSIS_WIZARD_REFACTORING.md` - Keep if contains unique info
 
 **In `docs/`:**
+
 - `REFACTORING_OPPORTUNITIES.md` - Keep (main reference)
 - `REFACTORING_GUIDE.md` - Review if redundant with REFACTORING_OPPORTUNITIES.md
 
@@ -115,9 +118,6 @@ These refactoring docs can be consolidated:
 
 1. ✅ Remove migration scripts (DONE)
 2. Move test routes to `(dev)` route group
-3. Move test pages to `(dev)` route group  
+3. Move test pages to `(dev)` route group
 4. Consolidate documentation files
 5. Review and remove any unused scripts
-
-
-

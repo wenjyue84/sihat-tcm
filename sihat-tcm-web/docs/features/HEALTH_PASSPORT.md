@@ -545,7 +545,9 @@ await saveDiagnosis({
   primary_diagnosis: "Yin Deficiency",
   constitution: "Deficient Type",
   overall_score: 65,
-  full_report: { /* JSONB */ },
+  full_report: {
+    /* JSONB */
+  },
 });
 
 // Get user's history (paginated)
@@ -754,4 +756,3 @@ Implemented following the project spec: "My Health Passport (Patient History)"
 ---
 
 **Status**: ✅ **COMPLETE & PRODUCTION READY**
-

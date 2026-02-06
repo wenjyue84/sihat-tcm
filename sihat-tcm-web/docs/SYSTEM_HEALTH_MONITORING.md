@@ -17,31 +17,33 @@ The system health monitoring feature provides comprehensive error tracking, perf
 ### 1. Error Logging System
 
 #### Automatic Error Capture
+
 - Unhandled JavaScript errors
 - Promise rejections
 - Network request failures
 - React component errors (via Error Boundary)
 
 #### Manual Error Logging
+
 ```typescript
-import { logError, logUserActionError, logNetworkError } from '@/lib/errorLogger';
+import { logError, logUserActionError, logNetworkError } from "@/lib/errorLogger";
 
 // Log a general error
-await logError(new Error('Something went wrong'), {
-  component: 'UserProfile',
-  action: 'UPDATE_PROFILE',
-  severity: 'medium'
+await logError(new Error("Something went wrong"), {
+  component: "UserProfile",
+  action: "UPDATE_PROFILE",
+  severity: "medium",
 });
 
 // Log user action error
-await logUserActionError('SUBMIT_FORM', error, {
-  component: 'ContactForm',
-  metadata: { formData: sanitizedData }
+await logUserActionError("SUBMIT_FORM", error, {
+  component: "ContactForm",
+  metadata: { formData: sanitizedData },
 });
 
 // Log network error
-await logNetworkError('/api/users', error, {
-  severity: 'high'
+await logNetworkError("/api/users", error, {
+  severity: "high",
 });
 ```
 
@@ -52,47 +54,51 @@ Access the system health dashboard at `/admin/system-health` (admin access requi
 #### Dashboard Sections
 
 **Overview Metrics**
+
 - Total errors in last 24 hours
 - Critical error count
 - Database response time
 - Memory usage
 
 **Error Monitoring**
+
 - Error breakdown by severity
 - Recent errors list with details
 - Error resolution tracking
 - Component-wise error analysis
 
 **System Health**
+
 - Database health status
 - API service status
 - Memory usage monitoring
 - Alert status
 
 **Performance Metrics**
+
 - Page load times
 - User interaction performance
 - Diagnosis completion metrics
 
 ### 3. Error Severity Levels
 
-| Severity | Description | Examples |
-|----------|-------------|----------|
-| **Critical** | System-breaking errors | Authentication failures, database connection errors, syntax errors |
-| **High** | Significant functionality issues | Type errors, permission denied, undefined function calls |
-| **Medium** | Moderate issues | Validation errors, timeouts, invalid inputs |
-| **Low** | Minor issues | UI glitches, non-critical warnings |
+| Severity     | Description                      | Examples                                                           |
+| ------------ | -------------------------------- | ------------------------------------------------------------------ |
+| **Critical** | System-breaking errors           | Authentication failures, database connection errors, syntax errors |
+| **High**     | Significant functionality issues | Type errors, permission denied, undefined function calls           |
+| **Medium**   | Moderate issues                  | Validation errors, timeouts, invalid inputs                        |
+| **Low**      | Minor issues                     | UI glitches, non-critical warnings                                 |
 
 ### 4. Error Boundary Integration
 
 Wrap components with error boundaries to automatically capture and log React errors:
 
 ```tsx
-import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 function App() {
   return (
-    <ErrorBoundary showDetails={process.env.NODE_ENV === 'development'}>
+    <ErrorBoundary showDetails={process.env.NODE_ENV === "development"}>
       <YourComponent />
     </ErrorBoundary>
   );
@@ -119,16 +125,16 @@ Add error logger initialization to your app:
 
 ```typescript
 // In your main app file or layout
-import { initializeErrorLogger } from '@/lib/errorLogger';
+import { initializeErrorLogger } from "@/lib/errorLogger";
 
 // Initialize with default settings
 initializeErrorLogger();
 
 // Or with custom configuration
 initializeErrorLogger({
-  enableConsoleLog: process.env.NODE_ENV === 'development',
+  enableConsoleLog: process.env.NODE_ENV === "development",
   enableAutoCapture: true,
-  maxRetries: 3
+  maxRetries: 3,
 });
 ```
 
@@ -153,9 +159,11 @@ MONITORING_WEBHOOK=your_custom_webhook_url
 ## API Endpoints
 
 ### GET /api/admin/system-health
+
 Retrieve comprehensive system health dashboard data.
 
 **Response:**
+
 ```json
 {
   "timestamp": "2024-12-27T10:00:00Z",
@@ -186,9 +194,11 @@ Retrieve comprehensive system health dashboard data.
 ```
 
 ### POST /api/admin/system-health
+
 Log a new system error.
 
 **Request:**
+
 ```json
 {
   "error_type": "ValidationError",
@@ -206,44 +216,48 @@ Log a new system error.
 
 ### system_errors Table
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key |
-| timestamp | TIMESTAMPTZ | When the error occurred |
-| error_type | VARCHAR(100) | Type of error (e.g., ValidationError) |
-| message | TEXT | Error message |
-| stack_trace | TEXT | Stack trace (optional) |
-| component | VARCHAR(200) | Component where error occurred |
-| user_id | UUID | User who encountered the error |
-| session_id | VARCHAR(255) | Session identifier |
-| url | TEXT | URL where error occurred |
-| user_agent | TEXT | Browser user agent |
-| severity | VARCHAR(20) | Error severity level |
-| resolved | BOOLEAN | Whether error has been resolved |
-| resolved_at | TIMESTAMPTZ | When error was resolved |
-| resolved_by | UUID | Admin who resolved the error |
-| metadata | JSONB | Additional error context |
+| Column      | Type         | Description                           |
+| ----------- | ------------ | ------------------------------------- |
+| id          | UUID         | Primary key                           |
+| timestamp   | TIMESTAMPTZ  | When the error occurred               |
+| error_type  | VARCHAR(100) | Type of error (e.g., ValidationError) |
+| message     | TEXT         | Error message                         |
+| stack_trace | TEXT         | Stack trace (optional)                |
+| component   | VARCHAR(200) | Component where error occurred        |
+| user_id     | UUID         | User who encountered the error        |
+| session_id  | VARCHAR(255) | Session identifier                    |
+| url         | TEXT         | URL where error occurred              |
+| user_agent  | TEXT         | Browser user agent                    |
+| severity    | VARCHAR(20)  | Error severity level                  |
+| resolved    | BOOLEAN      | Whether error has been resolved       |
+| resolved_at | TIMESTAMPTZ  | When error was resolved               |
+| resolved_by | UUID         | Admin who resolved the error          |
+| metadata    | JSONB        | Additional error context              |
 
 ## Best Practices
 
 ### 1. Error Logging
+
 - Use appropriate severity levels
 - Include relevant context in metadata
 - Avoid logging sensitive information
 - Use descriptive error messages
 
 ### 2. Performance
+
 - Error logging is asynchronous and won't block user interactions
 - Failed error logs are retried automatically
 - Old error logs are automatically cleaned up (30-day retention)
 
 ### 3. Security
+
 - Admin-only access to monitoring dashboard
 - Row-level security on error data
 - No sensitive data in error logs
 - Secure API endpoints with authentication
 
 ### 4. Monitoring
+
 - Check the dashboard regularly for system health
 - Set up alerts for critical errors
 - Monitor error trends and patterns
@@ -254,16 +268,19 @@ Log a new system error.
 ### Common Issues
 
 **Dashboard not loading**
+
 - Verify admin access permissions
 - Check database connectivity
 - Ensure migration has been run
 
 **Errors not being logged**
+
 - Verify error logger initialization
 - Check network connectivity to API
 - Review browser console for client-side errors
 
 **High memory usage**
+
 - Monitor error log retention
 - Check for memory leaks in application code
 - Review system resource allocation
@@ -271,6 +288,7 @@ Log a new system error.
 ### Support
 
 For technical support or questions about the monitoring system:
+
 1. Check the error logs in the admin dashboard
 2. Review the browser console for client-side issues
 3. Contact the development team with specific error IDs
@@ -278,6 +296,7 @@ For technical support or questions about the monitoring system:
 ## Future Enhancements
 
 Planned improvements for the monitoring system:
+
 - Real-time error notifications
 - Advanced analytics and reporting
 - Integration with external monitoring services

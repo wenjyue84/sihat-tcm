@@ -72,6 +72,7 @@ Sihat TCM digitizes the four classical TCM diagnostic methods:
 ### Account Benefits
 
 Creating an account unlocks:
+
 - ✅ Save diagnosis history
 - ✅ AI Meal Planner with 7-day plans
 - ✅ Snore Analysis for sleep health
@@ -143,6 +144,7 @@ Sihat TCM supports three user roles, each with different access levels:
 **Who it's for**: Regular users seeking TCM consultations
 
 **What you can do**:
+
 - Start new diagnoses
 - View your diagnosis history (Health Journey)
 - Download PDF reports
@@ -165,6 +167,7 @@ Sihat TCM supports three user roles, each with different access levels:
 **Who it's for**: Licensed TCM practitioners
 
 **What you can do**:
+
 - View patient diagnosis reports
 - Verify AI-generated diagnoses
 - Provide professional oversight
@@ -177,6 +180,7 @@ Sihat TCM supports three user roles, each with different access levels:
 **Who it's for**: System administrators
 
 **What you can do**:
+
 - Manage system prompts
 - Configure AI settings (default model selection)
 - Monitor system usage
@@ -194,6 +198,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 ### Step 1: Basic Information (基本信息)
 
 **What you'll provide**:
+
 - Name
 - Age
 - Gender
@@ -204,6 +209,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 - Duration of symptoms
 
 **Tips**:
+
 - If you're logged in, your profile information will be pre-filled
 - Be as accurate as possible with measurements
 - Describe your main complaint clearly and focus on ONE major issue
@@ -217,6 +223,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What this is**: An interactive chat with the AI doctor
 
 **What the AI will ask about**:
+
 - Detailed symptom patterns
 - Sleep quality and patterns
 - Appetite and digestion
@@ -225,12 +232,14 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 - Medical history
 
 **How to give good answers**:
+
 - Be honest and thorough
 - Describe how symptoms affect your daily life
 - Mention any patterns you've noticed
 - Include current medications or treatments
 
 **Example good responses**:
+
 - ❌ "I sleep badly"
 - ✅ "I fall asleep easily but wake up at 3 AM every night and can't get back to sleep. This has been happening for 2 months."
 
@@ -241,17 +250,20 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **Best practices for tongue photos**:
 
 **Lighting**:
+
 - Use natural daylight when possible
 - Avoid yellow indoor lighting
 - Face a window or go outside
 
 **Positioning**:
+
 - Stick tongue out naturally (don't force it)
 - Keep tongue flat and relaxed
 - Ensure entire tongue is visible
 - Keep mouth wide open
 
 **Camera tips**:
+
 - Hold camera steady
 - Focus on the tongue
 - Take multiple photos if needed
@@ -264,11 +276,13 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What this measures**: Heart rate and pulse quality
 
 **How it works**:
+
 - Place your finger on the camera sensor
 - Keep still for 30-60 seconds
 - The system uses photoplethysmography (PPG) to detect pulse
 
 **Tips**:
+
 - Ensure good lighting
 - Keep finger still
 - Remove any nail polish
@@ -279,6 +293,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 ### Step 5: AI Analysis & Report Generation
 
 **What happens**:
+
 - All collected data is processed by Gemini AI
 - The AI synthesizes information from all four examinations
 - A comprehensive TCM diagnosis is generated
@@ -319,6 +334,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **Location**: Main patient dashboard
 
 **Features**:
+
 - **Health Trends**: Visualize diagnostic scores over time
 - **Recent Diagnoses**: Quick access to your latest reports
 - **Documents**: Manage uploaded medical reports
@@ -329,12 +345,14 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What it does**: Generates personalized 7-day TCM meal plans
 
 **Features**:
+
 - Customized based on your diagnosis
 - Shopping lists organized by category
 - Recipe details and cooking instructions
 - TCM Food Checker to validate food suitability
 
 **How to use**:
+
 1. Navigate to Patient Portal
 2. Click "AI Meal Planner"
 3. Set dietary preferences (allergies, dislikes, serving size)
@@ -346,12 +364,14 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What it does**: Analyzes sleep audio for TCM-based fatigue patterns
 
 **Features**:
+
 - Record sleep audio
 - AI analysis of snoring patterns
 - Correlation with TCM syndromes (Qi Deficiency, Phlegm-Dampness)
 - Sleep quality recommendations
 
 **How to use**:
+
 1. Navigate to Patient Portal
 2. Click "Snore Analysis"
 3. Record audio during sleep
@@ -363,6 +383,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What it does**: Tracks constitution and provides seasonal health guidance
 
 **Features**:
+
 - **Constitution Tracker**: Monitor your body constitution over time
 - **Meridian Clock**: Optimal times for different activities
 - **Solar Terms**: Seasonal health alerts and recommendations
@@ -373,6 +394,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What it does**: Guided TCM exercises with gamification
 
 **Features**:
+
 - **Baduanjin Exercises**: 8-section brocade exercises
 - **Qi Garden**: Visual metaphor for health status (plants grow with healthy actions)
 - **Progress Tracking**: Track exercise completion
@@ -383,6 +405,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What it does**: Anonymous community support groups
 
 **Features**:
+
 - Join communities based on health conditions
 - Share experiences anonymously
 - Get peer support
@@ -393,6 +416,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What it does**: Manage family member health profiles
 
 **Features**:
+
 - Add family members
 - Manage their health profiles
 - Track family health history
@@ -403,6 +427,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What it does**: TCM herb and product recommendations
 
 **Features**:
+
 - Browse recommended herbs based on diagnosis
 - View product details and pricing
 - Purchase herbal remedies
@@ -413,6 +438,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 **What it does**: Visual health organ mapping
 
 **Features**:
+
 - Interactive organ visualization
 - Health status indicators
 - Organ-specific recommendations
@@ -538,6 +564,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 #### Cannot Log In
 
 **Solutions**:
+
 - Check email and password
 - Verify email address is confirmed
 - Try password reset
@@ -546,6 +573,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 #### Report Not Generating
 
 **Solutions**:
+
 - Check internet connection
 - Wait for AI processing to complete
 - Refresh page
@@ -554,6 +582,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 #### Images Not Uploading
 
 **Solutions**:
+
 - Check file size (should be < 5MB)
 - Ensure image format is JPG or PNG
 - Check internet connection
@@ -562,6 +591,7 @@ The diagnosis process follows the four classical TCM examinations. Here's a step
 #### Mobile App Not Syncing
 
 **Solutions**:
+
 - Check internet connection
 - Log out and log back in
 - Update app to latest version
@@ -641,6 +671,3 @@ A: The meal planner generates personalized 7-day plans based on your TCM diagnos
 **Last Updated**: 2025-12-26  
 **Version**: 4.0 (Consolidated)  
 **This documentation consolidates content from USER_MANUAL.md and USER_GUIDES.md. For original detailed files, see archive/.**
-
-
-

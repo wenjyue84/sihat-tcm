@@ -39,6 +39,7 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 ### Key Features
 
 **Core Features:**
+
 - Patient onboarding and medical history collection
 - TCM diagnostic workflows (Four Examinations: pulse, tongue, face, body)
 - AI-powered diagnostic assistance using Gemini AI
@@ -48,6 +49,7 @@ Sihat TCM is a comprehensive Traditional Chinese Medicine (TCM) diagnostic and p
 - Real-time chat with AI for medical inquiries
 
 **Patient Portal Features:**
+
 - Health Journey Dashboard: Unified patient portal with health trends and diagnostics
 - AI Meal Planner: Personalized 7-day TCM meal plans with shopping lists
 - TCM Food Checker: Evaluate food suitability based on diagnosis
@@ -125,12 +127,14 @@ graph TB
 ### Technology Stack
 
 #### Frontend
+
 - **Web**: Next.js 16 with App Router, React 19.2.1, TypeScript
 - **Mobile**: Expo SDK 52, React Native, TypeScript
 - **Styling**: Tailwind CSS v4, Radix UI, Framer Motion
 - **State Management**: React Context API, Zustand for complex state
 
 #### Backend
+
 - **Runtime**: Node.js with Next.js API Routes
 - **Database**: Supabase (PostgreSQL) with Row Level Security
 - **Authentication**: Supabase Auth with JWT tokens
@@ -138,12 +142,14 @@ graph TB
 - **Real-time**: Supabase Realtime subscriptions
 
 #### AI & ML
+
 - **Primary Models**: Google Gemini (2.0-flash, 2.5-pro, 3-pro-preview)
 - **SDK**: Vercel AI SDK for model integration
 - **Fallback**: Multiple model support with automatic routing
 - **Vision**: Gemini Vision for image analysis
 
 #### Development Tools
+
 - **Language**: TypeScript 5.x
 - **Testing**: Vitest, React Testing Library, Jest-DOM
 - **Linting**: ESLint with Next.js config
@@ -265,6 +271,7 @@ Xcode (for iOS development, macOS only)
    If you experience hot reload problems, try these solutions:
 
    **Quick Fix - Clear Next.js Cache:**
+
    ```bash
    npm run dev:clear
    # Or manually:
@@ -272,6 +279,7 @@ Xcode (for iOS development, macOS only)
    ```
 
    **Full Reset - Clear node_modules:**
+
    ```bash
    rm -rf node_modules package-lock.json
    npm install
@@ -279,6 +287,7 @@ Xcode (for iOS development, macOS only)
    ```
 
    **Test with Turbopack (experimental):**
+
    ```bash
    npm run dev:turbo
    ```
@@ -291,11 +300,13 @@ Xcode (for iOS development, macOS only)
 ### Mobile App Setup
 
 1. **Navigate to mobile directory**
+
    ```bash
    cd ../sihat-tcm-mobile
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -303,6 +314,7 @@ Xcode (for iOS development, macOS only)
 3. **Configure API endpoint**
 
    Update `lib/apiConfig.js` with your web application URL:
+
    ```javascript
    export const API_BASE_URL = "http://localhost:3100";
    ```
@@ -366,6 +378,7 @@ sihat-tcm-mobile/
 **Location**: `src/contexts/AuthContext.tsx`, `src/app/api/auth/`
 
 The authentication system uses Supabase Auth with role-based access control:
+
 - **Roles**: Patient, Doctor, Admin
 - **Middleware**: `src/middleware.ts` handles route protection
 - **Context**: `AuthContext` provides authentication state throughout the app
@@ -390,6 +403,7 @@ const result = await engine.processEnhancedDiagnosis({
 ```
 
 **Key Features:**
+
 - Intelligent AI model routing
 - Personalized recommendations
 - Medical safety validation
@@ -417,6 +431,7 @@ const result = await router.generateWithRouting(
 ```
 
 **Complexity Levels:**
+
 - **Simple (0-24)**: Basic text processing
 - **Moderate (25-49)**: Some complexity factors
 - **Complex (50-74)**: Multiple factors
@@ -447,6 +462,7 @@ const safetyResult = await validator.validateRecommendations(
 ```
 
 **Safety Checks:**
+
 - Allergy cross-referencing
 - Drug-herb interactions
 - Contraindications
@@ -459,6 +475,7 @@ const safetyResult = await validator.validateRecommendations(
 **Location**: `src/components/patient/UnifiedDashboard.tsx`
 
 The core of the patient experience, integrating multiple health modules:
+
 - **Health Trends**: Visualizes diagnostic scores over time
 - **Documents**: Manages medical reports with OCR capabilities
 - **Modules**: Pluggable architecture supports Vitality Rhythm, Qi Dose, and more
@@ -468,6 +485,7 @@ The core of the patient experience, integrating multiple health modules:
 **Location**: `src/components/diagnosis/`, `src/hooks/useDiagnosisWizard.ts`
 
 The diagnosis workflow includes:
+
 1. Patient Information Collection
 2. Pulse Examination - Pulse pattern analysis via camera (PPG)
 3. Tongue & Face Examination - Image analysis
@@ -493,7 +511,9 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-const { data: { session } } = await supabase.auth.getSession();
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 const token = session?.access_token;
 
 const response = await fetch("/api/v2/enhanced-diagnosis", {
@@ -525,6 +545,7 @@ interface APIResponse<T> {
 ### Rate Limiting
 
 API endpoints have rate limits to ensure fair usage. Check response headers:
+
 - `X-RateLimit-Limit`: Maximum requests allowed
 - `X-RateLimit-Remaining`: Remaining requests
 - `X-RateLimit-Reset`: Time when limit resets
@@ -559,24 +580,28 @@ API endpoints have rate limits to ensure fair usage. Check response headers:
 ### Core Tables
 
 **users** - User accounts (extends Supabase auth.users)
+
 - `id` (UUID, primary key)
 - `email`
 - `role` (patient, doctor, admin)
 - `created_at`, `updated_at`
 
 **patients** - Patient-specific information
+
 - `id` (UUID, primary key, references users)
 - `name`, `date_of_birth`, `gender`
 - `medical_history` (JSONB)
 - `created_at`, `updated_at`
 
 **practitioners** - Doctor/practitioner information
+
 - `id` (UUID, primary key, references users)
 - `name`, `license_number`
 - `specialization`, `level`
 - `created_at`, `updated_at`
 
 **diagnosis_sessions** - Diagnosis sessions
+
 - `id` (UUID, primary key)
 - `patient_id` (references patients)
 - `practitioner_id` (references practitioners)
@@ -586,6 +611,7 @@ API endpoints have rate limits to ensure fair usage. Check response headers:
 - `created_at`, `updated_at`, `completed_at`
 
 **medical_reports** - Generated medical reports
+
 - `id` (UUID, primary key)
 - `diagnosis_id` (references diagnosis_sessions)
 - `patient_id` (references patients)
@@ -597,6 +623,7 @@ API endpoints have rate limits to ensure fair usage. Check response headers:
 ### Row Level Security (RLS)
 
 Supabase RLS policies enforce data access:
+
 - Patients can only see their own data
 - Doctors can see data for their assigned patients
 - Admins can see all data
@@ -735,6 +762,7 @@ npm run test:coverage
 ### Manual Testing
 
 The application includes several test pages for development:
+
 - `/test-basic-info` - Test basic information collection
 - `/test-chat` - Test AI chat functionality
 - `/test-gemini` - Test Gemini API integration
@@ -750,6 +778,7 @@ The application includes several test pages for development:
 #### Vercel Deployment (Recommended)
 
 1. **Connect repository to Vercel**
+
    ```bash
    npm install -g vercel
    vercel login
@@ -757,6 +786,7 @@ The application includes several test pages for development:
    ```
 
 2. **Configure environment variables**
+
    ```bash
    vercel env add NEXT_PUBLIC_SUPABASE_URL production
    vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY production
@@ -772,6 +802,7 @@ The application includes several test pages for development:
 ### Mobile App Deployment
 
 #### iOS Deployment
+
 ```bash
 cd sihat-tcm-mobile
 eas build --platform ios --profile production
@@ -779,6 +810,7 @@ eas submit --platform ios
 ```
 
 #### Android Deployment
+
 ```bash
 eas build --platform android --profile production
 eas submit --platform android
@@ -888,7 +920,10 @@ export async function validateAuth(request: Request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const { data: { user }, error } = await supabase.auth.getUser(token);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
   if (error || !user) throw new Error("Invalid authentication token");
 
   return user;
@@ -970,9 +1005,7 @@ export async function GET() {
     checkExternalAPIs(),
   ]);
 
-  const overallStatus = checks.every(c => c.status === "fulfilled") 
-    ? "healthy" 
-    : "degraded";
+  const overallStatus = checks.every((c) => c.status === "fulfilled") ? "healthy" : "degraded";
 
   return Response.json({
     status: overallStatus,
@@ -1029,24 +1062,28 @@ docs(api): update enhanced diagnosis endpoint documentation
 ### Code Review Checklist
 
 **Functionality**
+
 - [ ] Code works as intended
 - [ ] Edge cases are handled
 - [ ] Error handling is appropriate
 - [ ] Performance is acceptable
 
 **Security**
+
 - [ ] Input validation is present
 - [ ] No sensitive data exposure
 - [ ] Authentication/authorization correct
 - [ ] SQL injection prevention
 
 **Code Quality**
+
 - [ ] Code is readable and maintainable
 - [ ] TypeScript types are correct
 - [ ] No code duplication
 - [ ] Follows project conventions
 
 **Testing**
+
 - [ ] Unit tests cover new functionality
 - [ ] Integration tests pass
 - [ ] Manual testing completed
@@ -1062,6 +1099,7 @@ docs(api): update enhanced diagnosis endpoint documentation
 **Problem**: Cannot connect to Supabase
 
 **Solutions**:
+
 - Verify environment variables are set correctly
 - Check Supabase project status
 - Verify network connectivity
@@ -1072,6 +1110,7 @@ docs(api): update enhanced diagnosis endpoint documentation
 **Problem**: AI features not working
 
 **Solutions**:
+
 - Verify `GEMINI_API_KEY` is set
 - Check API quota/limits
 - Review API error logs
@@ -1082,6 +1121,7 @@ docs(api): update enhanced diagnosis endpoint documentation
 **Problem**: Users cannot log in or access protected routes
 
 **Solutions**:
+
 - Check Supabase Auth configuration
 - Verify middleware is correctly protecting routes
 - Check user role assignments in database
@@ -1092,6 +1132,7 @@ docs(api): update enhanced diagnosis endpoint documentation
 **Problem**: Schema changes not applying
 
 **Solutions**:
+
 - Run migrations in correct order
 - Check for conflicting changes
 - Verify database user permissions
@@ -1102,6 +1143,7 @@ docs(api): update enhanced diagnosis endpoint documentation
 **Problem**: Application fails to build
 
 **Solutions**:
+
 - Clear `.next` directory: `rm -rf .next`
 - Clear node_modules: `rm -rf node_modules && npm install`
 - Check TypeScript errors: `npm run type-check`
@@ -1112,6 +1154,7 @@ docs(api): update enhanced diagnosis endpoint documentation
 **Problem**: Navigating to `/tina-admin` returns a 404 error.
 
 **Solutions**:
+
 - Ensure you are running `npm run dev:tina` instead of `npm run dev`
 - Verify that `public/tina-admin` contains an `index.html` file
 - Check the terminal for "🦙 TinaCMS Dev Server" status
@@ -1121,6 +1164,7 @@ docs(api): update enhanced diagnosis endpoint documentation
 **Problem**: Expo app crashes or styles don't apply.
 
 **Solutions**:
+
 - Avoid inline styles; use `StyleSheet.create()`
 - Use `SafeAreaView` for all top-level screen containers
 - Use `FlatList` or `ScrollView`, never `.map()` directly
@@ -1166,6 +1210,3 @@ docs(api): update enhanced diagnosis endpoint documentation
 **Last Updated**: 2025-12-26  
 **Version**: 5.0 (Consolidated)  
 **This documentation consolidates content from DEVELOPER_MANUAL.md and DEVELOPER_DOCUMENTATION.md. For original detailed files, see archive/.**
-
-
-

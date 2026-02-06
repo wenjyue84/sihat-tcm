@@ -335,4 +335,3 @@ The key improvements focus on:
 5. **Mobile-first optimizations** (sticky navigation, reading progress)
 
 These changes will significantly improve the mobile reading experience while maintaining the professional medical aesthetic of the TCM report.
-

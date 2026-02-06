@@ -337,4 +337,3 @@ Text: ~347px (90%) - perfect for 55-60 character lines
 - Maintains professional medical aesthetic
 - Backward compatible with desktop design
 - No breaking changes to functionality
-
