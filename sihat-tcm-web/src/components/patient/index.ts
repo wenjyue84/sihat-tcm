@@ -39,6 +39,9 @@ export { SaveToDashboardBanner } from "./SaveToDashboardBanner";
 export { HealingGarden } from "./HealingGarden";
 export { HeartCompanion } from "./HeartCompanion";
 export { DailyTipCard } from "./DailyTipCard";
+export { QuickSymptomTracker } from "./QuickSymptomTracker";
+export { ConstitutionTrendChart } from "./ConstitutionTrendChart";
+export { DailyWellnessTip } from "./DailyWellnessTip";
 
 // Settings and management
 export { PatientSettings } from "./PatientSettings";
