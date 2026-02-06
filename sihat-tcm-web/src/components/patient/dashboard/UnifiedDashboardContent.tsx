@@ -17,6 +17,7 @@ import { QiDose } from "../../qi-dose/QiDose";
 import { VitalityRhythmTab } from "../VitalityRhythmTab";
 import { CircleOfHealth } from "../CircleOfHealth";
 import { FamilyManagement } from "../FamilyManagement";
+import { DailyWellnessTip, ConstitutionTrendChart } from "@/components/patient";
 import { HeartCompanion } from "../HeartCompanion";
 import { PatientCommunication } from "../PatientCommunication";
 import { PatientSettings } from "../PatientSettings";
@@ -90,11 +91,14 @@ export function UnifiedDashboardContent({
   // Health Journey Section
   if (activeSection === "journey") {
     return (
-      <HealthJourneyTimeline
-        sessions={sessions}
-        loading={loadingSessions}
-        onStartDiagnosis={() => router.push("/")}
-      />
+      <div className="space-y-4">
+        <DailyWellnessTip />
+        <HealthJourneyTimeline
+          sessions={sessions}
+          loading={loadingSessions}
+          onStartDiagnosis={() => router.push("/")}
+        />
+      </div>
     );
   }
 
@@ -102,6 +106,7 @@ export function UnifiedDashboardContent({
   if (activeSection === "five-elements") {
     return (
       <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+        <DailyWellnessTip />
         <FiveElementsRadar
           constitutionType={
             sessions.length > 0 && sessions[0].constitution
@@ -187,7 +192,23 @@ export function UnifiedDashboardContent({
 
   // Vitality Rhythm Section
   if (activeSection === "vitality") {
-    return <VitalityRhythmTab sessions={sessions} />;
+    return (
+      <div className="space-y-6">
+        <DailyWellnessTip />
+        <VitalityRhythmTab sessions={sessions} />
+        <Card className="border-none shadow-md bg-white p-6">
+          <CardHeader className="px-0 pt-0">
+            <CardTitle className="text-lg">Constitution Trend Analysis</CardTitle>
+            <CardDescription>
+              Track how your Five Elements balance evolves over time
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-0 pb-0">
+            <ConstitutionTrendChart />
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   // Community Section
@@ -252,6 +273,7 @@ export function UnifiedDashboardContent({
   if (activeSection === "profile") {
     return (
       <div className="space-y-6 max-w-7xl mx-auto">
+        <DailyWellnessTip />
         {/* Hero Section */}
         <ProfileHero
           name={profileData.full_name || "Patient"}

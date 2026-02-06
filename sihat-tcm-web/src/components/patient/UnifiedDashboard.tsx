@@ -33,6 +33,7 @@ import { UnifiedDashboardMobileHeader } from "./dashboard/UnifiedDashboardMobile
 import { UnifiedDashboardContent } from "./dashboard/UnifiedDashboardContent";
 import { getSectionTitle } from "./dashboard/dashboardUtils";
 import { MobileBottomNav } from "./dashboard/MobileBottomNav";
+import { QuickSymptomTracker } from "./QuickSymptomTracker";
 
 export function UnifiedDashboard() {
   const { user, profile, updatePreferences, signOut, refreshProfile } = useAuth();
@@ -152,6 +153,9 @@ export function UnifiedDashboard() {
         onSectionChange={state.setActiveSection}
         onMoreClick={() => state.setIsMobileMenuOpen(true)}
       />
+
+      {/* Quick Symptom Tracker - Floating Action Button */}
+      <QuickSymptomTracker />
     </div>
   );
 }
