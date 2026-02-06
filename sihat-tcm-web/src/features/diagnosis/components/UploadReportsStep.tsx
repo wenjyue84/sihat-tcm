@@ -62,11 +62,11 @@ export function UploadReportsStep({
 
       const result = await getMedicalReports();
       if (result.success && result.data && result.data.length > 0) {
-        const portfolioFiles: FileData[] = result.data.map(report => ({
+        const portfolioFiles: FileData[] = result.data.map((report) => ({
           name: report.name,
-          type: report.type || 'application/pdf',
-          data: report.file_url || '', // We don't have base64, but we have the URL
-          extractedText: report.extracted_text || ''
+          type: report.type || "application/pdf",
+          data: report.file_url || "", // We don't have base64, but we have the URL
+          extractedText: report.extracted_text || "",
         }));
         setFiles(portfolioFiles);
       }
@@ -84,18 +84,18 @@ export function UploadReportsStep({
   };
 
   useEffect(() => {
+    const hasBack = !!onBack;
     setNavigationState({
       onNext: handleNext,
-      onBack: onBack ? () => onBackRef.current?.() : undefined,
+      onBack: hasBack ? () => onBackRef.current?.() : undefined,
       onSkip: () => onSkipRef.current(),
       showNext: true,
       canNext: true, // Always allow clicking, we'll validate on click
-      showBack: !!onBack,
+      showBack: hasBack,
       showSkip: true,
     });
-  }, [files, setNavigationState, !!onBack]);
-
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [files, setNavigationState]);
 
   // Background extraction state
   const [extractingFiles, setExtractingFiles] = useState<Set<string>>(new Set());
@@ -134,7 +134,7 @@ export function UploadReportsStep({
       // Update the file with extracted text
       setFiles((prev) =>
         prev.map((f) => {
-          // Identify file by name (assuming unique for this session for simplicity, 
+          // Identify file by name (assuming unique for this session for simplicity,
           // or we could use the ID we generated)
           if (f.name === file.name) {
             return { ...f, extractedText: data.text || "" };
@@ -164,7 +164,9 @@ export function UploadReportsStep({
     for (const file of newFiles) {
       // Check file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert(t.errors?.fileTooBig?.replace("{size}", "5") || `File ${file.name} too big (max 5MB)`);
+        alert(
+          t.errors?.fileTooBig?.replace("{size}", "5") || `File ${file.name} too big (max 5MB)`
+        );
         continue;
       }
 
@@ -186,7 +188,6 @@ export function UploadReportsStep({
         // Start background extraction
         setExtractingFiles((prev) => new Set(prev).add(fileId));
         extractTextInBackground(file);
-
       } catch (error) {
         console.error("Error processing file:", error);
       }
@@ -333,7 +334,9 @@ export function UploadReportsStep({
             {files.map((file, index) => {
               // Simple check if this file is extracting (using name as key for simplicity)
               // In production, better to use a unique ID
-              const isExtracting = extractingFiles.has(file.name + (file as any).lastModified) || (file.extractedText === "" && file.name.includes("Time")); // Fallback check
+              const isExtracting =
+                extractingFiles.has(file.name + (file as any).lastModified) ||
+                (file.extractedText === "" && file.name.includes("Time")); // Fallback check
 
               return (
                 <div
@@ -345,8 +348,14 @@ export function UploadReportsStep({
                     onClick={() => setViewingFile(file)}
                     title={content.clickToView[lang]}
                   >
-                    <div className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${isExtracting ? 'bg-amber-100 text-amber-600' : 'bg-stone-100 text-stone-500'}`}>
-                      {isExtracting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+                    <div
+                      className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${isExtracting ? "bg-amber-100 text-amber-600" : "bg-stone-100 text-stone-500"}`}
+                    >
+                      {isExtracting ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <FileText className="w-4 h-4" />
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
@@ -358,7 +367,9 @@ export function UploadReportsStep({
                       <p className="text-xs text-stone-500 truncate">
                         {isExtracting
                           ? content.extracting[lang]
-                          : (file.extractedText ? `${file.extractedText.substring(0, 50)}...` : content.noTextExtracted[lang])}
+                          : file.extractedText
+                            ? `${file.extractedText.substring(0, 50)}...`
+                            : content.noTextExtracted[lang]}
                       </p>
                     </div>
                   </div>

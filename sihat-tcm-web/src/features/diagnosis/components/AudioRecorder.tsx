@@ -47,11 +47,7 @@ interface AudioRecorderProps {
   initialData?: Partial<AudioRecorderData>;
 }
 
-export function AudioRecorder({
-  onComplete,
-  onBack,
-  initialData,
-}: AudioRecorderProps) {
+export function AudioRecorder({ onComplete, onBack, initialData }: AudioRecorderProps) {
   const { t, language } = useLanguage();
   // Use direct Zustand selector for stable function reference (avoids infinite loops)
   const setNavigationState = useAppStore((state) => state.setDiagnosisNavigationState);
@@ -111,14 +107,17 @@ export function AudioRecorder({
   }, [recording.audioData, analysis]);
 
   // Continue after analysis result
-  const handleContinueWithResult = useCallback((overriddenAnalysis?: AudioAnalysisData) => {
-    if (recording.audioData) {
-      onCompleteRef.current({
-        audio: recording.audioData,
-        analysis: overriddenAnalysis || analysis.analysisResult,
-      });
-    }
-  }, [recording.audioData, analysis.analysisResult]);
+  const handleContinueWithResult = useCallback(
+    (overriddenAnalysis?: AudioAnalysisData) => {
+      if (recording.audioData) {
+        onCompleteRef.current({
+          audio: recording.audioData,
+          analysis: overriddenAnalysis || analysis.analysisResult,
+        });
+      }
+    },
+    [recording.audioData, analysis.analysisResult]
+  );
 
   // Stable next handler
   const handleNext = useCallback(() => {
@@ -129,7 +128,13 @@ export function AudioRecorder({
     } else {
       setIsSkipPromptOpen(true);
     }
-  }, [analysis.analysisResult, recording.audioData, recording.recordingState, handleContinueWithResult, handleContinue]);
+  }, [
+    analysis.analysisResult,
+    recording.audioData,
+    recording.recordingState,
+    handleContinueWithResult,
+    handleContinue,
+  ]);
 
   // Stable back handler
   const handleBack = useCallback(() => {
@@ -157,18 +162,18 @@ export function AudioRecorder({
   });
 
   // Update global navigation state - only re-run when primitive values change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    const hasBack = !!onBack;
     setNavigationState({
       onNext: () => handleNextRef.current(),
-      onBack: onBack ? () => handleBackRef.current() : undefined,
+      onBack: hasBack ? () => handleBackRef.current() : undefined,
       onSkip: () => handleSkipAnalysisRef.current(),
       showNext: true,
-      showBack: !!onBack,
+      showBack: hasBack,
       showSkip: true,
       canNext: !analysis.isAnalyzing,
     });
-  }, [setNavigationState, !!onBack, analysis.isAnalyzing]);
+  }, [setNavigationState, analysis.isAnalyzing]);
 
   // Show analysis loader while analyzing
   if (analysis.isAnalyzing) {
@@ -321,10 +326,7 @@ export function AudioRecorder({
         />
 
         {/* Recording Tips */}
-        <RecordingTips
-          title={t.audio.tipsForBetterRecording}
-          tips={t.audio.tips}
-        />
+        <RecordingTips title={t.audio.tipsForBetterRecording} tips={t.audio.tips} />
       </Card>
 
       {/* Educational Content Section */}

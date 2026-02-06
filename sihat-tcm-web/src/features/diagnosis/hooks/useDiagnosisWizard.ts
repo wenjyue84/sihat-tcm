@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/stores/useAppStore";
 import { useLanguage } from "@/stores/useAppStore";
 import { useDiagnosisProgress } from "@/stores/useAppStore";
@@ -9,6 +10,21 @@ import type { DiagnosisWizardData, AnalysisResult, PendingResumeState } from "@/
 // Import refactored modules
 import { STEPS_CONFIG } from "./diagnosisConstants";
 import type { DiagnosisStep, AnalysisType } from "./diagnosisTypes";
+
+const VALID_URL_STEPS: Set<string> = new Set([
+  "basic_info",
+  "wen_inquiry",
+  "wang_tongue",
+  "wang_face",
+  "wang_part",
+  "wen_audio",
+  "qie",
+  "smart_connect",
+  "summary",
+  "processing",
+  "report",
+]);
+const DEFAULT_STEP: DiagnosisStep = "basic_info";
 import { useDiagnosisResume } from "./useDiagnosisResume";
 import { useDiagnosisProgressTracking } from "./useDiagnosisProgressTracking";
 import { useDiagnosisNavigation } from "./useDiagnosisNavigation";
@@ -26,6 +42,15 @@ export function useDiagnosisWizard() {
   const { setNavigationState } = useDiagnosisProgress();
   const { profile } = useAuth();
   const { saveProgress } = useDiagnosisPersistence();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // URL step: derive initial step from URL so each step has a distinct URL
+  const stepParam = searchParams.get("step");
+  const searchParamsString = searchParams.toString(); // Stable string value for deps
+  const initialStepFromUrl: DiagnosisStep = (VALID_URL_STEPS.has(stepParam ?? "")
+    ? stepParam
+    : DEFAULT_STEP) as DiagnosisStep;
 
   // Determine if we should include summary step
   // Mode is 'advanced' ONLY if user is logged in AND has 'advanced' setting
@@ -40,8 +65,8 @@ export function useDiagnosisWizard() {
     return STEPS_CONFIG.filter((s) => s.id !== "summary"); // Hide summary for Simple Mode / Guests
   }, [isAdvancedMode]);
 
-  // Local State
-  const [step, setStep] = useState<DiagnosisStep>("basic_info");
+  // Local State (initialized from URL when present and valid)
+  const [step, setStep] = useState<DiagnosisStep>(initialStepFromUrl);
   const [maxStepReached, setMaxStepReached] = useState(0);
   const [data, setData] = useState<DiagnosisWizardData>({
     basic_info: null,
@@ -68,7 +93,7 @@ export function useDiagnosisWizard() {
 
   const navigationHook = useDiagnosisNavigation({
     setStep,
-    submitConsultation: submissionHook.submitConsultation,
+    submitConsultation: async () => { await submissionHook.submitConsultation(); },
   });
 
   const imageAnalysisHook = useDiagnosisImageAnalysis({
@@ -88,7 +113,13 @@ export function useDiagnosisWizard() {
       const seededData = resumeHook.seedDataFromProfile(data);
       setData(seededData);
     }
-  }, [resumeHook.hasCheckedPersistence, resumeHook.pendingResumeState, profile, data.basic_info, resumeHook]);
+  }, [
+    resumeHook.hasCheckedPersistence,
+    resumeHook.pendingResumeState,
+    profile,
+    data.basic_info,
+    resumeHook,
+  ]);
 
   // Handler to resume saved progress (called from dialog)
   const handleResumeProgress = useCallback(() => {
@@ -122,6 +153,24 @@ export function useDiagnosisWizard() {
     }
   }, [data, step, saveProgress, resumeHook.hasCheckedPersistence]);
 
+  // URL sync: state -> URL when step changes (so address bar shows ?step=...)
+  useEffect(() => {
+    if (stepParam === step) return; // Already in sync, avoid replace loop
+    const q = new URLSearchParams(searchParamsString);
+    q.set("step", step);
+    router.replace(`/?${q.toString()}`, { scroll: false });
+  }, [step, stepParam, router, searchParamsString]);
+
+  // URL sync: URL -> state when user uses back/forward or lands with bookmark
+  // Normalizes invalid or missing step to basic_info
+  useEffect(() => {
+    if (!VALID_URL_STEPS.has(stepParam ?? "")) {
+      setStep(DEFAULT_STEP);
+      return;
+    }
+    setStep(stepParam as DiagnosisStep);
+  }, [stepParam]);
+
   // Progress Tracking
   useDiagnosisProgressTracking({
     step,
@@ -133,6 +182,27 @@ export function useDiagnosisWizard() {
   // Navigation Sync Effect
   // Destructure stable callbacks to avoid infinite loop (navigationHook object changes every render)
   const { nextStep, prevStep } = navigationHook;
+
+  // Use refs to avoid creating new functions on every render
+  const stepRef = useRef(step);
+  const nextStepRef = useRef(nextStep);
+  const prevStepRef = useRef(prevStep);
+
+  // Keep refs in sync
+  useEffect(() => {
+    stepRef.current = step;
+    nextStepRef.current = nextStep;
+    prevStepRef.current = prevStep;
+  }, [step, nextStep, prevStep]);
+
+  // Create stable callback refs that use the refs
+  const handleNext = useCallback(() => {
+    nextStepRef.current(stepRef.current);
+  }, []);
+
+  const handleBack = useCallback(() => {
+    prevStepRef.current(stepRef.current);
+  }, []);
 
   useEffect(() => {
     const customNavSteps = [
@@ -150,14 +220,16 @@ export function useDiagnosisWizard() {
     const showNext = step !== "processing" && step !== "report";
 
     setNavigationState({
-      onNext: () => nextStep(step),
-      onBack: () => prevStep(step),
+      onNext: handleNext,
+      onBack: handleBack,
       onSkip: undefined,
       showNext,
       showBack,
       showSkip: false,
     });
-  }, [step, setNavigationState, nextStep, prevStep]);
+    // handleNext and handleBack are stable (empty deps in useCallback), so we don't include them
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, setNavigationState]);
 
   // Return Interface
   return {

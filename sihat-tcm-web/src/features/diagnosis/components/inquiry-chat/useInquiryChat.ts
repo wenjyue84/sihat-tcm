@@ -35,6 +35,14 @@ Duration: ${basicInfo.symptomDuration}
 
   const sendMessage = useCallback(
     async (userMessage: string, isInitialPrompt = false, isSystemInjection = false) => {
+      console.log("[InquiryChat] sendMessage called", {
+        userMessage,
+        isInitialPrompt,
+        isSystemInjection,
+        model: doctorInfo.model,
+        language,
+      });
+
       setIsLoading(true);
 
       const userMsg: Message = {
@@ -51,7 +59,16 @@ Duration: ${basicInfo.symptomDuration}
         ? [{ role: "system", content: systemMessage }, userMsg]
         : [...messages, userMsg];
 
+      console.log("[InquiryChat] Sending to API", {
+        messageCount: currentMessages.length,
+        model: doctorInfo.model,
+      });
+
       try {
+        // Add timeout to prevent infinite hangs
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -61,54 +78,97 @@ Duration: ${basicInfo.symptomDuration}
             model: doctorInfo.model,
             language,
           }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        console.log("[InquiryChat] API response received", {
+          ok: response.ok,
+          status: response.status,
+          statusText: response.statusText,
         });
 
         if (!response.ok) {
           try {
             const errorData = await response.json();
+            console.error("[InquiryChat] API error data:", errorData);
             throw new Error(JSON.stringify(errorData));
-          } catch {
-            throw new Error(`API error: ${response.status}`);
+          } catch (parseError) {
+            console.error("[InquiryChat] Failed to parse error response:", parseError);
+            throw new Error(`API error: ${response.status} ${response.statusText}`);
           }
         }
 
         const reader = response.body?.getReader();
+        if (!reader) {
+          throw new Error("No response body reader available");
+        }
+
         const decoder = new TextDecoder();
         let fullText = "";
 
         const assistantMsgId = (Date.now() + 1).toString();
         setMessages((prev) => [...prev, { id: assistantMsgId, role: "assistant", content: "" }]);
 
-        if (reader) {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            fullText += chunk;
+        console.log("[InquiryChat] Starting stream read");
+        let chunkCount = 0;
 
-            setMessages((prev) =>
-              prev.map((m) => (m.id === assistantMsgId ? { ...m, content: fullText } : m))
-            );
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            console.log("[InquiryChat] Stream complete", { chunkCount, textLength: fullText.length });
+            break;
           }
+          chunkCount++;
+          const chunk = decoder.decode(value, { stream: true });
+          fullText += chunk;
+
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantMsgId ? { ...m, content: fullText } : m))
+          );
         }
       } catch (err: any) {
-        console.error("[InquiryChat] Error:", err);
+        console.error("[InquiryChat] Error caught:", err);
+        console.error("[InquiryChat] Error stack:", err?.stack);
 
-        // Error handling logic (simplified for brevity, can be expanded if needed)
-        const errorMessage =
-          language === "zh"
-            ? "抱歉，发生了错误。请重试。"
-            : "Sorry, I encountered an error. Please try again.";
+        // Handle timeout specifically
+        if (err.name === "AbortError") {
+          const timeoutMessage =
+            language === "zh"
+              ? "请求超时。医师可能正在处理其他患者。请稍后重试。"
+              : language === "ms"
+                ? "Permintaan tamat masa. Doktor mungkin sedang memproses pesakit lain. Sila cuba sebentar lagi."
+                : "Request timed out. The doctor may be busy with other patients. Please try again in a moment.";
 
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            role: "assistant",
-            content: errorMessage,
-          },
-        ]);
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now().toString(),
+              role: "assistant",
+              content: timeoutMessage,
+            },
+          ]);
+        } else {
+          // Error handling logic for other errors
+          const errorMessage =
+            language === "zh"
+              ? `抱歉，发生了错误：${err.message || "未知错误"}。请重试。`
+              : language === "ms"
+                ? `Maaf, terdapat ralat: ${err.message || "Unknown error"}. Sila cuba lagi.`
+                : `Sorry, an error occurred: ${err.message || "Unknown error"}. Please try again.`;
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now().toString(),
+              role: "assistant",
+              content: errorMessage,
+            },
+          ]);
+        }
       } finally {
+        console.log("[InquiryChat] Setting isLoading to false");
         setIsLoading(false);
       }
     },

@@ -40,14 +40,15 @@ export function ChooseDoctorStep({ onComplete, onBack }: ChooseDoctorStepProps) 
 
   // Sync with global navigation
   useEffect(() => {
+    const hasBack = !!onBack;
     setNavigationState({
       onNext: handleNext,
-      onBack: onBack ? handleBack : undefined,
+      onBack: hasBack ? handleBack : undefined,
       showNext: true,
-      showBack: !!onBack,
+      showBack: hasBack,
       showSkip: false,
     });
-  }, [setNavigationState, handleNext, handleBack, !!onBack]);
+  }, [setNavigationState, handleNext, handleBack]);
 
   // Get translated doctor level info
   const getDoctorLevelInfo = (level: DoctorLevel) => {

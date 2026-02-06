@@ -104,23 +104,25 @@ export function InquiryChatStep({
   const onCompleteRef = useRef(onComplete);
   const onBackRef = useRef(onBack);
   const messagesRef = useRef(messages);
+  const hasBackRef = useRef(!!onBack);
 
   useEffect(() => {
     onCompleteRef.current = onComplete;
     onBackRef.current = onBack;
     messagesRef.current = messages;
+    hasBackRef.current = !!onBack;
   }, [onComplete, onBack, messages]);
 
   useEffect(() => {
     setNavigationState({
       onNext: () => onCompleteRef.current(messagesRef.current),
-      onBack: onBack ? () => onBackRef.current?.() : undefined,
+      onBack: hasBackRef.current ? () => onBackRef.current?.() : undefined,
       showNext: true,
       canNext: displayMessagesCount >= 2,
-      showBack: !!onBack,
+      showBack: hasBackRef.current,
       showSkip: false,
     });
-  }, [displayMessagesCount, setNavigationState, !!onBack]);
+  }, [displayMessagesCount, setNavigationState]);
 
   // Handlers
   const handleSubmit = async (e: React.FormEvent) => {
