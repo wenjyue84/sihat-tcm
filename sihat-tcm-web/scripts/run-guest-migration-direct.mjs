@@ -72,4 +72,3 @@ console.log("");
 console.log("💡 Since direct database connection requires the password,");
 console.log("   the easiest way is to use the Supabase Dashboard SQL Editor.");
 console.log("   The migration file is ready to copy and paste.");
-

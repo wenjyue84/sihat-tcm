@@ -72,4 +72,3 @@ try {
   console.error("❌ Error:", error.message);
   console.error("\n📋 Please use Supabase Dashboard to run the migration manually.");
 }
-
