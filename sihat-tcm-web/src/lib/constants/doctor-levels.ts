@@ -1,6 +1,6 @@
 /**
  * Doctor Level Constants
- * 
+ *
  * Moved from doctorLevels.ts for better organization
  */
 
@@ -12,7 +12,7 @@ export const DOCTOR_LEVELS = {
     name: "Master",
     nameZh: "名医大师",
     description: "Most experienced, renowned doctor",
-    model: "gemini-1.5-pro", // Most advanced stable model for Master level
+    model: "gemini-1.5-flash", // Most advanced stable model for Master level (gemini-1.5-pro deprecated)
     icon: "👨‍⚕️",
     color: "from-amber-500 to-orange-600",
     bgColor: "bg-amber-50",
@@ -44,5 +44,3 @@ export const DOCTOR_LEVELS = {
     textColor: "text-blue-800",
   },
 } as const;
-
-

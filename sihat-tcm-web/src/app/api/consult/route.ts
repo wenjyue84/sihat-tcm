@@ -10,6 +10,7 @@
  * @since 1.0
  */
 
+import { NextRequest } from "next/server";
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 import { devLog } from "@/lib/systemLogger";
@@ -20,7 +21,7 @@ import {
   normalizeLanguage,
 } from "@/lib/translations/languageInstructions";
 import { streamTextWithFallback, parseApiError } from "@/lib/modelFallback";
-import { createErrorResponse } from "@/lib/api/middleware/error-handler";
+import { createErrorResponse, withRateLimit } from "@/lib/api/middleware";
 
 /**
  * Maximum execution duration for the consultation endpoint (60 seconds)
@@ -84,7 +85,7 @@ export const maxDuration = 60;
  * @param {boolean} req.body.data.report_options.includeDietary - Include dietary advice
  * @param {Object} [req.body.data.verified_summaries] - Pre-verified analysis summaries
  * @param {string} [req.body.prompt] - Custom prompt (rarely used)
- * @param {string} [req.body.model='gemini-1.5-pro'] - AI model to use
+ * @param {string} [req.body.model='gemini-1.5-flash'] - AI model to use
  * @param {string} [req.body.language='en'] - Response language (en|zh|ms)
  *
  * @returns {Response} Streaming text response with TCM diagnosis report
@@ -190,13 +191,17 @@ export const maxDuration = 60;
  * @see {@link /lib/systemPrompts.ts} System prompts for AI models
  * @see {@link /lib/translations/languageInstructions.ts} Language handling
  */
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // SECURITY: Apply rate limiting (stricter for expensive AI operations)
+  const rateLimitResponse = await withRateLimit(req, { securityLevel: 3 });
+  if (rateLimitResponse) return rateLimitResponse;
+
   const startTime = Date.now();
   devLog("info", "API/consult", "Request started");
 
   try {
     const body = await req.json();
-    const { data, prompt, model = "gemini-1.5-pro", language: rawLanguage = "en" } = body;
+    const { data, prompt, model = "gemini-1.5-flash", language: rawLanguage = "en" } = body;
     const language = normalizeLanguage(rawLanguage);
 
     devLog("info", "API/consult", "Request params", {
@@ -500,16 +505,17 @@ Your response MUST include these fields based on the above options:
   "patient_summary": {
     "name": "${opts.includePatientName ? "string" : "null"}",
     "age": "${opts.includePatientAge ? "number" : "null"}",
-    "gender": "${opts.includePatientGender ? "string" : "null"}"${opts.includeVitalSigns || opts.includeBMI
-          ? `,
+    "gender": "${opts.includePatientGender ? "string" : "null"}"${
+      opts.includeVitalSigns || opts.includeBMI
+        ? `,
     "vital_signs": {
       "bmi": "number or null",
       "blood_pressure": "string or null",
       "heart_rate": "number or null",
       "temperature": "number or null"
     }`
-          : ""
-        }
+        : ""
+    }
   },
   "diagnosis": {
     "primary_pattern": "Primary TCM syndrome (辨证)",
@@ -546,21 +552,23 @@ Your response MUST include these fields based on the above options:
     }
   },
   "recommendations": {
-    ${opts.includeDietary
-          ? `"food_therapy": {
+    ${
+      opts.includeDietary
+        ? `"food_therapy": {
       "beneficial": ["5+ foods with specific reasons"],
       "recipes": ["2+ therapeutic recipes with preparation"],
       "avoid": ["3+ foods to avoid with reasons"]
     },`
-          : ""
-        }
+        : ""
+    }
     ${opts.includeLifestyle ? `"lifestyle": ["4+ specific lifestyle recommendations"],` : ""}
     ${opts.includeAcupuncture ? `"acupoints": ["3+ acupoints with locations and techniques"],` : ""}
     ${opts.includeExercise ? `"exercise": ["2+ exercise types with frequency/duration"],` : ""}
     ${opts.includeSleepAdvice ? `"sleep_guidance": "Specific sleep recommendations",` : ""}
     ${opts.includeEmotionalWellness ? `"emotional_care": "Emotional wellness guidance",` : ""}
-    ${opts.suggestMedicine
-          ? `"herbal_formulas": [
+    ${
+      opts.suggestMedicine
+        ? `"herbal_formulas": [
       {
         "name": "Formula name (Chinese & English)",
         "ingredients": ["list of herbs"],
@@ -568,32 +576,35 @@ Your response MUST include these fields based on the above options:
         "purpose": "what it treats"
       }
     ],`
-          : ""
-        }
+        : ""
+    }
     ${opts.suggestDoctor ? `"doctor_consultation": "Recommendation to see a TCM practitioner",` : ""}
     "general": ["any additional recommendations"]
-  }${opts.includePrecautions
-          ? `,
+  }${
+    opts.includePrecautions
+      ? `,
   "precautions": {
     "warning_signs": ["symptoms requiring immediate attention"],
     "contraindications": ["things to avoid"],
     "special_notes": "important notes"
   }`
-          : ""
-        }${opts.includeFollowUp
-          ? `,
+      : ""
+  }${
+    opts.includeFollowUp
+      ? `,
   "follow_up": {
     "timeline": "when to reassess",
     "expected_improvement": "what to expect",
     "next_steps": "recommended next steps"
   }`
-          : "},"
-        }
-  "disclaimer": "Standard medical disclaimer"${opts.includeTimestamp
-          ? `,
+      : "},"
+  }
+  "disclaimer": "Standard medical disclaimer"${
+    opts.includeTimestamp
+      ? `,
   "timestamp": "${new Date().toISOString()}"`
-          : ""
-        }
+      : ""
+  }
 }
 `;
     } else {
