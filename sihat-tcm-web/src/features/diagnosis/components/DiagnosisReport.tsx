@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
@@ -122,6 +122,10 @@ export function DiagnosisReport({
   const router = useRouter();
   const { user } = useAuth();
   const reportViewedNotificationSent = useRef(false);
+  const [telegramStatus, setTelegramStatus] = useState<{
+    sent: boolean;
+    message: string;
+  } | null>(null);
 
   // Notify (e.g. Telegram) when user first sees the Comprehensive TCM Report — once per mount
   useEffect(() => {
@@ -131,7 +135,20 @@ export function DiagnosisReport({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ isGuest: !user }),
-    }).catch(() => {});
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setTelegramStatus({
+          sent: data.sent || false,
+          message: data.message || "Unknown status",
+        });
+      })
+      .catch(() => {
+        setTelegramStatus({
+          sent: false,
+          message: "Failed to connect to notification service",
+        });
+      });
   }, [notifyOnFirstView, user]);
   const { getDoctorInfo } = useDoctorLevel();
   const doctorInfo = getDoctorInfo();
@@ -200,8 +217,10 @@ export function DiagnosisReport({
   // Process Data
   const diagnosisText = extractDiagnosisTitle(data.diagnosis);
   const constitutionText = extractConstitutionType(data.constitution);
-  const analysisText =
+  const rawAnalysis =
     typeof data.analysis === "string" ? data.analysis : data.analysis?.summary || "";
+  // Normalize literal \n (backslash-n) from API/LLM into real newlines for display
+  const analysisText = rawAnalysis.replace(/\\n/g, "\n");
 
   // Use extracted data transformers
   const foodRecommendations = getFoodRecommendations(data);
@@ -359,6 +378,28 @@ export function DiagnosisReport({
               </p>
             </div>
           </motion.div>
+
+          {/* Telegram Notification Status */}
+          {notifyOnFirstView && telegramStatus && (
+            <motion.div variants={item}>
+              <div
+                className={`rounded-xl p-4 text-center border ${
+                  telegramStatus.sent
+                    ? "bg-emerald-50/80 border-emerald-200 backdrop-blur-sm"
+                    : "bg-amber-50/80 border-amber-200 backdrop-blur-sm"
+                }`}
+              >
+                <p
+                  className={`text-sm font-medium ${
+                    telegramStatus.sent ? "text-emerald-700" : "text-amber-700"
+                  }`}
+                >
+                  {telegramStatus.sent ? "✓ " : "⚠ "}
+                  {telegramStatus.message}
+                </p>
+              </div>
+            </motion.div>
+          )}
 
           {!isDoctorView && viewMode !== "summary" && (
             <motion.div variants={item}>
