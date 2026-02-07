@@ -9,6 +9,7 @@ import { getAdminSettings } from "@/lib/settings";
 import { BackgroundMusic } from "@/components/BackgroundMusic";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { Analytics } from "@vercel/analytics/next";
 
 // Inter as fallback (closest to SF Pro) - system fonts are used first via CSS
 const inter = Inter({
@@ -143,6 +144,7 @@ export default async function RootLayout({
             initialVolume={settings.backgroundMusicVolume}
           />
           <Toaster />
+          <Analytics />
         </Providers>
       </body>
     </html>
