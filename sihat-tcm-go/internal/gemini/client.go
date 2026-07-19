@@ -164,9 +164,13 @@ func (c *Client) Generate(ctx context.Context, model string, req GenerateRequest
 }
 
 // GenerateText is a convenience wrapper for a single-prompt text generation.
+// Thinking is disabled: these are simple text/JSON extractions, and on the
+// mapped thinking-models a non-streamed call can otherwise return empty output
+// (thinking tokens starve the response).
 func (c *Client) GenerateText(ctx context.Context, model, system, prompt string) (string, error) {
 	req := GenerateRequest{
-		Contents: []Content{{Role: "user", Parts: []Part{{Text: prompt}}}},
+		Contents:         []Content{{Role: "user", Parts: []Part{{Text: prompt}}}},
+		GenerationConfig: &GenerationConfig{MaxOutputTokens: 2048, ThinkingConfig: NoThinking},
 	}
 	if system != "" {
 		req.SystemInstruction = &Content{Parts: []Part{{Text: system}}}
