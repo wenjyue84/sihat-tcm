@@ -129,17 +129,18 @@ async function main() {
     patients.push({ p, email, name, token: li.token, userId: li.userId, chosen, requestId });
   }
 
-  // ---- [7] Each doctor sees ONLY the requests routed to them ----
-  elog("\n[7] Doctor inbox routing");
+  // ---- [7] Master inbox: EVERY doctor sees ALL patient requests ----
+  elog("\n[7] Master doctor inbox");
+  const allReqIds = patients.map((pt) => pt.requestId);
   for (const doc of doctors) {
     const inbox = await api("/api/doctor/requests", { token: doc.token });
     const reqs = (inbox.json && inbox.json.requests) || [];
-    const expected = patients.filter((pt) => pt.chosen.id === doc.id);
     const gotIds = new Set(reqs.map((x) => x.id));
-    const allExpectedPresent = expected.every((pt) => gotIds.has(pt.requestId));
-    const noForeign = reqs.every((x) => x.doctor_id === doc.id);
-    check(`${doc.name}.inbox_has_assigned`, allExpectedPresent, `expected ${expected.length} reqs, inbox has ${reqs.length}`);
-    check(`${doc.name}.inbox_no_foreign`, noForeign, "inbox contains a request not assigned to this doctor");
+    const seesAll = allReqIds.every((id) => gotIds.has(id));
+    check(`${doc.name}.master_inbox_sees_all`, seesAll, `inbox has ${reqs.length}, expected all ${allReqIds.length} this-run requests`);
+    // Each request still records which doctor the patient selected.
+    const labelled = reqs.filter((x) => allReqIds.includes(x.id)).every((x) => x.doctor_id);
+    check(`${doc.name}.requests_keep_selected_doctor`, labelled, "a request lost its selected-doctor id");
   }
 
   // ---- [8] Doctor reviews + replies; patient sees feedback ----
@@ -157,6 +158,22 @@ async function main() {
     const docMsg = msgs.find((m) => m.role === "doctor" && m.content && m.content.includes(doc.name));
     check(`p${pt.p}.8.patient_sees_feedback`, !!docMsg && row.status === "reviewed", `status=${row && row.status} hasDocMsg=${!!docMsg}`);
   }
+
+  // ---- Patient basic profile save + read-back ----
+  elog("\nPatient profile save/read");
+  const p0 = patients[0];
+  await api("/api/patient/profile", { method: "PUT", token: p0.token, body: { full_name: "Renamed Test", age: 41, gender: "female", height: 165, weight: 60, bmi: 22 } });
+  const prof = (((await api("/api/patient/profile", { token: p0.token })).json) || {}).profile || {};
+  check("profile.save_and_read", prof.full_name === "Renamed Test" && String(prof.age) === "41", `name=${prof.full_name} age=${prof.age}`);
+
+  // ---- Patient cancels/removes a consultation (ownership enforced) ----
+  elog("\nCancel consultation");
+  const notMine = await api("/api/patient/requests/cancel", { method: "POST", token: patients[1].token, body: { id: p0.requestId } });
+  check("cancel.rejects_foreign", notMine.status === 403, `status=${notMine.status} (want 403)`);
+  const before = ((await api("/api/patient/requests", { token: p0.token })).json || {}).requests || [];
+  const cancelResp = await api("/api/patient/requests/cancel", { method: "POST", token: p0.token, body: { id: p0.requestId } });
+  const after = ((await api("/api/patient/requests", { token: p0.token })).json || {}).requests || [];
+  check("cancel.owner_removes", cancelResp.status === 200 && after.length < before.length && !after.some((x) => x.id === p0.requestId), `before=${before.length} after=${after.length}`);
 
   // ---- [9] Doctor auth isolation: a patient token cannot read the doctor inbox ----
   elog("\n[9] Access control");
