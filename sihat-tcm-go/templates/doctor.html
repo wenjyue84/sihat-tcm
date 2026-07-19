@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{.Title}} — Doctor Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{asset "/static/css/app.css"}}">
+  <style>
+    .doctor-inbox-section { margin: 1.5rem 0 2rem; }
+    .inbox-title { font-size: 1.15rem; font-weight: 700; color: var(--slate-700, #334155); display: flex; align-items: center; gap: .5rem; margin-bottom: .3rem; }
+    .inbox-count-badge { background: var(--blue-600, #2563eb); color: #fff; font-size: .78rem; font-weight: 700; min-width: 1.4rem; text-align: center; padding: .1rem .5rem; border-radius: 999px; }
+    .inbox-item { background: #fff; border: 1px solid var(--slate-200, #e2e8f0); border-radius: .75rem; padding: 1rem; margin-bottom: .75rem; }
+    .inbox-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .inbox-diag { font-size: .82rem; color: var(--slate-500, #64748b); margin-top: .15rem; }
+    .inbox-summary { font-size: .82rem; color: var(--stone-600, #57534e); margin: .55rem 0; line-height: 1.5; }
+    .inbox-reply { display: flex; gap: .5rem; align-items: flex-start; margin-top: .6rem; }
+    .inbox-reply textarea { flex: 1; resize: vertical; }
+    .reply-status { font-size: .78rem; margin-top: .35rem; min-height: .9rem; }
+    .consult-badge { font-size: .72rem; font-weight: 600; padding: .2rem .55rem; border-radius: 999px; white-space: nowrap; }
+    .consult-badge.pending { background: #fef3c7; color: #92400e; }
+    .consult-badge.reviewed { background: #d1fae5; color: #047857; }
+    .consult-feedback { background: #eff6ff; border-left: 3px solid var(--blue-500, #3b82f6); padding: .5rem .7rem; border-radius: .4rem; font-size: .83rem; color: var(--slate-700, #334155); margin-top: .45rem; }
+  </style>
+</head>
+<body class="page-doctor">
+
+{{template "doctor-header" .}}
+
+<main class="doctor-main">
+
+  <!-- CTA Card -->
+  <div class="doctor-cta-card">
+    <h2>Doctor Dashboard 医生控制台</h2>
+    <p>Review patient AI assessments, generate tailored inquiry sets, and guide consultations.</p>
+    <a href="/" class="btn btn-primary" style="background:#fff;color:var(--blue-700);">
+      Open Diagnosis Wizard 诊断向导
+    </a>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="stat-total">—</div>
+      <div class="stat-label">Total Sessions 总诊断数</div>
+      <div class="stat-sub">All time</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-today">—</div>
+      <div class="stat-label">Today 今日</div>
+      <div class="stat-sub">Sessions today</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-constitution">—</div>
+      <div class="stat-label">Top Constitution 最常见体质</div>
+      <div class="stat-sub">Most common</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="inbox-pending">—</div>
+      <div class="stat-label">Pending Reviews 待审阅</div>
+      <div class="stat-sub">Awaiting your feedback</div>
+    </div>
+  </div>
+
+  <!-- Patient Requests Inbox -->
+  <section class="doctor-inbox-section">
+    <h2 class="inbox-title">Patient Requests 患者请求 <span id="inbox-count" class="inbox-count-badge">0</span></h2>
+    <p class="text-muted" style="font-size:.85rem;margin-bottom:.85rem">Consultation requests patients routed to you. Review the AI report and send feedback — it appears in the patient's dashboard.</p>
+    <div id="doctor-inbox">Loading requests…</div>
+  </section>
+
+  <!-- Quick Actions -->
+  <h2 class="mb-4" style="font-size:1.1rem;font-weight:700;color:var(--slate-700)">Quick Actions 快捷操作</h2>
+  <div class="quick-actions">
+    <div class="qa-card">
+      <h3>New Patient Assessment</h3>
+      <p>Run the full 四诊合参 wizard for a new or returning patient.</p>
+      <a href="/" class="btn btn-blue btn-sm">Start Wizard →</a>
+    </div>
+    <div class="qa-card">
+      <h3>Patient Sessions</h3>
+      <p>View all past TCM assessment sessions and full reports.</p>
+      <a href="/patient" class="btn btn-secondary btn-sm">View Sessions →</a>
+    </div>
+    <div class="qa-card">
+      <h3>Generate Inquiry Set</h3>
+      <p>AI-generated custom question set for specific patient profiles.</p>
+      <button class="btn btn-secondary btn-sm" onclick="doctorGenInquiry()">Generate Questions →</button>
+    </div>
+  </div>
+
+  <!-- Generate Inquiry Panel -->
+  <div id="gen-inquiry-panel" class="card mt-6 hidden">
+    <h3 class="mb-4">Generate Patient Inquiry 生成问诊题</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="gi-age">Age 年龄</label>
+        <input class="form-input" id="gi-age" type="number" placeholder="e.g. 45">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="gi-gender">Gender 性别</label>
+        <select class="form-select" id="gi-gender">
+          <option value="">Select…</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="gi-symptoms">Chief Symptoms 主诉</label>
+      <input class="form-input" id="gi-symptoms" type="text" placeholder="e.g. chronic fatigue, cold limbs">
+    </div>
+    <button class="btn btn-blue" onclick="doctorSubmitInquiry()">Generate 生成</button>
+    <div id="gi-loading" class="loading-row hidden">
+      <div class="spinner spinner-dark"></div> Generating inquiry questions…
+    </div>
+    <div id="gi-result" class="hidden" style="margin-top:1.25rem"></div>
+    <div id="gi-error" class="alert alert-error hidden"></div>
+  </div>
+
+</main>
+
+{{template "footer" .}}
+
+<script src="{{asset "/static/js/dashboard.js"}}"></script>
+<script src="{{asset "/static/js/doctor-inbox.js"}}"></script>
+<script>
+// Doctor-specific: load stats from /api/patient/sessions
+(function(){
+  var token = localStorage.getItem('tcm-token') || '';
+  fetch('/api/patient/sessions', {
+    headers: token ? {'Authorization': 'Bearer ' + token} : {}
+  })
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(data){
+    if (!data || !data.sessions) return;
+    var sessions = data.sessions;
+    document.getElementById('stat-total').textContent = sessions.length;
+    // today
+    var today = new Date().toISOString().slice(0,10);
+    var todayCount = sessions.filter(function(s){
+      return (s.created_at || '').slice(0,10) === today;
+    }).length;
+    document.getElementById('stat-today').textContent = todayCount;
+    // top constitution
+    var counts = {};
+    sessions.forEach(function(s){
+      var c = s.constitution || 'Unknown';
+      counts[c] = (counts[c] || 0) + 1;
+    });
+    var top = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; })[0] || '—';
+    document.getElementById('stat-constitution').textContent = top.length > 10 ? top.slice(0,10)+'…' : top;
+    // completion (sessions that have full_report) — optional card
+    var completeEl = document.getElementById('stat-complete');
+    if (completeEl) {
+      var complete = sessions.filter(function(s){ return !!s.full_report; }).length;
+      var pct = sessions.length > 0 ? Math.round(complete / sessions.length * 100) : 0;
+      completeEl.textContent = pct + '%';
+    }
+  })
+  .catch(function(){ /* silently leave placeholders */ });
+
+  function doctorGenInquiry(){
+    document.getElementById('gen-inquiry-panel').classList.remove('hidden');
+    document.getElementById('gen-inquiry-panel').scrollIntoView({behavior:'smooth'});
+  }
+  window.doctorGenInquiry = doctorGenInquiry;
+
+  function doctorSubmitInquiry(){
+    var age = document.getElementById('gi-age').value;
+    var gender = document.getElementById('gi-gender').value;
+    var symptoms = document.getElementById('gi-symptoms').value.trim();
+    if (!symptoms) { alert('Please enter chief symptoms.'); return; }
+    var loading = document.getElementById('gi-loading');
+    var result  = document.getElementById('gi-result');
+    var errEl   = document.getElementById('gi-error');
+    loading.classList.remove('hidden');
+    result.classList.add('hidden');
+    errEl.classList.add('hidden');
+    fetch('/api/doctor/generate-inquiry', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({patientInfo:{age:parseInt(age)||null,gender:gender}, symptoms:symptoms})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      loading.classList.add('hidden');
+      if (!data.questions || !data.questions.length) {
+        errEl.textContent = 'No questions returned.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      var html = '<ol style="padding-left:1.2rem;display:flex;flex-direction:column;gap:.85rem">';
+      data.questions.forEach(function(q){
+        html += '<li style="font-size:.9rem;font-weight:600;color:var(--slate-700)">' + escHtml(q.question);
+        if (q.choices && q.choices.length) {
+          html += '<ul style="margin-top:.4rem;padding-left:1rem;font-weight:400;color:var(--stone-600)">';
+          q.choices.forEach(function(c){ html += '<li>' + escHtml(c.label) + '</li>'; });
+          html += '</ul>';
+        }
+        html += '</li>';
+      });
+      html += '</ol>';
+      result.innerHTML = html;
+      result.classList.remove('hidden');
+    })
+    .catch(function(err){
+      loading.classList.add('hidden');
+      errEl.textContent = 'Error: ' + err.message;
+      errEl.classList.remove('hidden');
+    });
+  }
+  window.doctorSubmitInquiry = doctorSubmitInquiry;
+
+  function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+})();
+</script>
+</body>
+</html>

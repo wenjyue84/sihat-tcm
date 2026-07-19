@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{.Title}} — Health Journey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{asset "/static/css/app.css"}}">
+  <style>
+    .dashboard-section { margin-top: 2rem; }
+    .dashboard-section-title { font-size: 1.05rem; font-weight: 700; color: var(--emerald-800, #065f46); margin-bottom: .5rem; }
+    #health-overview { margin-top: 1.25rem; }
+    .overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; }
+    .overview-stat { background: #fff; border: 1px solid var(--stone-200, #e7e5e4); border-radius: .75rem; padding: .85rem .6rem; text-align: center; }
+    .overview-val { font-size: 1.15rem; font-weight: 800; color: var(--emerald-700, #047857); line-height: 1.2; word-break: break-word; }
+    .overview-lbl { font-size: .72rem; color: var(--color-muted, #78716c); margin-top: .2rem; }
+    .overview-row { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: .6rem; }
+    .organ-clock, .wellness-tip { background: #fff; border: 1px solid var(--stone-200, #e7e5e4); border-radius: .75rem; padding: .9rem 1rem; }
+    .organ-clock-title, .wellness-tip-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--color-muted, #78716c); margin-bottom: .4rem; }
+    .organ-now { font-size: 1.05rem; font-weight: 700; color: var(--stone-800, #292524); }
+    .organ-window { font-size: .78rem; color: var(--emerald-700, #047857); }
+    .organ-advice, .wellness-tip-body { font-size: .82rem; color: var(--stone-600, #57534e); line-height: 1.55; margin-top: .35rem; }
+    @media (max-width: 640px) { .overview-grid { grid-template-columns: repeat(2, 1fr); } .overview-row { grid-template-columns: 1fr; } }
+    .consult-status { font-size: .85rem; margin-bottom: .6rem; min-height: 1rem; }
+    .doctor-directory { display: grid; gap: .75rem; }
+    .doctor-card { display: flex; align-items: center; gap: .85rem; background: #fff; border: 1px solid var(--stone-200, #e7e5e4); border-radius: .75rem; padding: .9rem 1rem; }
+    .doctor-avatar { flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--emerald-500, #10b981), var(--emerald-700, #047857)); color: #fff; font-weight: 700; font-size: .95rem; display: flex; align-items: center; justify-content: center; }
+    .doctor-info { flex: 1; min-width: 0; }
+    .doctor-name { font-weight: 700; color: var(--stone-800, #292524); font-size: .95rem; }
+    .doctor-specialty { font-size: .8rem; color: var(--emerald-700, #047857); margin-top: .1rem; }
+    .doctor-bio { font-size: .78rem; color: var(--color-muted, #78716c); margin-top: .25rem; }
+    .doctor-actions { display: flex; flex-direction: column; gap: .35rem; flex-shrink: 0; }
+    .doctor-modal { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
+    .doctor-modal-card { background: #fff; border-radius: 1rem; max-width: 440px; width: 100%; padding: 1.5rem; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,.25); max-height: 90vh; overflow-y: auto; }
+    .doctor-modal-close { position: absolute; top: .6rem; right: .8rem; border: none; background: none; font-size: 1.6rem; line-height: 1; cursor: pointer; color: var(--color-muted, #78716c); }
+    .dm-head { display: flex; align-items: center; gap: .85rem; margin-bottom: .85rem; }
+    .dm-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--emerald-500, #10b981), var(--emerald-700, #047857)); color: #fff; font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+    .dm-name { font-weight: 700; font-size: 1.05rem; color: var(--stone-800, #292524); }
+    .dm-verified { font-size: .7rem; color: #047857; font-weight: 600; }
+    .dm-spec { font-size: .85rem; color: var(--emerald-700, #047857); }
+    .dm-bio { font-size: .85rem; color: var(--stone-600, #57534e); line-height: 1.6; margin-bottom: .85rem; }
+    .dm-rows { display: flex; flex-direction: column; gap: .4rem; }
+    .dm-row { display: flex; justify-content: space-between; gap: 1rem; font-size: .83rem; padding: .35rem 0; border-bottom: 1px solid var(--stone-100, #f5f5f4); }
+    .dm-row span { color: var(--color-muted, #78716c); }
+    .dm-row strong { color: var(--stone-700, #44403c); text-align: right; }
+    .consult-item { background: #fff; border: 1px solid var(--stone-200, #e7e5e4); border-radius: .75rem; padding: .85rem 1rem; margin-bottom: .6rem; }
+    .consult-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .4rem; }
+    .consult-badge { font-size: .72rem; font-weight: 600; padding: .2rem .55rem; border-radius: 999px; }
+    .consult-badge.pending { background: #fef3c7; color: #92400e; }
+    .consult-badge.reviewed { background: #d1fae5; color: #047857; }
+    .consult-feedback { background: #f0fdf4; border-left: 3px solid var(--emerald-500, #10b981); padding: .5rem .7rem; border-radius: .4rem; font-size: .85rem; color: var(--stone-700, #44403c); margin-top: .35rem; }
+  </style>
+</head>
+<body class="page-patient">
+
+{{template "header" .}}
+
+<main class="dashboard-main">
+
+  <!-- Hero Banner -->
+  <div class="dashboard-hero">
+    <h2>Your Health Journey 健康旅程</h2>
+    <p>Track your TCM constitutional assessments over time and monitor your wellness progress.</p>
+    <a href="/" class="btn btn-primary">+ New Assessment 新诊断</a>
+  </div>
+
+  <!-- Health Overview -->
+  <section class="dashboard-section" id="health-overview">
+    <div class="overview-grid">
+      <div class="overview-stat"><div class="overview-val" id="ov-sessions">—</div><div class="overview-lbl">Assessments 评估</div></div>
+      <div class="overview-stat"><div class="overview-val" id="ov-constitution">—</div><div class="overview-lbl">Constitution 体质</div></div>
+      <div class="overview-stat"><div class="overview-val" id="ov-journey">—</div><div class="overview-lbl">Journey 旅程</div></div>
+      <div class="overview-stat"><div class="overview-val" id="ov-pattern">—</div><div class="overview-lbl">Top Pattern 主证</div></div>
+    </div>
+    <div class="overview-row">
+      <div class="organ-clock" id="organ-clock"></div>
+      <div class="wellness-tip" id="wellness-tip"></div>
+    </div>
+  </section>
+
+  <!-- Session List -->
+  <h3 class="dashboard-section-title" style="margin-top:1.5rem">Assessment History 评估记录</h3>
+  <div id="sessions-loading" class="loading-row">
+    <div class="spinner spinner-dark"></div> Loading your sessions…
+  </div>
+
+  <div id="sessions-error" class="alert alert-error hidden"></div>
+
+  <div id="sessions-list" class="session-list hidden"></div>
+
+  <div id="sessions-empty" class="empty-state hidden">
+    <div class="empty-icon">🌿</div>
+    <h3>No assessments yet 暂无记录</h3>
+    <p class="text-muted">Complete your first TCM assessment to start your health journey.</p>
+    <a href="/" class="btn btn-primary mt-4">Start Assessment 开始诊断</a>
+  </div>
+
+  <!-- Find a Doctor -->
+  <section class="dashboard-section">
+    <h3 class="dashboard-section-title">Consult a Doctor 咨询医生</h3>
+    <p class="text-muted" style="font-size:.85rem;margin-bottom:.75rem">Choose a registered TCM doctor to review your latest assessment and give you personalised feedback.</p>
+    <div id="consult-status" class="consult-status"></div>
+    <div id="doctor-directory" class="doctor-directory">Loading doctors…</div>
+  </section>
+
+  <!-- My Consultations -->
+  <section class="dashboard-section">
+    <h3 class="dashboard-section-title">My Consultations 我的咨询</h3>
+    <div id="consultations-list">Loading…</div>
+  </section>
+
+</main>
+
+<!-- Doctor detail modal -->
+<div id="doctor-modal" class="doctor-modal hidden" onclick="if(event.target===this)closeDoctorModal()">
+  <div class="doctor-modal-card">
+    <button class="doctor-modal-close" onclick="closeDoctorModal()" aria-label="Close">×</button>
+    <div id="doctor-modal-body"></div>
+  </div>
+</div>
+
+{{template "footer" .}}
+
+<script src="{{asset "/static/js/dashboard.js"}}"></script>
+<script src="{{asset "/static/js/consult.js"}}"></script>
+</body>
+</html>
