@@ -32,6 +32,9 @@
       'feat.audio.d': 'Voice and breathing pattern analysis to assess energy levels and organ vitality.',
       'feat.pulse.t': 'Pulse 切诊',
       'feat.pulse.d': 'Pulse rate and quality assessment — floating, wiry, slippery, deep and more traditional pulse types.',
+      'wiz.step.info': 'Info', 'wiz.step.inquiry': 'Inquiry', 'wiz.step.tongue': 'Tongue', 'wiz.step.face': 'Face',
+      'wiz.step.audio': 'Audio', 'wiz.step.pulse': 'Pulse', 'wiz.step.review': 'Review', 'wiz.step.report': 'Report',
+      'wiz.reset': '🔄 Reset', 'wiz.save': '💾 Save to My Account', 'wiz.print': '🖨 Print / Save PDF', 'wiz.startnew': 'Start New Assessment',
       'footer.disclaimer': 'For educational purposes only. Not a substitute for professional medical advice.',
     },
     zh: {
@@ -49,6 +52,9 @@
       'feat.audio.d': '语音和呼吸模式分析，评估能量水平与脏腑活力。',
       'feat.pulse.t': '切诊',
       'feat.pulse.d': '脉率与脉质评估 —— 浮、弦、滑、沉等传统脉象。',
+      'wiz.step.info': '基本', 'wiz.step.inquiry': '问诊', 'wiz.step.tongue': '舌诊', 'wiz.step.face': '面诊',
+      'wiz.step.audio': '闻诊', 'wiz.step.pulse': '切诊', 'wiz.step.review': '总结', 'wiz.step.report': '报告',
+      'wiz.reset': '🔄 重新开始', 'wiz.save': '💾 保存到我的账户', 'wiz.print': '🖨 打印·存为 PDF', 'wiz.startnew': '重新开始评估',
       'footer.disclaimer': '仅供教育参考，不替代专业医疗建议。',
     },
     ms: {
@@ -66,6 +72,9 @@
       'feat.audio.d': 'Analisis corak suara dan pernafasan untuk menilai tahap tenaga dan vitaliti organ.',
       'feat.pulse.t': 'Nadi 切诊',
       'feat.pulse.d': 'Penilaian kadar dan kualiti nadi — terapung, tegang, licin, dalam dan jenis nadi tradisional lain.',
+      'wiz.step.info': 'Maklumat', 'wiz.step.inquiry': 'Soal Selidik', 'wiz.step.tongue': 'Lidah', 'wiz.step.face': 'Wajah',
+      'wiz.step.audio': 'Audio', 'wiz.step.pulse': 'Nadi', 'wiz.step.review': 'Semakan', 'wiz.step.report': 'Laporan',
+      'wiz.reset': '🔄 Set Semula', 'wiz.save': '💾 Simpan ke Akaun Saya', 'wiz.print': '🖨 Cetak / Simpan PDF', 'wiz.startnew': 'Mula Penilaian Baharu',
       'footer.disclaimer': 'Untuk tujuan pendidikan sahaja. Bukan pengganti nasihat perubatan profesional.',
     },
   };

@@ -18,11 +18,16 @@ with sync_playwright() as p:
     def hero():
         return pg.inner_text(".hero-title") + " || " + pg.inner_text(".hero-sub")
 
-    en = hero()
+    def stepper():
+        # first two stepper labels (Info, Inquiry); hidden but data-i18n still applies
+        return pg.eval_on_selector_all(
+            ".step-label", "els => els.slice(0,2).map(e => e.textContent).join('/')")
+
+    en = hero(); en_step = stepper()
     pg.click("#lang-toggle"); pg.wait_for_timeout(350)
-    zh = hero()
+    zh = hero(); zh_step = stepper()
     pg.click("#lang-toggle"); pg.wait_for_timeout(350)
-    ms = hero()
+    ms = hero(); ms_step = stepper()
     b.close()
 
 checks = [
@@ -31,6 +36,9 @@ checks = [
     ("ms switches to Malay", ("Kesihatan Anda" in ms) or ("Difahami" in ms) or ("Penilaian" in ms)),
     ("zh != en", zh != en),
     ("ms != zh", ms != zh),
+    ("stepper en", "Info" in en_step),
+    ("stepper zh", "基本" in zh_step and "问诊" in zh_step),
+    ("stepper ms", "Maklumat" in ms_step or "Soal" in ms_step),
 ]
 passed = sum(1 for _, ok in checks if ok)
 for name, ok in checks:

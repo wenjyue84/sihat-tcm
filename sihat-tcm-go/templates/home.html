@@ -83,10 +83,10 @@
 
     <!-- Test toolbar -->
     <div class="wizard-toolbar">
-      <button class="btn btn-ghost btn-sm" type="button" onclick="window.wizardReset()" title="Clear everything and start a fresh assessment">
+      <button class="btn btn-ghost btn-sm" type="button" onclick="window.wizardReset()" title="Clear everything and start a fresh assessment" data-i18n="wiz.reset">
         🔄 Reset 重新开始
       </button>
-      <button class="btn btn-ghost btn-sm" type="button" onclick="window.wizardFillTest()" title="Populate all steps with sample data and jump to the summary">
+      <button class="btn btn-ghost btn-sm" type="button" onclick="window.wizardFillTest()" title="Populate all steps with sample data and jump to the summary" data-i18n="hero.filltest">
         🧪 Fill Test Data 填充测试数据
       </button>
     </div>
@@ -95,35 +95,35 @@
     <div class="stepper" id="stepper">
       <div class="step-item" data-step="0">
         <div class="step-dot">1</div>
-        <span class="step-label">Info<br>基本</span>
+        <span class="step-label" data-i18n="wiz.step.info">Info<br>基本</span>
       </div>
       <div class="step-item" data-step="1">
         <div class="step-dot">2</div>
-        <span class="step-label">Inquiry<br>问诊</span>
+        <span class="step-label" data-i18n="wiz.step.inquiry">Inquiry<br>问诊</span>
       </div>
       <div class="step-item" data-step="2">
         <div class="step-dot">3</div>
-        <span class="step-label">Tongue<br>舌</span>
+        <span class="step-label" data-i18n="wiz.step.tongue">Tongue<br>舌</span>
       </div>
       <div class="step-item" data-step="3">
         <div class="step-dot">4</div>
-        <span class="step-label">Face<br>面</span>
+        <span class="step-label" data-i18n="wiz.step.face">Face<br>面</span>
       </div>
       <div class="step-item" data-step="4">
         <div class="step-dot">5</div>
-        <span class="step-label">Audio<br>闻诊</span>
+        <span class="step-label" data-i18n="wiz.step.audio">Audio<br>闻诊</span>
       </div>
       <div class="step-item" data-step="5">
         <div class="step-dot">6</div>
-        <span class="step-label">Pulse<br>切诊</span>
+        <span class="step-label" data-i18n="wiz.step.pulse">Pulse<br>切诊</span>
       </div>
       <div class="step-item" data-step="6">
         <div class="step-dot">7</div>
-        <span class="step-label">Review<br>总结</span>
+        <span class="step-label" data-i18n="wiz.step.review">Review<br>总结</span>
       </div>
       <div class="step-item" data-step="7">
         <div class="step-dot">8</div>
-        <span class="step-label">Report<br>报告</span>
+        <span class="step-label" data-i18n="wiz.step.report">Report<br>报告</span>
       </div>
     </div>
 
@@ -397,14 +397,14 @@
           <div class="disclaimer-box" id="rpt-disclaimer"></div>
           <!-- Save CTA -->
           <div class="text-center mt-6" id="rpt-save-cta">
-            <button class="btn btn-primary" onclick="window.wizardSaveSession()">
+            <button class="btn btn-primary" onclick="window.wizardSaveSession()" data-i18n="wiz.save">
               💾 Save to My Account 保存
             </button>
-            <button class="btn btn-secondary" type="button" onclick="window.wizardPrintReport()" style="margin-left:.5rem">
+            <button class="btn btn-secondary" type="button" onclick="window.wizardPrintReport()" style="margin-left:.5rem" data-i18n="wiz.print">
               🖨 Print / Save PDF 打印·存为 PDF
             </button>
             <span class="text-muted text-sm" style="display:block;margin-top:.5rem" id="rpt-save-status"></span>
-            <button class="btn btn-outline mt-3" onclick="window.wizardReset()">
+            <button class="btn btn-outline mt-3" onclick="window.wizardReset()" data-i18n="wiz.startnew">
               Start New Assessment 重新开始
             </button>
           </div>
