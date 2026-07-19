@@ -60,6 +60,27 @@
     box.querySelectorAll('button[data-reply]').forEach(function (b) { b.addEventListener('click', function () { doctorReply(b.getAttribute('data-reply')); }); });
     box.querySelectorAll('select[data-flag]').forEach(function (sel) { sel.addEventListener('change', function () { doctorSetFlag(sel.getAttribute('data-flag'), sel.value); }); });
     box.querySelectorAll('button[data-print]').forEach(function (b) { b.addEventListener('click', function () { doctorPrint(b.getAttribute('data-print')); }); });
+    box.querySelectorAll('button[data-tp]').forEach(function (b) { b.addEventListener('click', function () { doctorSaveTreatmentPlan(b.getAttribute('data-tp')); }); });
+  }
+
+  function doctorSaveTreatmentPlan(id) {
+    var plan = {
+      pattern: val('tp-pattern-' + id),
+      treatment: val('tp-treat-' + id),
+      lifestyle: val('tp-life-' + id),
+      follow_up: val('tp-follow-' + id),
+    };
+    var st = document.getElementById('tp-status-' + id);
+    if (!plan.pattern && !plan.treatment && !plan.lifestyle) { st.textContent = 'Add at least one field. 请至少填一项。'; st.style.color = '#b45309'; return; }
+    st.textContent = 'Saving… 保存中…'; st.style.color = 'var(--color-muted)';
+    fetch('/api/doctor/treatment-plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
+      body: JSON.stringify({ requestId: id, plan: plan }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (!d || !d.success) throw new Error(); st.textContent = 'Saved ✓ 已保存'; st.style.color = 'var(--emerald-600)'; setTimeout(loadInbox, 900); })
+      .catch(function () { st.textContent = 'Could not save. 保存失败。'; st.style.color = '#dc2626'; });
   }
 
   function doctorPrint(id) {
@@ -195,8 +216,20 @@
       + '<option value="watch"' + (flag === 'watch' ? ' selected' : '') + '>Watch 关注</option>'
       + '<option value="critical"' + (flag === 'critical' ? ' selected' : '') + '>Critical 紧急</option>'
       + '</select></div>'
-      + '<div class="reply-status" id="reply-status-' + esc(req.id) + '"></div></div>';
+      + '<div class="reply-status" id="reply-status-' + esc(req.id) + '"></div>'
+      + '<details style="margin-top:.5rem"><summary style="cursor:pointer;font-size:.82rem;font-weight:600;color:var(--blue-700,#1d4ed8)">📋 Treatment Plan 治疗方案' + (rep.treatment_plan ? ' ✓' : '') + '</summary>'
+      + '<div style="margin-top:.5rem;display:flex;flex-direction:column;gap:.4rem">'
+      + '<input class="form-input" id="tp-pattern-' + esc(req.id) + '" placeholder="Confirmed pattern 证型" value="' + esc(planVal(rep, 'pattern')) + '">'
+      + '<textarea class="form-input" id="tp-treat-' + esc(req.id) + '" rows="2" placeholder="Herbs / formula 方药">' + esc(planVal(rep, 'treatment')) + '</textarea>'
+      + '<textarea class="form-input" id="tp-life-' + esc(req.id) + '" rows="2" placeholder="Lifestyle advice 生活建议">' + esc(planVal(rep, 'lifestyle')) + '</textarea>'
+      + '<input class="form-input" id="tp-follow-' + esc(req.id) + '" type="date" value="' + esc(planVal(rep, 'follow_up')) + '">'
+      + '<button class="btn btn-blue btn-sm" data-tp="' + esc(req.id) + '">Save Plan 保存方案</button>'
+      + '<div class="reply-status" id="tp-status-' + esc(req.id) + '" style="font-size:.76rem;min-height:.9rem"></div>'
+      + '</div></details>'
+      + '</div>';
   }
+
+  function planVal(rep, key) { var tp = (rep && rep.treatment_plan) || {}; return tp[key] != null ? String(tp[key]) : ''; }
 
   function doctorReply(id) {
     var ta = document.getElementById('reply-' + id);

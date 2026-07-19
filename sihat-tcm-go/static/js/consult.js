@@ -189,10 +189,18 @@
             + '<input class="form-input" id="creply-' + esc(req.id) + '" type="text" placeholder="Reply to the doctor… 回复医生…" style="flex:1">'
             + '<button class="btn btn-primary btn-sm" data-preply="' + esc(req.id) + '">Send 发送</button>'
             + '</div>';
+          var tp = rep.treatment_plan;
+          var tpCard = tp ? '<div class="tp-card" style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:.6rem;padding:.6rem .8rem;margin:.5rem 0">'
+            + '<div style="font-weight:700;font-size:.85rem;color:#3730a3">📋 Doctor\'s Treatment Plan 医生治疗方案</div>'
+            + (tp.pattern ? '<div style="font-size:.82rem;margin-top:.3rem"><strong>证型 Pattern:</strong> ' + esc(tp.pattern) + '</div>' : '')
+            + (tp.treatment ? '<div style="font-size:.82rem"><strong>方药 Herbs:</strong> ' + esc(tp.treatment) + '</div>' : '')
+            + (tp.lifestyle ? '<div style="font-size:.82rem"><strong>生活 Lifestyle:</strong> ' + esc(tp.lifestyle) + '</div>' : '')
+            + (tp.follow_up ? '<div style="font-size:.82rem"><strong>复诊 Follow-up:</strong> ' + esc(tp.follow_up) + '</div>' : '')
+            + '</div>' : '';
           return '<div class="consult-item">'
             + '<div class="consult-head"><strong>' + esc(doc.name || 'Doctor') + '</strong> ' + badge + '</div>'
             + '<div class="consult-meta">' + esc(metaBits.join('  ·  ')) + '</div>'
-            + thread + replyBox
+            + tpCard + thread + replyBox
             + '<div class="consult-actions" style="margin-top:.4rem"><button class="btn btn-ghost btn-sm consult-cancel" data-cancel="' + esc(req.id) + '">🗑 Remove 取消</button></div>'
             + '<div class="reply-status" id="creply-status-' + esc(req.id) + '" style="font-size:.76rem;min-height:.9rem"></div>'
             + '</div>';

@@ -40,6 +40,9 @@ func (s *Server) registerDataRoutes() {
 	// Patient reply — two-way messaging; any authed user, scoped to their own request
 	s.Mux.HandleFunc("POST /api/patient/reply", s.RequireAuth(s.handlePatientReply))
 
+	// Doctor treatment plan — a structured plan the doctor authors on a request
+	s.Mux.HandleFunc("POST /api/doctor/treatment-plan", s.RequireAuth(s.handleDoctorTreatmentPlan, "doctor"))
+
 	// AI patient summary — requires auth
 	s.Mux.HandleFunc("POST /api/ai/patient-summary", s.RequireAuth(s.handleAIPatientSummary))
 
@@ -194,6 +197,57 @@ func (s *Server) handlePatientReply(w http.ResponseWriter, r *http.Request, user
 		map[string]any{"diagnosis_report": report, "status": "pending"}, "", &updated); err != nil {
 		log.Printf("patient/reply update: %v", err)
 		s.JSONError(w, http.StatusInternalServerError, "failed to send reply")
+		return
+	}
+
+	s.JSON(w, http.StatusOK, map[string]any{"success": true, "data": report})
+}
+
+// handleDoctorTreatmentPlan stores a structured treatment plan authored by a
+// doctor onto the request's report (diagnosis_report.treatment_plan) and marks
+// the request reviewed. The plan shape mirrors the AI report's recommendation
+// fields (pattern / treatment / lifestyle / follow_up / notes) so the patient UI
+// can render it consistently. Doctor auth required.
+func (s *Server) handleDoctorTreatmentPlan(w http.ResponseWriter, r *http.Request, user *AuthUser) {
+	var body struct {
+		RequestID string         `json:"requestId"`
+		Plan      map[string]any `json:"plan"`
+	}
+	if !dtReadJSON(w, r, &body) {
+		return
+	}
+	if body.RequestID == "" || len(body.Plan) == 0 {
+		s.JSONError(w, http.StatusBadRequest, "requestId and plan are required")
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
+	defer cancel()
+
+	var rows []map[string]json.RawMessage
+	if err := s.DB.Select(ctx, "inquiries", "select=id,diagnosis_report&id=eq."+body.RequestID, "", &rows); err != nil || len(rows) == 0 {
+		s.JSONError(w, http.StatusNotFound, "record not found")
+		return
+	}
+
+	var report map[string]any
+	if raw, ok := rows[0]["diagnosis_report"]; ok && len(raw) > 0 {
+		_ = json.Unmarshal(raw, &report)
+	}
+	if report == nil {
+		report = map[string]any{}
+	}
+
+	body.Plan["authored_at"] = dtNowISO()
+	body.Plan["doctor_id"] = user.ID
+	report["treatment_plan"] = body.Plan
+	report["status"] = "reviewed"
+
+	var updated []map[string]any
+	if err := s.DB.Update(ctx, "inquiries", "id=eq."+body.RequestID,
+		map[string]any{"diagnosis_report": report, "status": "reviewed"}, "", &updated); err != nil {
+		log.Printf("doctor/treatment-plan: %v", err)
+		s.JSONError(w, http.StatusInternalServerError, "failed to save treatment plan")
 		return
 	}
 
