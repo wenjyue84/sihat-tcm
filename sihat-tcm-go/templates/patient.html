@@ -72,7 +72,7 @@
 
   <!-- Hero Banner -->
   <div class="dashboard-hero">
-    <h2>Your Health Journey 健康旅程</h2>
+    <h2 data-i18n="pt.journey">Your Health Journey 健康旅程</h2>
     <p>Track your TCM constitutional assessments over time and monitor your wellness progress.</p>
     <a href="/" class="btn btn-primary">+ New Assessment 新诊断</a>
   </div>
@@ -80,10 +80,10 @@
   <!-- Health Overview -->
   <section class="dashboard-section" id="health-overview">
     <div class="overview-grid">
-      <div class="overview-stat"><div class="overview-val" id="ov-sessions">—</div><div class="overview-lbl">Assessments 评估</div></div>
-      <div class="overview-stat"><div class="overview-val" id="ov-constitution">—</div><div class="overview-lbl">Constitution 体质</div></div>
-      <div class="overview-stat"><div class="overview-val" id="ov-journey">—</div><div class="overview-lbl">Journey 旅程</div></div>
-      <div class="overview-stat"><div class="overview-val" id="ov-pattern">—</div><div class="overview-lbl">Top Pattern 主证</div></div>
+      <div class="overview-stat"><div class="overview-val" id="ov-sessions">—</div><div class="overview-lbl" data-i18n="pt.ov.assessments">Assessments 评估</div></div>
+      <div class="overview-stat"><div class="overview-val" id="ov-constitution">—</div><div class="overview-lbl" data-i18n="pt.ov.constitution">Constitution 体质</div></div>
+      <div class="overview-stat"><div class="overview-val" id="ov-journey">—</div><div class="overview-lbl" data-i18n="pt.ov.journey">Journey 旅程</div></div>
+      <div class="overview-stat"><div class="overview-val" id="ov-pattern">—</div><div class="overview-lbl" data-i18n="pt.ov.pattern">Top Pattern 主证</div></div>
     </div>
     <div class="overview-row">
       <div class="organ-clock" id="organ-clock"></div>
@@ -94,31 +94,31 @@
   <!-- My Profile -->
   <section class="dashboard-section">
     <details class="profile-details">
-      <summary class="dashboard-section-title" style="cursor:pointer">My Profile 我的资料 <span class="profile-hint">(click to edit)</span></summary>
+      <summary class="dashboard-section-title" style="cursor:pointer"><span data-i18n="pt.profile">My Profile 我的资料</span> <span class="profile-hint">(click to edit)</span></summary>
       <div class="profile-card">
         <div class="form-row">
-          <div class="form-group"><label class="form-label" for="pf-name">Full Name 姓名</label><input class="form-input" id="pf-name" type="text"></div>
-          <div class="form-group"><label class="form-label" for="pf-age">Age 年龄</label><input class="form-input" id="pf-age" type="number" min="1" max="120"></div>
+          <div class="form-group"><label class="form-label" for="pf-name" data-i18n="login.fullname">Full Name 姓名</label><input class="form-input" id="pf-name" type="text"></div>
+          <div class="form-group"><label class="form-label" for="pf-age" data-i18n="pt.age">Age 年龄</label><input class="form-input" id="pf-age" type="number" min="1" max="120"></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label" for="pf-gender">Gender 性别</label>
+          <div class="form-group"><label class="form-label" for="pf-gender" data-i18n="pt.gender">Gender 性别</label>
             <select class="form-select" id="pf-gender"><option value="">Select…</option><option value="male">Male 男</option><option value="female">Female 女</option><option value="other">Other 其他</option></select>
           </div>
-          <div class="form-group"><label class="form-label" for="pf-height">Height (cm) 身高</label><input class="form-input" id="pf-height" type="number" min="50" max="250"></div>
+          <div class="form-group"><label class="form-label" for="pf-height" data-i18n="pt.height">Height (cm) 身高</label><input class="form-input" id="pf-height" type="number" min="50" max="250"></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label" for="pf-weight">Weight (kg) 体重</label><input class="form-input" id="pf-weight" type="number" min="20" max="300"></div>
+          <div class="form-group"><label class="form-label" for="pf-weight" data-i18n="pt.weight">Weight (kg) 体重</label><input class="form-input" id="pf-weight" type="number" min="20" max="300"></div>
           <div class="form-group"><label class="form-label" for="pf-bmi">BMI</label><input class="form-input" id="pf-bmi" type="text" readonly placeholder="auto"></div>
         </div>
-        <div class="form-group"><label class="form-label" for="pf-history">Medical History 病史</label><input class="form-input" id="pf-history" type="text" placeholder="e.g. hypertension, allergies (optional)"></div>
-        <button class="btn btn-primary btn-sm" id="pf-save">Save Profile 保存</button>
+        <div class="form-group"><label class="form-label" for="pf-history" data-i18n="pt.history">Medical History 病史</label><input class="form-input" id="pf-history" type="text" placeholder="e.g. hypertension, allergies (optional)"></div>
+        <button class="btn btn-primary btn-sm" id="pf-save" data-i18n="pt.saveprofile">Save Profile 保存</button>
         <span id="pf-status" class="pf-status"></span>
       </div>
     </details>
   </section>
 
   <!-- Session List -->
-  <h3 class="dashboard-section-title" style="margin-top:1.5rem">Assessment History 评估记录</h3>
+  <h3 class="dashboard-section-title" style="margin-top:1.5rem" data-i18n="pt.historytitle">Assessment History 评估记录</h3>
   <div id="sessions-loading" class="loading-row">
     <div class="spinner spinner-dark"></div> Loading your sessions…
   </div>
@@ -129,14 +129,14 @@
 
   <div id="sessions-empty" class="empty-state hidden">
     <div class="empty-icon">🌿</div>
-    <h3>No assessments yet 暂无记录</h3>
+    <h3 data-i18n="pt.noassess">No assessments yet 暂无记录</h3>
     <p class="text-muted">Complete your first TCM assessment to start your health journey.</p>
     <a href="/" class="btn btn-primary mt-4">Start Assessment 开始诊断</a>
   </div>
 
   <!-- Find a Doctor -->
   <section class="dashboard-section">
-    <h3 class="dashboard-section-title">Consult a Doctor 咨询医生</h3>
+    <h3 class="dashboard-section-title" data-i18n="pt.consult">Consult a Doctor 咨询医生</h3>
     <p class="text-muted" style="font-size:.85rem;margin-bottom:.75rem">Choose a registered TCM doctor to review your latest assessment and give you personalised feedback.</p>
     <div id="consult-status" class="consult-status"></div>
     <div id="doctor-directory" class="doctor-directory">Loading doctors…</div>
@@ -144,18 +144,18 @@
 
   <!-- Dietary Advice -->
   <section class="dashboard-section">
-    <h3 class="dashboard-section-title">Ask about Diet & Food 食疗问答</h3>
+    <h3 class="dashboard-section-title" data-i18n="pt.dietary">Ask about Diet & Food 食疗问答</h3>
     <p class="text-muted" style="font-size:.85rem;margin-bottom:.5rem">Ask a TCM food or diet question — answered for your latest constitution.</p>
     <div class="dietary-row">
-      <input class="form-input" id="dietary-q" type="text" placeholder="e.g. Can I eat cold fruit? Is coffee okay for me?">
-      <button class="btn btn-primary btn-sm" id="dietary-ask">Ask 提问</button>
+      <input class="form-input" id="dietary-q" type="text" placeholder="e.g. Can I eat cold fruit? Is coffee okay for me?" data-i18n-ph="pt.dietary.ph">
+      <button class="btn btn-primary btn-sm" id="dietary-ask" data-i18n="pt.ask">Ask 提问</button>
     </div>
     <div id="dietary-answer" class="dietary-answer hidden"></div>
   </section>
 
   <!-- My Consultations -->
   <section class="dashboard-section">
-    <h3 class="dashboard-section-title">My Consultations 我的咨询</h3>
+    <h3 class="dashboard-section-title" data-i18n="pt.consultations">My Consultations 我的咨询</h3>
     <div id="consultations-list">Loading…</div>
   </section>
 
