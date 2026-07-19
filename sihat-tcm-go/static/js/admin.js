@@ -41,7 +41,32 @@
     });
 
     getJSON('/api/admin/settings', {}).then(function (d) { renderSettings(d || {}); });
+
+    var tk = document.getElementById('adm-testkey');
+    if (tk) tk.addEventListener('click', function () { testGeminiKey(auth); });
   });
+
+  function testGeminiKey(auth) {
+    var out = document.getElementById('adm-testkey-result');
+    if (!out) return;
+    out.textContent = 'Testing… 测试中…'; out.style.color = '';
+    fetch('/api/admin/test-api-key', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, auth || {}),
+      body: JSON.stringify({ useSavedKey: true }),
+    })
+      .then(function (r) { return r.json().then(function (d) { return { status: r.status, ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (res.ok && res.d && res.d.success) {
+          out.innerHTML = '<span class="pill healthy">✓ Valid 有效</span> ' + esc(res.d.message || 'Key is working');
+        } else {
+          var msg = (res.d && res.d.error) || 'Test failed';
+          var quota = res.status === 429;
+          out.innerHTML = '<span class="pill ' + (quota ? 'degraded' : 'unhealthy') + '">' + (quota ? '⚠ Quota 配额' : '✗ Error 错误') + '</span> ' + esc(msg);
+        }
+      })
+      .catch(function () { out.textContent = 'Could not run the test. 无法测试。'; });
+  }
 
   /* ---- renderers ---- */
   function renderPrompts(arr) {

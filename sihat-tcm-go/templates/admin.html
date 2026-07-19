@@ -52,6 +52,10 @@
   <div class="admin-section"><h2>Error Statistics (24h) 错误统计</h2><div id="adm-errors" class="muted">Loading…</div></div>
   <div class="admin-section"><h2>Recent Logs 近期日志</h2><div id="adm-logs" class="muted">Loading…</div></div>
   <div class="admin-section"><h2>Settings 设置</h2><div id="adm-settings" class="muted">Loading…</div></div>
+  <div class="admin-section"><h2>AI Key Diagnostics AI 密钥诊断</h2>
+    <button class="btn btn-primary btn-sm" id="adm-testkey" type="button">Test Gemini Key 测试密钥</button>
+    <div id="adm-testkey-result" class="muted" style="margin-top:.6rem">Check whether the configured Gemini key is valid or quota-limited. 检测已配置的 Gemini 密钥是否有效或受配额限制。</div>
+  </div>
 </main>
 
 {{template "footer" .}}
