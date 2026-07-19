@@ -159,6 +159,14 @@ async function main() {
     check(`p${pt.p}.8.patient_sees_feedback`, !!docMsg && row.status === "reviewed", `status=${row && row.status} hasDocMsg=${!!docMsg}`);
   }
 
+  // ---- Doctor triage flag (explicit, not keyword-inferred) ----
+  elog("\nDoctor triage flag");
+  const flagTarget = patients[1].requestId;
+  const flagResp = await api("/api/doctor/flag", { method: "POST", token: doctors[0].token, body: { requestId: flagTarget, flag: "critical" } });
+  const inboxFlag = ((await api("/api/doctor/requests", { token: doctors[0].token })).json || {}).requests || [];
+  const flagged = inboxFlag.find((x) => x.id === flagTarget);
+  check("flag.set_and_reads", flagResp.status === 200 && flagged && flagged.flag === "critical", `status=${flagResp.status} flag=${flagged && flagged.flag}`);
+
   // ---- Patient basic profile save + read-back ----
   elog("\nPatient profile save/read");
   const p0 = patients[0];
