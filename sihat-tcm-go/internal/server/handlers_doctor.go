@@ -17,6 +17,8 @@ func (s *Server) registerDoctorRoutes() {
 	s.Mux.HandleFunc("GET /api/doctors", s.handleDoctorsDirectory)
 	// Doctor inbox — consultation requests routed to the authenticated doctor.
 	s.Mux.HandleFunc("GET /api/doctor/requests", s.RequireAuth(s.handleDoctorRequests, "doctor"))
+	// Doctor sets a triage flag (normal/watch/critical) on a request.
+	s.Mux.HandleFunc("POST /api/doctor/flag", s.RequireAuth(s.handleDoctorFlag, "doctor"))
 	// Patient consultations — the patient's own requests + any doctor replies.
 	s.Mux.HandleFunc("GET /api/patient/requests", s.RequireAuth(s.handlePatientRequests))
 	// Patient cancels/removes one of their own consultation requests.
@@ -52,7 +54,7 @@ func (s *Server) handleDoctorRequests(w http.ResponseWriter, r *http.Request, us
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
 	var rows []map[string]any
-	q := "select=id,user_id,doctor_id,symptoms,status,diagnosis_report,created_at&order=created_at.desc&limit=300"
+	q := "select=id,user_id,doctor_id,symptoms,status,flag,diagnosis_report,created_at&order=created_at.desc&limit=300"
 	if err := s.DB.Select(ctx, "inquiries", q, "", &rows); err != nil {
 		log.Printf("doctor/requests: %v", err)
 		s.JSONError(w, http.StatusInternalServerError, "failed to load requests")
@@ -62,6 +64,37 @@ func (s *Server) handleDoctorRequests(w http.ResponseWriter, r *http.Request, us
 		rows = []map[string]any{}
 	}
 	s.JSON(w, http.StatusOK, map[string]any{"requests": rows})
+}
+
+// handleDoctorFlag sets an EXPLICIT triage flag on a request (normal/watch/
+// critical). Explicit — never keyword-inferred — to avoid false positives.
+func (s *Server) handleDoctorFlag(w http.ResponseWriter, r *http.Request, user *AuthUser) {
+	var body struct {
+		RequestID string `json:"requestId"`
+		Flag      string `json:"flag"`
+	}
+	if !dtReadJSON(w, r, &body) {
+		return
+	}
+	if body.RequestID == "" {
+		s.JSONError(w, http.StatusBadRequest, "requestId is required")
+		return
+	}
+	flag := body.Flag
+	switch flag {
+	case "normal", "watch", "critical":
+	default:
+		flag = "normal"
+	}
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
+	defer cancel()
+	var ignore []map[string]any
+	if err := s.DB.Update(ctx, "inquiries", "id=eq."+body.RequestID, map[string]any{"flag": flag}, "", &ignore); err != nil {
+		log.Printf("doctor/flag: %v", err)
+		s.JSONError(w, http.StatusInternalServerError, "failed to set flag")
+		return
+	}
+	s.JSON(w, http.StatusOK, map[string]any{"success": true, "flag": flag})
 }
 
 // handlePatientRequests lists the patient's own consultation requests + replies.

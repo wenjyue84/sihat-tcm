@@ -12,9 +12,10 @@
 
   function token() { return localStorage.getItem('tcm-token') || getCookie('sb-access-token'); }
 
+  var allRequests = [];
+
   function loadInbox() {
     var box = document.getElementById('doctor-inbox');
-    var countEl = document.getElementById('inbox-count');
     fetch('/api/doctor/requests', { headers: { 'Authorization': 'Bearer ' + token() } })
       .then(function (r) {
         if (r.status === 401 || r.status === 403) { box.innerHTML = '<p class="alert alert-error">Doctor access required. Please sign in as a doctor.</p>'; return null; }
@@ -22,19 +23,51 @@
       })
       .then(function (d) {
         if (!d) return;
-        var reqs = d.requests || [];
-        if (countEl) countEl.textContent = reqs.length;
-        var pending = reqs.filter(function (x) { return x.status !== 'reviewed'; }).length;
-        var pendEl = document.getElementById('inbox-pending');
-        if (pendEl) pendEl.textContent = pending;
-        if (!reqs.length) { box.innerHTML = '<p class="text-muted">No patient requests yet. When a patient selects you, their report appears here.</p>'; return; }
-        box.innerHTML = reqs.map(renderRequest).join('');
-        box.querySelectorAll('button[data-reply]').forEach(function (b) {
-          b.addEventListener('click', function () { doctorReply(b.getAttribute('data-reply')); });
+        allRequests = d.requests || [];
+        // Wire the filter controls once.
+        ['inbox-search', 'inbox-status', 'inbox-flag'].forEach(function (id) {
+          var e = document.getElementById(id);
+          if (e && !e.dataset.wired) { e.dataset.wired = '1'; e.addEventListener('input', applyFilters); e.addEventListener('change', applyFilters); }
         });
+        applyFilters();
       })
       .catch(function () { box.innerHTML = '<p class="alert alert-error">Could not load requests.</p>'; });
   }
+
+  function applyFilters() {
+    var box = document.getElementById('doctor-inbox');
+    var q = (val('inbox-search') || '').toLowerCase();
+    var statusF = val('inbox-status');
+    var flagF = val('inbox-flag');
+    var filtered = allRequests.filter(function (req) {
+      if (statusF && (req.status || 'pending') !== statusF) return false;
+      if (flagF && (req.flag || 'normal') !== flagF) return false;
+      if (q) {
+        var rep = req.diagnosis_report || {};
+        var hay = ((rep.patient_profile && rep.patient_profile.name) || '') + ' '
+          + ((rep.full_report && rep.full_report.diagnosis && rep.full_report.diagnosis.primary_pattern) || '') + ' '
+          + ((rep.selected_doctor && rep.selected_doctor.name) || '');
+        if (hay.toLowerCase().indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    var countEl = document.getElementById('inbox-count'); if (countEl) countEl.textContent = allRequests.length;
+    var pendEl = document.getElementById('inbox-pending'); if (pendEl) pendEl.textContent = allRequests.filter(function (x) { return (x.status || 'pending') !== 'reviewed'; }).length;
+    if (!allRequests.length) { box.innerHTML = '<p class="text-muted">No patient requests yet. When a patient selects a doctor, their report appears here.</p>'; return; }
+    if (!filtered.length) { box.innerHTML = '<p class="text-muted">No requests match your filters.</p>'; return; }
+    box.innerHTML = filtered.map(renderRequest).join('');
+    box.querySelectorAll('button[data-reply]').forEach(function (b) { b.addEventListener('click', function () { doctorReply(b.getAttribute('data-reply')); }); });
+    box.querySelectorAll('select[data-flag]').forEach(function (sel) { sel.addEventListener('change', function () { doctorSetFlag(sel.getAttribute('data-flag'), sel.value); }); });
+  }
+
+  function doctorSetFlag(id, flag) {
+    fetch('/api/doctor/flag', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() }, body: JSON.stringify({ requestId: id, flag: flag }) })
+      .then(function (r) { return r.json(); })
+      .then(function () { var req = allRequests.filter(function (x) { return x.id === id; })[0]; if (req) req.flag = flag; applyFilters(); })
+      .catch(function () { /* ignore */ });
+  }
+
+  function val(id) { var e = document.getElementById(id); return e ? e.value : ''; }
 
   function renderRequest(req) {
     var rep = req.diagnosis_report || {};
@@ -47,18 +80,26 @@
     var summary = (report.analysis && report.analysis.summary) || '';
     var msgs = (rep.messages || []).filter(function (m) { return m.role === 'doctor'; });
     var reviewed = req.status === 'reviewed' || msgs.length > 0;
+    var flag = req.flag || 'normal';
+    var flagBadge = flag !== 'normal' ? '<span class="flag-badge flag-' + flag + '">' + (flag === 'critical' ? '🔴 Critical' : '🟡 Watch') + '</span> ' : '';
 
-    return '<div class="inbox-item">'
+    return '<div class="inbox-item flag-border-' + flag + '">'
       + '<div class="inbox-head"><div><strong>' + esc(pp.name || 'Patient') + '</strong>'
       + '<div class="inbox-diag">Pattern: ' + esc(typeof diag === 'string' ? diag : '—') + (constitution ? ' · ' + esc(constitution) : '') + '</div>'
       + '<div class="inbox-diag">→ Requested ' + esc(doc.name || 'any doctor') + '  ·  ' + esc(fmtDT(req.created_at)) + '</div></div>'
-      + '<span class="consult-badge ' + (reviewed ? 'reviewed' : 'pending') + '">' + (reviewed ? 'Reviewed ✓' : 'Pending ⏳') + '</span></div>'
+      + '<div class="inbox-badges">' + flagBadge + '<span class="consult-badge ' + (reviewed ? 'reviewed' : 'pending') + '">' + (reviewed ? 'Reviewed ✓' : 'Pending ⏳') + '</span></div></div>'
       + (summary ? '<div class="inbox-summary">' + esc(summary.slice(0, 260)) + (summary.length > 260 ? '…' : '') + '</div>' : '')
       + (msgs.length ? '<div class="consult-feedback">Your reply: ' + esc(msgs[msgs.length - 1].content) + '</div>' : '')
       + '<div class="inbox-reply">'
       + '<textarea class="form-input" id="reply-' + esc(req.id) + '" rows="2" placeholder="Write clinical feedback to the patient…"></textarea>'
       + '<button class="btn btn-blue btn-sm" data-reply="' + esc(req.id) + '">Send Feedback 发送反馈</button>'
-      + '</div><div class="reply-status" id="reply-status-' + esc(req.id) + '"></div></div>';
+      + '</div>'
+      + '<div class="inbox-flagrow">Priority 优先级: <select class="flag-select" data-flag="' + esc(req.id) + '">'
+      + '<option value="normal"' + (flag === 'normal' ? ' selected' : '') + '>Normal 普通</option>'
+      + '<option value="watch"' + (flag === 'watch' ? ' selected' : '') + '>Watch 关注</option>'
+      + '<option value="critical"' + (flag === 'critical' ? ' selected' : '') + '>Critical 紧急</option>'
+      + '</select></div>'
+      + '<div class="reply-status" id="reply-status-' + esc(req.id) + '"></div></div>';
   }
 
   function doctorReply(id) {
