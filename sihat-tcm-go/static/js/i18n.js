@@ -45,6 +45,10 @@
       'pt.saveprofile': 'Save Profile', 'pt.historytitle': 'Assessment History', 'pt.noassess': 'No assessments yet', 'pt.consult': 'Consult a Doctor',
       'pt.dietary': 'Ask about Diet & Food', 'pt.ask': 'Ask', 'pt.consultations': 'My Consultations',
       'pt.dietary.ph': 'e.g. Can I eat cold fruit? Is coffee okay for me?',
+      'dr.title': 'Doctor Dashboard', 'dr.subtitle': 'Review patient AI assessments, generate tailored inquiry sets, and guide consultations.', 'dr.openwizard': 'Open Diagnosis Wizard',
+      'dr.stat.total': 'Total Sessions', 'dr.stat.today': 'Today', 'dr.stat.constitution': 'Top Constitution', 'dr.stat.pending': 'Pending Reviews',
+      'dr.inbox': 'Patient Requests', 'dr.tab.requests': '📋 Requests', 'dr.tab.patients': '👥 Patients', 'dr.quickactions': 'Quick Actions',
+      'dr.qa.new': 'New Patient Assessment', 'dr.qa.newbtn': 'Start Wizard →', 'dr.qa.sessions': 'Patient Sessions', 'dr.qa.sessionsbtn': 'View Sessions →', 'dr.qa.inquiry': 'Generate Inquiry Set', 'dr.qa.inquirybtn': 'Generate Questions →',
       'footer.disclaimer': 'For educational purposes only. Not a substitute for professional medical advice.',
     },
     zh: {
@@ -75,6 +79,10 @@
       'pt.saveprofile': '保存资料', 'pt.historytitle': '评估记录', 'pt.noassess': '暂无记录', 'pt.consult': '咨询医生',
       'pt.dietary': '食疗问答', 'pt.ask': '提问', 'pt.consultations': '我的咨询',
       'pt.dietary.ph': '例如：我能吃凉性水果吗？咖啡适合我吗？',
+      'dr.title': '医生控制台', 'dr.subtitle': '查看患者 AI 评估，生成定制问诊题，指导咨询。', 'dr.openwizard': '打开诊断向导',
+      'dr.stat.total': '总诊断数', 'dr.stat.today': '今日', 'dr.stat.constitution': '最常见体质', 'dr.stat.pending': '待审阅',
+      'dr.inbox': '患者请求', 'dr.tab.requests': '📋 请求', 'dr.tab.patients': '👥 患者', 'dr.quickactions': '快捷操作',
+      'dr.qa.new': '新患者评估', 'dr.qa.newbtn': '开始向导 →', 'dr.qa.sessions': '患者记录', 'dr.qa.sessionsbtn': '查看记录 →', 'dr.qa.inquiry': '生成问诊题', 'dr.qa.inquirybtn': '生成问题 →',
       'footer.disclaimer': '仅供教育参考，不替代专业医疗建议。',
     },
     ms: {
@@ -105,6 +113,10 @@
       'pt.saveprofile': 'Simpan Profil', 'pt.historytitle': 'Sejarah Penilaian', 'pt.noassess': 'Tiada penilaian lagi', 'pt.consult': 'Rujuk Doktor',
       'pt.dietary': 'Tanya tentang Diet & Makanan', 'pt.ask': 'Tanya', 'pt.consultations': 'Perundingan Saya',
       'pt.dietary.ph': 'cth. Bolehkah saya makan buah sejuk? Kopi sesuai untuk saya?',
+      'dr.title': 'Papan Pemuka Doktor', 'dr.subtitle': 'Semak penilaian AI pesakit, jana set soal selidik tersuai, dan pandu perundingan.', 'dr.openwizard': 'Buka Wizard Diagnosis',
+      'dr.stat.total': 'Jumlah Sesi', 'dr.stat.today': 'Hari Ini', 'dr.stat.constitution': 'Perlembagaan Teratas', 'dr.stat.pending': 'Semakan Tertunda',
+      'dr.inbox': 'Permintaan Pesakit', 'dr.tab.requests': '📋 Permintaan', 'dr.tab.patients': '👥 Pesakit', 'dr.quickactions': 'Tindakan Pantas',
+      'dr.qa.new': 'Penilaian Pesakit Baharu', 'dr.qa.newbtn': 'Mula Wizard →', 'dr.qa.sessions': 'Sesi Pesakit', 'dr.qa.sessionsbtn': 'Lihat Sesi →', 'dr.qa.inquiry': 'Jana Set Soal Selidik', 'dr.qa.inquirybtn': 'Jana Soalan →',
       'footer.disclaimer': 'Untuk tujuan pendidikan sahaja. Bukan pengganti nasihat perubatan profesional.',
     },
   };

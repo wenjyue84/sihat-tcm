@@ -56,9 +56,9 @@
 
   <!-- CTA Card -->
   <div class="doctor-cta-card">
-    <h2>Doctor Dashboard 医生控制台</h2>
-    <p>Review patient AI assessments, generate tailored inquiry sets, and guide consultations.</p>
-    <a href="/" class="btn btn-primary" style="background:#fff;color:var(--blue-700);">
+    <h2 data-i18n="dr.title">Doctor Dashboard 医生控制台</h2>
+    <p data-i18n="dr.subtitle">Review patient AI assessments, generate tailored inquiry sets, and guide consultations.</p>
+    <a href="/" class="btn btn-primary" style="background:#fff;color:var(--blue-700);" data-i18n="dr.openwizard">
       Open Diagnosis Wizard 诊断向导
     </a>
   </div>
@@ -67,33 +67,33 @@
   <div class="stats-grid" id="stats-grid">
     <div class="stat-card">
       <div class="stat-value" id="stat-total">—</div>
-      <div class="stat-label">Total Sessions 总诊断数</div>
+      <div class="stat-label" data-i18n="dr.stat.total">Total Sessions 总诊断数</div>
       <div class="stat-sub">All time</div>
     </div>
     <div class="stat-card">
       <div class="stat-value" id="stat-today">—</div>
-      <div class="stat-label">Today 今日</div>
+      <div class="stat-label" data-i18n="dr.stat.today">Today 今日</div>
       <div class="stat-sub">Sessions today</div>
     </div>
     <div class="stat-card">
       <div class="stat-value" id="stat-constitution">—</div>
-      <div class="stat-label">Top Constitution 最常见体质</div>
+      <div class="stat-label" data-i18n="dr.stat.constitution">Top Constitution 最常见体质</div>
       <div class="stat-sub">Most common</div>
     </div>
     <div class="stat-card">
       <div class="stat-value" id="inbox-pending">—</div>
-      <div class="stat-label">Pending Reviews 待审阅</div>
+      <div class="stat-label" data-i18n="dr.stat.pending">Pending Reviews 待审阅</div>
       <div class="stat-sub">Awaiting your feedback</div>
     </div>
   </div>
 
   <!-- Patient Requests Inbox -->
   <section class="doctor-inbox-section">
-    <h2 class="inbox-title">Patient Requests 患者请求 <span id="inbox-count" class="inbox-count-badge">0</span></h2>
+    <h2 class="inbox-title"><span data-i18n="dr.inbox">Patient Requests 患者请求</span> <span id="inbox-count" class="inbox-count-badge">0</span></h2>
     <p class="text-muted" style="font-size:.85rem;margin-bottom:.85rem">Master inbox — <strong>all</strong> patient consultation requests appear here (each shows the doctor the patient chose). Review the AI report, set a priority, and send feedback; it appears in the patient's dashboard.</p>
     <div class="inbox-tabs">
-      <button class="inbox-tab active" id="tabbtn-requests" type="button" onclick="doctorShowTab('requests')">📋 Requests 请求</button>
-      <button class="inbox-tab" id="tabbtn-patients" type="button" onclick="doctorShowTab('patients')">👥 Patients 患者 <span id="patients-count" class="inbox-count-badge" style="background:var(--slate-500,#64748b)">0</span></button>
+      <button class="inbox-tab active" id="tabbtn-requests" type="button" onclick="doctorShowTab('requests')" data-i18n="dr.tab.requests">📋 Requests 请求</button>
+      <button class="inbox-tab" id="tabbtn-patients" type="button" onclick="doctorShowTab('patients')"><span data-i18n="dr.tab.patients">👥 Patients 患者</span> <span id="patients-count" class="inbox-count-badge" style="background:var(--slate-500,#64748b)">0</span></button>
     </div>
     <div id="tab-requests">
       <div class="inbox-filters">
@@ -119,22 +119,22 @@
   </section>
 
   <!-- Quick Actions -->
-  <h2 class="mb-4" style="font-size:1.1rem;font-weight:700;color:var(--slate-700)">Quick Actions 快捷操作</h2>
+  <h2 class="mb-4" style="font-size:1.1rem;font-weight:700;color:var(--slate-700)" data-i18n="dr.quickactions">Quick Actions 快捷操作</h2>
   <div class="quick-actions">
     <div class="qa-card">
-      <h3>New Patient Assessment</h3>
+      <h3 data-i18n="dr.qa.new">New Patient Assessment</h3>
       <p>Run the full 四诊合参 wizard for a new or returning patient.</p>
-      <a href="/" class="btn btn-blue btn-sm">Start Wizard →</a>
+      <a href="/" class="btn btn-blue btn-sm" data-i18n="dr.qa.newbtn">Start Wizard →</a>
     </div>
     <div class="qa-card">
-      <h3>Patient Sessions</h3>
+      <h3 data-i18n="dr.qa.sessions">Patient Sessions</h3>
       <p>View all past TCM assessment sessions and full reports.</p>
-      <a href="/patient" class="btn btn-secondary btn-sm">View Sessions →</a>
+      <a href="/patient" class="btn btn-secondary btn-sm" data-i18n="dr.qa.sessionsbtn">View Sessions →</a>
     </div>
     <div class="qa-card">
-      <h3>Generate Inquiry Set</h3>
+      <h3 data-i18n="dr.qa.inquiry">Generate Inquiry Set</h3>
       <p>AI-generated custom question set for specific patient profiles.</p>
-      <button class="btn btn-secondary btn-sm" onclick="doctorGenInquiry()">Generate Questions →</button>
+      <button class="btn btn-secondary btn-sm" onclick="doctorGenInquiry()" data-i18n="dr.qa.inquirybtn">Generate Questions →</button>
     </div>
   </div>
 
