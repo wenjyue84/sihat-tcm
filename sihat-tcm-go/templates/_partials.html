@@ -1,0 +1,117 @@
+{{define "header"}}
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-logo">
+      Sihat TCM <span class="logo-zh">中医</span>
+    </a>
+    <nav class="header-nav">
+      <span id="header-auth-link">
+        <a href="/login" id="nav-login-link">Login</a>
+      </span>
+      <button class="lang-btn" id="lang-toggle" onclick="window.tcmLang && window.tcmLang.toggle()">EN</button>
+    </nav>
+  </div>
+</header>
+<script>
+(function(){
+  var langs = ['en','zh','ms'];
+  var labels = {en:'EN', zh:'中文', ms:'BM'};
+  var idx = 0;
+  var stored = localStorage.getItem('tcm-lang') || 'en';
+  idx = langs.indexOf(stored);
+  if (idx < 0) idx = 0;
+  var btn = document.getElementById('lang-toggle');
+  if (btn) btn.textContent = labels[langs[idx]];
+
+  window.tcmLang = {
+    get: function(){ return langs[idx]; },
+    toggle: function(){
+      idx = (idx + 1) % langs.length;
+      var l = langs[idx];
+      localStorage.setItem('tcm-lang', l);
+      if (btn) btn.textContent = labels[l];
+      document.dispatchEvent(new CustomEvent('tcm:langchange', {detail: l}));
+    }
+  };
+
+  // Auth link swap — show Dashboard + Logout when signed in.
+  // The access token cookie is HttpOnly (invisible to JS), so detect login via
+  // the non-HttpOnly tcm-user/tcm-role that storeAuth() always writes.
+  var token = localStorage.getItem('tcm-token') || getCookie('sb-access-token');
+  var role   = localStorage.getItem('tcm-role');
+  var loggedIn = !!(token || role || localStorage.getItem('tcm-user'));
+  var loginEl = document.getElementById('nav-login-link');
+  var authSpan = document.getElementById('header-auth-link');
+  if (loggedIn && loginEl) {
+    var dest = (role === 'doctor') ? '/doctor' : '/patient';
+    loginEl.href = dest;
+    loginEl.textContent = 'Dashboard';
+    if (authSpan && !document.getElementById('nav-logout-link')) {
+      var lo = document.createElement('a');
+      lo.id = 'nav-logout-link';
+      lo.href = '#';
+      lo.textContent = 'Logout';
+      lo.style.marginLeft = '.75rem';
+      lo.addEventListener('click', function (e) { e.preventDefault(); window.tcmLogout(); });
+      authSpan.appendChild(lo);
+    }
+  }
+  window.tcmLogout = function () {
+    fetch('/api/auth/logout', { method: 'POST' }).finally(function () {
+      localStorage.removeItem('tcm-token');
+      localStorage.removeItem('tcm-role');
+      localStorage.removeItem('tcm-user');
+      window.location.href = '/';
+    });
+  };
+  function getCookie(n){
+    var m = document.cookie.match('(^|;)\\s*' + n + '\\s*=\\s*([^;]+)');
+    return m ? m.pop() : '';
+  }
+})();
+</script>
+{{end}}
+
+{{define "doctor-header"}}
+<header class="doctor-header">
+  <div class="container">
+    <a href="/" class="site-logo">
+      Sihat TCM <span class="logo-zh">医生</span>
+    </a>
+    <nav class="header-nav">
+      <a href="/patient">Patient View</a>
+      <a href="#" id="doc-logout-link">Logout</a>
+      <button class="lang-btn" id="lang-toggle-doc" onclick="window.tcmLang && window.tcmLang.toggle()">EN</button>
+    </nav>
+  </div>
+</header>
+<script>
+(function(){
+  document.getElementById('doc-logout-link').addEventListener('click', function(e){
+    e.preventDefault();
+    fetch('/api/auth/logout', {method:'POST'}).finally(function(){
+      localStorage.removeItem('tcm-token');
+      localStorage.removeItem('tcm-role');
+      localStorage.removeItem('tcm-user');
+      window.location.href = '/login';
+    });
+  });
+})();
+</script>
+{{end}}
+
+{{define "footer"}}
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      &copy; 2025 Sihat TCM &mdash; AI-powered 四诊合参 diagnostics &mdash;
+      <a href="/">Home</a> &middot;
+      <a href="/login">Login</a>
+    </p>
+    <p class="mt-2" style="font-size:.75rem">
+      For educational purposes only. Not a substitute for professional medical advice.
+      仅供教育参考，不替代专业医疗建议。
+    </p>
+  </div>
+</footer>
+{{end}}

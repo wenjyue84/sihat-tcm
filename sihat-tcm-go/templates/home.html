@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{.Title}} — AI-Powered TCM Diagnostics 中医AI诊断</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{asset "/static/css/app.css"}}">
+  <style>
+    .hero-test-row { margin-top: .9rem; text-align: center; }
+    .wizard-toolbar { display: flex; justify-content: flex-end; margin-bottom: .5rem; }
+    .wizard-toolbar .btn { border: 1px dashed var(--stone-300, #d6d3d1); }
+    .chat-options { display: flex; flex-wrap: wrap; gap: .5rem; padding: .5rem .25rem 0; }
+    .chat-option-chip { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; padding: .5rem 1rem; border-radius: 999px; font-size: .85rem; font-weight: 500; cursor: pointer; transition: background .15s, transform .05s; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    .chat-option-chip:hover { background: #d1fae5; }
+    .chat-option-chip:active { transform: scale(.96); }
+    .report-progress { padding: 1.5rem .5rem; text-align: center; }
+    .report-progress-top { display: flex; align-items: center; justify-content: center; gap: .6rem; font-weight: 600; color: var(--stone-700, #44403c); font-size: .95rem; }
+    .report-progress-msg { transition: opacity .3s; }
+    .report-progress-bar { max-width: 420px; margin: 1rem auto .5rem; height: 8px; background: var(--stone-200, #e7e5e4); border-radius: 999px; overflow: hidden; }
+    .report-progress-fill { height: 100%; width: 8%; background: linear-gradient(90deg, var(--emerald-500, #10b981), var(--emerald-600, #059669)); border-radius: 999px; transition: width 1.6s ease; }
+    .report-progress-hint { font-size: .78rem; color: var(--color-muted, #78716c); }
+  </style>
+</head>
+<body class="page-patient">
+
+{{template "header" .}}
+
+<!-- ===== HERO ===== -->
+<section class="hero-section" id="home-hero">
+  <div class="container">
+    <div class="hero-badge">Traditional Chinese Medicine · 传统中医</div>
+    <h1 class="hero-title">
+      Your Health,<br><span>Understood Holistically</span>
+    </h1>
+    <p class="hero-sub">
+      AI-powered 四诊合参 (Four Examinations) — combining inquiry, visual, audio, and pulse
+      analysis for a complete TCM constitutional assessment.
+    </p>
+    <div class="hero-actions">
+      <button class="btn btn-primary btn-lg" onclick="startWizard()">
+        Start Free Assessment 开始诊断
+      </button>
+      <a href="/login" class="btn btn-outline btn-lg">Sign In 登录</a>
+    </div>
+    <div class="hero-test-row">
+      <button class="btn btn-ghost btn-sm" type="button" onclick="window.wizardFillTest()">
+        🧪 Fill Test Data 填充测试数据
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section class="features-grid" id="home-features">
+  <div class="feature-card">
+    <div class="feature-icon">💬</div>
+    <h3>Inquiry 问诊</h3>
+    <p>AI-guided symptom inquiry in your language. Natural conversation covering chief complaints, lifestyle, and history.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">👁️</div>
+    <h3>Visual Analysis 望诊</h3>
+    <p>Tongue and facial analysis using computer vision — detecting coating, color, shape patterns.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🎙️</div>
+    <h3>Audio 闻诊</h3>
+    <p>Voice and breathing pattern analysis to assess energy levels and organ vitality.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🫀</div>
+    <h3>Pulse 切诊</h3>
+    <p>Pulse rate and quality assessment — floating, wiry, slippery, deep and more traditional pulse types.</p>
+  </div>
+</section>
+
+<!-- ===== DIAGNOSIS WIZARD ===== -->
+<section id="wizard-section" class="hidden">
+  <div class="wizard-card">
+
+    <!-- Test toolbar -->
+    <div class="wizard-toolbar">
+      <button class="btn btn-ghost btn-sm" type="button" onclick="window.wizardReset()" title="Clear everything and start a fresh assessment">
+        🔄 Reset 重新开始
+      </button>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="window.wizardFillTest()" title="Populate all steps with sample data and jump to the summary">
+        🧪 Fill Test Data 填充测试数据
+      </button>
+    </div>
+
+    <!-- Stepper -->
+    <div class="stepper" id="stepper">
+      <div class="step-item" data-step="0">
+        <div class="step-dot">1</div>
+        <span class="step-label">Info<br>基本</span>
+      </div>
+      <div class="step-item" data-step="1">
+        <div class="step-dot">2</div>
+        <span class="step-label">Inquiry<br>问诊</span>
+      </div>
+      <div class="step-item" data-step="2">
+        <div class="step-dot">3</div>
+        <span class="step-label">Tongue<br>舌</span>
+      </div>
+      <div class="step-item" data-step="3">
+        <div class="step-dot">4</div>
+        <span class="step-label">Face<br>面</span>
+      </div>
+      <div class="step-item" data-step="4">
+        <div class="step-dot">5</div>
+        <span class="step-label">Audio<br>闻诊</span>
+      </div>
+      <div class="step-item" data-step="5">
+        <div class="step-dot">6</div>
+        <span class="step-label">Pulse<br>切诊</span>
+      </div>
+      <div class="step-item" data-step="6">
+        <div class="step-dot">7</div>
+        <span class="step-label">Review<br>总结</span>
+      </div>
+      <div class="step-item" data-step="7">
+        <div class="step-dot">8</div>
+        <span class="step-label">Report<br>报告</span>
+      </div>
+    </div>
+
+    <!-- Step Bodies -->
+    <div class="wizard-body">
+
+      <!-- Step 0: Basic Info -->
+      <div class="wizard-step active" id="step-0">
+        <h2 class="step-title">Basic Information 基本信息</h2>
+        <p class="step-subtitle">Tell us a little about yourself so we can personalise your assessment.</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="bi-name">Full Name 姓名</label>
+            <input class="form-input" id="bi-name" type="text" placeholder="Your name" autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="bi-age">Age 年龄</label>
+            <input class="form-input" id="bi-age" type="number" min="1" max="120" placeholder="e.g. 35">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="bi-gender">Gender 性别</label>
+            <select class="form-select" id="bi-gender">
+              <option value="">Select…</option>
+              <option value="male">Male 男</option>
+              <option value="female">Female 女</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="bi-height">Height (cm) 身高</label>
+            <input class="form-input" id="bi-height" type="number" min="50" max="250" placeholder="e.g. 168">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="bi-weight">Weight (kg) 体重</label>
+            <input class="form-input" id="bi-weight" type="number" min="20" max="300" placeholder="e.g. 65">
+          </div>
+          <div class="form-group">
+            <!-- spacer -->
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Main Symptoms 主要症状</label>
+          <p class="form-hint">Select all that apply or type your own.</p>
+          <div class="chips-container" id="symptom-chips">
+            <span class="chip" data-value="fatigue">Fatigue 疲劳</span>
+            <span class="chip" data-value="headache">Headache 头痛</span>
+            <span class="chip" data-value="insomnia">Insomnia 失眠</span>
+            <span class="chip" data-value="digestive">Digestive Issues 消化不良</span>
+            <span class="chip" data-value="joint-pain">Joint Pain 关节痛</span>
+            <span class="chip" data-value="anxiety">Anxiety 焦虑</span>
+            <span class="chip" data-value="cold-limbs">Cold Limbs 四肢冰冷</span>
+            <span class="chip" data-value="hot-flush">Hot Flushes 潮热</span>
+            <span class="chip" data-value="palpitations">Palpitations 心悸</span>
+            <span class="chip" data-value="shortness-breath">Shortness of Breath 气促</span>
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:center;margin-top:.5rem">
+            <input class="chip-add-input" id="symptom-custom-input" type="text" placeholder="Add symptom…" maxlength="50">
+            <button class="btn btn-secondary btn-sm" type="button" onclick="window.wizardAddCustomSymptom()">Add</button>
+          </div>
+        </div>
+        <div id="step0-error" class="alert alert-error hidden"></div>
+      </div>
+
+      <!-- Step 1: Inquiry (Chat) -->
+      <div class="wizard-step" id="step-1">
+        <h2 class="step-title">Inquiry 问诊</h2>
+        <p class="step-subtitle">Chat with our AI TCM assistant. Answer at least 4 questions for an accurate assessment.</p>
+        <div class="chat-progress-bar">
+          <div class="chat-progress-fill" id="chat-progress" style="width:0%"></div>
+        </div>
+        <div class="chat-container">
+          <div class="chat-messages" id="chat-messages"></div>
+          <div class="chat-options" id="chat-options"></div>
+          <div class="chat-input-row">
+            <textarea class="chat-input" id="chat-input" placeholder="Type your reply…" rows="1"></textarea>
+            <button class="btn btn-primary" id="chat-send-btn" onclick="window.wizardChatSend()">Send</button>
+          </div>
+        </div>
+        <div id="inquiry-summary-box" class="observation-box hidden">
+          <strong>Inquiry Summary 问诊摘要</strong>
+          <p id="inquiry-summary-text" style="margin-top:.4rem;font-size:.85rem"></p>
+        </div>
+      </div>
+
+      <!-- Step 2: Tongue Analysis 望诊 (舌) -->
+      <div class="wizard-step" id="step-2">
+        <h2 class="step-title">Tongue Analysis 舌诊</h2>
+        <p class="step-subtitle">Take a clear photo of your tongue in natural light. Stick out your tongue fully.</p>
+        <div class="upload-zone" id="tongue-upload-zone">
+          <div class="upload-icon">📷</div>
+          <strong>Tap to upload or take photo</strong>
+          <p>Supports JPG, PNG · Best in daylight</p>
+          <input type="file" id="tongue-file" accept="image/*" capture="environment" onchange="window.wizardHandleImage('tongue', this)">
+        </div>
+        <div id="tongue-preview" class="image-preview hidden">
+          <img id="tongue-img" src="" alt="Tongue photo">
+          <div class="preview-overlay">
+            <button class="btn btn-secondary btn-sm" onclick="window.wizardClearImage('tongue')">Retake</button>
+          </div>
+        </div>
+        <div id="tongue-observation" class="observation-box hidden">
+          <strong>AI Observation 观察 <span id="tongue-obs-confidence" class="tag" style="margin-left:.4rem"></span></strong>
+          <textarea class="observation-edit" id="tongue-obs-text" placeholder="AI observation will appear here…"></textarea>
+        </div>
+        <div id="tongue-loading" class="loading-row hidden">
+          <div class="spinner spinner-dark"></div> Analysing tongue image…
+        </div>
+        <div id="tongue-error" class="alert alert-error hidden"></div>
+      </div>
+
+      <!-- Step 3: Face Analysis 望诊 (面) -->
+      <div class="wizard-step" id="step-3">
+        <h2 class="step-title">Face Analysis 面诊</h2>
+        <p class="step-subtitle">Take a clear photo of your face without makeup. Natural lighting preferred.</p>
+        <div class="upload-zone" id="face-upload-zone">
+          <div class="upload-icon">🤳</div>
+          <strong>Tap to upload or take selfie</strong>
+          <p>Supports JPG, PNG · Remove glasses if possible</p>
+          <input type="file" id="face-file" accept="image/*" capture="user" onchange="window.wizardHandleImage('face', this)">
+        </div>
+        <div id="face-preview" class="image-preview hidden">
+          <img id="face-img" src="" alt="Face photo">
+          <div class="preview-overlay">
+            <button class="btn btn-secondary btn-sm" onclick="window.wizardClearImage('face')">Retake</button>
+          </div>
+        </div>
+        <div id="face-observation" class="observation-box hidden">
+          <strong>AI Observation 观察 <span id="face-obs-confidence" class="tag" style="margin-left:.4rem"></span></strong>
+          <textarea class="observation-edit" id="face-obs-text" placeholder="AI observation will appear here…"></textarea>
+        </div>
+        <div id="face-loading" class="loading-row hidden">
+          <div class="spinner spinner-dark"></div> Analysing face image…
+        </div>
+        <div id="face-error" class="alert alert-error hidden"></div>
+      </div>
+
+      <!-- Step 4: Audio 闻诊 -->
+      <div class="wizard-step" id="step-4">
+        <h2 class="step-title">Audio Analysis 闻诊</h2>
+        <p class="step-subtitle">Record 10–30 seconds of normal speech or breathing. This step is optional.</p>
+        <div class="recorder-controls">
+          <button class="rec-btn" id="rec-btn" onclick="window.wizardToggleRecording()" title="Record">🎙️</button>
+          <div>
+            <div class="rec-timer" id="rec-timer">0:00</div>
+            <div class="rec-status" id="rec-status">Press to record</div>
+          </div>
+        </div>
+        <audio id="audio-preview" class="audio-preview hidden" controls></audio>
+        <div id="audio-observation" class="observation-box hidden" style="margin-top:1rem">
+          <strong>AI Observation 观察</strong>
+          <textarea class="observation-edit" id="audio-obs-text" placeholder="AI observation will appear here…"></textarea>
+        </div>
+        <div id="audio-loading" class="loading-row hidden">
+          <div class="spinner spinner-dark"></div> Analysing audio…
+        </div>
+        <div id="audio-error" class="alert alert-error hidden"></div>
+        <p class="text-muted mt-4" style="font-size:.8rem">
+          Audio is analysed locally and not stored. You may skip this step.
+        </p>
+      </div>
+
+      <!-- Step 5: Pulse 切诊 -->
+      <div class="wizard-step" id="step-5">
+        <h2 class="step-title">Pulse Assessment 切诊</h2>
+        <p class="step-subtitle">Measure your heart rate (BPM) and select your pulse quality. This step is optional.</p>
+        <div class="pulse-row">
+          <div>
+            <div class="bpm-display" id="bpm-display">--</div>
+            <div class="text-muted" style="font-size:.78rem;text-align:center">BPM</div>
+          </div>
+          <div style="flex:1">
+            <div class="form-group" style="margin-bottom:.5rem">
+              <label class="form-label" for="bpm-input">Heart Rate (BPM) 心率</label>
+              <input class="form-input" id="bpm-input" type="number" min="30" max="220" placeholder="e.g. 72"
+                oninput="document.getElementById('bpm-display').textContent = this.value || '--'">
+            </div>
+          </div>
+        </div>
+        <div class="form-group mt-4">
+          <label class="form-label">Pulse Quality 脉质 <span class="form-hint">(select all that apply)</span></label>
+          <div class="pulse-quality-grid" id="pulse-quality-grid">
+            <div class="quality-chip" data-value="floating">Floating 浮</div>
+            <div class="quality-chip" data-value="deep">Deep 沉</div>
+            <div class="quality-chip" data-value="wiry">Wiry 弦</div>
+            <div class="quality-chip" data-value="slippery">Slippery 滑</div>
+            <div class="quality-chip" data-value="rapid">Rapid 数</div>
+            <div class="quality-chip" data-value="slow">Slow 迟</div>
+            <div class="quality-chip" data-value="thready">Thready 细</div>
+            <div class="quality-chip" data-value="strong">Strong 有力</div>
+            <div class="quality-chip" data-value="weak">Weak 无力</div>
+          </div>
+        </div>
+        <p class="text-muted" style="font-size:.8rem;margin-top:.5rem">
+          You may skip this step if you don't have a heart rate monitor.
+        </p>
+      </div>
+
+      <!-- Step 6: Summary Review -->
+      <div class="wizard-step" id="step-6">
+        <h2 class="step-title">Review Summary 总结回顾</h2>
+        <p class="step-subtitle">Check the information collected before generating your TCM report.</p>
+        <div class="summary-grid" id="summary-grid">
+          <!-- populated by JS -->
+        </div>
+        <div class="alert alert-info mt-4" style="font-size:.82rem">
+          ℹ️ Your data is used only for this session. Nothing is saved unless you choose to save after viewing your report.
+        </div>
+      </div>
+
+      <!-- Step 7: Report -->
+      <div class="wizard-step" id="step-7">
+        <h2 class="step-title">Your TCM Report 中医报告</h2>
+        <div id="report-loading" class="report-progress">
+          <div class="report-progress-top"><div class="spinner spinner-dark"></div>
+            <span class="report-progress-msg" id="report-progress-msg">Generating your personalised TCM report…</span>
+          </div>
+          <div class="report-progress-bar"><div class="report-progress-fill" id="report-progress-fill"></div></div>
+          <div class="report-progress-hint">四诊合参 · integrating all four examinations — this usually takes 10–20 seconds</div>
+        </div>
+        <div id="report-error" class="alert alert-error hidden"></div>
+        <div id="report-content" class="hidden">
+          <!-- Constitution -->
+          <div class="report-section">
+            <h3>Constitution 体质</h3>
+            <div class="constitution-card">
+              <div class="constitution-type" id="rpt-constitution-type"></div>
+              <p class="constitution-desc" id="rpt-constitution-desc"></p>
+            </div>
+          </div>
+          <!-- Five Elements (hidden unless the model returns scores) -->
+          <div class="report-section" id="rpt-five-elements-section" style="display:none">
+            <h3>Five Elements Balance 五行平衡</h3>
+            <div class="five-elements" id="rpt-five-elements"></div>
+          </div>
+          <!-- Diagnosis -->
+          <div class="report-section">
+            <h3>Diagnosis 诊断</h3>
+            <div id="rpt-diagnosis"></div>
+          </div>
+          <!-- Recommendations -->
+          <div class="report-section">
+            <h3>Recommendations 建议</h3>
+            <div class="rec-grid" id="rpt-recommendations"></div>
+          </div>
+          <!-- Analysis Summary -->
+          <div class="report-section">
+            <h3>Analysis Summary 分析摘要</h3>
+            <p id="rpt-summary" style="font-size:.88rem;color:var(--stone-700);line-height:1.7"></p>
+            <ul id="rpt-key-findings" style="margin-top:.6rem;padding-left:1.2rem;font-size:.85rem;color:var(--stone-600);line-height:1.8"></ul>
+          </div>
+          <!-- Treatment Principle -->
+          <div class="report-section" id="rpt-treatment-section" style="display:none">
+            <h3>Treatment Principle 治则治法</h3>
+            <div id="rpt-treatment"></div>
+          </div>
+          <!-- Precautions -->
+          <div class="report-section" id="rpt-precautions-section" style="display:none">
+            <h3>Precautions 注意事项</h3>
+            <div id="rpt-precautions"></div>
+          </div>
+          <!-- Follow-up -->
+          <div class="report-section" id="rpt-followup-section" style="display:none">
+            <h3>Follow-up 复诊建议</h3>
+            <div id="rpt-followup"></div>
+          </div>
+          <!-- Disclaimer -->
+          <div class="disclaimer-box" id="rpt-disclaimer"></div>
+          <!-- Save CTA -->
+          <div class="text-center mt-6" id="rpt-save-cta">
+            <button class="btn btn-primary" onclick="window.wizardSaveSession()">
+              💾 Save to My Account 保存
+            </button>
+            <span class="text-muted text-sm" style="display:block;margin-top:.5rem" id="rpt-save-status"></span>
+            <button class="btn btn-outline mt-3" onclick="window.wizardReset()">
+              Start New Assessment 重新开始
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /wizard-body -->
+
+    <!-- Wizard Footer (nav buttons) -->
+    <div class="wizard-footer">
+      <button class="btn btn-ghost" id="wiz-back-btn" onclick="window.wizardBack()">← Back</button>
+      <span class="text-muted text-sm" id="wiz-step-counter"></span>
+      <div class="btn-group">
+        <button class="btn btn-secondary" id="wiz-skip-btn" onclick="window.wizardSkip()" style="display:none">Skip</button>
+        <button class="btn btn-primary" id="wiz-next-btn" onclick="window.wizardNext()">Next →</button>
+      </div>
+    </div>
+
+  </div><!-- /wizard-card -->
+</section>
+
+{{template "footer" .}}
+
+<script src="{{asset "/static/js/wizard.js"}}"></script>
+</body>
+</html>
