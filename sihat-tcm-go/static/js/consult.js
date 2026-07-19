@@ -10,7 +10,30 @@
     if (!document.getElementById('doctor-directory')) return; // patient page only
     loadDoctors();
     loadConsultations();
+    var da = document.getElementById('dietary-ask');
+    if (da) da.addEventListener('click', askDietary);
+    var dq = document.getElementById('dietary-q');
+    if (dq) dq.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); askDietary(); } });
   });
+
+  function askDietary() {
+    var q = (document.getElementById('dietary-q').value || '').trim();
+    var ans = document.getElementById('dietary-answer');
+    if (!q) return;
+    ans.classList.remove('hidden');
+    ans.textContent = 'Thinking… 思考中…';
+    loadLatestReport(function () {
+      var report = latestReport || {};
+      fetch('/api/ask-dietary-advice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q, diagnosis: report.diagnosis, profile: report.constitution || {}, advice: report.recommendations || {} }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { ans.textContent = d.answer || 'Sorry, no answer is available right now.'; })
+        .catch(function () { ans.textContent = 'Could not get an answer. Please try again.'; });
+    });
+  }
 
   function token() { return localStorage.getItem('tcm-token') || getCookie('sb-access-token'); }
   function me() { try { return JSON.parse(localStorage.getItem('tcm-user') || '{}'); } catch (e) { return {}; } }

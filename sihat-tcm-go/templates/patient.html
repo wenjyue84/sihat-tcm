@@ -26,6 +26,9 @@
     .profile-card { background: #fff; border: 1px solid var(--stone-200, #e7e5e4); border-radius: .75rem; padding: 1rem; margin-top: .6rem; }
     .profile-hint { font-size: .72rem; font-weight: 400; color: var(--color-muted, #78716c); }
     .pf-status { font-size: .8rem; margin-left: .75rem; }
+    .dietary-row { display: flex; gap: .5rem; }
+    .dietary-row .form-input { flex: 1; }
+    .dietary-answer { margin-top: .6rem; background: #f0fdf4; border: 1px solid #a7f3d0; border-radius: .6rem; padding: .7rem .85rem; font-size: .85rem; color: var(--stone-700, #44403c); line-height: 1.6; white-space: pre-wrap; }
     .consult-status { font-size: .85rem; margin-bottom: .6rem; min-height: 1rem; }
     .doctor-directory { display: grid; gap: .75rem; }
     .doctor-card { display: flex; align-items: center; gap: .85rem; background: #fff; border: 1px solid var(--stone-200, #e7e5e4); border-radius: .75rem; padding: .9rem 1rem; }
@@ -137,6 +140,17 @@
     <p class="text-muted" style="font-size:.85rem;margin-bottom:.75rem">Choose a registered TCM doctor to review your latest assessment and give you personalised feedback.</p>
     <div id="consult-status" class="consult-status"></div>
     <div id="doctor-directory" class="doctor-directory">Loading doctors…</div>
+  </section>
+
+  <!-- Dietary Advice -->
+  <section class="dashboard-section">
+    <h3 class="dashboard-section-title">Ask about Diet & Food 食疗问答</h3>
+    <p class="text-muted" style="font-size:.85rem;margin-bottom:.5rem">Ask a TCM food or diet question — answered for your latest constitution.</p>
+    <div class="dietary-row">
+      <input class="form-input" id="dietary-q" type="text" placeholder="e.g. Can I eat cold fruit? Is coffee okay for me?">
+      <button class="btn btn-primary btn-sm" id="dietary-ask">Ask 提问</button>
+    </div>
+    <div id="dietary-answer" class="dietary-answer hidden"></div>
   </section>
 
   <!-- My Consultations -->
