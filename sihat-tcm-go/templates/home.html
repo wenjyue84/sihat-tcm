@@ -132,8 +132,8 @@
 
       <!-- Step 0: Basic Info -->
       <div class="wizard-step active" id="step-0">
-        <h2 class="step-title">Basic Information 基本信息</h2>
-        <p class="step-subtitle">Tell us a little about yourself so we can personalise your assessment.</p>
+        <h2 class="step-title" data-i18n="wiz.t.info">Basic Information 基本信息</h2>
+        <p class="step-subtitle" data-i18n="wiz.s.info">Tell us a little about yourself so we can personalise your assessment.</p>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="bi-name">Full Name 姓名</label>
@@ -193,8 +193,8 @@
 
       <!-- Step 1: Inquiry (Chat) -->
       <div class="wizard-step" id="step-1">
-        <h2 class="step-title">Inquiry 问诊</h2>
-        <p class="step-subtitle">Chat with our AI TCM assistant. Answer at least 4 questions for an accurate assessment.</p>
+        <h2 class="step-title" data-i18n="wiz.t.inquiry">Inquiry 问诊</h2>
+        <p class="step-subtitle" data-i18n="wiz.s.inquiry">Chat with our AI TCM assistant. Answer at least 4 questions for an accurate assessment.</p>
         <div class="chat-progress-bar">
           <div class="chat-progress-fill" id="chat-progress" style="width:0%"></div>
         </div>
@@ -214,8 +214,8 @@
 
       <!-- Step 2: Tongue Analysis 望诊 (舌) -->
       <div class="wizard-step" id="step-2">
-        <h2 class="step-title">Tongue Analysis 舌诊</h2>
-        <p class="step-subtitle">Take a clear photo of your tongue in natural light. Stick out your tongue fully.</p>
+        <h2 class="step-title" data-i18n="wiz.t.tongue">Tongue Analysis 舌诊</h2>
+        <p class="step-subtitle" data-i18n="wiz.s.tongue">Take a clear photo of your tongue in natural light. Stick out your tongue fully.</p>
         <div class="upload-zone" id="tongue-upload-zone">
           <div class="upload-icon">📷</div>
           <strong>Tap to upload or take photo</strong>
@@ -240,8 +240,8 @@
 
       <!-- Step 3: Face Analysis 望诊 (面) -->
       <div class="wizard-step" id="step-3">
-        <h2 class="step-title">Face Analysis 面诊</h2>
-        <p class="step-subtitle">Take a clear photo of your face without makeup. Natural lighting preferred.</p>
+        <h2 class="step-title" data-i18n="wiz.t.face">Face Analysis 面诊</h2>
+        <p class="step-subtitle" data-i18n="wiz.s.face">Take a clear photo of your face without makeup. Natural lighting preferred.</p>
         <div class="upload-zone" id="face-upload-zone">
           <div class="upload-icon">🤳</div>
           <strong>Tap to upload or take selfie</strong>
@@ -266,8 +266,8 @@
 
       <!-- Step 4: Audio 闻诊 -->
       <div class="wizard-step" id="step-4">
-        <h2 class="step-title">Audio Analysis 闻诊</h2>
-        <p class="step-subtitle">Record 10–30 seconds of normal speech or breathing. This step is optional.</p>
+        <h2 class="step-title" data-i18n="wiz.t.audio">Audio Analysis 闻诊</h2>
+        <p class="step-subtitle" data-i18n="wiz.s.audio">Record 10–30 seconds of normal speech or breathing. This step is optional.</p>
         <div class="recorder-controls">
           <button class="rec-btn" id="rec-btn" onclick="window.wizardToggleRecording()" title="Record">🎙️</button>
           <div>
@@ -291,8 +291,8 @@
 
       <!-- Step 5: Pulse 切诊 -->
       <div class="wizard-step" id="step-5">
-        <h2 class="step-title">Pulse Assessment 切诊</h2>
-        <p class="step-subtitle">Measure your heart rate (BPM) and select your pulse quality. This step is optional.</p>
+        <h2 class="step-title" data-i18n="wiz.t.pulse">Pulse Assessment 切诊</h2>
+        <p class="step-subtitle" data-i18n="wiz.s.pulse">Measure your heart rate (BPM) and select your pulse quality. This step is optional.</p>
         <div class="pulse-row">
           <div>
             <div class="bpm-display" id="bpm-display">--</div>
@@ -327,8 +327,8 @@
 
       <!-- Step 6: Summary Review -->
       <div class="wizard-step" id="step-6">
-        <h2 class="step-title">Review Summary 总结回顾</h2>
-        <p class="step-subtitle">Check the information collected before generating your TCM report.</p>
+        <h2 class="step-title" data-i18n="wiz.t.review">Review Summary 总结回顾</h2>
+        <p class="step-subtitle" data-i18n="wiz.s.review">Check the information collected before generating your TCM report.</p>
         <div class="summary-grid" id="summary-grid">
           <!-- populated by JS -->
         </div>
@@ -339,7 +339,7 @@
 
       <!-- Step 7: Report -->
       <div class="wizard-step" id="step-7">
-        <h2 class="step-title">Your TCM Report 中医报告</h2>
+        <h2 class="step-title" data-i18n="wiz.t.report">Your TCM Report 中医报告</h2>
         <div id="report-loading" class="report-progress">
           <div class="report-progress-top"><div class="spinner spinner-dark"></div>
             <span class="report-progress-msg" id="report-progress-msg">Generating your personalised TCM report…</span>

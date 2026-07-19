@@ -23,11 +23,15 @@ with sync_playwright() as p:
         return pg.eval_on_selector_all(
             ".step-label", "els => els.slice(0,2).map(e => e.textContent).join('/')")
 
-    en = hero(); en_step = stepper()
+    def steptitle():
+        # first step-title (Basic Information); hidden but data-i18n still applies
+        return pg.eval_on_selector(".step-title", "e => e.textContent")
+
+    en = hero(); en_step = stepper(); en_title = steptitle()
     pg.click("#lang-toggle"); pg.wait_for_timeout(350)
-    zh = hero(); zh_step = stepper()
+    zh = hero(); zh_step = stepper(); zh_title = steptitle()
     pg.click("#lang-toggle"); pg.wait_for_timeout(350)
-    ms = hero(); ms_step = stepper()
+    ms = hero(); ms_step = stepper(); ms_title = steptitle()
 
     # --- Login page (public) ---
     pg.evaluate("localStorage.removeItem('tcm-lang')")
@@ -52,6 +56,9 @@ checks = [
     ("login en", "Welcome Back" in login_en),
     ("login zh", "欢迎回来" in login_zh),
     ("login ms", "Selamat Kembali" in login_ms),
+    ("step-title en", "Basic Information" in en_title),
+    ("step-title zh", "基本信息" in zh_title),
+    ("step-title ms", "Maklumat Asas" in ms_title),
 ]
 passed = sum(1 for _, ok in checks if ok)
 for name, ok in checks:
