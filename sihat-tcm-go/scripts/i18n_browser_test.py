@@ -1,0 +1,42 @@
+"""Runtime check: the landing-page language toggle actually switches UI text
+across en -> zh -> ms. Public page, no AI/quota needed. Exit 0 = all pass."""
+import sys
+from playwright.sync_api import sync_playwright
+
+BASE = "https://tcm.wenjyue.com/"
+
+with sync_playwright() as p:
+    b = p.chromium.launch(headless=True)
+    pg = b.new_page()
+    pg.goto(BASE)
+    pg.wait_for_load_state("networkidle")
+    # normalise to a known start (en) then reload
+    pg.evaluate("localStorage.removeItem('tcm-lang')")
+    pg.reload()
+    pg.wait_for_load_state("networkidle")
+
+    def hero():
+        return pg.inner_text(".hero-title") + " || " + pg.inner_text(".hero-sub")
+
+    en = hero()
+    pg.click("#lang-toggle"); pg.wait_for_timeout(350)
+    zh = hero()
+    pg.click("#lang-toggle"); pg.wait_for_timeout(350)
+    ms = hero()
+    b.close()
+
+checks = [
+    ("en shows English", "Understood Holistically" in en),
+    ("zh switches to Chinese", ("全面理解" in zh) or ("结合问诊" in zh)),
+    ("ms switches to Malay", ("Kesihatan Anda" in ms) or ("Difahami" in ms) or ("Penilaian" in ms)),
+    ("zh != en", zh != en),
+    ("ms != zh", ms != zh),
+]
+passed = sum(1 for _, ok in checks if ok)
+for name, ok in checks:
+    print(("PASS" if ok else "FAIL"), name)
+print("RESULT %d/%d" % (passed, len(checks)))
+print("EN:", en[:90].replace("\n", " "))
+print("ZH:", zh[:90].replace("\n", " "))
+print("MS:", ms[:90].replace("\n", " "))
+sys.exit(0 if passed == len(checks) else 1)
