@@ -236,6 +236,15 @@
           if (window.TCMPrintReport) window.TCMPrintReport(session);
         });
         actions.appendChild(printBtn);
+        if (session.id) {
+          var openLink = document.createElement('a');
+          openLink.className = 'btn btn-ghost btn-sm';
+          openLink.href = '/patient/report/' + encodeURIComponent(session.id);
+          openLink.textContent = '🔗 Open as page 单页';
+          openLink.style.marginRight = '.5rem';
+          openLink.addEventListener('click', function (e) { e.stopPropagation(); });
+          actions.insertBefore(openLink, printBtn);
+        }
         detail.appendChild(actions);
         // Animate bars
         requestAnimationFrame(function () {

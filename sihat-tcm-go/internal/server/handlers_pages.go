@@ -17,6 +17,7 @@ func (s *Server) registerPageRoutes() {
 	s.Mux.HandleFunc("GET /login", s.handleLoginPage)
 	s.Mux.HandleFunc("GET /reset-password", s.handleResetPasswordPage)
 	s.Mux.HandleFunc("GET /patient", s.handlePatientPage)
+	s.Mux.HandleFunc("GET /patient/report/{id}", s.handlePatientReportPage)
 	s.Mux.HandleFunc("GET /doctor", s.handleDoctorPage)
 	s.Mux.HandleFunc("GET /robots.txt", s.handleRobots)
 	s.Mux.HandleFunc("GET /sitemap.xml", s.handleSitemap)
@@ -70,6 +71,19 @@ func (s *Server) handlePatientPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.Render(w, "patient.html", pgPageData{Title: "Health Journey", User: user})
+}
+
+// handlePatientReportPage renders report.html — a standalone, shareable view of
+// a single saved assessment. Requires auth; the report id in the path is read
+// client-side (report-page.js) and resolved against the patient's own sessions,
+// so the API's row-level scoping still governs which report is actually shown.
+func (s *Server) handlePatientReportPage(w http.ResponseWriter, r *http.Request) {
+	user := s.Authenticate(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+	s.Render(w, "report.html", pgPageData{Title: "Assessment Report", User: user})
 }
 
 // handleDoctorPage renders doctor.html.
