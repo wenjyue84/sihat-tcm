@@ -58,6 +58,19 @@
     box.innerHTML = filtered.map(renderRequest).join('');
     box.querySelectorAll('button[data-reply]').forEach(function (b) { b.addEventListener('click', function () { doctorReply(b.getAttribute('data-reply')); }); });
     box.querySelectorAll('select[data-flag]').forEach(function (sel) { sel.addEventListener('change', function () { doctorSetFlag(sel.getAttribute('data-flag'), sel.value); }); });
+    box.querySelectorAll('button[data-print]').forEach(function (b) { b.addEventListener('click', function () { doctorPrint(b.getAttribute('data-print')); }); });
+  }
+
+  function doctorPrint(id) {
+    var req = allRequests.filter(function (x) { return String(x.id) === String(id); })[0];
+    if (!req || !window.TCMPrintReport) return;
+    var rep = req.diagnosis_report || {};
+    var pp = rep.patient_profile || {};
+    window.TCMPrintReport({
+      full_report: rep.full_report || {},
+      symptoms: pp.symptoms || (Array.isArray(req.symptoms) ? req.symptoms.join(', ') : req.symptoms) || '',
+      created_at: req.created_at,
+    });
   }
 
   function doctorSetFlag(id, flag) {
@@ -78,6 +91,7 @@
     if (diag && typeof diag === 'object') diag = diag.primary_pattern || '—';
     var constitution = (report.constitution && report.constitution.type) || '';
     var summary = (report.analysis && report.analysis.summary) || '';
+    var hasReport = !!(report && (report.diagnosis || report.constitution || report.analysis || report.recommendations));
     var msgs = (rep.messages || []).filter(function (m) { return m.role === 'doctor'; });
     var reviewed = req.status === 'reviewed' || msgs.length > 0;
     var flag = req.flag || 'normal';
@@ -90,6 +104,7 @@
       + '<div class="inbox-badges">' + flagBadge + '<span class="consult-badge ' + (reviewed ? 'reviewed' : 'pending') + '">' + (reviewed ? 'Reviewed ✓' : 'Pending ⏳') + '</span></div></div>'
       + (summary ? '<div class="inbox-summary">' + esc(summary.slice(0, 260)) + (summary.length > 260 ? '…' : '') + '</div>' : '')
       + (msgs.length ? '<div class="consult-feedback">Your reply: ' + esc(msgs[msgs.length - 1].content) + '</div>' : '')
+      + (hasReport ? '<div class="inbox-actions" style="margin:.4rem 0"><button class="btn btn-ghost btn-sm" data-print="' + esc(req.id) + '">🖨 Print / Save PDF 打印报告</button></div>' : '')
       + '<div class="inbox-reply">'
       + '<textarea class="form-input" id="reply-' + esc(req.id) + '" rows="2" placeholder="Write clinical feedback to the patient…"></textarea>'
       + '<button class="btn btn-blue btn-sm" data-reply="' + esc(req.id) + '">Send Feedback 发送反馈</button>'

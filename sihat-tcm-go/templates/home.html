@@ -400,6 +400,9 @@
             <button class="btn btn-primary" onclick="window.wizardSaveSession()">
               💾 Save to My Account 保存
             </button>
+            <button class="btn btn-secondary" type="button" onclick="window.wizardPrintReport()" style="margin-left:.5rem">
+              🖨 Print / Save PDF 打印·存为 PDF
+            </button>
             <span class="text-muted text-sm" style="display:block;margin-top:.5rem" id="rpt-save-status"></span>
             <button class="btn btn-outline mt-3" onclick="window.wizardReset()">
               Start New Assessment 重新开始
@@ -425,6 +428,7 @@
 
 {{template "footer" .}}
 
+<script src="{{asset "/static/js/report-print.js"}}"></script>
 <script src="{{asset "/static/js/wizard.js"}}"></script>
 </body>
 </html>

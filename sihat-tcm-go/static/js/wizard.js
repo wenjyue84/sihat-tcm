@@ -1075,6 +1075,19 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /*  Print / Save-PDF the freshly generated report                       */
+  /* ------------------------------------------------------------------ */
+  window.wizardPrintReport = function () {
+    if (!state.report) { alert('Please generate your report first.'); return; }
+    if (!window.TCMPrintReport) return;
+    window.TCMPrintReport({
+      full_report: state.report,
+      symptoms: (state.basicInfo.symptoms || []).join(', '),
+      created_at: new Date().toISOString(),
+    });
+  };
+
+  /* ------------------------------------------------------------------ */
   /*  Save Session                                                        */
   /* ------------------------------------------------------------------ */
   window.wizardSaveSession = function () {
