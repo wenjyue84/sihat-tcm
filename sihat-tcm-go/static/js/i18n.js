@@ -52,6 +52,8 @@
       'wiz.t.info': 'Basic Information', 'wiz.t.inquiry': 'Inquiry', 'wiz.t.tongue': 'Tongue Analysis', 'wiz.t.face': 'Face Analysis', 'wiz.t.audio': 'Audio Analysis', 'wiz.t.pulse': 'Pulse Assessment', 'wiz.t.review': 'Review Summary', 'wiz.t.report': 'Your TCM Report',
       'wiz.s.info': 'Tell us a little about yourself so we can personalise your assessment.', 'wiz.s.inquiry': 'Chat with our AI TCM assistant. Answer at least 4 questions for an accurate assessment.', 'wiz.s.tongue': 'Take a clear photo of your tongue in natural light. Stick out your tongue fully.', 'wiz.s.face': 'Take a clear photo of your face without makeup. Natural lighting preferred.', 'wiz.s.audio': 'Record 10–30 seconds of normal speech or breathing. This step is optional.', 'wiz.s.pulse': 'Measure your heart rate (BPM) and select your pulse quality. This step is optional.', 'wiz.s.review': 'Check the information collected before generating your TCM report.',
       'wiz.f.symptoms': 'Main Symptoms', 'wiz.f.bpm': 'Heart Rate (BPM)', 'wiz.f.pulsequality': 'Pulse Quality',
+      'wiz.g.select': 'Select…', 'wiz.g.male': 'Male', 'wiz.g.female': 'Female', 'wiz.g.other': 'Other',
+      'wiz.ph.name': 'Your name', 'wiz.ph.chat': 'Type your reply…', 'wiz.ph.addsymptom': 'Add symptom…',
       'footer.disclaimer': 'For educational purposes only. Not a substitute for professional medical advice.',
     },
     zh: {
@@ -89,6 +91,8 @@
       'wiz.t.info': '基本信息', 'wiz.t.inquiry': '问诊', 'wiz.t.tongue': '舌诊', 'wiz.t.face': '面诊', 'wiz.t.audio': '闻诊', 'wiz.t.pulse': '切诊', 'wiz.t.review': '总结回顾', 'wiz.t.report': '中医报告',
       'wiz.s.info': '简单介绍一下您自己，以便我们为您定制评估。', 'wiz.s.inquiry': '与 AI 中医助手对话。至少回答 4 个问题以获得准确评估。', 'wiz.s.tongue': '在自然光下拍摄清晰的舌头照片，请完全伸出舌头。', 'wiz.s.face': '拍摄不化妆的清晰面部照片，建议使用自然光。', 'wiz.s.audio': '录制 10–30 秒的正常说话或呼吸声。此步骤为可选。', 'wiz.s.pulse': '测量心率（BPM）并选择脉象。此步骤为可选。', 'wiz.s.review': '在生成中医报告前检查已收集的信息。',
       'wiz.f.symptoms': '主要症状', 'wiz.f.bpm': '心率 (BPM)', 'wiz.f.pulsequality': '脉质',
+      'wiz.g.select': '请选择…', 'wiz.g.male': '男', 'wiz.g.female': '女', 'wiz.g.other': '其他',
+      'wiz.ph.name': '您的姓名', 'wiz.ph.chat': '输入您的回复…', 'wiz.ph.addsymptom': '添加症状…',
       'footer.disclaimer': '仅供教育参考，不替代专业医疗建议。',
     },
     ms: {
@@ -126,6 +130,8 @@
       'wiz.t.info': 'Maklumat Asas', 'wiz.t.inquiry': 'Soal Selidik', 'wiz.t.tongue': 'Analisis Lidah', 'wiz.t.face': 'Analisis Wajah', 'wiz.t.audio': 'Analisis Audio', 'wiz.t.pulse': 'Penilaian Nadi', 'wiz.t.review': 'Ringkasan Semakan', 'wiz.t.report': 'Laporan TCM Anda',
       'wiz.s.info': 'Beritahu kami sedikit tentang diri anda supaya kami boleh memperibadikan penilaian.', 'wiz.s.inquiry': 'Berbual dengan pembantu TCM AI kami. Jawab sekurang-kurangnya 4 soalan untuk penilaian tepat.', 'wiz.s.tongue': 'Ambil foto lidah anda yang jelas dalam cahaya semula jadi. Julurkan lidah sepenuhnya.', 'wiz.s.face': 'Ambil foto wajah anda tanpa solekan. Cahaya semula jadi diutamakan.', 'wiz.s.audio': 'Rakam 10–30 saat pertuturan atau pernafasan biasa. Langkah ini pilihan.', 'wiz.s.pulse': 'Ukur kadar jantung (BPM) dan pilih kualiti nadi anda. Langkah ini pilihan.', 'wiz.s.review': 'Semak maklumat yang dikumpul sebelum menjana laporan TCM anda.',
       'wiz.f.symptoms': 'Gejala Utama', 'wiz.f.bpm': 'Kadar Jantung (BPM)', 'wiz.f.pulsequality': 'Kualiti Nadi',
+      'wiz.g.select': 'Pilih…', 'wiz.g.male': 'Lelaki', 'wiz.g.female': 'Perempuan', 'wiz.g.other': 'Lain-lain',
+      'wiz.ph.name': 'Nama anda', 'wiz.ph.chat': 'Taip balasan anda…', 'wiz.ph.addsymptom': 'Tambah gejala…',
       'footer.disclaimer': 'Untuk tujuan pendidikan sahaja. Bukan pengganti nasihat perubatan profesional.',
     },
   };
