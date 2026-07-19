@@ -36,30 +36,30 @@
     <div class="auth-logo">
       <a href="/">Sihat TCM <span class="logo-zh">中医</span></a>
     </div>
-    <h1 class="auth-title">Welcome Back 欢迎回来</h1>
-    <p class="auth-sub">Sign in to view your health journey or create a new account.</p>
+    <h1 class="auth-title" data-i18n="login.welcome">Welcome Back 欢迎回来</h1>
+    <p class="auth-sub" data-i18n="login.sub">Sign in to view your health journey or create a new account.</p>
 
     <div class="tab-row">
-      <button class="tab-btn active" id="tab-login" onclick="authSwitchTab('login')">Login 登录</button>
-      <button class="tab-btn" id="tab-signup" onclick="authSwitchTab('signup')">Sign Up 注册</button>
+      <button class="tab-btn active" id="tab-login" onclick="authSwitchTab('login')" data-i18n="login.tablogin">Login 登录</button>
+      <button class="tab-btn" id="tab-signup" onclick="authSwitchTab('signup')" data-i18n="login.tabsignup">Sign Up 注册</button>
     </div>
 
     <!-- Login Panel -->
     <div class="tab-panel active" id="panel-login">
       <div id="login-alert" class="alert hidden"></div>
       <div class="form-group">
-        <label class="form-label" for="login-email">Email 邮箱</label>
+        <label class="form-label" for="login-email" data-i18n="login.email">Email 邮箱</label>
         <input class="form-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email">
       </div>
       <div class="form-group">
-        <label class="form-label" for="login-password">Password 密码</label>
+        <label class="form-label" for="login-password" data-i18n="login.password">Password 密码</label>
         <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
       </div>
       <button class="btn btn-primary btn-full mt-2" id="login-btn" onclick="authLogin()">
         Sign In 登录
       </button>
       <p class="text-center text-sm mt-3">
-        <a href="#" id="forgot-link" onclick="authShowForgot();return false;">Forgot password? 忘记密码？</a>
+        <a href="#" id="forgot-link" onclick="authShowForgot();return false;" data-i18n="login.forgot">Forgot password? 忘记密码？</a>
       </p>
       <p class="text-center text-sm text-muted mt-2">
         Don't have an account? <a href="#" onclick="authSwitchTab('signup');return false;">Sign up 注册</a>
@@ -67,7 +67,7 @@
 
       <!-- Quick test-role login (demo accounts) -->
       <div class="quick-access">
-        <div class="quick-access-title">Quick Test Login 测试快捷登录</div>
+        <div class="quick-access-title" data-i18n="login.quicktitle">Quick Test Login 测试快捷登录</div>
         <div class="quick-roles">
           <button type="button" class="quick-role" data-role="patient" style="--qc:#059669" onclick="authQuickLogin('patient')">
             <span class="quick-role-icon">🧑</span><span class="quick-role-label">Patient <small>患者</small></span>
@@ -87,7 +87,7 @@
 
       <!-- Log in as a specific doctor -->
       <div class="quick-access" style="border-top:none;padding-top:.25rem;margin-top:.5rem">
-        <div class="quick-access-title">Or log in as a specific doctor 医生登录</div>
+        <div class="quick-access-title" data-i18n="login.docselect">Or log in as a specific doctor 医生登录</div>
         <select class="form-input" id="doctor-login-select">
           <option value="">Select a doctor… 选择医生</option>
         </select>
@@ -98,39 +98,39 @@
     <div class="tab-panel" id="panel-signup">
       <div id="signup-alert" class="alert hidden"></div>
       <div class="form-group">
-        <label class="form-label">Register as 注册身份</label>
+        <label class="form-label" data-i18n="login.registeras">Register as 注册身份</label>
         <div class="role-toggle">
           <button type="button" class="role-toggle-btn active" id="role-patient" onclick="authSetRole('patient')">🧑 Patient 患者</button>
           <button type="button" class="role-toggle-btn" id="role-doctor" onclick="authSetRole('doctor')">🩺 Doctor 医生</button>
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label" for="signup-name">Full Name 姓名</label>
+        <label class="form-label" for="signup-name" data-i18n="login.fullname">Full Name 姓名</label>
         <input class="form-input" id="signup-name" type="text" placeholder="Your name" autocomplete="name">
       </div>
       <!-- Doctor-only fields -->
       <div id="doctor-fields" class="hidden">
         <div class="form-group">
-          <label class="form-label" for="signup-specialty">Specialty 专长</label>
+          <label class="form-label" for="signup-specialty" data-i18n="login.specialty">Specialty 专长</label>
           <input class="form-input" id="signup-specialty" type="text" placeholder="e.g. Internal Medicine 内科">
         </div>
         <div class="form-group">
-          <label class="form-label" for="signup-bio">Short Bio 简介</label>
+          <label class="form-label" for="signup-bio" data-i18n="login.bio">Short Bio 简介</label>
           <input class="form-input" id="signup-bio" type="text" placeholder="e.g. 15 years treating digestive disorders">
         </div>
         <div class="form-group">
-          <label class="form-label" for="signup-years">Years of Experience 从业年限</label>
+          <label class="form-label" for="signup-years" data-i18n="login.years">Years of Experience 从业年限</label>
           <input class="form-input" id="signup-years" type="number" min="0" max="70" placeholder="e.g. 15">
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label" for="signup-email">Email 邮箱</label>
+        <label class="form-label" for="signup-email" data-i18n="login.email">Email 邮箱</label>
         <input class="form-input" id="signup-email" type="email" placeholder="you@example.com" autocomplete="email">
       </div>
       <div class="form-group">
-        <label class="form-label" for="signup-password">Password 密码</label>
+        <label class="form-label" for="signup-password" data-i18n="login.password">Password 密码</label>
         <input class="form-input" id="signup-password" type="password" placeholder="Min 8 characters" autocomplete="new-password">
-        <span class="form-hint">Minimum 8 characters</span>
+        <span class="form-hint" data-i18n="login.pwhint">Minimum 8 characters</span>
       </div>
       <button class="btn btn-primary btn-full mt-2" id="signup-btn" onclick="authSignup()">
         Create Account 创建账户
@@ -143,12 +143,11 @@
     <!-- Forgot Password Panel -->
     <div class="tab-panel" id="panel-forgot">
       <div id="forgot-alert" class="alert hidden"></div>
-      <p class="text-sm text-muted" style="margin-bottom:.6rem">
+      <p class="text-sm text-muted" style="margin-bottom:.6rem" data-i18n="login.forgottext">
         Enter your account email and we'll send you a password reset link.
-        输入邮箱，我们将发送重置密码链接。
       </p>
       <div class="form-group">
-        <label class="form-label" for="forgot-email">Email 邮箱</label>
+        <label class="form-label" for="forgot-email" data-i18n="login.email">Email 邮箱</label>
         <input class="form-input" id="forgot-email" type="email" placeholder="you@example.com" autocomplete="email">
       </div>
       <button class="btn btn-primary btn-full mt-2" id="forgot-btn" onclick="authSendReset()">

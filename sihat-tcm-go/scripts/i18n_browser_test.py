@@ -28,6 +28,16 @@ with sync_playwright() as p:
     zh = hero(); zh_step = stepper()
     pg.click("#lang-toggle"); pg.wait_for_timeout(350)
     ms = hero(); ms_step = stepper()
+
+    # --- Login page (public) ---
+    pg.evaluate("localStorage.removeItem('tcm-lang')")
+    pg.goto(BASE + "login")
+    pg.wait_for_load_state("networkidle")
+    login_en = pg.inner_text(".auth-title")
+    pg.click("#lang-toggle"); pg.wait_for_timeout(350)
+    login_zh = pg.inner_text(".auth-title")
+    pg.click("#lang-toggle"); pg.wait_for_timeout(350)
+    login_ms = pg.inner_text(".auth-title")
     b.close()
 
 checks = [
@@ -39,6 +49,9 @@ checks = [
     ("stepper en", "Info" in en_step),
     ("stepper zh", "基本" in zh_step and "问诊" in zh_step),
     ("stepper ms", "Maklumat" in ms_step or "Soal" in ms_step),
+    ("login en", "Welcome Back" in login_en),
+    ("login zh", "欢迎回来" in login_zh),
+    ("login ms", "Selamat Kembali" in login_ms),
 ]
 passed = sum(1 for _, ok in checks if ok)
 for name, ok in checks:
