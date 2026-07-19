@@ -244,6 +244,7 @@ func (s *Server) handleAuthSignup(w http.ResponseWriter, r *http.Request) {
 			"id":        u.ID,
 			"role":      role,
 			"full_name": body.Name,
+			"email":     u.Email,
 		}
 		if role == "doctor" {
 			// Demo: doctors are auto-approved so the directory shows them immediately.
