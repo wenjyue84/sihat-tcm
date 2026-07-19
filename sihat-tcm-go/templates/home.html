@@ -136,17 +136,17 @@
         <p class="step-subtitle" data-i18n="wiz.s.info">Tell us a little about yourself so we can personalise your assessment.</p>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="bi-name">Full Name 姓名</label>
+            <label class="form-label" for="bi-name" data-i18n="login.fullname">Full Name 姓名</label>
             <input class="form-input" id="bi-name" type="text" placeholder="Your name" autocomplete="name">
           </div>
           <div class="form-group">
-            <label class="form-label" for="bi-age">Age 年龄</label>
+            <label class="form-label" for="bi-age" data-i18n="pt.age">Age 年龄</label>
             <input class="form-input" id="bi-age" type="number" min="1" max="120" placeholder="e.g. 35">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="bi-gender">Gender 性别</label>
+            <label class="form-label" for="bi-gender" data-i18n="pt.gender">Gender 性别</label>
             <select class="form-select" id="bi-gender">
               <option value="">Select…</option>
               <option value="male">Male 男</option>
@@ -155,13 +155,13 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label" for="bi-height">Height (cm) 身高</label>
+            <label class="form-label" for="bi-height" data-i18n="pt.height">Height (cm) 身高</label>
             <input class="form-input" id="bi-height" type="number" min="50" max="250" placeholder="e.g. 168">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="bi-weight">Weight (kg) 体重</label>
+            <label class="form-label" for="bi-weight" data-i18n="pt.weight">Weight (kg) 体重</label>
             <input class="form-input" id="bi-weight" type="number" min="20" max="300" placeholder="e.g. 65">
           </div>
           <div class="form-group">
@@ -169,7 +169,7 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Main Symptoms 主要症状</label>
+          <label class="form-label" data-i18n="wiz.f.symptoms">Main Symptoms 主要症状</label>
           <p class="form-hint">Select all that apply or type your own.</p>
           <div class="chips-container" id="symptom-chips">
             <span class="chip" data-value="fatigue">Fatigue 疲劳</span>
@@ -300,14 +300,14 @@
           </div>
           <div style="flex:1">
             <div class="form-group" style="margin-bottom:.5rem">
-              <label class="form-label" for="bpm-input">Heart Rate (BPM) 心率</label>
+              <label class="form-label" for="bpm-input" data-i18n="wiz.f.bpm">Heart Rate (BPM) 心率</label>
               <input class="form-input" id="bpm-input" type="number" min="30" max="220" placeholder="e.g. 72"
                 oninput="document.getElementById('bpm-display').textContent = this.value || '--'">
             </div>
           </div>
         </div>
         <div class="form-group mt-4">
-          <label class="form-label">Pulse Quality 脉质 <span class="form-hint">(select all that apply)</span></label>
+          <label class="form-label"><span data-i18n="wiz.f.pulsequality">Pulse Quality 脉质</span> <span class="form-hint">(select all that apply)</span></label>
           <div class="pulse-quality-grid" id="pulse-quality-grid">
             <div class="quality-chip" data-value="floating">Floating 浮</div>
             <div class="quality-chip" data-value="deep">Deep 沉</div>
