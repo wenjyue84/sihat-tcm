@@ -37,6 +37,9 @@ func (s *Server) registerDataRoutes() {
 	// Doctor reply — requires an authenticated doctor
 	s.Mux.HandleFunc("POST /api/doctor/reply", s.RequireAuth(s.handleDoctorReply, "doctor"))
 
+	// Patient reply — two-way messaging; any authed user, scoped to their own request
+	s.Mux.HandleFunc("POST /api/patient/reply", s.RequireAuth(s.handlePatientReply))
+
 	// AI patient summary — requires auth
 	s.Mux.HandleFunc("POST /api/ai/patient-summary", s.RequireAuth(s.handleAIPatientSummary))
 
@@ -134,6 +137,67 @@ func (s *Server) handleDoctorReply(w http.ResponseWriter, r *http.Request, user 
 		"success": true,
 		"data":    currentReport,
 	})
+}
+
+// handlePatientReply appends a patient message to their own consultation request,
+// enabling two-way doctor↔patient messaging. Ownership is enforced by scoping the
+// lookup to the caller's user_id, so a patient can only post into their own thread.
+// A patient follow-up flips the request back to "pending" so it re-surfaces for the doctor.
+func (s *Server) handlePatientReply(w http.ResponseWriter, r *http.Request, user *AuthUser) {
+	var body struct {
+		RequestID string `json:"requestId"`
+		Message   string `json:"message"`
+	}
+	if !dtReadJSON(w, r, &body) {
+		return
+	}
+	if body.RequestID == "" || strings.TrimSpace(body.Message) == "" {
+		s.JSONError(w, http.StatusBadRequest, "requestId and message are required")
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
+	defer cancel()
+
+	// Fetch the request scoped to THIS patient — the ownership gate.
+	var rows []map[string]json.RawMessage
+	q := fmt.Sprintf("select=id,diagnosis_report&id=eq.%s&user_id=eq.%s", body.RequestID, user.ID)
+	if err := s.DB.Select(ctx, "inquiries", q, "", &rows); err != nil || len(rows) == 0 {
+		s.JSONError(w, http.StatusNotFound, "request not found")
+		return
+	}
+
+	var report map[string]any
+	if raw, ok := rows[0]["diagnosis_report"]; ok && len(raw) > 0 {
+		_ = json.Unmarshal(raw, &report)
+	}
+	if report == nil {
+		report = map[string]any{}
+	}
+
+	var messages []any
+	if m, ok := report["messages"]; ok {
+		if arr, ok := m.([]any); ok {
+			messages = arr
+		}
+	}
+	messages = append(messages, map[string]string{
+		"role":      "patient",
+		"content":   body.Message,
+		"timestamp": dtNowISO(),
+	})
+	report["messages"] = messages
+	report["status"] = "pending"
+
+	var updated []map[string]any
+	if err := s.DB.Update(ctx, "inquiries", "id=eq."+body.RequestID,
+		map[string]any{"diagnosis_report": report, "status": "pending"}, "", &updated); err != nil {
+		log.Printf("patient/reply update: %v", err)
+		s.JSONError(w, http.StatusInternalServerError, "failed to send reply")
+		return
+	}
+
+	s.JSON(w, http.StatusOK, map[string]any{"success": true, "data": report})
 }
 
 // handleAIPatientSummary generates a clinical summary for a patient using Gemini.

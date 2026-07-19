@@ -162,9 +162,10 @@
         box.innerHTML = reqs.map(function (req) {
           var rep = req.diagnosis_report || {};
           var doc = rep.selected_doctor || {};
-          var msgs = (rep.messages || []).filter(function (m) { return m.role === 'doctor'; });
-          var reviewed = req.status === 'reviewed' || msgs.length > 0;
+          var allMsgs = (rep.messages || []);
           var cancelled = req.status === 'cancelled';
+          var hasDoctorMsg = allMsgs.some(function (m) { return m.role === 'doctor'; });
+          var reviewed = req.status === 'reviewed' && hasDoctorMsg;
           var badge = '<span class="consult-badge ' + (cancelled ? 'cancelled' : (reviewed ? 'reviewed' : 'pending')) + '">'
             + (cancelled ? 'Cancelled 已取消' : (reviewed ? 'Reviewed ✓ 已回复' : 'Pending ⏳ 等待中')) + '</span>';
           var report = rep.full_report || {};
@@ -172,18 +173,35 @@
           if (diag && typeof diag === 'object') diag = diag.primary_pattern || '';
           var metaBits = ['Requested ' + fmtDateTime(req.created_at)];
           if (diag) metaBits.push('Pattern: ' + String(diag));
-          var fb = msgs.length
-            ? msgs.map(function (m) { return '<div class="consult-feedback">💬 ' + esc(m.content) + (m.timestamp ? '<div class="consult-ts">— ' + esc(fmtDateTime(m.timestamp)) + '</div>' : '') + '</div>'; }).join('')
-            : '<div class="text-muted" style="font-size:.8rem">Awaiting doctor feedback…</div>';
+          // Full conversation thread (both sides)
+          var thread = allMsgs.length
+            ? '<div class="consult-thread">' + allMsgs.map(function (m) {
+                var isDoc = m.role === 'doctor';
+                var who = isDoc ? '🩺 ' + esc(doc.name || 'Doctor') : '🧑 You 我';
+                return '<div class="consult-msg ' + (isDoc ? 'from-doctor' : 'from-patient') + '" style="margin:.35rem 0;padding:.5rem .7rem;border-radius:.5rem;font-size:.83rem;'
+                  + (isDoc ? 'background:#eff6ff;border-left:3px solid #3b82f6' : 'background:#f0fdf4;border-left:3px solid #22c55e') + '">'
+                  + '<strong style="font-size:.76rem;color:var(--stone-600,#57534e)">' + who + '</strong><br>' + esc(m.content)
+                  + (m.timestamp ? '<div class="consult-ts" style="font-size:.72rem;color:var(--color-muted,#78716c);margin-top:.2rem">' + esc(fmtDateTime(m.timestamp)) + '</div>' : '')
+                  + '</div>';
+              }).join('') + '</div>'
+            : '<div class="text-muted" style="font-size:.8rem">Awaiting doctor feedback… 等待医生回复…</div>';
+          var replyBox = cancelled ? '' : '<div class="consult-reply" style="display:flex;gap:.4rem;margin-top:.5rem">'
+            + '<input class="form-input" id="creply-' + esc(req.id) + '" type="text" placeholder="Reply to the doctor… 回复医生…" style="flex:1">'
+            + '<button class="btn btn-primary btn-sm" data-preply="' + esc(req.id) + '">Send 发送</button>'
+            + '</div>';
           return '<div class="consult-item">'
             + '<div class="consult-head"><strong>' + esc(doc.name || 'Doctor') + '</strong> ' + badge + '</div>'
             + '<div class="consult-meta">' + esc(metaBits.join('  ·  ')) + '</div>'
-            + fb
-            + '<div class="consult-actions"><button class="btn btn-ghost btn-sm consult-cancel" data-cancel="' + esc(req.id) + '">🗑 Remove 取消</button></div>'
+            + thread + replyBox
+            + '<div class="consult-actions" style="margin-top:.4rem"><button class="btn btn-ghost btn-sm consult-cancel" data-cancel="' + esc(req.id) + '">🗑 Remove 取消</button></div>'
+            + '<div class="reply-status" id="creply-status-' + esc(req.id) + '" style="font-size:.76rem;min-height:.9rem"></div>'
             + '</div>';
         }).join('');
         box.querySelectorAll('button[data-cancel]').forEach(function (b) {
           b.addEventListener('click', function () { cancelConsult(b.getAttribute('data-cancel')); });
+        });
+        box.querySelectorAll('button[data-preply]').forEach(function (b) {
+          b.addEventListener('click', function () { patientReply(b.getAttribute('data-preply')); });
         });
       })
       .catch(function () { box.innerHTML = '<p class="alert alert-error">Could not load consultations.</p>'; });
@@ -200,6 +218,23 @@
       .then(function (r) { return r.json(); })
       .then(function (d) { if (!d || !d.success) throw new Error((d && d.error) || 'failed'); loadConsultations(); })
       .catch(function () { alert('Could not remove the request. Please try again.'); });
+  }
+
+  function patientReply(id) {
+    var input = document.getElementById('creply-' + id);
+    var status = document.getElementById('creply-status-' + id);
+    var msg = (input.value || '').trim();
+    if (!msg) return;
+    status.textContent = 'Sending… 发送中…';
+    status.style.color = 'var(--color-muted)';
+    fetch('/api/patient/reply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
+      body: JSON.stringify({ requestId: id, message: msg }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (!d || !d.success) throw new Error((d && d.error) || 'failed'); input.value = ''; loadConsultations(); })
+      .catch(function () { status.textContent = 'Could not send. Please try again.'; status.style.color = '#dc2626'; });
   }
 
   function fmtDateTime(iso) {

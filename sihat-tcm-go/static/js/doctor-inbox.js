@@ -163,7 +163,7 @@
     var summary = (report.analysis && report.analysis.summary) || '';
     var hasReport = !!(report && (report.diagnosis || report.constitution || report.analysis || report.recommendations));
     var msgs = (rep.messages || []).filter(function (m) { return m.role === 'doctor'; });
-    var reviewed = req.status === 'reviewed' || msgs.length > 0;
+    var reviewed = req.status === 'reviewed' && msgs.length > 0;
     var flag = req.flag || 'normal';
     var flagBadge = flag !== 'normal' ? '<span class="flag-badge flag-' + flag + '">' + (flag === 'critical' ? '🔴 Critical' : '🟡 Watch') + '</span> ' : '';
 
@@ -173,7 +173,18 @@
       + '<div class="inbox-diag">→ Requested ' + esc(doc.name || 'any doctor') + '  ·  ' + esc(fmtDT(req.created_at)) + '</div></div>'
       + '<div class="inbox-badges">' + flagBadge + '<span class="consult-badge ' + (reviewed ? 'reviewed' : 'pending') + '">' + (reviewed ? 'Reviewed ✓' : 'Pending ⏳') + '</span></div></div>'
       + (summary ? '<div class="inbox-summary">' + esc(summary.slice(0, 260)) + (summary.length > 260 ? '…' : '') + '</div>' : '')
-      + (msgs.length ? '<div class="consult-feedback">Your reply: ' + esc(msgs[msgs.length - 1].content) + '</div>' : '')
+      + (function () {
+          var all = rep.messages || [];
+          if (!all.length) return '';
+          return '<div class="consult-thread" style="margin:.4rem 0">' + all.map(function (m) {
+            var isDoc = m.role === 'doctor';
+            return '<div style="margin:.3rem 0;padding:.45rem .65rem;border-radius:.5rem;font-size:.82rem;'
+              + (isDoc ? 'background:#eff6ff;border-left:3px solid #3b82f6' : 'background:#f0fdf4;border-left:3px solid #22c55e') + '">'
+              + '<strong style="font-size:.74rem;color:var(--slate-500,#64748b)">' + (isDoc ? '🩺 You 我' : '🧑 ' + esc(pp.name || 'Patient')) + '</strong><br>' + esc(m.content)
+              + (m.timestamp ? '<div style="font-size:.72rem;color:var(--slate-400,#94a3b8);margin-top:.15rem">' + esc(fmtDT(m.timestamp)) + '</div>' : '')
+              + '</div>';
+          }).join('') + '</div>';
+        })()
       + (hasReport ? '<div class="inbox-actions" style="margin:.4rem 0"><button class="btn btn-ghost btn-sm" data-print="' + esc(req.id) + '">🖨 Print / Save PDF 打印报告</button></div>' : '')
       + '<div class="inbox-reply">'
       + '<textarea class="form-input" id="reply-' + esc(req.id) + '" rows="2" placeholder="Write clinical feedback to the patient…"></textarea>'
