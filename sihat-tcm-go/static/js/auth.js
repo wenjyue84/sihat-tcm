@@ -315,5 +315,34 @@
     if (window.location.hash === '#signup') {
       window.authSwitchTab('signup');
     }
+
+    // Populate the "log in as a specific doctor" dropdown.
+    var docSel = document.getElementById('doctor-login-select');
+    if (docSel) {
+      fetch('/api/doctors')
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          (d.doctors || []).forEach(function (doc) {
+            if (!doc.email) return;
+            var o = document.createElement('option');
+            o.value = doc.email;
+            o.textContent = doc.full_name + (doc.specialty ? ' — ' + doc.specialty : '');
+            docSel.appendChild(o);
+          });
+        })
+        .catch(function () { /* directory optional */ });
+      docSel.addEventListener('change', function () {
+        if (docSel.value) window.authDoctorLogin(docSel.value);
+      });
+    }
   });
+
+  // Log in as a chosen doctor (demo password) via the login-form flow.
+  window.authDoctorLogin = function (email) {
+    var el = document.getElementById('login-email');
+    var pw = document.getElementById('login-password');
+    if (el) el.value = email;
+    if (pw) pw.value = 'password123';
+    window.authLogin();
+  };
 })();

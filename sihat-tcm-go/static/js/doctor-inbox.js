@@ -39,6 +39,7 @@
   function renderRequest(req) {
     var rep = req.diagnosis_report || {};
     var pp = rep.patient_profile || {};
+    var doc = rep.selected_doctor || {};
     var report = rep.full_report || {};
     var diag = (report.diagnosis && report.diagnosis.primary_pattern) || rep.ai_diagnosis || '—';
     if (diag && typeof diag === 'object') diag = diag.primary_pattern || '—';
@@ -49,7 +50,8 @@
 
     return '<div class="inbox-item">'
       + '<div class="inbox-head"><div><strong>' + esc(pp.name || 'Patient') + '</strong>'
-      + '<div class="inbox-diag">Pattern: ' + esc(typeof diag === 'string' ? diag : '—') + (constitution ? ' · ' + esc(constitution) : '') + '</div></div>'
+      + '<div class="inbox-diag">Pattern: ' + esc(typeof diag === 'string' ? diag : '—') + (constitution ? ' · ' + esc(constitution) : '') + '</div>'
+      + '<div class="inbox-diag">→ Requested ' + esc(doc.name || 'any doctor') + '  ·  ' + esc(fmtDT(req.created_at)) + '</div></div>'
       + '<span class="consult-badge ' + (reviewed ? 'reviewed' : 'pending') + '">' + (reviewed ? 'Reviewed ✓' : 'Pending ⏳') + '</span></div>'
       + (summary ? '<div class="inbox-summary">' + esc(summary.slice(0, 260)) + (summary.length > 260 ? '…' : '') + '</div>' : '')
       + (msgs.length ? '<div class="consult-feedback">Your reply: ' + esc(msgs[msgs.length - 1].content) + '</div>' : '')
@@ -77,5 +79,6 @@
   }
 
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function fmtDT(iso) { if (!iso) return ''; try { return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch (e) { return String(iso); } }
   function getCookie(n) { var m = document.cookie.match('(^|;)\\s*' + n + '\\s*=\\s*([^;]+)'); return m ? m.pop() : ''; }
 })();
