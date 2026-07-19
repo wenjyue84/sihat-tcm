@@ -295,19 +295,35 @@
         + '</p>';
     }
 
-    // Recommendations (compact)
+    // Key findings (object with from_inquiry/from_visual/from_pulse)
+    var kf = (report.analysis || {}).key_findings;
+    if (kf && typeof kf === 'object' && !Array.isArray(kf)) {
+      [['from_inquiry', '问诊'], ['from_visual', '望诊'], ['from_pulse', '切诊']].forEach(function (p) {
+        if (kf[p[0]]) html += '<div style="font-size:.8rem;margin-bottom:.3rem;color:var(--stone-600)"><strong>' + p[1] + ':</strong> ' + escHtml(String(kf[p[0]])) + '</div>';
+      });
+    }
+
+    // Recommendations — matches the doctor_final schema (food_therapy/acupoints/…)
     var rec = report.recommendations || {};
-    var recKeys = ['diet', 'herbs', 'lifestyle', 'exercise', 'acupuncture'];
-    var recIcons = { diet: '🥗', herbs: '🌿', lifestyle: '🧘', exercise: '🏃', acupuncture: '💉' };
-    recKeys.forEach(function (k) {
-      if (!rec[k] || !rec[k].length) return;
-      var items = Array.isArray(rec[k]) ? rec[k] : [rec[k]];
-      html += '<div style="margin-bottom:.4rem;font-size:.82rem">'
-        + '<strong>' + recIcons[k] + ' ' + capitalize(k) + ':</strong> '
+    var ft = rec.food_therapy || {};
+    var recRows = [
+      { icon: '🥗', label: 'Beneficial Foods 宜食', items: (ft.beneficial && ft.beneficial.length) ? ft.beneficial : rec.food },
+      { icon: '🚫', label: 'Foods to Avoid 忌口', items: (ft.avoid && ft.avoid.length) ? ft.avoid : rec.foods_to_avoid },
+      { icon: '🧘', label: 'Lifestyle 生活', items: rec.lifestyle },
+      { icon: '📍', label: 'Acupoints 穴位', items: rec.acupoints },
+      { icon: '🏃', label: 'Exercise 运动', items: rec.exercise },
+    ];
+    recRows.forEach(function (row) {
+      var items = Array.isArray(row.items) ? row.items : [];
+      if (!items.length) return;
+      html += '<div style="margin-bottom:.4rem;font-size:.82rem"><strong>' + row.icon + ' ' + row.label + ':</strong> '
         + items.slice(0, 3).map(function (i) { return escHtml(String(i)); }).join(' · ')
-        + (items.length > 3 ? ' …' : '')
-        + '</div>';
+        + (items.length > 3 ? ' …' : '') + '</div>';
     });
+    if (Array.isArray(rec.herbal_formulas) && rec.herbal_formulas.length) {
+      var names = rec.herbal_formulas.map(function (f) { return escHtml(typeof f === 'string' ? f : (f.name || '')); }).filter(Boolean);
+      if (names.length) html += '<div style="margin-bottom:.4rem;font-size:.82rem"><strong>🌿 Herbal Formulas 方剂:</strong> ' + names.join(' · ') + '</div>';
+    }
 
     // Disclaimer
     if (report.disclaimer) {
