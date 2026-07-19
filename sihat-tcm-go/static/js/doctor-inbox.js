@@ -30,6 +30,7 @@
           if (e && !e.dataset.wired) { e.dataset.wired = '1'; e.addEventListener('input', applyFilters); e.addEventListener('change', applyFilters); }
         });
         applyFilters();
+        renderPatients();
       })
       .catch(function () { box.innerHTML = '<p class="alert alert-error">Could not load requests.</p>'; });
   }
@@ -81,6 +82,75 @@
   }
 
   function val(id) { var e = document.getElementById(id); return e ? e.value : ''; }
+
+  /* ---- Patients view: group the master inbox by patient ---- */
+  var FLAG_RANK = { critical: 3, watch: 2, normal: 1 };
+
+  function renderPatients() {
+    var box = document.getElementById('doctor-patients');
+    if (!box) return;
+    var groups = {};
+    allRequests.forEach(function (req) {
+      var pp = (req.diagnosis_report || {}).patient_profile || {};
+      var key = req.user_id || pp.name || ('req-' + req.id);
+      if (!groups[key]) groups[key] = { name: pp.name || 'Patient', reqs: [] };
+      if (pp.name && groups[key].name === 'Patient') groups[key].name = pp.name;
+      groups[key].reqs.push(req);
+    });
+
+    var rows = Object.keys(groups).map(function (k) {
+      var reqs = groups[k].reqs.slice().sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+      var latest = reqs[0];
+      var report = (latest.diagnosis_report || {}).full_report || {};
+      var pattern = (report.diagnosis && report.diagnosis.primary_pattern) || (latest.diagnosis_report || {}).ai_diagnosis || '—';
+      if (pattern && typeof pattern === 'object') pattern = pattern.primary_pattern || pattern.name || '—';
+      var topFlag = reqs.reduce(function (acc, r) { var f = r.flag || 'normal'; return FLAG_RANK[f] > FLAG_RANK[acc] ? f : acc; }, 'normal');
+      var pending = reqs.filter(function (r) { return (r.status || 'pending') !== 'reviewed'; }).length;
+      return { name: groups[k].name, count: reqs.length, pattern: typeof pattern === 'string' ? pattern : '—', flag: topFlag, pending: pending, last: latest.created_at };
+    }).sort(function (a, b) {
+      if (FLAG_RANK[b.flag] !== FLAG_RANK[a.flag]) return FLAG_RANK[b.flag] - FLAG_RANK[a.flag];
+      return new Date(b.last) - new Date(a.last);
+    });
+
+    var pc = document.getElementById('patients-count'); if (pc) pc.textContent = rows.length;
+    if (!rows.length) { box.innerHTML = '<p class="text-muted">No patients yet.</p>'; return; }
+    box.innerHTML = '<table class="patients-table"><thead><tr>'
+      + '<th>Patient 患者</th><th>Assessments 评估</th><th>Latest Pattern 最新证型</th><th>Priority 优先级</th><th>Pending 待办</th><th>Last Activity 最近</th><th></th>'
+      + '</tr></thead><tbody>'
+      + rows.map(function (r) {
+          var flagLabel = r.flag === 'critical' ? '🔴 Critical' : (r.flag === 'watch' ? '🟡 Watch' : 'Normal');
+          return '<tr>'
+            + '<td class="pt-name">' + esc(r.name) + '</td>'
+            + '<td>' + r.count + '</td>'
+            + '<td>' + esc(r.pattern) + '</td>'
+            + '<td><span class="pt-pill ' + r.flag + '">' + flagLabel + '</span></td>'
+            + '<td>' + (r.pending ? '<strong style="color:#b45309">' + r.pending + '</strong>' : '0') + '</td>'
+            + '<td>' + esc(fmtDT(r.last)) + '</td>'
+            + '<td><button class="btn btn-ghost btn-sm" data-patient="' + esc(r.name) + '">View 查看</button></td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table>';
+    box.querySelectorAll('button[data-patient]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var s = document.getElementById('inbox-search'); if (s) s.value = b.getAttribute('data-patient');
+        doctorShowTab('requests');
+        applyFilters();
+      });
+    });
+  }
+
+  function doctorShowTab(tab) {
+    var reqPanel = document.getElementById('tab-requests');
+    var patPanel = document.getElementById('tab-patients');
+    if (!reqPanel || !patPanel) return;
+    var showReq = tab !== 'patients';
+    reqPanel.classList.toggle('hidden', !showReq);
+    patPanel.classList.toggle('hidden', showReq);
+    var rb = document.getElementById('tabbtn-requests'); if (rb) rb.classList.toggle('active', showReq);
+    var pb = document.getElementById('tabbtn-patients'); if (pb) pb.classList.toggle('active', !showReq);
+    if (!showReq) renderPatients();
+  }
+  window.doctorShowTab = doctorShowTab;
 
   function renderRequest(req) {
     var rep = req.diagnosis_report || {};
