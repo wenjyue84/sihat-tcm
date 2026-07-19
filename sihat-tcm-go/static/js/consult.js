@@ -14,6 +14,15 @@
     if (da) da.addEventListener('click', askDietary);
     var dq = document.getElementById('dietary-q');
     if (dq) dq.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); askDietary(); } });
+    // Approximate real-time: poll for doctor replies / treatment plans, but never
+    // clobber a reply the patient is mid-way through typing.
+    setInterval(function () {
+      if (document.hidden) return;
+      var a = document.activeElement;
+      if (a && a.id && a.id.indexOf('creply-') === 0) return;
+      var dirty = Array.prototype.some.call(document.querySelectorAll('input[id^="creply-"]'), function (i) { return (i.value || '').trim(); });
+      if (!dirty) loadConsultations();
+    }, 25000);
   });
 
   function askDietary() {

@@ -8,6 +8,15 @@
   document.addEventListener('DOMContentLoaded', function () {
     if (!document.getElementById('doctor-inbox')) return; // doctor page only
     loadInbox();
+    // Approximate real-time: poll for new patient messages, but never clobber a
+    // reply or treatment plan the doctor is mid-way through composing.
+    setInterval(function () {
+      if (document.hidden) return;
+      var a = document.activeElement;
+      if (a && a.id && (a.id.indexOf('reply-') === 0 || a.id.indexOf('tp-') === 0)) return;
+      var dirty = Array.prototype.some.call(document.querySelectorAll('textarea[id^="reply-"], input[id^="tp-"], textarea[id^="tp-"]'), function (i) { return (i.value || '').trim(); });
+      if (!dirty) loadInbox();
+    }, 25000);
   });
 
   function token() { return localStorage.getItem('tcm-token') || getCookie('sb-access-token'); }
