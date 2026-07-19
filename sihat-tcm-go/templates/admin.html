@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{.Title}} — Sihat TCM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{asset "/static/css/app.css"}}">
+  <style>
+    .admin-main { max-width: 1000px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+    .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .75rem; margin-bottom: 1.25rem; }
+    .admin-stat { background: #fff; border: 1px solid var(--slate-200, #e2e8f0); border-radius: .75rem; padding: 1rem; }
+    .admin-stat .v { font-size: 1.4rem; font-weight: 800; color: var(--slate-700, #334155); }
+    .admin-stat .l { font-size: .76rem; color: var(--slate-500, #64748b); margin-top: .2rem; }
+    .admin-section { background: #fff; border: 1px solid var(--slate-200, #e2e8f0); border-radius: .75rem; padding: 1.1rem 1.25rem; margin-bottom: 1.25rem; }
+    .admin-section h2 { font-size: 1rem; font-weight: 700; margin: 0 0 .75rem; color: var(--slate-700, #334155); }
+    .pill { display: inline-block; font-size: .72rem; font-weight: 700; padding: .12rem .55rem; border-radius: 999px; }
+    .pill.healthy { background: #d1fae5; color: #047857; }
+    .pill.degraded { background: #fef3c7; color: #92400e; }
+    .pill.unhealthy { background: #fee2e2; color: #b91c1c; }
+    .adm-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    .adm-table th { text-align: left; padding: .4rem .5rem; color: var(--slate-500, #64748b); border-bottom: 1px solid var(--slate-200, #e2e8f0); font-size: .7rem; text-transform: uppercase; }
+    .adm-table td { padding: .4rem .5rem; border-bottom: 1px solid var(--slate-100, #f1f5f9); vertical-align: top; }
+    .lvl { font-weight: 700; } .lvl.error { color: #b91c1c; } .lvl.warn { color: #92400e; } .lvl.info { color: #2563eb; } .lvl.debug { color: #64748b; }
+    .muted { color: var(--slate-500, #64748b); font-size: .85rem; }
+  </style>
+</head>
+<body class="page-doctor">
+
+{{template "header" .}}
+
+<main class="admin-main">
+  <h1 class="dashboard-section-title" style="margin-bottom:1rem">Admin Console 管理控制台 <span class="muted" style="font-size:.8rem">· read-only 只读</span></h1>
+
+  <div class="admin-grid" id="adm-overview">
+    <div class="admin-stat"><div class="v" id="ov-status">—</div><div class="l">Overall 总体</div></div>
+    <div class="admin-stat"><div class="v" id="ov-db">—</div><div class="l">Database 数据库</div></div>
+    <div class="admin-stat"><div class="v" id="ov-ai">—</div><div class="l">AI Service</div></div>
+    <div class="admin-stat"><div class="v" id="ov-uptime">—</div><div class="l">Uptime 运行</div></div>
+    <div class="admin-stat"><div class="v" id="ov-env">—</div><div class="l">Environment</div></div>
+  </div>
+
+  <div class="admin-grid" id="adm-stats">
+    <div class="admin-stat"><div class="v" id="st-users">—</div><div class="l">Total Users 用户</div></div>
+    <div class="admin-stat"><div class="v" id="st-admins">—</div><div class="l">Admins 管理员</div></div>
+    <div class="admin-stat"><div class="v" id="st-diag">—</div><div class="l">Diagnoses 诊断</div></div>
+  </div>
+
+  <div class="admin-section"><h2>System Prompts 系统提示词</h2><div id="adm-prompts" class="muted">Loading…</div></div>
+  <div class="admin-section"><h2>Error Statistics (24h) 错误统计</h2><div id="adm-errors" class="muted">Loading…</div></div>
+  <div class="admin-section"><h2>Recent Logs 近期日志</h2><div id="adm-logs" class="muted">Loading…</div></div>
+  <div class="admin-section"><h2>Settings 设置</h2><div id="adm-settings" class="muted">Loading…</div></div>
+</main>
+
+{{template "footer" .}}
+
+<script src="{{asset "/static/js/admin.js"}}"></script>
+</body>
+</html>

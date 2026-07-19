@@ -19,6 +19,7 @@ func (s *Server) registerPageRoutes() {
 	s.Mux.HandleFunc("GET /patient", s.handlePatientPage)
 	s.Mux.HandleFunc("GET /patient/report/{id}", s.handlePatientReportPage)
 	s.Mux.HandleFunc("GET /doctor", s.handleDoctorPage)
+	s.Mux.HandleFunc("GET /admin", s.handleAdminPage)
 	s.Mux.HandleFunc("GET /robots.txt", s.handleRobots)
 	s.Mux.HandleFunc("GET /sitemap.xml", s.handleSitemap)
 }
@@ -97,6 +98,24 @@ func (s *Server) handleDoctorPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.Render(w, "doctor.html", pgPageData{Title: "Doctor Dashboard", User: user})
+}
+
+// handleAdminPage renders admin.html — a read-only operations dashboard that
+// surfaces the existing admin/monitoring APIs. Gated to admin/developer roles;
+// other authenticated users are bounced to their own dashboard. The APIs still
+// enforce their own role checks, so the page never exposes more than the caller
+// is entitled to.
+func (s *Server) handleAdminPage(w http.ResponseWriter, r *http.Request) {
+	user := s.Authenticate(r)
+	if user == nil {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+	if user.Role != "admin" && user.Role != "developer" {
+		pgRedirectByRole(w, r, user.Role)
+		return
+	}
+	s.Render(w, "admin.html", pgPageData{Title: "Admin Console", User: user})
 }
 
 // pgRedirectByRole sends the user to their role-appropriate dashboard.
