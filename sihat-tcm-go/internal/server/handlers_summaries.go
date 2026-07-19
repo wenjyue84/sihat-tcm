@@ -430,7 +430,13 @@ func (s *Server) handleAskDietaryAdvice(w http.ResponseWriter, r *http.Request) 
 
 	text, err := s.AI.GenerateText(r.Context(), "gemini-2.0-flash", "", prompt)
 	if err != nil {
-		s.JSONError(w, http.StatusInternalServerError, err.Error())
+		// The free-tier Gemini quota is small; surface a clean 429 (not a raw 500
+		// leaking Google's quota text) so the client can show a friendly retry.
+		if containsAny(err.Error(), "429", "quota", "RATE_LIMIT", "rate limit") {
+			s.JSONError(w, http.StatusTooManyRequests, "The AI service is busy right now (rate limit). Please try again in a minute.")
+			return
+		}
+		s.JSONError(w, http.StatusInternalServerError, "Could not generate an answer right now. Please try again.")
 		return
 	}
 

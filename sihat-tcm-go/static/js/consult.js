@@ -39,7 +39,7 @@
         body: JSON.stringify({ question: q, diagnosis: report.diagnosis, profile: report.constitution || {}, advice: report.recommendations || {} }),
       })
         .then(function (r) { return r.json(); })
-        .then(function (d) { ans.textContent = d.answer || 'Sorry, no answer is available right now.'; })
+        .then(function (d) { ans.textContent = d.answer || d.error || 'Sorry, no answer is available right now.'; })
         .catch(function () { ans.textContent = 'Could not get an answer. Please try again.'; });
     });
   }
