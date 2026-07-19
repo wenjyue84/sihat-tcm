@@ -1,0 +1,14 @@
+# Compiled binaries (rebuilt via build.sh)
+/sihat-tcm-go
+/sihat-tcm-go.exe
+*.exe
+
+# Secrets — never commit
+.env
+.env.local
+.env.production
+
+# Test/dev artifacts
+*.stackdump
+scripts/scenario_reports*/
+*.png
