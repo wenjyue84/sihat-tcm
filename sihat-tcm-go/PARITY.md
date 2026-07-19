@@ -20,9 +20,8 @@ https://tcm.wenjyue.com. Last updated 2026-07-20.
 
 | Item | Why not auto-built |
 |------|--------------------|
-| Real-time / websocket / split-pane chat | Large new infra (WS server, presence) for marginal gain — polling refresh already delivers the messaging. Low priority. |
-| Writable admin (edit prompts / users / practitioners) | Mutating admin operations — needs explicit sign-off on scope before wiring. Read-only console ships now. |
-| AI end-to-end testing (chat/consult/image/dietary) | Gemini **free-tier quota exhausted (429)**. Code is complete; needs billing or a quota reset to verify live. |
+| True real-time (websocket / presence) | Large new infra for marginal gain — 25s guarded auto-refresh now delivers near-real-time messaging. Low priority. |
+| Writable admin (edit prompts / users / practitioners) | Mutating admin operations — needs explicit sign-off on scope before wiring. Read-only console + AI-key diagnostic ship now. |
 
 ## Deliberately NOT ported (TS placeholders / would re-introduce bugs)
 
@@ -41,8 +40,10 @@ Every change ships behind green gates (per-commit):
 - **Playwright** `scripts/{i18n,report_page,admin}_browser_test.py` — 14 + 4 + 5 assertions.
 - **API round-trips** for mutations (two-way reply, treatment plan) incl. ownership/403 checks.
 
-AI-dependent ACI suites (chat/image/consult) are quota-blocked (429) and skipped —
-not a regression.
+AI-dependent ACI suites (chat/image/consult) were verified green on 2026-07-20
+after the daily quota reset: **full `--suite=all` = 28/28**. The Gemini free-tier
+limit (~20 req/day/model) re-exhausts within minutes of heavy testing — a runtime
+constraint, not a code gap. Sustained AI use needs a billed/paid key.
 
 ## Deploy
 
