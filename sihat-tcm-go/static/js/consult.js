@@ -127,7 +127,7 @@
     });
   }
 
-  /* ---- My consultations (with doctor feedback) ---- */
+  /* ---- My consultations (with details + doctor feedback + cancel) ---- */
   function loadConsultations() {
     var box = document.getElementById('consultations-list');
     if (!box) return;
@@ -141,16 +141,49 @@
           var doc = rep.selected_doctor || {};
           var msgs = (rep.messages || []).filter(function (m) { return m.role === 'doctor'; });
           var reviewed = req.status === 'reviewed' || msgs.length > 0;
-          var badge = '<span class="consult-badge ' + (reviewed ? 'reviewed' : 'pending') + '">' + (reviewed ? 'Reviewed ✓ 已回复' : 'Pending ⏳ 等待中') + '</span>';
+          var cancelled = req.status === 'cancelled';
+          var badge = '<span class="consult-badge ' + (cancelled ? 'cancelled' : (reviewed ? 'reviewed' : 'pending')) + '">'
+            + (cancelled ? 'Cancelled 已取消' : (reviewed ? 'Reviewed ✓ 已回复' : 'Pending ⏳ 等待中')) + '</span>';
+          var report = rep.full_report || {};
+          var diag = (report.diagnosis && report.diagnosis.primary_pattern) || rep.ai_diagnosis || '';
+          if (diag && typeof diag === 'object') diag = diag.primary_pattern || '';
+          var metaBits = ['Requested ' + fmtDateTime(req.created_at)];
+          if (diag) metaBits.push('Pattern: ' + String(diag));
           var fb = msgs.length
-            ? msgs.map(function (m) { return '<div class="consult-feedback">💬 ' + esc(m.content) + '</div>'; }).join('')
+            ? msgs.map(function (m) { return '<div class="consult-feedback">💬 ' + esc(m.content) + (m.timestamp ? '<div class="consult-ts">— ' + esc(fmtDateTime(m.timestamp)) + '</div>' : '') + '</div>'; }).join('')
             : '<div class="text-muted" style="font-size:.8rem">Awaiting doctor feedback…</div>';
-          return '<div class="consult-item"><div class="consult-head"><strong>' + esc(doc.name || 'Doctor') + '</strong> ' + badge + '</div>' + fb + '</div>';
+          return '<div class="consult-item">'
+            + '<div class="consult-head"><strong>' + esc(doc.name || 'Doctor') + '</strong> ' + badge + '</div>'
+            + '<div class="consult-meta">' + esc(metaBits.join('  ·  ')) + '</div>'
+            + fb
+            + '<div class="consult-actions"><button class="btn btn-ghost btn-sm consult-cancel" data-cancel="' + esc(req.id) + '">🗑 Remove 取消</button></div>'
+            + '</div>';
         }).join('');
+        box.querySelectorAll('button[data-cancel]').forEach(function (b) {
+          b.addEventListener('click', function () { cancelConsult(b.getAttribute('data-cancel')); });
+        });
       })
       .catch(function () { box.innerHTML = '<p class="alert alert-error">Could not load consultations.</p>'; });
   }
   window.loadConsultations = loadConsultations;
+
+  function cancelConsult(id) {
+    if (!window.confirm('Remove this consultation request? This cannot be undone.')) return;
+    fetch('/api/patient/requests/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token() },
+      body: JSON.stringify({ id: id }),
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (!d || !d.success) throw new Error((d && d.error) || 'failed'); loadConsultations(); })
+      .catch(function () { alert('Could not remove the request. Please try again.'); });
+  }
+
+  function fmtDateTime(iso) {
+    if (!iso) return '';
+    try { return new Date(iso).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+    catch (e) { return String(iso); }
+  }
 
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function getCookie(n) { var m = document.cookie.match('(^|;)\\s*' + n + '\\s*=\\s*([^;]+)'); return m ? m.pop() : ''; }

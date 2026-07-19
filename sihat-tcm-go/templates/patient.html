@@ -23,6 +23,9 @@
     .organ-window { font-size: .78rem; color: var(--emerald-700, #047857); }
     .organ-advice, .wellness-tip-body { font-size: .82rem; color: var(--stone-600, #57534e); line-height: 1.55; margin-top: .35rem; }
     @media (max-width: 640px) { .overview-grid { grid-template-columns: repeat(2, 1fr); } .overview-row { grid-template-columns: 1fr; } }
+    .profile-card { background: #fff; border: 1px solid var(--stone-200, #e7e5e4); border-radius: .75rem; padding: 1rem; margin-top: .6rem; }
+    .profile-hint { font-size: .72rem; font-weight: 400; color: var(--color-muted, #78716c); }
+    .pf-status { font-size: .8rem; margin-left: .75rem; }
     .consult-status { font-size: .85rem; margin-bottom: .6rem; min-height: 1rem; }
     .doctor-directory { display: grid; gap: .75rem; }
     .doctor-card { display: flex; align-items: center; gap: .85rem; background: #fff; border: 1px solid var(--stone-200, #e7e5e4); border-radius: .75rem; padding: .9rem 1rem; }
@@ -50,7 +53,12 @@
     .consult-badge { font-size: .72rem; font-weight: 600; padding: .2rem .55rem; border-radius: 999px; }
     .consult-badge.pending { background: #fef3c7; color: #92400e; }
     .consult-badge.reviewed { background: #d1fae5; color: #047857; }
+    .consult-badge.cancelled { background: #f1f5f9; color: #64748b; }
+    .consult-meta { font-size: .76rem; color: var(--color-muted, #78716c); margin-bottom: .35rem; }
     .consult-feedback { background: #f0fdf4; border-left: 3px solid var(--emerald-500, #10b981); padding: .5rem .7rem; border-radius: .4rem; font-size: .85rem; color: var(--stone-700, #44403c); margin-top: .35rem; }
+    .consult-ts { font-size: .72rem; color: var(--color-muted, #78716c); margin-top: .2rem; }
+    .consult-actions { margin-top: .5rem; text-align: right; }
+    .consult-cancel { color: #b91c1c; }
   </style>
 </head>
 <body class="page-patient">
@@ -78,6 +86,32 @@
       <div class="organ-clock" id="organ-clock"></div>
       <div class="wellness-tip" id="wellness-tip"></div>
     </div>
+  </section>
+
+  <!-- My Profile -->
+  <section class="dashboard-section">
+    <details class="profile-details">
+      <summary class="dashboard-section-title" style="cursor:pointer">My Profile 我的资料 <span class="profile-hint">(click to edit)</span></summary>
+      <div class="profile-card">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label" for="pf-name">Full Name 姓名</label><input class="form-input" id="pf-name" type="text"></div>
+          <div class="form-group"><label class="form-label" for="pf-age">Age 年龄</label><input class="form-input" id="pf-age" type="number" min="1" max="120"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label" for="pf-gender">Gender 性别</label>
+            <select class="form-select" id="pf-gender"><option value="">Select…</option><option value="male">Male 男</option><option value="female">Female 女</option><option value="other">Other 其他</option></select>
+          </div>
+          <div class="form-group"><label class="form-label" for="pf-height">Height (cm) 身高</label><input class="form-input" id="pf-height" type="number" min="50" max="250"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label" for="pf-weight">Weight (kg) 体重</label><input class="form-input" id="pf-weight" type="number" min="20" max="300"></div>
+          <div class="form-group"><label class="form-label" for="pf-bmi">BMI</label><input class="form-input" id="pf-bmi" type="text" readonly placeholder="auto"></div>
+        </div>
+        <div class="form-group"><label class="form-label" for="pf-history">Medical History 病史</label><input class="form-input" id="pf-history" type="text" placeholder="e.g. hypertension, allergies (optional)"></div>
+        <button class="btn btn-primary btn-sm" id="pf-save">Save Profile 保存</button>
+        <span id="pf-status" class="pf-status"></span>
+      </div>
+    </details>
   </section>
 
   <!-- Session List -->

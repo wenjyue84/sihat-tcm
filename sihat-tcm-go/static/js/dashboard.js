@@ -16,11 +16,60 @@
     loadSessions();
     renderOrganClock();
     renderWellnessTip();
+    initProfile();
 
     // Logout hook (patient header uses generic "Dashboard" link,
     // but we add a convenience logout to the header nav if a token exists)
     injectLogoutLink();
   });
+
+  /* ------------------------------------------------------------------ */
+  /*  Patient basic profile — view + save                                 */
+  /* ------------------------------------------------------------------ */
+  function initProfile() {
+    var saveBtn = document.getElementById('pf-save');
+    if (!saveBtn) return;
+    var token = localStorage.getItem('tcm-token') || getCookie('sb-access-token');
+    fetch('/api/patient/profile', { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.profile) return;
+        var p = d.profile;
+        pfSet('pf-name', p.full_name); pfSet('pf-age', p.age); pfSet('pf-gender', p.gender);
+        pfSet('pf-height', p.height); pfSet('pf-weight', p.weight); pfSet('pf-history', p.medical_history);
+        computeBMI();
+      })
+      .catch(function () { /* profile optional */ });
+    ['pf-height', 'pf-weight'].forEach(function (id) {
+      var e = document.getElementById(id); if (e) e.addEventListener('input', computeBMI);
+    });
+    saveBtn.addEventListener('click', saveProfile);
+  }
+
+  function computeBMI() {
+    var h = parseFloat(pfVal('pf-height')), w = parseFloat(pfVal('pf-weight'));
+    var el = document.getElementById('pf-bmi');
+    if (!el) return;
+    el.value = (h > 0 && w > 0) ? (w / Math.pow(h / 100, 2)).toFixed(1) : '';
+  }
+
+  function saveProfile() {
+    var token = localStorage.getItem('tcm-token') || getCookie('sb-access-token');
+    var status = document.getElementById('pf-status');
+    var payload = { full_name: pfVal('pf-name'), gender: pfVal('pf-gender'), medical_history: pfVal('pf-history') };
+    var age = parseInt(pfVal('pf-age'), 10); if (!isNaN(age)) payload.age = age;
+    var h = parseFloat(pfVal('pf-height')); if (!isNaN(h)) payload.height = h;
+    var w = parseFloat(pfVal('pf-weight')); if (!isNaN(w)) payload.weight = w;
+    var bmi = parseFloat(pfVal('pf-bmi')); if (!isNaN(bmi)) payload.bmi = bmi;
+    status.textContent = 'Saving…'; status.style.color = 'var(--color-muted)';
+    fetch('/api/patient/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(payload) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (!d || !d.success) throw new Error(); status.textContent = 'Saved ✓ 已保存'; status.style.color = 'var(--emerald-600)'; })
+      .catch(function () { status.textContent = 'Could not save.'; status.style.color = '#dc2626'; });
+  }
+
+  function pfSet(id, v) { var e = document.getElementById(id); if (e && v != null && v !== '') e.value = v; }
+  function pfVal(id) { var e = document.getElementById(id); return e ? String(e.value).trim() : ''; }
 
   /* ------------------------------------------------------------------ */
   /*  Health overview — stats, TCM organ clock, daily wellness tip        */
