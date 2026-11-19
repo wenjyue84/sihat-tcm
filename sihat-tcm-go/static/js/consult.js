@@ -74,7 +74,18 @@
       .then(function (r) { return r.json(); })
       .then(function (d) {
         allDoctors = d.doctors || [];
-        if (!allDoctors.length) { box.innerHTML = '<p class="text-muted" style="font-size:.85rem">No doctors are available yet.</p>'; return; }
+        var panel = document.getElementById('consult-section');
+        if (panel) panel.classList.toggle('has-no-doctors', !allDoctors.length);
+        if (!allDoctors.length) {
+          box.innerHTML = '<div class="art-empty" id="doctors-empty">'
+            + '<img class="art-empty__img" src="/static/img/art/consult.webp" width="900" height="700" loading="lazy" decoding="async"'
+            + ' alt="Illustration of a doctor and patient in a video consultation." data-i18n-alt="art.consult">'
+            + '<h4 data-i18n="art.consult.t">Connect with a TCM doctor</h4>'
+            + '<p data-i18n="art.consult.d">No doctors are listed yet. Once a registered doctor joins, you can request a consultation here.</p>'
+            + '</div>';
+          if (window.tcmApplyLang) window.tcmApplyLang();
+          return;
+        }
         box.innerHTML = allDoctors.map(function (doc) {
           var name = esc(doc.full_name || 'TCM Doctor');
           var yrs = doc.years_experience ? doc.years_experience + ' yrs exp' : '';
@@ -124,17 +135,46 @@
       + '<div class="dm-rows">' + rows.map(function (r) { return '<div class="dm-row"><span>' + esc(r[0]) + '</span><strong>' + esc(String(r[1])) + '</strong></div>'; }).join('') + '</div>'
       + '<button class="btn btn-primary btn-full mt-2" id="dm-request">Request Review 请求会诊</button>';
     document.getElementById('dm-request').addEventListener('click', function () { closeDoctorModal(); consultRequest(doc.id, doc.full_name); });
+    modalOpener = document.activeElement;
     modal.classList.remove('hidden');
+    var card = modal.querySelector('.doctor-modal-card');
+    var closeBtn = modal.querySelector('.doctor-modal-close');
+    if (closeBtn && closeBtn.focus) closeBtn.focus(); else if (card && card.focus) card.focus();
   }
-  function closeDoctorModal() { var m = document.getElementById('doctor-modal'); if (m) m.classList.add('hidden'); }
+  var modalOpener = null;
+  function closeDoctorModal() {
+    var m = document.getElementById('doctor-modal');
+    if (m) m.classList.add('hidden');
+    if (modalOpener && typeof modalOpener.focus === 'function') { try { modalOpener.focus(); } catch (e) { /* element gone */ } }
+    modalOpener = null;
+  }
   window.closeDoctorModal = closeDoctorModal;
 
+  // Escape dismisses the doctor detail dialog; Tab is kept inside it while it is open.
+  document.addEventListener('keydown', function (e) {
+    var m = document.getElementById('doctor-modal');
+    if (!m || m.classList.contains('hidden')) return;
+    if (e.key === 'Escape' || e.key === 'Esc') { e.preventDefault(); closeDoctorModal(); return; }
+    if (e.key === 'Tab') {
+      var f = m.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      else if (!m.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  var requestInFlight = false;
   function consultRequest(doctorId, doctorName) {
+    if (requestInFlight) return;
+    requestInFlight = true;
     var status = document.getElementById('consult-status');
     status.style.color = 'var(--color-muted)';
     status.textContent = 'Preparing your latest report for ' + doctorName + '…';
     loadLatestReport(function () {
       if (!latestReport) {
+        requestInFlight = false;
         status.textContent = 'Please complete and save an assessment first, then request a review.';
         status.style.color = '#b45309';
         return;
@@ -152,10 +192,11 @@
         .then(function (d) {
           if (!d || !d.success) throw new Error((d && d.error) || 'failed');
           status.textContent = '✓ Request sent to ' + doctorName + '. They will review your report and reply below.';
-          status.style.color = 'var(--emerald-600)';
+          status.style.color = 'var(--emerald-700)';
           loadConsultations();
         })
-        .catch(function (err) { status.textContent = 'Could not send request: ' + err.message; status.style.color = '#dc2626'; });
+        .catch(function (err) { status.textContent = 'Could not send request: ' + err.message; status.style.color = '#dc2626'; })
+        .then(function () { requestInFlight = false; });
     });
   }
 
@@ -178,7 +219,7 @@
           var badge = '<span class="consult-badge ' + (cancelled ? 'cancelled' : (reviewed ? 'reviewed' : 'pending')) + '">'
             + (cancelled ? 'Cancelled 已取消' : (reviewed ? 'Reviewed ✓ 已回复' : 'Pending ⏳ 等待中')) + '</span>';
           var report = rep.full_report || {};
-          var diag = (report.diagnosis && report.diagnosis.primary_pattern) || rep.ai_diagnosis || '';
+          var diag = (typeof report.diagnosis === 'string' ? report.diagnosis : (report.diagnosis && report.diagnosis.primary_pattern)) || rep.ai_diagnosis || '';
           if (diag && typeof diag === 'object') diag = diag.primary_pattern || '';
           var metaBits = ['Requested ' + fmtDateTime(req.created_at)];
           if (diag) metaBits.push('Pattern: ' + String(diag));
@@ -195,7 +236,7 @@
               }).join('') + '</div>'
             : '<div class="text-muted" style="font-size:.8rem">Awaiting doctor feedback… 等待医生回复…</div>';
           var replyBox = cancelled ? '' : '<div class="consult-reply" style="display:flex;gap:.4rem;margin-top:.5rem">'
-            + '<input class="form-input" id="creply-' + esc(req.id) + '" type="text" placeholder="Reply to the doctor… 回复医生…" style="flex:1">'
+            + '<input class="form-input" id="creply-' + esc(req.id) + '" type="text" aria-label="Reply to the doctor 回复医生" placeholder="Reply to the doctor… 回复医生…" style="flex:1">'
             + '<button class="btn btn-primary btn-sm" data-preply="' + esc(req.id) + '">Send 发送</button>'
             + '</div>';
           var tp = rep.treatment_plan;

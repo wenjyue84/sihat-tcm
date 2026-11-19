@@ -1,0 +1,119 @@
+{
+  "id": "tongue-13",
+  "type": "tongue",
+  "label": "baseline",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T01:57:44.242Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 125998,
+      "bytes": 2283,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 125998,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Spleen-Stomach Dampness · Digestive Support\",\"confidence\":91.4,\"description\":\"舌中央的厚白苔直接對應TCM舌診中的脾胃區域，提示寒濕或食積阻滯中焦，脾胃的運化功能受損。此證型臨床上常見腹脹、消化遲緩、身體沉重感或大便溏稀等症狀。\",\"recommendations\":[\"戒除寒涼、生冷及油膩食物（冰飲、生菜沙拉、煎炸食品），改以溫熱熟食為主，並搭配生薑、陳皮、豆蔻等溫中化濕的食材，以溫暖脾陽、化解寒濕。\",\"每餐飯後進行10至15分鐘的緩步散步（飯後百步走），避免立即坐臥，以促進脾氣運行、防止食積進一步加重。\"],\"title\":\"Thick White Center Coating\",\"title_cn\":\"中部厚白苔\"},{\"category\":\"Heart Fire · Emotional Calming\",\"confidence\":86.7,\"description\":\"舌尖在TCM分區中對應心與肺，此處呈現明顯較深的紅色，提示心火上炎——多由情緒壓力、焦慮、思慮過度或睡眠質量差所誘發。臨床上可能表現為心悸、失眠、口腔潰瘍或煩躁不安等症狀。\",\"recommendations\":[\"日常飲食中加入清心降火的食材：蓮子、百合、綠豆湯、浮小麥，有助於清瀉心火、安定心神（神）。\",\"建立固定的睡前放鬆程序——睡前60分鐘減少螢幕使用，並進行5至10分鐘的腹式呼吸或靜坐冥想，以收斂心神、降低心火。\"],\"title\":\"Red Tongue Tip\",\"title_cn\":\"舌尖紅\"},{\"category\":\"Dampness Accumulation · Yang Qi Support\",\"confidence\":78.2,\"description\":\"舌面整體呈均勻濕潤、略帶光澤的潤滑苔，提示體內津液尚充足，但脾陽不足以完全氣化和輸布水液，導致濕邪內停。結合中部厚白苔，此象進一步印證脾氣／脾陽虛弱、痰濕內蘊的複合證型。\",\"recommendations\":[\"避免長時間處於潮濕或冷氣環境中，飲食上每週適量加入羊肉、山藥、薏苡仁、黑胡椒等溫陽化濕食材，以強健脾陽、促進水濕運化。\",\"每日進行至少30分鐘的中等強度有氧運動（快步走、騎單車），以推動陽氣運行、促進水液代謝，防止痰濕進一步積聚——但應避免大汗淋漓，以免耗傷正氣。\"],\"title\":\"Moist and Slightly Glossy Tongue Surface\",\"title_cn\":\"舌面潤滑\"}],\"confidence\":84,\"image_description\":\"清晰的舌頭近距離照片，顯示舌體完全伸出，中後背部有明顯的厚白苔集中分佈，舌尖相對較紅且苔較薄，整體舌面濕潤，舌體呈淡紅色。\",\"modelUsed\":1,\"notes\":\"照片光線充足、舌體完全伸出，影像質量良好，可準確評估苔質紋理及各分區色澤變化。中部厚白苔為本次最具臨床意義的發現，應作為首要調治重點。建議先從飲食及生活方式調整入手，再考慮是否需要草藥介入。飲食調整後2至3週可再次觀察舌象，以評估中部苔色是否改善。本次影像未見明顯裂紋、齒痕、紫色瘀斑或舌下靜脈怒張等異常。\",\"observation\":\"舌體淡紅（淡紅舌），舌面濕潤，大小適中。最顯著的特徵是中央脾胃對應區域有厚白苔集中分佈，舌尖則相對較紅且苔薄，提示中焦寒濕與上焦輕度熱象並存的複合證型。\",\"pattern_suggestions\":[\"主證：脾胃寒濕（脾胃寒濕）夾食積——中央厚白苔伴舌面潤滑為主導表現，治療以溫中化濕、消食導滯為首要原則\",\"兼證：心火上炎——舌尖偏紅提示上焦同時存在情志或壓力誘發的熱象，應在調治中焦的同時兼顧清心安神\",\"整體TCM辨證：虛實夾雜——中焦脾胃濕滯（實）與上焦心火（熱）並存；治法宜溫化中焦（溫化）與清心安神（清心安神）雙管齊下\"],\"potential_issues\":[\"主證：脾胃寒濕（脾胃寒濕）夾食積——中央厚白苔伴舌面潤滑為主導表現，治療以溫中化濕、消食導滯為首要原則\",\"兼證：心火上炎——舌尖偏紅提示上焦同時存在情志或壓力誘發的熱象，應在調治中焦的同時兼顧清心安神\",\"整體TCM辨證：虛實夾雜——中焦脾胃濕滯（實）與上焦心火（熱）並存；治法宜溫化中焦（溫化）與清心安神（清心安神）雙管齊下\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"厚白苔（Hòu Bái Tāi）— Thick White Coating — 提示脾胃中焦寒濕或食積；苔越厚，病情越重\",\"舌尖紅（Shé Jiān Hóng）— Red Tongue Tip — 反映心火上炎或肺熱；多與情緒壓力、失眠、焦慮相關\",\"潤滑苔（Rùn Huá Tāi）— Moist/Slippery Coating — 提示脾陽運化不足，體內水濕偏盛\",\"淡紅舌體（Dàn Hóng Shé Tǐ）— Light-Red Tongue Body — 整體體質接近正常，可排除嚴重血虛或全身性極熱之象\",\"不均勻苔分佈（Bù Jūn Yún Tāi Fēn Bù）— Uneven Coating Distribution — 中央苔厚、舌尖無苔，提示不同臟腑系統之虛實夾雜複合證型\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Spleen-Stomach Dampness · Digestive Support",
+        "confidence": 91.4,
+        "description": "舌中央的厚白苔直接對應TCM舌診中的脾胃區域，提示寒濕或食積阻滯中焦，脾胃的運化功能受損。此證型臨床上常見腹脹、消化遲緩、身體沉重感或大便溏稀等症狀。",
+        "recommendations": [
+          "戒除寒涼、生冷及油膩食物（冰飲、生菜沙拉、煎炸食品），改以溫熱熟食為主，並搭配生薑、陳皮、豆蔻等溫中化濕的食材，以溫暖脾陽、化解寒濕。",
+          "每餐飯後進行10至15分鐘的緩步散步（飯後百步走），避免立即坐臥，以促進脾氣運行、防止食積進一步加重。"
+        ],
+        "title": "Thick White Center Coating",
+        "title_cn": "中部厚白苔"
+      },
+      {
+        "category": "Heart Fire · Emotional Calming",
+        "confidence": 86.7,
+        "description": "舌尖在TCM分區中對應心與肺，此處呈現明顯較深的紅色，提示心火上炎——多由情緒壓力、焦慮、思慮過度或睡眠質量差所誘發。臨床上可能表現為心悸、失眠、口腔潰瘍或煩躁不安等症狀。",
+        "recommendations": [
+          "日常飲食中加入清心降火的食材：蓮子、百合、綠豆湯、浮小麥，有助於清瀉心火、安定心神（神）。",
+          "建立固定的睡前放鬆程序——睡前60分鐘減少螢幕使用，並進行5至10分鐘的腹式呼吸或靜坐冥想，以收斂心神、降低心火。"
+        ],
+        "title": "Red Tongue Tip",
+        "title_cn": "舌尖紅"
+      },
+      {
+        "category": "Dampness Accumulation · Yang Qi Support",
+        "confidence": 78.2,
+        "description": "舌面整體呈均勻濕潤、略帶光澤的潤滑苔，提示體內津液尚充足，但脾陽不足以完全氣化和輸布水液，導致濕邪內停。結合中部厚白苔，此象進一步印證脾氣／脾陽虛弱、痰濕內蘊的複合證型。",
+        "recommendations": [
+          "避免長時間處於潮濕或冷氣環境中，飲食上每週適量加入羊肉、山藥、薏苡仁、黑胡椒等溫陽化濕食材，以強健脾陽、促進水濕運化。",
+          "每日進行至少30分鐘的中等強度有氧運動（快步走、騎單車），以推動陽氣運行、促進水液代謝，防止痰濕進一步積聚——但應避免大汗淋漓，以免耗傷正氣。"
+        ],
+        "title": "Moist and Slightly Glossy Tongue Surface",
+        "title_cn": "舌面潤滑"
+      }
+    ],
+    "confidence": 84,
+    "image_description": "清晰的舌頭近距離照片，顯示舌體完全伸出，中後背部有明顯的厚白苔集中分佈，舌尖相對較紅且苔較薄，整體舌面濕潤，舌體呈淡紅色。",
+    "modelUsed": 1,
+    "notes": "照片光線充足、舌體完全伸出，影像質量良好，可準確評估苔質紋理及各分區色澤變化。中部厚白苔為本次最具臨床意義的發現，應作為首要調治重點。建議先從飲食及生活方式調整入手，再考慮是否需要草藥介入。飲食調整後2至3週可再次觀察舌象，以評估中部苔色是否改善。本次影像未見明顯裂紋、齒痕、紫色瘀斑或舌下靜脈怒張等異常。",
+    "observation": "舌體淡紅（淡紅舌），舌面濕潤，大小適中。最顯著的特徵是中央脾胃對應區域有厚白苔集中分佈，舌尖則相對較紅且苔薄，提示中焦寒濕與上焦輕度熱象並存的複合證型。",
+    "pattern_suggestions": [
+      "主證：脾胃寒濕（脾胃寒濕）夾食積——中央厚白苔伴舌面潤滑為主導表現，治療以溫中化濕、消食導滯為首要原則",
+      "兼證：心火上炎——舌尖偏紅提示上焦同時存在情志或壓力誘發的熱象，應在調治中焦的同時兼顧清心安神",
+      "整體TCM辨證：虛實夾雜——中焦脾胃濕滯（實）與上焦心火（熱）並存；治法宜溫化中焦（溫化）與清心安神（清心安神）雙管齊下"
+    ],
+    "potential_issues": [
+      "主證：脾胃寒濕（脾胃寒濕）夾食積——中央厚白苔伴舌面潤滑為主導表現，治療以溫中化濕、消食導滯為首要原則",
+      "兼證：心火上炎——舌尖偏紅提示上焦同時存在情志或壓力誘發的熱象，應在調治中焦的同時兼顧清心安神",
+      "整體TCM辨證：虛實夾雜——中焦脾胃濕滯（實）與上焦心火（熱）並存；治法宜溫化中焦（溫化）與清心安神（清心安神）雙管齊下"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "厚白苔（Hòu Bái Tāi）— Thick White Coating — 提示脾胃中焦寒濕或食積；苔越厚，病情越重",
+      "舌尖紅（Shé Jiān Hóng）— Red Tongue Tip — 反映心火上炎或肺熱；多與情緒壓力、失眠、焦慮相關",
+      "潤滑苔（Rùn Huá Tāi）— Moist/Slippery Coating — 提示脾陽運化不足，體內水濕偏盛",
+      "淡紅舌體（Dàn Hóng Shé Tǐ）— Light-Red Tongue Body — 整體體質接近正常，可排除嚴重血虛或全身性極熱之象",
+      "不均勻苔分佈（Bù Jūn Yún Tāi Fēn Bù）— Uneven Coating Distribution — 中央苔厚、舌尖無苔，提示不同臟腑系統之虛實夾雜複合證型"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-scharlach.jpg",
+    "image_bytes": 164567
+  },
+  "expected": {
+    "documented_condition": "raspberry/strawberry tongue in late scarlet fever (red with white surface remnants)",
+    "expected_tcm": {
+      "body_colour": "crimson / bright red with prominent red papillae (prickles)",
+      "coating": "white coating remnants peeling away",
+      "thickness": "thin to peeling",
+      "shape": "swollen red papillae (raspberry)",
+      "moisture": "moist to dry",
+      "pattern": "Heat entering Ying/Blood level (warm-febrile disease), Excess Heat; red prickly tongue"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Scharlach.JPG"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "red",
+          "crimson",
+          "scarlet"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "heat",
+          "fire"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

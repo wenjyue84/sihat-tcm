@@ -24,6 +24,7 @@
     audioDataURL: '',
     bpm: '',
     pulseQualities: [],
+    deviceVitals: [],   // readings from a linked device (Bluetooth / synced account data): [{metric,value,unit,measured_at,device,source}]
     report: null,
   };
 
@@ -32,6 +33,18 @@
   var audioChunks = [];
   var recInterval = null;
   var recSeconds = 0;
+
+  /* ------------------------------------------------------------------ */
+  /*  i18n helper                                                         */
+  /* ------------------------------------------------------------------ */
+  // T('wiz.next', 'Next →') -> the string for the selected language (en/zh/ms) via i18n.js; the English
+  // fallback keeps the wizard usable if i18n.js is missing.
+  function T(key, fallback, vars) {
+    if (typeof window.tcmT === 'function') return window.tcmT(key, fallback, vars);
+    var s = fallback;
+    if (vars) Object.keys(vars).forEach(function (k) { s = String(s).split('{' + k + '}').join(vars[k]); });
+    return s;
+  }
 
   /* ------------------------------------------------------------------ */
   /*  Persistence                                                         */
@@ -64,7 +77,9 @@
     loadState();
     bindSymptomChips();
     bindPulseChips();
+    bindDeviceLink();
     renderStep(state.currentStep);
+    document.addEventListener('tcm:langchange', function () { renderNavLabels(state.currentStep); });
     // If there's saved state beyond step 0, show wizard immediately
     if (state.currentStep > 0 || state.basicInfo.name) {
       showWizard();
@@ -77,6 +92,9 @@
         document.getElementById('bpm-input').value = state.bpm;
         document.getElementById('bpm-display').textContent = state.bpm;
       }
+      document.querySelectorAll('#pulse-quality-grid .quality-chip').forEach(function (c) {
+        setChipActive(c, (state.pulseQualities || []).indexOf(c.dataset.value) !== -1);
+      });
     }
   }
 
@@ -131,27 +149,44 @@
     var skipBtn = document.getElementById('wiz-skip-btn');
     skipBtn.style.display = (idx === 4 || idx === 5) ? '' : 'none';
 
-    // Next button label
-    var nextBtn = document.getElementById('wiz-next-btn');
-    if (idx === 6) {
-      nextBtn.textContent = 'Generate Report →';
-    } else if (idx === 7) {
-      nextBtn.style.display = 'none';
-    } else {
-      nextBtn.style.display = '';
-      nextBtn.textContent = 'Next →';
-    }
-
-    // Step counter
-    document.getElementById('wiz-step-counter').textContent =
-      'Step ' + (idx + 1) + ' of ' + TOTAL_STEPS;
+    // Next button label + step counter (translated; also refreshed on tcm:langchange)
+    renderNavLabels(idx);
 
     // Step-specific init
     if (idx === 6) renderSummary();
-    if (idx === 7 && !state.report) generateReport();
+    if (idx === 7) {
+      if (state.report) {
+        // A report already exists (page reload, or Back then Next): show it. Previously only generateReport()
+        // ran when there was NO report and nothing ever rendered state.report, so the "Generating…" card
+        // spun forever after a refresh.
+        stopReportProgress(true);
+        document.getElementById('report-loading').classList.add('hidden');
+        hideEl(document.getElementById('report-error'));
+        renderReport(state.report);
+      } else {
+        generateReport();
+      }
+    }
 
     state.currentStep = idx;
     saveState();
+  }
+
+  function renderNavLabels(idx) {
+    var nextBtn = document.getElementById('wiz-next-btn');
+    if (nextBtn) {
+      if (idx === 6) {
+        nextBtn.style.display = '';
+        nextBtn.textContent = T('wiz.generate', 'Generate Report →');
+      } else if (idx === 7) {
+        nextBtn.style.display = 'none';
+      } else {
+        nextBtn.style.display = '';
+        nextBtn.textContent = T('wiz.next', 'Next →');
+      }
+    }
+    var counter = document.getElementById('wiz-step-counter');
+    if (counter) counter.textContent = T('wiz.stepof', 'Step {n} of {total}', { n: idx + 1, total: TOTAL_STEPS });
   }
 
   /* ------------------------------------------------------------------ */
@@ -190,6 +225,7 @@
       audioDataURL: '',
       bpm: '',
       pulseQualities: [],
+      deviceVitals: [],
       report: null,
     };
     window.location.reload();
@@ -237,7 +273,7 @@
     var bpmDisp = document.getElementById('bpm-display');
     if (bpmDisp) bpmDisp.textContent = mock.bpm;
     document.querySelectorAll('#pulse-quality-grid .quality-chip').forEach(function (c) {
-      c.classList.toggle('active', mock.pulseQualities.indexOf(c.dataset.value) !== -1);
+      setChipActive(c, mock.pulseQualities.indexOf(c.dataset.value) !== -1);
     });
     renderChatHistory();
     showObservation('tongue', mock.tongueObs, '');
@@ -253,18 +289,33 @@
   /* ------------------------------------------------------------------ */
   /*  Step 0 — Basic Info                                                 */
   /* ------------------------------------------------------------------ */
+  // Whole number within [min, max]; '' is "not given". <input min/max> is not enforced (there is no <form>), so check here.
+  function numInRange(raw, min, max) {
+    var s = String(raw == null ? '' : raw).trim();
+    if (!/^-?\d+(\.\d+)?$/.test(s)) return false;
+    var n = Number(s);
+    return isFinite(n) && n >= min && n <= max;
+  }
+
   function validateBasicInfo() {
-    var name = document.getElementById('bi-name').value.trim();
-    var age  = document.getElementById('bi-age').value.trim();
+    var nameEl = document.getElementById('bi-name');
+    var ageEl  = document.getElementById('bi-age');
+    var name = nameEl.value.trim();
+    var age  = ageEl.value.trim();
     var errEl = document.getElementById('step0-error');
-    if (!name) {
-      showEl(errEl, 'Please enter your name.', 'alert-error');
+    function fail(el, key, fallback) {
+      showEl(errEl, T(key, fallback), 'alert-error');
+      if (el && el.focus) el.focus(); // keyboard / screen-reader users land on the field that needs fixing
       return false;
     }
-    if (!age || isNaN(parseInt(age))) {
-      showEl(errEl, 'Please enter a valid age.', 'alert-error');
-      return false;
+    if (!name) return fail(nameEl, 'wiz.err.name', 'Please enter your name.');
+    if (!age || !/^\d{1,3}$/.test(age) || Number(age) < 1 || Number(age) > 120) {
+      return fail(ageEl, 'wiz.err.age', 'Please enter a valid age (1–120).');
     }
+    var hEl = document.getElementById('bi-height'), wEl = document.getElementById('bi-weight');
+    var h = hEl ? String(hEl.value || '').trim() : '', w = wEl ? String(wEl.value || '').trim() : '';
+    if (h && !numInRange(h, 50, 250)) return fail(hEl, 'wiz.err.height', 'Height must be between 50 and 250 cm.');
+    if (w && !numInRange(w, 20, 300)) return fail(wEl, 'wiz.err.weight', 'Weight must be between 20 and 300 kg.');
     hideEl(errEl);
     return true;
   }
@@ -286,13 +337,48 @@
     if (bi.gender) document.getElementById('bi-gender').value = bi.gender;
     if (bi.height) document.getElementById('bi-height').value = bi.height;
     if (bi.weight) document.getElementById('bi-weight').value = bi.weight;
-    // re-activate chips
-    var chips = document.querySelectorAll('#symptom-chips .chip[data-value]');
+    // re-activate chips; a CUSTOM symptom has no chip in the HTML after a reload, so re-create it
+    // (otherwise it stays in state and is sent to the model but can never be un-selected)
+    var chips = Array.prototype.slice.call(document.querySelectorAll('#symptom-chips .chip[data-value]'));
+    var seen = {};
     chips.forEach(function (c) {
-      if (state.basicInfo.symptoms.indexOf(c.dataset.value) !== -1) {
-        c.classList.add('active');
-      }
+      var on = state.basicInfo.symptoms.indexOf(c.dataset.value) !== -1;
+      if (on) seen[c.dataset.value] = true;
+      setChipActive(c, on);
     });
+    var box = document.getElementById('symptom-chips');
+    (state.basicInfo.symptoms || []).forEach(function (sym) {
+      if (seen[sym]) return;
+      seen[sym] = true;
+      if (box) box.appendChild(makeSymptomChip(sym, true));
+    });
+  }
+
+  // Chips are role=checkbox elements: keep aria-checked in step with the .active class.
+  function setChipActive(chip, on) {
+    chip.classList.toggle('active', !!on);
+    if (typeof chip.setAttribute === 'function') chip.setAttribute('aria-checked', on ? 'true' : 'false');
+  }
+
+  function makeSymptomChip(val, active) {
+    var chip = document.createElement('span');
+    chip.className = 'chip' + (active ? ' active' : '');
+    chip.dataset.value = val;
+    chip.textContent = val;
+    chip.setAttribute('role', 'checkbox');
+    chip.setAttribute('tabindex', '0');
+    chip.setAttribute('aria-checked', active ? 'true' : 'false');
+    return chip;
+  }
+
+  function toggleSymptomChip(chip) {
+    var val = chip.dataset.value;
+    var idx = state.basicInfo.symptoms.indexOf(val);
+    var on = idx === -1;
+    setChipActive(chip, on);
+    if (on) state.basicInfo.symptoms.push(val);
+    else state.basicInfo.symptoms.splice(idx, 1);
+    saveState();
   }
 
   function bindSymptomChips() {
@@ -300,12 +386,15 @@
     container.addEventListener('click', function (e) {
       var chip = e.target.closest('.chip[data-value]');
       if (!chip) return;
-      chip.classList.toggle('active');
-      var val = chip.dataset.value;
-      var idx = state.basicInfo.symptoms.indexOf(val);
-      if (idx === -1) state.basicInfo.symptoms.push(val);
-      else state.basicInfo.symptoms.splice(idx, 1);
-      saveState();
+      toggleSymptomChip(chip);
+    });
+    // keyboard: Space / Enter toggles the focused chip
+    container.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+      var chip = e.target.closest && e.target.closest('.chip[data-value]');
+      if (!chip) return;
+      e.preventDefault();
+      toggleSymptomChip(chip);
     });
   }
 
@@ -314,12 +403,20 @@
     var val = inp.value.trim();
     if (!val) return;
     var container = document.getElementById('symptom-chips');
-    var chip = document.createElement('span');
-    chip.className = 'chip active';
-    chip.dataset.value = val;
-    chip.textContent = val;
-    container.appendChild(chip);
-    state.basicInfo.symptoms.push(val);
+    var syms = state.basicInfo.symptoms;
+    var key = val.toLowerCase();
+    var already = syms.some(function (s) { return String(s).toLowerCase() === key; });
+    // an existing chip with that value (preset or custom): select it instead of creating a duplicate
+    var existing = Array.prototype.slice.call(document.querySelectorAll('#symptom-chips .chip[data-value]')).filter(function (c) {
+      return String(c.dataset.value).toLowerCase() === key;
+    })[0];
+    if (existing) {
+      if (!already) { syms.push(existing.dataset.value); }
+      setChipActive(existing, true);
+    } else if (!already) {
+      container.appendChild(makeSymptomChip(val, true));
+      syms.push(val);
+    }
     inp.value = '';
     saveState();
   };
@@ -338,6 +435,7 @@
   /*  Step 1 — Inquiry Chat                                               */
   /* ------------------------------------------------------------------ */
   var chatExchanges = 0; // count of user messages sent
+  var chatBusy = false;  // true while an assistant answer is streaming: Enter / quick-reply chips must not start a second request
 
   function startChat() {
     if (state.chatHistory.length > 0) {
@@ -368,6 +466,7 @@
   }
 
   window.wizardChatSend = function () {
+    if (chatBusy) return; // keep what the user typed; it can be sent once the answer has finished
     var inp = document.getElementById('chat-input');
     var text = inp.value.trim();
     if (!text) return;
@@ -379,7 +478,8 @@
   // sendChatMessage is shared by the text input and the quick-reply option chips.
   function sendChatMessage(text) {
     text = (text || '').trim();
-    if (!text) return;
+    if (!text || chatBusy) return;
+    chatBusy = true;
     clearOptionChips();
 
     appendChatMsg('user', text);
@@ -458,6 +558,7 @@
   function streamChat(userText) {
     var sendBtn = document.getElementById('chat-send-btn');
     sendBtn.disabled = true;
+    chatBusy = true;
 
     var lang = (window.tcmLang && window.tcmLang.get()) || localStorage.getItem('tcm-lang') || 'en';
     var msgEl = appendChatMsg('assistant', '');
@@ -487,6 +588,7 @@
               state.chatHistory.push({ role: 'assistant', content: full });
               saveState();
               sendBtn.disabled = false;
+              chatBusy = false;
               scrollChatToBottom();
               renderOptionChips();
               return;
@@ -504,6 +606,7 @@
         msgEl.textContent = 'Sorry, I encountered an error. Please try again. (' + err.message + ')';
         msgEl.classList.remove('streaming');
         sendBtn.disabled = false;
+        chatBusy = false;
       });
   }
 
@@ -754,15 +857,24 @@
   function bindPulseChips() {
     var grid = document.getElementById('pulse-quality-grid');
     if (!grid) return;
-    grid.addEventListener('click', function (e) {
-      var chip = e.target.closest('.quality-chip');
-      if (!chip) return;
-      chip.classList.toggle('active');
+    function toggle(chip) {
       var val = chip.dataset.value;
       var idx = state.pulseQualities.indexOf(val);
+      setChipActive(chip, idx === -1);
       if (idx === -1) state.pulseQualities.push(val);
       else state.pulseQualities.splice(idx, 1);
       saveState();
+    }
+    grid.addEventListener('click', function (e) {
+      var chip = e.target.closest('.quality-chip');
+      if (chip) toggle(chip);
+    });
+    grid.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+      var chip = e.target.closest && e.target.closest('.quality-chip');
+      if (!chip) return;
+      e.preventDefault();
+      toggle(chip);
     });
   }
 
@@ -770,6 +882,207 @@
     state.bpm = document.getElementById('bpm-input').value.trim();
     // pulseQualities already updated by chip clicks
     saveState();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Step 5 - link a device (static/js/health-connect.js)                */
+  /* ------------------------------------------------------------------ */
+  // Web Bluetooth straps / cuffs / oximeters / thermometers fill the pulse step and the vitals that go to the AI;
+  // a signed-in user can also pull the latest readings synced from Google Health, an Apple export or a Shortcut.
+  var hcHandle = null;
+
+  function hcEl(id) { return document.getElementById(id); }
+
+  function hcStatus(msg, cls) {
+    var e = hcEl('hc-status');
+    if (!e) return;
+    e.textContent = msg || '';
+    e.className = 'hc-status' + (cls ? ' ' + cls : '');
+  }
+
+  function hcBar(frac) {
+    var bar = hcEl('hc-bar'), fill = hcEl('hc-bar-fill');
+    if (!bar || !fill) return;
+    if (frac === null) { bar.classList.add('hidden'); fill.style.width = '0'; return; }
+    bar.classList.remove('hidden');
+    fill.style.width = Math.max(0, Math.min(100, Math.round(frac * 100))) + '%';
+  }
+
+  var HC_METRIC_KEYS = {
+    heart_rate: 'health.m.heart_rate',
+    resting_heart_rate: 'health.m.resting_heart_rate',
+    hrv_rmssd: 'health.m.hrv_rmssd',
+    hrv_sdnn: 'health.m.hrv_sdnn',
+    spo2: 'health.m.spo2',
+    systolic_bp: 'health.m.systolic_bp',
+    diastolic_bp: 'health.m.diastolic_bp',
+    body_temperature: 'health.m.body_temperature',
+    respiratory_rate: 'health.m.respiratory_rate',
+    steps: 'health.m.steps',
+    weight_kg: 'health.m.weight_kg',
+    sleep_hours: 'health.m.sleep_hours'
+  };
+  var HC_SOURCE_KEYS = {
+    manual: 'health.src.manual',
+    bluetooth: 'health.src.bluetooth',
+    google_health: 'health.src.google_health',
+    apple_export: 'health.src.apple_export',
+    ingest: 'health.src.ingest'
+  };
+  function hcMetricLabel(m) { return HC_METRIC_KEYS[m] ? T(HC_METRIC_KEYS[m], m.replace(/_/g, ' ')) : m; }
+  function hcSourceLabel(s) { return HC_SOURCE_KEYS[s] ? T(HC_SOURCE_KEYS[s], s) : (s || ''); }
+
+  function hcFormat(v) {
+    var n = Number(v.value);
+    var txt = Math.abs(n) >= 100 || Math.round(n) === n ? String(Math.round(n * 10) / 10) : String(Math.round(n * 100) / 100);
+    var unit = v.unit === 'degC' ? '\u00b0C' : v.unit === 'brpm' ? '/min' : (v.unit || '');
+    return txt + ' ' + unit;
+  }
+
+  function addDeviceVital(r, device, source) {
+    state.deviceVitals = (state.deviceVitals || []).filter(function (v) { return v.metric !== r.metric; });
+    state.deviceVitals.push({ metric: r.metric, value: r.value, unit: r.unit, measured_at: r.measured_at, device: device || '', source: source || 'bluetooth' });
+  }
+
+  function renderDeviceVitals() {
+    var wrap = hcEl('hc-vitals');
+    if (!wrap) return;
+    wrap.innerHTML = (state.deviceVitals || []).map(function (v) {
+      return '<span class="hc-chip">' + escHtml(hcMetricLabel(v.metric)) + ': <b>' + escHtml(hcFormat(v)) + '</b>' + (v.device ? ' \u00b7 ' + escHtml(v.device) : '') + '</span>';
+    }).join('');
+  }
+
+  // what travels to the AI (and into the saved report): numbers + where they came from, nothing else
+  function compactVitals() {
+    return (state.deviceVitals || []).map(function (v) {
+      return { metric: v.metric, value: v.value, unit: v.unit, measured_at: v.measured_at, device: v.device || '', source: v.source || '' };
+    });
+  }
+
+  function setBpmFromDevice(bpm) {
+    var input = hcEl('bpm-input');
+    if (!input) return;
+    input.value = String(bpm);
+    var disp = hcEl('bpm-display');
+    if (disp) disp.textContent = String(bpm);
+    state.bpm = String(bpm);
+  }
+
+  function hcSetBusy(busy) {
+    document.querySelectorAll('#hc-buttons button').forEach(function (b) { b.disabled = !!busy; });
+    var stop = hcEl('hc-stop');
+    if (stop) stop.classList.toggle('hidden', !busy);
+  }
+
+  function hcExplainUnsupported(why) {
+    var key = why === 'ios' ? 'health.bt.ios' : why === 'insecure' ? 'health.bt.insecure' : 'health.bt.noapi';
+    hcStatus(T(key, 'Web Bluetooth is not available in this browser.'), 'is-error');
+  }
+
+  function startDeviceCapture(kind) {
+    if (hcHandle) return;
+    var HC = window.HealthConnect;
+    var why = HC ? HC.notSupportedReason() : 'no-api';
+    if (why) { hcExplainUnsupported(why); return; }
+    hcStatus(T('health.bt.connecting', 'Choose your device in the pop-up\u2026'));
+    hcBar(null);
+    var token = localStorage.getItem('tcm-token') || getCookie('sb-access-token');
+    var h;
+    try {
+      h = HC.capture(kind, {
+        seconds: 30,
+        onStatus: function (code, detail) {
+          if (code === 'connected') hcStatus(T('health.bt.connected', 'Connected to {name}. Waiting for data\u2026', { name: detail || '' }));
+          else if (code === 'reconnecting') hcStatus(T('health.bt.reconnecting', 'Connection lost - reconnecting ({n}/3)\u2026', { n: detail }), 'is-error');
+        },
+        onProgress: function (p) {
+          if (kind !== 'heart_rate') return;
+          if (p.contact === 'no-contact') { hcStatus(T('health.bt.nocontact', 'No skin contact.'), 'is-error'); return; }
+          hcBar(p.elapsed / p.seconds);
+          hcStatus(T('health.bt.measuring', 'Measuring\u2026 {s} s left. Keep still.', { s: Math.max(0, Math.ceil(p.seconds - p.elapsed)) }) + (p.bpm ? '  \u2764 ' + p.bpm + ' bpm' : ''));
+        },
+        onData: function (parsed) {
+          if (kind === 'heart_rate' && parsed && parsed.bpm) { var d = hcEl('bpm-display'); if (d) d.textContent = String(parsed.bpm); }
+        },
+      });
+    } catch (e) { hcStatus(T('health.bt.err', 'Could not use that device: {err}', { err: e.message }), 'is-error'); return; }
+    hcHandle = h;
+    hcSetBusy(true);
+    h.promise.then(function (res) {
+      res.readings.forEach(function (r) { addDeviceVital(r, res.device, 'bluetooth'); });
+      if (kind === 'heart_rate' && res.summary) {
+        setBpmFromDevice(res.summary.bpm);
+        var msg = T('health.bt.result.hr', 'Average {bpm} bpm over {n} readings.', { bpm: res.summary.bpm, n: res.summary.n });
+        if (res.summary.hrv) msg += ' ' + T('health.bt.result.hrv', 'HRV (RMSSD) {ms} ms.', { ms: res.summary.hrv.rmssd });
+        hcStatus(msg, 'is-ok');
+      } else {
+        var bpmR = res.readings.filter(function (r) { return r.metric === 'heart_rate'; })[0];
+        if (bpmR && !state.bpm) setBpmFromDevice(Math.round(bpmR.value));
+        hcStatus(T('health.bt.captured', 'Captured: {what}', { what: res.readings.map(function (r) { return hcMetricLabel(r.metric) + ' ' + hcFormat(r); }).join(', ') }), 'is-ok');
+      }
+      renderDeviceVitals();
+      saveState();
+      if (token && window.HealthConnect) {
+        window.HealthConnect.saveReadings(token, res.readings, res.device).then(function (saved) {
+          if (saved && saved.inserted !== undefined) hcStatus(hcEl('hc-status').textContent + ' ' + T('health.bt.saved', 'Saved to your account.'), 'is-ok');
+        });
+      }
+    }).catch(function (e) {
+      if (e && e.message === 'cancelled') return;
+      if (e && e.name === 'NotFoundError') hcStatus(T('health.bt.cancel', 'No device was chosen.'));
+      else if (e && e.code && /^(ios|insecure|no-api)$/.test(e.code)) hcExplainUnsupported(e.code);
+      else hcStatus(T('health.bt.err', 'Could not use that device: {err}', { err: (e && e.message) || String(e) }), 'is-error');
+    }).then(function () {
+      hcHandle = null;
+      hcSetBusy(false);
+      hcBar(null);
+    });
+  }
+
+  // readings synced to the signed-in account (Google Health / Apple export / Shortcut / earlier Bluetooth sessions)
+  var LINKED_METRICS = ['heart_rate', 'resting_heart_rate', 'hrv_rmssd', 'hrv_sdnn', 'spo2', 'systolic_bp', 'diastolic_bp', 'body_temperature', 'respiratory_rate', 'sleep_hours', 'steps'];
+  var LINKED_MAX_AGE_MS = 7 * 86400000;
+  function loadLinkedVitals() {
+    var token = localStorage.getItem('tcm-token') || getCookie('sb-access-token');
+    if (!token) { hcStatus(T('health.wiz.linked.signin', 'Sign in to use data from linked devices.'), 'is-error'); return; }
+    fetch('/api/health/summary', { headers: { 'Authorization': 'Bearer ' + token } })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (d) {
+        var latest = (d && d.latest) || {}, n = 0, now = Date.now();
+        LINKED_METRICS.forEach(function (m) {
+          var r = latest[m];
+          if (!r || now - Date.parse(r.measured_at) > LINKED_MAX_AGE_MS) return;
+          addDeviceVital(r, r.device || hcSourceLabel(r.source), 'linked');
+          n++;
+        });
+        var bpm = latest.heart_rate && now - Date.parse(latest.heart_rate.measured_at) <= 86400000 ? latest.heart_rate : latest.resting_heart_rate;
+        if (bpm && now - Date.parse(bpm.measured_at) <= LINKED_MAX_AGE_MS && !state.bpm) setBpmFromDevice(Math.round(bpm.value));
+        renderDeviceVitals();
+        saveState();
+        hcStatus(n ? T('health.wiz.linked.ok', 'Loaded {n} recent readings from your linked devices.', { n: n }) : T('health.wiz.linked.none', 'No recent readings found. Link a device on your dashboard first.'), n ? 'is-ok' : '');
+      })
+      .catch(function (e) { hcStatus(T('health.bt.err', 'Could not use that device: {err}', { err: e.message }), 'is-error'); });
+  }
+
+  function bindDeviceLink() {
+    var wrap = hcEl('hc-buttons');
+    if (!wrap) return;
+    wrap.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('button');
+      if (!b) return;
+      if (b.id === 'hc-load-linked') { loadLinkedVitals(); return; }
+      if (b.dataset.hcKind) startDeviceCapture(b.dataset.hcKind);
+    });
+    var stop = hcEl('hc-stop');
+    if (stop) stop.addEventListener('click', function () { if (hcHandle) hcHandle.stop(); });
+    // say up front, in plain words, when this browser cannot do Bluetooth at all
+    var why = window.HealthConnect ? window.HealthConnect.notSupportedReason() : 'no-api';
+    if (why) {
+      wrap.querySelectorAll('[data-hc-kind]').forEach(function (b) { b.setAttribute('aria-disabled', 'true'); b.classList.add('btn-ghost'); });
+      hcExplainUnsupported(why);
+    }
+    renderDeviceVitals();
+    document.addEventListener('tcm:langchange', renderDeviceVitals);
   }
 
   /* ------------------------------------------------------------------ */
@@ -790,6 +1103,9 @@
       { label: 'Audio 闻',        value: state.audioObs ? state.audioObs.slice(0, 80) + (state.audioObs.length > 80 ? '…' : '') : 'Skipped' },
       { label: 'Pulse 切诊',      value: [state.bpm ? state.bpm + ' BPM' : '', state.pulseQualities.join(', ')].filter(Boolean).join(' · ') || 'Skipped' },
     ];
+    if ((state.deviceVitals || []).length) {
+      items.push({ label: T('health.wiz.dev', 'Device readings'), value: state.deviceVitals.map(function (v) { return hcMetricLabel(v.metric) + ' ' + hcFormat(v); }).join(', ') });
+    }
     var grid = document.getElementById('summary-grid');
     grid.innerHTML = items.map(function (it) {
       return '<div class="summary-item"><div class="summary-item-label">' + escHtml(it.label) + '</div><div class="summary-item-value">' + escHtml(it.value) + '</div></div>';
@@ -850,10 +1166,12 @@
         wang_tongue:  state.tongueObs  || '',
         wang_face:    state.faceObs    || '',
         wen_audio:    state.audioObs   || '',
-        qie: {
-          bpm: state.bpm || '',
-          qualities: state.pulseQualities,
-        },
+        qie: (function () {
+          var q = { bpm: state.bpm || '', qualities: state.pulseQualities };
+          // measured by a device, not typed in: lets the AI weigh them as objective values and name their source
+          if ((state.deviceVitals || []).length) q.device_vitals = compactVitals();
+          return q;
+        })(),
       },
       language: lang,
     };
@@ -1088,22 +1406,43 @@
   };
 
   /* ------------------------------------------------------------------ */
+  /*  Guest tokens                                                        */
+  /* ------------------------------------------------------------------ */
+  // 'tcm-guest-tokens' = JSON list of every guest report token not migrated yet (auth.js migrates them all after login/signup);
+  // 'tcm-guest-token' = the latest one, kept for older clients and scripts.
+  function rememberGuestToken(tok) {
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem('tcm-guest-tokens') || '[]'); } catch (e) { list = []; }
+    if (!Array.isArray(list)) list = [];
+    var legacy = localStorage.getItem('tcm-guest-token');
+    if (legacy && list.indexOf(legacy) === -1) list.push(legacy);
+    if (list.indexOf(tok) === -1) list.push(tok);
+    localStorage.setItem('tcm-guest-tokens', JSON.stringify(list));
+    localStorage.setItem('tcm-guest-token', tok);
+  }
+
+  /* ------------------------------------------------------------------ */
   /*  Save Session                                                        */
   /* ------------------------------------------------------------------ */
   window.wizardSaveSession = function () {
     var token = localStorage.getItem('tcm-token') || getCookie('sb-access-token');
     var statusEl = document.getElementById('rpt-save-status');
+    // constitution / diagnosis may be an object ({type}, {primary_pattern}) or a plain string
+    var rc = (state.report || {}).constitution, rd = (state.report || {}).diagnosis;
     var payload = {
       full_report: state.report,
       symptoms: (state.basicInfo.symptoms || []).join(', '),
-      constitution: ((state.report || {}).constitution || {}).type || '',
-      primary_diagnosis: ((state.report || {}).diagnosis || {}).primary_pattern || '',
+      constitution: typeof rc === 'string' ? rc : ((rc || {}).type || ''),
+      primary_diagnosis: typeof rd === 'string' ? rd : ((rd || {}).primary_pattern || ''),
     };
+    if (state.bpm || (state.pulseQualities || []).length || (state.deviceVitals || []).length) {
+      payload.pulse_data = { bpm: state.bpm || '', qualities: state.pulseQualities || [], device_vitals: compactVitals() };
+    }
 
     if (!token) {
       // Guest: persist server-side and remember the token; it is migrated to the
       // account automatically after the user registers / signs in.
-      statusEl.textContent = 'Saving your report…';
+      statusEl.textContent = T('wiz.saving', 'Saving your report…');
       statusEl.style.color = 'var(--color-muted)';
       var guestPayload = JSON.parse(JSON.stringify(payload));
       guestPayload.guest_name = state.basicInfo.name || '';
@@ -1112,16 +1451,21 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(guestPayload),
       })
-        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          // A non-2xx used to be treated as success ("Report saved!" + redirect) with no token stored: the report was lost silently.
+          if (!r.ok) throw new Error('Save failed: ' + r.status);
+          return r.json();
+        })
         .then(function (d) {
-          if (d && d.session_token) localStorage.setItem('tcm-guest-token', d.session_token);
-          statusEl.textContent = 'Report saved! Create an account to keep it in your history…';
-          statusEl.style.color = 'var(--emerald-600)';
+          if (!d || !d.session_token) throw new Error('Save failed: no session token');
+          rememberGuestToken(d.session_token);
+          statusEl.textContent = T('wiz.saved.guest', 'Report saved! Create an account to keep it in your history…');
+          statusEl.style.color = 'var(--emerald-700)';
           setTimeout(function () { window.location.href = '/login#signup'; }, 1400);
         })
         .catch(function () {
-          statusEl.textContent = 'Please log in to save your session.';
-          setTimeout(function () { window.location.href = '/login'; }, 1500);
+          statusEl.textContent = T('wiz.save.fail', 'Could not save your report. Please try again.');
+          statusEl.style.color = '#dc2626';
         });
       return;
     }
@@ -1141,7 +1485,7 @@
       })
       .then(function () {
         statusEl.textContent = 'Saved! View in your dashboard.';
-        statusEl.style.color = 'var(--emerald-600)';
+        statusEl.style.color = 'var(--emerald-700)';
       })
       .catch(function (err) {
         statusEl.textContent = 'Could not save: ' + err.message;

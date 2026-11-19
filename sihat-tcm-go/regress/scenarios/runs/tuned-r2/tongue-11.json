@@ -1,0 +1,121 @@
+{
+  "id": "tongue-11",
+  "type": "tongue",
+  "label": "tuned-r2",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T03:57:59.138Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 137012,
+      "bytes": 2357,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 137014,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Spleen Qi Deficiency · Spleen \\u0026 Damp Support\",\"confidence\":88.4,\"description\":\"舌體寬大、兩側舌緣有扇貝狀齒痕（齒痕），是脾氣虛失於運化、水濕不化而停聚舌體的典型徵象。此為本次舌診診斷權重最高的單一指標，為確立主證提供最直接依據。\",\"recommendations\":[\"飲食以溫熱易消化為主，如白粥、蒸煮蔬菜、小米粥；嚴格避免生冷沙拉、冰飲、乳製品及油膩食物，以免進一步損傷脾氣。\",\"每日進行30分鐘快步走等溫和有氧運動，促進脾氣升發及淋巴循環；飯後避免久坐，有助於脾胃運化。\"],\"title\":\"Swollen Tongue with Teeth Marks\",\"title_cn\":\"胖大齒痕舌\"},{\"category\":\"Damp-Phlegm Accumulation · Resolve Dampness\",\"confidence\":84.1,\"description\":\"舌中及舌根覆以白色、中等厚度、質地膩滯（膩）之苔，提示寒濕或痰濁阻滯中焦；苔面滑潤（滑）進一步支持陽氣或脾氣不足、無力溫化水濕之病機。苔質有根，說明為內在病邪而非表淺外感。\",\"recommendations\":[\"日常可加入祛濕化痰食材：薏苡仁粥、赤小豆、陳皮茶、蓮子等，性味偏溫且具滲濕功效。\",\"減少酒精、糖分、加工食品及寒涼水果（西瓜、香蕉、梨）的攝取，以免助生痰濕；保持睡眠環境乾燥通風。\"],\"title\":\"White Greasy Coating\",\"title_cn\":\"白膩苔\"},{\"category\":\"Borderline Qi \\u0026 Blood Deficiency · Nourish Qi\",\"confidence\":74.6,\"description\":\"舌尖及薄苔區域的舌質色澤呈淡紅偏淡，提示氣血處於正常下限——尚未達到明顯虛損，但氣血充盈度不足以維持舌質飽滿紅潤。結合胖大舌與膩苔，此偏淡色澤很可能繼發於脾氣虛、生化無源所致。需注意：暖色光源可將舌色感知提升約半個等級，此評分已將此因素納入考量。\",\"recommendations\":[\"以補脾養氣血食材輔助：慢燉紅棗、龍眼肉、黑芝麻，以及每日適量清淡熟食蛋白質（如水煮蛋或瘦肉），支持脾胃生化氣血。\",\"建立規律作息，於23:00前入睡，避免過度勞心耗神——思慮過度直接耗傷脾氣與心血，會加重舌色偏淡的傾向。\"],\"title\":\"Pale Light-Red Tongue Body\",\"title_cn\":\"淡紅偏淡舌\"}],\"confidence\":82,\"image_description\":\"成年男性舌象清晰特寫，舌體完全伸出，光線為略帶暖色的中性光，整個舌面、兩側舌緣及舌尖均清晰可評估。\",\"modelUsed\":1,\"notes\":\"圖像品質良好，舌象可充分評估。暖色光源可能令舌色感知偏紅約半個等級，「淡紅偏淡」之判斷已保守處理此干擾。白膩苔廣泛分佈、有根附著，與飲食染苔不同，後者通常侷限、無根、可擦除。本圖未見裂紋、紅色芒刺、紫色舌質或舌下脈絡怒張。完整TCM辨證須結合脈診、消化、體力、大便性狀、寒熱偏好等全身症狀及體質問診——舌象僅確立證型方向，不能單獨作出最終診斷。\",\"observation\":\"舌緣與舌尖處舌質呈淡紅偏淡色，照片暖色調可能令整體色感略偏粉，舌體顏色與周圍唇色相比並無明顯偏紅。舌面覆蓋白苔，中部至根部苔質偏厚，質地濕潤、略帶膩感，中央苔較厚遮蓋舌體，舌尖及舌緣苔薄漸退。舌面乳頭形態正常，未見明顯紅色芒刺或地圖樣剝苔；在此解析度下未見明顯裂紋、斑點或舌下脈絡異常。舌體明顯寬大飽滿，兩側舌緣呈扇貝狀壓痕，符合齒痕表現；舌面濕度為滑潤（滑）。\",\"pattern_suggestions\":[\"主證：脾氣虛兼濕困——胖大舌、齒痕、白膩滑苔三者並見，為此虛實夾雜證的典型組合；治則為健脾益氣、化濕祛痰，代表方向為參苓白術散（Shen Ling Bai Zhu San）類方。\",\"次要考量：若兼見畏寒肢冷、喜溫、大便溏薄等全身陽虛症狀，可考慮脾陽虛兼水濕——苔面滑濕支持此方向，方向轉以理中丸（Li Zhong Wan）加祛濕藥為主。舌象本身無法單獨區分兩者，需結合脈診及全身症狀最終確診。\"],\"potential_issues\":[\"主證：脾氣虛兼濕困——胖大舌、齒痕、白膩滑苔三者並見，為此虛實夾雜證的典型組合；治則為健脾益氣、化濕祛痰，代表方向為參苓白術散（Shen Ling Bai Zhu San）類方。\",\"次要考量：若兼見畏寒肢冷、喜溫、大便溏薄等全身陽虛症狀，可考慮脾陽虛兼水濕——苔面滑濕支持此方向，方向轉以理中丸（Li Zhong Wan）加祛濕藥為主。舌象本身無法單獨區分兩者，需結合脈診及全身症狀最終確診。\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"胖大舌 (Pàng Dà Shé) — 舌體寬大腫脹，主脾氣虛、水液輸布失司、濕濁內停\",\"齒痕舌 (Chǐ Hén Shé) — 舌緣齒痕壓痕，主脾氣虛兼水濕，舌體虛軟受牙齒擠壓所致\",\"白膩苔 (Bái Nì Tāi) — 白色膩滯舌苔，主寒濕或痰濁阻滯中焦，內有濕邪\",\"滑潤 (Huá Rùn) — 苔面滑濕，主體內水液偏盛，陽氣或脾氣不足以溫化水濕\",\"淡紅偏淡舌色 (Dàn Hóng Piān Dàn) — 舌質色澤偏淡，提示氣血偏虛，多繼發於脾失健運\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Spleen Qi Deficiency · Spleen & Damp Support",
+        "confidence": 88.4,
+        "description": "舌體寬大、兩側舌緣有扇貝狀齒痕（齒痕），是脾氣虛失於運化、水濕不化而停聚舌體的典型徵象。此為本次舌診診斷權重最高的單一指標，為確立主證提供最直接依據。",
+        "recommendations": [
+          "飲食以溫熱易消化為主，如白粥、蒸煮蔬菜、小米粥；嚴格避免生冷沙拉、冰飲、乳製品及油膩食物，以免進一步損傷脾氣。",
+          "每日進行30分鐘快步走等溫和有氧運動，促進脾氣升發及淋巴循環；飯後避免久坐，有助於脾胃運化。"
+        ],
+        "title": "Swollen Tongue with Teeth Marks",
+        "title_cn": "胖大齒痕舌"
+      },
+      {
+        "category": "Damp-Phlegm Accumulation · Resolve Dampness",
+        "confidence": 84.1,
+        "description": "舌中及舌根覆以白色、中等厚度、質地膩滯（膩）之苔，提示寒濕或痰濁阻滯中焦；苔面滑潤（滑）進一步支持陽氣或脾氣不足、無力溫化水濕之病機。苔質有根，說明為內在病邪而非表淺外感。",
+        "recommendations": [
+          "日常可加入祛濕化痰食材：薏苡仁粥、赤小豆、陳皮茶、蓮子等，性味偏溫且具滲濕功效。",
+          "減少酒精、糖分、加工食品及寒涼水果（西瓜、香蕉、梨）的攝取，以免助生痰濕；保持睡眠環境乾燥通風。"
+        ],
+        "title": "White Greasy Coating",
+        "title_cn": "白膩苔"
+      },
+      {
+        "category": "Borderline Qi & Blood Deficiency · Nourish Qi",
+        "confidence": 74.6,
+        "description": "舌尖及薄苔區域的舌質色澤呈淡紅偏淡，提示氣血處於正常下限——尚未達到明顯虛損，但氣血充盈度不足以維持舌質飽滿紅潤。結合胖大舌與膩苔，此偏淡色澤很可能繼發於脾氣虛、生化無源所致。需注意：暖色光源可將舌色感知提升約半個等級，此評分已將此因素納入考量。",
+        "recommendations": [
+          "以補脾養氣血食材輔助：慢燉紅棗、龍眼肉、黑芝麻，以及每日適量清淡熟食蛋白質（如水煮蛋或瘦肉），支持脾胃生化氣血。",
+          "建立規律作息，於23:00前入睡，避免過度勞心耗神——思慮過度直接耗傷脾氣與心血，會加重舌色偏淡的傾向。"
+        ],
+        "title": "Pale Light-Red Tongue Body",
+        "title_cn": "淡紅偏淡舌"
+      }
+    ],
+    "confidence": 82,
+    "image_description": "成年男性舌象清晰特寫，舌體完全伸出，光線為略帶暖色的中性光，整個舌面、兩側舌緣及舌尖均清晰可評估。",
+    "modelUsed": 1,
+    "notes": "圖像品質良好，舌象可充分評估。暖色光源可能令舌色感知偏紅約半個等級，「淡紅偏淡」之判斷已保守處理此干擾。白膩苔廣泛分佈、有根附著，與飲食染苔不同，後者通常侷限、無根、可擦除。本圖未見裂紋、紅色芒刺、紫色舌質或舌下脈絡怒張。完整TCM辨證須結合脈診、消化、體力、大便性狀、寒熱偏好等全身症狀及體質問診——舌象僅確立證型方向，不能單獨作出最終診斷。",
+    "observation": "舌緣與舌尖處舌質呈淡紅偏淡色，照片暖色調可能令整體色感略偏粉，舌體顏色與周圍唇色相比並無明顯偏紅。舌面覆蓋白苔，中部至根部苔質偏厚，質地濕潤、略帶膩感，中央苔較厚遮蓋舌體，舌尖及舌緣苔薄漸退。舌面乳頭形態正常，未見明顯紅色芒刺或地圖樣剝苔；在此解析度下未見明顯裂紋、斑點或舌下脈絡異常。舌體明顯寬大飽滿，兩側舌緣呈扇貝狀壓痕，符合齒痕表現；舌面濕度為滑潤（滑）。",
+    "pattern_suggestions": [
+      "主證：脾氣虛兼濕困——胖大舌、齒痕、白膩滑苔三者並見，為此虛實夾雜證的典型組合；治則為健脾益氣、化濕祛痰，代表方向為參苓白術散（Shen Ling Bai Zhu San）類方。",
+      "次要考量：若兼見畏寒肢冷、喜溫、大便溏薄等全身陽虛症狀，可考慮脾陽虛兼水濕——苔面滑濕支持此方向，方向轉以理中丸（Li Zhong Wan）加祛濕藥為主。舌象本身無法單獨區分兩者，需結合脈診及全身症狀最終確診。"
+    ],
+    "potential_issues": [
+      "主證：脾氣虛兼濕困——胖大舌、齒痕、白膩滑苔三者並見，為此虛實夾雜證的典型組合；治則為健脾益氣、化濕祛痰，代表方向為參苓白術散（Shen Ling Bai Zhu San）類方。",
+      "次要考量：若兼見畏寒肢冷、喜溫、大便溏薄等全身陽虛症狀，可考慮脾陽虛兼水濕——苔面滑濕支持此方向，方向轉以理中丸（Li Zhong Wan）加祛濕藥為主。舌象本身無法單獨區分兩者，需結合脈診及全身症狀最終確診。"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "胖大舌 (Pàng Dà Shé) — 舌體寬大腫脹，主脾氣虛、水液輸布失司、濕濁內停",
+      "齒痕舌 (Chǐ Hén Shé) — 舌緣齒痕壓痕，主脾氣虛兼水濕，舌體虛軟受牙齒擠壓所致",
+      "白膩苔 (Bái Nì Tāi) — 白色膩滯舌苔，主寒濕或痰濁阻滯中焦，內有濕邪",
+      "滑潤 (Huá Rùn) — 苔面滑濕，主體內水液偏盛，陽氣或脾氣不足以溫化水濕",
+      "淡紅偏淡舌色 (Dàn Hóng Piān Dàn) — 舌質色澤偏淡，提示氣血偏虛，多繼發於脾失健運"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-macroglossia-with-crenations-along-the-m.png",
+    "image_bytes": 751966
+  },
+  "expected": {
+    "documented_condition": "macroglossia with scalloped (crenated) margins and papillary atrophy",
+    "expected_tcm": {
+      "body_colour": "pale to pale-red",
+      "coating": "thin / reduced",
+      "thickness": "thin",
+      "shape": "enlarged with scalloped, tooth-marked edges",
+      "moisture": "moist/wet",
+      "pattern": "Spleen Qi deficiency with Dampness; Kidney/Spleen Yang deficiency in the elderly"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Macroglossia_with_crenations_along_the_margins_and_loss_of_papillae_on_dorsum_surface_of_the_tongue.png"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "scallop",
+          "tooth",
+          "teeth",
+          "crenat",
+          "swollen",
+          "enlarg"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "spleen",
+          "damp",
+          "qi"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

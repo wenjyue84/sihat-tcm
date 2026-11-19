@@ -1,0 +1,120 @@
+{
+  "id": "tongue-09",
+  "type": "tongue",
+  "label": "tuned-r2",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T03:55:41.128Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 189416,
+      "bytes": 2690,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 189418,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Yin Deficiency · Heart-Stomach Nourishment\",\"confidence\":88.3,\"description\":\"舌面中線出現一條延伸大半舌長的縱行裂紋，提示陰液長期虧耗，最可能累及心（心陰虛）或胃（胃陰虛），此類裂紋常見於口乾、睡眠不寧、午後潮熱或心神易動等慢性虛損表現。裂紋之深度與長度提示病程較久，非近期驟發。\",\"recommendations\":[\"每週規律食用滋陰食材——百合、銀耳、蓮子、雪梨——同時避免辛辣燥熱食物及過量咖啡因，以免進一步耗傷津液。\",\"每晚在十一時前入睡，並於就寢前進行十至十五分鐘的靜息調息或冥想，有助收攝心陰，減少夜間陰液的無形耗損。\"],\"title\":\"Central Longitudinal Crack\",\"title_cn\":\"裂紋舌（中線縱裂）\"},{\"category\":\"Spleen Qi Deficiency · Dampness Accumulation\",\"confidence\":84.7,\"description\":\"舌體明顯胖大圓潤，側緣可見輕微扇貝狀齒痕壓痕，提示脾之運化功能減弱、水濕不化積聚體內，致使舌體腫脹外壓牙齒（脾氣虛、濕濁內停）。此型患者多見倦怠乏力、大便偏溏、腹部脹滿及肢體困重等症狀。\",\"recommendations\":[\"飲食宜溫熱易消化，如白粥、烹熟根莖類蔬菜及清淡暖湯；嚴格避免生冷、冰飲及過甜食物，以免加重脾胃負擔。\",\"每日飯後進行二十至三十分鐘輕快散步，藉以振奮脾胃之氣、促進水液代謝，逐步消散體內濕濁。\"],\"title\":\"Swollen Tongue with Teeth Marks\",\"title_cn\":\"胖大舌 · 齒痕舌\"},{\"category\":\"Qi \\u0026 Blood Deficiency · Tonification\",\"confidence\":76.2,\"description\":\"舌質顏色偏淡粉而非飽和淡紅，尤以側緣及舌尖最為明顯，提示氣虛（氣虛）或血液不足（血虛），舌體失於充分濡養。此類表現常伴倦怠、面色偏白、輕微動則氣短或注意力難以集中，與同時出現的脾氣虛弱在病機上相互呼應。\",\"recommendations\":[\"每週規律食用補氣養血食材：紅棗、枸杞、黑芝麻，以及適量瘦紅肉或豬肝，以補益血液、協助脾胃化生氣血。\",\"避免長時間過勞及持續耗神；每日午間小憩二十分鐘有助脾胃化生氣血，於本質性虛損患者尤為重要。\"],\"title\":\"Pale Tongue Body\",\"title_cn\":\"淡白舌\"}],\"confidence\":83,\"image_description\":\"自然暖光下拍攝之清晰舌象特寫，對焦清楚，舌體充分伸出，各診斷層次均可評估。\",\"modelUsed\":1,\"notes\":\"拍攝光線偏暖，可能使舌質顏色看起來較實際偏粉，故淡白舌之判讀信心值相應調降至76.2。中線縱行裂紋為本圖最明確之單一發現，信心值最高。患者口周皮膚色澤偏深（於唇部及口周區域可見）已記錄在案，惟不影響舌質顏色評估，舌黏膜須獨立判讀。圖中未見舌下絡脈怒張、潰瘍、紅點或芒刺。如能在中性日光色溫下補拍一張，將有助於提升顏色判讀精準度，更準確區分淡白與淡紅。\",\"observation\":\"舌質顏色呈淡粉至淡紅（淡白偏淡紅），以側緣及舌尖處最為明顯——此處苔薄可直接評估底色；拍攝光線偏暖，略使舌色顯得較實際更粉，故真實底色應偏淡而非飽和淡紅。舌苔呈薄白潤苔（薄白苔），均勻鋪布於舌背，既不黏膩亦不乾燥，有根附著，未見剝落。舌面中線可見一條縱行裂紋（裂紋），延伸大半舌長，深度中等；其餘乳頭形態扁平正常，未見芒刺或光剝無苔區。舌體明顯胖大圓潤（胖大舌），側緣可見輕微扇貝狀壓痕，符合齒痕表現（齒痕舌），舌面整體濕潤度充足，略偏滑潤。\",\"pattern_suggestions\":[\"主要證型：脾氣虛夾濕（Spleen Qi Deficiency with Dampness）——以胖大圓潤之舌體、扇貝狀側緣齒痕、淡白舌色及薄白潤苔為據；整體屬虛實夾雜、以虛為主之格局。\",\"次要證型：心胃陰虛（Heart and/or Stomach Yin Deficiency）——以顯著的中線縱行裂紋為主要依據，結合舌色偏淡而無熱象，提示慢性精血耗損而非急性熱邪傷津。\",\"臨床備註：兩類證型常相互並存——脾氣虛損日久，化生津液不足，往往衍生繼發性陰虛。舌診僅為四診之一，最終辨證仍須結合脈象、體質病史及主訴症狀（消化、睡眠品質、口渴感、汗出情況）方可確立。\"],\"potential_issues\":[\"主要證型：脾氣虛夾濕（Spleen Qi Deficiency with Dampness）——以胖大圓潤之舌體、扇貝狀側緣齒痕、淡白舌色及薄白潤苔為據；整體屬虛實夾雜、以虛為主之格局。\",\"次要證型：心胃陰虛（Heart and/or Stomach Yin Deficiency）——以顯著的中線縱行裂紋為主要依據，結合舌色偏淡而無熱象，提示慢性精血耗損而非急性熱邪傷津。\",\"臨床備註：兩類證型常相互並存——脾氣虛損日久，化生津液不足，往往衍生繼發性陰虛。舌診僅為四診之一，最終辨證仍須結合脈象、體質病史及主訴症狀（消化、睡眠品質、口渴感、汗出情況）方可確立。\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"裂紋舌 (Liè Wén Shé) - Fissured/Cracked Tongue - 陰虛或津液長期虧耗，以心陰或胃陰不足為主\",\"胖大舌 (Páng Dà Shé) - Enlarged/Swollen Tongue - 脾氣虛弱，水濕積聚，舌體腫脹\",\"齒痕舌 (Chǐ Hén Shé) - Teeth-Marked Tongue - 印證脾氣虛弱，腫脹之舌抵壓內側齒緣\",\"淡白舌 (Dàn Bái Shé) - Pale Tongue Body - 氣虛血虛，陽氣及血液對舌體濡養不足\",\"薄白苔 (Báo Bái Tāi) - Thin White Coating - 表現輕微，符合寒濕傾向或早期虛損，尚無明顯邪實積聚\",\"潤苔 (Rùn Tāi) - Moist Coating - 水液代謝尚可，目前未見熱邪耗傷津液\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Yin Deficiency · Heart-Stomach Nourishment",
+        "confidence": 88.3,
+        "description": "舌面中線出現一條延伸大半舌長的縱行裂紋，提示陰液長期虧耗，最可能累及心（心陰虛）或胃（胃陰虛），此類裂紋常見於口乾、睡眠不寧、午後潮熱或心神易動等慢性虛損表現。裂紋之深度與長度提示病程較久，非近期驟發。",
+        "recommendations": [
+          "每週規律食用滋陰食材——百合、銀耳、蓮子、雪梨——同時避免辛辣燥熱食物及過量咖啡因，以免進一步耗傷津液。",
+          "每晚在十一時前入睡，並於就寢前進行十至十五分鐘的靜息調息或冥想，有助收攝心陰，減少夜間陰液的無形耗損。"
+        ],
+        "title": "Central Longitudinal Crack",
+        "title_cn": "裂紋舌（中線縱裂）"
+      },
+      {
+        "category": "Spleen Qi Deficiency · Dampness Accumulation",
+        "confidence": 84.7,
+        "description": "舌體明顯胖大圓潤，側緣可見輕微扇貝狀齒痕壓痕，提示脾之運化功能減弱、水濕不化積聚體內，致使舌體腫脹外壓牙齒（脾氣虛、濕濁內停）。此型患者多見倦怠乏力、大便偏溏、腹部脹滿及肢體困重等症狀。",
+        "recommendations": [
+          "飲食宜溫熱易消化，如白粥、烹熟根莖類蔬菜及清淡暖湯；嚴格避免生冷、冰飲及過甜食物，以免加重脾胃負擔。",
+          "每日飯後進行二十至三十分鐘輕快散步，藉以振奮脾胃之氣、促進水液代謝，逐步消散體內濕濁。"
+        ],
+        "title": "Swollen Tongue with Teeth Marks",
+        "title_cn": "胖大舌 · 齒痕舌"
+      },
+      {
+        "category": "Qi & Blood Deficiency · Tonification",
+        "confidence": 76.2,
+        "description": "舌質顏色偏淡粉而非飽和淡紅，尤以側緣及舌尖最為明顯，提示氣虛（氣虛）或血液不足（血虛），舌體失於充分濡養。此類表現常伴倦怠、面色偏白、輕微動則氣短或注意力難以集中，與同時出現的脾氣虛弱在病機上相互呼應。",
+        "recommendations": [
+          "每週規律食用補氣養血食材：紅棗、枸杞、黑芝麻，以及適量瘦紅肉或豬肝，以補益血液、協助脾胃化生氣血。",
+          "避免長時間過勞及持續耗神；每日午間小憩二十分鐘有助脾胃化生氣血，於本質性虛損患者尤為重要。"
+        ],
+        "title": "Pale Tongue Body",
+        "title_cn": "淡白舌"
+      }
+    ],
+    "confidence": 83,
+    "image_description": "自然暖光下拍攝之清晰舌象特寫，對焦清楚，舌體充分伸出，各診斷層次均可評估。",
+    "modelUsed": 1,
+    "notes": "拍攝光線偏暖，可能使舌質顏色看起來較實際偏粉，故淡白舌之判讀信心值相應調降至76.2。中線縱行裂紋為本圖最明確之單一發現，信心值最高。患者口周皮膚色澤偏深（於唇部及口周區域可見）已記錄在案，惟不影響舌質顏色評估，舌黏膜須獨立判讀。圖中未見舌下絡脈怒張、潰瘍、紅點或芒刺。如能在中性日光色溫下補拍一張，將有助於提升顏色判讀精準度，更準確區分淡白與淡紅。",
+    "observation": "舌質顏色呈淡粉至淡紅（淡白偏淡紅），以側緣及舌尖處最為明顯——此處苔薄可直接評估底色；拍攝光線偏暖，略使舌色顯得較實際更粉，故真實底色應偏淡而非飽和淡紅。舌苔呈薄白潤苔（薄白苔），均勻鋪布於舌背，既不黏膩亦不乾燥，有根附著，未見剝落。舌面中線可見一條縱行裂紋（裂紋），延伸大半舌長，深度中等；其餘乳頭形態扁平正常，未見芒刺或光剝無苔區。舌體明顯胖大圓潤（胖大舌），側緣可見輕微扇貝狀壓痕，符合齒痕表現（齒痕舌），舌面整體濕潤度充足，略偏滑潤。",
+    "pattern_suggestions": [
+      "主要證型：脾氣虛夾濕（Spleen Qi Deficiency with Dampness）——以胖大圓潤之舌體、扇貝狀側緣齒痕、淡白舌色及薄白潤苔為據；整體屬虛實夾雜、以虛為主之格局。",
+      "次要證型：心胃陰虛（Heart and/or Stomach Yin Deficiency）——以顯著的中線縱行裂紋為主要依據，結合舌色偏淡而無熱象，提示慢性精血耗損而非急性熱邪傷津。",
+      "臨床備註：兩類證型常相互並存——脾氣虛損日久，化生津液不足，往往衍生繼發性陰虛。舌診僅為四診之一，最終辨證仍須結合脈象、體質病史及主訴症狀（消化、睡眠品質、口渴感、汗出情況）方可確立。"
+    ],
+    "potential_issues": [
+      "主要證型：脾氣虛夾濕（Spleen Qi Deficiency with Dampness）——以胖大圓潤之舌體、扇貝狀側緣齒痕、淡白舌色及薄白潤苔為據；整體屬虛實夾雜、以虛為主之格局。",
+      "次要證型：心胃陰虛（Heart and/or Stomach Yin Deficiency）——以顯著的中線縱行裂紋為主要依據，結合舌色偏淡而無熱象，提示慢性精血耗損而非急性熱邪傷津。",
+      "臨床備註：兩類證型常相互並存——脾氣虛損日久，化生津液不足，往往衍生繼發性陰虛。舌診僅為四診之一，最終辨證仍須結合脈象、體質病史及主訴症狀（消化、睡眠品質、口渴感、汗出情況）方可確立。"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "裂紋舌 (Liè Wén Shé) - Fissured/Cracked Tongue - 陰虛或津液長期虧耗，以心陰或胃陰不足為主",
+      "胖大舌 (Páng Dà Shé) - Enlarged/Swollen Tongue - 脾氣虛弱，水濕積聚，舌體腫脹",
+      "齒痕舌 (Chǐ Hén Shé) - Teeth-Marked Tongue - 印證脾氣虛弱，腫脹之舌抵壓內側齒緣",
+      "淡白舌 (Dàn Bái Shé) - Pale Tongue Body - 氣虛血虛，陽氣及血液對舌體濡養不足",
+      "薄白苔 (Báo Bái Tāi) - Thin White Coating - 表現輕微，符合寒濕傾向或早期虛損，尚無明顯邪實積聚",
+      "潤苔 (Rùn Tāi) - Moist Coating - 水液代謝尚可，目前未見熱邪耗傷津液"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-glossitis-in-iron-deficiency-anaemia-a-t.jpg",
+    "image_bytes": 457363
+  },
+  "expected": {
+    "documented_condition": "glossitis in iron-deficiency anaemia (enlarged, pale/smooth tongue)",
+    "expected_tcm": {
+      "body_colour": "pale (to pale-red)",
+      "coating": "thin/scanty to absent",
+      "thickness": "thin",
+      "shape": "swollen/enlarged, possibly smooth with loss of papillae, tooth marks",
+      "moisture": "moist",
+      "pattern": "Blood deficiency with Spleen Qi deficiency (pale + swollen); Qi/Blood deficiency"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Glossitis_in_Iron-deficiency_Anaemia,_a_Thai_female_patient_(2025).jpg"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "pale"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "blood",
+          "qi",
+          "spleen",
+          "deficien"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

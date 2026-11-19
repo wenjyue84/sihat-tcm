@@ -1,0 +1,121 @@
+{
+  "id": "tongue-08",
+  "type": "tongue",
+  "label": "baseline",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T01:54:19.402Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 166326,
+      "bytes": 2247,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 166326,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Dampness-Heat · Spleen-Stomach Clearing\",\"confidence\":92.7,\"description\":\"厚膩白黃苔覆蓋舌中後部，提示中焦痰濕積聚並開始化熱，反映脾胃系統被濁濕所困，氣機升降失常，津液運化障礙。苔質之膩厚合參，說明此乃裡實之證，非表淺病邪。\",\"recommendations\":[\"戒除油膩、煎炸、重奶製品及過甜食物，以溫熱易消化飲食為主，如薏苡仁蓮子粥，積極化濕助脾運化\",\"只飲溫水或常溫水，禁冷飲、生冷食物及酒精以免進一步損傷脾陽加重濕邪；飯後可飲薑豆蔻茶助脾胃升發消化之氣\"],\"title\":\"Thick Greasy Coating\",\"title_cn\":\"厚膩苔\"},{\"category\":\"Heart-Stomach Heat · Internal Heat Clearing\",\"confidence\":88.4,\"description\":\"舌面及側緣、舌尖大量突起的紅色芒刺（菌狀乳頭明顯腫大）提示心胃二經熱邪熾盛，內熱耗傷津液、擾亂神明並驅動消化道炎症反應；臨床可見煩躁、口渴、口腔潰瘍或胃脘灼熱等表現。\",\"recommendations\":[\"適量增加清熱生津食物，如蓮藕、黃瓜、冬瓜、綠豆湯、菊花茶，以清內熱、護陰液\",\"嚴格限制辛辣、油炸、酒精及晚間九點後的屏幕使用與情緒壓力；養成晚上十一點前入睡的習慣，防止相火上炎加重心火\"],\"title\":\"Prickly Red Dots\",\"title_cn\":\"芒刺紅點舌\"},{\"category\":\"Spleen Qi Deficiency · Dampness Transformation\",\"confidence\":83.1,\"description\":\"舌體輕度胖大伴苔下側緣明顯泛紅，呈虛實夾雜之象：根本在於脾氣虛弱、無力運化水液，水濕停聚致舌體胖大；而側緣紅赤則提示肝膽或胃經兼有熱邪，說明濕邪正在化熱而非單純寒濕之證。\",\"recommendations\":[\"以固定用餐時間、適量規律飲食補益脾氣，多食山藥、薏米、茯苓、紅棗煮湯或熬粥——避免跳餐或深夜進食以免耗傷脾氣\",\"每日進行三十分鐘溫和運動如快步走或太極拳，以行氣化濕、疏通肝氣鬱結，從根本上解除脾胃負擔\"],\"title\":\"Swollen Tongue with Red Edges\",\"title_cn\":\"胖大紅邊舌\"}],\"confidence\":84,\"image_description\":\"清晰的高解析度舌頭特寫照片，顯示完全伸出的舌體，中央覆蓋厚白至黃色膩苔，舌面及側緣散佈大量突出的紅色乳頭（芒刺），舌體輕度胖大，覆苔下可見紅色側緣。\",\"modelUsed\":1,\"notes\":\"圖像質量優良，特寫清晰、光線充足、舌體完全伸出，各診斷分區均可清楚評估。苔質分佈（中後部厚、邊緣漸薄）為中焦濕熱的經典呈現，非表面偽象。苔下及舌緣可見的紅色芒刺為重要臨床發現，確認熱邪積聚，不應忽視。此舌象與現代不良飲食習慣（高脂高糖、飲食不規律、飲酒、熬夜）致脾胃超負荷的模式高度吻合。建議首先從生活方式與飲食調整介入；若症狀持續，可在執業中醫師指導下考慮平胃散加味清熱藥或三仁湯等方劑。本分析不替代專業中醫面診。\",\"observation\":\"舌象呈現厚膩白黃苔集中於舌中後部，突出的紅色芒刺遍佈全面並可見紅色側緣露於苔下，舌體輕度胖大——整體提示濕熱內蘊、脾胃功能失調，兼見心胃火熱積聚之象。\",\"pattern_suggestions\":[\"主證：濕熱內蘊——脾胃功能失調致濕邪積聚並化熱，厚膩苔、芒刺及舌體胖大三象並見，確認裡實濕熱格局\",\"次證：脾氣虛兼痰濕——舌體胖大所反映的根本病機為脾氣不足，無力運化水穀精微，水濕聚而成痰\",\"兼證參考：心胃熱盛——顯著芒刺及紅點提示熱邪已在上中二焦累積，臨床可出現煩躁、口渴、口瘡或消化道炎症等症狀\"],\"potential_issues\":[\"主證：濕熱內蘊——脾胃功能失調致濕邪積聚並化熱，厚膩苔、芒刺及舌體胖大三象並見，確認裡實濕熱格局\",\"次證：脾氣虛兼痰濕——舌體胖大所反映的根本病機為脾氣不足，無力運化水穀精微，水濕聚而成痰\",\"兼證參考：心胃熱盛——顯著芒刺及紅點提示熱邪已在上中二焦累積，臨床可出現煩躁、口渴、口瘡或消化道炎症等症狀\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"厚膩苔 (Hòu Nì Tāi) - Thick Greasy Coating - 痰濕與濕熱積聚，阻遏中焦脾胃氣機\",\"芒刺舌 (Máng Cì Shé) - Prickly/Thorny Tongue - 菌狀乳頭突出腫大，提示心、胃、肝經熱邪熾盛\",\"胖大舌 (Pàng Dà Shé) - Swollen/Enlarged Tongue Body - 脾氣不足，水液代謝失常，濕邪留滯於內\",\"白黃苔 (Bái Huáng Tāi) - White-Yellow Transitional Coating - 濕邪正化熱之過渡苔色，提示病情動態演變\",\"紅邊舌 (Hóng Biān Shé) - Red Tongue Edges - 熱邪積聚於肝膽或胃經，於側緣苔下顯現\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Dampness-Heat · Spleen-Stomach Clearing",
+        "confidence": 92.7,
+        "description": "厚膩白黃苔覆蓋舌中後部，提示中焦痰濕積聚並開始化熱，反映脾胃系統被濁濕所困，氣機升降失常，津液運化障礙。苔質之膩厚合參，說明此乃裡實之證，非表淺病邪。",
+        "recommendations": [
+          "戒除油膩、煎炸、重奶製品及過甜食物，以溫熱易消化飲食為主，如薏苡仁蓮子粥，積極化濕助脾運化",
+          "只飲溫水或常溫水，禁冷飲、生冷食物及酒精以免進一步損傷脾陽加重濕邪；飯後可飲薑豆蔻茶助脾胃升發消化之氣"
+        ],
+        "title": "Thick Greasy Coating",
+        "title_cn": "厚膩苔"
+      },
+      {
+        "category": "Heart-Stomach Heat · Internal Heat Clearing",
+        "confidence": 88.4,
+        "description": "舌面及側緣、舌尖大量突起的紅色芒刺（菌狀乳頭明顯腫大）提示心胃二經熱邪熾盛，內熱耗傷津液、擾亂神明並驅動消化道炎症反應；臨床可見煩躁、口渴、口腔潰瘍或胃脘灼熱等表現。",
+        "recommendations": [
+          "適量增加清熱生津食物，如蓮藕、黃瓜、冬瓜、綠豆湯、菊花茶，以清內熱、護陰液",
+          "嚴格限制辛辣、油炸、酒精及晚間九點後的屏幕使用與情緒壓力；養成晚上十一點前入睡的習慣，防止相火上炎加重心火"
+        ],
+        "title": "Prickly Red Dots",
+        "title_cn": "芒刺紅點舌"
+      },
+      {
+        "category": "Spleen Qi Deficiency · Dampness Transformation",
+        "confidence": 83.1,
+        "description": "舌體輕度胖大伴苔下側緣明顯泛紅，呈虛實夾雜之象：根本在於脾氣虛弱、無力運化水液，水濕停聚致舌體胖大；而側緣紅赤則提示肝膽或胃經兼有熱邪，說明濕邪正在化熱而非單純寒濕之證。",
+        "recommendations": [
+          "以固定用餐時間、適量規律飲食補益脾氣，多食山藥、薏米、茯苓、紅棗煮湯或熬粥——避免跳餐或深夜進食以免耗傷脾氣",
+          "每日進行三十分鐘溫和運動如快步走或太極拳，以行氣化濕、疏通肝氣鬱結，從根本上解除脾胃負擔"
+        ],
+        "title": "Swollen Tongue with Red Edges",
+        "title_cn": "胖大紅邊舌"
+      }
+    ],
+    "confidence": 84,
+    "image_description": "清晰的高解析度舌頭特寫照片，顯示完全伸出的舌體，中央覆蓋厚白至黃色膩苔，舌面及側緣散佈大量突出的紅色乳頭（芒刺），舌體輕度胖大，覆苔下可見紅色側緣。",
+    "modelUsed": 1,
+    "notes": "圖像質量優良，特寫清晰、光線充足、舌體完全伸出，各診斷分區均可清楚評估。苔質分佈（中後部厚、邊緣漸薄）為中焦濕熱的經典呈現，非表面偽象。苔下及舌緣可見的紅色芒刺為重要臨床發現，確認熱邪積聚，不應忽視。此舌象與現代不良飲食習慣（高脂高糖、飲食不規律、飲酒、熬夜）致脾胃超負荷的模式高度吻合。建議首先從生活方式與飲食調整介入；若症狀持續，可在執業中醫師指導下考慮平胃散加味清熱藥或三仁湯等方劑。本分析不替代專業中醫面診。",
+    "observation": "舌象呈現厚膩白黃苔集中於舌中後部，突出的紅色芒刺遍佈全面並可見紅色側緣露於苔下，舌體輕度胖大——整體提示濕熱內蘊、脾胃功能失調，兼見心胃火熱積聚之象。",
+    "pattern_suggestions": [
+      "主證：濕熱內蘊——脾胃功能失調致濕邪積聚並化熱，厚膩苔、芒刺及舌體胖大三象並見，確認裡實濕熱格局",
+      "次證：脾氣虛兼痰濕——舌體胖大所反映的根本病機為脾氣不足，無力運化水穀精微，水濕聚而成痰",
+      "兼證參考：心胃熱盛——顯著芒刺及紅點提示熱邪已在上中二焦累積，臨床可出現煩躁、口渴、口瘡或消化道炎症等症狀"
+    ],
+    "potential_issues": [
+      "主證：濕熱內蘊——脾胃功能失調致濕邪積聚並化熱，厚膩苔、芒刺及舌體胖大三象並見，確認裡實濕熱格局",
+      "次證：脾氣虛兼痰濕——舌體胖大所反映的根本病機為脾氣不足，無力運化水穀精微，水濕聚而成痰",
+      "兼證參考：心胃熱盛——顯著芒刺及紅點提示熱邪已在上中二焦累積，臨床可出現煩躁、口渴、口瘡或消化道炎症等症狀"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "厚膩苔 (Hòu Nì Tāi) - Thick Greasy Coating - 痰濕與濕熱積聚，阻遏中焦脾胃氣機",
+      "芒刺舌 (Máng Cì Shé) - Prickly/Thorny Tongue - 菌狀乳頭突出腫大，提示心、胃、肝經熱邪熾盛",
+      "胖大舌 (Pàng Dà Shé) - Swollen/Enlarged Tongue Body - 脾氣不足，水液代謝失常，濕邪留滯於內",
+      "白黃苔 (Bái Huáng Tāi) - White-Yellow Transitional Coating - 濕邪正化熱之過渡苔色，提示病情動態演變",
+      "紅邊舌 (Hóng Biān Shé) - Red Tongue Edges - 熱邪積聚於肝膽或胃經，於側緣苔下顯現"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-human-tongue-infected-with-oral-candidia.jpg",
+    "image_bytes": 326587
+  },
+  "expected": {
+    "documented_condition": "oral candidiasis (thrush) in a child after antibiotics",
+    "expected_tcm": {
+      "body_colour": "pink-red beneath the plaques",
+      "coating": "thick white curd-like plaques",
+      "thickness": "thick",
+      "shape": "coated dorsum, plaques",
+      "moisture": "moist/greasy",
+      "pattern": "Damp-Heat or Phlegm-Damp in Spleen/Stomach (thick white greasy/curd coating); child with Spleen Qi weakness after antibiotics"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Human_tongue_infected_with_oral_candidiasis.jpg"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "white"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "thick",
+          "greasy",
+          "curd",
+          "damp",
+          "phlegm",
+          "spleen"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

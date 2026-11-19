@@ -1,0 +1,119 @@
+{
+  "id": "tongue-06",
+  "type": "tongue",
+  "label": "tuned-r2",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T03:52:37.848Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 174765,
+      "bytes": 2406,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 174765,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Damp-Heat Accumulation · Middle Jiao Regulation\",\"confidence\":91.5,\"description\":\"舌面可見緻密、極厚的黑色舌苔，絲狀乳頭明顯延長形成毛髮狀質感（黑毛苔），覆蓋中前區。中醫認為黑苔主脾胃濕熱重積，或於苔乾時提示熱盛傷津；然而此毛髮狀乳頭形態亦常見於抗生素使用、吸菸、過量咖啡或茶飲及真菌過度增生，臨床診斷前須先排除外因。\",\"recommendations\":[\"大幅減少或戒除咖啡、濃茶、菸草及深色色素食物；每日早晚以軟毛刷輕刷舌面，針對可能的乳頭過度增生進行口腔護理\",\"就診以排除抗生素相關或念珠菌（Candida）引起的 Black Hairy Tongue；中醫師指導下可考慮黃連、薏苡仁等藥材以清利中焦濕熱\"],\"title\":\"Black Hairy Coating\",\"title_cn\":\"黑毛苔\"},{\"category\":\"Mild Heat Pattern · Yin-Fluid Monitoring\",\"confidence\":74.2,\"description\":\"在未被苔覆蓋的兩側邊緣處，舌體呈淡紅偏紅色（淡紅偏紅），提示基礎存在輕度熱象或陰虛內熱的初期徵兆；因中央厚苔遮蔽大部分舌面，加上暖色燈光干擾，本項判斷置信度屬中等。\",\"recommendations\":[\"增加滋陰清熱食物如百合、蓮子、銀耳、梨；減少辛辣、煎炸、酒精及高度加工食品，以免助生內熱\",\"養成晚上十一時前入睡的習慣，避免長時間深夜使用螢幕，以護陰防虛熱（虛熱）加重\"],\"title\":\"Light Red to Mildly Red Tongue Body\",\"title_cn\":\"淡紅偏紅舌\"},{\"category\":\"Spleen Qi Deficiency · Dampness Transformation\",\"confidence\":68.5,\"description\":\"舌體明顯寬闊肥大（胖大舌），符合脾氣虛、水濕內停（濕盛）之象，提示脾的運化功能失調（運化失調）；此發現與厚苔相互印證，說明中焦運化無力是濕邪積聚化熱的根本土壤。兩側疑有齒痕（齒痕舌）但受拍攝角度限制未能確認。\",\"recommendations\":[\"以溫熱、熟食、易消化為飲食原則，多食健脾食材如山藥、薏苡仁、蓮藕、白米粥；嚴格避免冷飲、生冷食物及甜膩肥厚之品，以免進一步損傷脾陽\",\"每日進行溫和運動，例如快步走或八段錦 20–30 分鐘，以振奮脾陽、促進氣機運行、化濕健脾\"],\"title\":\"Broad / Enlarged Tongue Body\",\"title_cn\":\"胖大舌\"}],\"confidence\":82,\"image_description\":\"清晰的近距離舌頭照片，口腔完全張開、舌頭充分伸出，適合進行完整的中醫舌診評估\",\"modelUsed\":1,\"notes\":\"本例黑色毛苔高度符合 Lingua Villosa Nigra（黑毛舌）的形態，此為一種主要由抗生素使用、菸草、過量咖啡或茶飲及口腔衛生不良所誘發的良性可逆狀況，不必然代表嚴重內在病變。依診斷規範，本苔象以中性描述呈報，不標註為「危急」或「極端」——兩側邊緣舌體並無絳紅色、明顯芒刺或嚴重乾燥等可支持熱盛竭脫或寒極亡陽的表現。中醫師在確立最終證型診斷前，必須結合患者完整病史、現行用藥、生活方式、症狀及脈象進行綜合判斷。\",\"observation\":\"舌頭完全伸出，在人工閃光燈下拍攝，略帶暖色偏差；舌體顏色依據未被苔覆蓋的兩側邊緣判斷，呈現淡紅偏紅色調（淡紅偏紅），需注意暖色燈光可能令舌體看起來比實際稍偏粉紅。最突出且臨床意義最重大的發現，是覆蓋舌體中前三分之二的極厚、緻密黑色舌苔（黑苔），加上絲狀乳頭明顯延長所形成的毛髮狀質感（黑毛苔）；兩側邊緣及舌根相對較少受累。由於苔層過厚，潤燥難以可靠判斷，但表面既無明顯水滑，亦無明顯乾燥跡象。舌體寬闊肥大（胖大舌）；兩側邊緣疑有齒痕（齒痕舌），但受拍攝角度限制未能確認。\",\"pattern_suggestions\":[\"首選病機 — 脾胃濕熱（脾胃濕熱）：極厚黑苔配合胖大舌體及輕度偏紅舌質，指向中焦濕邪蘊久化熱；診斷確立前須先排除抗生素使用、吸菸、咖啡過量及口腔衛生不佳等外因\",\"次選病機 — 熱盛傷津（熱盛傷津）：若臨床觸診舌苔確認乾燥，且患者伴有高熱、口渴劇烈、便秘、尿少色深，則需考慮此較重熱證；單憑舌象不足以確定任何中醫證型\"],\"potential_issues\":[\"首選病機 — 脾胃濕熱（脾胃濕熱）：極厚黑苔配合胖大舌體及輕度偏紅舌質，指向中焦濕邪蘊久化熱；診斷確立前須先排除抗生素使用、吸菸、咖啡過量及口腔衛生不佳等外因\",\"次選病機 — 熱盛傷津（熱盛傷津）：若臨床觸診舌苔確認乾燥，且患者伴有高熱、口渴劇烈、便秘、尿少色深，則需考慮此較重熱證；單憑舌象不足以確定任何中醫證型\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"黑毛苔 (Hēi Máo Tāi) — 黑色毛苔 — 中焦濕熱重積，或外因（抗生素／菸草／咖啡）所致乳頭過度增生；本圖最具診斷主導地位的單一發現\",\"厚苔 (Hòu Tāi) — 厚苔 — 內邪積聚，濕、痰或食滯阻礙中焦，胃氣不得正常上承\",\"淡紅偏紅舌 (Dàn Hóng Piān Hóng Shé) — 淡紅偏紅舌體 — 輕度熱象基礎或陰虛初起；僅於未被苔覆蓋的兩側邊緣可見\",\"胖大舌 (Pàng Dà Shé) — 胖大舌體 — 脾氣虛、水濕內停（脾虛濕盛）；支持中焦病機的整體判斷\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Damp-Heat Accumulation · Middle Jiao Regulation",
+        "confidence": 91.5,
+        "description": "舌面可見緻密、極厚的黑色舌苔，絲狀乳頭明顯延長形成毛髮狀質感（黑毛苔），覆蓋中前區。中醫認為黑苔主脾胃濕熱重積，或於苔乾時提示熱盛傷津；然而此毛髮狀乳頭形態亦常見於抗生素使用、吸菸、過量咖啡或茶飲及真菌過度增生，臨床診斷前須先排除外因。",
+        "recommendations": [
+          "大幅減少或戒除咖啡、濃茶、菸草及深色色素食物；每日早晚以軟毛刷輕刷舌面，針對可能的乳頭過度增生進行口腔護理",
+          "就診以排除抗生素相關或念珠菌（Candida）引起的 Black Hairy Tongue；中醫師指導下可考慮黃連、薏苡仁等藥材以清利中焦濕熱"
+        ],
+        "title": "Black Hairy Coating",
+        "title_cn": "黑毛苔"
+      },
+      {
+        "category": "Mild Heat Pattern · Yin-Fluid Monitoring",
+        "confidence": 74.2,
+        "description": "在未被苔覆蓋的兩側邊緣處，舌體呈淡紅偏紅色（淡紅偏紅），提示基礎存在輕度熱象或陰虛內熱的初期徵兆；因中央厚苔遮蔽大部分舌面，加上暖色燈光干擾，本項判斷置信度屬中等。",
+        "recommendations": [
+          "增加滋陰清熱食物如百合、蓮子、銀耳、梨；減少辛辣、煎炸、酒精及高度加工食品，以免助生內熱",
+          "養成晚上十一時前入睡的習慣，避免長時間深夜使用螢幕，以護陰防虛熱（虛熱）加重"
+        ],
+        "title": "Light Red to Mildly Red Tongue Body",
+        "title_cn": "淡紅偏紅舌"
+      },
+      {
+        "category": "Spleen Qi Deficiency · Dampness Transformation",
+        "confidence": 68.5,
+        "description": "舌體明顯寬闊肥大（胖大舌），符合脾氣虛、水濕內停（濕盛）之象，提示脾的運化功能失調（運化失調）；此發現與厚苔相互印證，說明中焦運化無力是濕邪積聚化熱的根本土壤。兩側疑有齒痕（齒痕舌）但受拍攝角度限制未能確認。",
+        "recommendations": [
+          "以溫熱、熟食、易消化為飲食原則，多食健脾食材如山藥、薏苡仁、蓮藕、白米粥；嚴格避免冷飲、生冷食物及甜膩肥厚之品，以免進一步損傷脾陽",
+          "每日進行溫和運動，例如快步走或八段錦 20–30 分鐘，以振奮脾陽、促進氣機運行、化濕健脾"
+        ],
+        "title": "Broad / Enlarged Tongue Body",
+        "title_cn": "胖大舌"
+      }
+    ],
+    "confidence": 82,
+    "image_description": "清晰的近距離舌頭照片，口腔完全張開、舌頭充分伸出，適合進行完整的中醫舌診評估",
+    "modelUsed": 1,
+    "notes": "本例黑色毛苔高度符合 Lingua Villosa Nigra（黑毛舌）的形態，此為一種主要由抗生素使用、菸草、過量咖啡或茶飲及口腔衛生不良所誘發的良性可逆狀況，不必然代表嚴重內在病變。依診斷規範，本苔象以中性描述呈報，不標註為「危急」或「極端」——兩側邊緣舌體並無絳紅色、明顯芒刺或嚴重乾燥等可支持熱盛竭脫或寒極亡陽的表現。中醫師在確立最終證型診斷前，必須結合患者完整病史、現行用藥、生活方式、症狀及脈象進行綜合判斷。",
+    "observation": "舌頭完全伸出，在人工閃光燈下拍攝，略帶暖色偏差；舌體顏色依據未被苔覆蓋的兩側邊緣判斷，呈現淡紅偏紅色調（淡紅偏紅），需注意暖色燈光可能令舌體看起來比實際稍偏粉紅。最突出且臨床意義最重大的發現，是覆蓋舌體中前三分之二的極厚、緻密黑色舌苔（黑苔），加上絲狀乳頭明顯延長所形成的毛髮狀質感（黑毛苔）；兩側邊緣及舌根相對較少受累。由於苔層過厚，潤燥難以可靠判斷，但表面既無明顯水滑，亦無明顯乾燥跡象。舌體寬闊肥大（胖大舌）；兩側邊緣疑有齒痕（齒痕舌），但受拍攝角度限制未能確認。",
+    "pattern_suggestions": [
+      "首選病機 — 脾胃濕熱（脾胃濕熱）：極厚黑苔配合胖大舌體及輕度偏紅舌質，指向中焦濕邪蘊久化熱；診斷確立前須先排除抗生素使用、吸菸、咖啡過量及口腔衛生不佳等外因",
+      "次選病機 — 熱盛傷津（熱盛傷津）：若臨床觸診舌苔確認乾燥，且患者伴有高熱、口渴劇烈、便秘、尿少色深，則需考慮此較重熱證；單憑舌象不足以確定任何中醫證型"
+    ],
+    "potential_issues": [
+      "首選病機 — 脾胃濕熱（脾胃濕熱）：極厚黑苔配合胖大舌體及輕度偏紅舌質，指向中焦濕邪蘊久化熱；診斷確立前須先排除抗生素使用、吸菸、咖啡過量及口腔衛生不佳等外因",
+      "次選病機 — 熱盛傷津（熱盛傷津）：若臨床觸診舌苔確認乾燥，且患者伴有高熱、口渴劇烈、便秘、尿少色深，則需考慮此較重熱證；單憑舌象不足以確定任何中醫證型"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "黑毛苔 (Hēi Máo Tāi) — 黑色毛苔 — 中焦濕熱重積，或外因（抗生素／菸草／咖啡）所致乳頭過度增生；本圖最具診斷主導地位的單一發現",
+      "厚苔 (Hòu Tāi) — 厚苔 — 內邪積聚，濕、痰或食滯阻礙中焦，胃氣不得正常上承",
+      "淡紅偏紅舌 (Dàn Hóng Piān Hóng Shé) — 淡紅偏紅舌體 — 輕度熱象基礎或陰虛初起；僅於未被苔覆蓋的兩側邊緣可見",
+      "胖大舌 (Pàng Dà Shé) — 胖大舌體 — 脾氣虛、水濕內停（脾虛濕盛）；支持中焦病機的整體判斷"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-black-hairy-tounge.jpg",
+    "image_bytes": 47083
+  },
+  "expected": {
+    "documented_condition": "black hairy tongue (lingua villosa nigra)",
+    "expected_tcm": {
+      "body_colour": "hard to judge under dark coating (reported light red in a TCM case)",
+      "coating": "black/dark brown, thick, hair-like",
+      "thickness": "thick",
+      "shape": "elongated filiform papillae",
+      "moisture": "moist or dry",
+      "pattern": "heat or cold-damp accumulation in Stomach/Spleen (grey-black coating = extreme interior heat if dry, extreme cold if moist); stains from coffee/antibiotics must be considered"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Black_hairy_tounge.jpg"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "black",
+          "dark",
+          "brown"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "thick",
+          "heat",
+          "damp",
+          "stomach",
+          "spleen"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

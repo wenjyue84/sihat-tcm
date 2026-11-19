@@ -1,0 +1,57 @@
+{
+  "id": "case-06",
+  "type": "text",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11046358/",
+  "source_licence": "CC BY",
+  "source_title": "Treatment of Peripheral Facial Paralysis After COVID-19 Infection With TCM Therapies: A Case Report",
+  "paraphrase_note": "Symptoms/tongue/pulse paraphrased by the harness author from the open-access full text; source pattern and principle are the authors' own.",
+  "patient": {
+    "age": 23,
+    "sex": "male"
+  },
+  "chief_complaint": "Right-sided facial numbness, asymmetry and ear pain for five days after COVID-19 (House-Brackmann grade IV facial palsy).",
+  "symptoms": [
+    "numbness of the right face",
+    "facial droop",
+    "ear pain on the right side"
+  ],
+  "tongue_as_reported": "pale tongue with white fur",
+  "pulse_as_reported": "floating and tense (tight)",
+  "source_pattern": "Wind-Cold (with phlegm) obstructing the channels at the acute stage",
+  "source_treatment_principle": "Expel wind and disperse cold, resolve phlegm and unblock the channels/collaterals (acupuncture, herbs; syndrome changes by stage)",
+  "ground_truth_strength": "strong",
+  "expect_keyword_groups": [
+    [
+      "wind"
+    ],
+    [
+      "cold"
+    ]
+  ],
+  "consult_request": {
+    "data": {
+      "basic_info": {
+        "name": "Case 06",
+        "age": "23",
+        "gender": "male",
+        "height": "",
+        "weight": "",
+        "symptoms": [
+          "headache"
+        ]
+      },
+      "wen_inquiry": "Chief complaint: Right-sided facial numbness, asymmetry and ear pain for five days after COVID-19 (House-Brackmann grade IV facial palsy). Symptoms: numbness of the right face; facial droop; ear pain on the right side.",
+      "wang_tongue": "pale tongue with white fur",
+      "wang_face": "",
+      "wen_audio": "",
+      "qie": {
+        "bpm": "",
+        "qualities": [
+          "floating"
+        ],
+        "note": "floating and tense (tight)"
+      }
+    },
+    "language": "en"
+  }
+}

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -15,22 +16,22 @@ const baseURL = "https://generativelanguage.googleapis.com/v1beta/models"
 
 // Model tiers mirroring the web app's AI model router.
 const (
-	ModelFlash = "gemini-flash-latest" // standard tier
-	ModelPro   = "gemini-3.5-flash"    // complex cases
+	ModelFlash = "gemini-flash-latest"   // standard tier
+	ModelPro   = "gemini-3.5-flash"      // complex cases
 	ModelLite  = "gemini-3.1-flash-lite" // simple cases
 )
 
 // legacyModels maps deprecated model IDs (ported from the Next.js codebase)
 // to currently-available equivalents. Free tier no longer serves 1.x/2.x models.
 var legacyModels = map[string]string{
-	"gemini-1.5-flash":     ModelLite,
-	"gemini-1.5-pro":       ModelPro,
-	"gemini-2.0-flash":     ModelFlash,
-	"gemini-2.0-flash-exp": ModelFlash,
+	"gemini-1.5-flash":                    ModelLite,
+	"gemini-1.5-pro":                      ModelPro,
+	"gemini-2.0-flash":                    ModelFlash,
+	"gemini-2.0-flash-exp":                ModelFlash,
 	"gemini-2.0-flash-thinking-exp-01-21": ModelPro,
-	"gemini-2.5-flash":      ModelFlash,
-	"gemini-2.5-flash-lite": ModelLite,
-	"gemini-2.5-pro":        ModelPro,
+	"gemini-2.5-flash":                    ModelFlash,
+	"gemini-2.5-flash-lite":               ModelLite,
+	"gemini-2.5-pro":                      ModelPro,
 }
 
 // normalizeModel translates legacy model IDs to supported ones.
@@ -48,6 +49,18 @@ func normalizeModel(model string) string {
 type Client struct {
 	APIKey string
 	HTTP   *http.Client
+	// BaseURL overrides the Google endpoint (e.g. a sihat-listener bridging to
+	// local Claude models). It must speak the same /models/{m}:generateContent
+	// REST shape. Empty = Google.
+	BaseURL string
+}
+
+// base returns the effective models endpoint without a trailing slash.
+func (c *Client) base() string {
+	if c.BaseURL != "" {
+		return strings.TrimRight(c.BaseURL, "/")
+	}
+	return baseURL
 }
 
 // New creates a Gemini client.
@@ -112,6 +125,7 @@ type generateResponse struct {
 				Text string `json:"text"`
 			} `json:"parts"`
 		} `json:"content"`
+		FinishReason string `json:"finishReason"`
 	} `json:"candidates"`
 	Error *struct {
 		Code    int    `json:"code"`
@@ -129,7 +143,7 @@ func (c *Client) Generate(ctx context.Context, model string, req GenerateRequest
 	if err != nil {
 		return "", fmt.Errorf("gemini: marshal request: %w", err)
 	}
-	url := fmt.Sprintf("%s/%s:generateContent?key=%s", baseURL, model, c.APIKey)
+	url := fmt.Sprintf("%s/%s:generateContent?key=%s", c.base(), model, c.APIKey)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return "", err

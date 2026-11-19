@@ -1,0 +1,58 @@
+{
+  "id": "case-09",
+  "type": "text",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11709150/",
+  "source_licence": "CC BY",
+  "source_title": "Lung cancer palindromia due to the deficiency of vital energy and blood syndrome treated by TCM herbs: A case report",
+  "paraphrase_note": "Symptoms/tongue/pulse paraphrased by the harness author from the open-access full text; source pattern and principle are the authors' own.",
+  "patient": {
+    "age": 57,
+    "sex": "female"
+  },
+  "chief_complaint": "Half a year of chest pain and fatigue; lung nodules found and later a recurrence in the other lung after surgery.",
+  "symptoms": [
+    "chest pain",
+    "fatigue",
+    "good appetite, sleep and mood noted at first visit"
+  ],
+  "tongue_as_reported": "not captured in the portion read",
+  "pulse_as_reported": "not captured in the portion read",
+  "source_pattern": "Qi and Blood deficiency (deficiency of vital energy and blood)",
+  "source_treatment_principle": "Tonify healthy Qi and Blood, attack evil and remove blood stasis; supplement Qi, nourish Yin, moisten the Lung",
+  "ground_truth_strength": "medium (tongue/pulse partly missing)",
+  "expect_keyword_groups": [
+    [
+      "qi"
+    ],
+    [
+      "blood"
+    ],
+    [
+      "deficien"
+    ]
+  ],
+  "consult_request": {
+    "data": {
+      "basic_info": {
+        "name": "Case 09",
+        "age": "57",
+        "gender": "female",
+        "height": "",
+        "weight": "",
+        "symptoms": [
+          "fatigue"
+        ]
+      },
+      "wen_inquiry": "Chief complaint: Half a year of chest pain and fatigue; lung nodules found and later a recurrence in the other lung after surgery. Symptoms: chest pain; fatigue; good appetite, sleep and mood noted at first visit.",
+      "wang_tongue": "",
+      "wang_face": "",
+      "wen_audio": "",
+      "qie": {
+        "bpm": "",
+        "qualities": [],
+        "note": ""
+      }
+    },
+    "language": "en"
+  }
+}

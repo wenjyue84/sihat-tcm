@@ -1,0 +1,42 @@
+{
+  "label": "baseline",
+  "ai": "pc",
+  "db": "fake",
+  "port_offset": "300",
+  "concurrency": 3,
+  "started_at": "2026-10-12T01:50:03.827Z",
+  "wall_seconds": 1557,
+  "selected": 26,
+  "ok": 26,
+  "failed": [],
+  "by_type": {
+    "tongue": {
+      "n": 14,
+      "ok": 14,
+      "kw_all_hit": 8,
+      "kw_miss": [
+        "tongue-01",
+        "tongue-02",
+        "tongue-07",
+        "tongue-09",
+        "tongue-11",
+        "tongue-14"
+      ]
+    },
+    "face": {
+      "n": 1,
+      "ok": 1,
+      "kw_all_hit": 0,
+      "kw_miss": [
+        "face-01"
+      ]
+    },
+    "text": {
+      "n": 11,
+      "ok": 11,
+      "kw_all_hit": 11,
+      "kw_miss": []
+    }
+  },
+  "note": "keyword hits are a crude lexical signal against literature-derived expectations; read the raw JSONs before drawing conclusions."
+}

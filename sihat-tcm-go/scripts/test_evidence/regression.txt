@@ -1,0 +1,15 @@
+$ final regression after all changes (2026-10-12)
+go vet ./...                                   ok
+go test ./... -count=1                         1316 passed in 6 packages
+node --test regress/health-connect.test.mjs    24/24 pass
+node aci.mjs test --suite=all --db=fake           1837/1837 passed, 0 failed, 16 skipped  "ok": true
+node aci.mjs test --suite=all --db=sqlite         2064/2064 passed, 0 failed, 10 skipped  "ok": true
+
+per suite (sqlite):
+  auth               8  chat               4  consult            4  datacontract     122
+  demo             159  demodata         215  doctor_approval   55  fakedb           159
+  health            71  hunt_ai           52  hunt_frontend     41  hunt_mutation    112
+  hunt_patient      63  hunt_robust       28  hunt_sec          17  hunt_staff        26
+  image              7  journey           93  listener         108  no_blobs_in_db    11
+  pages            322  ratelimit         63  roles            127  security         166
+  video             31

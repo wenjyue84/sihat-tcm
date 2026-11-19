@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"sihattcm/internal/gemini"
 )
@@ -22,22 +23,17 @@ func (s *Server) handleSummarizeInquiry(w http.ResponseWriter, r *http.Request) 
 	start := time.Now()
 
 	var body struct {
-		ChatHistory   []map[string]any   `json:"chatHistory"`
-		ReportFiles   []map[string]any   `json:"reportFiles"`
-		MedicineFiles []map[string]any   `json:"medicineFiles"`
-		BasicInfo     map[string]any     `json:"basicInfo"`
-		Language      string             `json:"language"`
-		Model         string             `json:"model"`
+		ChatHistory   []map[string]any `json:"chatHistory"`
+		ReportFiles   []map[string]any `json:"reportFiles"`
+		MedicineFiles []map[string]any `json:"medicineFiles"`
+		BasicInfo     map[string]any   `json:"basicInfo"`
+		Language      string           `json:"language"`
+		Model         string           `json:"model"`
 	}
 	if !anReadJSON(w, r, &body) {
 		return
 	}
-	if body.Language == "" {
-		body.Language = "en"
-	}
-	if body.Model == "" {
-		body.Model = "gemini-2.0-flash"
-	}
+	body.Language = aiLang(body.Language)
 
 	sysPrompt := s.SystemPrompt(r.Context(), PromptDoctorInquirySummary)
 
@@ -120,16 +116,9 @@ Follow the structured format specified in your system prompt.
 		langLabel,
 	)
 
-	models := []string{body.Model, "gemini-2.0-flash", "gemini-1.5-flash"}
-	// Deduplicate while preserving order.
-	seen := map[string]bool{}
-	deduped := make([]string, 0, len(models))
-	for _, m := range models {
-		if !seen[m] {
-			seen[m] = true
-			deduped = append(deduped, m)
-		}
-	}
+	// The caller's model is honoured only inside the cheap allow-list (it used to go verbatim into the upstream URL:
+	// a "?" injected query parameters, "pc-opus" selected the most expensive listener tier).
+	deduped := aiModelChain(body.Model, "gemini-2.0-flash", "gemini-1.5-flash")
 
 	req := gemini.GenerateRequest{
 		Contents: []gemini.Content{
@@ -142,7 +131,7 @@ Follow the structured format specified in your system prompt.
 
 	text, modelUsed, err := s.AI.GenerateWithFallback(r.Context(), deduped, req)
 	if err != nil {
-		s.JSONError(w, http.StatusInternalServerError, "summarization failed: "+err.Error())
+		s.anUpstreamFail(w, "summarize-inquiry", err)
 		return
 	}
 
@@ -171,9 +160,7 @@ func (s *Server) handleSummarizeReports(w http.ResponseWriter, r *http.Request) 
 	if !anReadJSON(w, r, &body) {
 		return
 	}
-	if body.Language == "" {
-		body.Language = "en"
-	}
+	body.Language = aiLang(body.Language)
 
 	if len(body.Reports) == 0 && len(body.DiagnosisHistory) == 0 {
 		s.JSON(w, http.StatusBadRequest, map[string]any{"error": "No data provided", "code": "NO_DATA"})
@@ -256,7 +243,7 @@ Format the response as a clear, paragraph-based summary suitable for medical rec
 	genDur := int(time.Since(genStart).Milliseconds())
 
 	if err != nil {
-		s.JSONError(w, http.StatusInternalServerError, "generation failed: "+err.Error())
+		s.anUpstreamFail(w, "summarize-reports", err)
 		return
 	}
 
@@ -354,16 +341,15 @@ func (s *Server) handleSummarizeMedicalHistory(w http.ResponseWriter, r *http.Re
 		reportsSummary = sb.String()
 	}
 
-	promptTmpl := body.CustomPrompt
-	if promptTmpl == "" {
-		promptTmpl = sumMedHistoryDefaultPrompt
-	}
+	// body.CustomPrompt is deliberately NOT used: this endpoint is anonymous, and a caller-supplied template turned it
+	// into a free general-purpose LLM (and a prompt-injection primitive). The server's own template is always used.
+	promptTmpl := sumMedHistoryDefaultPrompt
 	finalPrompt := strings.ReplaceAll(promptTmpl, "{inquiries}", inquirySummary)
 	finalPrompt = strings.ReplaceAll(finalPrompt, "{reports}", reportsSummary)
 
 	text, err := s.AI.GenerateText(r.Context(), "gemini-2.0-flash", "", finalPrompt)
 	if err != nil {
-		s.JSONError(w, http.StatusInternalServerError, err.Error())
+		s.anUpstreamFail(w, "summarize-medical-history", err)
 		return
 	}
 
@@ -401,49 +387,60 @@ func (s *Server) handleAskDietaryAdvice(w http.ResponseWriter, r *http.Request) 
 		Profile   any    `json:"profile"`
 		Diagnosis any    `json:"diagnosis"`
 		Advice    any    `json:"advice"`
+		Language  string `json:"language"`
 	}
 	if !anReadJSON(w, r, &body) {
 		return
 	}
+	body.Question = strings.TrimSpace(body.Question)
 	if body.Question == "" {
 		s.JSONError(w, http.StatusBadRequest, "question is required")
 		return
 	}
-
-	marshalOrStr := func(v any) string {
-		if v == nil {
-			return "Not provided"
-		}
-		b, err := json.Marshal(v)
-		if err != nil {
-			return "Not provided"
-		}
-		return string(b)
-	}
-
-	prompt := strings.NewReplacer(
-		"{profile}", marshalOrStr(body.Profile),
-		"{diagnosis}", marshalOrStr(body.Diagnosis),
-		"{advice}", marshalOrStr(body.Advice),
-		"{question}", body.Question,
-	).Replace(sumDietaryDefaultPrompt)
-
-	text, err := s.AI.GenerateText(r.Context(), "gemini-2.0-flash", "", prompt)
-	if err != nil {
-		// The free-tier Gemini quota is small; surface a clean 429 (not a raw 500
-		// leaking Google's quota text) so the client can show a friendly retry.
-		if containsAny(err.Error(), "429", "quota", "RATE_LIMIT", "rate limit") {
-			s.JSONError(w, http.StatusTooManyRequests, "The AI service is busy right now (rate limit). Please try again in a minute.")
-			return
-		}
-		s.JSONError(w, http.StatusInternalServerError, "Could not generate an answer right now. Please try again.")
+	if utf8.RuneCountInString(body.Question) > maxDietaryQuestionRune {
+		s.JSONError(w, http.StatusBadRequest, "question too long (max 2000 characters)")
 		return
 	}
 
-	s.JSON(w, http.StatusOK, map[string]any{
-		"answer": text,
-		"prompt": prompt,
-	})
+	marshalOrStr := func(v any) (string, bool) {
+		if v == nil {
+			return "Not provided", true
+		}
+		b, err := json.Marshal(v)
+		if err != nil {
+			return "Not provided", true
+		}
+		if len(b) > 20000 {
+			return "", false
+		}
+		return string(b), true
+	}
+	profile, ok1 := marshalOrStr(body.Profile)
+	diagnosis, ok2 := marshalOrStr(body.Diagnosis)
+	advice, ok3 := marshalOrStr(body.Advice)
+	if !ok1 || !ok2 || !ok3 {
+		s.JSONError(w, http.StatusBadRequest, "profile, diagnosis or advice is too large")
+		return
+	}
+
+	prompt := strings.NewReplacer(
+		"{profile}", profile,
+		"{diagnosis}", diagnosis,
+		"{advice}", advice,
+		"{question}", body.Question,
+	).Replace(sumDietaryDefaultPrompt)
+	// answer in the patient's language (zh / ms / en; locale tags such as zh-CN are accepted)
+	prompt += "\n\n" + sumLangLabel(body.Language)
+
+	text, err := s.AI.GenerateText(r.Context(), "gemini-2.0-flash", "", prompt)
+	if err != nil {
+		// 429 (with Retry-After) for upstream quota, 502 for every other upstream failure - like the sibling AI routes
+		s.anUpstreamFail(w, "ask-dietary-advice", err)
+		return
+	}
+
+	// only the answer goes back: the prompt (template + the patient's profile and diagnosis) stays on the server
+	s.JSON(w, http.StatusOK, map[string]any{"answer": text})
 }
 
 // ---- POST /api/generate-infographic ----
@@ -615,10 +612,7 @@ func sumPlaceholderSVG(reportData, _ map[string]any, style string) string {
 	for i, f := range foods {
 		y1 := 410 + i*60
 		y2 := 443 + i*60
-		label := f
-		if len(label) > 35 {
-			label = label[:35]
-		}
+		label := anTruncRunes(f, 35)
 		foodRows += fmt.Sprintf(
 			`<rect x="40" y="%d" width="340" height="50" rx="10" fill="white"/>
         <text x="60" y="%d" fill="#22c55e" font-size="18" font-family="system-ui">✅</text>
@@ -628,8 +622,8 @@ func sumPlaceholderSVG(reportData, _ map[string]any, style string) string {
 	}
 
 	diagLabel := diagnosis
-	if len(diagLabel) > 50 {
-		diagLabel = diagLabel[:50] + "..."
+	if utf8.RuneCountInString(diagLabel) > 50 {
+		diagLabel = anTruncRunes(diagLabel, 50) + "..."
 	}
 
 	svg := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
@@ -797,7 +791,7 @@ func sumMapStr(m map[string]any, key, def string) string {
 }
 
 func sumLangLabel(lang string) string {
-	switch lang {
+	switch aiLang(lang) {
 	case "zh":
 		return "Respond in Simplified Chinese (中文)."
 	case "ms":
@@ -809,6 +803,17 @@ func sumLangLabel(lang string) string {
 
 // xmlEscape escapes special XML/HTML characters for safe embedding in SVG/HTML.
 func xmlEscape(s string) string {
+	// XML 1.0 forbids U+0000-0008, 000B, 000C, 000E-001F (and surrogates / FFFE / FFFF): an SVG that carries one is not
+	// well-formed and the data-URL image fails to render. Drop them before escaping.
+	s = strings.Map(func(r rune) rune {
+		switch {
+		case r == '\t' || r == '\n' || r == '\r':
+			return r
+		case r < 0x20, r == 0xFFFE, r == 0xFFFF:
+			return -1
+		}
+		return r
+	}, s)
 	s = strings.ReplaceAll(s, "&", "&amp;")
 	s = strings.ReplaceAll(s, "<", "&lt;")
 	s = strings.ReplaceAll(s, ">", "&gt;")
@@ -824,9 +829,10 @@ var _ = (*gemini.Client)(nil)
 
 // registerSummaryRoutes wires up all summary-related API routes.
 func (s *Server) registerSummaryRoutes() {
-	s.Mux.HandleFunc("POST /api/summarize-inquiry", s.handleSummarizeInquiry)
-	s.Mux.HandleFunc("POST /api/summarize-reports", s.handleSummarizeReports)
-	s.Mux.HandleFunc("POST /api/summarize-medical-history", s.handleSummarizeMedicalHistory)
-	s.Mux.HandleFunc("POST /api/ask-dietary-advice", s.handleAskDietaryAdvice)
-	s.Mux.HandleFunc("POST /api/generate-infographic", s.handleGenerateInfographic)
+	// Anonymous and each call is a paid model request: throttled like the chat / consult / analysis routes.
+	s.Mux.HandleFunc("POST /api/summarize-inquiry", s.RateLimit(20, 500, s.handleSummarizeInquiry))
+	s.Mux.HandleFunc("POST /api/summarize-reports", s.RateLimit(20, 500, s.handleSummarizeReports))
+	s.Mux.HandleFunc("POST /api/summarize-medical-history", s.RateLimit(20, 500, s.handleSummarizeMedicalHistory))
+	s.Mux.HandleFunc("POST /api/ask-dietary-advice", s.RateLimit(20, 500, s.handleAskDietaryAdvice))
+	s.Mux.HandleFunc("POST /api/generate-infographic", s.RateLimit(60, 2000, s.handleGenerateInfographic))
 }

@@ -1,0 +1,312 @@
+{
+ "art-home-hero-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 69.7
+ },
+ "art-home-elements-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 40.5
+ },
+ "art-home-hero-390.webp": {
+  "w": 390,
+  "h": 844,
+  "kb": 27.8
+ },
+ "art-login-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 29.4
+ },
+ "art-reset-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 30.9
+ },
+ "art-notfound-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 12.5
+ },
+ "art-notfound-390.webp": {
+  "w": 390,
+  "h": 844,
+  "kb": 13.1
+ },
+ "art-history-empty-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 29.4
+ },
+ "art-history-empty-390.webp": {
+  "w": 390,
+  "h": 844,
+  "kb": 21.5
+ },
+ "art-doctor-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 46.5
+ },
+ "dev-wizard-pulse.webp": {
+  "w": 1280,
+  "h": 900,
+  "kb": 42.9
+ },
+ "dev-wizard-ios.webp": {
+  "w": 390,
+  "h": 800,
+  "kb": 23.8
+ },
+ "dev-dashboard-empty.webp": {
+  "w": 1280,
+  "h": 2816,
+  "kb": 174.1
+ },
+ "dev-dashboard-full.webp": {
+  "w": 1280,
+  "h": 2816,
+  "kb": 166.1
+ },
+ "dev-dashboard-375.webp": {
+  "w": 375,
+  "h": 800,
+  "kb": 29.2
+ },
+ "dev-patient-devices-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 66.3
+ },
+ "art-features-before-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 40.2
+ },
+ "art-features-after-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 40.5
+ },
+ "prod-home-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 69.7
+ },
+ "prod-demo-log-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 72.7
+ },
+ "prod-demo-log-390.webp": {
+  "w": 390,
+  "h": 844,
+  "kb": 36.0
+ },
+ "prod-notfound-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 12.5
+ },
+ "log-page-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 72.7
+ },
+ "log-page-390.webp": {
+  "w": 390,
+  "h": 844,
+  "kb": 27.0
+ },
+ "cdp-reset-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 22.6
+ },
+ "cdp-wizard-pulse-1440.webp": {
+  "w": 390,
+  "h": 844,
+  "kb": 20.0
+ },
+ "cdp-patient-390.webp": {
+  "w": 390,
+  "h": 844,
+  "kb": 25.4
+ },
+ "cdp-doctor-1440.webp": {
+  "w": 1280,
+  "h": 800,
+  "kb": 42.6
+ },
+ "scen-tongue-01.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 82.2
+ },
+ "scen-tongue-02.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 69.7
+ },
+ "scen-tongue-03.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 79.9
+ },
+ "scen-tongue-04.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 71.3
+ },
+ "scen-tongue-05.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 67.8
+ },
+ "scen-tongue-06.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 78.8
+ },
+ "scen-tongue-07.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 71.2
+ },
+ "scen-tongue-08.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 74.2
+ },
+ "scen-tongue-09.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 91.8
+ },
+ "scen-tongue-10.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 71.0
+ },
+ "scen-tongue-11.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 71.2
+ },
+ "scen-tongue-12.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 57.2
+ },
+ "scen-tongue-13.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 69.2
+ },
+ "scen-tongue-14.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 69.4
+ },
+ "scen-face-01.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 51.9
+ },
+ "scen-case-01.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 70.1
+ },
+ "scen-case-02.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 73.6
+ },
+ "scen-case-03.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 57.7
+ },
+ "scen-case-04.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 70.7
+ },
+ "scen-case-05.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 73.8
+ },
+ "scen-case-06.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 69.7
+ },
+ "scen-case-07.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 71.8
+ },
+ "scen-case-08.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 71.7
+ },
+ "scen-case-09.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 55.4
+ },
+ "scen-case-10.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 68.8
+ },
+ "scen-case-11.webp": {
+  "w": 1280,
+  "h": 720,
+  "kb": 70.3
+ },
+ "scen-accuracy.webp": {
+  "w": 1280,
+  "h": 640,
+  "kb": 23.9
+ },
+ "term-deploy.webp": {
+  "w": 1280,
+  "h": 630,
+  "kb": 79.5
+ },
+ "term-devices-browser.webp": {
+  "w": 1280,
+  "h": 854,
+  "kb": 66.3
+ },
+ "term-illustrations-browser.webp": {
+  "w": 1280,
+  "h": 770,
+  "kb": 85.5
+ },
+ "term-openrouter-gate.webp": {
+  "w": 1280,
+  "h": 462,
+  "kb": 51.8
+ },
+ "term-prod-readonly.webp": {
+  "w": 1280,
+  "h": 518,
+  "kb": 46.3
+ },
+ "term-regression.webp": {
+  "w": 1280,
+  "h": 490,
+  "kb": 38.8
+ },
+ "art-og.webp": {
+  "w": 1200,
+  "h": 630,
+  "kb": 36.4
+ }
+}

@@ -1,0 +1,59 @@
+{
+  "id": "case-11",
+  "type": "text",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10615480/",
+  "source_licence": "CC BY",
+  "source_title": "Black hairy tongue treated with traditional Chinese medicine: A case report",
+  "paraphrase_note": "Symptoms/tongue/pulse paraphrased by the harness author from the open-access full text; source pattern and principle are the authors' own.",
+  "patient": {
+    "age": 73,
+    "sex": "female"
+  },
+  "chief_complaint": "A black tongue for two weeks, with thirst and diarrhea, a month after urosepsis treated in hospital with antibiotics.",
+  "symptoms": [
+    "black tongue coating",
+    "thirst",
+    "diarrhea",
+    "history of hypertension and arrhythmia"
+  ],
+  "tongue_as_reported": "thick black coating ringed by thick white coating; medium-sized body with tooth marks; light-red body",
+  "pulse_as_reported": "not captured in the portion read",
+  "source_pattern": "Not captured in the portion read (a gastrointestinal / Spleen-Stomach damp-heat or cold-damp pattern is the usual TCM reading of a thick black coating with diarrhea and thirst)",
+  "source_treatment_principle": "Source treated with TCM herbs; principle not captured",
+  "ground_truth_strength": "weak (pattern not captured)",
+  "expect_keyword_groups": [
+    [
+      "spleen",
+      "stomach",
+      "damp"
+    ],
+    [
+      "heat",
+      "cold"
+    ]
+  ],
+  "consult_request": {
+    "data": {
+      "basic_info": {
+        "name": "Case 11",
+        "age": "73",
+        "gender": "female",
+        "height": "",
+        "weight": "",
+        "symptoms": [
+          "digestive"
+        ]
+      },
+      "wen_inquiry": "Chief complaint: A black tongue for two weeks, with thirst and diarrhea, a month after urosepsis treated in hospital with antibiotics. Symptoms: black tongue coating; thirst; diarrhea; history of hypertension and arrhythmia.",
+      "wang_tongue": "thick black coating ringed by thick white coating; medium-sized body with tooth marks; light-red body",
+      "wang_face": "",
+      "wen_audio": "",
+      "qie": {
+        "bpm": "",
+        "qualities": [],
+        "note": ""
+      }
+    },
+    "language": "en"
+  }
+}

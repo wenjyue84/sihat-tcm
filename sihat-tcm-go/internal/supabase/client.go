@@ -147,6 +147,15 @@ func (c *Client) Insert(ctx context.Context, table string, body any, userToken s
 		map[string]string{"Prefer": "return=representation"})
 }
 
+// InsertIgnoreDuplicates inserts rows and silently skips the ones that hit the unique constraint named by
+// onConflict (comma-separated columns, PostgREST ?on_conflict=). out receives only the rows that were really
+// inserted, so len(out) is the inserted count.
+func (c *Client) InsertIgnoreDuplicates(ctx context.Context, table, onConflict string, body any, userToken string, out any) error {
+	path := "/rest/v1/" + url.PathEscape(table) + "?on_conflict=" + url.QueryEscape(onConflict)
+	return c.doJSONHeaders(ctx, http.MethodPost, path, c.apiKey(), c.bearer(userToken), body, out,
+		map[string]string{"Prefer": "resolution=ignore-duplicates,return=representation"})
+}
+
 // Upsert inserts or updates rows on primary-key conflict (merge-duplicates).
 // Useful when a DB trigger may have already created the row (e.g. profiles).
 func (c *Client) Upsert(ctx context.Context, table string, body any, userToken string, out any) error {

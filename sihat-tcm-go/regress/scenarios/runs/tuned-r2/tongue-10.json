@@ -1,0 +1,127 @@
+{
+  "id": "tongue-10",
+  "type": "tongue",
+  "label": "tuned-r2",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T03:56:23.200Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 148482,
+      "bytes": 2525,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 148483,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Stomach-Yin Deficiency · Middle Jiao Nourishment\",\"confidence\":87.4,\"description\":\"舌苔呈不規則地圖狀分佈，中央背面可見局部苔薄或脫落區域，為胃陰（胃陰）及胃氣不足的典型徵象。中醫認為舌苔乃胃氣蒸騰上承之產物；胃之氣陰長期虧損，乳頭失於濡養，舌苔隨之脫落或無法生成，形成特徵性地圖舌。\",\"recommendations\":[\"規律進食，以柔軟易消化、滋陰養胃的食物為主——白粥、蒸蛋、蓮藕湯、清淡蔬菜；嚴格避免生冷食物、冰飲及不規律飲食，以免進一步損傷胃陰。\",\"每日以沙參、麥冬煮水代茶飲，或在持牌中醫師指導下服用益胃湯等養胃方劑，逐步修復中焦陰液。\"],\"title\":\"Geographic / Peeled Coating\",\"title_cn\":\"地圖舌（剥苔）\"},{\"category\":\"Spleen Qi Deficiency · Dampness Resolution\",\"confidence\":82.7,\"description\":\"舌體明顯較正常寬大，充盈口腔，兩側舌邊可見輕微齒痕壓印，是脾之運化功能減弱的典型表現。脾氣虛弱時，水液代謝失司，濕邪內停，舌體因水濕停聚而腫大，壓迫齒緣，形成特徵性齒痕。\",\"recommendations\":[\"減少生濕食物的攝取：冷飲乳製品、生菜沙律、冰品、油炸食物及過甜食物均應節制；改以溫熱熟食為主，尤其推薦加入薏苡仁、山藥烹製的清淡湯品，健脾利濕。\",\"每日維持溫和、規律的運動，如晨間快走二十至三十分鐘或練習八段錦，以振奮脾陽、推動氣機、促進水液代謝。\"],\"title\":\"Swollen Tongue with Teeth Marks\",\"title_cn\":\"胖大齒痕舌\"},{\"category\":\"Qi and Blood Deficiency · Heart-Spleen Nourishment\",\"confidence\":76.5,\"description\":\"以同圖唇部為顏色基準，無苔覆蓋的舌邊及舌尖呈淡紅偏淡色，提示氣血輕度不足（氣血不足）。中醫認為舌為心之苗；心血與脾所化之氣不足時，舌體失於血氣充盈，故色澤偏淡。\",\"recommendations\":[\"每日攝取補血食物：紅棗、龍眼肉、黑芝麻、深色瘦肉及枸杞；搭配糙米、燕麥等補氣穀物，支持脾胃化生氣血。\",\"力求在二十三時前入睡，使肝臟在其值時（二十三時至凌晨三時）充分藏血補血；睡前一至兩小時減少屏幕使用及高度耗神的工作，避免氣血進一步耗損。\"],\"title\":\"Pale-Light Red Tongue Body\",\"title_cn\":\"淡紅偏淡舌\"}],\"confidence\":83,\"image_description\":\"清晰的舌頭近距離照片，舌頭完全伸出。光線均勻，略帶暖色調；焦距與解析度良好；周圍嘴唇及口腔黏膜可見，可作為顏色對比基準。\",\"modelUsed\":1,\"notes\":\"拍攝光源略帶暖色調，可能令偏淡舌體顯得較實際更粉紅，舌色偏淡的程度實際上或更為明顯；因此舌色一項的置信度（76.5）低於苔象與舌形兩項。地圖舌為本圖最具臨床意義且最可靠的可見特徵。圖中未見熱象（紅絳舌、芒刺、黃苔）、血瘀（紫暗舌、舌下絡脈怒張）或重症指徵。此舌象與現代常見的過勞、飲食不規律及慢性輕度消化功能不足相符。完整中醫診斷仍須結合脈診、問診及體質評估方可確立。\",\"observation\":\"拍攝光源均勻，略帶暖色調（可使舌色偏粉），以清晰可見的唇部及口腔黏膜作為同圖顏色基準——舌邊及舌尖暴露部位呈淡紅偏淡色，明顯淺於唇部朱砂色，傾向氣血不足而非熱證。舌苔色白、薄至中等厚度，但分佈呈地圖狀或斑駁剝落（地圖舌／剥苔），中央背面可見不規則薄苔或無苔區域，提示胃陰或中焦氣陰受損，而非單純苔象。舌體明顯寬大（胖大舌），充滿口腔，舌邊可見輕微齒痕（齒痕舌），提示脾氣虛、水濕內停；未見芒刺、歪斜或裂紋。舌面濕潤度正常至略潤（潤），無燥象或滑膩水濕過盛之象。\",\"pattern_suggestions\":[\"主要證型：脾氣虛兼胃陰不足——中焦氣陰兩虛之複合虛證。地圖舌為胃陰津液受損之最強指徵；胖大舌兼齒痕確認脾氣虛弱及水濕內停；淡紅偏淡舌體進一步提示氣血輕度不足。本案為虛證，非實證或熱證。\",\"次要考量：氣血兩虛兼脾胃不和——若患者自述疲乏、食慾不振、大便偏溏或腹脹，則更支持以脾胃為核心的辨證方向。單憑舌診不能確診，須由持牌中醫師結合脈診、問診及體質評估作綜合判斷。\"],\"potential_issues\":[\"主要證型：脾氣虛兼胃陰不足——中焦氣陰兩虛之複合虛證。地圖舌為胃陰津液受損之最強指徵；胖大舌兼齒痕確認脾氣虛弱及水濕內停；淡紅偏淡舌體進一步提示氣血輕度不足。本案為虛證，非實證或熱證。\",\"次要考量：氣血兩虛兼脾胃不和——若患者自述疲乏、食慾不振、大便偏溏或腹脹，則更支持以脾胃為核心的辨證方向。單憑舌診不能確診，須由持牌中醫師結合脈診、問診及體質評估作綜合判斷。\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"地圖舌／剥苔 (Geographic / Peeled Coating) — 苔面呈不規則斑駁脫落 — 胃陰及中焦氣陰虧虛；胃之腐熟運化功能長期受損\",\"胖大舌 (Enlarged / Swollen Tongue) — 舌體較正常寬大 — 脾氣虛弱；水液運化失司，濕邪內停\",\"齒痕舌 (Teeth-Marked Tongue) — 舌邊呈扇貝狀齒痕壓印 — 脾氣虛兼濕盛；舌體腫大壓迫齒緣\",\"淡紅偏淡舌 (Pale-Light Red Tongue Body) — 舌色較唇部基準偏淡 — 氣血輕度不足，心脾兩虛\",\"潤苔 (Moist Coating) — 舌面濕潤度正常 — 水液代謝尚未嚴重受損；目前無活躍火熱或陰竭燥象\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Stomach-Yin Deficiency · Middle Jiao Nourishment",
+        "confidence": 87.4,
+        "description": "舌苔呈不規則地圖狀分佈，中央背面可見局部苔薄或脫落區域，為胃陰（胃陰）及胃氣不足的典型徵象。中醫認為舌苔乃胃氣蒸騰上承之產物；胃之氣陰長期虧損，乳頭失於濡養，舌苔隨之脫落或無法生成，形成特徵性地圖舌。",
+        "recommendations": [
+          "規律進食，以柔軟易消化、滋陰養胃的食物為主——白粥、蒸蛋、蓮藕湯、清淡蔬菜；嚴格避免生冷食物、冰飲及不規律飲食，以免進一步損傷胃陰。",
+          "每日以沙參、麥冬煮水代茶飲，或在持牌中醫師指導下服用益胃湯等養胃方劑，逐步修復中焦陰液。"
+        ],
+        "title": "Geographic / Peeled Coating",
+        "title_cn": "地圖舌（剥苔）"
+      },
+      {
+        "category": "Spleen Qi Deficiency · Dampness Resolution",
+        "confidence": 82.7,
+        "description": "舌體明顯較正常寬大，充盈口腔，兩側舌邊可見輕微齒痕壓印，是脾之運化功能減弱的典型表現。脾氣虛弱時，水液代謝失司，濕邪內停，舌體因水濕停聚而腫大，壓迫齒緣，形成特徵性齒痕。",
+        "recommendations": [
+          "減少生濕食物的攝取：冷飲乳製品、生菜沙律、冰品、油炸食物及過甜食物均應節制；改以溫熱熟食為主，尤其推薦加入薏苡仁、山藥烹製的清淡湯品，健脾利濕。",
+          "每日維持溫和、規律的運動，如晨間快走二十至三十分鐘或練習八段錦，以振奮脾陽、推動氣機、促進水液代謝。"
+        ],
+        "title": "Swollen Tongue with Teeth Marks",
+        "title_cn": "胖大齒痕舌"
+      },
+      {
+        "category": "Qi and Blood Deficiency · Heart-Spleen Nourishment",
+        "confidence": 76.5,
+        "description": "以同圖唇部為顏色基準，無苔覆蓋的舌邊及舌尖呈淡紅偏淡色，提示氣血輕度不足（氣血不足）。中醫認為舌為心之苗；心血與脾所化之氣不足時，舌體失於血氣充盈，故色澤偏淡。",
+        "recommendations": [
+          "每日攝取補血食物：紅棗、龍眼肉、黑芝麻、深色瘦肉及枸杞；搭配糙米、燕麥等補氣穀物，支持脾胃化生氣血。",
+          "力求在二十三時前入睡，使肝臟在其值時（二十三時至凌晨三時）充分藏血補血；睡前一至兩小時減少屏幕使用及高度耗神的工作，避免氣血進一步耗損。"
+        ],
+        "title": "Pale-Light Red Tongue Body",
+        "title_cn": "淡紅偏淡舌"
+      }
+    ],
+    "confidence": 83,
+    "image_description": "清晰的舌頭近距離照片，舌頭完全伸出。光線均勻，略帶暖色調；焦距與解析度良好；周圍嘴唇及口腔黏膜可見，可作為顏色對比基準。",
+    "modelUsed": 1,
+    "notes": "拍攝光源略帶暖色調，可能令偏淡舌體顯得較實際更粉紅，舌色偏淡的程度實際上或更為明顯；因此舌色一項的置信度（76.5）低於苔象與舌形兩項。地圖舌為本圖最具臨床意義且最可靠的可見特徵。圖中未見熱象（紅絳舌、芒刺、黃苔）、血瘀（紫暗舌、舌下絡脈怒張）或重症指徵。此舌象與現代常見的過勞、飲食不規律及慢性輕度消化功能不足相符。完整中醫診斷仍須結合脈診、問診及體質評估方可確立。",
+    "observation": "拍攝光源均勻，略帶暖色調（可使舌色偏粉），以清晰可見的唇部及口腔黏膜作為同圖顏色基準——舌邊及舌尖暴露部位呈淡紅偏淡色，明顯淺於唇部朱砂色，傾向氣血不足而非熱證。舌苔色白、薄至中等厚度，但分佈呈地圖狀或斑駁剝落（地圖舌／剥苔），中央背面可見不規則薄苔或無苔區域，提示胃陰或中焦氣陰受損，而非單純苔象。舌體明顯寬大（胖大舌），充滿口腔，舌邊可見輕微齒痕（齒痕舌），提示脾氣虛、水濕內停；未見芒刺、歪斜或裂紋。舌面濕潤度正常至略潤（潤），無燥象或滑膩水濕過盛之象。",
+    "pattern_suggestions": [
+      "主要證型：脾氣虛兼胃陰不足——中焦氣陰兩虛之複合虛證。地圖舌為胃陰津液受損之最強指徵；胖大舌兼齒痕確認脾氣虛弱及水濕內停；淡紅偏淡舌體進一步提示氣血輕度不足。本案為虛證，非實證或熱證。",
+      "次要考量：氣血兩虛兼脾胃不和——若患者自述疲乏、食慾不振、大便偏溏或腹脹，則更支持以脾胃為核心的辨證方向。單憑舌診不能確診，須由持牌中醫師結合脈診、問診及體質評估作綜合判斷。"
+    ],
+    "potential_issues": [
+      "主要證型：脾氣虛兼胃陰不足——中焦氣陰兩虛之複合虛證。地圖舌為胃陰津液受損之最強指徵；胖大舌兼齒痕確認脾氣虛弱及水濕內停；淡紅偏淡舌體進一步提示氣血輕度不足。本案為虛證，非實證或熱證。",
+      "次要考量：氣血兩虛兼脾胃不和——若患者自述疲乏、食慾不振、大便偏溏或腹脹，則更支持以脾胃為核心的辨證方向。單憑舌診不能確診，須由持牌中醫師結合脈診、問診及體質評估作綜合判斷。"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "地圖舌／剥苔 (Geographic / Peeled Coating) — 苔面呈不規則斑駁脫落 — 胃陰及中焦氣陰虧虛；胃之腐熟運化功能長期受損",
+      "胖大舌 (Enlarged / Swollen Tongue) — 舌體較正常寬大 — 脾氣虛弱；水液運化失司，濕邪內停",
+      "齒痕舌 (Teeth-Marked Tongue) — 舌邊呈扇貝狀齒痕壓印 — 脾氣虛兼濕盛；舌體腫大壓迫齒緣",
+      "淡紅偏淡舌 (Pale-Light Red Tongue Body) — 舌色較唇部基準偏淡 — 氣血輕度不足，心脾兩虛",
+      "潤苔 (Moist Coating) — 舌面濕潤度正常 — 水液代謝尚未嚴重受損；目前無活躍火熱或陰竭燥象"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-image-of-the-tongue-in-a-b12-deficient-p.webp",
+    "image_bytes": 58519
+  },
+  "expected": {
+    "documented_condition": "vitamin B12 deficiency glossitis (erythema, depapillation: smooth red tongue)",
+    "expected_tcm": {
+      "body_colour": "red (bright/crimson)",
+      "coating": "little or none (peeled / mirror-like)",
+      "thickness": "absent",
+      "shape": "smooth, depapillated",
+      "moisture": "dry or shiny",
+      "pattern": "Yin deficiency with empty heat (red, no coating); Stomach/Kidney Yin deficiency; Blood deficiency"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Image_of_the_tongue_in_a_B12-deficient_patient_without_a_history_of_gastrectomy.webp"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "red"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "no coat",
+          "little coat",
+          "peel",
+          "smooth",
+          "mirror",
+          "depapill",
+          "scanty",
+          "absent"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "yin"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

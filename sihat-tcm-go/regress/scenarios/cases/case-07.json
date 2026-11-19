@@ -1,0 +1,62 @@
+{
+  "id": "case-07",
+  "type": "text",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6531189/",
+  "source_licence": "CC BY-NC-ND",
+  "source_title": "Chinese patent medicine to treat a 32-year-old man with sinus bradycardia and cardiac sinus arrests",
+  "paraphrase_note": "Symptoms/tongue/pulse paraphrased by the harness author from the open-access full text; source pattern and principle are the authors' own.",
+  "patient": {
+    "age": 32,
+    "sex": "male"
+  },
+  "chief_complaint": "Slow heart rate found at a check-up, with occasional palpitation and shortness of breath after two months of staying up late; difficulty falling asleep.",
+  "symptoms": [
+    "occasional palpitations",
+    "shortness of breath",
+    "difficulty falling asleep after two months of late nights",
+    "later constipation"
+  ],
+  "tongue_as_reported": "puffy and red with cracks, thin yellow fur",
+  "pulse_as_reported": "weak and deep",
+  "source_pattern": "Qi and Yin deficiency with Blood stasis (palpitation, 心悸)",
+  "source_treatment_principle": "Benefit Qi, nourish Yin and activate blood circulation, with warming Yang; Zhibai Dihuang pill later added",
+  "ground_truth_strength": "strong",
+  "expect_keyword_groups": [
+    [
+      "yin",
+      "qi"
+    ],
+    [
+      "deficien"
+    ]
+  ],
+  "consult_request": {
+    "data": {
+      "basic_info": {
+        "name": "Case 07",
+        "age": "32",
+        "gender": "male",
+        "height": "",
+        "weight": "",
+        "symptoms": [
+          "palpitations",
+          "shortness-breath",
+          "insomnia"
+        ]
+      },
+      "wen_inquiry": "Chief complaint: Slow heart rate found at a check-up, with occasional palpitation and shortness of breath after two months of staying up late; difficulty falling asleep. Symptoms: occasional palpitations; shortness of breath; difficulty falling asleep after two months of late nights; later constipation.",
+      "wang_tongue": "puffy and red with cracks, thin yellow fur",
+      "wang_face": "",
+      "wen_audio": "",
+      "qie": {
+        "bpm": "",
+        "qualities": [
+          "weak",
+          "deep"
+        ],
+        "note": "weak and deep"
+      }
+    },
+    "language": "en"
+  }
+}

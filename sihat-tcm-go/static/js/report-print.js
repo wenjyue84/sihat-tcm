@@ -47,9 +47,10 @@
     session = session || {};
     var r = session.full_report || {};
     var when = fmtDate(session.created_at);
-    var c = r.constitution || {};
-    var diag = r.diagnosis || {};
-    var analysis = r.analysis || {};
+    // constitution / diagnosis / analysis may be plain strings as well as objects
+    var c = (typeof r.constitution === 'string') ? { type: r.constitution } : (r.constitution || {});
+    var diag = (typeof r.diagnosis === 'string') ? { primary_pattern: r.diagnosis } : (r.diagnosis || {});
+    var analysis = (typeof r.analysis === 'string') ? { summary: r.analysis } : (r.analysis || {});
     var rec = r.recommendations || {};
     var parts = [];
 

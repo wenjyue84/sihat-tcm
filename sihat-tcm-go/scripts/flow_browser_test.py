@@ -7,6 +7,7 @@ Run against a local server. Prints PASS/FAIL; exits 1 on any failure.
 import os
 import time
 from playwright.sync_api import sync_playwright
+from e2e_admin import approve_doctor
 
 BASE = os.environ.get("E2E_BASE", "http://localhost:8081").rstrip("/")
 RUN = str(int(time.time()))
@@ -38,11 +39,18 @@ with sync_playwright() as p:
     dpage.fill("#signup-bio", "20 years treating fatigue and digestive disorders")
     dpage.fill("#signup-years", "20")
     dpage.click("#signup-btn")
+    # A self-registered doctor is NOT approved: the signup redirects to /doctor, which bounces an unapproved doctor to /patient
+    # (no inbox yet). An admin must approve the account (done through the API below) before the inbox opens.
     try:
-        dpage.wait_for_url("**/doctor", timeout=20000)
+        dpage.wait_for_url("**/patient", timeout=20000)
     except Exception:
         pass
-    check("doctor.register_lands_on_doctor_dash", dpage.url.rstrip("/").endswith("/doctor"), f"url={dpage.url}")
+    check("doctor.unapproved_register_lands_on_patient_area", dpage.url.rstrip("/").endswith("/patient"), f"url={dpage.url}")
+    dpage.goto(BASE + "/doctor"); dpage.wait_for_load_state("networkidle")
+    check("doctor.unapproved_cannot_open_inbox", dpage.url.rstrip("/").endswith("/patient") and not dpage.query_selector("#doctor-inbox"), f"url={dpage.url}")
+    approve_doctor(BASE, DOC_EMAIL)  # admin approval through the API
+    dpage.goto(BASE + "/doctor"); dpage.wait_for_load_state("networkidle")
+    check("doctor.approved_lands_on_doctor_dash", dpage.url.rstrip("/").endswith("/doctor"), f"url={dpage.url}")
     dpage.wait_for_timeout(1500)
     check("doctor.inbox_section_present", dpage.is_visible("#doctor-inbox"), "doctor inbox not rendered")
 

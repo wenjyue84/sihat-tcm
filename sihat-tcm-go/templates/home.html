@@ -4,10 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{.Title}} — AI-Powered TCM Diagnostics 中医AI诊断</title>
+  <meta property="og:title" content="Sihat TCM — AI-Powered TCM Diagnostics 中医AI诊断">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="{{absasset "/static/img/art/og.jpg"}}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{{absasset "/static/img/art/og.jpg"}}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{asset "/static/css/app.css"}}">
+  <link rel="stylesheet" href="{{asset "/static/css/art.css"}}">
+  <link rel="stylesheet" href="{{asset "/static/css/health.css"}}">
+  {{template "favicon"}}
   <style>
     .hero-test-row { margin-top: .9rem; text-align: center; }
     .wizard-toolbar { display: flex; justify-content: flex-end; margin-bottom: .5rem; }
@@ -28,9 +38,11 @@
 
 {{template "header" .}}
 
+<main id="main">
 <!-- ===== HERO ===== -->
-<section class="hero-section" id="home-hero">
-  <div class="container">
+<section class="hero-section art-hero" id="home-hero">
+  <img class="art-hero__img" src="{{asset "/static/img/art/hero.webp"}}" width="1536" height="864" alt="Watercolour of a wooden Chinese herbal drawer cabinet with ginseng root, goji berries and a jade-green teapot." data-i18n-alt="art.hero" fetchpriority="high" decoding="async">
+  <div class="container art-hero__body">
     <div class="hero-badge" data-i18n="hero.badge">Traditional Chinese Medicine · 传统中医</div>
     <h1 class="hero-title" data-i18n-html="hero.title">
       Your Health,<br><span>Understood Holistically</span>
@@ -54,6 +66,7 @@
 </section>
 
 <!-- ===== FEATURES ===== -->
+<div class="art-mist art-band">
 <section class="features-grid" id="home-features">
   <div class="feature-card">
     <div class="feature-icon">💬</div>
@@ -71,10 +84,18 @@
     <p data-i18n="feat.audio.d">Voice and breathing pattern analysis to assess energy levels and organ vitality.</p>
   </div>
   <div class="feature-card">
-    <div class="feature-icon">🫀</div>
+    <div class="feature-icon">💓</div>
     <h3 data-i18n="feat.pulse.t">Pulse 切诊</h3>
     <p data-i18n="feat.pulse.d">Pulse rate and quality assessment — floating, wiry, slippery, deep and more traditional pulse types.</p>
   </div>
+</section>
+</div>
+
+<!-- ===== FIVE ELEMENTS BAND ===== -->
+<section class="art-elements" id="home-elements">
+  <img src="{{asset "/static/img/art/elements.webp"}}" width="1200" height="247" alt="Watercolour of the five elements: a sprout, a flame, a clay pot, a bell and a water drop." data-i18n-alt="art.elements" loading="lazy" decoding="async">
+  <h2 data-i18n="art.elements.t">Five elements, one picture of you</h2>
+  <p data-i18n="art.elements.d">Wood, fire, earth, metal and water frame how TCM links your organs, emotions and seasons into one constitution.</p>
 </section>
 
 <!-- ===== DIAGNOSIS WIZARD ===== -->
@@ -169,32 +190,37 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label" data-i18n="wiz.f.symptoms">Main Symptoms 主要症状</label>
+          <label class="form-label" id="symptoms-label" data-i18n="wiz.f.symptoms">Main Symptoms 主要症状</label>
           <p class="form-hint">Select all that apply or type your own.</p>
-          <div class="chips-container" id="symptom-chips">
-            <span class="chip" data-value="fatigue">Fatigue 疲劳</span>
-            <span class="chip" data-value="headache">Headache 头痛</span>
-            <span class="chip" data-value="insomnia">Insomnia 失眠</span>
-            <span class="chip" data-value="digestive">Digestive Issues 消化不良</span>
-            <span class="chip" data-value="joint-pain">Joint Pain 关节痛</span>
-            <span class="chip" data-value="anxiety">Anxiety 焦虑</span>
-            <span class="chip" data-value="cold-limbs">Cold Limbs 四肢冰冷</span>
-            <span class="chip" data-value="hot-flush">Hot Flushes 潮热</span>
-            <span class="chip" data-value="palpitations">Palpitations 心悸</span>
-            <span class="chip" data-value="shortness-breath">Shortness of Breath 气促</span>
+          <div class="chips-container" id="symptom-chips" role="group" aria-labelledby="symptoms-label">
+            <span class="chip" role="checkbox" aria-checked="false" tabindex="0" data-value="fatigue">Fatigue 疲劳</span>
+            <span class="chip" role="checkbox" aria-checked="false" tabindex="0" data-value="headache">Headache 头痛</span>
+            <span class="chip" role="checkbox" aria-checked="false" tabindex="0" data-value="insomnia">Insomnia 失眠</span>
+            <span class="chip" role="checkbox" aria-checked="false" tabindex="0" data-value="digestive">Digestive Issues 消化不良</span>
+            <span class="chip" role="checkbox" aria-checked="false" tabindex="0" data-value="joint-pain">Joint Pain 关节痛</span>
+            <span class="chip" role="checkbox" aria-checked="false" tabindex="0" data-value="anxiety">Anxiety 焦虑</span>
+            <span class="chip" role="checkbox" aria-checked="false" tabindex="0" data-value="cold-limbs">Cold Limbs 四肢冰冷</span>
+            <span class="chip" role="checkbox" aria-checked="false" tabindex="0" data-value="hot-flush">Hot Flushes 潮热</span>
+            <span class="chip" role="checkbox" aria-checked="false" tabindex="0" data-value="palpitations">Palpitations 心悸</span>
+            <span class="chip" role="checkbox" aria-checked="false" tabindex="0" data-value="shortness-breath">Shortness of Breath 气促</span>
           </div>
           <div style="display:flex;gap:.5rem;align-items:center;margin-top:.5rem">
-            <input class="chip-add-input" id="symptom-custom-input" type="text" placeholder="Add symptom…" maxlength="50" data-i18n-ph="wiz.ph.addsymptom">
+            <input class="chip-add-input" id="symptom-custom-input" type="text" placeholder="Add symptom…" aria-label="Add a symptom 添加症状" maxlength="50" data-i18n-ph="wiz.ph.addsymptom">
             <button class="btn btn-secondary btn-sm" type="button" onclick="window.wizardAddCustomSymptom()">Add</button>
           </div>
         </div>
-        <div id="step0-error" class="alert alert-error hidden"></div>
+        <div id="step0-error" role="alert" class="alert alert-error hidden"></div>
       </div>
 
       <!-- Step 1: Inquiry (Chat) -->
       <div class="wizard-step" id="step-1">
-        <h2 class="step-title" data-i18n="wiz.t.inquiry">Inquiry 问诊</h2>
-        <p class="step-subtitle" data-i18n="wiz.s.inquiry">Chat with our AI TCM assistant. Answer at least 4 questions for an accurate assessment.</p>
+        <div class="art-stephead">
+          <div class="art-stephead__text">
+          <h2 class="step-title" data-i18n="wiz.t.inquiry">Inquiry 问诊</h2>
+          <p class="step-subtitle" data-i18n="wiz.s.inquiry">Chat with our AI TCM assistant. Answer at least 4 questions for an accurate assessment.</p>
+          </div>
+          <img class="art-stephead__img" src="{{asset "/static/img/art/wen.webp"}}" width="900" height="700" alt="Illustration of a doctor listening and asking questions during a consultation." data-i18n-alt="art.wen" loading="lazy" decoding="async">
+        </div>
         <div class="chat-progress-bar">
           <div class="chat-progress-fill" id="chat-progress" style="width:0%"></div>
         </div>
@@ -202,7 +228,7 @@
           <div class="chat-messages" id="chat-messages"></div>
           <div class="chat-options" id="chat-options"></div>
           <div class="chat-input-row">
-            <textarea class="chat-input" id="chat-input" placeholder="Type your reply…" rows="1" data-i18n-ph="wiz.ph.chat"></textarea>
+            <textarea class="chat-input" id="chat-input" placeholder="Type your reply…" aria-label="Your reply 您的回复" rows="1" data-i18n-ph="wiz.ph.chat"></textarea>
             <button class="btn btn-primary" id="chat-send-btn" onclick="window.wizardChatSend()">Send</button>
           </div>
         </div>
@@ -214,8 +240,13 @@
 
       <!-- Step 2: Tongue Analysis 望诊 (舌) -->
       <div class="wizard-step" id="step-2">
-        <h2 class="step-title" data-i18n="wiz.t.tongue">Tongue Analysis 舌诊</h2>
-        <p class="step-subtitle" data-i18n="wiz.s.tongue">Take a clear photo of your tongue in natural light. Stick out your tongue fully.</p>
+        <div class="art-stephead">
+          <div class="art-stephead__text">
+          <h2 class="step-title" data-i18n="wiz.t.tongue">Tongue Analysis 舌诊</h2>
+          <p class="step-subtitle" data-i18n="wiz.s.tongue">Take a clear photo of your tongue in natural light. Stick out your tongue fully.</p>
+          </div>
+          <img class="art-stephead__img" src="{{asset "/static/img/art/wang.webp"}}" width="900" height="700" alt="Illustration of a doctor sticking out his tongue for tongue inspection." data-i18n-alt="art.wang" loading="lazy" decoding="async">
+        </div>
         <div class="upload-zone" id="tongue-upload-zone">
           <div class="upload-icon">📷</div>
           <strong>Tap to upload or take photo</strong>
@@ -230,18 +261,23 @@
         </div>
         <div id="tongue-observation" class="observation-box hidden">
           <strong>AI Observation 观察 <span id="tongue-obs-confidence" class="tag" style="margin-left:.4rem"></span></strong>
-          <textarea class="observation-edit" id="tongue-obs-text" placeholder="AI observation will appear here…"></textarea>
+          <textarea class="observation-edit" id="tongue-obs-text" aria-label="AI tongue observation 舌诊观察" placeholder="AI observation will appear here…"></textarea>
         </div>
         <div id="tongue-loading" class="loading-row hidden">
           <div class="spinner spinner-dark"></div> Analysing tongue image…
         </div>
-        <div id="tongue-error" class="alert alert-error hidden"></div>
+        <div id="tongue-error" role="alert" class="alert alert-error hidden"></div>
       </div>
 
       <!-- Step 3: Face Analysis 望诊 (面) -->
       <div class="wizard-step" id="step-3">
-        <h2 class="step-title" data-i18n="wiz.t.face">Face Analysis 面诊</h2>
-        <p class="step-subtitle" data-i18n="wiz.s.face">Take a clear photo of your face without makeup. Natural lighting preferred.</p>
+        <div class="art-stephead">
+          <div class="art-stephead__text">
+          <h2 class="step-title" data-i18n="wiz.t.face">Face Analysis 面诊</h2>
+          <p class="step-subtitle" data-i18n="wiz.s.face">Take a clear photo of your face without makeup. Natural lighting preferred.</p>
+          </div>
+          <img class="art-stephead__img" src="{{asset "/static/img/art/wang.webp"}}" width="900" height="700" alt="Illustration of a doctor sticking out his tongue for tongue inspection." data-i18n-alt="art.wang" loading="lazy" decoding="async">
+        </div>
         <div class="upload-zone" id="face-upload-zone">
           <div class="upload-icon">🤳</div>
           <strong>Tap to upload or take selfie</strong>
@@ -256,18 +292,23 @@
         </div>
         <div id="face-observation" class="observation-box hidden">
           <strong>AI Observation 观察 <span id="face-obs-confidence" class="tag" style="margin-left:.4rem"></span></strong>
-          <textarea class="observation-edit" id="face-obs-text" placeholder="AI observation will appear here…"></textarea>
+          <textarea class="observation-edit" id="face-obs-text" aria-label="AI face observation 面诊观察" placeholder="AI observation will appear here…"></textarea>
         </div>
         <div id="face-loading" class="loading-row hidden">
           <div class="spinner spinner-dark"></div> Analysing face image…
         </div>
-        <div id="face-error" class="alert alert-error hidden"></div>
+        <div id="face-error" role="alert" class="alert alert-error hidden"></div>
       </div>
 
       <!-- Step 4: Audio 闻诊 -->
       <div class="wizard-step" id="step-4">
-        <h2 class="step-title" data-i18n="wiz.t.audio">Audio Analysis 闻诊</h2>
-        <p class="step-subtitle" data-i18n="wiz.s.audio">Record 10–30 seconds of normal speech or breathing. This step is optional.</p>
+        <div class="art-stephead">
+          <div class="art-stephead__text">
+          <h2 class="step-title" data-i18n="wiz.t.audio">Audio Analysis 闻诊</h2>
+          <p class="step-subtitle" data-i18n="wiz.s.audio">Record 10–30 seconds of normal speech or breathing. This step is optional.</p>
+          </div>
+          <img class="art-stephead__img" src="{{asset "/static/img/art/wen.webp"}}" width="900" height="700" alt="Illustration of a doctor listening and asking questions during a consultation." data-i18n-alt="art.wen" loading="lazy" decoding="async">
+        </div>
         <div class="recorder-controls">
           <button class="rec-btn" id="rec-btn" onclick="window.wizardToggleRecording()" title="Record">🎙️</button>
           <div>
@@ -278,12 +319,12 @@
         <audio id="audio-preview" class="audio-preview hidden" controls></audio>
         <div id="audio-observation" class="observation-box hidden" style="margin-top:1rem">
           <strong>AI Observation 观察</strong>
-          <textarea class="observation-edit" id="audio-obs-text" placeholder="AI observation will appear here…"></textarea>
+          <textarea class="observation-edit" id="audio-obs-text" aria-label="AI audio observation 闻诊观察" placeholder="AI observation will appear here…"></textarea>
         </div>
         <div id="audio-loading" class="loading-row hidden">
           <div class="spinner spinner-dark"></div> Analysing audio…
         </div>
-        <div id="audio-error" class="alert alert-error hidden"></div>
+        <div id="audio-error" role="alert" class="alert alert-error hidden"></div>
         <p class="text-muted mt-4" style="font-size:.8rem">
           Audio is analysed locally and not stored. You may skip this step.
         </p>
@@ -291,8 +332,13 @@
 
       <!-- Step 5: Pulse 切诊 -->
       <div class="wizard-step" id="step-5">
-        <h2 class="step-title" data-i18n="wiz.t.pulse">Pulse Assessment 切诊</h2>
-        <p class="step-subtitle" data-i18n="wiz.s.pulse">Measure your heart rate (BPM) and select your pulse quality. This step is optional.</p>
+        <div class="art-stephead">
+          <div class="art-stephead__text">
+          <h2 class="step-title" data-i18n="wiz.t.pulse">Pulse Assessment 切诊</h2>
+          <p class="step-subtitle" data-i18n="wiz.s.pulse">Measure your heart rate (BPM) and select your pulse quality. This step is optional.</p>
+          </div>
+          <img class="art-stephead__img" src="{{asset "/static/img/art/qie.webp"}}" width="900" height="700" alt="Illustration of a practitioner taking a patient's pulse at the wrist." data-i18n-alt="art.qie" loading="lazy" decoding="async">
+        </div>
         <div class="pulse-row">
           <div>
             <div class="bpm-display" id="bpm-display">--</div>
@@ -306,18 +352,39 @@
             </div>
           </div>
         </div>
+        <div class="hc-panel" id="hc-panel">
+          <h4 data-i18n="health.wiz.title">Link a device</h4>
+          <p class="hc-hint" data-i18n="health.wiz.hint">Pick what you have - values are filled in for you. Nothing is sent anywhere unless you are signed in.</p>
+          <div class="hc-buttons" id="hc-buttons">
+            <button type="button" class="btn btn-secondary btn-sm" data-hc-kind="heart_rate" data-i18n="health.bt.hr">Heart-rate strap / watch</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-hc-kind="spo2" data-i18n="health.bt.spo2">Pulse oximeter</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-hc-kind="blood_pressure" data-i18n="health.bt.bp">Blood-pressure cuff</button>
+            <button type="button" class="btn btn-secondary btn-sm" data-hc-kind="thermometer" data-i18n="health.bt.temp">Thermometer</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="hc-load-linked" data-i18n="health.wiz.linked">Use my latest from linked devices</button>
+          </div>
+          <div class="hc-bar hidden" id="hc-bar" aria-hidden="true"><i id="hc-bar-fill"></i></div>
+          <div class="hc-status" id="hc-status" role="status" aria-live="polite"></div>
+          <div class="hc-vitals" id="hc-vitals" aria-label="Device readings"></div>
+          <button type="button" class="btn btn-primary btn-sm hidden" id="hc-stop" data-i18n="health.bt.stop">Stop and use this</button>
+          <details class="hc-help">
+            <summary data-i18n="health.wiz.help">Which devices work?</summary>
+            <p data-i18n="health.bt.yes">Works with: chest straps (Polar, Garmin HRM, Wahoo), Garmin / Polar / Coros / Amazfit / Huawei watches with "broadcast heart rate" switched on, and Bluetooth blood-pressure cuffs, pulse oximeters and thermometers.</p>
+            <p data-i18n="health.bt.no">Does NOT work with: Apple Watch, most Fitbit and Pixel watches, or any browser on iPhone / iPad (Apple does not allow Web Bluetooth there).</p>
+            <p><a href="/patient#devices" data-i18n="health.wiz.manage">Manage devices &amp; health data</a></p>
+          </details>
+        </div>
         <div class="form-group mt-4">
           <label class="form-label"><span data-i18n="wiz.f.pulsequality">Pulse Quality 脉质</span> <span class="form-hint">(select all that apply)</span></label>
-          <div class="pulse-quality-grid" id="pulse-quality-grid">
-            <div class="quality-chip" data-value="floating">Floating 浮</div>
-            <div class="quality-chip" data-value="deep">Deep 沉</div>
-            <div class="quality-chip" data-value="wiry">Wiry 弦</div>
-            <div class="quality-chip" data-value="slippery">Slippery 滑</div>
-            <div class="quality-chip" data-value="rapid">Rapid 数</div>
-            <div class="quality-chip" data-value="slow">Slow 迟</div>
-            <div class="quality-chip" data-value="thready">Thready 细</div>
-            <div class="quality-chip" data-value="strong">Strong 有力</div>
-            <div class="quality-chip" data-value="weak">Weak 无力</div>
+          <div class="pulse-quality-grid" id="pulse-quality-grid" role="group" aria-label="Pulse quality 脉质">
+            <div class="quality-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="floating">Floating 浮</div>
+            <div class="quality-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="deep">Deep 沉</div>
+            <div class="quality-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="wiry">Wiry 弦</div>
+            <div class="quality-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="slippery">Slippery 滑</div>
+            <div class="quality-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="rapid">Rapid 数</div>
+            <div class="quality-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="slow">Slow 迟</div>
+            <div class="quality-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="thready">Thready 细</div>
+            <div class="quality-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="strong">Strong 有力</div>
+            <div class="quality-chip" role="checkbox" aria-checked="false" tabindex="0" data-value="weak">Weak 无力</div>
           </div>
         </div>
         <p class="text-muted" style="font-size:.8rem;margin-top:.5rem">
@@ -347,7 +414,7 @@
           <div class="report-progress-bar"><div class="report-progress-fill" id="report-progress-fill"></div></div>
           <div class="report-progress-hint">四诊合参 · integrating all four examinations — this usually takes 10–20 seconds</div>
         </div>
-        <div id="report-error" class="alert alert-error hidden"></div>
+        <div id="report-error" role="alert" class="alert alert-error hidden"></div>
         <div id="report-content" class="hidden">
           <!-- Constitution -->
           <div class="report-section">
@@ -403,7 +470,7 @@
             <button class="btn btn-secondary" type="button" onclick="window.wizardPrintReport()" style="margin-left:.5rem" data-i18n="wiz.print">
               🖨 Print / Save PDF 打印·存为 PDF
             </button>
-            <span class="text-muted text-sm" style="display:block;margin-top:.5rem" id="rpt-save-status"></span>
+            <span class="text-muted text-sm" style="display:block;margin-top:.5rem" id="rpt-save-status" role="status" aria-live="polite"></span>
             <button class="btn btn-outline mt-3" onclick="window.wizardReset()" data-i18n="wiz.startnew">
               Start New Assessment 重新开始
             </button>
@@ -415,20 +482,22 @@
 
     <!-- Wizard Footer (nav buttons) -->
     <div class="wizard-footer">
-      <button class="btn btn-ghost" id="wiz-back-btn" onclick="window.wizardBack()">← Back</button>
-      <span class="text-muted text-sm" id="wiz-step-counter"></span>
+      <button class="btn btn-ghost" id="wiz-back-btn" onclick="window.wizardBack()" data-i18n="wiz.back">← Back</button>
+      <span class="text-muted text-sm" id="wiz-step-counter" aria-live="polite"></span>
       <div class="btn-group">
-        <button class="btn btn-secondary" id="wiz-skip-btn" onclick="window.wizardSkip()" style="display:none">Skip</button>
+        <button class="btn btn-secondary" id="wiz-skip-btn" onclick="window.wizardSkip()" style="display:none" data-i18n="wiz.skip">Skip</button>
         <button class="btn btn-primary" id="wiz-next-btn" onclick="window.wizardNext()">Next →</button>
       </div>
     </div>
 
   </div><!-- /wizard-card -->
 </section>
+</main>
 
 {{template "footer" .}}
 
 <script src="{{asset "/static/js/report-print.js"}}"></script>
+<script src="{{asset "/static/js/health-connect.js"}}"></script>
 <script src="{{asset "/static/js/wizard.js"}}"></script>
 </body>
 </html>

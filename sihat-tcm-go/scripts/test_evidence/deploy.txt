@@ -1,0 +1,20 @@
+$ node aci.mjs gates --profile=predeploy      (2026-10-12, tree a45dae8bf24b581b)
+✓ wiring  1797ms — 6 Go packages, 25 suites, ACI + agents present
+✓ build-linux  1979ms — linux/amd64 static binary compiles (the deploy artifact)
+✓ vet  9306ms — go vet clean; gofmt clean
+✓ unit  25403ms — 1316 Go tests passed, 0 skipped (KNOWN BUG pins), 0 failed; 24 JS unit tests passed
+✓ integration  31512ms — 1419/1419 checks, 11 skipped, 30888ms
+✓ e2e-api  5620ms — 118/118 checks, 0 skipped, 4841ms
+✓ contract-localdb  12376ms — 188/188 contract checks vs the Go SQLite backend, 1 skipped
+✓ e2e-sqlite  35332ms — 789/789 checks, 1 skipped, 34491ms
+✓ e2e-ui  285937ms — e2e_browser_test.py 12 ok, flow_browser_test.py 15 ok, features_browser_test.py 7 ok, admin_browser_test.py 6 ok, i18n_browse
+✓ e2e-pc  1140900ms — 93/93 checks, 0 skipped, 1139976ms
+✅ GRAPH GREEN — stamp written (deploy allowed for tree a45dae8bf24b581b)
+
+$ scripts/deploy.sh --yes  ->  upload + restart + post-deploy read-only suites on https://tcm.wenjyue.com
+health 5/5, consult 4/4 (1 skipped: device checks need the ACI own stack)   deployed + verified
+
+$ production checks after the deploy
+/ 200   /login 200   /demo 200   /healthz 200   /no-such-page 404
+POST 40 MB to /api/health/apple/import  -> 401 (passes the new 100 MB nginx location; auth refuses)
+POST 40 MB to /api/chat                  -> 413 (normal routes keep the 30 MB cap)

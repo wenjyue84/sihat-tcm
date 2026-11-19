@@ -1,0 +1,223 @@
+/* art.css - illustration layer (watercolour art in /static/img/art/).
+ *
+ * Reusable classes (every <img> must carry width/height, alt text via data-i18n-alt, and
+ * loading="lazy" unless it is the above-the-fold hero):
+ *   .art-hero   full-bleed banner: image + text on its empty cream area (home hero)
+ *   .art-card   horizontal card: small illustration + text (stacks on phones)
+ *   .art-empty  centred empty-state illustration + title + text + CTA
+ *   .art-mist   very faint ink-wash mountain background for a section
+ *   .art-stephead  wizard step header: title/subtitle with a small illustration at the right
+ * Text over images always sits on the solid cream (#fdfbf2) area -> dark text, AA contrast.
+ */
+:root {
+  --art-cream: #fdfbf2;
+  --art-ink: #1c1917;      /* stone-900 on cream: 17:1 */
+  --art-ink-soft: #44403c; /* stone-700 on cream: 9:1  */
+  --art-jade: #047857;     /* emerald-700 on cream: 5.4:1 */
+}
+
+/* ---------- .art-hero ---------- */
+.art-hero {
+  position: relative;
+  max-width: 1280px;
+  margin: 1rem auto 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: var(--art-cream);
+  text-align: left;
+  min-height: 520px;
+  box-shadow: 0 6px 28px rgba(6, 78, 59, .10);
+}
+.art-hero__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left bottom;
+  display: block;
+}
+.art-hero__body {
+  position: relative;
+  box-sizing: border-box;
+  margin: 0 0 0 57%;
+  width: 40%;
+  max-width: none;
+  min-height: 520px;
+  padding: 2.5rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.art-hero .hero-title { color: var(--art-ink); text-align: left; font-size: clamp(1.7rem, 3vw, 2.6rem); }
+.art-hero .hero-title span { color: var(--art-jade); }
+.art-hero .hero-sub { color: var(--art-ink-soft); margin: 0 0 1.5rem; max-width: 520px; }
+.art-hero .hero-badge { background: #d1fae5; color: #065f46; }
+.art-hero .hero-actions { justify-content: flex-start; }
+.art-hero .hero-test-row { text-align: left; }
+.art-hero .hero-test-row .btn { color: var(--art-ink-soft); }
+
+@media (max-width: 960px) {
+  .art-hero { min-height: 0; margin: 0; border-radius: 0; box-shadow: none; }
+  .art-hero__img {
+    position: static;
+    height: auto;
+    aspect-ratio: 16 / 8;
+    object-position: 12% center;
+  }
+  .art-hero__body {
+    margin: 0;
+    width: 100%;
+    min-height: 0;
+    padding: 1.5rem 1.25rem 2rem;
+    align-items: center;
+    text-align: center;
+  }
+  .art-hero .hero-title, .art-hero .hero-test-row { text-align: center; }
+  .art-hero .hero-sub { margin: 0 auto 1.5rem; }
+  .art-hero .hero-actions { justify-content: center; }
+}
+
+/* ---------- .art-mist (faint background) ---------- */
+.art-mist { position: relative; isolation: isolate; }
+.art-mist::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url("/static/img/art/mist.webp") center bottom / cover no-repeat;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+}
+
+/* ---------- .art-card ---------- */
+.art-card {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  background: var(--art-cream);
+  border: 1px solid var(--stone-200, #e7e5e4);
+  border-radius: 1rem;
+  padding: .85rem 1.1rem .85rem .85rem;
+  margin-bottom: 1rem;
+}
+.art-card__img {
+  flex: 0 0 auto;
+  width: 132px;
+  height: auto;
+  aspect-ratio: 900 / 700;
+  border-radius: .75rem;
+  object-fit: cover;
+  display: block;
+}
+.art-card__text { min-width: 0; }
+.art-card__text h3, .art-card__text h4 { color: var(--art-ink); margin: 0 0 .25rem; }
+.art-card__text p { color: var(--art-ink-soft); font-size: .85rem; margin: 0; }
+.has-no-doctors .art-card { display: none; }
+@media (max-width: 520px) {
+  .art-card { flex-direction: column; text-align: center; padding: .85rem; }
+  .art-card__img { width: 100%; max-width: 260px; }
+}
+
+/* ---------- .art-empty ---------- */
+.art-empty {
+  text-align: center;
+  padding: 1.5rem 1rem 1.75rem;
+  background: var(--art-cream);
+  border-radius: 1rem;
+  border: 1px dashed var(--stone-300, #d6d3d1);
+}
+.art-empty__img {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  aspect-ratio: 900 / 700;
+  object-fit: cover;
+  border-radius: .9rem;
+  display: block;
+  margin: 0 auto .9rem;
+}
+.art-empty h3, .art-empty h4 { color: var(--art-ink); margin: 0 0 .35rem; }
+.art-empty p { color: var(--art-ink-soft); font-size: .88rem; margin: 0 auto; max-width: 420px; }
+.art-empty .btn { margin-top: 1rem; }
+
+/* ---------- wizard step header ---------- */
+.art-stephead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.art-stephead__text { min-width: 0; flex: 1; }
+.art-stephead .step-subtitle { margin-bottom: 0; }
+.art-stephead__img {
+  flex: 0 0 auto;
+  width: 120px;
+  height: auto;
+  aspect-ratio: 900 / 700;
+  object-fit: cover;
+  border-radius: .75rem;
+  background: var(--art-cream);
+  display: block;
+}
+@media (max-width: 520px) {
+  .art-stephead { flex-direction: column-reverse; align-items: flex-start; }
+  .art-stephead__img { width: 100%; max-width: 200px; }
+}
+
+/* ---------- login side art ---------- */
+.auth-art {
+  display: none;
+  margin: 0;
+  max-width: 400px;
+  text-align: center;
+}
+.auth-art img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 900 / 700;
+  object-fit: cover;
+  border-radius: 1.25rem;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, .10);
+  display: block;
+}
+.auth-art figcaption {
+  margin-top: .85rem;
+  font-size: .95rem;
+  color: var(--art-ink-soft);
+}
+@media (min-width: 960px) {
+  .page-auth .auth-container { gap: 3rem; }
+  .page-auth .auth-art { display: block; flex: 0 1 400px; }
+}
+.page-auth .auth-container {
+  background-image: url("/static/img/art/mist.webp");
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: cover;
+}
+
+/* ---------- motion: gentle hover only, never when the user opts out ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .art-card__img, .art-empty__img { transition: transform .35s ease; }
+  .art-card:hover .art-card__img, .art-empty:hover .art-empty__img { transform: scale(1.03); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .art-card__img, .art-empty__img, .art-hero__img { transition: none !important; transform: none !important; }
+}
+
+.art-band { padding: 2.5rem 0; }
+
+/* compact empty state for staff consoles (doctor inbox): small art, no data-table decoration */
+.art-empty--sm { padding: 1rem; }
+.art-empty--sm .art-empty__img { max-width: 150px; margin-bottom: .6rem; }
+
+/* ---------- landing: five-elements divider band ---------- */
+.art-elements { max-width: 960px; margin: 1rem auto 2rem; padding: 0 1rem; text-align: center; }
+.art-elements img { width: 100%; height: auto; aspect-ratio: 1200 / 247; border-radius: 1rem; display: block; }
+.art-elements h2 { color: var(--art-ink); font-size: 1.25rem; margin: 1rem 0 .35rem; }
+.art-elements p { color: var(--art-ink-soft); max-width: 640px; margin: 0 auto; font-size: .92rem; }

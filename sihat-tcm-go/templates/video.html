@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" data-vlang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{.Title}} — Sihat TCM</title>
+  <meta name="description" content="Sihat TCM 介绍视频(约 2 分 44 秒,中文旁白):AI 辅助四诊合参,从访客问诊到医生回复。 / A 2:44 introduction video (Chinese narration) of Sihat TCM.">
+  <meta name="theme-color" content="#0f5132">
+  <meta property="og:title" content="Sihat TCM 介绍视频 / Introduction video">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{.PageURL}}">
+  <meta property="og:image" content="{{absasset "/static/img/art/video-poster.webp"}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{{absasset "/static/img/art/video-poster.webp"}}">
+  <script>
+  /* language before first paint: the header toggle stores 'tcm-lang' (en|zh|ms); ms falls back to English here */
+  (function () { try { var l = localStorage.getItem('tcm-lang'); document.documentElement.setAttribute('data-vlang', l === 'zh' ? 'zh' : 'en'); document.documentElement.setAttribute('lang', l === 'zh' ? 'zh-CN' : 'en'); } catch (e) {} })();
+  </script>
+  <link rel="stylesheet" href="{{asset "/static/css/app.css"}}">
+  {{template "favicon"}}
+  <style>
+    html[data-vlang="zh"] .en, html[data-vlang="en"] .zh { display: none !important; }
+    .video-wrap { max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+    .video-wrap h1 { font-size: 1.6rem; margin: 0 0 .35rem; }
+    .video-wrap .lede { color: var(--color-muted, #78716c); margin: 0 0 1rem; }
+    .player { position: relative; background: #000; border-radius: 14px; overflow: hidden; aspect-ratio: 16 / 9; box-shadow: 0 8px 28px rgba(0,0,0,.18); }
+    .player video { width: 100%; height: 100%; display: block; background: #000; }
+    .video-missing { background: #f5f5f4; border: 1px dashed #a8a29e; border-radius: 14px; padding: 2rem 1.25rem; text-align: center; color: #44403c; }
+    .video-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0 1.5rem; }
+    .video-actions a { display: inline-flex; align-items: center; gap: .4rem; padding: .55rem 1rem; border-radius: 999px; border: 1.5px solid #0f5132; color: #0f5132; text-decoration: none; font-weight: 600; font-size: .9rem; background: #fff; }
+    .video-actions a:hover { background: #0f5132; color: #fff; }
+    .chapters h2, .credits h2 { font-size: 1.1rem; margin: 1.25rem 0 .5rem; }
+    .chapters ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: .5rem; }
+    .chapters button { width: 100%; text-align: left; display: flex; gap: .6rem; align-items: baseline; padding: .55rem .75rem; border: 1px solid #e7e5e4; border-radius: 10px; background: #fff; cursor: pointer; font: inherit; color: inherit; }
+    .chapters button:hover, .chapters button.on { border-color: #0f5132; background: #ecfdf5; }
+    .chapters button:disabled { opacity: .5; cursor: default; }
+    .chapters time { font-variant-numeric: tabular-nums; font-weight: 700; color: #0f5132; min-width: 2.6rem; }
+    .credits { font-size: .78rem; color: var(--color-muted, #78716c); line-height: 1.6; }
+    .credits p { margin: .35rem 0; }
+  </style>
+</head>
+<body>
+{{template "header" .}}
+<main class="video-wrap" id="main">
+  <h1><span class="zh">观看 Sihat TCM 介绍视频</span><span class="en">Watch the Sihat TCM introduction</span></h1>
+  <p class="lede"><span class="zh">约 2 分 44 秒 · 中文旁白 · 从访客问诊、注册患者、连接医生,到管理与可靠性。</span><span class="en">About 2:44 · Chinese narration · from guest consultation and registered patients to doctors, admin and reliability.</span></p>
+
+  {{if .Available}}
+  <div class="player" id="player-box">
+    <video id="promo" controls preload="metadata" playsinline poster="{{asset "/static/img/art/video-poster.webp"}}">
+      <source src="/media/sihat-tcm-demo.mp4" type="video/mp4">
+      <track kind="captions" srclang="zh" label="中文 (简体) captions" src="{{asset "/static/video/sihat-tcm-demo.zh.vtt"}}" default>
+      <span class="zh">您的浏览器不支持视频播放,请使用下方下载链接。</span><span class="en">Your browser cannot play this video; use the download link below.</span>
+    </video>
+  </div>
+  <div class="video-missing" id="video-missing" hidden>
+    <p><b><span class="zh">此服务器暂时没有该视频文件</span><span class="en">The video is not available on this server</span></b></p>
+    <p><a href="/demo"><span class="zh">先看图文演示 /demo</span><span class="en">See the illustrated tour at /demo</span></a></p>
+  </div>
+  <div class="video-actions" id="video-actions">
+    <a href="/media/sihat-tcm-demo.mp4" download="sihat-tcm-demo.mp4" id="video-download"><span class="zh">⬇ 下载视频 (MP4, 约 25 MB)</span><span class="en">⬇ Download (MP4, about 25 MB)</span></a>
+    <a href="{{.ShareURL}}" id="video-share" target="_blank" rel="noopener"><span class="zh">分享到 WhatsApp</span><span class="en">Share on WhatsApp</span></a>
+    <a href="/demo"><span class="zh">图文演示 /demo</span><span class="en">Illustrated tour /demo</span></a>
+  </div>
+  {{else}}
+  <div class="video-missing" id="video-missing">
+    <p><b><span class="zh">此服务器暂时没有该视频文件</span><span class="en">The video is not available on this server</span></b></p>
+    <p><span class="zh">请稍后再试,或先看图文演示。</span><span class="en">Please try again later, or see the illustrated tour first.</span></p>
+    <p><a href="/demo"><span class="zh">图文演示 /demo</span><span class="en">Illustrated tour /demo</span></a></p>
+  </div>
+  <div class="video-actions" id="video-actions">
+    <a href="{{.ShareURL}}" id="video-share" target="_blank" rel="noopener"><span class="zh">分享到 WhatsApp</span><span class="en">Share on WhatsApp</span></a>
+  </div>
+  {{end}}
+
+  <section class="chapters" aria-labelledby="chapters-title">
+    <h2 id="chapters-title"><span class="zh">章节</span><span class="en">Chapters</span></h2>
+    <ol id="chapter-list">
+      {{range .Chapters}}<li><button type="button" data-seek="{{printf "%.2f" .Start}}"{{if not $.Available}} disabled{{end}}><time>{{.Label}}</time><span class="zh">{{.TitleZH}}</span><span class="en">{{.TitleEN}}</span></button></li>
+      {{end}}
+    </ol>
+  </section>
+
+  <section class="credits" id="video-credits" aria-labelledby="credits-title">
+    <h2 id="credits-title"><span class="zh">素材致谢 (CC BY)</span><span class="en">Credits (CC BY)</span></h2>
+    <p>Video clips from Wikimedia Commons, used under Creative Commons licences and edited (trimmed, cropped/scaled, audio removed): SETHLUI.com, 中国新闻社 (China News Service), 中国新闻网, NewsInStar, Walking China (all CC BY 3.0); Rose Abrams, "Park games in Beijing 6" (CC BY 4.0); Wobuzowatsj, "Ink grinding" (CC0).</p>
+    <p>Music from Wikimedia Commons (CC BY 3.0): "Guzheng Morning" and "Erhu Something" by Antti Luode; "Cattails" by Kevin MacLeod. Acupuncture charts: Wellcome Collection (CC BY 4.0). Yin-yang symbol: Gregory Maxwell (public domain).</p>
+    <p>CC BY 3.0: <a href="https://creativecommons.org/licenses/by/3.0" rel="noopener">creativecommons.org/licenses/by/3.0</a> · CC BY 4.0: <a href="https://creativecommons.org/licenses/by/4.0" rel="noopener">creativecommons.org/licenses/by/4.0</a>. Source links per clip: Wikimedia Commons file pages.</p>
+    <p><span class="zh">视频仅用于产品介绍;不构成医疗建议。</span><span class="en">For product introduction only; not medical advice.</span></p>
+  </section>
+</main>
+{{template "footer" .}}
+<script>
+(function () {
+  var root = document.documentElement;
+  function sync(l) { var z = l === 'zh'; root.setAttribute('data-vlang', z ? 'zh' : 'en'); root.setAttribute('lang', z ? 'zh-CN' : 'en'); }
+  document.addEventListener('tcm:langchange', function (e) { sync(e.detail); });
+  var v = document.getElementById('promo');
+  if (!v) return;
+  var missing = document.getElementById('video-missing');
+  var box = document.getElementById('player-box');
+  var dl = document.getElementById('video-download');
+  var btns = Array.prototype.slice.call(document.querySelectorAll('#chapter-list button'));
+  function fail() {
+    if (box) box.hidden = true;
+    if (missing) missing.hidden = false;
+    if (dl) dl.hidden = true;
+    btns.forEach(function (b) { b.disabled = true; });
+  }
+  // the server stat says the file exists; the HEAD fetch + error events cover a file removed afterwards or a blocked proxy
+  try { fetch('/media/sihat-tcm-demo.mp4', { method: 'HEAD' }).then(function (r) { if (!r.ok) fail(); }).catch(function () {}); } catch (e) {}
+  var src = v.querySelector('source');
+  if (src) src.addEventListener('error', fail);
+  v.addEventListener('error', fail);
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var t = parseFloat(b.getAttribute('data-seek')) || 0;
+      function go() { try { v.currentTime = t; } catch (e) {} var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+      if (v.readyState >= 1) go(); else { v.addEventListener('loadedmetadata', go, { once: true }); v.load(); }
+    });
+  });
+  v.addEventListener('timeupdate', function () {
+    var cur = -1;
+    btns.forEach(function (b, i) { if (v.currentTime + 0.05 >= parseFloat(b.getAttribute('data-seek'))) cur = i; });
+    btns.forEach(function (b, i) { b.classList.toggle('on', i === cur); });
+  });
+})();
+</script>
+</body>
+</html>

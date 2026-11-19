@@ -4,6 +4,7 @@ profile save+persist, consultation details + cancel/remove.
 """
 import os, time
 from playwright.sync_api import sync_playwright
+from e2e_admin import approve_doctor
 
 BASE = os.environ.get("E2E_BASE", "http://localhost:8081").rstrip("/")
 RUN = str(int(time.time())); PW = "password123"
@@ -38,7 +39,10 @@ with sync_playwright() as p:
     dp.click("#tab-signup"); dp.click("#role-doctor")
     dp.fill("#signup-name", DNAME); dp.fill("#signup-email", DE); dp.fill("#signup-password", PW)
     dp.fill("#signup-specialty", "General TCM"); dp.fill("#signup-bio", "feature test doctor")
-    dp.click("#signup-btn"); dp.wait_for_url("**/doctor", timeout=20000)
+    # an unapproved doctor lands on /patient (the /doctor page bounces them); the admin approval is done through the API
+    dp.click("#signup-btn"); dp.wait_for_url("**/patient", timeout=20000)
+    check("doctor.unapproved_signup_lands_on_patient_area", dp.url.rstrip("/").endswith("/patient"), f"url={dp.url}")
+    approve_doctor(BASE, DE)
 
     # ---- 2) Patient: guest report -> save -> register (so they own a report) ----
     pctx = browser.new_context(); pp = pctx.new_page()

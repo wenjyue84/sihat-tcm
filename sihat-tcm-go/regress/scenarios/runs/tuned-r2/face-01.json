@@ -1,0 +1,117 @@
+{
+  "id": "face-01",
+  "type": "face",
+  "label": "tuned-r2",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T04:01:41.213Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 112760,
+      "bytes": 2302,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 112761,
+  "raw": "{\"analysis_tags\":[{\"category\":\"虛證\",\"confidence\":74,\"description\":\"全面淡白微帶萎黃，兩顴及額部均無紅潤光澤，唇色淡紅飽和度不足，屬氣虛推動無力、血不上榮於面之典型表現（面色淡白無華）。目光尚清但神采稍欠，提示心血不足、心神失養。\",\"recommendations\":[\"可以八珍湯（Ba Zhen Tang）或歸脾湯（Gui Pi Tang）為基礎方，益氣補血\",\"飲食宜多攝取補血食材：紅棗、龍眼肉、黑芝麻、適量瘦肉紅肉\",\"每晚應於二十三時前就寢，以利肝血夜間充養；減少長時間盯視屏幕\"],\"title\":\"Qi \\u0026 Blood Deficiency\",\"title_cn\":\"氣血兩虛\"},{\"category\":\"臟腑虧虛\",\"confidence\":68,\"description\":\"雙側眼眶暗沉（眼眶暗）為腎色（黑色）上現之象，亦與肝經繞目有關，提示肝血不足、腎精虧損。下眼瞼輕微浮腫（下眼瞼微浮腫）可能反映腎氣不足、氣化失司、水液代謝輕度受礙。目珠清澈但欠瑩潤光澤，缺乏肝血充沛時應有的明亮神采。\",\"recommendations\":[\"腎陰虧虛者可選六味地黃丸（Liu Wei Di Huang Wan）；若兼有寒象則改用右歸丸（You Gui Wan）\",\"飲食宜攝取養肝補腎之品：枸杞子、桑椹、黑豆、核桃\",\"避免久視傷血、熬夜耗陰，減少過度用眼及精神消耗\"],\"title\":\"Liver Blood Deficiency with Kidney Involvement\",\"title_cn\":\"肝血虛兼腎虛\"},{\"category\":\"臟腑虧虛\",\"confidence\":62,\"description\":\"面色帶萎黃偏淡（面色萎黃）、唇色淡而少澤，與脾主運化水穀精微、其華在唇的理論相符，提示脾氣不足、氣血生化乏源。下眼瞼輕浮則與脾失健運、水濕輕度積聚有關。\",\"recommendations\":[\"可以四君子湯（Si Jun Zi Tang）為基礎；若兼脘腹脹悶、納呆，可改香砂六君子湯（Xiang Sha Liu Jun Zi Tang）\",\"飲食宜溫熱易消化，避免生冷、油膩及過度加工食品以免損傷脾陽\",\"每日宜進行三十分鐘輕度有氧活動（步行或太極拳）以助脾胃氣機運動\"],\"title\":\"Spleen Qi Deficiency\",\"title_cn\":\"脾氣虛\"}],\"confidence\":72,\"image_description\":\"東亞裔年輕女性，推測年齡介於二十五至三十五歲之間，深色頭髮向後梳起，正面直視鏡頭，背景為中性灰色。影像涵蓋面部及頸肩上緣，無可見妝容，攝影棚均勻光源使面部細節清晰可辨。\",\"modelUsed\":1,\"notes\":\"影像光線均勻、品質良好，適合望診分析。未見明顯實證徵象，如潮紅、面赤、血絡外露或顯著色素沉著。無肝火（肝火）或心火（心火）上炎之表現，亦無急性病象。整體面象提示氣血不足之體質傾向，在青年女性中較為常見，可能與生活不規律或月經失血有關。本次信心值定為72分，原因在於攝影棚燈光及影像色彩渲染可能使自然膚色略顯偏淡；正式診斷前務必結合舌診（舌診）及脈診（脈診）進行綜合評估。\",\"observation\":\"面色呈淡白偏萎黃，欠缺氣血充盛時應有的紅潤光澤（榮色）。雙側眼眶下方暗沉、下眼瞼輕微浮腫，提示腎肝兩臟有所不足；唇色淡紅、兩顴缺乏紅潤，則指向氣虛血虧、脾氣不足。整體面象呈現中等程度氣血兩虛之象，未見明顯實熱或急性病理表現。\",\"pattern_suggestions\":[\"氣血兩虛（Qi and Blood Dual Deficiency）— 主要診斷：最符合整體面色淡白、唇色欠澤、面部光澤不足等表現\",\"肝血虛（Liver Blood Deficiency）— 次要診斷：眼眶暗沉、目神欠瑩，與肝血不足相符\",\"脾氣虛（Spleen Qi Deficiency）— 次要診斷：萎黃面色、淡唇、下眼瞼輕浮，脾虛失運之象\",\"腎氣陰虛（Kidney Qi or Yin Deficiency）— 輔助診斷：眼眶暗沉及下眼瞼浮腫位於腎之面部對應區\"],\"potential_issues\":[\"氣血兩虛（Qi and Blood Dual Deficiency）— 主要診斷：最符合整體面色淡白、唇色欠澤、面部光澤不足等表現\",\"肝血虛（Liver Blood Deficiency）— 次要診斷：眼眶暗沉、目神欠瑩，與肝血不足相符\",\"脾氣虛（Spleen Qi Deficiency）— 次要診斷：萎黃面色、淡唇、下眼瞼輕浮，脾虛失運之象\",\"腎氣陰虛（Kidney Qi or Yin Deficiency）— 輔助診斷：眼眶暗沉及下眼瞼浮腫位於腎之面部對應區\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"面色淡白微萎黃 — 整體膚色偏白帶萎黃，氣血不足之象\",\"兩目眼眶暗沉 — 雙側眼周暗圈，提示腎虧或肝血虛\",\"下眼瞼微浮腫 — 下眼瞼輕度浮腫，腎氣不足、水液代謝輕度失調\",\"唇色淡紅欠澤 — 唇色偏淡，飽和度不足，脾氣虛、血虛之徵\",\"兩顴缺乏紅潤 — 顴部無紅潤之色，心血不足、氣血未能上榮\",\"神采稍欠 — 目光清澈但略欠瑩亮，心神失養之輕微表現\",\"額部色澤偏淡 — 額部（對應心臟區）色調偏淡，心氣心血略顯不足\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "虛證",
+        "confidence": 74,
+        "description": "全面淡白微帶萎黃，兩顴及額部均無紅潤光澤，唇色淡紅飽和度不足，屬氣虛推動無力、血不上榮於面之典型表現（面色淡白無華）。目光尚清但神采稍欠，提示心血不足、心神失養。",
+        "recommendations": [
+          "可以八珍湯（Ba Zhen Tang）或歸脾湯（Gui Pi Tang）為基礎方，益氣補血",
+          "飲食宜多攝取補血食材：紅棗、龍眼肉、黑芝麻、適量瘦肉紅肉",
+          "每晚應於二十三時前就寢，以利肝血夜間充養；減少長時間盯視屏幕"
+        ],
+        "title": "Qi & Blood Deficiency",
+        "title_cn": "氣血兩虛"
+      },
+      {
+        "category": "臟腑虧虛",
+        "confidence": 68,
+        "description": "雙側眼眶暗沉（眼眶暗）為腎色（黑色）上現之象，亦與肝經繞目有關，提示肝血不足、腎精虧損。下眼瞼輕微浮腫（下眼瞼微浮腫）可能反映腎氣不足、氣化失司、水液代謝輕度受礙。目珠清澈但欠瑩潤光澤，缺乏肝血充沛時應有的明亮神采。",
+        "recommendations": [
+          "腎陰虧虛者可選六味地黃丸（Liu Wei Di Huang Wan）；若兼有寒象則改用右歸丸（You Gui Wan）",
+          "飲食宜攝取養肝補腎之品：枸杞子、桑椹、黑豆、核桃",
+          "避免久視傷血、熬夜耗陰，減少過度用眼及精神消耗"
+        ],
+        "title": "Liver Blood Deficiency with Kidney Involvement",
+        "title_cn": "肝血虛兼腎虛"
+      },
+      {
+        "category": "臟腑虧虛",
+        "confidence": 62,
+        "description": "面色帶萎黃偏淡（面色萎黃）、唇色淡而少澤，與脾主運化水穀精微、其華在唇的理論相符，提示脾氣不足、氣血生化乏源。下眼瞼輕浮則與脾失健運、水濕輕度積聚有關。",
+        "recommendations": [
+          "可以四君子湯（Si Jun Zi Tang）為基礎；若兼脘腹脹悶、納呆，可改香砂六君子湯（Xiang Sha Liu Jun Zi Tang）",
+          "飲食宜溫熱易消化，避免生冷、油膩及過度加工食品以免損傷脾陽",
+          "每日宜進行三十分鐘輕度有氧活動（步行或太極拳）以助脾胃氣機運動"
+        ],
+        "title": "Spleen Qi Deficiency",
+        "title_cn": "脾氣虛"
+      }
+    ],
+    "confidence": 72,
+    "image_description": "東亞裔年輕女性，推測年齡介於二十五至三十五歲之間，深色頭髮向後梳起，正面直視鏡頭，背景為中性灰色。影像涵蓋面部及頸肩上緣，無可見妝容，攝影棚均勻光源使面部細節清晰可辨。",
+    "modelUsed": 1,
+    "notes": "影像光線均勻、品質良好，適合望診分析。未見明顯實證徵象，如潮紅、面赤、血絡外露或顯著色素沉著。無肝火（肝火）或心火（心火）上炎之表現，亦無急性病象。整體面象提示氣血不足之體質傾向，在青年女性中較為常見，可能與生活不規律或月經失血有關。本次信心值定為72分，原因在於攝影棚燈光及影像色彩渲染可能使自然膚色略顯偏淡；正式診斷前務必結合舌診（舌診）及脈診（脈診）進行綜合評估。",
+    "observation": "面色呈淡白偏萎黃，欠缺氣血充盛時應有的紅潤光澤（榮色）。雙側眼眶下方暗沉、下眼瞼輕微浮腫，提示腎肝兩臟有所不足；唇色淡紅、兩顴缺乏紅潤，則指向氣虛血虧、脾氣不足。整體面象呈現中等程度氣血兩虛之象，未見明顯實熱或急性病理表現。",
+    "pattern_suggestions": [
+      "氣血兩虛（Qi and Blood Dual Deficiency）— 主要診斷：最符合整體面色淡白、唇色欠澤、面部光澤不足等表現",
+      "肝血虛（Liver Blood Deficiency）— 次要診斷：眼眶暗沉、目神欠瑩，與肝血不足相符",
+      "脾氣虛（Spleen Qi Deficiency）— 次要診斷：萎黃面色、淡唇、下眼瞼輕浮，脾虛失運之象",
+      "腎氣陰虛（Kidney Qi or Yin Deficiency）— 輔助診斷：眼眶暗沉及下眼瞼浮腫位於腎之面部對應區"
+    ],
+    "potential_issues": [
+      "氣血兩虛（Qi and Blood Dual Deficiency）— 主要診斷：最符合整體面色淡白、唇色欠澤、面部光澤不足等表現",
+      "肝血虛（Liver Blood Deficiency）— 次要診斷：眼眶暗沉、目神欠瑩，與肝血不足相符",
+      "脾氣虛（Spleen Qi Deficiency）— 次要診斷：萎黃面色、淡唇、下眼瞼輕浮，脾虛失運之象",
+      "腎氣陰虛（Kidney Qi or Yin Deficiency）— 輔助診斷：眼眶暗沉及下眼瞼浮腫位於腎之面部對應區"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "面色淡白微萎黃 — 整體膚色偏白帶萎黃，氣血不足之象",
+      "兩目眼眶暗沉 — 雙側眼周暗圈，提示腎虧或肝血虛",
+      "下眼瞼微浮腫 — 下眼瞼輕度浮腫，腎氣不足、水液代謝輕度失調",
+      "唇色淡紅欠澤 — 唇色偏淡，飽和度不足，脾氣虛、血虛之徵",
+      "兩顴缺乏紅潤 — 顴部無紅潤之色，心血不足、氣血未能上榮",
+      "神采稍欠 — 目光清澈但略欠瑩亮，心神失養之輕微表現",
+      "額部色澤偏淡 — 額部（對應心臟區）色調偏淡，心氣心血略顯不足"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "face",
+    "image_file": "images/face-pale-s1101.webp",
+    "image_bytes": 44167
+  },
+  "expected": {
+    "intended_complexion": "pale / white (淡白)",
+    "expected_tcm": {
+      "complexion": "pale white",
+      "pattern": "Qi/Blood deficiency, Yang deficiency or cold",
+      "note": "WEAK ground truth: the generated pallor is subtle (a fairly ordinary fair complexion); treat a 'normal' reading as acceptable"
+    }
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "pale",
+          "pallid",
+          "white",
+          "light",
+          "fair"
+        ],
+        "hit": false
+      }
+    ],
+    "all_hit": false
+  }
+}

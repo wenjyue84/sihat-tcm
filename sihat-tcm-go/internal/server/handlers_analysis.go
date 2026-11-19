@@ -1,25 +1,165 @@
 package server
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
+	"unicode/utf8"
 
 	"sihattcm/internal/gemini"
 )
 
 // ---- shared helpers (an* prefix to avoid collisions with sibling handler files) ----
 
-// anReadJSON decodes the request body into dst; writes 400 and returns false on error.
+// Request size / field caps for the analysis + summary endpoints.
+const (
+	anMaxBodyBytes   = 12 << 20 // whole JSON body (media is base64 inside it)
+	anMaxMediaB64    = 10 << 20 // one base64 media payload
+	anMaxShortField  = 64       // type / language / mode fields
+	anMaxTextField   = 4000     // free-text fields (symptoms, medicine text)
+	anMaxFileName    = 255
+	anMaxContextJSON = 16 << 10 // snore tcmContext once re-marshalled
+)
+
+// anWriteJSONError writes a JSON {error} body with the given status. Unlike
+// http.Error it sets Content-Type: application/json.
+func anWriteJSONError(w http.ResponseWriter, status int, msg string) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(map[string]string{"error": msg})
+}
+
+// anReadJSON decodes the request body into dst; writes a JSON 400 (413 when the
+// body exceeds anMaxBodyBytes) and returns false on error.
 func anReadJSON(w http.ResponseWriter, r *http.Request, dst any) bool {
+	r.Body = http.MaxBytesReader(w, r.Body, anMaxBodyBytes)
 	if err := json.NewDecoder(r.Body).Decode(dst); err != nil {
-		http.Error(w, `{"error":"invalid JSON body"}`, http.StatusBadRequest)
+		var tooBig *http.MaxBytesError
+		if errors.As(err, &tooBig) {
+			anWriteJSONError(w, http.StatusRequestEntityTooLarge, "request body too large")
+			return false
+		}
+		anWriteJSONError(w, http.StatusBadRequest, "invalid JSON body")
 		return false
 	}
 	return true
+}
+
+// anTruncRunes shortens s to at most n runes without splitting a multibyte
+// character, so valid UTF-8 in means valid UTF-8 out.
+func anTruncRunes(s string, n int) string {
+	if n <= 0 {
+		return ""
+	}
+	if len(s) <= n { // byte length >= rune count, so this is a cheap fast path
+		return s
+	}
+	i := 0
+	for pos := range s {
+		if i == n {
+			return s[:pos]
+		}
+		i++
+	}
+	return s
+}
+
+// anUpstreamFail logs the real upstream error server-side and answers with a
+// generic, user-safe message: 429 for quota / rate-limit exhaustion, 502 for
+// any other upstream failure. The upstream text (which can embed the request
+// URL, including the API key) is never sent to the client.
+func (s *Server) anUpstreamFail(w http.ResponseWriter, what string, err error) {
+	log.Printf("%s: upstream AI error: %s", what, anRedactKey(err.Error()))
+	if containsAny(err.Error(), "429", "quota", "RESOURCE_EXHAUSTED", "RATE_LIMIT", "rate limit") {
+		w.Header().Set("Retry-After", "30") // upstream quota: tell the client when to come back
+		s.JSONError(w, http.StatusTooManyRequests, "The AI service is busy right now (rate limit). Please try again in a minute.")
+		return
+	}
+	s.JSONError(w, http.StatusBadGateway, "The AI service is unavailable right now. Please try again.")
+}
+
+var anKeyParamRE = regexp.MustCompile(`(?i)(key=)[^&\s"']+`)
+
+// anRedactKey masks API keys embedded in upstream error text (Go's transport
+// errors include the request URL, query string and all) before it is logged.
+func anRedactKey(s string) string { return anKeyParamRE.ReplaceAllString(s, "${1}REDACTED") }
+
+// anCheckLen reports whether every field is within max runes.
+func anCheckLen(max int, fields ...string) bool {
+	for _, f := range fields {
+		if len(f) > max*4 || utf8.RuneCountInString(f) > max {
+			return false
+		}
+	}
+	return true
+}
+
+// anValidateMedia validates a base64 media payload (data URL or raw base64) and
+// returns (mime, base64 data). On failure it returns a non-zero HTTP status and a
+// user-safe message. allowed lists acceptable mime prefixes (ending in "/") or
+// exact types; a data URL's declared mime must match one. Raw base64 uses
+// fallbackMime.
+//
+// The mime that comes back is NEVER the client's raw string: it is the declared type reduced to type/subtype
+// (checked against ^[a-z]+/[a-z0-9.+-]+$ — the listener turns it into a file extension, so a backslash or ".." in
+// it was a path traversal). analyze-image additionally checks the image bytes (anRequireImageBytes).
+func anValidateMedia(in, fallbackMime string, allowed ...string) (mime, b64 string, status int, msg string) {
+	if len(in) > anMaxMediaB64 {
+		return "", "", http.StatusRequestEntityTooLarge, "payload too large"
+	}
+	mime, b64 = anStripDataURL(in, fallbackMime)
+	if strings.HasPrefix(in, "data:") && b64 == in {
+		return "", "", http.StatusBadRequest, "invalid data URL: expected data:<mime>;base64,<data>"
+	}
+	if mime == "" {
+		mime = fallbackMime
+	}
+	base := strings.ToLower(strings.TrimSpace(mime))
+	if i := strings.IndexByte(base, ';'); i >= 0 {
+		base = strings.TrimSpace(base[:i])
+	}
+	if !mimeRe.MatchString(base) {
+		return "", "", http.StatusBadRequest, "unsupported media type"
+	}
+	ok := false
+	for _, a := range allowed {
+		if (strings.HasSuffix(a, "/") && strings.HasPrefix(base, a)) || base == a {
+			ok = true
+			break
+		}
+	}
+	if !ok {
+		return "", "", http.StatusBadRequest, "unsupported media type"
+	}
+	b64 = strings.TrimSpace(b64)
+	if b64 == "" {
+		return "", "", http.StatusBadRequest, "empty payload"
+	}
+	if _, err := base64.StdEncoding.DecodeString(b64); err != nil {
+		if _, err2 := base64.RawStdEncoding.DecodeString(b64); err2 != nil {
+			return "", "", http.StatusBadRequest, "payload is not valid base64"
+		}
+	}
+	return base, b64, 0, ""
+}
+
+// anRequireImageBytes is the extra check of analyze-image: the model accepts png / jpeg / webp / heic / heif only, so
+// SVG, GIF and arbitrary bytes labelled image/png are refused up front instead of costing two paid model calls and
+// a vague "Analysis pending". It returns the type the bytes really are (which replaces the declared one).
+func anRequireImageBytes(b64 string) (mime string, status int, msg string) {
+	m := anSniffImage(b64)
+	if m == "" {
+		return "", http.StatusBadRequest, "unsupported image: use a PNG, JPEG, WebP or HEIC photo"
+	}
+	return m, 0, ""
 }
 
 // anStripDataURL separates a data URL "data:<mime>;base64,<data>" into (mime, base64data).
@@ -58,8 +198,13 @@ func anDetectMime(existing, fileName string) string {
 	return "image/png"
 }
 
-// anCleanJSON strips Markdown code fences that some model responses include.
+// anCleanJSON returns the JSON document inside a model reply: the first complete object/array, whether the reply is
+// bare, wrapped in a ``` fence, or preceded by a line of chatter ("Sure, here is the analysis:"). If there is none
+// (prose, or a truncated document) it falls back to just stripping a leading/trailing fence.
 func anCleanJSON(s string) string {
+	if j, ok := anExtractJSON(s); ok {
+		return j
+	}
 	s = strings.TrimSpace(s)
 	s = strings.TrimPrefix(s, "```json")
 	s = strings.TrimPrefix(s, "```")
@@ -67,19 +212,27 @@ func anCleanJSON(s string) string {
 	return strings.TrimSpace(s)
 }
 
-// anValidObs returns true if the text looks like a real clinical observation
-// (not a refusal or empty stub).
+// anRefusalPhrases open a refusal or an empty stub.
+var anRefusalPhrases = []string{
+	"cannot analyze", "can't analyze", "unable to analyze", "no observation", "unclear image",
+	"cannot see", "can't see", "not visible", "i cannot", "i can't", "i'm unable", "i am unable", "sorry",
+}
+
+// anValidObs returns true if the text looks like a real clinical observation (not a refusal or empty stub). A
+// refusal is detected only in the FIRST clause of the text: a good observation may legitimately mention that one
+// structure "is not visible in this photo" or that the model "cannot see the root clearly" further down, and used to
+// be thrown away (and the patient told "analysis pending") because of it.
 func anValidObs(text string) bool {
-	if len(strings.TrimSpace(text)) < 50 {
+	t := strings.TrimSpace(text)
+	if len(t) < 50 {
 		return false
 	}
-	lower := strings.ToLower(text)
-	for _, pat := range []string{
-		"cannot analyze", "unable to analyze", "no observation",
-		"unclear image", "cannot see", "not visible",
-		"i cannot", "i'm unable", "sorry",
-	} {
-		if strings.Contains(lower, pat) {
+	first := strings.ToLower(t)
+	if i := strings.IndexAny(first, ".;:!?\n"); i >= 0 {
+		first = first[:i]
+	}
+	for _, pat := range anRefusalPhrases {
+		if strings.Contains(first, pat) {
 			return false
 		}
 	}
@@ -123,7 +276,7 @@ Analyze the provided tongue image and return a detailed JSON response with EXACT
 {
   "is_valid_image": boolean,
   "image_description": "What you see in the image",
-  "observation": "1-2 sentence comprehensive summary",
+  "observation": "2-4 sentence summary: body colour, coating (colour/thickness/distribution/texture), papillae or surface, shape and moisture",
   "confidence": number (0-100),
   "analysis_tags": [
     {
@@ -144,7 +297,7 @@ const anEnhancedTongueUserPrompt = `Analyze this TONGUE image according to TCM t
 
 CRITICAL INSTRUCTIONS - You MUST follow these exactly:
 
-1. RETURN EXACTLY 3 ANALYSIS_TAGS - Each representing a distinct TCM finding from the tongue image
+1. RETURN EXACTLY 3 ANALYSIS_TAGS - Each representing a distinct TCM finding from the tongue image. Spread them over different layers (body colour, coating, shape/moisture/papillae) in order of diagnostic weight, rather than three variants of one finding. Report what is actually visible; do not name a finding just because it is typical for a pattern.
 
 2. EACH ANALYSIS_TAG MUST INCLUDE:
    - title: English name (e.g., "Swollen Tongue", "Cracked Tongue", "Red Tongue", "Pale Tongue")
@@ -165,7 +318,7 @@ CRITICAL INSTRUCTIONS - You MUST follow these exactly:
 {
   "is_valid_image": true,
   "image_description": "Clear tongue photo showing...",
-  "observation": "Brief 1-2 sentence overall summary of tongue condition",
+  "observation": "2-4 sentences covering, in order: body colour (and the lighting caveat if any), coating colour/thickness/distribution/texture, papillae or surface features, shape and moisture",
   "confidence": 85,
   "analysis_tags": [...],
   "tcm_indicators": ["Indicator: Chinese term - English meaning"],
@@ -213,9 +366,13 @@ Return a JSON object with these fields:
 	return
 }
 
-// anJSONStrFieldRE matches a top-level "field": "string value" pair, tolerating
-// escaped quotes inside the value.
-var anJSONStrFieldRE = map[string]*regexp.Regexp{}
+// anJSONStrFieldRE caches compiled "field": "string value" matchers (tolerating
+// escaped quotes inside the value), keyed by field name. A sync.Map keeps it
+// safe under concurrent requests.
+var anJSONStrFieldRE sync.Map // field name -> *regexp.Regexp
+
+// anJSONNumFieldRE matches a numeric (optionally quoted) "confidence" value.
+var anJSONNumFieldRE = regexp.MustCompile(`"confidence"\s*:\s*"?(-?\d+(?:\.\d+)?)`)
 
 // anExtractJSONString pulls the value of a "field": "..." string out of a
 // possibly-malformed / truncated JSON blob. Returns "" if not found. This
@@ -223,10 +380,13 @@ var anJSONStrFieldRE = map[string]*regexp.Regexp{}
 // structured Chinese responses) so the user still sees a real analysis instead
 // of an empty box or a raw JSON dump.
 func anExtractJSONString(raw, field string) string {
-	re, ok := anJSONStrFieldRE[field]
-	if !ok {
+	var re *regexp.Regexp
+	if v, ok := anJSONStrFieldRE.Load(field); ok {
+		re = v.(*regexp.Regexp)
+	} else {
 		re = regexp.MustCompile(`"` + regexp.QuoteMeta(field) + `"\s*:\s*"((?:[^"\\]|\\.)*)"`)
-		anJSONStrFieldRE[field] = re
+		actual, _ := anJSONStrFieldRE.LoadOrStore(field, re)
+		re = actual.(*regexp.Regexp)
 	}
 	m := re.FindStringSubmatch(raw)
 	if len(m) < 2 {
@@ -238,6 +398,16 @@ func anExtractJSONString(raw, field string) string {
 		return out
 	}
 	return m[1]
+}
+
+// anExtractJSONConfidence salvages "confidence": 85 / 85.5 / "85" from malformed JSON.
+func anExtractJSONConfidence(raw string) (float64, bool) {
+	m := anJSONNumFieldRE.FindStringSubmatch(raw)
+	if len(m) < 2 {
+		return 0, false
+	}
+	f, err := strconv.ParseFloat(m[1], 64)
+	return f, err == nil
 }
 
 // anExtractJSONBool pulls a "field": true|false out of malformed JSON.
@@ -269,6 +439,27 @@ func (s *Server) handleAnalyzeImage(w http.ResponseWriter, r *http.Request) {
 		s.JSONError(w, http.StatusBadRequest, "image is required")
 		return
 	}
+	if !anCheckLen(anMaxShortField, body.Type) || !anCheckLen(anMaxTextField, body.Symptoms, body.MainComplaint) {
+		s.JSONError(w, http.StatusBadRequest, "field too long")
+		return
+	}
+	// "type" is interpolated into the SYSTEM prompt, so it is an allow-list, not free text.
+	body.Type = strings.ToLower(strings.TrimSpace(body.Type))
+	switch body.Type {
+	case "", "tongue", "face", "body", "part":
+	default:
+		s.JSONError(w, http.StatusBadRequest, "type must be tongue, face, body or part")
+		return
+	}
+	mime, b64, st, msg := anValidateMedia(body.Image, "image/jpeg", "image/")
+	if st != 0 {
+		s.JSONError(w, st, msg)
+		return
+	}
+	if mime, st, msg = anRequireImageBytes(b64); st != 0 {
+		s.JSONError(w, st, msg)
+		return
+	}
 
 	// Resolve prompts. Tongue uses the enhanced 舌诊 prompt (or DB override);
 	// face/body use their OWN visual prompt — never the tongue prompt, or a
@@ -292,12 +483,6 @@ func (s *Server) handleAnalyzeImage(w http.ResponseWriter, r *http.Request) {
 			strOrDefault(body.MainComplaint, "Not provided"),
 			strOrDefault(body.Symptoms, "Not provided"),
 		)
-	}
-
-	// Strip data URL prefix; detect MIME.
-	mime, b64 := anStripDataURL(body.Image, "image/jpeg")
-	if mime == "" {
-		mime = "image/jpeg"
 	}
 
 	models := []string{"gemini-2.0-flash", "gemini-1.5-flash"}
@@ -353,15 +538,19 @@ func (s *Server) handleAnalyzeImage(w http.ResponseWriter, r *http.Request) {
 			if v, ok := anExtractJSONBool(clean, "is_valid_image"); ok {
 				isValidImage = v
 			}
-			if c := anExtractJSONString(clean, "confidence"); c != "" {
-				if f, e := strconv.ParseFloat(strings.TrimSpace(c), 64); e == nil {
-					confidence = f
-				}
+			if f, ok := anExtractJSONConfidence(clean); ok {
+				confidence = f
 			}
 			// Nothing usable recovered → try the next model.
 			if strings.TrimSpace(observation) == "" && strings.TrimSpace(imageDesc) == "" {
 				continue
 			}
+		}
+
+		// Models report confidence as 0-100 OR as a 0-1 score (the wizard supports both): 0.92 is 92%, not a
+		// rejection of the photo.
+		if confidence > 0 && confidence <= 1 {
+			confidence *= 100
 		}
 
 		// Invalid / unclear image → return a clear message AS the observation so
@@ -448,9 +637,10 @@ func (s *Server) handleAnalyzeAudio(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mime, b64 := anStripDataURL(body.Audio, "audio/webm")
-	if mime == "" {
-		mime = "audio/webm"
+	mime, b64, st, msg := anValidateMedia(body.Audio, "audio/webm", "audio/", "video/webm")
+	if st != 0 {
+		s.JSONError(w, st, msg)
+		return
 	}
 
 	sysPrompt := s.SystemPrompt(r.Context(), PromptDoctorListening)
@@ -481,14 +671,26 @@ func (s *Server) handleAnalyzeAudio(w http.ResponseWriter, r *http.Request) {
 		clean := anCleanJSON(text)
 		var data map[string]any
 		if err := json.Unmarshal([]byte(clean), &data); err != nil {
-			// Raw text fallback: if long enough return a partial response.
-			if len(text) > 50 {
+			// A single object wrapped in an array is still the answer.
+			var arr []map[string]any
+			if json.Unmarshal([]byte(clean), &arr) == nil && len(arr) == 1 {
+				data = arr[0]
+			}
+		}
+		if data == nil {
+			// Unparseable (typically truncated) JSON: salvage the observation if it is there; plain prose is usable
+			// as is; raw JSON / fences must never be shown to the patient or stored as the finding.
+			obs := anSalvageString(text, "overall_observation")
+			if obs == "" && !anLooksLikeJSON(text) && len(strings.TrimSpace(text)) > 50 {
+				obs = strings.TrimSpace(text)
+			}
+			if len(obs) > 20 {
 				s.JSON(w, http.StatusOK, map[string]any{
-					"overall_observation": text,
+					"overall_observation": obs,
 					"voice_quality_analysis": map[string]any{
-						"observation":          "Analysis available in overall observation",
-						"severity":             "normal",
-						"tcm_indicators":       []any{},
+						"observation":           "Analysis available in overall observation",
+						"severity":              "normal",
+						"tcm_indicators":        []any{},
 						"clinical_significance": "See overall observation for details",
 					},
 					"breathing_patterns": nil,
@@ -526,27 +728,27 @@ func (s *Server) handleAnalyzeAudio(w http.ResponseWriter, r *http.Request) {
 	s.JSON(w, http.StatusOK, map[string]any{
 		"overall_observation": "Audio analysis will be processed with your final diagnosis report.",
 		"voice_quality_analysis": map[string]any{
-			"observation":          "Voice recording received",
-			"severity":             "pending",
-			"tcm_indicators":       []string{"Audio recorded successfully"},
+			"observation":           "Voice recording received",
+			"severity":              "pending",
+			"tcm_indicators":        []string{"Audio recorded successfully"},
 			"clinical_significance": "Will be integrated with other diagnostic data",
 		},
 		"breathing_patterns": map[string]any{
-			"observation":          "Pending analysis",
-			"severity":             "pending",
-			"tcm_indicators":       []any{},
+			"observation":           "Pending analysis",
+			"severity":              "pending",
+			"tcm_indicators":        []any{},
 			"clinical_significance": "Pending comprehensive analysis",
 		},
 		"speech_patterns": map[string]any{
-			"observation":          "Pending analysis",
-			"severity":             "pending",
-			"tcm_indicators":       []any{},
+			"observation":           "Pending analysis",
+			"severity":              "pending",
+			"tcm_indicators":        []any{},
 			"clinical_significance": "Will be evaluated alongside other findings",
 		},
 		"cough_sounds": map[string]any{
-			"observation":          "Pending analysis",
-			"severity":             "pending",
-			"tcm_indicators":       []any{},
+			"observation":           "Pending analysis",
+			"severity":              "pending",
+			"tcm_indicators":        []any{},
 			"clinical_significance": "Pending",
 		},
 		"pattern_suggestions": []string{"Analysis pending"},
@@ -594,17 +796,27 @@ func (s *Server) handleAnalyzeSnore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, b64, st, msg := anValidateMedia(body.Audio, "audio/webm", "audio/", "video/webm")
+	if st != 0 {
+		s.JSONError(w, st, msg)
+		return
+	}
+
 	// TCM context serialisation for prompt.
 	tcmCtxStr := "No previous diagnosis data available."
 	if body.TCMContext != nil {
 		if b, err := json.Marshal(body.TCMContext); err == nil {
+			if len(b) > anMaxContextJSON {
+				s.JSONError(w, http.StatusBadRequest, "tcmContext too large")
+				return
+			}
 			tcmCtxStr = string(b)
 		}
 	}
 
 	durStr := "unknown"
 	if body.Duration != nil {
-		durStr = fmt.Sprintf("%v", body.Duration)
+		durStr = anTruncRunes(fmt.Sprintf("%v", body.Duration), anMaxShortField)
 	}
 
 	userPrompt := fmt.Sprintf(`Please analyse this sleep sound recording.
@@ -619,8 +831,6 @@ Return JSON with fields: snoring_detected (bool), severity (none/mild/moderate/s
 		durStr, tcmCtxStr)
 
 	// audio/webm regardless of content (TS source hardcodes this).
-	_, b64 := anStripDataURL(body.Audio, "audio/webm")
-
 	req := gemini.GenerateRequest{
 		Contents: []gemini.Content{
 			{
@@ -641,14 +851,15 @@ Return JSON with fields: snoring_detected (bool), severity (none/mild/moderate/s
 
 	text, err := s.AI.Generate(r.Context(), "gemini-2.0-flash", req)
 	if err != nil {
-		s.JSONError(w, http.StatusInternalServerError, "failed to analyse audio: "+err.Error())
+		s.anUpstreamFail(w, "analyze-snore", err)
 		return
 	}
 
 	clean := anCleanJSON(text)
 	var result map[string]any
 	if err := json.Unmarshal([]byte(clean), &result); err != nil {
-		s.JSONError(w, http.StatusInternalServerError, "failed to parse AI response")
+		log.Printf("analyze-snore: unparseable AI response: %v", err)
+		s.JSONError(w, http.StatusBadGateway, "failed to parse AI response")
 		return
 	}
 	s.JSON(w, http.StatusOK, result)
@@ -680,10 +891,17 @@ func (s *Server) handleExtractText(w http.ResponseWriter, r *http.Request) {
 		body.Language = "en"
 	}
 
-	mimeFromURL, b64 := anStripDataURL(body.File, "")
-	mime := anDetectMime(mimeFromURL, body.FileType+body.FileName)
-	if b64 == "" {
-		b64 = body.File
+	if !anCheckLen(anMaxFileName, body.FileName, body.FileType) || !anCheckLen(anMaxShortField, body.Mode, body.Language) {
+		s.JSONError(w, http.StatusBadRequest, "field too long")
+		return
+	}
+	mimeFromURL, _ := anStripDataURL(body.File, "")
+	hint := anDetectMime(mimeFromURL, body.FileType+body.FileName)
+	// the mime that goes to the model is the one the bytes prove, not the client's label
+	mime, b64, st, msg := anValidateMedia(body.File, hint, "image/", "application/pdf")
+	if st != 0 {
+		s.JSONError(w, st, msg)
+		return
 	}
 
 	langLabel := map[string]string{
@@ -754,15 +972,26 @@ RESPOND IN STRICT JSON FORMAT:
 
 	text, err := s.AI.Generate(r.Context(), "gemini-2.0-flash", req)
 	if err != nil {
-		s.JSONError(w, http.StatusInternalServerError, err.Error())
+		s.anUpstreamFail(w, "extract-text", err)
 		return
 	}
 
 	clean := anCleanJSON(text)
 	var result map[string]any
 	if jsonErr := json.Unmarshal([]byte(clean), &result); jsonErr != nil {
-		// Fallback: return raw text.
-		s.JSON(w, http.StatusOK, map[string]any{"text": text, "warning": nil})
+		// The reply is not a complete JSON document. Plain prose is usable as the extracted text; a TRUNCATED
+		// document is salvaged up to where it stops; raw braces / fences must never become the stored "document
+		// text" (it feeds the summaries and the doctor's view).
+		if salvaged := anSalvageString(text, "text"); salvaged != "" {
+			s.JSON(w, http.StatusOK, map[string]any{"text": salvaged, "warning": "The extraction was cut short; the text may be incomplete."})
+			return
+		}
+		if anLooksLikeJSON(text) {
+			log.Printf("extract-text: unusable AI reply (not prose, not complete JSON)")
+			s.JSONError(w, http.StatusBadGateway, "Could not read the document. Please try again.")
+			return
+		}
+		s.JSON(w, http.StatusOK, map[string]any{"text": strings.TrimSpace(text), "warning": nil})
 		return
 	}
 
@@ -782,8 +1011,8 @@ RESPOND IN STRICT JSON FORMAT:
 			return
 		}
 		s.JSON(w, http.StatusOK, map[string]any{
-			"text":    anEnsureString(result["text"]),
-			"warning": result["warning"],
+			"text":     anEnsureString(result["text"]),
+			"warning":  result["warning"],
 			"is_valid": true,
 		})
 		return
@@ -831,6 +1060,10 @@ func (s *Server) handleValidateMedicine(w http.ResponseWriter, r *http.Request) 
 		s.JSONError(w, http.StatusBadRequest, "text is required")
 		return
 	}
+	if !anCheckLen(anMaxTextField, body.Text) || !anCheckLen(anMaxShortField, body.Language) {
+		s.JSONError(w, http.StatusBadRequest, "field too long")
+		return
+	}
 	if body.Language == "" {
 		body.Language = "en"
 	}
@@ -856,17 +1089,35 @@ Rules:
 5. Do not include markdown formatting. Just the raw JSON string.`,
 		body.Text, body.Language)
 
-	text, err := s.AI.GenerateText(r.Context(), "gemini-2.0-flash", "", prompt)
+	// Ask for JSON mode so the {isValid,message} object is reliable.
+	text, err := s.AI.Generate(r.Context(), "gemini-2.0-flash", gemini.GenerateRequest{
+		Contents: []gemini.Content{{Role: "user", Parts: []gemini.Part{{Text: prompt}}}},
+		GenerationConfig: &gemini.GenerationConfig{
+			ResponseMimeType: "application/json",
+			MaxOutputTokens:  1024,
+			ThinkingConfig:   gemini.NoThinking,
+		},
+	})
 	if err != nil {
-		s.JSONError(w, http.StatusInternalServerError, err.Error())
+		s.anUpstreamFail(w, "validate-medicine", err)
 		return
 	}
 
 	clean := anCleanJSON(text)
 	var result map[string]any
 	if err := json.Unmarshal([]byte(clean), &result); err != nil {
-		s.JSONError(w, http.StatusInternalServerError, "failed to parse AI response")
+		log.Printf("validate-medicine: unparseable AI response: %v", err)
+		s.JSONError(w, http.StatusBadGateway, "failed to parse AI response")
 		return
+	}
+	// The contract is {isValid: bool, message: string}; refuse to invent a verdict.
+	if _, ok := result["isValid"].(bool); !ok {
+		log.Printf("validate-medicine: AI response missing boolean isValid")
+		s.JSONError(w, http.StatusBadGateway, "failed to parse AI response")
+		return
+	}
+	if _, ok := result["message"].(string); !ok {
+		result["message"] = ""
 	}
 	s.JSON(w, http.StatusOK, result)
 }
@@ -952,7 +1203,7 @@ type anPatientInfo struct {
 	Weight any    `json:"weight"`
 }
 
-func (s *Server) handleGenerateInquiry(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGenerateInquiry(w http.ResponseWriter, r *http.Request, _ *AuthUser) {
 	if r.Method != http.MethodPost {
 		s.JSONError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
@@ -1021,7 +1272,64 @@ Return ONLY a JSON object with a "questions" array. Each question must have: id 
 		s.JSON(w, http.StatusOK, anFallbackQuestions)
 		return
 	}
-	s.JSON(w, http.StatusOK, result)
+	// The client needs a non-empty "questions" array of {id, question, choices[{id,label}], multiSelect}; the model
+	// sometimes returns bare strings or choices as one string, which the doctor UI renders as "undefined" or crashes
+	// on. Keep only well-formed questions; if none survive, use the fallback set.
+	raw, _ := result["questions"].([]any)
+	questions := anCleanQuestions(raw)
+	if len(questions) == 0 {
+		s.JSON(w, http.StatusOK, anFallbackQuestions)
+		return
+	}
+	s.JSON(w, http.StatusOK, map[string]any{"questions": questions})
+}
+
+// anCleanQuestions normalises the model's questions to the shape the doctor UI expects, dropping malformed ones.
+func anCleanQuestions(raw []any) []map[string]any {
+	out := make([]map[string]any, 0, len(raw))
+	for i, item := range raw {
+		m, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		question, ok := m["question"].(string)
+		if !ok || strings.TrimSpace(question) == "" {
+			continue
+		}
+		id, _ := m["id"].(string)
+		if strings.TrimSpace(id) == "" {
+			id = fmt.Sprintf("q%d", i+1)
+		}
+		rawChoices, ok := m["choices"].([]any)
+		if !ok {
+			continue
+		}
+		choices := make([]map[string]string, 0, len(rawChoices))
+		for j, c := range rawChoices {
+			switch x := c.(type) {
+			case string:
+				if strings.TrimSpace(x) != "" {
+					choices = append(choices, map[string]string{"id": fmt.Sprintf("c%d", j+1), "label": x})
+				}
+			case map[string]any:
+				label, _ := x["label"].(string)
+				if strings.TrimSpace(label) == "" {
+					continue
+				}
+				cid, _ := x["id"].(string)
+				if strings.TrimSpace(cid) == "" {
+					cid = fmt.Sprintf("c%d", j+1)
+				}
+				choices = append(choices, map[string]string{"id": cid, "label": label})
+			}
+		}
+		if len(choices) == 0 && len(rawChoices) > 0 {
+			continue // had choices, none of them usable
+		}
+		multi, _ := m["multiSelect"].(bool)
+		out = append(out, map[string]any{"id": id, "question": question, "choices": choices, "multiSelect": multi})
+	}
+	return out
 }
 
 // ---- map accessor helpers (unexported, an* prefix) ----
@@ -1089,7 +1397,7 @@ func anySliceVal(m map[string]any, keys ...string) any {
 }
 
 func strOrDefault(s, def string) string {
-	if s == "" || s == "<nil>" || s == "0" {
+	if strings.TrimSpace(s) == "" || s == "<nil>" {
 		return def
 	}
 	return s
@@ -1099,10 +1407,12 @@ func strOrDefault(s, def string) string {
 
 // registerAnalysisRoutes wires up all analysis-related API routes.
 func (s *Server) registerAnalysisRoutes() {
-	s.Mux.HandleFunc("POST /api/analyze-image", s.handleAnalyzeImage)
-	s.Mux.HandleFunc("POST /api/analyze-audio", s.handleAnalyzeAudio)
-	s.Mux.HandleFunc("POST /api/analyze-snore", s.handleAnalyzeSnore)
-	s.Mux.HandleFunc("POST /api/extract-text", s.handleExtractText)
-	s.Mux.HandleFunc("POST /api/validate-medicine", s.handleValidateMedicine)
-	s.Mux.HandleFunc("POST /api/doctor/generate-inquiry", s.handleGenerateInquiry)
+	// Public (the wizard and mobile app call these without a session) but each call spends model quota, so throttle per IP.
+	s.Mux.HandleFunc("POST /api/analyze-image", s.RateLimit(30, 1000, s.handleAnalyzeImage))
+	s.Mux.HandleFunc("POST /api/analyze-audio", s.RateLimit(30, 1000, s.handleAnalyzeAudio))
+	s.Mux.HandleFunc("POST /api/analyze-snore", s.RateLimit(30, 1000, s.handleAnalyzeSnore))
+	s.Mux.HandleFunc("POST /api/extract-text", s.RateLimit(30, 1000, s.handleExtractText))
+	s.Mux.HandleFunc("POST /api/validate-medicine", s.RateLimit(30, 1000, s.handleValidateMedicine))
+	s.Mux.HandleFunc("POST /api/doctor/generate-inquiry",
+		s.RateLimit(20, 500, s.RequireAuth(s.handleGenerateInquiry, "doctor", "admin")))
 }

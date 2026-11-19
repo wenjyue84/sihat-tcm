@@ -1,0 +1,35 @@
+{
+  "label": "_smoke",
+  "ai": "fake",
+  "db": "fake",
+  "port_offset": "300",
+  "concurrency": 3,
+  "started_at": "2026-10-12T01:49:50.907Z",
+  "wall_seconds": 5,
+  "selected": 3,
+  "ok": 3,
+  "failed": [],
+  "by_type": {
+    "tongue": {
+      "n": 1,
+      "ok": 1,
+      "kw_all_hit": 0,
+      "kw_miss": [
+        "tongue-01"
+      ]
+    },
+    "face": {
+      "n": 1,
+      "ok": 1,
+      "kw_all_hit": 1,
+      "kw_miss": []
+    },
+    "text": {
+      "n": 1,
+      "ok": 1,
+      "kw_all_hit": 1,
+      "kw_miss": []
+    }
+  },
+  "note": "keyword hits are a crude lexical signal against literature-derived expectations; read the raw JSONs before drawing conclusions."
+}

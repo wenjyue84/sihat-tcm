@@ -23,6 +23,10 @@
     return out;
   }
 
+  function tr(key, fallback) {
+    return typeof window.tcmT === 'function' ? window.tcmT(key, fallback) : fallback;
+  }
+
   var params      = parseParams();
   var tokenHash   = params.token_hash || '';
   var accessToken = params.access_token || '';
@@ -31,9 +35,9 @@
   document.addEventListener('DOMContentLoaded', function () {
     if (errCode) {
       showAlert(params.error_description ||
-        'This reset link is invalid or has expired. Please request a new one.', 'alert-error');
+        tr('reset.expired', 'This reset link is invalid or has expired. Please request a new one.'), 'alert-error');
     } else if (!tokenHash && !accessToken) {
-      showAlert('No reset token found. Please open the link from your password reset email.', 'alert-error');
+      showAlert(tr('reset.notoken', 'No reset token found. Please open the link from your password reset email.'), 'alert-error');
     }
     ['reset-password', 'reset-password2'].forEach(function (id) {
       var el = document.getElementById(id);
@@ -47,16 +51,16 @@
     var pw  = val('reset-password');
     var pw2 = val('reset-password2');
 
-    if (!pw || pw.length < 8) { showAlert('Password must be at least 8 characters.', 'alert-error'); return; }
-    if (pw !== pw2)           { showAlert('Passwords do not match.', 'alert-error'); return; }
+    if (!pw || pw.length < 8) { showAlert(tr('reset.minlen', 'Password must be at least 8 characters.'), 'alert-error'); return; }
+    if (pw !== pw2)           { showAlert(tr('reset.mismatch', 'Passwords do not match.'), 'alert-error'); return; }
     if (!tokenHash && !accessToken) {
-      showAlert('No reset token found. Please use the link from your email.', 'alert-error');
+      showAlert(tr('reset.notoken', 'No reset token found. Please open the link from your password reset email.'), 'alert-error');
       return;
     }
 
     var btn = document.getElementById('reset-btn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Updating…';
+    btn.innerHTML = '<span class="spinner"></span> ' + tr('reset.updating', 'Updating…');
 
     var payload = { password: pw };
     if (accessToken) payload.access_token = accessToken;
@@ -70,15 +74,15 @@
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
       .then(function (res) {
         if (!res.ok || res.d.success === false) {
-          throw new Error(res.d.error || 'Reset failed. The link may have expired.');
+          throw new Error(res.d.error || tr('reset.failed', 'Reset failed. The link may have expired.'));
         }
-        showAlert('Password updated! Redirecting to login…', 'alert-success');
+        showAlert(tr('reset.done', 'Password updated! Redirecting to login…'), 'alert-success');
         document.getElementById('reset-form').style.display = 'none';
         setTimeout(function () { window.location.href = '/login'; }, 1800);
       })
       .catch(function (err) {
         btn.disabled = false;
-        btn.textContent = 'Update Password 更新密码';
+        btn.textContent = tr('reset.btn', 'Update Password 更新密码');
         showAlert(err.message, 'alert-error');
       });
   };

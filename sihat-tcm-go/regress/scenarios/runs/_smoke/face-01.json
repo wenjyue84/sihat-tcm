@@ -1,0 +1,64 @@
+{
+  "id": "face-01",
+  "type": "face",
+  "label": "_smoke",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T01:49:55.868Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 34,
+      "bytes": 420,
+      "json_ok": true
+    }
+  ],
+  "ai": "fake",
+  "db": "fake",
+  "status": 200,
+  "ms": 34,
+  "raw": "{\"analysis_tags\":[],\"confidence\":100,\"image_description\":\"\",\"modelUsed\":1,\"notes\":\"\",\"observation\":\"Facial complexion appears pale with mild dark circles under the eyes; no jaundice or redness noted. Facial complexion appears pale with mild dark circles under the eyes; no jaundice or redness noted. \",\"pattern_suggestions\":[],\"potential_issues\":[\"Qi deficiency\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[]}\n",
+  "parsed": {
+    "analysis_tags": [],
+    "confidence": 100,
+    "image_description": "",
+    "modelUsed": 1,
+    "notes": "",
+    "observation": "Facial complexion appears pale with mild dark circles under the eyes; no jaundice or redness noted. Facial complexion appears pale with mild dark circles under the eyes; no jaundice or redness noted. ",
+    "pattern_suggestions": [],
+    "potential_issues": [
+      "Qi deficiency"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": []
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "face",
+    "image_file": "images/face-pale-s1101.webp",
+    "image_bytes": 44167
+  },
+  "expected": {
+    "intended_complexion": "pale / white (淡白)",
+    "expected_tcm": {
+      "complexion": "pale white",
+      "pattern": "Qi/Blood deficiency, Yang deficiency or cold",
+      "note": "WEAK ground truth: the generated pallor is subtle (a fairly ordinary fair complexion); treat a 'normal' reading as acceptable"
+    }
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "pale",
+          "pallid",
+          "white",
+          "light",
+          "fair"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

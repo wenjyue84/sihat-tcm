@@ -1,0 +1,62 @@
+{
+  "id": "case-04",
+  "type": "text",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9771247/",
+  "source_licence": "CC BY",
+  "source_title": "The effect of dilated cardiomyopathy with moyamoya disease in a 31-year-old Chinese man: A case report",
+  "paraphrase_note": "Symptoms/tongue/pulse paraphrased by the harness author from the open-access full text; source pattern and principle are the authors' own.",
+  "patient": {
+    "age": 31,
+    "sex": "male"
+  },
+  "chief_complaint": "Four days of episodic chest tightness and shortness of breath.",
+  "symptoms": [
+    "palpitations",
+    "fatigue after activity",
+    "swelling of both lower legs",
+    "slightly low spirit"
+  ],
+  "tongue_as_reported": "red tongue with thin coating",
+  "pulse_as_reported": "weak / sluggish (as reported after treatment); not described precisely at admission",
+  "source_pattern": "Qi deficiency with Blood stasis (Heart Yang/Qi lacking; water-damp overflowing as edema)",
+  "source_treatment_principle": "Invigorate the Heart and tonify Qi, promote blood circulation and remove stasis, with fluid-draining herbs (astragalus, codonopsis, poria, polyporus, angelica, chuanxiong)",
+  "ground_truth_strength": "strong",
+  "expect_keyword_groups": [
+    [
+      "qi"
+    ],
+    [
+      "blood stasis",
+      "stasis",
+      "stagnation"
+    ]
+  ],
+  "consult_request": {
+    "data": {
+      "basic_info": {
+        "name": "Case 04",
+        "age": "31",
+        "gender": "male",
+        "height": "",
+        "weight": "",
+        "symptoms": [
+          "shortness-breath",
+          "palpitations",
+          "fatigue"
+        ]
+      },
+      "wen_inquiry": "Chief complaint: Four days of episodic chest tightness and shortness of breath. Symptoms: palpitations; fatigue after activity; swelling of both lower legs; slightly low spirit.",
+      "wang_tongue": "red tongue with thin coating",
+      "wang_face": "",
+      "wen_audio": "",
+      "qie": {
+        "bpm": "",
+        "qualities": [
+          "weak"
+        ],
+        "note": "weak / sluggish (as reported after treatment); not described precisely at admission"
+      }
+    },
+    "language": "en"
+  }
+}

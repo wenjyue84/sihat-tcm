@@ -12,3 +12,18 @@
 *.stackdump
 scripts/scenario_reports*/
 *.png
+
+sihat-listener/logs/
+regress/.bin/
+regress/.state/
+regress/reports/
+
+# SQLite fallback database (DB_BACKEND=sqlite)
+/data/
+*.db
+*.db-wal
+*.db-shm
+/media/
+
+# ACI idle-sweep state (ledger, locks, sweep log)
+.aci/

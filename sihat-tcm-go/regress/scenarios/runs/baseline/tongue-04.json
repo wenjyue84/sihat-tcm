@@ -1,0 +1,120 @@
+{
+  "id": "tongue-04",
+  "type": "tongue",
+  "label": "baseline",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T01:50:56.587Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 118638,
+      "bytes": 2219,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 118639,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Yin Deficiency · Fluid Nourishment\",\"confidence\":91.4,\"description\":\"舌背縱橫交錯的多條深層裂紋，是慢性陰虛的典型表徵——體內津液長期不足，無法充養舌體組織。此格局經典對應胃陰或腎陰虧損，臨床可見口乾、盜汗、持續低度口渴等症狀。\",\"recommendations\":[\"每日補充滋陰食物：黑芝麻、銀耳、枸杞、蓮子、雪梨，同時嚴格避免辛辣、煎炸及燥烈食品，以防加速津液耗損\",\"務必在晚上11時前入睡以修復陰分；子時（23:00–01:00）熬夜對腎陰的損耗尤為嚴重，充足且規律的睡眠是養陰的根本\"],\"title\":\"Cracked Tongue\",\"title_cn\":\"裂紋舌\"},{\"category\":\"Qi \\u0026 Blood Deficiency · Spleen-Heart Nourishment\",\"confidence\":83.7,\"description\":\"舌體顏色明顯淺於正常淡紅舌標準，反映氣血不足、無力溫煦及充盈舌絡。此象多見於脾氣虛弱、生血乏源，心血不足以安神，臨床常伴疲倦、面色蒼白、注意力渙散及心悸等表現。\",\"recommendations\":[\"持續攝取補血食物：紅棗、龍眼肉、菠菜、黑豆，以及適量瘦紅肉或骨湯，雙補脾氣與心血\",\"戒除生冷食物及不規律飲食——此兩者直接損傷脾陽，削減脾胃運化生血之力；三餐定時、食物溫熟是固護中焦的基礎\"],\"title\":\"Pale Tongue\",\"title_cn\":\"淡白舌\"},{\"category\":\"Stomach Yin Deficiency · Digestive Restoration\",\"confidence\":76.8,\"description\":\"舌苔薄且局部呈地圖狀剝落，提示胃氣與胃陰不足，無力生成根底堅實的正常舌苔。此象常與上述裂紋並見，臨床表現為食慾減退、飯後腹脹、大便偏乾，或「胃中嘈雜、似飢非飢」的不適感。\",\"recommendations\":[\"採少食多餐、易消化的飲食模式：以溫粥、清蒸蔬菜及清淡湯品為主；避免暴飲暴食、長時間空腹及過量生冷乳製品，以免滅損胃陰\",\"可在中醫師指導下考慮使用滋養胃陰的中藥，如沙參、麥冬、玉竹，以恢復胃黏膜津液、促進舌苔生根\"],\"title\":\"Scanty Coating\",\"title_cn\":\"少苔 / 剝苔\"}],\"confidence\":86,\"image_description\":\"清晰的臨床特寫照，受檢者舌頭由手套手指輔助伸出，光線良好，舌背可見明顯裂紋與偏淡舌色。\",\"modelUsed\":1,\"notes\":\"圖片質素良好，自然光線充足；以手套手指輔助伸舌為標準臨床操作，不影響診斷讀取。拍攝角度略偏俯視，可見舌尖及側緣相對舌體稍紅，或提示心火或肝氣鬱結的兼症。舌底絡脈在舌根部分可見，未見明顯紫暗怒張，暫不支持顯著血瘀（瘀血）格局。建議補充正上方光源下的全舌正面照，以完整評估舌尖與兩側邊緣，提升診斷精確度。\",\"observation\":\"舌體呈淡白至淡粉色，舌面分布多條深層縱橫裂紋，舌苔薄而局部剝落，表面整體滋潤——整體指向陰虛夾氣血兩虛的複合虛損格局。\",\"pattern_suggestions\":[\"主要格局——陰虛夾氣血兩虛：裂紋、淡白舌色、少苔三者並見，指向慢性虛損積累——長期陰虧逐漸累及氣血生化之源；脾、胃、腎、心四臟均受牽連\",\"次要考量——脾胃氣陰兩虛：剝苔合淡白舌與裂紋，核心定位在中焦，提示脾胃運化失健是氣血陰液不足的上游根源\",\"格局鑑別——實熱證可能性較低（舌體偏淡為據）；但若患者自覺烘熱、五心煩熱或午後低熱，則需進一步評估是否兼有虛熱（陰虛火旺）的疊加\"],\"potential_issues\":[\"主要格局——陰虛夾氣血兩虛：裂紋、淡白舌色、少苔三者並見，指向慢性虛損積累——長期陰虧逐漸累及氣血生化之源；脾、胃、腎、心四臟均受牽連\",\"次要考量——脾胃氣陰兩虛：剝苔合淡白舌與裂紋，核心定位在中焦，提示脾胃運化失健是氣血陰液不足的上游根源\",\"格局鑑別——實熱證可能性較低（舌體偏淡為據）；但若患者自覺烘熱、五心煩熱或午後低熱，則需進一步評估是否兼有虛熱（陰虛火旺）的疊加\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"裂紋舌 (Liè Wén Shé) — Cracked Tongue — 多向深層裂紋，提示長期陰液虧耗，尤以胃、腎二經為重\",\"淡白舌 (Dàn Bái Shé) — Pale Tongue Body — 舌色偏淡，反映氣虛、血虛或陽虛寒凝\",\"少苔 / 剝苔 (Shǎo Tāi / Bō Tāi) — Scanty/Peeled Coating — 苔薄且局部剝脫，指向胃陰不足、消化之氣羸弱\",\"舌面潤澤 (Shé Miàn Rùn Zé) — Moist Tongue Surface — 表面仍有津潤，說明津液未至全竭，陽脫或嚴重乾燥的可能性較低\",\"舌質偏淡 (Shé Zhì Piān Dàn) — Pale-Tending Body — 支持虛損格局，實熱證的可能性低\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Yin Deficiency · Fluid Nourishment",
+        "confidence": 91.4,
+        "description": "舌背縱橫交錯的多條深層裂紋，是慢性陰虛的典型表徵——體內津液長期不足，無法充養舌體組織。此格局經典對應胃陰或腎陰虧損，臨床可見口乾、盜汗、持續低度口渴等症狀。",
+        "recommendations": [
+          "每日補充滋陰食物：黑芝麻、銀耳、枸杞、蓮子、雪梨，同時嚴格避免辛辣、煎炸及燥烈食品，以防加速津液耗損",
+          "務必在晚上11時前入睡以修復陰分；子時（23:00–01:00）熬夜對腎陰的損耗尤為嚴重，充足且規律的睡眠是養陰的根本"
+        ],
+        "title": "Cracked Tongue",
+        "title_cn": "裂紋舌"
+      },
+      {
+        "category": "Qi & Blood Deficiency · Spleen-Heart Nourishment",
+        "confidence": 83.7,
+        "description": "舌體顏色明顯淺於正常淡紅舌標準，反映氣血不足、無力溫煦及充盈舌絡。此象多見於脾氣虛弱、生血乏源，心血不足以安神，臨床常伴疲倦、面色蒼白、注意力渙散及心悸等表現。",
+        "recommendations": [
+          "持續攝取補血食物：紅棗、龍眼肉、菠菜、黑豆，以及適量瘦紅肉或骨湯，雙補脾氣與心血",
+          "戒除生冷食物及不規律飲食——此兩者直接損傷脾陽，削減脾胃運化生血之力；三餐定時、食物溫熟是固護中焦的基礎"
+        ],
+        "title": "Pale Tongue",
+        "title_cn": "淡白舌"
+      },
+      {
+        "category": "Stomach Yin Deficiency · Digestive Restoration",
+        "confidence": 76.8,
+        "description": "舌苔薄且局部呈地圖狀剝落，提示胃氣與胃陰不足，無力生成根底堅實的正常舌苔。此象常與上述裂紋並見，臨床表現為食慾減退、飯後腹脹、大便偏乾，或「胃中嘈雜、似飢非飢」的不適感。",
+        "recommendations": [
+          "採少食多餐、易消化的飲食模式：以溫粥、清蒸蔬菜及清淡湯品為主；避免暴飲暴食、長時間空腹及過量生冷乳製品，以免滅損胃陰",
+          "可在中醫師指導下考慮使用滋養胃陰的中藥，如沙參、麥冬、玉竹，以恢復胃黏膜津液、促進舌苔生根"
+        ],
+        "title": "Scanty Coating",
+        "title_cn": "少苔 / 剝苔"
+      }
+    ],
+    "confidence": 86,
+    "image_description": "清晰的臨床特寫照，受檢者舌頭由手套手指輔助伸出，光線良好，舌背可見明顯裂紋與偏淡舌色。",
+    "modelUsed": 1,
+    "notes": "圖片質素良好，自然光線充足；以手套手指輔助伸舌為標準臨床操作，不影響診斷讀取。拍攝角度略偏俯視，可見舌尖及側緣相對舌體稍紅，或提示心火或肝氣鬱結的兼症。舌底絡脈在舌根部分可見，未見明顯紫暗怒張，暫不支持顯著血瘀（瘀血）格局。建議補充正上方光源下的全舌正面照，以完整評估舌尖與兩側邊緣，提升診斷精確度。",
+    "observation": "舌體呈淡白至淡粉色，舌面分布多條深層縱橫裂紋，舌苔薄而局部剝落，表面整體滋潤——整體指向陰虛夾氣血兩虛的複合虛損格局。",
+    "pattern_suggestions": [
+      "主要格局——陰虛夾氣血兩虛：裂紋、淡白舌色、少苔三者並見，指向慢性虛損積累——長期陰虧逐漸累及氣血生化之源；脾、胃、腎、心四臟均受牽連",
+      "次要考量——脾胃氣陰兩虛：剝苔合淡白舌與裂紋，核心定位在中焦，提示脾胃運化失健是氣血陰液不足的上游根源",
+      "格局鑑別——實熱證可能性較低（舌體偏淡為據）；但若患者自覺烘熱、五心煩熱或午後低熱，則需進一步評估是否兼有虛熱（陰虛火旺）的疊加"
+    ],
+    "potential_issues": [
+      "主要格局——陰虛夾氣血兩虛：裂紋、淡白舌色、少苔三者並見，指向慢性虛損積累——長期陰虧逐漸累及氣血生化之源；脾、胃、腎、心四臟均受牽連",
+      "次要考量——脾胃氣陰兩虛：剝苔合淡白舌與裂紋，核心定位在中焦，提示脾胃運化失健是氣血陰液不足的上游根源",
+      "格局鑑別——實熱證可能性較低（舌體偏淡為據）；但若患者自覺烘熱、五心煩熱或午後低熱，則需進一步評估是否兼有虛熱（陰虛火旺）的疊加"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "裂紋舌 (Liè Wén Shé) — Cracked Tongue — 多向深層裂紋，提示長期陰液虧耗，尤以胃、腎二經為重",
+      "淡白舌 (Dàn Bái Shé) — Pale Tongue Body — 舌色偏淡，反映氣虛、血虛或陽虛寒凝",
+      "少苔 / 剝苔 (Shǎo Tāi / Bō Tāi) — Scanty/Peeled Coating — 苔薄且局部剝脫，指向胃陰不足、消化之氣羸弱",
+      "舌面潤澤 (Shé Miàn Rùn Zé) — Moist Tongue Surface — 表面仍有津潤，說明津液未至全竭，陽脫或嚴重乾燥的可能性較低",
+      "舌質偏淡 (Shé Zhì Piān Dàn) — Pale-Tending Body — 支持虛損格局，實熱證的可能性低"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-fissured-tongue.jpg",
+    "image_bytes": 316463
+  },
+  "expected": {
+    "documented_condition": "fissured tongue (own work, Commons)",
+    "expected_tcm": {
+      "body_colour": "pink-red",
+      "coating": "thin white, partly sparse",
+      "thickness": "thin",
+      "shape": "deep central and transverse fissures",
+      "moisture": "moist",
+      "pattern": "Yin or Blood deficiency, or Spleen Qi deficiency with dampness (shallow central cracks); often asymptomatic"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Fissured_tongue.jpg"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "crack",
+          "fissur"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "yin",
+          "blood",
+          "spleen",
+          "qi"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

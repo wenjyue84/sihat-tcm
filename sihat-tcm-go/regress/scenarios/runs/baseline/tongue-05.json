@@ -1,0 +1,120 @@
+{
+  "id": "tongue-05",
+  "type": "tongue",
+  "label": "baseline",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T01:52:27.106Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 112294,
+      "bytes": 1796,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 112295,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Yin Deficiency · Fluid Nourishment\",\"confidence\":93.2,\"description\":\"舌體表面可見多條深裂紋，尤以中央區域最為明顯，提示陰液不足、舌體失於濡養。裂紋舌在中醫診斷中為陰虛（陰虛）或熱邪長期耗傷津液之典型表現。\",\"recommendations\":[\"每日可食用滋陰養液之品，如黑芝麻、白木耳、枸杞、百合，以補充體內陰津。\",\"避免辛辣、油炸及過於溫燥之食物（如辣椒、酒精、煎炸品），以免進一步耗傷陰液；宜多飲溫水或清涼草茶，如菊花茶。\"],\"title\":\"Cracked Tongue\",\"title_cn\":\"裂纹舌\"},{\"category\":\"Spleen Qi Deficiency · Spleen Support\",\"confidence\":86.7,\"description\":\"舌體胖大圓潤，提示脾氣虛弱、運化失司，水濕不得正常輸布，停聚於舌體而致胖大，即濕困之象。\",\"recommendations\":[\"宜食溫熱易消化之品以顧護脾氣，如白粥（粥）、山藥、薏苡仁、蓮子；避免生冷、肥甘厚膩之物，以免加重脾胃負擔。\",\"養成規律三餐習慣，避免過飽或深夜進食，因飲食不節是中醫認為損傷脾氣、助長濕邪的主要因素之一。\"],\"title\":\"Swollen Tongue\",\"title_cn\":\"胖大舌\"},{\"category\":\"Deficiency Heat · Heat Clearing\",\"confidence\":78.3,\"description\":\"舌體顏色較正常淡紅舌偏深，提示體內存在熱象；結合裂紋舌等陰虛指徵，此熱象多屬虛熱（虛熱），而非實火證型。\",\"recommendations\":[\"可適量食用清熱滋陰之品，如綠豆湯、蓮藕、雪梨；同時注意情緒調節，因肝氣鬱結化火亦為虛熱常見誘因。\",\"養成早睡習慣，建議晚上11時前入睡，因長期熬夜為中醫陰虛及虛熱的主要成因之一。\"],\"title\":\"Red Tongue\",\"title_cn\":\"红舌\"}],\"confidence\":88,\"image_description\":\"清晰的舌頭特寫照片，可見舌體顏色、表面紋理、明顯深裂紋及薄少舌苔。\",\"modelUsed\":1,\"notes\":\"圖像清晰，特寫角度良好；但室內暖色光源可能使舌色顯得偏紅，建議於自然光下複查以確認紅舌程度。裂紋（裂纹舌）為本次診斷最顯著且明確之特徵。胖大舌評估為中等置信度，因舌體大小最佳評估需參照完整口腔空間，本圖口腔部分被遮擋。圖中未見舌下靜脈曲張、口腔潰瘍、芒刺（芒刺舌）或地圖苔（剥苔）等特殊表現。\",\"observation\":\"舌體偏紅且胖大，表面可見多條明顯深裂紋，舌苔薄少，整體提示陰虛與脾氣虛並存、兼有輕度內熱的複合證型。\",\"pattern_suggestions\":[\"主證：脾氣虛濕困（脾氣虛湿困）— 以舌體胖大、苔少分佈不均為據\",\"兼證：陰虛內熱（陰虛内熱）— 以多條深裂紋、舌色偏紅、少苔為據\",\"複合體質：脾氣虛日久不能化生足夠津液，漸致陰虛，陰虛生內熱，最終形成虛熱並見之慢性複合虛損體質\"],\"potential_issues\":[\"主證：脾氣虛濕困（脾氣虛湿困）— 以舌體胖大、苔少分佈不均為據\",\"兼證：陰虛內熱（陰虛内熱）— 以多條深裂紋、舌色偏紅、少苔為據\",\"複合體質：脾氣虛日久不能化生足夠津液，漸致陰虛，陰虛生內熱，最終形成虛熱並見之慢性複合虛損體質\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"裂纹舌 (Liè Wén Shé) — 裂紋舌 — 主陰虛、熱邪耗傷津液，或脾胃氣虛日久所致\",\"胖大舌 (Pàng Dà Shé) — 胖大舌 — 主脾氣虛弱、水濕停聚，或兼陽虛之象\",\"红舌 (Hóng Shé) — 紅舌 — 主內熱證；結合陰虛諸象，考慮以虛熱為主\",\"少苔 (Shǎo Tāi) — 少苔 — 主胃氣或陰液不足，苔少提示津液已有耗傷之象\",\"舌津偏润 (Shé Jīn Piān Rùn) — 舌面偏潤 — 提示水液代謝尚有部分功能，陰傷未至極重\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Yin Deficiency · Fluid Nourishment",
+        "confidence": 93.2,
+        "description": "舌體表面可見多條深裂紋，尤以中央區域最為明顯，提示陰液不足、舌體失於濡養。裂紋舌在中醫診斷中為陰虛（陰虛）或熱邪長期耗傷津液之典型表現。",
+        "recommendations": [
+          "每日可食用滋陰養液之品，如黑芝麻、白木耳、枸杞、百合，以補充體內陰津。",
+          "避免辛辣、油炸及過於溫燥之食物（如辣椒、酒精、煎炸品），以免進一步耗傷陰液；宜多飲溫水或清涼草茶，如菊花茶。"
+        ],
+        "title": "Cracked Tongue",
+        "title_cn": "裂纹舌"
+      },
+      {
+        "category": "Spleen Qi Deficiency · Spleen Support",
+        "confidence": 86.7,
+        "description": "舌體胖大圓潤，提示脾氣虛弱、運化失司，水濕不得正常輸布，停聚於舌體而致胖大，即濕困之象。",
+        "recommendations": [
+          "宜食溫熱易消化之品以顧護脾氣，如白粥（粥）、山藥、薏苡仁、蓮子；避免生冷、肥甘厚膩之物，以免加重脾胃負擔。",
+          "養成規律三餐習慣，避免過飽或深夜進食，因飲食不節是中醫認為損傷脾氣、助長濕邪的主要因素之一。"
+        ],
+        "title": "Swollen Tongue",
+        "title_cn": "胖大舌"
+      },
+      {
+        "category": "Deficiency Heat · Heat Clearing",
+        "confidence": 78.3,
+        "description": "舌體顏色較正常淡紅舌偏深，提示體內存在熱象；結合裂紋舌等陰虛指徵，此熱象多屬虛熱（虛熱），而非實火證型。",
+        "recommendations": [
+          "可適量食用清熱滋陰之品，如綠豆湯、蓮藕、雪梨；同時注意情緒調節，因肝氣鬱結化火亦為虛熱常見誘因。",
+          "養成早睡習慣，建議晚上11時前入睡，因長期熬夜為中醫陰虛及虛熱的主要成因之一。"
+        ],
+        "title": "Red Tongue",
+        "title_cn": "红舌"
+      }
+    ],
+    "confidence": 88,
+    "image_description": "清晰的舌頭特寫照片，可見舌體顏色、表面紋理、明顯深裂紋及薄少舌苔。",
+    "modelUsed": 1,
+    "notes": "圖像清晰，特寫角度良好；但室內暖色光源可能使舌色顯得偏紅，建議於自然光下複查以確認紅舌程度。裂紋（裂纹舌）為本次診斷最顯著且明確之特徵。胖大舌評估為中等置信度，因舌體大小最佳評估需參照完整口腔空間，本圖口腔部分被遮擋。圖中未見舌下靜脈曲張、口腔潰瘍、芒刺（芒刺舌）或地圖苔（剥苔）等特殊表現。",
+    "observation": "舌體偏紅且胖大，表面可見多條明顯深裂紋，舌苔薄少，整體提示陰虛與脾氣虛並存、兼有輕度內熱的複合證型。",
+    "pattern_suggestions": [
+      "主證：脾氣虛濕困（脾氣虛湿困）— 以舌體胖大、苔少分佈不均為據",
+      "兼證：陰虛內熱（陰虛内熱）— 以多條深裂紋、舌色偏紅、少苔為據",
+      "複合體質：脾氣虛日久不能化生足夠津液，漸致陰虛，陰虛生內熱，最終形成虛熱並見之慢性複合虛損體質"
+    ],
+    "potential_issues": [
+      "主證：脾氣虛濕困（脾氣虛湿困）— 以舌體胖大、苔少分佈不均為據",
+      "兼證：陰虛內熱（陰虛内熱）— 以多條深裂紋、舌色偏紅、少苔為據",
+      "複合體質：脾氣虛日久不能化生足夠津液，漸致陰虛，陰虛生內熱，最終形成虛熱並見之慢性複合虛損體質"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "裂纹舌 (Liè Wén Shé) — 裂紋舌 — 主陰虛、熱邪耗傷津液，或脾胃氣虛日久所致",
+      "胖大舌 (Pàng Dà Shé) — 胖大舌 — 主脾氣虛弱、水濕停聚，或兼陽虛之象",
+      "红舌 (Hóng Shé) — 紅舌 — 主內熱證；結合陰虛諸象，考慮以虛熱為主",
+      "少苔 (Shǎo Tāi) — 少苔 — 主胃氣或陰液不足，苔少提示津液已有耗傷之象",
+      "舌津偏润 (Shé Jīn Piān Rùn) — 舌面偏潤 — 提示水液代謝尚有部分功能，陰傷未至極重"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-fissured-tongue-b.jpg",
+    "image_bytes": 445283
+  },
+  "expected": {
+    "documented_condition": "fissured tongue",
+    "expected_tcm": {
+      "body_colour": "light red",
+      "coating": "thin white",
+      "thickness": "thin",
+      "shape": "central deep fissure with side cracks",
+      "moisture": "moist",
+      "pattern": "Yin/Blood deficiency or Spleen Qi deficiency (cracks)"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Fissured_Tongue.JPG"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "crack",
+          "fissur"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "yin",
+          "blood",
+          "spleen",
+          "qi"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

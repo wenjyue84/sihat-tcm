@@ -1,0 +1,28 @@
+$ uv run --with playwright python scripts/devices_browser_test.py   (run 3 of 3, 2026-10-12)
+PASS wizard.link_panel_visible
+PASS wizard.requests_heart_rate_service
+PASS wizard.live_bpm_shown
+PASS wizard.average_in_bpm_field
+PASS wizard.vitals_chip
+PASS wizard.result_text
+PASS wizard.summary_lists_device_readings
+PASS wizard.consult_payload_has_device_vitals
+PASS ios.explains_why_not
+PASS ios.bluetooth_buttons_marked_unavailable
+PASS dash.four_channel_cards
+PASS dash.art_image_has_dimensions
+PASS dash.honest_bluetooth_copy
+PASS dash.google_goes_to_consent_with_pkce
+PASS dash.google_connected_and_synced
+PASS dash.return_banner_shown
+PASS dash.token_shown_once
+PASS dash.ingest_with_the_token_works
+PASS dash.token_not_shown_again
+PASS dash.apple_export_imported
+PASS dash.apple_reimport_is_noop
+PASS dash.manual_entry_saved
+PASS dash.recent_table_lists_sources
+PASS dash.mobile_no_horizontal_overflow
+PASS dash.chinese_strings
+PASS dash.delete_all
+26/26 checks passed

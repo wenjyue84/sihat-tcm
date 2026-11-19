@@ -44,11 +44,11 @@ func (s *Server) SystemPrompt(ctx context.Context, role string) string {
 	text := ""
 	if s.DB.Configured() {
 		var rows []struct {
-			Prompt string `json:"prompt"`
+			Prompt string `json:"prompt_text"`
 		}
 		cctx, cancel := context.WithTimeout(ctx, 8*time.Second)
 		defer cancel()
-		if err := s.DB.Select(cctx, "system_prompts", "select=prompt&role=eq."+role, "", &rows); err == nil && len(rows) > 0 {
+		if err := s.DB.Select(cctx, "system_prompts", "select=prompt_text&role=eq."+role, "", &rows); err == nil && len(rows) > 0 {
 			text = rows[0].Prompt
 		}
 	}

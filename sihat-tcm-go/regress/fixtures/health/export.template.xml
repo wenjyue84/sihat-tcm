@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HealthData [
+<!ELEMENT HealthData (ExportDate,Me,(Record|Correlation|Workout|ActivitySummary)*)>
+<!ATTLIST HealthData locale CDATA #REQUIRED>
+<!ELEMENT ExportDate EMPTY>
+<!ATTLIST ExportDate value CDATA #REQUIRED>
+<!ELEMENT Me EMPTY>
+<!ATTLIST Me HKCharacteristicTypeIdentifierDateOfBirth CDATA #REQUIRED>
+<!ELEMENT Record (MetadataEntry*)>
+<!ATTLIST Record type CDATA #REQUIRED sourceName CDATA #REQUIRED unit CDATA #IMPLIED startDate CDATA #REQUIRED endDate CDATA #REQUIRED value CDATA #IMPLIED>
+<!ELEMENT MetadataEntry EMPTY>
+<!ATTLIST MetadataEntry key CDATA #REQUIRED value CDATA #REQUIRED>
+]>
+<!-- SYNTHETIC Apple Health export for the health ACI suite / Go tests. {{dN}} = the date N days ago (UTC), filled in at run time so the
+     30-day window always contains it. Not real health data. -->
+<HealthData locale="en_MY">
+ <ExportDate value="{{d0}} 12:00:00 +0800"/>
+ <Me HKCharacteristicTypeIdentifierDateOfBirth="1990-01-01"/>
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Test Watch" unit="count/min" startDate="{{d1}} 08:05:00 +0800" endDate="{{d1}} 08:05:00 +0800" value="70">
+  <MetadataEntry key="HKMetadataKeyHeartRateMotionContext" value="0"/>
+ </Record>
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Test Watch" unit="count/min" startDate="{{d1}} 08:30:00 +0800" endDate="{{d1}} 08:30:00 +0800" value="80"/>
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Test Watch" unit="count/min" startDate="{{d1}} 09:10:00 +0800" endDate="{{d1}} 09:10:00 +0800" value="90"/>
+ <Record type="HKQuantityTypeIdentifierHeartRate" sourceName="Test Watch" unit="count/min" startDate="{{d45}} 09:10:00 +0800" endDate="{{d45}} 09:10:00 +0800" value="99"/>
+ <Record type="HKQuantityTypeIdentifierRestingHeartRate" sourceName="Test Watch" unit="count/min" startDate="{{d1}} 00:00:00 +0800" endDate="{{d1}} 23:59:00 +0800" value="58"/>
+ <Record type="HKQuantityTypeIdentifierHeartRateVariabilitySDNN" sourceName="Test Watch" unit="ms" startDate="{{d1}} 03:10:00 +0800" endDate="{{d1}} 03:10:30 +0800" value="42.5"/>
+ <Record type="HKQuantityTypeIdentifierOxygenSaturation" sourceName="Test Watch" unit="%" startDate="{{d1}} 03:00:00 +0800" endDate="{{d1}} 03:00:00 +0800" value="0.97"/>
+ <Record type="HKQuantityTypeIdentifierBloodPressureSystolic" sourceName="Test Cuff" unit="mmHg" startDate="{{d2}} 07:00:00 +0800" endDate="{{d2}} 07:00:00 +0800" value="118"/>
+ <Record type="HKQuantityTypeIdentifierBloodPressureDiastolic" sourceName="Test Cuff" unit="mmHg" startDate="{{d2}} 07:00:00 +0800" endDate="{{d2}} 07:00:00 +0800" value="76"/>
+ <Record type="HKQuantityTypeIdentifierBodyTemperature" sourceName="Test Thermometer" unit="degF" startDate="{{d2}} 07:10:00 +0800" endDate="{{d2}} 07:10:00 +0800" value="98.6"/>
+ <Record type="HKQuantityTypeIdentifierBodyTemperature" sourceName="Test Thermometer" unit="degC" startDate="{{d3}} 07:10:00 +0800" endDate="{{d3}} 07:10:00 +0800" value="120"/>
+ <Record type="HKQuantityTypeIdentifierRespiratoryRate" sourceName="Test Watch" unit="count/min" startDate="{{d1}} 03:20:00 +0800" endDate="{{d1}} 03:20:00 +0800" value="15"/>
+ <Record type="HKQuantityTypeIdentifierStepCount" sourceName="Test iPhone" unit="count" startDate="{{d1}} 09:00:00 +0800" endDate="{{d1}} 09:30:00 +0800" value="3000"/>
+ <Record type="HKQuantityTypeIdentifierStepCount" sourceName="Test iPhone" unit="count" startDate="{{d1}} 15:00:00 +0800" endDate="{{d1}} 15:30:00 +0800" value="2000"/>
+ <Record type="HKQuantityTypeIdentifierStepCount" sourceName="Test Watch" unit="count" startDate="{{d1}} 09:00:00 +0800" endDate="{{d1}} 09:30:00 +0800" value="2500"/>
+ <Record type="HKQuantityTypeIdentifierBodyMass" sourceName="Test Scale" unit="kg" startDate="{{d3}} 06:30:00 +0800" endDate="{{d3}} 06:30:00 +0800" value="70.5"/>
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Test Watch" startDate="{{d2}} 22:00:00 +0800" endDate="{{d1}} 07:00:00 +0800" value="HKCategoryValueSleepAnalysisInBed"/>
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Test Watch" startDate="{{d1}} 00:00:00 +0800" endDate="{{d1}} 04:00:00 +0800" value="HKCategoryValueSleepAnalysisAsleepCore"/>
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Test Watch" startDate="{{d1}} 04:00:00 +0800" endDate="{{d1}} 06:30:00 +0800" value="HKCategoryValueSleepAnalysisAsleepREM"/>
+ <Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Test Watch" startDate="{{d1}} 06:30:00 +0800" endDate="{{d1}} 07:00:00 +0800" value="HKCategoryValueSleepAnalysisAwake"/>
+ <Record type="HKQuantityTypeIdentifierDietaryWater" sourceName="Test iPhone" unit="mL" startDate="{{d1}} 10:00:00 +0800" endDate="{{d1}} 10:00:00 +0800" value="250"/>
+</HealthData>

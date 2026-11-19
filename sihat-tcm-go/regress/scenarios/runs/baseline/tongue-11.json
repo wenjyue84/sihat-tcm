@@ -1,0 +1,123 @@
+{
+  "id": "tongue-11",
+  "type": "tongue",
+  "label": "baseline",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T01:56:40.296Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 95677,
+      "bytes": 1785,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 95679,
+  "raw": "{\"analysis_tags\":[{\"category\":\"脾氣虛 · 化濕健脾\",\"confidence\":87.4,\"description\":\"舌體明顯寬胖腫大，超出正常比例，是脾失運化、水濕停聚於舌體的經典表現。臨床常伴疲倦乏力、消化遲滯、四肢沉重感。\",\"recommendations\":[\"戒除生冷、冰凍及寒涼飲食，改以溫熱熟食為主，以護脾陽、防止進一步生濕。\",\"每日食用健脾食材，如山藥、薏苡仁、蓮子，煮成粥或湯水作為日常調養。\"],\"title\":\"Swollen Enlarged Tongue\",\"title_cn\":\"胖大舌\"},{\"category\":\"脾氣虛 · 運化水液\",\"confidence\":82.1,\"description\":\"舌緣出現鋸齒狀齒印，說明舌體過於柔軟腫脹而無力維持形態，是脾氣不足、水液代謝失常的典型徵象，常見於便溏、食後腹脹、食欲不振等症狀。\",\"recommendations\":[\"養成定時進餐習慣，避免深夜進食，讓脾胃有充分時間休息與恢復。\",\"每日進行20至30分鐘的散步或太極拳等和緩運動，有助於行氣化濕，且不耗傷脾氣。\"],\"title\":\"Teeth-Marked Edges\",\"title_cn\":\"齒痕舌\"},{\"category\":\"寒濕內蘊 · 調和脾胃\",\"confidence\":78.9,\"description\":\"全舌均勻分佈白色濕潤苔，提示體內寒濕之邪，反映脾胃運化水液功能受阻，偏向寒濕性質。臨床可見消化不適、水腫傾向、精神倦怠及思維不清晰等表現。\",\"recommendations\":[\"每日以生薑、陳皮、桂皮煮茶飲用，溫暖中焦、驅散寒濕之邪。\",\"嚴格避免冰飲、冰鎮水果、乳製品及過量甜食，此類食物是中醫飲食生濕的主要成因。\"],\"title\":\"White Moist Coating\",\"title_cn\":\"白潤苔\"}],\"confidence\":84,\"image_description\":\"清晰的舌頭近拍照片，可見成年男性伸出的舌體、舌苔及舌緣\",\"modelUsed\":1,\"notes\":\"照片光線充足、舌體伸展清晰，圖像質量良好。未見舌下靜脈怒張、舌面潰瘍或明顯地圖舌剝苔。面部鬍鬚構成畫面邊框，但不影響診斷判讀。建議結合臨床問診，重點詢問：消化症狀（腹脹、便溏）、精力狀況、四肢沉重感及飲水習慣，以確認脾虛濕困證型。若患者另有皮膚油膩、頭部昏重或噁心等症狀，應正式評估是否屬於痰濕體質。\",\"observation\":\"舌體明顯胖大寬闊（胖大舌），舌色淡紅偏淡，舌緣呈鋸齒狀齒痕，全舌覆蓋白潤苔，整體指向脾氣虛弱、內生濕邪積聚的核心病機。\",\"pattern_suggestions\":[\"主要證型 — 脾虛濕困：舌體胖大、齒痕、白潤苔三者並見，確立此為核心證型。脾氣不足、運化失司，水濕內生並停聚於組織。\",\"次要證型 — 寒濕內蘊：白潤苔（而非黃苔或燥苔）配合舌色偏淡，提示濕邪夾寒，中焦陽氣不足為重要成因。\",\"建議排查 脾胃氣虛 作為上述兩型之根本，尤其當患者同時出現長期疲勞、便溏及食欲不振時，更應重視此底層虛證。\"],\"potential_issues\":[\"主要證型 — 脾虛濕困：舌體胖大、齒痕、白潤苔三者並見，確立此為核心證型。脾氣不足、運化失司，水濕內生並停聚於組織。\",\"次要證型 — 寒濕內蘊：白潤苔（而非黃苔或燥苔）配合舌色偏淡，提示濕邪夾寒，中焦陽氣不足為重要成因。\",\"建議排查 脾胃氣虛 作為上述兩型之根本，尤其當患者同時出現長期疲勞、便溏及食欲不振時，更應重視此底層虛證。\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"胖大舌 (Páng Dà Shé) — 舌體胖大 — 脾氣虛、水濕積聚於舌體組織\",\"齒痕舌 (Chǐ Hén Shé) — 鋸齒狀舌緣 — 脾氣虛弱、無力運化水濕\",\"白苔 (Bái Tāi) — 白色舌苔 — 寒象或寒濕內蘊、脾胃功能失調\",\"潤苔 (Rùn Tāi) — 濕潤舌苔 — 水濕過盛、陽氣不足以運化津液\",\"淡紅偏淡舌色 (Dàn Hóng Piān Dàn) — 淡紅偏淡 — 輕度氣虛或血虛兼夾\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "脾氣虛 · 化濕健脾",
+        "confidence": 87.4,
+        "description": "舌體明顯寬胖腫大，超出正常比例，是脾失運化、水濕停聚於舌體的經典表現。臨床常伴疲倦乏力、消化遲滯、四肢沉重感。",
+        "recommendations": [
+          "戒除生冷、冰凍及寒涼飲食，改以溫熱熟食為主，以護脾陽、防止進一步生濕。",
+          "每日食用健脾食材，如山藥、薏苡仁、蓮子，煮成粥或湯水作為日常調養。"
+        ],
+        "title": "Swollen Enlarged Tongue",
+        "title_cn": "胖大舌"
+      },
+      {
+        "category": "脾氣虛 · 運化水液",
+        "confidence": 82.1,
+        "description": "舌緣出現鋸齒狀齒印，說明舌體過於柔軟腫脹而無力維持形態，是脾氣不足、水液代謝失常的典型徵象，常見於便溏、食後腹脹、食欲不振等症狀。",
+        "recommendations": [
+          "養成定時進餐習慣，避免深夜進食，讓脾胃有充分時間休息與恢復。",
+          "每日進行20至30分鐘的散步或太極拳等和緩運動，有助於行氣化濕，且不耗傷脾氣。"
+        ],
+        "title": "Teeth-Marked Edges",
+        "title_cn": "齒痕舌"
+      },
+      {
+        "category": "寒濕內蘊 · 調和脾胃",
+        "confidence": 78.9,
+        "description": "全舌均勻分佈白色濕潤苔，提示體內寒濕之邪，反映脾胃運化水液功能受阻，偏向寒濕性質。臨床可見消化不適、水腫傾向、精神倦怠及思維不清晰等表現。",
+        "recommendations": [
+          "每日以生薑、陳皮、桂皮煮茶飲用，溫暖中焦、驅散寒濕之邪。",
+          "嚴格避免冰飲、冰鎮水果、乳製品及過量甜食，此類食物是中醫飲食生濕的主要成因。"
+        ],
+        "title": "White Moist Coating",
+        "title_cn": "白潤苔"
+      }
+    ],
+    "confidence": 84,
+    "image_description": "清晰的舌頭近拍照片，可見成年男性伸出的舌體、舌苔及舌緣",
+    "modelUsed": 1,
+    "notes": "照片光線充足、舌體伸展清晰，圖像質量良好。未見舌下靜脈怒張、舌面潰瘍或明顯地圖舌剝苔。面部鬍鬚構成畫面邊框，但不影響診斷判讀。建議結合臨床問診，重點詢問：消化症狀（腹脹、便溏）、精力狀況、四肢沉重感及飲水習慣，以確認脾虛濕困證型。若患者另有皮膚油膩、頭部昏重或噁心等症狀，應正式評估是否屬於痰濕體質。",
+    "observation": "舌體明顯胖大寬闊（胖大舌），舌色淡紅偏淡，舌緣呈鋸齒狀齒痕，全舌覆蓋白潤苔，整體指向脾氣虛弱、內生濕邪積聚的核心病機。",
+    "pattern_suggestions": [
+      "主要證型 — 脾虛濕困：舌體胖大、齒痕、白潤苔三者並見，確立此為核心證型。脾氣不足、運化失司，水濕內生並停聚於組織。",
+      "次要證型 — 寒濕內蘊：白潤苔（而非黃苔或燥苔）配合舌色偏淡，提示濕邪夾寒，中焦陽氣不足為重要成因。",
+      "建議排查 脾胃氣虛 作為上述兩型之根本，尤其當患者同時出現長期疲勞、便溏及食欲不振時，更應重視此底層虛證。"
+    ],
+    "potential_issues": [
+      "主要證型 — 脾虛濕困：舌體胖大、齒痕、白潤苔三者並見，確立此為核心證型。脾氣不足、運化失司，水濕內生並停聚於組織。",
+      "次要證型 — 寒濕內蘊：白潤苔（而非黃苔或燥苔）配合舌色偏淡，提示濕邪夾寒，中焦陽氣不足為重要成因。",
+      "建議排查 脾胃氣虛 作為上述兩型之根本，尤其當患者同時出現長期疲勞、便溏及食欲不振時，更應重視此底層虛證。"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "胖大舌 (Páng Dà Shé) — 舌體胖大 — 脾氣虛、水濕積聚於舌體組織",
+      "齒痕舌 (Chǐ Hén Shé) — 鋸齒狀舌緣 — 脾氣虛弱、無力運化水濕",
+      "白苔 (Bái Tāi) — 白色舌苔 — 寒象或寒濕內蘊、脾胃功能失調",
+      "潤苔 (Rùn Tāi) — 濕潤舌苔 — 水濕過盛、陽氣不足以運化津液",
+      "淡紅偏淡舌色 (Dàn Hóng Piān Dàn) — 淡紅偏淡 — 輕度氣虛或血虛兼夾"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-macroglossia-with-crenations-along-the-m.png",
+    "image_bytes": 751966
+  },
+  "expected": {
+    "documented_condition": "macroglossia with scalloped (crenated) margins and papillary atrophy",
+    "expected_tcm": {
+      "body_colour": "pale to pale-red",
+      "coating": "thin / reduced",
+      "thickness": "thin",
+      "shape": "enlarged with scalloped, tooth-marked edges",
+      "moisture": "moist/wet",
+      "pattern": "Spleen Qi deficiency with Dampness; Kidney/Spleen Yang deficiency in the elderly"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Macroglossia_with_crenations_along_the_margins_and_loss_of_papillae_on_dorsum_surface_of_the_tongue.png"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "scallop",
+          "tooth",
+          "teeth",
+          "crenat",
+          "swollen",
+          "enlarg"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "spleen",
+          "damp",
+          "qi"
+        ],
+        "hit": false
+      }
+    ],
+    "all_hit": false
+  }
+}

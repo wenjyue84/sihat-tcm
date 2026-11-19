@@ -1,0 +1,240 @@
+{{define "bi"}}<span class="zh" lang="zh-CN">{{.ZH}}</span><span class="en" lang="en">{{.EN}}</span>{{end}}<!DOCTYPE html>
+<html lang="zh-CN" data-dlang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{.Title}} · Sihat TCM Tour</title>
+  <meta name="description" content="Sihat TCM 产品演示:AI 辅助四诊合参,覆盖访客、患者、医生、管理员、开发者全部角色。 / A guided tour of every role in Sihat TCM.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0f5132">
+  <script>
+  /* Language is decided before first paint (no flash): ?lang= > saved choice > Chinese. */
+  (function () {
+    var l = 'zh';
+    try { var q = new URLSearchParams(location.search).get('lang'); var s = localStorage.getItem('tcm-demo-lang'); l = (q === 'en' || q === 'zh') ? q : (s === 'en' || s === 'zh' ? s : 'zh'); } catch (e) {}
+    var d = document.documentElement; d.setAttribute('data-dlang', l); d.setAttribute('lang', l === 'en' ? 'en' : 'zh-CN');
+    if (/[?&]autoplay=1/.test(location.search)) d.className += ' autoplay';
+  })();
+  </script>
+  <link rel="stylesheet" href="{{asset "/static/css/demo.css"}}">
+  {{template "favicon"}}
+</head>
+<body{{if .Autoplay}} class="autoplay"{{end}} data-start-act="{{.StartAct}}">
+<a class="skip" href="#act-0"><span class="zh">跳到正文</span><span class="en">Skip to content</span></a>
+<div id="demo-progress" class="demo-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Tour progress"><i></i></div>
+
+<header class="demo-head">
+  <div class="wrap head-row">
+    <a class="brand" href="#act-0" aria-label="Sihat TCM">Sihat TCM <span class="brand-zh">四诊合参</span></a>
+    <nav class="act-nav" aria-label="Acts">
+      <a href="#act-0" data-act-link="0">{{template "bi" (pair "总览" "Overview")}}</a>
+      {{range .Acts}}<a href="#act-{{.N}}" data-act-link="{{.N}}">{{.N}} · {{template "bi" .RoleLabel}}</a>{{end}}
+      <a href="#act-8" data-act-link="8">{{template "bi" (pair "总结" "Summary")}}</a>
+      {{if .Tests.Groups}}<a href="#tests">{{template "bi" (pair "测试实录" "Test log")}}</a>{{end}}
+    </nav>
+    <div class="head-tools">
+      <button type="button" class="btn-ghost" id="demo-autoplay" aria-pressed="false"><span class="zh">▶ 自动播放</span><span class="en">▶ Autoplay</span></button>
+      <button type="button" class="btn-ghost" id="demo-lang" aria-label="Switch language / 切换语言"><span class="zh">English</span><span class="en">中文</span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ======================= ACT 0 — HERO ======================= -->
+<section class="act hero" id="act-0" data-act="0" aria-labelledby="hero-title">
+  <div class="wrap">
+    <p class="eyebrow">{{template "bi" (pair "产品演示 · 全角色 · 真实运行截图" "Product tour · every role · real screenshots")}}</p>
+    <h1 id="hero-title" data-tour="hero" data-cap-act="0">
+      <span class="zh">AI 辅助的 <em>四诊合参</em><br>让中医问诊更完整、更可追溯</span>
+      <span class="en">AI-assisted <em>Four Examinations</em><br>a more complete, more traceable TCM consultation</span>
+    </h1>
+    <p class="lede">
+      <span class="zh">望、闻、问、切 + IoT 设备数据,汇成一份辨证报告;再交给真人医生把关。下面按真实使用顺序,带你走完访客、患者、医生、管理员、开发者每个角色的每一步 —— 每张图都来自真实运行的系统。</span>
+      <span class="en">Inspection, listening, inquiry and palpation plus IoT data become one pattern-differentiation report that a real doctor then reviews. Follow the real order of use through every step of every role — each image comes from the running system.</span>
+    </p>
+    <div class="cta-row">
+      <a class="btn-primary" href="#act-1">{{template "bi" (pair "开始导览 →" "Start the tour →")}}</a>
+      <a class="btn-ghost lg" href="?autoplay=1" id="hero-autoplay">{{template "bi" (pair "▶ 自动播放(适合录屏)" "▶ Autoplay (for screen recording)")}}</a>
+      <a class="btn-ghost lg" href="/login">{{template "bi" (pair "直接体验真实系统" "Try the live system")}}</a>
+    </div>
+
+    <a class="video-card" id="demo-video-card" href="/video">
+      <span class="video-card-thumb" aria-hidden="true"><img src="{{asset "/static/img/art/video-poster.webp"}}" alt="" width="960" height="540" loading="lazy"><i>▶</i></span>
+      <span class="video-card-body">
+        <b>{{template "bi" (pair "观看介绍视频 · 2 分 44 秒" "Watch the introduction video · 2:44")}}</b>
+        <span>{{template "bi" (pair "中文旁白,带章节:访客问诊、注册患者、连接医生、管理与可靠性。可在线播放、下载或分享到 WhatsApp。" "Chinese narration with chapters: guest consultation, registered patients, doctors, admin and reliability. Play online, download or share on WhatsApp.")}}</span>
+      </span>
+    </a>
+    <ul class="stats" aria-label="Automated checks">
+      {{range .Stats}}<li data-stat="{{.Key}}"><b>{{.Value}}</b><span>{{template "bi" .Label}}</span></li>{{end}}
+    </ul>
+    <p class="fine">{{template "bi" (pair "数字来自 2026-10-09 最近一次部署前全量回归(predeploy)的通行记录。" "Figures are the counts recorded by the last full pre-deploy regression run (2026-10-09).")}}</p>
+
+    <h2 class="sec-title">{{template "bi" (pair "五大优势" "Five advantages")}}</h2>
+    <div class="adv-grid">
+      {{range .Advantages}}
+      <article class="adv" id="step-{{.ID}}" data-tour="adv" data-cap-act="0">
+        <span class="adv-ico" aria-hidden="true">{{.Icon}}</span>
+        <h3>{{template "bi" .Title}}</h3>
+        <p class="adv-body">{{template "bi" .Body}}</p>
+      </article>
+      {{end}}
+    </div>
+  </div>
+</section>
+
+<!-- ======================= ACTS 1-7 ======================= -->
+{{range .Acts}}
+<section class="act role-{{.Role}}" id="act-{{.N}}" data-act="{{.N}}" aria-labelledby="act-{{.N}}-title">
+  <div class="wrap">
+    <header class="act-head">
+      <span class="act-num" aria-hidden="true">{{.N}}</span>
+      <div>
+        <p class="eyebrow"><span class="zh">第 {{.N}} 幕</span><span class="en">Act {{.N}}</span> · {{template "bi" .RoleLabel}}</p>
+        <h2 id="act-{{.N}}-title">{{template "bi" .Title}}</h2>
+        <p class="act-intro">{{template "bi" .Intro}}</p>
+      </div>
+    </header>
+
+    {{range .Steps}}
+    <article class="step role-{{.Role}}" id="step-{{.ID}}" data-tour="step" data-act="{{.Act}}" data-step="{{.Index}}" data-role="{{.Role}}" data-cap-act="{{.Act}}" aria-labelledby="step-{{.ID}}-title">
+      <div class="step-media{{if .Shots}}{{else}} empty{{end}}">
+        {{if .Shots}}
+        {{$first := index .Shots 0}}
+        <figure class="shot{{if $first.Mobile}} mobile{{end}}" data-main>
+          <img src="{{asset $first.Src}}" alt="{{$first.Caption.ZH}} / {{$first.Caption.EN}}" {{if $first.W}}width="{{$first.W}}" height="{{$first.H}}"{{end}} loading="lazy" decoding="async">
+          <figcaption>{{template "bi" $first.Caption}}</figcaption>
+        </figure>
+        {{if gt (len .Shots) 1}}
+        <div class="thumbs" role="group" aria-label="Screenshots">
+          {{range $i, $s := .Shots}}
+          <button type="button" class="thumb{{if eq $i 0}} on{{end}}" data-src="{{asset $s.Src}}" data-w="{{$s.W}}" data-h="{{$s.H}}" data-mobile="{{if $s.Mobile}}1{{else}}0{{end}}" data-cap-zh="{{$s.Caption.ZH}}" data-cap-en="{{$s.Caption.EN}}" aria-label="{{$s.Caption.ZH}} / {{$s.Caption.EN}}">
+            <img src="{{asset $s.Src}}" alt="" loading="lazy" decoding="async">
+          </button>
+          {{end}}
+        </div>
+        {{end}}
+        {{else}}
+        <p class="noshot">{{template "bi" (pair "截图未生成(运行 scripts/capture_demo_assets.py)" "Screenshot not generated (run scripts/capture_demo_assets.py)")}}</p>
+        {{end}}
+      </div>
+      <div class="step-body">
+        <div class="step-meta"><span class="badge role-{{.Role}}">{{template "bi" .RoleLabel}}</span><span class="step-no">{{.ID}}</span></div>
+        <h3 id="step-{{.ID}}-title" data-cap>{{template "bi" .Title}}</h3>
+        <p class="see" data-cap-see><b>{{template "bi" (pair "你会看到 " "What you see ")}}</b>{{template "bi" .See}}</p>
+        <p class="why"><b>{{template "bi" (pair "为什么重要 " "Why it matters ")}}</b>{{template "bi" .Why}}</p>
+        <div class="step-foot">
+          <a class="live" href="{{.Href}}" target="_blank" rel="noopener">{{template "bi" (pair "打开真实页面 ↗" "Open live ↗")}}</a>
+          <span class="verified"><span class="v-lab">{{template "bi" (pair "自动验证" "Verified by")}}</span>{{range .Verified}}<span class="chip">{{.}}</span>{{end}}</span>
+        </div>
+      </div>
+    </article>
+    {{end}}
+  </div>
+</section>
+{{end}}
+
+<!-- ======================= ACT 8 — SUMMARY / CTA ======================= -->
+<section class="act summary" id="act-8" data-act="8" aria-labelledby="act-8-title">
+  <div class="wrap">
+    <header class="act-head">
+      <span class="act-num" aria-hidden="true">8</span>
+      <div>
+        <p class="eyebrow">{{template "bi" (pair "总结" "Summary")}}</p>
+        <h2 id="act-8-title">{{template "bi" (pair "一个系统,五个角色,一条完整的健康闭环" "One system, five roles, one complete care loop")}}</h2>
+      </div>
+    </header>
+    <article class="step recap" id="step-8-1" data-tour="step" data-act="8" data-step="1" data-cap-act="8" aria-labelledby="step-8-1-title">
+      <h3 id="step-8-1-title" data-cap>{{template "bi" (pair "五大优势回顾" "The five advantages, recapped")}}</h3>
+      <ol class="recap-list">
+        {{range .Advantages}}<li><b>{{template "bi" .Title}}</b></li>{{end}}
+      </ol>
+      <ul class="stats compact">
+        {{range .Stats}}<li><b>{{.Value}}</b><span>{{template "bi" .Label}}</span></li>{{end}}
+      </ul>
+    </article>
+    <article class="step cta" id="step-8-2" data-tour="step" data-act="8" data-step="2" data-cap-act="8" aria-labelledby="step-8-2-title">
+      <h3 id="step-8-2-title" data-cap>{{template "bi" (pair "现在就亲自试一试" "Try it yourself right now")}}</h3>
+      <p class="see" data-cap-see>{{template "bi" (pair "点击任一角色,直接以演示账号进入真实系统(演示账号密码均为 password123)。" "Click a role to enter the live system with a demo account (every demo password is password123).")}}</p>
+      <div class="quick" role="group" aria-label="Quick login">
+        <button type="button" class="quick-btn q-patient" data-quick="patient"><b>{{template "bi" (pair "患者" "Patient")}}</b><small>{{template "bi" (pair "做问诊、看报告" "Consult and read reports")}}</small></button>
+        <button type="button" class="quick-btn q-doctor" data-quick="doctor"><b>{{template "bi" (pair "医生" "Doctor")}}</b><small>{{template "bi" (pair "分诊、回复、开方案" "Triage, reply, plan")}}</small></button>
+        <button type="button" class="quick-btn q-admin" data-quick="admin"><b>{{template "bi" (pair "管理员" "Admin")}}</b><small>{{template "bi" (pair "系统健康与设置" "Health and settings")}}</small></button>
+        <button type="button" class="quick-btn q-developer" data-quick="developer"><b>{{template "bi" (pair "开发者" "Developer")}}</b><small>{{template "bi" (pair "日志、指标、助手" "Logs, metrics, assistant")}}</small></button>
+      </div>
+      <p class="quick-msg" id="quick-msg" role="status" aria-live="polite"></p>
+      <p class="cta-links"><a class="btn-primary" href="/">{{template "bi" (pair "以访客身份开始免费评估" "Start a free guest assessment")}}</a></p>
+    </article>
+    <p class="fine disclaimer">
+      {{template "bi" (pair "截图录制于隔离测试环境(模拟数据库 + 真实 AI 模型),患者与医生均为虚构示例。本系统用于健康教育与辅助,不能替代专业医疗意见。" "Screenshots were recorded on an isolated test stack (simulated database, real AI models); patients and doctors are fictional. For education and decision support only — not a substitute for professional medical advice.")}}
+      {{if .ShotCount}}<span class="meta">· {{.ShotCount}} screenshots</span>{{end}}
+    </p>
+  </div>
+</section>
+
+<!-- ======================= APPENDIX — TEST LOG (static/demo-tests/tests.json) ======================= -->
+{{if .Tests.Groups}}
+{{$status := .TestStatus}}
+<section class="act tests" id="tests" aria-labelledby="tests-title">
+  <div class="wrap">
+    <header class="act-head">
+      <span class="act-num" aria-hidden="true">验</span>
+      <div>
+        <p class="eyebrow">{{template "bi" (pair "附录" "Appendix")}}{{if .Tests.Updated}} · {{.Tests.Updated}}{{end}}</p>
+        <h2 id="tests-title">{{template "bi" (pair "测试实录:每项测试的截图、方法与结果" "Test log: screenshots, method and result of every test")}}</h2>
+        <p class="act-intro">{{template "bi" (pair "下面是为新功能实际执行过的测试,含未通过和只完成一部分的项目 —— 这是记录,不是宣传。" "These are the tests actually run for the new features, including the ones that only partly passed or failed — a record, not a brochure.")}}</p>
+      </div>
+    </header>
+    {{range .Tests.Groups}}
+    <h3 class="tests-group" id="tests-{{.ID}}">{{template "bi" .Title}}</h3>
+    <p class="tests-intro">{{template "bi" .Intro}}</p>
+    {{range .Items}}
+    <article class="step tcase st-{{.Status}}" id="test-{{.ID}}" aria-labelledby="test-{{.ID}}-title">
+      <div class="step-media{{if .Shots}}{{else}} empty{{end}}">
+        {{if .Shots}}
+        {{$first := index .Shots 0}}
+        <figure class="shot{{if $first.Mobile}} mobile{{end}}" data-main>
+          <img src="{{asset $first.Src}}" alt="{{$first.Caption.ZH}} / {{$first.Caption.EN}}" {{if $first.W}}width="{{$first.W}}" height="{{$first.H}}"{{end}} loading="lazy" decoding="async">
+          <figcaption>{{template "bi" $first.Caption}}</figcaption>
+        </figure>
+        {{if gt (len .Shots) 1}}
+        <div class="thumbs" role="group" aria-label="Screenshots">
+          {{range $i, $s := .Shots}}
+          <button type="button" class="thumb{{if eq $i 0}} on{{end}}" data-src="{{asset $s.Src}}" data-w="{{$s.W}}" data-h="{{$s.H}}" data-mobile="{{if $s.Mobile}}1{{else}}0{{end}}" data-cap-zh="{{$s.Caption.ZH}}" data-cap-en="{{$s.Caption.EN}}" aria-label="{{$s.Caption.ZH}} / {{$s.Caption.EN}}">
+            <img src="{{asset $s.Src}}" alt="" loading="lazy" decoding="async">
+          </button>
+          {{end}}
+        </div>
+        {{end}}
+        {{end}}
+      </div>
+      <div class="step-body">
+        <div class="step-meta"><span class="tstatus st-{{.Status}}">{{template "bi" (index $status .Status)}}</span><span class="step-no">{{.ID}}</span></div>
+        <h3 id="test-{{.ID}}-title">{{template "bi" .Title}}</h3>
+        <p class="see"><b>{{template "bi" (pair "测试方法 " "How it was tested ")}}</b>{{template "bi" .Desc}}</p>
+        <p class="why"><b>{{template "bi" (pair "结果 " "Result ")}}</b>{{template "bi" .Result}}</p>
+        {{if .Verified}}<div class="step-foot"><span class="verified"><span class="v-lab">{{template "bi" (pair "测试来源" "Test source")}}</span>{{range .Verified}}<span class="chip">{{.}}</span>{{end}}</span></div>{{end}}
+      </div>
+    </article>
+    {{end}}
+    {{end}}
+  </div>
+</section>
+{{end}}
+
+</main>
+
+<footer class="demo-foot"><div class="wrap">&copy; Sihat TCM · <a href="/">{{template "bi" (pair "首页" "Home")}}</a> · <a href="/login">{{template "bi" (pair "登录" "Login")}}</a></div></footer>
+
+<!-- Autoplay captions: filled by demo.js from the active step (both languages, so the toggle keeps working) -->
+<div id="demo-caption" class="demo-caption" aria-live="polite" hidden>
+  <div class="cap-act" id="cap-act"></div>
+  <div class="cap-title" id="cap-title"></div>
+  <div class="cap-see" id="cap-see"></div>
+</div>
+<div id="demo-done" class="demo-done" hidden><span class="zh">演示结束 · 点击任意处返回</span><span class="en">Tour finished · click anywhere to return</span></div>
+
+<script src="{{asset "/static/js/demo.js"}}"></script>
+</body>
+</html>

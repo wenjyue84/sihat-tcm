@@ -1,0 +1,72 @@
+{
+  "id": "tongue-01",
+  "type": "tongue",
+  "label": "baseline",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T01:50:09.064Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 47521,
+      "bytes": 468,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 47522,
+  "raw": "{\"confidence\":0,\"image_description\":\"一張女性全臉自拍照，該女性正伸出舌頭。此圖並非適合中醫舌診的近距離、獨立舌部特寫照片。\",\"message\":\"This image does not appear to be a clear tongue photo. 一張女性全臉自拍照，該女性正伸出舌頭。此圖並非適合中醫舌診的近距離、獨立舌部特寫照片。 Please retake it in good lighting and try again.\",\"modelUsed\":1,\"observation\":\"This image does not appear to be a clear tongue photo. 一張女性全臉自拍照，該女性正伸出舌頭。此圖並非適合中醫舌診的近距離、獨立舌部特寫照片。 Please retake it in good lighting and try again.\",\"potential_issues\":[],\"status\":\"invalid_image\"}\n",
+  "parsed": {
+    "confidence": 0,
+    "image_description": "一張女性全臉自拍照，該女性正伸出舌頭。此圖並非適合中醫舌診的近距離、獨立舌部特寫照片。",
+    "message": "This image does not appear to be a clear tongue photo. 一張女性全臉自拍照，該女性正伸出舌頭。此圖並非適合中醫舌診的近距離、獨立舌部特寫照片。 Please retake it in good lighting and try again.",
+    "modelUsed": 1,
+    "observation": "This image does not appear to be a clear tongue photo. 一張女性全臉自拍照，該女性正伸出舌頭。此圖並非適合中醫舌診的近距離、獨立舌部特寫照片。 Please retake it in good lighting and try again.",
+    "potential_issues": [],
+    "status": "invalid_image"
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-geographic-tongue-benign-migratory-gloss.jpg",
+    "image_bytes": 451683
+  },
+  "expected": {
+    "documented_condition": "geographic tongue (benign migratory glossitis)",
+    "expected_tcm": {
+      "body_colour": "red to light red with irregular smooth red patches",
+      "coating": "patchy, map-like loss of coating (peeled/geographic) with whitish borders",
+      "thickness": "thin to absent in patches",
+      "shape": "normal size, map-like patches",
+      "moisture": "moist to slightly dry",
+      "pattern": "Stomach Yin deficiency (peeled/geographic coating), possibly Spleen-Stomach Qi/Yin deficiency with heat"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Geographic_tongue_(benign_migratory_glossitis)_%E2%80%93_adult_female.jpg"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "peel",
+          "geographic",
+          "map",
+          "patch",
+          "partial coat",
+          "missing coat",
+          "absent coat"
+        ],
+        "hit": false
+      },
+      {
+        "any_of": [
+          "yin",
+          "stomach"
+        ],
+        "hit": false
+      }
+    ],
+    "all_hit": false
+  }
+}

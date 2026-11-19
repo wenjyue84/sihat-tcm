@@ -10,7 +10,7 @@ import sys
 from playwright.sync_api import sync_playwright
 
 BASE = os.environ.get("E2E_BASE", "http://localhost:8081").rstrip("/")
-MOCK_TONGUE = r"C:/Users/Jyue/Documents/1-projects/Software Projects/sihat-tcm/sihat-tcm-web/public/mock-tongue.png"
+MOCK_TONGUE = r"C:/Users/Jyue/Documents/2-areas/Software Projects/sihat-tcm/sihat-tcm-web/public/mock-tongue.png"
 
 results = []
 def check(label, ok, detail=""):

@@ -72,10 +72,10 @@
   function renderPrompts(arr) {
     var box = document.getElementById('adm-prompts');
     if (!arr.length) { box.innerHTML = '<p class="muted">No prompt data.</p>'; return; }
-    box.innerHTML = '<table class="adm-table"><thead><tr><th>Role</th><th>Exists</th><th>Has content</th></tr></thead><tbody>'
+    box.innerHTML = '<div class="adm-table-wrap"><table class="adm-table"><thead><tr><th>Role</th><th>Exists</th><th>Has content</th></tr></thead><tbody>'
       + arr.map(function (p) {
           return '<tr><td>' + esc(p.role) + '</td><td>' + yn(p.exists) + '</td><td>' + yn(p.hasContent) + '</td></tr>';
-        }).join('') + '</tbody></table>';
+        }).join('') + '</tbody></table></div>';
   }
 
   function renderErrors(d) {
@@ -88,10 +88,10 @@
     ].map(function (r) { return '<span class="admin-stat" style="display:inline-block;padding:.4rem .7rem;margin:.2rem"><strong>' + num(r[1]) + '</strong> <span class="muted">' + esc(r[0]) + '</span></span>'; }).join('');
     var recent = (d.recent_errors || []).slice(0, 8);
     var list = recent.length
-      ? '<table class="adm-table" style="margin-top:.6rem"><thead><tr><th>When</th><th>Severity</th><th>Message</th></tr></thead><tbody>'
+      ? '<div class="adm-table-wrap" style="margin-top:.6rem"><table class="adm-table"><thead><tr><th>When</th><th>Severity</th><th>Message</th></tr></thead><tbody>'
           + recent.map(function (e) {
               return '<tr><td>' + esc(fmtDT(e.created_at)) + '</td><td>' + esc(e.severity || '—') + '</td><td>' + esc(trunc(e.message || e.error_type || '', 90)) + '</td></tr>';
-            }).join('') + '</tbody></table>'
+            }).join('') + '</tbody></table></div>'
       : '<p class="muted" style="margin-top:.5rem">No errors in the last 24h. ✓</p>';
     box.innerHTML = '<div>Overall: <span class="pill ' + pillClass(overall) + '">' + esc(overall) + '</span></div><div style="margin-top:.5rem">' + chips + '</div>' + list;
   }
@@ -99,23 +99,23 @@
   function renderLogs(logs) {
     var box = document.getElementById('adm-logs');
     if (!logs.length) { box.innerHTML = '<p class="muted">No logs.</p>'; return; }
-    box.innerHTML = '<table class="adm-table"><thead><tr><th>When</th><th>Level</th><th>Category</th><th>Message</th></tr></thead><tbody>'
+    box.innerHTML = '<div class="adm-table-wrap"><table class="adm-table"><thead><tr><th>When</th><th>Level</th><th>Category</th><th>Message</th></tr></thead><tbody>'
       + logs.map(function (l) {
           var lvl = (l.level || 'info');
           return '<tr><td>' + esc(fmtDT(l.timestamp)) + '</td><td class="lvl ' + esc(lvl) + '">' + esc(lvl) + '</td><td>' + esc(l.category || '—') + '</td><td>' + esc(trunc(l.message || '', 100)) + '</td></tr>';
-        }).join('') + '</tbody></table>';
+        }).join('') + '</tbody></table></div>';
   }
 
   function renderSettings(obj) {
     var box = document.getElementById('adm-settings');
     var keys = Object.keys(obj).filter(function (k) { return k !== 'id'; });
     if (!keys.length) { box.innerHTML = '<p class="muted">No settings saved.</p>'; return; }
-    box.innerHTML = '<table class="adm-table"><tbody>'
+    box.innerHTML = '<div class="adm-table-wrap"><table class="adm-table"><tbody>'
       + keys.map(function (k) {
           var v = obj[k];
           if (v && typeof v === 'object') v = JSON.stringify(v);
           return '<tr><th style="text-transform:none;width:35%">' + esc(k) + '</th><td>' + esc(trunc(String(v == null ? '' : v), 120)) + '</td></tr>';
-        }).join('') + '</tbody></table>';
+        }).join('') + '</tbody></table></div>';
   }
 
   /* ---- helpers ---- */

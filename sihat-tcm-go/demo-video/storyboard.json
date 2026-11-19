@@ -1,0 +1,260 @@
+{
+ "music": {
+  "src": "assets/music/guzheng_morning.mp3",
+  "volume": 0.24
+ },
+ "scenes": [
+  {
+   "id": "s00",
+   "visuals": [
+    {
+     "type": "clip",
+     "src": "assets/clips/herbs_drawers.mp4",
+     "weight": 1
+    },
+    {
+     "type": "clip",
+     "src": "assets/clips/tea_hanfu_ceremony.mp4",
+     "weight": 1
+    },
+    {
+     "type": "clip",
+     "src": "assets/clips/misty_mountains.mp4",
+     "weight": 1
+    }
+   ]
+  },
+  {
+   "id": "s01",
+   "visuals": [
+    {
+     "type": "clip",
+     "src": "assets/clips/pulse_taking.mp4",
+     "weight": 1
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/home.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/m-home.webp",
+     "zoom": "none"
+    }
+   ]
+  },
+  {
+   "id": "s02",
+   "visuals": [
+    {
+     "type": "image",
+     "src": "../static/demo/wiz-info.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/wiz-inquiry.webp",
+     "zoom": "out"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/wiz-tongue.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/wiz-pulse.webp",
+     "zoom": "out"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/report-top.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/report-sections.webp",
+     "zoom": "out"
+    }
+   ]
+  },
+  {
+   "id": "s03",
+   "visuals": [
+    {
+     "type": "image",
+     "src": "../static/demo/login-signup.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/patient-dash.webp",
+     "zoom": "out"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/patient-dietary.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/patient-overview.webp",
+     "zoom": "out"
+    }
+   ]
+  },
+  {
+   "id": "s04",
+   "visuals": [
+    {
+     "type": "clip",
+     "src": "assets/clips/tcm_clinic_consult_moxa.mp4",
+     "weight": 0.8
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/doctor-directory.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/consult-sent.webp",
+     "zoom": "out"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/consult-status.webp",
+     "zoom": "in"
+    }
+   ]
+  },
+  {
+   "id": "s05",
+   "visuals": [
+    {
+     "type": "image",
+     "src": "../static/demo/doctor-inbox.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/doctor-triage.webp",
+     "zoom": "out"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/doctor-ai-summary.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/doctor-reply.webp",
+     "zoom": "out"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/patient-feedback.webp",
+     "zoom": "in"
+    }
+   ]
+  },
+  {
+   "id": "s06",
+   "visuals": [
+    {
+     "type": "image",
+     "src": "../static/demo/admin-console.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/admin-prompts.webp",
+     "zoom": "out"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/dev-logs.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/dev-metrics.webp",
+     "zoom": "out"
+    }
+   ]
+  },
+  {
+   "id": "s07",
+   "visuals": [
+    {
+     "type": "image",
+     "src": "../static/demo/sec-fences.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/sec-ratelimit.webp",
+     "zoom": "out"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/sec-validation.webp",
+     "zoom": "in"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/sec-ai-failure.webp",
+     "zoom": "out"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/sec-graph.webp",
+     "zoom": "in",
+     "weight": 1.6
+    }
+   ]
+  },
+  {
+   "id": "s08",
+   "visuals": [
+    {
+     "type": "image",
+     "src": "../static/demo/m-report.webp",
+     "zoom": "none"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/m-patient.webp",
+     "zoom": "none"
+    },
+    {
+     "type": "image",
+     "src": "../static/demo/login-quick.webp",
+     "zoom": "in"
+    }
+   ]
+  },
+  {
+   "id": "s09",
+   "visuals": [
+    {
+     "type": "clip",
+     "src": "assets/clips/lanterns.mp4",
+     "weight": 1
+    },
+    {
+     "type": "clip",
+     "src": "assets/clips/garden_pond_whitewall.mp4",
+     "weight": 1
+    }
+   ]
+  }
+ ],
+ "credits": [
+  "视频素材 Video: 中国新闻社 / 中国新闻网 / SETHLUI.com / Walking China / Rose Abrams / Wobuzowatsj",
+  "(CC BY 3.0 / CC BY 4.0 / CC0, via Wikimedia Commons)",
+  "音乐 Music: “Guzheng Morning” — Antti Luode (CC BY 3.0)",
+  "AI 辅助分析，不替代执业医师诊断；演示数据均为模拟"
+ ]
+}

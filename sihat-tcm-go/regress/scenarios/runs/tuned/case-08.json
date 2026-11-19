@@ -1,0 +1,109 @@
+{
+  "id": "case-08",
+  "type": "text",
+  "label": "tuned",
+  "endpoint": "/api/consult",
+  "started_at": "2026-10-12T02:50:52.819Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 162555,
+      "bytes": 9339,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 162555,
+  "raw": "{\n  \"diagnosis\": {\n    \"primary_pattern\": \"Spleen and Kidney Yang-Qi Deficiency with Spleen Failing to Control Blood\",\n    \"secondary_patterns\": [\n      \"Secondary Yin-Deficiency Heat manifestations\",\n      \"Deficiency-type Constipation (Qi and Yin insufficiency)\"\n    ],\n    \"affected_organs\": [\n      \"Spleen (primary Qi deficiency, failure to control blood)\",\n      \"Kidney (Yang and Essence/Jing deficiency underlying bone marrow failure)\",\n      \"Heart (Shen disturbance causing insomnia)\",\n      \"Liver (constraint secondary to chronic illness)\",\n      \"Large Intestine (deficiency-type constipation from weak Qi and depleted Yin fluids)\"\n    ],\n    \"pathomechanism\": \"The patient's aplastic anemia represents Kidney Essence (Jing) deficiency at the deepest level — bone marrow (marrow = Kidney jing) has lost the capacity to generate blood cells. Superimposed on this is post-illness Spleen Qi deficiency from prolonged fatigue, poor appetite, and the metabolic stress of bone marrow failure. When Spleen Qi fails, it cannot hold blood in the vessels, manifesting as purpura (bleeding into skin). The cold limbs reflect Kidney Yang weakness affecting warming circulation; however, the hot palms, sweaty soles, and insomnia with vivid dreams represent secondary Yin-deficiency heat — as the body's Yin fluids (which normally cool and nourish) become depleted by chronic disease, a relative heat pattern emerges despite the underlying Yang-cold deficiency. The blue-pale tongue (not red) confirms the cold-deficiency base; the dark sublingual veins indicate blood stasis from insufficient Qi to move it. The severe constipation is a deficiency-type constipation (not heat-type): weak Spleen Qi provides insufficient propulsive warmth, and consumed Yin fluids mean insufficient moisture to soften stool. The moon-shaped face may reflect facial edema from Spleen-Kidney Yang weakness or steroid side effects from conventional treatment. This is a complex deficiency-cold pattern with secondary heat signs, requiring careful tonification without overly heating.\"\n  },\n  \"constitution\": {\n    \"type\": \"Yang-Deficient Constitution (阳虚质) complicated by acquired Yin-Deficiency Heat from serious illness\",\n    \"characteristics\": \"Baseline constitutionally predisposed to cold intolerance, weak digestion, poor circulation, and easy fatigue. The serious illness (aplastic anemia) has added secondary Yin-deficiency heat signs (hot palms, insomnia with dreams) that overlay the foundational Yang deficiency. This is NOT a true Yin-deficient constitution type; rather, it is Yang-deficiency with secondary Yin consumption.\",\n    \"tendencies\": \"Prone to chronic Qi-deficiency conditions, delayed wound healing, poor immune function, constipation, edema, and blood production disorders. At risk for infection due to immune compromise (both from the disease and from Yang deficiency). May experience worsening fatigue, continued bleeding tendency, and coldness if Yang-tonification is not sustained.\",\n    \"percentage_match\": \"Strong match (75%) for underlying Yang-deficient constitution; overlaid with secondary Yin-heat (25%) acquired from the serious illness\"\n  },\n  \"analysis\": {\n    \"summary\": \"This 74-year-old female presents with a serious and life-threatening condition — acquired aplastic anemia with low platelets and hemoglobin unresponsive to conventional care — manifesting in TCM terms as Spleen-Kidney Yang-Qi deficiency with failure of the Spleen to control blood. The diagnostic picture is clear from the classical signs: marked fatigue and appetite loss (Spleen Qi deficiency), purpura and bleeding tendency (Spleen not controlling blood), cold feeling below the ankles (Kidney Yang deficiency), a blue-pale tongue with dark sublingual veins (Qi-Yang cold deficiency, not heat), and a fine weak slippery pulse consistent with deep Qi-Yin-Yang depletion.\\n\\nWhat distinguishes this case from simple chronic deficiency is the presence of secondary Yin-deficiency heat signs — hot palms, sweaty soles, and insomnia with many dreams — which might initially suggest a heat pattern. However, these are not primary heat signs (there is no red tongue, no thick yellow coat, no rapid forceful pulse). Instead, they represent the body's Yin becoming severely depleted by the chronic disease, creating a secondary relative heat in the upper body while the lower body remains cold (upper-heat lower-cold from deficiency). The severe constipation further confirms deficiency-type pathology: the Spleen's propulsive warmth is insufficient, and the consumed Yin fluids mean inadequate moistening of stool — this is not the constipation of heat-excess.\\n\\nAt the root lies Kidney Jing (Essence) deficiency — the bone marrow (which TCM recognizes as the storehouse of Jing) has failed in its primary function of producing blood cells, the hallmark of aplastic anemia. Superimposed is a post-illness Spleen Qi deficiency that prevents the remaining capacity for blood-making from functioning optimally. The moon-shaped face and pale complexion reflect both blood deficiency and facial edema from Yang weakness. Age (74) is itself a factor: the Kidney naturally declines with time, and chronic serious illness accelerates this decline.\\n\\nThe therapeutic priority is to tonify Spleen and Kidney Qi-Yang (the foundation of both blood production and immune function) while gently nourishing Yin to prevent the secondary heat signs from worsening and to restore fluid balance to address the constipation. This is not a case for heat-clearing or aggressive draining; it is a case for careful, sustained supplementation of the deepest deficiencies while avoiding formulas too cloying or warming-only that would exacerbate the secondary heat manifestations.\\n\\nCrucially, TCM treatment here is complementary to, not a replacement for, conventional hematology care. The patient must continue monitoring blood counts, seeing her hematologist, and following conventional protocols. TCM aims to support the body's own recovery capacity, improve symptoms, and potentially reduce treatment side effects, but cannot replace the need for medical monitoring of a bone marrow disorder.\"\n  },\n  \"key_findings\": {\n    \"from_inquiry\": \"Chief complaint of aplastic anemia with fatigue unresponsive to conventional care; marked fatigue; appetite loss (attributed to side effects but also consistent with Spleen Qi deficiency); severe constipation; purpura (small hemorrhages indicating Spleen failing to contain blood); cold feeling localized below ankles (Kidney Yang sign); insomnia with many dreams (Shen disturbance from Yin deficiency); pale complexion (Blood deficiency).\",\n    \"from_visual\": \"Tongue: blue-pale body (indicates cold-deficiency, not heat) with dark sublingual veins (indicates blood stasis from insufficient Qi movement, or pooled blood from deficiency); moon-shaped face (suggests facial edema from Yang-Spleen weakness or steroid side effects). Complexion pale overall.\",\n    \"from_pulse\": \"Pulse: thready (细, Qi-Yin deficiency), weak (弱, Qi-Yang deficiency, chronic disease), and slippery (滑, indicating fluidity in what should be solid Qi-Blood, or early blood deficiency). This combination is classic for Spleen-Kidney deficiency in chronic serious disease.\",\n    \"from_other\": \"Age 74 (Kidney naturally declining, constitutionally predisposed to Yang deficiency); diagnosis of aplastic anemia (bone marrow = Kidney Jing in TCM, so this is a Jing-deficiency disease); likely on hematologic medications (may include immunosuppressants, steroids, or blood-supporting drugs) that may compound Spleen-Qi weakness.\"\n  },\n  \"pattern_rationale\": \"The primary pattern is identified as Spleen-Kidney Yang-Qi Deficiency with Spleen Failing to Control Blood because: (1) Marked fatigue and appetite loss are the cardinal signs of Spleen Qi deficiency; (2) Purpura (bleeding into skin) in the setting of low platelets represents Spleen not controlling blood (脾不统血), a signature manifestation of Spleen Qi deficiency, not a heat-excess bleeding; (3) Cold feeling below ankles is a textbook sign of Kidney Yang deficiency; (4) Blue-pale tongue rules out a primary heat pattern (heat would produce red or crimson, not blue-pale); dark sublingual veins indicate blood stasis from weak Qi movement; (5) Thready weak slippery pulse confirms Qi-Yin-Yang deficiency across Spleen and Kidney; (6) Age 74 with serious illness = natural Kidney Jing decline + acquired Spleen Qi deficiency. The secondary Yin-deficiency heat signs (hot palms, sweaty soles, insomnia with dreams) are present but are not the dominant pattern — they arise from Yin depletion in the context of Yang-cold deficiency (upper-heat lower-cold). The severe constipation is deficiency-constipation (weak Spleen Qi, depleted Yin fluids), not heat-constipation (which would have dry scanty stool, urgency, and heat signs). The moon-shaped face likely reflects edema from Yang-Spleen weakness. This pattern makes clinical sense: bone marrow failure (Jing deficiency) → poor blood production → chronic illness stress → Spleen Qi exhaustion → failure of blood containment (purpura) + failure of Qi-Yang circulation (cold, edema). TCM treatment must tonify Spleen-Kidney Yang first (addressing the deficiency root), while carefully nourishing Yin to balance the secondary heat manifestations.\"\n  }",
+  "parsed": {
+    "diagnosis": {
+      "primary_pattern": "Spleen and Kidney Yang-Qi Deficiency with Spleen Failing to Control Blood",
+      "secondary_patterns": [
+        "Secondary Yin-Deficiency Heat manifestations",
+        "Deficiency-type Constipation (Qi and Yin insufficiency)"
+      ],
+      "affected_organs": [
+        "Spleen (primary Qi deficiency, failure to control blood)",
+        "Kidney (Yang and Essence/Jing deficiency underlying bone marrow failure)",
+        "Heart (Shen disturbance causing insomnia)",
+        "Liver (constraint secondary to chronic illness)",
+        "Large Intestine (deficiency-type constipation from weak Qi and depleted Yin fluids)"
+      ],
+      "pathomechanism": "The patient's aplastic anemia represents Kidney Essence (Jing) deficiency at the deepest level — bone marrow (marrow = Kidney jing) has lost the capacity to generate blood cells. Superimposed on this is post-illness Spleen Qi deficiency from prolonged fatigue, poor appetite, and the metabolic stress of bone marrow failure. When Spleen Qi fails, it cannot hold blood in the vessels, manifesting as purpura (bleeding into skin). The cold limbs reflect Kidney Yang weakness affecting warming circulation; however, the hot palms, sweaty soles, and insomnia with vivid dreams represent secondary Yin-deficiency heat — as the body's Yin fluids (which normally cool and nourish) become depleted by chronic disease, a relative heat pattern emerges despite the underlying Yang-cold deficiency. The blue-pale tongue (not red) confirms the cold-deficiency base; the dark sublingual veins indicate blood stasis from insufficient Qi to move it. The severe constipation is a deficiency-type constipation (not heat-type): weak Spleen Qi provides insufficient propulsive warmth, and consumed Yin fluids mean insufficient moisture to soften stool. The moon-shaped face may reflect facial edema from Spleen-Kidney Yang weakness or steroid side effects from conventional treatment. This is a complex deficiency-cold pattern with secondary heat signs, requiring careful tonification without overly heating."
+    },
+    "constitution": {
+      "type": "Yang-Deficient Constitution (阳虚质) complicated by acquired Yin-Deficiency Heat from serious illness",
+      "characteristics": "Baseline constitutionally predisposed to cold intolerance, weak digestion, poor circulation, and easy fatigue. The serious illness (aplastic anemia) has added secondary Yin-deficiency heat signs (hot palms, insomnia with dreams) that overlay the foundational Yang deficiency. This is NOT a true Yin-deficient constitution type; rather, it is Yang-deficiency with secondary Yin consumption.",
+      "tendencies": "Prone to chronic Qi-deficiency conditions, delayed wound healing, poor immune function, constipation, edema, and blood production disorders. At risk for infection due to immune compromise (both from the disease and from Yang deficiency). May experience worsening fatigue, continued bleeding tendency, and coldness if Yang-tonification is not sustained.",
+      "percentage_match": "Strong match (75%) for underlying Yang-deficient constitution; overlaid with secondary Yin-heat (25%) acquired from the serious illness"
+    },
+    "analysis": {
+      "summary": "This 74-year-old female presents with a serious and life-threatening condition — acquired aplastic anemia with low platelets and hemoglobin unresponsive to conventional care — manifesting in TCM terms as Spleen-Kidney Yang-Qi deficiency with failure of the Spleen to control blood. The diagnostic picture is clear from the classical signs: marked fatigue and appetite loss (Spleen Qi deficiency), purpura and bleeding tendency (Spleen not controlling blood), cold feeling below the ankles (Kidney Yang deficiency), a blue-pale tongue with dark sublingual veins (Qi-Yang cold deficiency, not heat), and a fine weak slippery pulse consistent with deep Qi-Yin-Yang depletion.\n\nWhat distinguishes this case from simple chronic deficiency is the presence of secondary Yin-deficiency heat signs — hot palms, sweaty soles, and insomnia with many dreams — which might initially suggest a heat pattern. However, these are not primary heat signs (there is no red tongue, no thick yellow coat, no rapid forceful pulse). Instead, they represent the body's Yin becoming severely depleted by the chronic disease, creating a secondary relative heat in the upper body while the lower body remains cold (upper-heat lower-cold from deficiency). The severe constipation further confirms deficiency-type pathology: the Spleen's propulsive warmth is insufficient, and the consumed Yin fluids mean inadequate moistening of stool — this is not the constipation of heat-excess.\n\nAt the root lies Kidney Jing (Essence) deficiency — the bone marrow (which TCM recognizes as the storehouse of Jing) has failed in its primary function of producing blood cells, the hallmark of aplastic anemia. Superimposed is a post-illness Spleen Qi deficiency that prevents the remaining capacity for blood-making from functioning optimally. The moon-shaped face and pale complexion reflect both blood deficiency and facial edema from Yang weakness. Age (74) is itself a factor: the Kidney naturally declines with time, and chronic serious illness accelerates this decline.\n\nThe therapeutic priority is to tonify Spleen and Kidney Qi-Yang (the foundation of both blood production and immune function) while gently nourishing Yin to prevent the secondary heat signs from worsening and to restore fluid balance to address the constipation. This is not a case for heat-clearing or aggressive draining; it is a case for careful, sustained supplementation of the deepest deficiencies while avoiding formulas too cloying or warming-only that would exacerbate the secondary heat manifestations.\n\nCrucially, TCM treatment here is complementary to, not a replacement for, conventional hematology care. The patient must continue monitoring blood counts, seeing her hematologist, and following conventional protocols. TCM aims to support the body's own recovery capacity, improve symptoms, and potentially reduce treatment side effects, but cannot replace the need for medical monitoring of a bone marrow disorder."
+    },
+    "key_findings": {
+      "from_inquiry": "Chief complaint of aplastic anemia with fatigue unresponsive to conventional care; marked fatigue; appetite loss (attributed to side effects but also consistent with Spleen Qi deficiency); severe constipation; purpura (small hemorrhages indicating Spleen failing to contain blood); cold feeling localized below ankles (Kidney Yang sign); insomnia with many dreams (Shen disturbance from Yin deficiency); pale complexion (Blood deficiency).",
+      "from_visual": "Tongue: blue-pale body (indicates cold-deficiency, not heat) with dark sublingual veins (indicates blood stasis from insufficient Qi movement, or pooled blood from deficiency); moon-shaped face (suggests facial edema from Yang-Spleen weakness or steroid side effects). Complexion pale overall.",
+      "from_pulse": "Pulse: thready (细, Qi-Yin deficiency), weak (弱, Qi-Yang deficiency, chronic disease), and slippery (滑, indicating fluidity in what should be solid Qi-Blood, or early blood deficiency). This combination is classic for Spleen-Kidney deficiency in chronic serious disease.",
+      "from_other": "Age 74 (Kidney naturally declining, constitutionally predisposed to Yang deficiency); diagnosis of aplastic anemia (bone marrow = Kidney Jing in TCM, so this is a Jing-deficiency disease); likely on hematologic medications (may include immunosuppressants, steroids, or blood-supporting drugs) that may compound Spleen-Qi weakness."
+    },
+    "pattern_rationale": "The primary pattern is identified as Spleen-Kidney Yang-Qi Deficiency with Spleen Failing to Control Blood because: (1) Marked fatigue and appetite loss are the cardinal signs of Spleen Qi deficiency; (2) Purpura (bleeding into skin) in the setting of low platelets represents Spleen not controlling blood (脾不统血), a signature manifestation of Spleen Qi deficiency, not a heat-excess bleeding; (3) Cold feeling below ankles is a textbook sign of Kidney Yang deficiency; (4) Blue-pale tongue rules out a primary heat pattern (heat would produce red or crimson, not blue-pale); dark sublingual veins indicate blood stasis from weak Qi movement; (5) Thready weak slippery pulse confirms Qi-Yin-Yang deficiency across Spleen and Kidney; (6) Age 74 with serious illness = natural Kidney Jing decline + acquired Spleen Qi deficiency. The secondary Yin-deficiency heat signs (hot palms, sweaty soles, insomnia with dreams) are present but are not the dominant pattern — they arise from Yin depletion in the context of Yang-cold deficiency (upper-heat lower-cold). The severe constipation is deficiency-constipation (weak Spleen Qi, depleted Yin fluids), not heat-constipation (which would have dry scanty stool, urgency, and heat signs). The moon-shaped face likely reflects edema from Yang-Spleen weakness. This pattern makes clinical sense: bone marrow failure (Jing deficiency) → poor blood production → chronic illness stress → Spleen Qi exhaustion → failure of blood containment (purpura) + failure of Qi-Yang circulation (cold, edema). TCM treatment must tonify Spleen-Kidney Yang first (addressing the deficiency root), while carefully nourishing Yin to balance the secondary heat manifestations."
+  },
+  "ok": true,
+  "request_summary": {
+    "data": {
+      "basic_info": {
+        "name": "Case 08",
+        "age": "74",
+        "gender": "female",
+        "height": "",
+        "weight": "",
+        "symptoms": [
+          "fatigue",
+          "digestive",
+          "insomnia",
+          "cold-limbs"
+        ]
+      },
+      "wen_inquiry": "Chief complaint: Acquired aplastic anemia with low platelets and haemoglobin not responding to conventional care; fatigue. Symptoms: marked fatigue; appetite loss and severe constipation (side effects); purpura; cold feeling below the ankles; hot palms and sweaty soles; insomnia with many dreams; pale complexion; moon-shaped face.",
+      "wang_tongue": "blue-pale body with dark sublingual veins",
+      "wang_face": "",
+      "wen_audio": "",
+      "qie": {
+        "bpm": "",
+        "qualities": [
+          "thready",
+          "weak",
+          "slippery"
+        ],
+        "note": "slippery, fine and weak"
+      }
+    },
+    "language": "en"
+  },
+  "expected": {
+    "source_pattern": "Spleen Qi deficiency with Blood deficiency, Yin and Yang deficiency, dampness, phlegm and blood stasis (treated with modified Gui Pi Tang)",
+    "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2840555/",
+    "ground_truth_strength": "strong"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "spleen"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "blood",
+          "qi"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

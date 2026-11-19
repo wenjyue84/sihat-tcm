@@ -1,0 +1,129 @@
+{
+  "id": "tongue-10",
+  "type": "tongue",
+  "label": "baseline",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T01:55:29.406Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 134835,
+      "bytes": 5994,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 134835,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Spleen-Stomach Yin Deficiency · Digestive Restoration\",\"confidence\":88.7,\"description\":\"The irregular, map-like distribution of coating with patchy bare zones interspersed with white coating indicates damage to Stomach Qi and Yin fluids. This pattern classically reflects chronic digestive weakness, prolonged illness, or nutritional depletion that impairs the Stomach's capacity to nourish the tongue surface.\",\"recommendations\":[\"Consume Yin-nourishing, easily digestible foods such as rice congee (粥), yam (山藥), lotus seeds (蓮子), and lily bulb (百合) daily to gently restore Stomach fluids and rebuild the coating.\",\"Avoid cold or raw foods, excessive spicy or fried dishes, and irregular meal times — these further erode Stomach Yin and prevent the coating from reestablishing evenly.\"],\"title\":\"Geographic Peeled Coating\",\"title_cn\":\"地圖苔 / 剝苔\"},{\"category\":\"Spleen Qi Deficiency · Dampness Elimination\",\"confidence\":82.4,\"description\":\"The visibly widened and puffy tongue body points to Spleen Qi deficiency with Dampness accumulation — a weakened Spleen fails to transform and transport fluids efficiently, allowing pathological Dampness to collect in the tissues and manifest as tongue enlargement.\",\"recommendations\":[\"Incorporate Dampness-resolving foods into daily meals — Job's tears (薏苡仁), adzuki beans (紅豆), winter melon (冬瓜), and poria mushroom (茯苓) — ideally simmered into soups or congee for easy absorption.\",\"Reduce dairy products, greasy or oily foods, refined sugars, and cold beverages, as these impede Spleen Yang and accelerate Dampness build-up inside the digestive system.\"],\"title\":\"Swollen Tongue\",\"title_cn\":\"胖大舌\"},{\"category\":\"Qi \\u0026 Blood Deficiency · Nourishment Support\",\"confidence\":76.9,\"description\":\"The tongue color trending toward the paler end of the light-red spectrum — rather than a robust, vibrant pink-red — suggests a mild deficiency of both Qi and Blood, indicating that the Spleen and Stomach are not adequately generating sufficient vital substances to nourish and color the tongue body.\",\"recommendations\":[\"Nourish Qi and Blood with red dates (紅棗), black sesame (黑芝麻), longan (龍眼肉), and moderate portions of lean meat or eggs to support the Spleen's production of vital substances.\",\"Establish consistent sleep routines by retiring before 11 PM — Blood is replenished and stored in the Liver during nighttime hours, and chronic late nights deepen Qi-Blood deficiency over time.\"],\"title\":\"Pale Light-Red Tongue Body\",\"title_cn\":\"淡紅偏淡舌\"}],\"confidence\":85,\"image_description\":\"Clear close-up tongue photo showing a widened tongue with patchy geographic white coating concentrated in the center-dorsum, slightly pale to light-red tongue body, visibly puffy lateral borders, and a moist surface — all features are well-lit and diagnostically readable.\",\"modelUsed\":1,\"notes\":\"Image quality is good with adequate lighting and full tongue protrusion enabling clear assessment. The geographic coating pattern is the most diagnostically significant finding and warrants cross-referencing with digestive symptoms (bloating, loose stools, poor appetite, post-meal fatigue) and history of prolonged illness or irregular eating habits. The lateral tongue edges appear comparatively redder than the body center, which may additionally suggest a mild element of Liver Qi constraint (肝氣鬱結) — worth exploring with stress and emotional history. Full TCM diagnosis should integrate pulse examination (脈診), symptom inquiry (問診), and medical history for complete pattern differentiation.\",\"observation\":\"The tongue presents with a slightly enlarged, pale-light-red body featuring a prominent geographic/peeled coating pattern with irregular white patches across the dorsum, alongside a moist surface — collectively indicating Spleen-Stomach deficiency with concurrent Dampness accumulation and early Yin impairment.\",\"pattern_suggestions\":[\"Primary Pattern: 脾胃氣陰兩虛 (Spleen-Stomach Qi and Yin Dual Deficiency) — the combination of geographic/peeled coating with pale body color strongly indicates exhaustion of both Spleen Qi and Stomach Yin from chronic digestive underperformance or dietary irregularity\",\"Secondary Pattern: 脾虛濕蘊 (Spleen Deficiency with Dampness Accumulation) — swollen tongue body with moist white coating supports impaired fluid metabolism driven by Spleen Qi deficiency failing to transform and transport\",\"Contributing Factor: 氣血不足 (Qi and Blood Insufficiency) — pale tongue tone suggests downstream deficiency of vital substances as a consequence of the primary Spleen-Stomach weakness\"],\"potential_issues\":[\"Primary Pattern: 脾胃氣陰兩虛 (Spleen-Stomach Qi and Yin Dual Deficiency) — the combination of geographic/peeled coating with pale body color strongly indicates exhaustion of both Spleen Qi and Stomach Yin from chronic digestive underperformance or dietary irregularity\",\"Secondary Pattern: 脾虛濕蘊 (Spleen Deficiency with Dampness Accumulation) — swollen tongue body with moist white coating supports impaired fluid metabolism driven by Spleen Qi deficiency failing to transform and transport\",\"Contributing Factor: 氣血不足 (Qi and Blood Insufficiency) — pale tongue tone suggests downstream deficiency of vital substances as a consequence of the primary Spleen-Stomach weakness\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"地圖苔 / 剝苔 (Dìtú Tāi / Bō Tāi) - Geographic/Peeled Coating — Stomach Qi and Yin deficiency; impaired digestive nourishing function\",\"胖大舌 (Pàng Dà Shé) - Swollen/Enlarged Tongue — Spleen Qi deficiency with Dampness and fluid accumulation in the body\",\"淡紅偏淡 (Dàn Hóng Piān Dàn) - Pale Light-Red Tongue Body — Mild Qi and Blood deficiency; reduced Spleen-Stomach production of vital substances\",\"白苔 (Bái Tāi) - White Coating — Cold or mild pathogenic influence; consistent with Spleen Qi deficiency pattern and internal Dampness\",\"潤苔 (Rùn Tāi) - Moist Surface — Relatively adequate fluids present but verging toward Dampness retention, supporting early Yang deficiency picture\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Spleen-Stomach Yin Deficiency · Digestive Restoration",
+        "confidence": 88.7,
+        "description": "The irregular, map-like distribution of coating with patchy bare zones interspersed with white coating indicates damage to Stomach Qi and Yin fluids. This pattern classically reflects chronic digestive weakness, prolonged illness, or nutritional depletion that impairs the Stomach's capacity to nourish the tongue surface.",
+        "recommendations": [
+          "Consume Yin-nourishing, easily digestible foods such as rice congee (粥), yam (山藥), lotus seeds (蓮子), and lily bulb (百合) daily to gently restore Stomach fluids and rebuild the coating.",
+          "Avoid cold or raw foods, excessive spicy or fried dishes, and irregular meal times — these further erode Stomach Yin and prevent the coating from reestablishing evenly."
+        ],
+        "title": "Geographic Peeled Coating",
+        "title_cn": "地圖苔 / 剝苔"
+      },
+      {
+        "category": "Spleen Qi Deficiency · Dampness Elimination",
+        "confidence": 82.4,
+        "description": "The visibly widened and puffy tongue body points to Spleen Qi deficiency with Dampness accumulation — a weakened Spleen fails to transform and transport fluids efficiently, allowing pathological Dampness to collect in the tissues and manifest as tongue enlargement.",
+        "recommendations": [
+          "Incorporate Dampness-resolving foods into daily meals — Job's tears (薏苡仁), adzuki beans (紅豆), winter melon (冬瓜), and poria mushroom (茯苓) — ideally simmered into soups or congee for easy absorption.",
+          "Reduce dairy products, greasy or oily foods, refined sugars, and cold beverages, as these impede Spleen Yang and accelerate Dampness build-up inside the digestive system."
+        ],
+        "title": "Swollen Tongue",
+        "title_cn": "胖大舌"
+      },
+      {
+        "category": "Qi & Blood Deficiency · Nourishment Support",
+        "confidence": 76.9,
+        "description": "The tongue color trending toward the paler end of the light-red spectrum — rather than a robust, vibrant pink-red — suggests a mild deficiency of both Qi and Blood, indicating that the Spleen and Stomach are not adequately generating sufficient vital substances to nourish and color the tongue body.",
+        "recommendations": [
+          "Nourish Qi and Blood with red dates (紅棗), black sesame (黑芝麻), longan (龍眼肉), and moderate portions of lean meat or eggs to support the Spleen's production of vital substances.",
+          "Establish consistent sleep routines by retiring before 11 PM — Blood is replenished and stored in the Liver during nighttime hours, and chronic late nights deepen Qi-Blood deficiency over time."
+        ],
+        "title": "Pale Light-Red Tongue Body",
+        "title_cn": "淡紅偏淡舌"
+      }
+    ],
+    "confidence": 85,
+    "image_description": "Clear close-up tongue photo showing a widened tongue with patchy geographic white coating concentrated in the center-dorsum, slightly pale to light-red tongue body, visibly puffy lateral borders, and a moist surface — all features are well-lit and diagnostically readable.",
+    "modelUsed": 1,
+    "notes": "Image quality is good with adequate lighting and full tongue protrusion enabling clear assessment. The geographic coating pattern is the most diagnostically significant finding and warrants cross-referencing with digestive symptoms (bloating, loose stools, poor appetite, post-meal fatigue) and history of prolonged illness or irregular eating habits. The lateral tongue edges appear comparatively redder than the body center, which may additionally suggest a mild element of Liver Qi constraint (肝氣鬱結) — worth exploring with stress and emotional history. Full TCM diagnosis should integrate pulse examination (脈診), symptom inquiry (問診), and medical history for complete pattern differentiation.",
+    "observation": "The tongue presents with a slightly enlarged, pale-light-red body featuring a prominent geographic/peeled coating pattern with irregular white patches across the dorsum, alongside a moist surface — collectively indicating Spleen-Stomach deficiency with concurrent Dampness accumulation and early Yin impairment.",
+    "pattern_suggestions": [
+      "Primary Pattern: 脾胃氣陰兩虛 (Spleen-Stomach Qi and Yin Dual Deficiency) — the combination of geographic/peeled coating with pale body color strongly indicates exhaustion of both Spleen Qi and Stomach Yin from chronic digestive underperformance or dietary irregularity",
+      "Secondary Pattern: 脾虛濕蘊 (Spleen Deficiency with Dampness Accumulation) — swollen tongue body with moist white coating supports impaired fluid metabolism driven by Spleen Qi deficiency failing to transform and transport",
+      "Contributing Factor: 氣血不足 (Qi and Blood Insufficiency) — pale tongue tone suggests downstream deficiency of vital substances as a consequence of the primary Spleen-Stomach weakness"
+    ],
+    "potential_issues": [
+      "Primary Pattern: 脾胃氣陰兩虛 (Spleen-Stomach Qi and Yin Dual Deficiency) — the combination of geographic/peeled coating with pale body color strongly indicates exhaustion of both Spleen Qi and Stomach Yin from chronic digestive underperformance or dietary irregularity",
+      "Secondary Pattern: 脾虛濕蘊 (Spleen Deficiency with Dampness Accumulation) — swollen tongue body with moist white coating supports impaired fluid metabolism driven by Spleen Qi deficiency failing to transform and transport",
+      "Contributing Factor: 氣血不足 (Qi and Blood Insufficiency) — pale tongue tone suggests downstream deficiency of vital substances as a consequence of the primary Spleen-Stomach weakness"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "地圖苔 / 剝苔 (Dìtú Tāi / Bō Tāi) - Geographic/Peeled Coating — Stomach Qi and Yin deficiency; impaired digestive nourishing function",
+      "胖大舌 (Pàng Dà Shé) - Swollen/Enlarged Tongue — Spleen Qi deficiency with Dampness and fluid accumulation in the body",
+      "淡紅偏淡 (Dàn Hóng Piān Dàn) - Pale Light-Red Tongue Body — Mild Qi and Blood deficiency; reduced Spleen-Stomach production of vital substances",
+      "白苔 (Bái Tāi) - White Coating — Cold or mild pathogenic influence; consistent with Spleen Qi deficiency pattern and internal Dampness",
+      "潤苔 (Rùn Tāi) - Moist Surface — Relatively adequate fluids present but verging toward Dampness retention, supporting early Yang deficiency picture"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-image-of-the-tongue-in-a-b12-deficient-p.webp",
+    "image_bytes": 58519
+  },
+  "expected": {
+    "documented_condition": "vitamin B12 deficiency glossitis (erythema, depapillation: smooth red tongue)",
+    "expected_tcm": {
+      "body_colour": "red (bright/crimson)",
+      "coating": "little or none (peeled / mirror-like)",
+      "thickness": "absent",
+      "shape": "smooth, depapillated",
+      "moisture": "dry or shiny",
+      "pattern": "Yin deficiency with empty heat (red, no coating); Stomach/Kidney Yin deficiency; Blood deficiency"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Image_of_the_tongue_in_a_B12-deficient_patient_without_a_history_of_gastrectomy.webp"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "red"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "no coat",
+          "little coat",
+          "peel",
+          "smooth",
+          "mirror",
+          "depapill",
+          "scanty",
+          "absent"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "yin"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

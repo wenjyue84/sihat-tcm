@@ -1,0 +1,58 @@
+{
+  "id": "case-10",
+  "type": "text",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11608678/",
+  "source_licence": "CC BY",
+  "source_title": "Chinese medicine as comprehensive therapy for psoriasis: A case report",
+  "paraphrase_note": "Symptoms/tongue/pulse paraphrased by the harness author from the open-access full text; source pattern and principle are the authors' own.",
+  "patient": {
+    "age": 32,
+    "sex": "male"
+  },
+  "chief_complaint": "About one year of increased dandruff and recurrent red scaly patches on face, trunk and limbs, making him feel inferior and low.",
+  "symptoms": [
+    "crimson plaques with dry itchy desquamation",
+    "itching that moves around the body",
+    "under heavy physical and psychological stress",
+    "limbs and abdomen cooler than normal while the upper body runs hot"
+  ],
+  "tongue_as_reported": "rather red with teeth marks",
+  "pulse_as_reported": "pulse signs considered but exact quality not captured in the portion read",
+  "source_pattern": "Yin-Yang imbalance (Yang floating upward), excessive toxic Heat, pathogenic Wind",
+  "source_treatment_principle": "Settle the floating Yang and clear toxic heat, expel wind (herbal therapy exclusively after stopping biologics)",
+  "ground_truth_strength": "medium (tongue/pulse partly missing)",
+  "expect_keyword_groups": [
+    [
+      "heat"
+    ],
+    [
+      "wind",
+      "yin",
+      "yang"
+    ]
+  ],
+  "consult_request": {
+    "data": {
+      "basic_info": {
+        "name": "Case 10",
+        "age": "32",
+        "gender": "male",
+        "height": "",
+        "weight": "",
+        "symptoms": [
+          "anxiety"
+        ]
+      },
+      "wen_inquiry": "Chief complaint: About one year of increased dandruff and recurrent red scaly patches on face, trunk and limbs, making him feel inferior and low. Symptoms: crimson plaques with dry itchy desquamation; itching that moves around the body; under heavy physical and psychological stress; limbs and abdomen cooler than normal while the upper body runs hot.",
+      "wang_tongue": "rather red with teeth marks",
+      "wang_face": "",
+      "wen_audio": "",
+      "qie": {
+        "bpm": "",
+        "qualities": [],
+        "note": "pulse signs considered but exact quality not captured in the portion read"
+      }
+    },
+    "language": "en"
+  }
+}

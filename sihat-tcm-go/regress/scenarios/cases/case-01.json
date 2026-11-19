@@ -1,0 +1,65 @@
+{
+  "id": "case-01",
+  "type": "text",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8137033/",
+  "source_licence": "CC BY 4.0",
+  "source_title": "A combination of herbal formulas, acupuncture, and novel pine-needle stimulation for recurrent alopecia areata",
+  "paraphrase_note": "Symptoms/tongue/pulse paraphrased by the harness author from the open-access full text; source pattern and principle are the authors' own.",
+  "patient": {
+    "age": 34,
+    "sex": "male"
+  },
+  "chief_complaint": "Sudden patchy hair loss on top of the head (alopecia areata), recurrence after a stressful period at work.",
+  "symptoms": [
+    "face redness",
+    "sleeps under six hours a night",
+    "thirst",
+    "hot flashes",
+    "excessive sweating",
+    "rage/irritability after months of work stress",
+    "tight abdomen with fullness in chest and rib-sides"
+  ],
+  "tongue_as_reported": "red tongue body, stasis at the edges, thin yellow coating",
+  "pulse_as_reported": "wiry/string-like and slippery; sunken and weak at the cubit (rear) position",
+  "source_pattern": "Liver Qi stagnation with Liver Yang rising",
+  "source_treatment_principle": "Soothe the Liver and release constraint, calm rising Yang (Kampo: saikokaryukotsuboreito; blood stasis addressed later); acupuncture added",
+  "ground_truth_strength": "strong",
+  "expect_keyword_groups": [
+    [
+      "liver"
+    ],
+    [
+      "qi stagnation",
+      "stagnation",
+      "constrain",
+      "depress"
+    ]
+  ],
+  "consult_request": {
+    "data": {
+      "basic_info": {
+        "name": "Case 01",
+        "age": "34",
+        "gender": "male",
+        "height": "",
+        "weight": "",
+        "symptoms": [
+          "insomnia"
+        ]
+      },
+      "wen_inquiry": "Chief complaint: Sudden patchy hair loss on top of the head (alopecia areata), recurrence after a stressful period at work. Symptoms: face redness; sleeps under six hours a night; thirst; hot flashes; excessive sweating; rage/irritability after months of work stress; tight abdomen with fullness in chest and rib-sides.",
+      "wang_tongue": "red tongue body, stasis at the edges, thin yellow coating",
+      "wang_face": "",
+      "wen_audio": "",
+      "qie": {
+        "bpm": "",
+        "qualities": [
+          "wiry",
+          "slippery"
+        ],
+        "note": "wiry/string-like and slippery; sunken and weak at the cubit (rear) position"
+      }
+    },
+    "language": "en"
+  }
+}

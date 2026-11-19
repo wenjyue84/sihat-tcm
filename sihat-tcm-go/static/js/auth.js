@@ -7,6 +7,56 @@
 
   var signupRole = 'patient';
 
+  // tr('login.signin', 'Sign In 登录') -> text in the selected language (i18n.js: window.tcmT), else the fallback
+  function tr(key, fallback, vars) {
+    return typeof window.tcmT === 'function' ? window.tcmT(key, fallback, vars) : fallback;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Guest report tokens                                                 */
+  /* ------------------------------------------------------------------ */
+  // The wizard keeps every unsaved-guest report token in 'tcm-guest-tokens' (JSON list) and the latest one in
+  // 'tcm-guest-token'. All of them are claimed after login / signup; a token is only forgotten once the server
+  // accepted it (or said it can never succeed), so a failed migration is retried on the next login.
+  function readGuestTokens() {
+    var out = [];
+    try {
+      var list = JSON.parse(localStorage.getItem('tcm-guest-tokens') || '[]');
+      if (Array.isArray(list)) list.forEach(function (t) { if (t && out.indexOf(t) === -1) out.push(t); });
+    } catch (e) { /* corrupt list: fall back to the single key */ }
+    var one = localStorage.getItem('tcm-guest-token');
+    if (one && out.indexOf(one) === -1) out.push(one);
+    return out;
+  }
+
+  function forgetGuestToken(tok) {
+    try {
+      var list = JSON.parse(localStorage.getItem('tcm-guest-tokens') || '[]');
+      if (Array.isArray(list)) {
+        list = list.filter(function (t) { return t !== tok; });
+        if (list.length) localStorage.setItem('tcm-guest-tokens', JSON.stringify(list));
+        else localStorage.removeItem('tcm-guest-tokens');
+      }
+    } catch (e) { localStorage.removeItem('tcm-guest-tokens'); }
+    if (localStorage.getItem('tcm-guest-token') === tok) {
+      var rest = readGuestTokens().filter(function (t) { return t !== tok; });
+      if (rest.length) localStorage.setItem('tcm-guest-token', rest[rest.length - 1]);
+      else localStorage.removeItem('tcm-guest-token');
+    }
+  }
+
+  // 2xx = migrated. 400/404/409/410 = the token is spent or unknown (migrating again can never work): drop it.
+  // Anything else (5xx, 401, 429, network error) is transient: KEEP the token so the next login retries.
+  function migrateGuestToken(tok, bearer) {
+    return fetch('/api/migrate-guest-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': bearer ? 'Bearer ' + bearer : '' },
+      body: JSON.stringify({ sessionToken: tok }),
+    }).then(function (r) {
+      if (r.ok || r.status === 400 || r.status === 404 || r.status === 409 || r.status === 410) forgetGuestToken(tok);
+    }).catch(function () { /* network error: keep the token */ });
+  }
+
   // authSetRole toggles the signup role (patient/doctor) + doctor-only fields.
   window.authSetRole = function (role) {
     signupRole = role === 'doctor' ? 'doctor' : 'patient';
@@ -23,18 +73,11 @@
   function afterAuth(data) {
     storeAuth(data);
     var role = data.role || (data.user && data.user.role) || 'patient';
-    var guestToken = localStorage.getItem('tcm-guest-token');
+    var tokens = readGuestTokens();
     var go = function () { redirectByRole(role); };
-    if (guestToken) {
-      var token = (data.user && data.user.token) || data.token || getBearerFromCookie();
-      fetch('/api/migrate-guest-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': token ? 'Bearer ' + token : '' },
-        body: JSON.stringify({ sessionToken: guestToken }),
-      }).finally(function () {
-        localStorage.removeItem('tcm-guest-token');
-        go();
-      });
+    if (tokens.length) {
+      var bearer = (data.user && data.user.token) || data.token || getBearerFromCookie();
+      Promise.all(tokens.map(function (t) { return migrateGuestToken(t, bearer); })).then(go, go);
     } else {
       go();
     }
@@ -79,11 +122,11 @@
 
     var btn = document.getElementById('forgot-btn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Sending…';
+    btn.innerHTML = '<span class="spinner"></span> ' + tr('login.sending', 'Sending…');
 
     var done = function (msg) {
       btn.disabled = false;
-      btn.textContent = 'Send Reset Link 发送重置链接';
+      btn.textContent = tr('login.sendreset', 'Send Reset Link 发送重置链接');
       // Uniform success message (server never reveals whether the email exists).
       showAlert(alertEl, msg || 'If an account exists for that email, a reset link has been sent. Please check your inbox.', 'alert-success');
     };
@@ -107,13 +150,13 @@
     var alertEl  = document.getElementById('login-alert');
 
     if (!email || !password) {
-      showAlert(alertEl, 'Please enter your email and password.', 'alert-error');
+      showAlert(alertEl, tr('login.err.creds', 'Please enter your email and password.'), 'alert-error');
       return;
     }
 
     var btn = document.getElementById('login-btn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Signing in…';
+    btn.innerHTML = '<span class="spinner"></span> ' + tr('login.signing', 'Signing in…');
     clearAlert('login-alert');
 
     fetch('/api/auth/login', {
@@ -131,7 +174,7 @@
       })
       .catch(function (err) {
         btn.disabled = false;
-        btn.textContent = 'Sign In 登录';
+        btn.textContent = tr('login.signin', 'Sign In 登录');
         showAlert(alertEl, err.message, 'alert-error');
       });
   };
@@ -211,7 +254,7 @@
 
     var btn = document.getElementById('signup-btn');
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Creating account…';
+    btn.innerHTML = '<span class="spinner"></span> ' + tr('login.creating', 'Creating account…');
     clearAlert('signup-alert');
 
     var payload = { email: email, password: password, name: name, role: signupRole };
@@ -239,7 +282,7 @@
         } else {
           // Email confirmation required
           btn.disabled = false;
-          btn.textContent = 'Create Account 创建账户';
+          btn.textContent = tr('login.create', 'Create Account 创建账户');
           showAlert(alertEl,
             'Account created! Please check your email to confirm before logging in.',
             'alert-success');
@@ -247,7 +290,7 @@
       })
       .catch(function (err) {
         btn.disabled = false;
-        btn.textContent = 'Create Account 创建账户';
+        btn.textContent = tr('login.create', 'Create Account 创建账户');
         showAlert(alertEl, err.message, 'alert-error');
       });
   };
@@ -267,6 +310,8 @@
   function redirectByRole(role) {
     if (role === 'doctor') {
       window.location.href = '/doctor';
+    } else if (role === 'admin' || role === 'developer') {
+      window.location.href = '/admin';
     } else {
       window.location.href = '/patient';
     }
@@ -279,6 +324,7 @@
 
   function showAlert(el, msg, cls) {
     if (!el) return;
+    el.setAttribute('role', 'alert'); // announced by screen readers (also set in the markup)
     el.textContent = msg;
     el.className = 'alert ' + cls;
     el.classList.remove('hidden');

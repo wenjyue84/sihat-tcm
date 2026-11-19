@@ -1,0 +1,1160 @@
+{
+ "updated": "2026-10-12",
+ "groups": [
+  {
+   "id": "art",
+   "title": {
+    "zh": "一、插图装饰(免费 AI 生成)",
+    "en": "1. Illustrations (free AI generation)"
+   },
+   "intro": {
+    "zh": "7 张新插图用免费的 Z-Image-Turbo 生成(不经 OpenRouter,零费用),统一水彩风格,用于 404、空状态、重设密码、五行横幅和社交分享图。",
+    "en": "Seven new illustrations made with the free Z-Image-Turbo model (no OpenRouter, zero cost) in one watercolour style, used on the 404 page, empty states, password reset, the five-elements band and the social share image."
+   },
+   "items": [
+    {
+     "id": "T1-1",
+     "status": "pass",
+     "title": {
+      "zh": "每张插图在真实浏览器里都能显示",
+      "en": "Every illustration paints in a real browser"
+     },
+     "desc": {
+      "zh": "Playwright(Chromium)打开 9 个页面 × 2 种宽度(桌面 1440、手机 390),先把懒加载图片滚入视野并等待加载完成,再逐张检查 naturalWidth > 0,同时检查没有横向滚动,然后截图。",
+      "en": "Playwright (Chromium) opens 9 pages at 2 widths (1440 desktop, 390 phone), scrolls lazy images into view and waits for them, then checks naturalWidth > 0 for every illustration and that there is no sideways scrolling, and takes the screenshot."
+     },
+     "result": {
+      "zh": "40/40 项通过。之前 chrome-cdp 截图里重设密码页和 404 页的插图是空白的,复查确认那是截图时图片尚未解码,不是缺陷。",
+      "en": "40/40 checks passed. The chrome-cdp screenshots had shown blank art on the reset and 404 pages; this re-check confirmed it was captured before the images decoded, not a defect."
+     },
+     "verified": [
+      "capture_test_evidence.py"
+     ],
+     "shots": [
+      {
+       "file": "art-home-hero-1440.webp",
+       "caption": {
+        "zh": "首页主视觉(桌面)",
+        "en": "Home hero (desktop)"
+       },
+       "w": 1280,
+       "h": 800
+      },
+      {
+       "file": "term-illustrations-browser.webp",
+       "caption": {
+        "zh": "测试输出:每页每种宽度的插图检查",
+        "en": "Test output: illustration checks per page and width"
+       },
+       "w": 1280,
+       "h": 770
+      },
+      {
+       "file": "art-home-elements-1440.webp",
+       "caption": {
+        "zh": "首页新增的五行横幅",
+        "en": "New five-elements band on the home page"
+       },
+       "w": 1280,
+       "h": 800
+      },
+      {
+       "file": "art-home-hero-390.webp",
+       "caption": {
+        "zh": "首页(手机 390px)",
+        "en": "Home (phone, 390 px)"
+       },
+       "mobile": true,
+       "w": 390,
+       "h": 844
+      },
+      {
+       "file": "art-notfound-1440.webp",
+       "caption": {
+        "zh": "404 页面插图",
+        "en": "404 page illustration"
+       },
+       "w": 1280,
+       "h": 800
+      },
+      {
+       "file": "art-notfound-390.webp",
+       "caption": {
+        "zh": "404 页面(手机)",
+        "en": "404 page (phone)"
+       },
+       "mobile": true,
+       "w": 390,
+       "h": 844
+      },
+      {
+       "file": "art-reset-1440.webp",
+       "caption": {
+        "zh": "重设密码页侧边插图",
+        "en": "Password-reset side illustration"
+       },
+       "w": 1280,
+       "h": 800
+      },
+      {
+       "file": "art-login-1440.webp",
+       "caption": {
+        "zh": "登录页",
+        "en": "Login page"
+       },
+       "w": 1280,
+       "h": 800
+      },
+      {
+       "file": "art-history-empty-1440.webp",
+       "caption": {
+        "zh": "新患者:病历空状态插图",
+        "en": "New patient: empty-history illustration"
+       },
+       "w": 1280,
+       "h": 800
+      },
+      {
+       "file": "art-history-empty-390.webp",
+       "caption": {
+        "zh": "病历空状态(手机)",
+        "en": "Empty history (phone)"
+       },
+       "mobile": true,
+       "w": 390,
+       "h": 844
+      },
+      {
+       "file": "art-doctor-1440.webp",
+       "caption": {
+        "zh": "医生工作台(数据密集页面不加装饰)",
+        "en": "Doctor workspace (no decoration on dense data pages)"
+       },
+       "w": 1280,
+       "h": 800
+      }
+     ]
+    },
+    {
+     "id": "T1-2",
+     "status": "pass",
+     "title": {
+      "zh": "页面与前端回归检查",
+      "en": "Page and front-end regression checks"
+     },
+     "desc": {
+      "zh": "ACI 的 pages 套件检查每个页面上的每个 img 都以 image/webp 提供、带缓存版本号;hunt_frontend 检查无障碍、对比度、移动端溢出;demo 与 video 套件检查演示页和视频页。",
+      "en": "The ACI pages suite checks every img on every page is served as image/webp with a cache-busting version; hunt_frontend covers accessibility, contrast and mobile overflow; the demo and video suites cover those pages."
+     },
+     "result": {
+      "zh": "加插图后 538/538 通过(pages 314、hunt_frontend 41、demo 152、video 31)。分享图另存为 og.jpg(部分平台的链接预览不支持 webp)后,pages + hunt_frontend 363/363 通过。",
+      "en": "538/538 after the art was added (pages 314, hunt_frontend 41, demo 152, video 31). After the share image was also saved as og.jpg (some link previews do not support webp), pages + hunt_frontend passed 363/363."
+     },
+     "verified": [
+      "ACI pages",
+      "ACI hunt_frontend",
+      "ACI demo",
+      "ACI video"
+     ],
+     "shots": [
+      {
+       "file": "art-og.webp",
+       "caption": {
+        "zh": "社交分享图(1200×630,og:image 使用 og.jpg)",
+        "en": "Social share image (1200x630; og:image uses og.jpg)"
+       },
+       "w": 1200,
+       "h": 630
+      }
+     ]
+    },
+    {
+     "id": "T1-3",
+     "status": "pass",
+     "title": {
+      "zh": "截图复查发现:切诊图标在 Windows 10 显示为方框",
+      "en": "Found by reviewing screenshots: the pulse icon shows as a box on Windows 10"
+     },
+     "desc": {
+      "zh": "逐张查看截图时发现首页「切诊」卡片的图标是空方框。原因是 🫀(Unicode 13 表情)在 Windows 10 的系统表情字体里没有字形。改为支持更广的 💓 后重新截图。",
+      "en": "Looking through the screenshots showed an empty box as the icon on the home page's Pulse card. The 🫀 emoji (Unicode 13) has no glyph in the Windows 10 emoji font. It was replaced with the widely supported 💓 and re-captured."
+     },
+     "result": {
+      "zh": "已修复,修复前后截图如下。",
+      "en": "Fixed; before and after screenshots below."
+     },
+     "verified": [
+      "capture_test_evidence.py"
+     ],
+     "shots": [
+      {
+       "file": "art-features-before-1440.webp",
+       "caption": {
+        "zh": "修复前:切诊卡片图标是方框",
+        "en": "Before: the pulse card icon is a box"
+       },
+       "w": 1280,
+       "h": 800
+      },
+      {
+       "file": "art-features-after-1440.webp",
+       "caption": {
+        "zh": "修复后",
+        "en": "After"
+       },
+       "w": 1280,
+       "h": 800
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "devices",
+   "title": {
+    "zh": "二、智能手表 / 手机健康数据接入",
+    "en": "2. Smart-watch and phone health data"
+   },
+   "intro": {
+    "zh": "四种接入方式:蓝牙直连(标准 GATT 心率、血氧、血压、体温)、Google Health 在线授权、Apple 健康导出文件上传、iOS 快捷指令 / Android 自动化推送(个人令牌),外加手动录入。",
+    "en": "Four ways in: direct Bluetooth (standard GATT heart rate, SpO2, blood pressure, temperature), Google Health online authorisation, Apple Health export upload, and iOS Shortcuts / Android automation push with a personal token — plus manual entry."
+   },
+   "items": [
+    {
+     "id": "T2-1",
+     "status": "pass",
+     "title": {
+      "zh": "问诊切诊步骤:蓝牙心率带实时读数",
+      "en": "Wizard pulse step: live heart rate from a Bluetooth strap"
+     },
+     "desc": {
+      "zh": "在 Chromium 中注入模拟的蓝牙心率带(navigator.bluetooth),检查:按心率服务 0x180D 请求设备、实时 BPM 显示、停止后取平均值写入心率栏、HRV 标签、汇总页列出设备读数、发给 AI 的请求里带 device_vitals。另用 iPhone 浏览器身份检查:没有蓝牙时给出白话说明,按钮标为不可用。",
+      "en": "A simulated Bluetooth strap (navigator.bluetooth) is injected into Chromium. Checks: the device is requested with the 0x180D heart-rate service, BPM streams live, the average goes into the field on stop, an HRV chip appears, the review screen lists device readings, and the AI request carries device_vitals. An iPhone browser identity checks that, without Bluetooth, a plain explanation appears and the buttons are marked unavailable."
+     },
+     "result": {
+      "zh": "10/10 项通过(包含在下面 T2-2 的 26 项中)。尚未用真实的心率带或手表测试。",
+      "en": "10/10 checks passed (part of the 26 in T2-2). Not yet tried with a real strap or watch."
+     },
+     "verified": [
+      "devices_browser_test.py",
+      "node --test regress/health-connect.test.mjs"
+     ],
+     "shots": [
+      {
+       "file": "dev-wizard-pulse.webp",
+       "caption": {
+        "zh": "切诊步骤:连接设备面板与实时心率",
+        "en": "Pulse step: link-a-device panel with live heart rate"
+       },
+       "w": 1280,
+       "h": 900
+      },
+      {
+       "file": "dev-wizard-ios.webp",
+       "caption": {
+        "zh": "iPhone:说明为什么不能蓝牙直连",
+        "en": "iPhone: explains why direct Bluetooth is unavailable"
+       },
+       "mobile": true,
+       "w": 390,
+       "h": 800
+      }
+     ]
+    },
+    {
+     "id": "T2-2",
+     "status": "pass",
+     "title": {
+      "zh": "患者中心「设备与健康数据」四种接入",
+      "en": "Patient hub 'Devices & health data': all four channels"
+     },
+     "desc": {
+      "zh": "新注册患者打开设备区块:四张接入卡片;Google 授权走完整流程(PKCE + state,用模拟的 Google 服务器)并自动同步;生成个人令牌(只显示一次)并用它推送一条读数;上传 Apple 健康 export.xml(再次上传应全部判为重复);手动录入;375px 无横向滚动;中文界面;最后全部删除。",
+      "en": "A newly registered patient opens the devices section: four channel cards; the Google flow runs end to end (PKCE + state, against a simulated Google server) and auto-syncs; a personal token is created (shown once) and used to push a reading; an Apple Health export.xml is uploaded (a second upload must be all duplicates); manual entry; no sideways scrolling at 375 px; Chinese UI; finally delete everything."
+     },
+     "result": {
+      "zh": "共运行 3 次:第 2、3 次 26/26 通过;第 1 次在「重复上传 Apple 文件」一步超时。同样的接口用 curl 直接调用结果正确(第二次 inserted 0、duplicates 12),是测试在列表刷新时选文件的时序问题,属偶发,未改代码。",
+      "en": "Run 3 times: runs 2 and 3 passed 26/26; run 1 timed out at the second Apple upload. The same endpoint called directly with curl was correct (second upload: inserted 0, duplicates 12), so it is a timing flake in the test (choosing the file while the list re-renders); no code change."
+     },
+     "verified": [
+      "devices_browser_test.py",
+      "ACI health"
+     ],
+     "shots": [
+      {
+       "file": "dev-dashboard-full.webp",
+       "caption": {
+        "zh": "接入 Google、令牌推送、Apple 导入、手动录入之后",
+        "en": "After Google, token push, Apple import and manual entry"
+       },
+       "w": 1280,
+       "h": 2816
+      },
+      {
+       "file": "term-devices-browser.webp",
+       "caption": {
+        "zh": "测试输出:26 项浏览器检查",
+        "en": "Test output: the 26 browser checks"
+       },
+       "w": 1280,
+       "h": 854
+      },
+      {
+       "file": "dev-dashboard-empty.webp",
+       "caption": {
+        "zh": "初始状态:四张接入卡片",
+        "en": "Initial state: four channel cards"
+       },
+       "w": 1280,
+       "h": 2816
+      },
+      {
+       "file": "dev-dashboard-375.webp",
+       "caption": {
+        "zh": "手机 375px",
+        "en": "Phone, 375 px"
+       },
+       "mobile": true,
+       "w": 375,
+       "h": 800
+      },
+      {
+       "file": "dev-patient-devices-1440.webp",
+       "caption": {
+        "zh": "演示患者账号的设备区块",
+        "en": "The demo patient's devices section"
+       },
+       "w": 1280,
+       "h": 800
+      }
+     ]
+    },
+    {
+     "id": "T2-3",
+     "status": "pass",
+     "title": {
+      "zh": "接口、数据隔离与安全检查",
+      "en": "API, data isolation and security checks"
+     },
+     "desc": {
+      "zh": "Go 单元测试(真实 SQLite + 模拟 Google);ACI health 套件 71 项:令牌生命周期、推送校验与去重、Apple XML 导入、Google 授权、只能读自己的数据、未配置状态;并与 roles、security、pages、no_blobs_in_db 套件一起在两种数据库后端各跑一遍。蓝牙数据解析另有 24 项 JS 单元测试。",
+      "en": "Go unit tests (real SQLite + simulated Google); the ACI health suite's 71 checks: token lifecycle, push validation and dedupe, Apple XML import, Google authorisation, own-rows-only, not-configured states; run together with the roles, security, pages and no_blobs_in_db suites on both database back-ends. The Bluetooth parsers have 24 JS unit tests."
+     },
+     "result": {
+      "zh": "Go 测试 6 个包全部通过;JS 24/24;ACI 在 sqlite 与 fake 两种数据库各 697/697 通过(各跳过 1 项)。令牌只存 SHA-256、Google 刷新令牌用 AES-GCM 加密且不发给浏览器、上传文件本身不存库。",
+      "en": "Go tests pass in all 6 packages; JS 24/24; ACI 697/697 on both the sqlite and fake databases (1 skipped each). Tokens are stored only as SHA-256, Google refresh tokens are AES-GCM sealed and never sent to the browser, and uploaded files are not stored."
+     },
+     "verified": [
+      "ACI health",
+      "ACI roles",
+      "ACI security",
+      "ACI no_blobs_in_db",
+      "Go unit tests"
+     ],
+     "shots": []
+    },
+    {
+     "id": "T2-4",
+     "status": "partial",
+     "title": {
+      "zh": "尚未用真实设备和真实账号验证",
+      "en": "Not yet verified with real devices and accounts"
+     },
+     "desc": {
+      "zh": "以上全部是对模拟对象的测试:模拟蓝牙心率带、模拟 Google 服务器、模板生成的 Apple 导出文件。",
+      "en": "Everything above ran against stand-ins: a simulated Bluetooth strap, a simulated Google server and a template-generated Apple export."
+     },
+     "result": {
+      "zh": "上线前还需要:在 Google OAuth 客户端加入回调地址并设置环境变量;用一条真实心率带 / 支持心率广播的手表试连;用一份真实 iPhone 健康导出试传。Apple Watch 和多数 Fitbit 不向浏览器开放标准蓝牙心率,只能走在线方式。",
+      "en": "Still needed before launch: add the callback URL to the Google OAuth client and set the env vars; pair one real strap or HR-broadcasting watch; upload one real iPhone Health export. Apple Watch and most Fitbits do not expose standard Bluetooth heart rate to browsers, so they use the online routes."
+     },
+     "verified": [],
+     "shots": []
+    }
+   ]
+  },
+  {
+   "id": "scenarios",
+   "title": {
+    "zh": "三、诊断准确度:对照网上资料的情境测试",
+    "en": "3. Diagnostic accuracy: scenario tests against online sources"
+   },
+   "intro": {
+    "zh": "用网上可核查的资料建测试集,让真实 AI 模型作答,再由独立评审逐项对照参考答案打分,据此调整提示词并重测。每项只跑一次,单项 1 分的变化视为噪声。",
+    "en": "A test set built from checkable online sources; the real AI models answer, an independent judge scores each answer against the reference, the prompts are adjusted from that, and the set is re-run. One sample per item, so a 1-point move on a single item counts as noise."
+   },
+   "items": [
+    {
+     "id": "T3-1",
+     "status": "partial",
+     "title": {
+      "zh": "测试集:14 张舌象照片、1 张合成面象、11 个公开医案",
+      "en": "Test set: 14 tongue photos, 1 synthetic face, 11 published cases"
+     },
+     "desc": {
+      "zh": "舌象照片来自 Wikimedia Commons,全部为 CC 授权或公有领域,逐张记录来源、作者、授权与文献中的诊断,并按中医舌诊资料写出预期表现。面象不用真人照片,用免费模型生成已知面色的合成人像。文字病例改写自 PMC 上公开的中医医案,保留原文的证型与治则作为参考答案。",
+      "en": "Tongue photos come from Wikimedia Commons, all CC-licensed or public domain, each with source, author, licence and the documented condition, plus the expected TCM reading from tongue-diagnosis references. Faces are not real people: synthetic portraits with a known complexion from the free model. Text cases are paraphrased from open-access TCM case reports on PMC, keeping the source's pattern and treatment principle as the reference."
+     },
+     "result": {
+      "zh": "计划 6 张面象,只生成了 1 张:HuggingFace 免费额度用完,其余 5 张待额度恢复。缺少心脾两虚和肾阴/肾阳虚的病例(没找到舌脉资料足够的公开医案)。",
+      "en": "6 faces were planned but only 1 exists: the HuggingFace free quota ran out, the other 5 wait for it to reset. Heart-Spleen and Kidney Yin/Yang cases are missing (no open case report with enough tongue and pulse detail was found)."
+     },
+     "verified": [
+      "regress/scenarios/manifest.json"
+     ],
+     "shots": [
+      {
+       "file": "scen-tongue-01.webp",
+       "caption": {
+        "zh": "tongue-01 地图舌",
+        "en": "tongue-01 geographic tongue"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-06.webp",
+       "caption": {
+        "zh": "tongue-06 黑毛舌",
+        "en": "tongue-06 black hairy tongue"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-08.webp",
+       "caption": {
+        "zh": "tongue-08 口腔念珠菌(白腐苔)",
+        "en": "tongue-08 oral thrush"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-face-01.webp",
+       "caption": {
+        "zh": "face-01 合成面象:面色淡白",
+        "en": "face-01 synthetic face: pale"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-case-01.webp",
+       "caption": {
+        "zh": "case-01 医案:肝郁阳亢",
+        "en": "case-01 case: Liver Qi stagnation with Yang rising"
+       },
+       "w": 1280,
+       "h": 720
+      }
+     ]
+    },
+    {
+     "id": "T3-2",
+     "status": "info",
+     "title": {
+      "zh": "基线:调整前 AI 与参考答案的对比",
+      "en": "Baseline: the AI before tuning, against the references"
+     },
+     "desc": {
+      "zh": "26 项全部用真实模型作答(26/26 返回成功,用时 1557 秒),独立评审查看每张图片和每份输出后打分。",
+      "en": "All 26 items answered by the real models (26/26 succeeded, 1557 s), then an independent judge looked at every image and every output and scored them."
+     },
+     "result": {
+      "zh": "舌象特征 51/78(65%):舌色 17/26、舌苔 16/26、舌形润燥 18/26;舌象证型 20/26,1 例寒热判反。医案:主证型完全一致 2 例、部分一致 8 例;要点 16/22;治则 10/20;安全 19/22。主要问题:漏掉实证成分、红舌被判为淡舌、地图舌和剥苔被当成舌苔、心动过缓说「会自行恢复」。",
+      "en": "Tongue features 51/78 (65%): colour 17/26, coating 16/26, shape/moisture 18/26; tongue pattern 20/26 with 1 hot/cold inversion. Cases: 2 exact and 8 partial primary patterns; key signs 16/22; principle 10/20; safety 19/22. Main problems: missed excess components, red tongues read as pale, geographic/peeled areas read as coating, and a bradycardia case told it would 'normalize on its own'."
+     },
+     "verified": [
+      "regress/scenarios/run.mjs"
+     ],
+     "shots": [
+      {
+       "file": "scen-tongue-13.webp",
+       "caption": {
+        "zh": "tongue-13 杨梅舌:AI 判为淡红舌、寒湿 —— 寒热判反",
+        "en": "tongue-13 raspberry tongue: read as light red and Cold-Damp, the opposite of Heat"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-case-07.webp",
+       "caption": {
+        "zh": "case-07 心动过缓:基线说会自行恢复(安全 0 分)",
+        "en": "case-07 bradycardia: baseline said it would resolve by itself (safety 0)"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-14.webp",
+       "caption": {
+        "zh": "tongue-14 地图舌",
+        "en": "tongue-14 geographic tongue"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-10.webp",
+       "caption": {
+        "zh": "tongue-10 B12 缺乏舌炎",
+        "en": "tongue-10 B12-deficiency glossitis"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-03.webp",
+       "caption": {
+        "zh": "tongue-03 裂纹舌 + 地图舌",
+        "en": "tongue-03 fissured + geographic"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-02.webp",
+       "caption": {
+        "zh": "tongue-02",
+        "en": "tongue-02"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-04.webp",
+       "caption": {
+        "zh": "tongue-04",
+        "en": "tongue-04"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-05.webp",
+       "caption": {
+        "zh": "tongue-05",
+        "en": "tongue-05"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-07.webp",
+       "caption": {
+        "zh": "tongue-07",
+        "en": "tongue-07"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-09.webp",
+       "caption": {
+        "zh": "tongue-09",
+        "en": "tongue-09"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-11.webp",
+       "caption": {
+        "zh": "tongue-11",
+        "en": "tongue-11"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-12.webp",
+       "caption": {
+        "zh": "tongue-12",
+        "en": "tongue-12"
+       },
+       "w": 1280,
+       "h": 720
+      }
+     ]
+    },
+    {
+     "id": "T3-3",
+     "status": "partial",
+     "title": {
+      "zh": "第一轮调整:医案变好,舌象变差",
+      "en": "Tuning round 1: cases improved, tongues got worse"
+     },
+     "desc": {
+      "zh": "只改提示词、不加任何针对个别题目的提示:问诊报告加入「虚实分列、舌脉约束证型、治则逐项对应、确定性校准、红旗症状与药物禁忌」;舌象加入 8 步观察流程;面象加入观察方法段。改后全部 26 项重跑(1782 秒),并跑契约测试。",
+      "en": "Prompt-only changes with no item-specific hints: the consult report gained 'list excess and deficiency separately, let tongue and pulse constrain the pattern, one principle per component, calibrated certainty, red flags and herb–drug cautions'; the tongue prompt gained an 8-step observation protocol; the face prompt gained a method paragraph. All 26 items re-run (1782 s), plus the contract suites."
+     },
+     "result": {
+      "zh": "医案:完全一致 2→3 例,要点 16→18,治则 10→12,安全 19→21,两例安全问题都修好了。但舌苔 16→14、证型判反 1→3 例,合成面象被误判为无效图片。契约测试 297/297、Go 测试 1314 项全部通过。评审建议撤回舌象和面象的改动。",
+      "en": "Cases: exact 2→3, key signs 16→18, principle 10→12, safety 19→21, both safety failures fixed. But tongue coating fell 16→14, hot/cold inversions rose 1→3, and the synthetic face was rejected as not a face. Contract suites 297/297 and 1314 Go tests passed. The judge recommended reverting the tongue and face changes."
+     },
+     "verified": [
+      "ACI image",
+      "ACI consult",
+      "ACI datacontract",
+      "ACI hunt_ai",
+      "ACI listener",
+      "ACI chat"
+     ],
+     "shots": [
+      {
+       "file": "scen-accuracy.webp",
+       "caption": {
+        "zh": "各轮准确度对比(独立评审)",
+        "en": "Accuracy per run (independent judge)"
+       },
+       "w": 1280,
+       "h": 640
+      },
+      {
+       "file": "scen-case-03.webp",
+       "caption": {
+        "zh": "case-03",
+        "en": "case-03"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-case-04.webp",
+       "caption": {
+        "zh": "case-04",
+        "en": "case-04"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-case-08.webp",
+       "caption": {
+        "zh": "case-08 第一轮报告被截断",
+        "en": "case-08: round-1 report was truncated"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-case-02.webp",
+       "caption": {
+        "zh": "case-02",
+        "en": "case-02"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-case-05.webp",
+       "caption": {
+        "zh": "case-05",
+        "en": "case-05"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-case-06.webp",
+       "caption": {
+        "zh": "case-06",
+        "en": "case-06"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-case-09.webp",
+       "caption": {
+        "zh": "case-09",
+        "en": "case-09"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-case-10.webp",
+       "caption": {
+        "zh": "case-10",
+        "en": "case-10"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-case-11.webp",
+       "caption": {
+        "zh": "case-11",
+        "en": "case-11"
+       },
+       "w": 1280,
+       "h": 720
+      }
+     ]
+    },
+    {
+     "id": "T3-4",
+     "status": "partial",
+     "title": {
+      "zh": "第二轮调整:舌象三项指标都是三轮中最好",
+      "en": "Tuning round 2: best of the three runs on every tongue metric"
+     },
+     "desc": {
+      "zh": "按评审建议改舌象流程:先找剥苔 / 无苔区再描述舌苔,看不到舌苔就写「薄」或「无」,删掉「淡、湿、胖 → 湿」这条会带偏的提示;面象提示词恢复基线。只重跑 14 张舌象 + 1 张面象,交给新的独立评审用同一套标准打分。",
+      "en": "Following the judge: find peeled/bare areas before describing the coating, write 'thin' or 'none' when no coating is visible, drop the misleading 'pale, wet, swollen → Damp' hint, and restore the baseline face prompt. Only the 14 tongues + 1 face were re-run and scored by a fresh independent judge with the same rubric."
+     },
+     "result": {
+      "zh": "同一组 13 张舌象:特征 51→54→60/78(65%→77%),舌色 17→18→20,舌苔 16→14→18,舌形 18→22→22,证型 20→19→21;面象恢复 2/2。评审结论:保留。仍未解决:地图舌(tongue-14 两次都说「未见剥苔」)、杨梅舌和 B12 舌炎的红舌仍判为淡红 / 寒证;输出里 potential_issues 与 pattern_suggestions 重复(15/15)。",
+      "en": "Same 13 tongues: features 51→54→60/78 (65%→77%), colour 17→18→20, coating 16→14→18, shape 18→22→22, pattern 20→19→21; face back to 2/2. Judge verdict: keep. Still unsolved: geographic tongue (tongue-14 says 'no peeling' in both runs), and the raspberry and B12 red tongues are still read as light red / Cold; potential_issues duplicates pattern_suggestions in 15/15 outputs."
+     },
+     "verified": [
+      "regress/scenarios/run.mjs",
+      "ACI image"
+     ],
+     "shots": [
+      {
+       "file": "scen-accuracy.webp",
+       "caption": {
+        "zh": "基线 / 第一轮 / 第二轮准确度",
+        "en": "Baseline / round 1 / round 2 accuracy"
+       },
+       "w": 1280,
+       "h": 640
+      },
+      {
+       "file": "scen-tongue-09.webp",
+       "caption": {
+        "zh": "tongue-09:第二轮不再虚构厚腻苔",
+        "en": "tongue-09: round 2 no longer invents a thick greasy coat"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-face-01.webp",
+       "caption": {
+        "zh": "face-01:误判无效已修复",
+        "en": "face-01: false rejection fixed"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-14.webp",
+       "caption": {
+        "zh": "tongue-14:地图舌仍未识别",
+        "en": "tongue-14: geographic tongue still missed"
+       },
+       "w": 1280,
+       "h": 720
+      },
+      {
+       "file": "scen-tongue-13.webp",
+       "caption": {
+        "zh": "tongue-13:红舌仍判为淡红",
+        "en": "tongue-13: red tongue still read as light red"
+       },
+       "w": 1280,
+       "h": 720
+      }
+     ]
+    },
+    {
+     "id": "T3-5",
+     "status": "pass",
+     "title": {
+      "zh": "case-08 报告截断:重跑后完整",
+      "en": "case-08 truncated report: complete on re-run"
+     },
+     "desc": {
+      "zh": "第一轮调整后 case-08(再生障碍性贫血伴紫癜)的报告只有 5 个区块,缺治疗、建议、注意事项、随访和免责声明。用同样的提示词单独重跑一次。",
+      "en": "After round 1, the case-08 report (aplastic anaemia with purpura) had only 5 sections and lacked treatment, recommendations, precautions, follow-up and disclaimer. It was re-run alone with the same prompt."
+     },
+     "result": {
+      "zh": "重跑后 8 个区块齐全(diagnosis、constitution、analysis、treatment、recommendations、precautions、follow_up、disclaimer),说明上次是单次输出被截断,不是提示词让报告变短。尚未加入「报告完整性」自动检查。",
+      "en": "The re-run has all 8 sections (diagnosis, constitution, analysis, treatment, recommendations, precautions, follow_up, disclaimer), so the earlier one was a single truncated output, not a prompt that shortens reports. An automatic completeness check is not added yet."
+     },
+     "verified": [
+      "regress/scenarios/run.mjs"
+     ],
+     "shots": [
+      {
+       "file": "scen-case-08.webp",
+       "caption": {
+        "zh": "case-08 医案与评分",
+        "en": "case-08 case and scores"
+       },
+       "w": 1280,
+       "h": 720
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "regression",
+   "title": {
+    "zh": "四、整体回归与界面测试",
+    "en": "4. Full regression and interface tests"
+   },
+   "intro": {
+    "zh": "所有改动之后跑整套自动化检查,并在真实浏览器里看界面。",
+    "en": "The whole automated suite after all changes, and the interface checked in real browsers."
+   },
+   "items": [
+    {
+     "id": "T4-1",
+     "status": "pass",
+     "title": {
+      "zh": "全套 ACI 回归(两种数据库后端)",
+      "en": "Full ACI regression (both database back-ends)"
+     },
+     "desc": {
+      "zh": "所有改动(插图、健康接入、提示词调整、测试实录本身)完成后重新跑:go vet、全部 Go 单元测试、JS 单元测试,以及 ACI 全部套件分别在模拟数据库与 SQLite 上运行。之前一轮回归中发现 1 个真实问题:测试用的模拟数据库不认识健康数据的 upsert 写法,已补上。本轮中新加的测试实录完整性测试也抓到一次「截图尚未生成」的状态,重建后通过。",
+      "en": "Re-run after every change (art, health integrations, prompt tuning and this test log itself): go vet, all Go unit tests, the JS unit tests, and every ACI suite on both the simulated database and SQLite. An earlier round found one real problem: the test fake did not understand the health-data upsert; it was added. In this round the new test-log completeness test also caught a moment when screenshots had not been built yet; it passed after the rebuild."
+     },
+     "result": {
+      "zh": "go vet 通过;Go 1316 项(6 个包)通过;JS 24/24;ACI 模拟数据库 1837/1837、SQLite 2064/2064(含新增的 7 项测试实录检查),0 失败。",
+      "en": "go vet clean; 1316 Go tests in 6 packages pass; JS 24/24; ACI simulated database 1837/1837 and SQLite 2064/2064 (including 7 new test-log checks), 0 failures."
+     },
+     "verified": [
+      "ACI demo",
+      "ACI health",
+      "ACI pages",
+      "ACI security",
+      "ACI roles",
+      "Go unit tests"
+     ],
+     "shots": [
+      {
+       "file": "term-regression.webp",
+       "caption": {
+        "zh": "最终回归输出",
+        "en": "Final regression output"
+       },
+       "w": 1280,
+       "h": 490
+      }
+     ]
+    },
+    {
+     "id": "T4-2",
+     "status": "partial",
+     "title": {
+      "zh": "chrome-cdp:在真实 Chrome 中测试界面",
+      "en": "chrome-cdp: interface test in the real Chrome"
+     },
+     "desc": {
+      "zh": "通过 Chrome 远程调试协议在你的 Chrome 里新开标签页,依次打开访客页面、切诊步骤、患者 / 医生 / 管理员首屏,检查图片、控制台错误和 390px 横向溢出。",
+      "en": "Through the Chrome DevTools Protocol, new tabs in your Chrome opened the guest pages, the pulse step and the patient, doctor and admin first screens, checking images, console errors and overflow at 390 px."
+     },
+     "result": {
+      "zh": "中途 Chrome 不再允许调试新标签页,测试未完成:患者设备区块、医生空收件箱、管理员页只做了首屏。截图中重设密码页插图空白,经 T1-1 复查确认是截图过早。",
+      "en": "Chrome stopped allowing debugging of new tabs part-way, so the run is incomplete: the patient devices section, the empty doctor inbox and admin beyond the first screen were not covered. The blank art on the reset page in these shots was confirmed by T1-1 to be an early capture."
+     },
+     "verified": [
+      "chrome-cdp"
+     ],
+     "shots": [
+      {
+       "file": "cdp-reset-1440.webp",
+       "caption": {
+        "zh": "chrome-cdp:重设密码页(插图尚未解码)",
+        "en": "chrome-cdp: reset page (art not yet decoded)"
+       },
+       "w": 1280,
+       "h": 800
+      },
+      {
+       "file": "cdp-wizard-pulse-1440.webp",
+       "caption": {
+        "zh": "chrome-cdp:切诊步骤",
+        "en": "chrome-cdp: pulse step"
+       },
+       "w": 390,
+       "h": 844
+      },
+      {
+       "file": "cdp-patient-390.webp",
+       "caption": {
+        "zh": "chrome-cdp:患者中心(手机)",
+        "en": "chrome-cdp: patient hub (phone)"
+       },
+       "mobile": true,
+       "w": 390,
+       "h": 844
+      },
+      {
+       "file": "cdp-doctor-1440.webp",
+       "caption": {
+        "zh": "chrome-cdp:医生工作台",
+        "en": "chrome-cdp: doctor workspace"
+       },
+       "w": 1280,
+       "h": 800
+      }
+     ]
+    },
+    {
+     "id": "T4-3",
+     "status": "fail",
+     "title": {
+      "zh": "Claude for Chrome:未能连接",
+      "en": "Claude for Chrome: could not connect"
+     },
+     "desc": {
+      "zh": "两次调用浏览器扩展,连接列表都是空的(Chrome 在运行,但扩展没有连到这个会话)。",
+      "en": "Two attempts to use the browser extension both returned an empty list of connected browsers (Chrome was running, but the extension was not connected to this session)."
+     },
+     "result": {
+      "zh": "未执行。需要在 Chrome 扩展里登录同一个 claude.ai 账号或重启 Chrome 后再试;界面测试改由 Playwright 完成(T1-1、T2-2)。",
+      "en": "Not run. It needs the extension signed in to the same claude.ai account, or a Chrome restart; the interface tests were done with Playwright instead (T1-1, T2-2)."
+     },
+     "verified": [],
+     "shots": []
+    },
+    {
+     "id": "T4-4",
+     "status": "pass",
+     "title": {
+      "zh": "本测试实录页面本身",
+      "en": "This test-log page itself"
+     },
+     "desc": {
+      "zh": "Playwright 打开 /demo#tests(桌面 1440、手机 390):强制加载区块内全部图片并检查 naturalWidth、统计条目数、检查横向溢出和控制台错误,并点一次缩略图确认主图会切换。ACI demo 套件另有 7 项检查:每个条目都渲染、都有状态 / 方法 / 结果、所有截图可访问且不超过 300 KB、不混入自动播放导览。",
+      "en": "Playwright opens /demo#tests (1440 desktop, 390 phone): forces every image in the section to load and checks naturalWidth, counts the entries, checks overflow and console errors, and clicks a thumbnail to confirm the main image switches. The ACI demo suite adds 7 checks: every entry renders, each has status / method / result, every screenshot is served and under 300 KB, and nothing joins the autoplay tour."
+     },
+     "result": {
+      "zh": "桌面与手机各:17 个条目、72 张图片全部加载(0 张损坏)、无横向溢出、0 个控制台错误;点击缩略图后主图切换为 scen-case-07.webp。",
+      "en": "Desktop and phone each: 17 entries, all 72 images loaded (0 broken), no sideways overflow, 0 console errors; clicking a thumbnail switched the main image to scen-case-07.webp."
+     },
+     "verified": [
+      "ACI demo",
+      "Go unit tests"
+     ],
+     "shots": [
+      {
+       "file": "log-page-1440.webp",
+       "caption": {
+        "zh": "测试实录(桌面)",
+        "en": "Test log (desktop)"
+       },
+       "w": 1280,
+       "h": 800
+      },
+      {
+       "file": "log-page-390.webp",
+       "caption": {
+        "zh": "测试实录(手机)",
+        "en": "Test log (phone)"
+       },
+       "mobile": true,
+       "w": 390,
+       "h": 844
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tooling",
+   "title": {
+    "zh": "五、费用保护:禁止未经批准调用 OpenRouter",
+    "en": "5. Spend guard: no OpenRouter calls without approval"
+   },
+   "intro": {
+    "zh": "测试图像模型时发现 OpenRouter 上标价为 0 的模型实际扣费 0.014 美元,因此加了一个强制拦截的钩子。",
+    "en": "While testing image models, an OpenRouter model listed at price 0 actually charged $0.014, so a hard-blocking hook was added."
+   },
+   "items": [
+    {
+     "id": "T5-1",
+     "status": "pass",
+     "title": {
+      "zh": "会产生费用的调用一律被拦截",
+      "en": "Every billable call is blocked"
+     },
+     "desc": {
+      "zh": "用真实的钩子输入测试 9 种情况:脚本里、.bash 文件里、通过管道读入的文本里、命令行直接调用计费接口;只读的模型列表;有预算检查的既有程序;自己写批准文件;无关命令。复测时还发现并修补了一个漏洞:原来只检查 .py / .sh 等扩展名的文件。",
+      "en": "Nine cases with real hook payloads: a billable call in a script, in a .bash file, in a text file piped in, and inline; a read-only model list; the existing budget-checked caller; writing the approval file itself; an unrelated command. The re-test also found and closed a loophole: only .py / .sh-style file names had been scanned."
+     },
+     "result": {
+      "zh": "9/9 通过;重新运行当初扣费的脚本会被直接拦下。只有你在对话中输入「approve openrouter」才会放行 30 分钟。",
+      "en": "9/9 passed; re-running the script that was charged is blocked outright. Only typing 'approve openrouter' in the chat unlocks it, for 30 minutes."
+     },
+     "verified": [
+      "openrouter-spend-gate.test.mjs"
+     ],
+     "shots": [
+      {
+       "file": "term-openrouter-gate.webp",
+       "caption": {
+        "zh": "钩子测试输出",
+        "en": "Hook test output"
+       },
+       "w": 1280,
+       "h": 462
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "deploy",
+   "title": {
+    "zh": "六、部署:回归、介面检查、正式站验证",
+    "en": "6. Deployment: regression, interface check, production verification"
+   },
+   "intro": {
+    "zh": "部署前必须先过自动化回归(ACI)和浏览器介面检查,部署后在正式站再验证一次。",
+    "en": "Before a deploy the automated regression (ACI) and a browser interface check must pass; after it, production is verified again."
+   },
+   "items": [
+    {
+     "id": "T6-1",
+     "status": "pass",
+     "title": {
+      "zh": "部署前:ACI 完整回归(predeploy)",
+      "en": "Before deploy: full ACI regression (predeploy)"
+     },
+     "desc": {
+      "zh": "十个节点依次运行:接线检查、Linux 编译、vet、Go 与 JS 单元测试、集成、e2e-api、SQLite 契约、e2e-sqlite、浏览器 e2e-ui,最后是调用本机真实 Claude 模型的完整旅程。全部通过才会写入与当前代码树绑定的通行戳,部署脚本只认这个戳。",
+      "en": "Ten nodes in order: wiring, Linux build, vet, Go and JS unit tests, integration, e2e-api, the SQLite contract, e2e-sqlite, browser e2e-ui and, last, the full journey through the local real Claude models. Only an all-green run writes the stamp tied to the current code tree, and the deploy script accepts nothing else."
+     },
+     "result": {
+      "zh": "第一次运行 SQLite 契约节点失败。原因是测试探针对没有唯一键的暂存表做 on_conflict,SQLite 后端按 Postgres 规则返回 42P10(正确行为);真实的 health_readings 有唯一键,去重由 ACI health 套件证明。修正探针后重跑:10/10 节点全绿,Go 1316 项、集成 1419、e2e-sqlite 789、浏览器 140 项、真实模型 93/93。",
+      "en": "The first run failed the SQLite contract node. Cause: the test probe did on_conflict on a scratch table with no unique key, and the SQLite backend answered 42P10 as Postgres would (correct behaviour); the real health_readings table has the unique key and the ACI health suite proves the dedupe. After fixing the probe and re-running: 10/10 nodes green, 1316 Go tests, 1419 integration, 789 e2e-sqlite, 140 browser checks, real models 93/93."
+     },
+     "verified": [
+      "regress graph (predeploy)",
+      "ACI fakedb",
+      "ACI health"
+     ],
+     "shots": [
+      {
+       "file": "term-deploy.webp",
+       "caption": {
+        "zh": "predeploy 输出、部署与正式站检查",
+        "en": "predeploy output, deploy and production checks"
+       },
+       "w": 1280,
+       "h": 630
+      }
+     ]
+    },
+    {
+     "id": "T6-2",
+     "status": "partial",
+     "title": {
+      "zh": "部署前:chrome-cdp 基本介面检查",
+      "en": "Before deploy: basic interface check with chrome-cdp"
+     },
+     "desc": {
+      "zh": "通过 Chrome 远程调试在真实 Chrome 中打开待部署版本的本机 stack,检查首页、登录、重设密码、404、演示页的图片是否载入、有无横向滚动,测试实录区块与缩略图切换,并用演示患者登录后查看设备区块。",
+      "en": "Through Chrome remote debugging, the real Chrome opened the local stack of the build about to be deployed and checked that images load and nothing scrolls sideways on the home, login, reset, 404 and demo pages, the test log and its thumbnails, and — logged in as the demo patient — the devices section."
+     },
+     "result": {
+      "zh": "第一轮 27 项通过、4 项失败,逐项在 Chrome 中复查:3 项是脚本问题(把隐藏的上传预览图算进去、终端编码导致 💓 比对失败、测试环境带模拟 Google 所以显示登录按钮),1 项是后台分页截图超时(改为截图前把分页带到前景后成功)。网站本身没有发现缺陷。之后每次重开分页都需要你在 Chrome 点「Allow debugging」,等不到点击,没能用修正后的脚本完整重跑,所以标为部分完成。",
+      "en": "First round: 27 passed, 4 failed; each was re-checked in Chrome: 3 were script problems (hidden upload-preview images were counted, terminal encoding broke the 💓 comparison, the test stack has a simulated Google so a sign-in button shows) and 1 was a screenshot timeout in a background tab (fixed by bringing the tab to the front first). No site defect found. Every newly opened tab needs a click on 'Allow debugging' in Chrome, which did not come in time, so the corrected script could not be re-run end to end; hence Partial."
+     },
+     "verified": [
+      "chrome-cdp"
+     ],
+     "shots": []
+    },
+    {
+     "id": "T6-3",
+     "status": "pass",
+     "title": {
+      "zh": "部署后:正式站唯读检查",
+      "en": "After deploy: read-only check of production"
+     },
+     "desc": {
+      "zh": "只用 GET 请求(不登录、不注册、不提交):首页、登录、测试实录、404 在桌面和手机两种宽度下,所有可见图片都能解码、没有横向滚动、没有自身请求失败或 JS 错误;并确认线上版本确实包含这次新增的内容。部署脚本本身还在正式站跑了 health 与 consult 两个只读套件。",
+      "en": "GET requests only (no login, no sign-up, no submit): on the home, login, test log and 404 pages at desktop and phone widths every visible image decodes, nothing scrolls sideways and no own request or JS error occurs; and the live build contains what this release added. The deploy script itself also ran the read-only health and consult suites against production."
+     },
+     "result": {
+      "zh": "35/35 通过;health 5/5、consult 4/4。第一次检查报了 8 个 console 错误,经查全是 Cloudflare 自动注入的流量统计脚本在沙盒浏览器里连不上,不是本站问题,检查改为只统计本站自己的请求。",
+      "en": "35/35 passed; health 5/5, consult 4/4. The first run reported 8 console errors; all were Cloudflare's injected analytics beacon being unreachable from the sandboxed browser, not the site, so the check now counts only the site's own requests."
+     },
+     "verified": [
+      "capture_prod_readonly.py",
+      "ACI health",
+      "ACI consult"
+     ],
+     "shots": [
+      {
+       "file": "prod-home-1440.webp",
+       "caption": {
+        "zh": "正式站首页",
+        "en": "Production home page"
+       },
+       "w": 1280,
+       "h": 800
+      },
+      {
+       "file": "prod-demo-log-1440.webp",
+       "caption": {
+        "zh": "正式站的测试实录(桌面)",
+        "en": "Production test log (desktop)"
+       },
+       "w": 1280,
+       "h": 800
+      },
+      {
+       "file": "prod-demo-log-390.webp",
+       "caption": {
+        "zh": "正式站的测试实录(手机)",
+        "en": "Production test log (phone)"
+       },
+       "mobile": true,
+       "w": 390,
+       "h": 844
+      },
+      {
+       "file": "prod-notfound-1440.webp",
+       "caption": {
+        "zh": "正式站 404 页",
+        "en": "Production 404 page"
+       },
+       "w": 1280,
+       "h": 800
+      },
+      {
+       "file": "term-prod-readonly.webp",
+       "caption": {
+        "zh": "检查输出",
+        "en": "Check output"
+       },
+       "w": 1280,
+       "h": 518
+      }
+     ]
+    },
+    {
+     "id": "T6-4",
+     "status": "pass",
+     "title": {
+      "zh": "正式机上的两处改动:提示词与 nginx",
+      "en": "Two changes on the production server: prompts and nginx"
+     },
+     "desc": {
+      "zh": "正式机的数据库里存着 10 月 10 日从种子文件复制的提示词,程序优先读数据库,所以新版默认提示词不会生效。做法:先在线备份数据库,再只在存档内容仍是原始种子时,才把 doctor_final 与 doctor_image 两条改成新版。另在 nginx 为 Apple 健康导出上传加一个放宽到 100MB 的路由(原上限 30MB),备份、nginx -t 通过后才重载。",
+      "en": "Production's database holds the prompts copied from the seed file on 10 October and the app reads the database first, so the new default prompts would not apply. Procedure: an online database backup first, then doctor_final and doctor_image are replaced only if the stored text is still the original seed. nginx also gets a route that raises the limit to 100 MB for the Apple Health export upload (the old cap is 30 MB), reloaded only after a backup and a passing nginx -t."
+     },
+     "result": {
+      "zh": "两条提示词已更新(15833→21643、4703→8530 字);备份文件权限收紧为 600。nginx 重载后:向 Apple 导入路由上传 40MB 返回 401(通过了大小限制,由登录校验拒绝),向普通路由上传 40MB 仍返回 413。 提示词快取过期后,在正式站做了一次真实的诊断请求:返回完整的 8 个区块报告。但从输出看不出用的是哪一版提示词,所以只能证明数据库里是新内容、程序读数据库、请求正常,不能直接证明输出已变。",
+      "en": "Both prompts were updated (15833→21643 and 4703→8530 characters); the backup files were tightened to mode 600. After the nginx reload, a 40 MB upload to the Apple import route returns 401 (it passes the size limit and is refused by the login check) while a 40 MB upload to a normal route still returns 413. After the 5-minute prompt cache expired, one real consult on production returned a complete 8-section report. The output cannot show which prompt text produced it, so this proves the database holds the new text, the app reads the database and the request works — not that the output changed."
+     },
+     "verified": [
+      "deploy.txt"
+     ],
+     "shots": []
+    }
+   ]
+  }
+ ]
+}

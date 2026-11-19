@@ -20,21 +20,34 @@ func (s *Server) registerPageRoutes() {
 	s.Mux.HandleFunc("GET /patient/report/{id}", s.handlePatientReportPage)
 	s.Mux.HandleFunc("GET /doctor", s.handleDoctorPage)
 	s.Mux.HandleFunc("GET /admin", s.handleAdminPage)
+	s.registerDemoRoutes()
 	s.Mux.HandleFunc("GET /robots.txt", s.handleRobots)
 	s.Mux.HandleFunc("GET /sitemap.xml", s.handleSitemap)
 }
 
-// handleRobots serves robots.txt pointing crawlers at the sitemap.
+// pgNoStore marks a response that carries the signed-in user's own data (patient history, doctor inbox, admin console).
+// Without it the browser may keep the page in its back/forward cache, so after Logout the Back button re-shows the
+// previous user's protected page.
+func pgNoStore(w http.ResponseWriter) {
+	w.Header().Set("Cache-Control", "no-store, private")
+	w.Header().Add("Vary", "Cookie")
+}
+
+// handleRobots serves robots.txt pointing crawlers at the sitemap. /demo is Disallowed on purpose (see
+// registerDemoRoutes): a link-shared investor page that is neither indexed nor in the sitemap.
 func (s *Server) handleRobots(w http.ResponseWriter, r *http.Request) {
 	base := strings.TrimRight(s.Cfg.PublicBaseURL, "/")
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	_, _ = w.Write([]byte("User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /patient\nDisallow: /doctor\nSitemap: " + base + "/sitemap.xml\n"))
+	_, _ = w.Write([]byte("User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /patient\nDisallow: /doctor\nDisallow: /admin\nDisallow: /demo\nSitemap: " + base + "/sitemap.xml\n"))
 }
 
 // handleSitemap serves a minimal sitemap of the public pages.
 func (s *Server) handleSitemap(w http.ResponseWriter, r *http.Request) {
 	base := strings.TrimRight(s.Cfg.PublicBaseURL, "/")
 	pages := []string{"/", "/login"}
+	if videoAvailable() {
+		pages = append(pages, "/video") // only listed when the media file exists on this server
+	}
 	var b strings.Builder
 	b.WriteString(`<?xml version="1.0" encoding="UTF-8"?>` + "\n")
 	b.WriteString(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` + "\n")
@@ -71,7 +84,9 @@ func (s *Server) handlePatientPage(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
-	s.Render(w, "patient.html", pgPageData{Title: "Health Journey", User: user})
+	pgNoStore(w)
+	// the template appends " — Health Journey": a handler title with the same words rendered it twice
+	s.Render(w, "patient.html", pgPageData{Title: "My Dashboard", User: user})
 }
 
 // handlePatientReportPage renders report.html — a standalone, shareable view of
@@ -84,20 +99,33 @@ func (s *Server) handlePatientReportPage(w http.ResponseWriter, r *http.Request)
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
+	pgNoStore(w)
 	s.Render(w, "report.html", pgPageData{Title: "Assessment Report", User: user})
 }
 
 // handleDoctorPage renders doctor.html.
 // Requires authentication; unauthenticated requests are redirected to /login.
-// Any authenticated role may view — the doctor header is cosmetic; the API
-// enforces role-scoped access separately.
+// Doctors (and admin/developer, who may inspect it) get the page; any other
+// role is bounced to its own dashboard, consistent with /admin. The APIs still
+// enforce role-scoped access separately.
 func (s *Server) handleDoctorPage(w http.ResponseWriter, r *http.Request) {
 	user := s.Authenticate(r)
 	if user == nil {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return
 	}
-	s.Render(w, "doctor.html", pgPageData{Title: "Doctor Dashboard", User: user})
+	if user.Role != "doctor" && user.Role != "admin" && user.Role != "developer" {
+		pgRedirectByRole(w, r, user.Role)
+		return
+	}
+	if user.Role == "doctor" && !user.Approved {
+		// registered but not yet approved by an admin: no doctor inbox yet, the patient area meanwhile
+		http.Redirect(w, r, "/patient", http.StatusFound)
+		return
+	}
+	pgNoStore(w)
+	// the template appends " — Doctor Dashboard": a handler title with the same words rendered it twice
+	s.Render(w, "doctor.html", pgPageData{Title: "Inbox", User: user})
 }
 
 // handleAdminPage renders admin.html — a read-only operations dashboard that
@@ -115,14 +143,18 @@ func (s *Server) handleAdminPage(w http.ResponseWriter, r *http.Request) {
 		pgRedirectByRole(w, r, user.Role)
 		return
 	}
+	pgNoStore(w)
 	s.Render(w, "admin.html", pgPageData{Title: "Admin Console", User: user})
 }
 
 // pgRedirectByRole sends the user to their role-appropriate dashboard.
 func pgRedirectByRole(w http.ResponseWriter, r *http.Request, role string) {
 	dest := "/patient"
-	if role == "doctor" {
+	switch role {
+	case "doctor":
 		dest = "/doctor"
+	case "admin", "developer":
+		dest = "/admin"
 	}
 	http.Redirect(w, r, dest, http.StatusFound)
 }

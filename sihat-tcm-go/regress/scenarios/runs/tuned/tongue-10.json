@@ -1,0 +1,128 @@
+{
+  "id": "tongue-10",
+  "type": "tongue",
+  "label": "tuned",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T02:37:14.036Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 199762,
+      "bytes": 2224,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 199763,
+  "raw": "{\"analysis_tags\":[{\"category\":\"痰濕內阻 · 脾胃調理\",\"confidence\":87.3,\"description\":\"中央及中後區域可見厚白膩苔，提示脾失健運、水液輸布失常，痰濕積聚於中焦。此為本次診斷中最具分量的陽性體徵，指向寒濕或痰濕偏盛、以脾虛為本底的虛實夾雜格局。\",\"recommendations\":[\"大幅減少或戒除生冷、油膩及乳製品為主的食物；改以溫熱、易消化的餐食為主，如白粥、清炒蔬菜及鮮薑湯，以減輕脾臟運化負擔。\",\"每日納入化濕食材——薏苡仁粥、蓮藕、赤小豆及烘焙大麥茶均為實用且具臨床依據的選擇。\"],\"title\":\"Thick White Greasy Coating\",\"title_cn\":\"厚白膩苔\"},{\"category\":\"脾氣虛弱 · 化濕利水\",\"confidence\":82.4,\"description\":\"舌體寬大腫脹，兩側邊緣輕度扇貝狀，為脾氣虛弱的典型徵象：脾失健運、水液輸布障礙，舌體組織因此水腫，柔軟到足以承受牙齒壓印（齒痕舌）。舌面濕潤偏滑進一步印證脾陽不足所致的痰濕內停。\",\"recommendations\":[\"每日進行三十至四十分鐘的輕度有氧運動，如快步行走或太極拳，以振奮陽氣、推動全身痰濕消散。\",\"避免冷飲、冰品及過多甜食或高糖食物，以免直接損傷脾陽；兩餐之間改飲溫水或薑棗大麥茶。\"],\"title\":\"Swollen Tongue with Teeth Marks\",\"title_cn\":\"胖大齒痕舌\"},{\"category\":\"脾胃氣虛 · 中焦調養\",\"confidence\":74.5,\"description\":\"中線縱裂不達舌尖，部分被上覆舌苔遮蔽，反映脾胃氣虛日久、舌體失於濡養而逐漸出現龜裂。結合膩苔與胖大形態，此裂紋指向長期虛損格局，而非急性陰虛型裂紋。\",\"recommendations\":[\"建立固定進食節律，每日三餐按時、從容就餐，以重建胃氣；避免略過早餐或在壓力下進食，此類習慣最易耗損中焦之氣。\",\"每日晨起及睡前各按壓 ST-36（足三里，膝下）及 SP-6（三陰交，內踝上）二至三分鐘，以補益脾胃之氣、改善水液代謝。\"],\"title\":\"Central Midline Crack\",\"title_cn\":\"中央裂紋舌\"}],\"confidence\":83,\"image_description\":\"清晰的臨床舌診照片。舌頭完全伸出，充滿畫面，可完整評估。光源為中性冷白色，無明顯暖黃偏色或重影，色彩判讀可靠。\",\"modelUsed\":1,\"notes\":\"光線中性偏臨床白光，色彩判讀可靠。苔質（膩苔與粉苔之辨）存在中度不確定性，因 WebP 壓縮可能削平細微表面紋理，膩苔判讀係依據整體光澤及分佈形態，而非細絲苔毛細節。中央裂紋部分被上覆舌苔遮蔽，建議待舌苔消退後於覆診時重新評估。未見食物、飲品、煙草或藥物染色跡象。單憑舌診無法確立完整格局——仍需脈診、體質評估及完整症狀問診，方能作出全面臨床辨證。\",\"observation\":\"舌質於舌尖及兩側邊緣呈淡紅色，略偏淡，較嘴唇色澤稍淺——無熱象發紅或絳紅色調。舌苔白色，中度偏厚，集中於舌中央及中後區域，舌尖及兩側邊緣苔薄；苔質濕潤且明顯膩滑（膩苔），有根附著，並非剝落。中線可見縱向裂紋自舌中段延伸至前三分之一，部分被上覆舌苔遮蔽；苔覆區乳頭略顯突出。舌體寬大腫脹，兩側邊緣輕度扇貝狀，符合齒痕舌表現；整體舌面滑潤，進一步支持痰濕內停之象。\",\"pattern_suggestions\":[\"主要格局 — 脾氣虛·痰濕內阻：胖大齒痕舌、厚白膩苔與中央裂紋三者並見，強烈提示脾氣虛弱導致水液運化失司、痰濕積聚中焦。此屬虛實夾雜格局，以脾虛為本、痰濕為標。\",\"次要考量 — 脾陽虛：舌面滑潤及苔質寒濕之象提示虛損或已延及陽分，尤其當患者兼見神疲、便溏、四肢不溫、腹脹或明顯喜暖喜熱食時，此可能性更高。\"],\"potential_issues\":[\"主要格局 — 脾氣虛·痰濕內阻：胖大齒痕舌、厚白膩苔與中央裂紋三者並見，強烈提示脾氣虛弱導致水液運化失司、痰濕積聚中焦。此屬虛實夾雜格局，以脾虛為本、痰濕為標。\",\"次要考量 — 脾陽虛：舌面滑潤及苔質寒濕之象提示虛損或已延及陽分，尤其當患者兼見神疲、便溏、四肢不溫、腹脹或明顯喜暖喜熱食時，此可能性更高。\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"厚白膩苔 (Thick White Greasy Coating) — 痰濕積聚於中焦，脾失轉輸水液之職\",\"胖大舌 (Swollen/Enlarged Tongue) — 脾氣陽不足，水液瀦留於舌體組織，致舌體明顯寬大\",\"齒痕舌 (Teeth-marked Tongue) — 脾氣虛夾濕，舌體柔軟水腫，受牙齒擠壓留下扇貝狀壓痕\",\"中央裂紋 (Central Midline Crack) — 脾胃氣虛日久，舌面失養而出現縱向裂紋\",\"舌色淡紅偏淡 (Light Red Body, slightly pale) — 氣血輕度不足傾向，未見明顯熱象\",\"舌面滑潤 (Wet-to-Moist Surface) — 痰濕內停，陽氣不足以正常輸化和敷布津液\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "痰濕內阻 · 脾胃調理",
+        "confidence": 87.3,
+        "description": "中央及中後區域可見厚白膩苔，提示脾失健運、水液輸布失常，痰濕積聚於中焦。此為本次診斷中最具分量的陽性體徵，指向寒濕或痰濕偏盛、以脾虛為本底的虛實夾雜格局。",
+        "recommendations": [
+          "大幅減少或戒除生冷、油膩及乳製品為主的食物；改以溫熱、易消化的餐食為主，如白粥、清炒蔬菜及鮮薑湯，以減輕脾臟運化負擔。",
+          "每日納入化濕食材——薏苡仁粥、蓮藕、赤小豆及烘焙大麥茶均為實用且具臨床依據的選擇。"
+        ],
+        "title": "Thick White Greasy Coating",
+        "title_cn": "厚白膩苔"
+      },
+      {
+        "category": "脾氣虛弱 · 化濕利水",
+        "confidence": 82.4,
+        "description": "舌體寬大腫脹，兩側邊緣輕度扇貝狀，為脾氣虛弱的典型徵象：脾失健運、水液輸布障礙，舌體組織因此水腫，柔軟到足以承受牙齒壓印（齒痕舌）。舌面濕潤偏滑進一步印證脾陽不足所致的痰濕內停。",
+        "recommendations": [
+          "每日進行三十至四十分鐘的輕度有氧運動，如快步行走或太極拳，以振奮陽氣、推動全身痰濕消散。",
+          "避免冷飲、冰品及過多甜食或高糖食物，以免直接損傷脾陽；兩餐之間改飲溫水或薑棗大麥茶。"
+        ],
+        "title": "Swollen Tongue with Teeth Marks",
+        "title_cn": "胖大齒痕舌"
+      },
+      {
+        "category": "脾胃氣虛 · 中焦調養",
+        "confidence": 74.5,
+        "description": "中線縱裂不達舌尖，部分被上覆舌苔遮蔽，反映脾胃氣虛日久、舌體失於濡養而逐漸出現龜裂。結合膩苔與胖大形態，此裂紋指向長期虛損格局，而非急性陰虛型裂紋。",
+        "recommendations": [
+          "建立固定進食節律，每日三餐按時、從容就餐，以重建胃氣；避免略過早餐或在壓力下進食，此類習慣最易耗損中焦之氣。",
+          "每日晨起及睡前各按壓 ST-36（足三里，膝下）及 SP-6（三陰交，內踝上）二至三分鐘，以補益脾胃之氣、改善水液代謝。"
+        ],
+        "title": "Central Midline Crack",
+        "title_cn": "中央裂紋舌"
+      }
+    ],
+    "confidence": 83,
+    "image_description": "清晰的臨床舌診照片。舌頭完全伸出，充滿畫面，可完整評估。光源為中性冷白色，無明顯暖黃偏色或重影，色彩判讀可靠。",
+    "modelUsed": 1,
+    "notes": "光線中性偏臨床白光，色彩判讀可靠。苔質（膩苔與粉苔之辨）存在中度不確定性，因 WebP 壓縮可能削平細微表面紋理，膩苔判讀係依據整體光澤及分佈形態，而非細絲苔毛細節。中央裂紋部分被上覆舌苔遮蔽，建議待舌苔消退後於覆診時重新評估。未見食物、飲品、煙草或藥物染色跡象。單憑舌診無法確立完整格局——仍需脈診、體質評估及完整症狀問診，方能作出全面臨床辨證。",
+    "observation": "舌質於舌尖及兩側邊緣呈淡紅色，略偏淡，較嘴唇色澤稍淺——無熱象發紅或絳紅色調。舌苔白色，中度偏厚，集中於舌中央及中後區域，舌尖及兩側邊緣苔薄；苔質濕潤且明顯膩滑（膩苔），有根附著，並非剝落。中線可見縱向裂紋自舌中段延伸至前三分之一，部分被上覆舌苔遮蔽；苔覆區乳頭略顯突出。舌體寬大腫脹，兩側邊緣輕度扇貝狀，符合齒痕舌表現；整體舌面滑潤，進一步支持痰濕內停之象。",
+    "pattern_suggestions": [
+      "主要格局 — 脾氣虛·痰濕內阻：胖大齒痕舌、厚白膩苔與中央裂紋三者並見，強烈提示脾氣虛弱導致水液運化失司、痰濕積聚中焦。此屬虛實夾雜格局，以脾虛為本、痰濕為標。",
+      "次要考量 — 脾陽虛：舌面滑潤及苔質寒濕之象提示虛損或已延及陽分，尤其當患者兼見神疲、便溏、四肢不溫、腹脹或明顯喜暖喜熱食時，此可能性更高。"
+    ],
+    "potential_issues": [
+      "主要格局 — 脾氣虛·痰濕內阻：胖大齒痕舌、厚白膩苔與中央裂紋三者並見，強烈提示脾氣虛弱導致水液運化失司、痰濕積聚中焦。此屬虛實夾雜格局，以脾虛為本、痰濕為標。",
+      "次要考量 — 脾陽虛：舌面滑潤及苔質寒濕之象提示虛損或已延及陽分，尤其當患者兼見神疲、便溏、四肢不溫、腹脹或明顯喜暖喜熱食時，此可能性更高。"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "厚白膩苔 (Thick White Greasy Coating) — 痰濕積聚於中焦，脾失轉輸水液之職",
+      "胖大舌 (Swollen/Enlarged Tongue) — 脾氣陽不足，水液瀦留於舌體組織，致舌體明顯寬大",
+      "齒痕舌 (Teeth-marked Tongue) — 脾氣虛夾濕，舌體柔軟水腫，受牙齒擠壓留下扇貝狀壓痕",
+      "中央裂紋 (Central Midline Crack) — 脾胃氣虛日久，舌面失養而出現縱向裂紋",
+      "舌色淡紅偏淡 (Light Red Body, slightly pale) — 氣血輕度不足傾向，未見明顯熱象",
+      "舌面滑潤 (Wet-to-Moist Surface) — 痰濕內停，陽氣不足以正常輸化和敷布津液"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-image-of-the-tongue-in-a-b12-deficient-p.webp",
+    "image_bytes": 58519
+  },
+  "expected": {
+    "documented_condition": "vitamin B12 deficiency glossitis (erythema, depapillation: smooth red tongue)",
+    "expected_tcm": {
+      "body_colour": "red (bright/crimson)",
+      "coating": "little or none (peeled / mirror-like)",
+      "thickness": "absent",
+      "shape": "smooth, depapillated",
+      "moisture": "dry or shiny",
+      "pattern": "Yin deficiency with empty heat (red, no coating); Stomach/Kidney Yin deficiency; Blood deficiency"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Image_of_the_tongue_in_a_B12-deficient_patient_without_a_history_of_gastrectomy.webp"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "red"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "no coat",
+          "little coat",
+          "peel",
+          "smooth",
+          "mirror",
+          "depapill",
+          "scanty",
+          "absent"
+        ],
+        "hit": false
+      },
+      {
+        "any_of": [
+          "yin"
+        ],
+        "hit": false
+      }
+    ],
+    "all_hit": false
+  }
+}

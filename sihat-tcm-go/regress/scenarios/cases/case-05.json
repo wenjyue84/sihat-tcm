@@ -1,0 +1,59 @@
+{
+  "id": "case-05",
+  "type": "text",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13538104/",
+  "source_licence": "CC BY",
+  "source_title": "Staged TCM treatment for suspected pulmonary inflammatory pseudotumor: a case report",
+  "paraphrase_note": "Symptoms/tongue/pulse paraphrased by the harness author from the open-access full text; source pattern and principle are the authors' own.",
+  "patient": {
+    "age": 55,
+    "sex": "male"
+  },
+  "chief_complaint": "Intermittent dry cough since an upper respiratory infection; imaging showed a 3-cm lung mass the patient chose not to operate on.",
+  "symptoms": [
+    "dry cough",
+    "no other major complaints recorded in the summary"
+  ],
+  "tongue_as_reported": "enlarged with teeth marks, pale-red body, white coating; sublingual veins distended later",
+  "pulse_as_reported": "deep (later deep and thready)",
+  "source_pattern": "Phlegm-dampness (Spleen weakness) with wind-phlegm obstructing the Lung, later phlegm plus blood stasis",
+  "source_treatment_principle": "Disperse wind, ventilate the Lung, resolve phlegm and relieve cough; later resolve phlegm, soften masses, move blood and support healthy Qi",
+  "ground_truth_strength": "strong",
+  "expect_keyword_groups": [
+    [
+      "phlegm",
+      "damp"
+    ],
+    [
+      "lung",
+      "spleen"
+    ]
+  ],
+  "consult_request": {
+    "data": {
+      "basic_info": {
+        "name": "Case 05",
+        "age": "55",
+        "gender": "male",
+        "height": "",
+        "weight": "",
+        "symptoms": [
+          "shortness-breath"
+        ]
+      },
+      "wen_inquiry": "Chief complaint: Intermittent dry cough since an upper respiratory infection; imaging showed a 3-cm lung mass the patient chose not to operate on. Symptoms: dry cough; no other major complaints recorded in the summary.",
+      "wang_tongue": "enlarged with teeth marks, pale-red body, white coating; sublingual veins distended later",
+      "wang_face": "",
+      "wen_audio": "",
+      "qie": {
+        "bpm": "",
+        "qualities": [
+          "deep",
+          "thready"
+        ],
+        "note": "deep (later deep and thready)"
+      }
+    },
+    "language": "en"
+  }
+}

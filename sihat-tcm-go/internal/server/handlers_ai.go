@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"strings"
 
 	"sihattcm/internal/gemini"
 )
@@ -22,30 +24,95 @@ type aiMessage struct {
 // aiReadJSON decodes at most 8 MB from r.Body into dst.
 func aiReadJSON(w http.ResponseWriter, r *http.Request, dst any) bool {
 	r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
-	dec := json.NewDecoder(r.Body)
-	if err := dec.Decode(dst); err != nil {
+	if err := decodeJSONBody(r.Body, dst); err != nil {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		http.Error(w, `{"error":"invalid JSON"}`, http.StatusBadRequest)
 		return false
 	}
 	return true
 }
 
-// aiMessagesToContents converts the web-app message array to gemini.Content
-// slices, mapping role "assistant" → "model" and skipping "system" entries.
+// decodeJSONBody decodes exactly one JSON value into dst and rejects a literal JSON null
+// (which json.Decoder silently accepts as "no change", letting an empty request through as valid).
+func decodeJSONBody(body io.Reader, dst any) error {
+	dec := json.NewDecoder(body)
+	var raw json.RawMessage
+	if err := dec.Decode(&raw); err != nil {
+		return err
+	}
+	if strings.TrimSpace(string(raw)) == "null" {
+		return fmt.Errorf("JSON null body")
+	}
+	return json.Unmarshal(raw, dst)
+}
+
+// aiMessagesToContents converts the web-app message array to gemini.Content slices, mapping role "assistant" →
+// "model". Only the roles user / assistant / model are forwarded (case-insensitively): "system" entries and unknown
+// roles are dropped, because the model API rejects invalid roles (the whole chat would 502) and a client must not
+// inject instructions as a system turn. Messages with blank content are dropped too (an empty part is rejected
+// upstream, which surfaced a client error as a 502).
 func aiMessagesToContents(msgs []aiMessage) []gemini.Content {
 	out := make([]gemini.Content, 0, len(msgs))
 	for _, m := range msgs {
-		if m.Role == "system" {
+		var role string
+		switch strings.ToLower(strings.TrimSpace(m.Role)) {
+		case "user":
+			role = "user"
+		case "assistant", "model":
+			role = "model"
+		default:
 			continue
 		}
-		role := m.Role
-		if role == "assistant" {
-			role = "model"
+		if strings.TrimSpace(m.Content) == "" {
+			continue
 		}
 		out = append(out, gemini.Content{
 			Role:  role,
 			Parts: []gemini.Part{{Text: m.Content}},
 		})
+	}
+	return out
+}
+
+// ---- model allow-list ----
+
+// aiCanonModel maps a known model id (including the legacy ones the web app used to send) to the model that is
+// really called. Unknown ids map to "".
+func aiCanonModel(m string) string {
+	switch strings.TrimSpace(m) {
+	case gemini.ModelFlash, "gemini-2.0-flash", "gemini-2.0-flash-exp", "gemini-2.5-flash":
+		return gemini.ModelFlash
+	case gemini.ModelLite, "gemini-1.5-flash", "gemini-2.5-flash-lite":
+		return gemini.ModelLite
+	case gemini.ModelPro, "gemini-1.5-pro", "gemini-2.5-pro", "gemini-2.0-flash-thinking-exp-01-21":
+		return gemini.ModelPro
+	}
+	return ""
+}
+
+// aiModelChain builds the ordered model list for a request: the caller's choice FIRST only if it is one of the cheap
+// tiers (an anonymous client must not steer cost: it could force the most expensive model, inject a query string
+// into the upstream URL, or select a listener tier), then the server's own defaults. Entries keep the name they were
+// given (it is what X-Model-Used reports and what the client library normalises), but two names that normalise to
+// the SAME model are one entry: a failing model is never retried under another alias.
+func aiModelChain(client string, defaults ...string) []string {
+	out := make([]string, 0, len(defaults)+1)
+	seen := map[string]bool{}
+	add := func(alias string) {
+		key := aiCanonModel(alias)
+		if key == "" {
+			key = alias
+		}
+		if alias != "" && !seen[key] {
+			seen[key] = true
+			out = append(out, alias)
+		}
+	}
+	if c := aiCanonModel(client); c == gemini.ModelFlash || c == gemini.ModelLite {
+		add(strings.TrimSpace(client))
+	}
+	for _, d := range defaults {
+		add(d)
 	}
 	return out
 }
@@ -58,7 +125,7 @@ func aiSystemContent(prompt string) *gemini.Content {
 // aiLanguageInstruction returns a one-line language enforcement directive.
 // Mirrors getSimpleLanguageInstruction from languageInstructions.ts.
 func aiLanguageInstruction(lang string) string {
-	switch lang {
+	switch aiLang(lang) {
 	case "zh":
 		return "语言要求：你必须完全使用中文回复。所有问诊对话必须使用简体中文。\n请使用简单易懂的中文，确保老年患者能够理解。不要使用英文或马来文。"
 	case "ms":
@@ -70,7 +137,7 @@ func aiLanguageInstruction(lang string) string {
 
 // aiStrictLanguageInstruction returns the strict (report-level) variant.
 func aiStrictLanguageInstruction(lang string) string {
-	switch lang {
+	switch aiLang(lang) {
 	case "zh":
 		return "重要提示：你必须完全使用中文回复。所有文字，包括标题、诊断术语、食物名称和建议都必须使用中文。\n- 不要使用英文。\n- 不要使用拼音。\n请确保所有内容对不懂英文的老年华人用户友好。使用简体中文。"
 	case "ms":
@@ -82,7 +149,7 @@ func aiStrictLanguageInstruction(lang string) string {
 
 // aiFriendlyLanguageInstruction returns the short friendly variant for report-chat.
 func aiFriendlyLanguageInstruction(lang string) string {
-	switch lang {
+	switch aiLang(lang) {
 	case "zh":
 		return "你必须完全使用简体中文回复。语言要清晰、友好、有教育性。"
 	case "ms":
@@ -92,10 +159,33 @@ func aiFriendlyLanguageInstruction(lang string) string {
 	}
 }
 
+// aiSymptomsText renders a symptoms value that clients send either as a string or as an
+// array of strings (the web wizard sends an array) as one readable line.
+func aiSymptomsText(v any) string {
+	switch t := v.(type) {
+	case nil:
+		return ""
+	case string:
+		return t
+	case []any:
+		parts := make([]string, 0, len(t))
+		for _, x := range t {
+			if str := strings.TrimSpace(fmt.Sprint(x)); str != "" {
+				parts = append(parts, str)
+			}
+		}
+		return strings.Join(parts, ", ")
+	default:
+		return fmt.Sprint(t)
+	}
+}
+
 // aiStream writes the streaming response from StreamWithFallback.
 // It sets Content-Type and X-Model-Used before the first byte, then flushes
 // each chunk so clients consuming text/plain streams see incremental output.
-// Returns false if the stream fails before any bytes are written (caller should 500).
+// If every model fails before any byte is written the client gets a JSON error (502/429/503). If the stream dies
+// AFTER bytes went out (upstream connection drop, in-stream error event) the response is ABORTED, not ended: a
+// clean 200 would make the client store half an answer as a complete one.
 func (s *Server) aiStream(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -136,22 +226,55 @@ func (s *Server) aiStream(
 	var lastErr error
 	for _, m := range models {
 		usedModel = m
-		_, _, err := s.AI.StreamWithFallback(r.Context(), []string{m}, req, onText)
+		text, _, err := s.AI.StreamWithFallback(r.Context(), []string{m}, req, onText)
+		if err == nil && !headersSent && strings.TrimSpace(text) == "" {
+			// A 200 with no content would render as a blank answer; treat it as a failure and try the next model.
+			err = fmt.Errorf("empty response from model %s", m)
+		}
 		if err == nil {
 			return
 		}
 		lastErr = err
 		if headersSent {
-			// Already started streaming; can't change status.
-			return
+			// Already started streaming; the status cannot change any more, so cut the connection: the client sees
+			// a failed transfer instead of a truncated answer that looks complete.
+			log.Printf("ai stream aborted mid-way (model %s): %s", m, anRedactKey(err.Error()))
+			panic(http.ErrAbortHandler)
 		}
 	}
 
 	// All models failed and no bytes were written.
 	if !headersSent {
-		s.JSONError(w, http.StatusInternalServerError,
-			fmt.Sprintf("AI stream failed: %v", lastErr))
+		if lastErr == nil {
+			lastErr = fmt.Errorf("no model configured")
+		}
+		log.Printf("ai stream failed: %s", anRedactKey(lastErr.Error()))
+		status, msg := aiUpstreamError(lastErr)
+		for k, v := range extraHeaders { // e.g. CORS for the public heart-companion endpoint
+			w.Header().Set(k, v)
+		}
+		if status == http.StatusTooManyRequests {
+			w.Header().Set("Retry-After", "30") // tell the client when to come back (our own 429s do)
+		}
+		s.JSONError(w, status, msg)
 	}
+}
+
+// aiUpstreamError maps an upstream AI failure to a client-safe status and
+// message. The raw error (which may carry upstream bodies) is never returned.
+func aiUpstreamError(err error) (int, string) {
+	if err != nil {
+		m := strings.ToLower(err.Error())
+		if strings.Contains(m, "quota") || strings.Contains(m, "resource_exhausted") ||
+			strings.Contains(m, "rate limit") || strings.Contains(m, "rate_limit") ||
+			strings.Contains(m, "status 429") || strings.Contains(m, "error 429") {
+			return http.StatusTooManyRequests, "The AI service is busy right now. Please try again in a minute."
+		}
+		if strings.Contains(m, "api key not configured") {
+			return http.StatusServiceUnavailable, "The AI service is not configured."
+		}
+	}
+	return http.StatusBadGateway, "The AI service is temporarily unavailable. Please try again."
 }
 
 // ---- handler: POST /api/chat ----
@@ -178,14 +301,7 @@ func (s *Server) handleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lang := body.Language
-	if lang == "" {
-		lang = "en"
-	}
-	model := body.Model
-	if model == "" {
-		model = "gemini-2.0-flash"
-	}
+	lang := aiLang(body.Language)
 
 	// Build system prompt.
 	systemPrompt := s.SystemPrompt(r.Context(), PromptDoctorChat)
@@ -211,8 +327,12 @@ Symptom Duration: %v
 			bi.Name, bi.Age, bi.Gender, bi.Height, bi.Weight, bi.Symptoms, bi.SymptomDuration)
 	}
 
-	// Filter system messages; seed an initial user turn if empty.
+	// Filter system messages; seed an initial user turn if the client sent no messages at all.
 	msgs := aiMessagesToContents(body.Messages)
+	if len(msgs) == 0 && len(body.Messages) > 0 {
+		s.JSONError(w, http.StatusBadRequest, "messages must contain at least one non-empty user message")
+		return
+	}
 	if len(msgs) == 0 {
 		seed := map[string]string{
 			"en": "Please start the consultation by asking me relevant questions about my symptoms.",
@@ -230,7 +350,7 @@ Symptom Duration: %v
 		Contents:          msgs,
 		SystemInstruction: aiSystemContent(systemPrompt),
 	}
-	s.aiStream(w, r, []string{model, "gemini-1.5-flash"}, req, nil)
+	s.aiStream(w, r, aiModelChain(body.Model, "gemini-2.0-flash", "gemini-1.5-flash"), req, nil)
 }
 
 // ---- handler: POST /api/consult ----
@@ -244,18 +364,18 @@ func (s *Server) handleConsult(w http.ResponseWriter, r *http.Request) {
 	if !aiReadJSON(w, r, &body) {
 		return
 	}
+	// The examination data must be a non-empty JSON OBJECT: null, {}, "", [], 0, false, a number or a string would only
+	// make the model invent a diagnosis for nobody (and cost a paid call).
+	var dataObj map[string]json.RawMessage
+	if err := json.Unmarshal(body.Data, &dataObj); err != nil || len(dataObj) == 0 {
+		s.JSONError(w, http.StatusBadRequest, "data is required and must be a non-empty object")
+		return
+	}
 
-	lang := body.Language
-	if lang == "" {
-		lang = "en"
-	}
-	model := body.Model
-	if model == "" {
-		model = "gemini-1.5-flash"
-	}
+	lang := aiLang(body.Language)
 
 	// System prompt with strict language enforcement.
-	systemPrompt := s.SystemPrompt(r.Context(), PromptDoctorFinal)
+	systemPrompt := aiAdaptReportPrompt(s.SystemPrompt(r.Context(), PromptDoctorFinal), lang)
 	systemPrompt = aiStrictLanguageInstruction(lang) + "\n\n" + systemPrompt
 
 	// Marshal the entire data blob as the user prompt so the model sees all
@@ -266,6 +386,9 @@ func (s *Server) handleConsult(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userPrompt := string(dataJSON)
+	if note := aiDeviceVitalsNote(dataObj); note != "" {
+		userPrompt = note + "\n\n" + userPrompt
+	}
 
 	req := gemini.GenerateRequest{
 		Contents:          []gemini.Content{{Role: "user", Parts: []gemini.Part{{Text: userPrompt}}}},
@@ -283,8 +406,39 @@ func (s *Server) handleConsult(w http.ResponseWriter, r *http.Request) {
 	// connection alive and returns as soon as the model finishes (~8s), whereas
 	// buffering with multiple retries can exceed proxy timeouts and looks like a
 	// hang. On the rare malformed-JSON response the client retries once.
-	models := []string{model, "gemini-1.5-flash", "gemini-2.0-flash"}
-	s.aiStream(w, r, models, req, nil)
+	s.aiStream(w, r, aiModelChain(body.Model, "gemini-1.5-flash", "gemini-2.0-flash"), req, nil)
+}
+
+// aiDeviceVitalsNote explains qie.device_vitals to the model. The wizard attaches that list when the readings came from a
+// linked device (Web Bluetooth strap / cuff / oximeter / thermometer, or synced Google Health / Apple Health / Shortcut
+// data) instead of being typed in: they are measured values with a named source and time, but still single readings.
+func aiDeviceVitalsNote(data map[string]json.RawMessage) string {
+	raw, ok := data["qie"]
+	if !ok {
+		return ""
+	}
+	var qie struct {
+		DeviceVitals []json.RawMessage `json:"device_vitals"`
+	}
+	if json.Unmarshal(raw, &qie) != nil || len(qie.DeviceVitals) == 0 {
+		return ""
+	}
+	return "NOTE: qie.device_vitals lists readings captured by a wearable or medical device (each entry names its device and measured_at). " +
+		"Treat them as measured values rather than patient-reported ones and mention the device when you use them in the palpation (qie) findings, " +
+		"but a single reading is not a diagnosis: weigh it together with the other examinations and with how recent it is."
+}
+
+// aiAdaptReportPrompt removes the one instruction of the stored/default report prompt that contradicts the strict
+// language rule for en and ms: its JSON schema asked for the therapeutic principle/method "in Chinese with English
+// explanation" while the same system prompt forbids Chinese characters (a real-model run produced CJK in 23 report
+// fields). Older database copies of the prompt still carry the phrase, so it is rewritten at request time.
+func aiAdaptReportPrompt(prompt, lang string) string {
+	if lang == "zh" {
+		return prompt
+	}
+	prompt = strings.ReplaceAll(prompt, "治则 in Chinese with English explanation", "the therapeutic principle, written in the required response language only")
+	prompt = strings.ReplaceAll(prompt, "治法 in Chinese with English explanation", "the treatment method, written in the required response language only")
+	return strings.ReplaceAll(prompt, "in Chinese with English explanation", "in the required response language")
 }
 
 // ---- handler: POST /api/report-chat ----
@@ -297,7 +451,7 @@ func (s *Server) handleReportChat(w http.ResponseWriter, r *http.Request) {
 			Name     string `json:"name"`
 			Age      any    `json:"age"`
 			Gender   string `json:"gender"`
-			Symptoms string `json:"symptoms"`
+			Symptoms any    `json:"symptoms"`
 		} `json:"patientInfo"`
 		Language string `json:"language"`
 		Model    string `json:"model"`
@@ -306,14 +460,7 @@ func (s *Server) handleReportChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lang := body.Language
-	if lang == "" {
-		lang = "en"
-	}
-	model := body.Model
-	if model == "" {
-		model = "gemini-2.0-flash"
-	}
+	lang := aiLang(body.Language)
 
 	// Build report context summary (mirrors buildReportContext in TS).
 	reportCtx := aiFormatReportContext(body.ReportData, body.PatientInfo)
@@ -344,7 +491,7 @@ func (s *Server) handleReportChat(w http.ResponseWriter, r *http.Request) {
 		Contents:          contents,
 		SystemInstruction: aiSystemContent(systemPrompt),
 	}
-	s.aiStream(w, r, []string{model, "gemini-1.5-flash", "gemini-2.0-flash"}, req, nil)
+	s.aiStream(w, r, aiModelChain(body.Model, "gemini-2.0-flash", "gemini-1.5-flash"), req, nil)
 }
 
 // aiFormatReportContext converts raw JSON report data + patient info into a
@@ -359,11 +506,11 @@ func aiFormatReportContext(reportRaw json.RawMessage, patientInfo any) string {
 			Name     string `json:"name"`
 			Age      any    `json:"age"`
 			Gender   string `json:"gender"`
-			Symptoms string `json:"symptoms"`
+			Symptoms any    `json:"symptoms"`
 		}
 		if json.Unmarshal(b, &pi) == nil {
 			ctx += fmt.Sprintf("PATIENT INFORMATION:\n- Name: %v\n- Age: %v\n- Gender: %v\n- Chief Complaint: %v\n",
-				pi.Name, pi.Age, pi.Gender, pi.Symptoms)
+				pi.Name, pi.Age, pi.Gender, aiSymptomsText(pi.Symptoms))
 		}
 	}
 
@@ -521,7 +668,7 @@ func (s *Server) handleWesternChat(w http.ResponseWriter, r *http.Request) {
 			Name     string `json:"name"`
 			Age      any    `json:"age"`
 			Gender   string `json:"gender"`
-			Symptoms string `json:"symptoms"`
+			Symptoms any    `json:"symptoms"`
 		} `json:"patientInfo"`
 		Model    string `json:"model"`
 		Language string `json:"language"`
@@ -530,20 +677,12 @@ func (s *Server) handleWesternChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lang := body.Language
-	if lang == "" {
-		lang = "en"
-	}
-	model := body.Model
-	if model == "" {
-		model = "gemini-2.0-flash"
-	}
+	lang := aiLang(body.Language)
 
-	// Use provided systemPrompt or fall back to stored western-chat prompt.
-	basePrompt := body.SystemPrompt
-	if basePrompt == "" {
-		basePrompt = s.SystemPrompt(r.Context(), PromptDoctorWesternChat)
-	}
+	// The persona, safety rules and language contract come from the stored western-chat prompt ONLY. A
+	// client-supplied systemPrompt used to replace all of it (a free general-purpose LLM and a prompt-injection
+	// primitive on an anonymous endpoint), so that field is ignored.
+	basePrompt := s.SystemPrompt(r.Context(), PromptDoctorWesternChat)
 
 	// Language instruction for western chat (friendly variant).
 	langInstr := map[string]string{
@@ -582,13 +721,9 @@ func (s *Server) handleWesternChat(w http.ResponseWriter, r *http.Request) {
 		Contents:          contents,
 		SystemInstruction: aiSystemContent(systemPrompt),
 	}
-	// Cascade mirrors the TS FALLBACK_MODELS list.
-	models := []string{"gemini-2.5-flash", "gemini-2.0-flash-exp", "gemini-2.0-flash"}
-	// If the caller specified a model, try it first.
-	if model != "" && model != models[0] {
-		models = append([]string{model}, models...)
-	}
-	s.aiStream(w, r, models, req, nil)
+	// The TS FALLBACK_MODELS cascade (2.5-flash, 2.0-flash-exp, 2.0-flash) normalised to ONE model, so the same call was
+	// made up to four times; it is now flash, then the lite tier. The caller's cheap-tier choice goes first.
+	s.aiStream(w, r, aiModelChain(body.Model, "gemini-2.0-flash", "gemini-1.5-flash"), req, nil)
 }
 
 // aiFormatTCMContext mirrors buildTCMContext from western-chat/route.ts.
@@ -601,11 +736,11 @@ func aiFormatTCMContext(reportRaw json.RawMessage, patientInfo any) string {
 			Name     string `json:"name"`
 			Age      any    `json:"age"`
 			Gender   string `json:"gender"`
-			Symptoms string `json:"symptoms"`
+			Symptoms any    `json:"symptoms"`
 		}
 		if json.Unmarshal(b, &pi) == nil {
 			ctx += fmt.Sprintf("PATIENT INFORMATION:\n- Name: %v\n- Age: %v\n- Gender: %v\n- Chief Complaint: %v\n",
-				pi.Name, pi.Age, pi.Gender, pi.Symptoms)
+				pi.Name, pi.Age, pi.Gender, aiSymptomsText(pi.Symptoms))
 		}
 	}
 
@@ -694,6 +829,9 @@ func aiFormatTCMContext(reportRaw json.RawMessage, patientInfo any) string {
 // ---- handler: POST /api/heart-companion (+ OPTIONS) ----
 
 func (s *Server) handleHeartCompanion(w http.ResponseWriter, r *http.Request) {
+	// public CORS endpoint: EVERY response (400/429/502 too) must carry the header, or a cross-origin / mobile client
+	// cannot even read the error
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	var body struct {
 		Messages []aiMessage `json:"messages"`
 		Language string      `json:"language"`
@@ -708,14 +846,7 @@ func (s *Server) handleHeartCompanion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lang := body.Language
-	if lang == "" {
-		lang = "en"
-	}
-	model := body.Model
-	if model == "" {
-		model = "gemini-2.0-flash"
-	}
+	lang := aiLang(body.Language)
 
 	systemPrompt := s.SystemPrompt(r.Context(), PromptHeartCompanion)
 	systemPrompt = aiLanguageInstruction(lang) + "\n\n" + systemPrompt
@@ -758,7 +889,7 @@ Name: %v
 	corsHeaders := map[string]string{
 		"Access-Control-Allow-Origin": "*",
 	}
-	s.aiStream(w, r, []string{model, "gemini-1.5-flash"}, req, corsHeaders)
+	s.aiStream(w, r, aiModelChain(body.Model, "gemini-2.0-flash", "gemini-1.5-flash"), req, corsHeaders)
 }
 
 func (s *Server) handleHeartCompanionOPTIONS(w http.ResponseWriter, r *http.Request) {
@@ -768,9 +899,50 @@ func (s *Server) handleHeartCompanionOPTIONS(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// ---- assistant system prompts (they must describe THIS codebase: a Go app, not the old Next.js one) ----
+
+const adminAssistantPrompt = `You are the 'Admin Assistant' for the Sihat TCM platform, an AI-assisted Traditional Chinese Medicine (TCM) diagnosis web app written in Go (server-rendered pages, a SQLite or Supabase database, AI answers from Gemini models or a local listener). You help administrators operate it.
+
+What the admin console (/admin) gives an administrator:
+  1. Settings (GET/PUT /api/admin/settings): background-music URL and switch, a saved Gemini API key (always shown masked, last 6 characters), and a free-form settings JSON whose secret-looking values are masked too.
+  2. DB status (GET /api/admin/db-status): whether the database answers, user / admin / diagnosis counts, and whether each system-prompt role has a row in system_prompts: doctor_chat, doctor_final, doctor_image, doctor_listening, doctor_inquiry_summary, doctor_report_chat, doctor_western_chat, heart_companion. A role without a row silently falls back to the built-in default prompt.
+  3. System health (GET /api/admin/system-health): errors of the last 24 hours by severity (low, medium, high, critical). Only UNRESOLVED errors count toward the overall status (healthy, degraded, unhealthy).
+  4. Logs and metrics (GET /api/logs, GET /api/monitoring/metrics): filter logs by level and category.
+  5. Doctor approval (GET /api/admin/doctors, POST /api/admin/doctors/approve): a doctor who registers is NOT approved. Until an admin approves the account the doctor cannot open the doctor inbox, reply, flag requests or appear in the public doctor directory.
+  6. Test API key (POST /api/admin/test-api-key): sends one tiny request through the configured AI backend.
+
+Roles are patient, doctor, admin and developer. Admins can change settings and approve doctors; developers can read settings (masked), logs, metrics, health and DB status but not change settings.
+
+Your role: explain how to use these screens, help troubleshoot ("why is the tongue analysis failing?" usually means the AI backend, the API key or the rate limit), and suggest improvements to system prompts. Be concise, professional and helpful. You have no live access to the database in this chat: for specific user data, tell the admin to check the console or the API directly.`
+
+const developerAssistantPrompt = `You are the 'Developer Assistant' for the Sihat TCM platform. You help developers debug, troubleshoot and understand this codebase.
+
+Tech stack:
+  * Backend: Go (module sihattcm), net/http ServeMux with Go 1.22 method+path patterns, html/template server-side rendering, embedded static assets (templates/*.html, static/js, static/css).
+  * Database: either Supabase (PostgREST + GoTrue, internal/supabase client) or the built-in SQLite fallback (DB_BACKEND=sqlite, internal/localdb: a PostgREST/GoTrue subset with owner row-level security). The handlers talk to both through the same REST client. Schema: db/schema.sql and internal/localdb/schema.go (keep in sync).
+  * AI: Gemini REST API through internal/gemini, optionally routed to a local listener (sihat-listener, AI_BASE_URL) that runs Claude models.
+  * Tests: go test ./... -count=1, and the ACI regression system (node aci.mjs describe | test --suite=quick | gates), which boots its own hermetic stack.
+
+Code layout: main.go (flags, server timeouts), internal/server/*.go (handlers_*.go per area, auth.go for sessions and rate limiting, prompts*.go for system prompts), internal/config, internal/gemini, internal/supabase, internal/localdb, regress/ (suites), scripts/.
+
+Roles: patient, doctor (must be approved by an admin), admin, developer. A session is the Supabase/GoTrue access token, sent as a Bearer header or the sb-access-token cookie; logout revokes the token server-side.
+
+Main API routes:
+  - AI (public, rate limited): POST /api/chat, /api/consult, /api/report-chat, /api/western-chat, /api/heart-companion, /api/analyze-image, /api/analyze-audio, /api/analyze-snore, /api/extract-text, /api/validate-medicine, /api/summarize-inquiry, /api/summarize-reports, /api/summarize-medical-history, /api/ask-dietary-advice, /api/generate-infographic.
+  - Auth: POST /api/auth/login, /signup, /logout, /forgot-password, /reset-password; GET /api/auth/me.
+  - Patient: GET/POST /api/patient/sessions, GET/PUT /api/patient/profile, GET /api/patient/requests, POST /api/patient/requests/cancel, POST /api/patient/reply, POST /api/verification-request, POST /api/guest/sessions, POST /api/migrate-guest-session, /api/notifications/*.
+  - Doctor: GET /api/doctors (directory), GET /api/doctor/requests (master inbox), POST /api/doctor/flag, /api/doctor/reply, /api/doctor/treatment-plan, /api/doctor/generate-inquiry, /api/ai/patient-summary.
+  - Admin / developer: /api/admin/settings, /api/admin/db-status, /api/admin/system-health, /api/admin/doctors, /api/admin/test-api-key, /api/logs, /api/monitoring/metrics, /api/admin/assistant, /api/developer/assistant.
+
+Database tables: profiles, patients, inquiries (consultation requests; the thread lives in diagnosis_report.messages), diagnosis_sessions, guest_diagnosis_sessions, admin_settings, system_prompts, system_logs, system_errors, system_metrics, user_notification_preferences, user_devices, scheduled_notifications, notification_history.
+
+Gotchas: the app is one process, so read-modify-write sections use in-process keyed locks (inquiryLock, lockKey); user-supplied model ids are never trusted (aiModelChain allow-list); PostgREST responses over 10 MB fail in the client, so documents the app grows are bounded when written; localdb supports only a PostgREST subset (no or=, no not.).
+
+Your role: help debug code and explain errors, explain the architecture and data flow, suggest solutions, and provide Go snippets (or JavaScript for the static front end) when helpful. Be concise and technical; assume developer expertise.`
+
 // ---- handler: POST /api/admin/assistant ----
 
-func (s *Server) handleAdminAssistant(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleAdminAssistant(w http.ResponseWriter, r *http.Request, _ *AuthUser) {
 	var body struct {
 		Messages []aiMessage `json:"messages"`
 	}
@@ -778,25 +950,7 @@ func (s *Server) handleAdminAssistant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	systemPrompt := `You are the 'Admin Assistant' for the Sihat TCM platform. You help administrators manage the application.
-
-Current System Context:
-- Platform: Sihat TCM (AI-powered Traditional Chinese Medicine diagnosis)
-- Admin Capabilities:
-  1. User Management (Roles: admin, doctor, user, developer)
-  2. Practitioner Directory (Manage doctor profiles)
-  3. System Prompts (Configure AI personas for diagnosis steps: Inquiry, Tongue, Face, Listen, Final)
-  4. Security Settings (Audit logs, password policies)
-  5. CMS (Manage blog content in English/Malay/Chinese)
-- AI Models Used: Gemini 2.0 Flash (Physician), Gemini 2.5 Pro (Expert), Gemini 3.0 Preview (Master)
-
-Your Role:
-- Explain how to use the admin dashboard features.
-- Troubleshoot configuration issues (e.g., "Why is the tongue analysis failing?").
-- Suggest improvements for system prompts.
-- Be concise, professional, and helpful.
-
-If asked about specific user data, remind the admin to check the "User Management" tab directly as you don't have real-time DB access in this chat.`
+	systemPrompt := adminAssistantPrompt
 
 	contents := aiMessagesToContents(body.Messages)
 	if len(contents) == 0 {
@@ -808,12 +962,12 @@ If asked about specific user data, remind the admin to check the "User Managemen
 		Contents:          contents,
 		SystemInstruction: aiSystemContent(systemPrompt),
 	}
-	s.aiStream(w, r, []string{"gemini-2.0-flash"}, req, nil)
+	s.aiStream(w, r, aiModelChain("", "gemini-2.0-flash"), req, nil)
 }
 
 // ---- handler: POST /api/developer/assistant ----
 
-func (s *Server) handleDeveloperAssistant(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleDeveloperAssistant(w http.ResponseWriter, r *http.Request, _ *AuthUser) {
 	var body struct {
 		Messages []aiMessage `json:"messages"`
 	}
@@ -821,62 +975,7 @@ func (s *Server) handleDeveloperAssistant(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	systemPrompt := `You are the 'Developer Assistant' for the Sihat TCM platform. You help developers debug, troubleshoot, and understand the codebase.
-
-Current System Context:
-- Platform: Sihat TCM (AI-powered Traditional Chinese Medicine diagnosis)
-- Tech Stack:
-  * Frontend: Next.js 16 (App Router), TypeScript, Tailwind CSS v4, Radix UI, Framer Motion
-  * Backend: Supabase (PostgreSQL, Auth, Storage), Edge Functions
-  * AI: Gemini 2.0 Flash, Gemini 2.5 Pro, @ai-sdk/google
-  * Mobile: Expo SDK 54, React Native 0.81 (JavaScript)
-
-Architecture Overview:
-- Web app: src/app/* (Next.js App Router structure)
-- Components: src/components/* (diagnosis/, admin/, patient/, blog/, ui/)
-- API Routes: src/app/api/* (analyze-image, chat, report-chat, admin/, developer/)
-- Contexts: AuthContext (user/roles), DeveloperContext (dev mode), LanguageContext
-- Lib: src/lib/* (supabase/, translations/, systemPrompts.ts, actions.ts)
-
-Key Features:
-1. TCM Diagnosis Flow: Inquiry chat -> Tongue analysis -> Face analysis -> Pulse -> Listening -> Final Report
-2. AI Analysis: Image analysis for tongue/face/body, audio analysis for voice/cough
-3. Multi-language: English, Malay (ms), Chinese (zh)
-4. Roles: admin, doctor, patient, developer
-
-Known Issues & Gotchas:
-- Circular imports: Mobile colors MUST come from constants/Colors.js, not App.js
-- Tailwind v4 uses CSS-based config, not tailwind.config.js
-- CORS headers needed for mobile requests on different origins
-- Image analysis accepts base64 in request body
-- Mobile app is JavaScript-only (no TypeScript)
-
-API Endpoints:
-- POST /api/analyze-image - Tongue/Face/Body image analysis
-- POST /api/analyze-audio - Voice/Cough audio analysis
-- POST /api/chat - Inquiry conversation
-- POST /api/report-chat - Follow-up questions on diagnosis report
-- POST /api/generate-infographic - Create shareable diagnosis infographic
-- GET /api/config - Public app configuration
-- Admin APIs: /api/admin/settings, /api/admin/assistant, /api/admin/db-status
-
-Database Tables (Supabase):
-- profiles: user profiles with role, preferences
-- diagnosis_history: saved diagnosis reports
-- medical_reports: uploaded medical documents
-- practitioners: doctor directory
-- admin_settings: system configuration
-- articles_en/ms/zh: blog content by language
-
-Your Role:
-- Help debug code issues and explain error messages
-- Explain the codebase architecture and data flow
-- Suggest solutions for common development problems
-- Provide code snippets and examples when helpful
-- Explain API usage and integration patterns
-- Be concise and technical, assume developer expertise
-
-When providing code, use TypeScript for web and JavaScript for mobile.`
+	systemPrompt := developerAssistantPrompt
 
 	contents := aiMessagesToContents(body.Messages)
 	if len(contents) == 0 {
@@ -888,7 +987,16 @@ When providing code, use TypeScript for web and JavaScript for mobile.`
 		Contents:          contents,
 		SystemInstruction: aiSystemContent(systemPrompt),
 	}
-	s.aiStream(w, r, []string{"gemini-2.0-flash"}, req, nil)
+	s.aiStream(w, r, aiModelChain("", "gemini-2.0-flash"), req, nil)
+}
+
+// withCORS sets Access-Control-Allow-Origin on every response of a public endpoint, including the 429 the rate
+// limiter answers before the handler runs.
+func withCORS(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		next(w, r)
+	}
 }
 
 // ---- route registration ----
@@ -910,11 +1018,13 @@ func (s *Server) registerAIRoutes() {
 
 	// Heart Companion — CORS required for mobile/cross-origin clients.
 	s.Mux.HandleFunc("POST /api/heart-companion",
-		s.RateLimit(20, 500, s.handleHeartCompanion))
+		withCORS(s.RateLimit(20, 500, s.handleHeartCompanion)))
 	s.Mux.HandleFunc("OPTIONS /api/heart-companion",
 		s.handleHeartCompanionOPTIONS)
 
-	// Admin & developer assistants — no additional rate limit beyond server-level.
-	s.Mux.HandleFunc("POST /api/admin/assistant", s.handleAdminAssistant)
-	s.Mux.HandleFunc("POST /api/developer/assistant", s.handleDeveloperAssistant)
+	// Admin & developer assistants — staff only, and rate-limited (each call is a paid AI request).
+	s.Mux.HandleFunc("POST /api/admin/assistant",
+		s.RateLimit(20, 500, s.RequireAuth(s.handleAdminAssistant, "admin", "developer")))
+	s.Mux.HandleFunc("POST /api/developer/assistant",
+		s.RateLimit(20, 500, s.RequireAuth(s.handleDeveloperAssistant, "developer", "admin")))
 }

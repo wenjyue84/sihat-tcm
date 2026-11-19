@@ -1,0 +1,90 @@
+{
+  "doctors": [
+    {"email": "dr.chong@sihat.com", "name": "Chong Kah Wai 张家伟", "specialty": "Digestive & Spleen-Stomach 脾胃病", "years": 16, "qualification": "B.Med (TCM), Fujian UCM · Cert. Gastroenterology in TCM", "bio": "Treats chronic gastritis, reflux, IBS and food-stagnation patterns with dietary therapy and individualised formulas.", "languages": "中文, English, Bahasa Malaysia", "clinic": "Zhong Yi Wellness, Melaka", "avg": 70},
+    {"email": "dr.aisyah@sihat.com", "name": "Aisyah Binti Omar", "specialty": "Sleep & Emotional Wellbeing 失眠与情志", "years": 9, "qualification": "Dip. TCM, INTI · Cert. Psycho-emotional Regulation", "bio": "Helps patients with insomnia, anxiety and stress-related patterns through herbal formulas, acupressure and daily-routine coaching.", "languages": "Bahasa Malaysia, English", "clinic": "Tenang TCM, Kota Kinabalu", "avg": 55}
+  ],
+  "patients": [
+    {"n": 1, "name": "Test Patient", "first": "Test", "last": "Patient", "age": 34, "gender": "female", "height": 162, "weight": 55, "lang": "en", "history": "Mild seasonal rhinitis. No chronic medication. Allergies: none known.", "phone": "+60 12-000 0001"},
+    {"n": 2, "name": "Tan Mei Ling 陈美玲", "first": "Mei Ling", "last": "Tan", "age": 41, "gender": "female", "height": 158, "weight": 52, "lang": "zh", "history": "产后体虚，经常疲倦；胃口一般。过敏：海鲜（虾）。", "phone": "+60 12-000 0002"},
+    {"n": 3, "name": "Muhammad Hafiz bin Ismail", "first": "Muhammad Hafiz", "last": "Ismail", "age": 29, "gender": "male", "height": 174, "weight": 82, "lang": "ms", "history": "Kerja syif malam, tekanan kerja tinggi. Alahan: tiada.", "phone": "+60 12-000 0003"},
+    {"n": 4, "name": "Lim Wei Jie 林伟杰", "first": "Wei Jie", "last": "Lim", "age": 52, "gender": "male", "height": 169, "weight": 78, "lang": "zh", "history": "高血压（服药控制），痛风病史。过敏：青霉素。", "phone": "+60 12-000 0004"},
+    {"n": 5, "name": "Priya Nair", "first": "Priya", "last": "Nair", "age": 37, "gender": "female", "height": 160, "weight": 66, "lang": "en", "history": "Irregular menstrual cycle, mild PCOS diagnosis (2022). Allergies: dust mites.", "phone": "+60 12-000 0005"},
+    {"n": 6, "name": "Nur Aisyah binti Rahman", "first": "Nur Aisyah", "last": "Rahman", "age": 26, "gender": "female", "height": 156, "weight": 47, "lang": "ms", "history": "Sering sakit kepala dan loya semasa haid. Alahan: tiada.", "phone": "+60 12-000 0006"},
+    {"n": 7, "name": "Wong Siew Fong 黄秀芳", "first": "Siew Fong", "last": "Wong", "age": 58, "gender": "female", "height": 155, "weight": 61, "lang": "zh", "history": "更年期症状，睡眠差，潮热盗汗。过敏：无。", "phone": "+60 12-000 0007"},
+    {"n": 8, "name": "Daniel Lee", "first": "Daniel", "last": "Lee", "age": 33, "gender": "male", "height": 178, "weight": 91, "lang": "en", "history": "Desk job, sedentary, borderline cholesterol. Allergies: none known.", "phone": "+60 12-000 0008"},
+    {"n": 9, "name": "Ahmad Faizal bin Hassan", "first": "Ahmad Faizal", "last": "Hassan", "age": 45, "gender": "male", "height": 170, "weight": 74, "lang": "ms", "history": "Kerap sakit pinggang dan sejuk kaki. Alahan: debunga.", "phone": "+60 12-000 0009"},
+    {"n": 10, "name": "Chua Hui Min 蔡慧敏", "first": "Hui Min", "last": "Chua", "age": 31, "gender": "female", "height": 164, "weight": 50, "lang": "zh", "history": "容易心悸、健忘、多梦。过敏：花粉。", "phone": "+60 12-000 0010"},
+    {"n": 11, "name": "Rajendran Subramaniam", "first": "Rajendran", "last": "Subramaniam", "age": 60, "gender": "male", "height": 167, "weight": 70, "lang": "en", "history": "Type 2 diabetes (diet-controlled), joint stiffness. Allergies: sulfa drugs.", "phone": "+60 12-000 0011"},
+    {"n": 12, "name": "Goh Li Ying 吴丽莹", "first": "Li Ying", "last": "Goh", "age": 24, "gender": "female", "height": 161, "weight": 58, "lang": "zh", "history": "面部痘痘反复，口苦，便秘。过敏：无。", "phone": "+60 12-000 0012"},
+    {"n": 13, "name": "Siti Nurhaliza binti Yusof", "first": "Siti Nurhaliza", "last": "Yusof", "age": 39, "gender": "female", "height": 158, "weight": 72, "lang": "ms", "history": "Berat badan berlebihan, rasa letih dan badan berat. Alahan: tiada.", "phone": "+60 12-000 0013"},
+    {"n": 14, "name": "Ong Jia Hao", "first": "Jia Hao", "last": "Ong", "age": 47, "gender": "male", "height": 172, "weight": 80, "lang": "en", "history": "Chronic neck and shoulder tension, work stress. Allergies: none known.", "phone": "+60 12-000 0014"},
+    {"n": 15, "name": "Kavitha Raman", "first": "Kavitha", "last": "Raman", "age": 50, "gender": "female", "height": 157, "weight": 59, "lang": "en", "history": "Peri-menopausal; dry mouth, hot flushes, night sweats. Allergies: penicillin.", "phone": "+60 12-000 0015"},
+    {"n": 16, "name": "Ng Kok Leong 黄国良", "first": "Kok Leong", "last": "Ng", "age": 64, "gender": "male", "height": 166, "weight": 63, "lang": "zh", "history": "长期失眠，腰膝酸软，耳鸣。过敏：无。", "phone": "+60 12-000 0016"}
+  ],
+  "threads": {
+    "zh": {
+      "doctor": ["您好，已仔细查看您的报告和舌象描述。证型判断基本合理，建议按报告中的饮食和作息调整，两周后复评。", "根据症状和脉象，目前以调养为主，不建议自行加重用药。若出现报告中的警示症状请尽快线下就诊。", "辛苦您提供的详细资料。我已标注为重点关注，请坚持记录每日睡眠和饮食，下次复诊带来。"],
+      "patient": ["谢谢医生！我会照着做。请问穴位按摩每天做几次比较好？", "医生，按建议调整了一周，感觉比之前好一些，但夜里还是容易醒，需要调整吗？"],
+      "doctor2": ["穴位按摩每天早晚各一次，每次3-5分钟即可，力度以微酸胀为宜。", "夜醒属正常的恢复过程，睡前一小时避免看手机，可以泡脚15分钟，继续观察一周。"]
+    },
+    "en": {
+      "doctor": ["Thank you for sharing the details. I reviewed your report and the pattern looks consistent. Please follow the dietary and lifestyle advice and we will reassess in two weeks.", "Based on your symptoms and pulse description, gentle regulation is enough for now. Please do not increase any medication yourself, and seek in-person care if any warning sign in the report appears.", "I have marked this as a priority to follow. Please keep a short daily log of sleep and meals and bring it to the next visit."],
+      "patient": ["Thank you, doctor! How often should I do the acupressure each day?", "I followed the advice for a week and feel somewhat better, but I still wake up at night. Should I adjust anything?"],
+      "doctor2": ["Acupressure twice a day, morning and evening, 3 to 5 minutes each with mild soreness is ideal.", "Night waking is part of normal recovery. Avoid screens an hour before bed, try a 15-minute warm foot soak, and observe for another week."]
+    },
+    "ms": {
+      "doctor": ["Terima kasih atas maklumat lengkap. Saya telah menyemak laporan anda dan corak ini munasabah. Sila ikut nasihat pemakanan dan gaya hidup, kita nilai semula dalam dua minggu.", "Berdasarkan gejala dan nadi, pengawalseliaan ringan sudah memadai buat masa ini. Jangan tambah ubat sendiri dan dapatkan rawatan segera jika tanda amaran dalam laporan muncul.", "Saya tandakan kes ini sebagai keutamaan. Sila catat tidur dan makan setiap hari dan bawa pada lawatan seterusnya."],
+      "patient": ["Terima kasih doktor! Berapa kali sehari saya patut buat urutan titik akupresur?", "Saya ikut nasihat selama seminggu dan rasa lebih baik, tetapi masih terjaga waktu malam. Perlukah saya ubah apa-apa?"],
+      "doctor2": ["Urutan akupresur dua kali sehari, pagi dan petang, 3 hingga 5 minit setiap kali dengan rasa sedikit lenguh.", "Terjaga malam adalah sebahagian pemulihan biasa. Elakkan skrin sejam sebelum tidur, rendam kaki 15 minit dan pantau seminggu lagi."]
+    }
+  },
+  "plans": {
+    "zh": {"lifestyle": "规律作息，晚上11点前入睡；饮食清淡温软，少食生冷辛辣；每日散步30分钟。", "treatment": "按证型随证加减，水煎服，每日一剂，分两次温服，连服7天后复诊调方。"},
+    "en": {"lifestyle": "Keep regular hours and sleep before 11pm; eat light, warm, cooked meals and avoid cold or spicy food; walk 30 minutes daily.", "treatment": "Pattern-based formula adjusted to the confirmed pattern, decocted, one dose daily in two warm portions for 7 days, then review."},
+    "ms": {"lifestyle": "Tidur awal sebelum 11 malam; makan makanan ringan dan suam, elak makanan sejuk atau pedas; berjalan 30 minit sehari.", "treatment": "Formula mengikut corak yang disahkan, direbus, satu dos sehari dalam dua bahagian suam selama 7 hari, kemudian semak semula."}
+  },
+  "notif": {
+    "zh": [
+      {"type": "health_reminder", "title": "今日养生提醒", "body": "记得按时吃早餐，喝一杯温水。", "category": "health"},
+      {"type": "exercise_reminder", "title": "运动时间", "body": "饭后散步30分钟，帮助脾胃运化。", "category": "exercise"},
+      {"type": "sleep_reminder", "title": "睡前提醒", "body": "晚上10点半后减少手机使用，泡脚后入睡。", "category": "sleep"},
+      {"type": "appointment_reminder", "title": "复诊提醒", "body": "您与医生约定的复诊时间即将到来。", "category": "appointment"}
+    ],
+    "en": [
+      {"type": "health_reminder", "title": "Daily wellness tip", "body": "Have a warm breakfast and a glass of warm water.", "category": "health"},
+      {"type": "exercise_reminder", "title": "Time to move", "body": "A 30-minute walk after dinner supports digestion.", "category": "exercise"},
+      {"type": "sleep_reminder", "title": "Wind-down reminder", "body": "Reduce screen time after 10:30pm and try a warm foot soak.", "category": "sleep"},
+      {"type": "appointment_reminder", "title": "Follow-up reminder", "body": "Your follow-up with your doctor is coming up.", "category": "appointment"}
+    ],
+    "ms": [
+      {"type": "health_reminder", "title": "Petua kesihatan harian", "body": "Sarapan hangat dan minum segelas air suam.", "category": "health"},
+      {"type": "exercise_reminder", "title": "Masa bersenam", "body": "Berjalan 30 minit selepas makan membantu penghadaman.", "category": "exercise"},
+      {"type": "sleep_reminder", "title": "Peringatan tidur", "body": "Kurangkan skrin selepas 10:30 malam dan rendam kaki.", "category": "sleep"},
+      {"type": "appointment_reminder", "title": "Peringatan susulan", "body": "Temujanji susulan anda dengan doktor hampir tiba.", "category": "appointment"}
+    ]
+  },
+  "logs": [
+    {"level": "info", "category": "auth", "message": "User logged in", "w": 20},
+    {"level": "info", "category": "api", "message": "POST /api/consult completed", "w": 18},
+    {"level": "info", "category": "api", "message": "GET /api/doctor/requests served", "w": 14},
+    {"level": "info", "category": "system", "message": "Scheduled backup completed", "w": 4},
+    {"level": "info", "category": "notification", "message": "Scheduled notifications dispatched", "w": 8},
+    {"level": "info", "category": "ai", "message": "AI report generated (model routed by complexity)", "w": 12},
+    {"level": "warn", "category": "ai", "message": "AI provider rate limit hit, retried with backoff", "w": 6},
+    {"level": "warn", "category": "auth", "message": "Failed login attempt (invalid credentials)", "w": 6},
+    {"level": "warn", "category": "api", "message": "Slow response above 2s on /api/ai/patient-summary", "w": 4},
+    {"level": "error", "category": "ai", "message": "AI request timed out after 60s", "w": 3},
+    {"level": "error", "category": "database", "message": "Transient database busy error, request retried", "w": 2},
+    {"level": "debug", "category": "system", "message": "Config reloaded", "w": 2}
+  ],
+  "errors": [
+    {"type": "AIRequestTimeout", "message": "AI provider did not answer within 60 seconds", "component": "handlers_ai", "severity": "high", "url": "/api/consult", "resolved": true, "ago_h": 150},
+    {"type": "RateLimitExceeded", "message": "Gemini quota exceeded for the minute window", "component": "gemini.client", "severity": "medium", "url": "/api/chat", "resolved": true, "ago_h": 120},
+    {"type": "ValidationError", "message": "full_report is required", "component": "handlers_data", "severity": "low", "url": "/api/patient/sessions", "resolved": true, "ago_h": 96},
+    {"type": "DatabaseBusy", "message": "database is locked (retry succeeded on 2nd attempt)", "component": "localdb", "severity": "medium", "url": "/rest/v1/inquiries", "resolved": false, "ago_h": 60},
+    {"type": "ImageDecodeError", "message": "unsupported image format uploaded for tongue analysis", "component": "handlers_analysis", "severity": "low", "url": "/api/analyze-image", "resolved": false, "ago_h": 30},
+    {"type": "AIResponseInvalid", "message": "report JSON failed contract check (key_findings array)", "component": "handlers_ai", "severity": "high", "url": "/api/consult", "resolved": false, "ago_h": 18},
+    {"type": "NotificationDeliveryFailed", "message": "push token rejected by provider", "component": "handlers_notifications", "severity": "medium", "url": "/api/notifications/sync", "resolved": false, "ago_h": 9},
+    {"type": "UpstreamUnavailable", "message": "listener upstream returned 503 for 40 seconds", "component": "gemini.stream", "severity": "critical", "url": "/api/chat", "resolved": true, "ago_h": 5}
+  ]
+}

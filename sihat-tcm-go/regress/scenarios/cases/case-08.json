@@ -1,0 +1,68 @@
+{
+  "id": "case-08",
+  "type": "text",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2840555/",
+  "source_licence": "CC BY-NC",
+  "source_title": "Treatment for intractable anemia with the traditional Chinese medicines Hominis Placenta and Cervi Cornus Colla (case 1)",
+  "paraphrase_note": "Symptoms/tongue/pulse paraphrased by the harness author from the open-access full text; source pattern and principle are the authors' own.",
+  "patient": {
+    "age": 74,
+    "sex": "female"
+  },
+  "chief_complaint": "Acquired aplastic anemia with low platelets and haemoglobin not responding to conventional care; fatigue.",
+  "symptoms": [
+    "marked fatigue",
+    "appetite loss and severe constipation (side effects)",
+    "purpura",
+    "cold feeling below the ankles",
+    "hot palms and sweaty soles",
+    "insomnia with many dreams",
+    "pale complexion",
+    "moon-shaped face"
+  ],
+  "tongue_as_reported": "blue-pale body with dark sublingual veins",
+  "pulse_as_reported": "slippery, fine and weak",
+  "source_pattern": "Spleen Qi deficiency with Blood deficiency, Yin and Yang deficiency, dampness, phlegm and blood stasis (treated with modified Gui Pi Tang)",
+  "source_treatment_principle": "Tonify Spleen, Heart, Lung and Kidney Qi; nourish Blood; warm Kidney and expel cold; invigorate blood",
+  "ground_truth_strength": "strong",
+  "expect_keyword_groups": [
+    [
+      "spleen"
+    ],
+    [
+      "blood",
+      "qi"
+    ]
+  ],
+  "consult_request": {
+    "data": {
+      "basic_info": {
+        "name": "Case 08",
+        "age": "74",
+        "gender": "female",
+        "height": "",
+        "weight": "",
+        "symptoms": [
+          "fatigue",
+          "digestive",
+          "insomnia",
+          "cold-limbs"
+        ]
+      },
+      "wen_inquiry": "Chief complaint: Acquired aplastic anemia with low platelets and haemoglobin not responding to conventional care; fatigue. Symptoms: marked fatigue; appetite loss and severe constipation (side effects); purpura; cold feeling below the ankles; hot palms and sweaty soles; insomnia with many dreams; pale complexion; moon-shaped face.",
+      "wang_tongue": "blue-pale body with dark sublingual veins",
+      "wang_face": "",
+      "wen_audio": "",
+      "qie": {
+        "bpm": "",
+        "qualities": [
+          "thready",
+          "weak",
+          "slippery"
+        ],
+        "note": "slippery, fine and weak"
+      }
+    },
+    "language": "en"
+  }
+}

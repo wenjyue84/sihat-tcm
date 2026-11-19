@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{.Title}} — Doctor Dashboard</title>
+  <title>{{.Title}} — Sihat TCM</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{asset "/static/css/app.css"}}">
+  <link rel="stylesheet" href="{{asset "/static/css/art.css"}}">
+  {{template "favicon"}}
   <style>
     .doctor-inbox-section { margin: 1.5rem 0 2rem; }
     .inbox-title { font-size: 1.15rem; font-weight: 700; color: var(--slate-700, #334155); display: flex; align-items: center; gap: .5rem; margin-bottom: .3rem; }
@@ -56,7 +58,7 @@
 
   <!-- CTA Card -->
   <div class="doctor-cta-card">
-    <h2 data-i18n="dr.title">Doctor Dashboard 医生控制台</h2>
+    <h1 data-i18n="dr.title">Doctor Dashboard 医生控制台</h1>
     <p data-i18n="dr.subtitle">Review patient AI assessments, generate tailored inquiry sets, and guide consultations.</p>
     <a href="/" class="btn btn-primary" style="background:#fff;color:var(--blue-700);" data-i18n="dr.openwizard">
       Open Diagnosis Wizard 诊断向导
@@ -97,13 +99,13 @@
     </div>
     <div id="tab-requests">
       <div class="inbox-filters">
-        <input class="form-input" id="inbox-search" type="text" placeholder="Search patient / pattern 搜索…">
-        <select class="form-select" id="inbox-status">
+        <input class="form-input" id="inbox-search" type="text" aria-label="Search patient or pattern 搜索患者或证型" placeholder="Search patient / pattern 搜索…">
+        <select class="form-select" id="inbox-status" aria-label="Filter by status 按状态筛选">
           <option value="">All status 全部状态</option>
           <option value="pending">Pending 等待中</option>
           <option value="reviewed">Reviewed 已回复</option>
         </select>
-        <select class="form-select" id="inbox-flag">
+        <select class="form-select" id="inbox-flag" aria-label="Filter by priority 按优先级筛选">
           <option value="">All priority 全部优先级</option>
           <option value="critical">🔴 Critical 紧急</option>
           <option value="watch">🟡 Watch 关注</option>
@@ -164,7 +166,7 @@
       <div class="spinner spinner-dark"></div> Generating inquiry questions…
     </div>
     <div id="gi-result" class="hidden" style="margin-top:1.25rem"></div>
-    <div id="gi-error" class="alert alert-error hidden"></div>
+    <div id="gi-error" role="alert" class="alert alert-error hidden"></div>
   </div>
 
 </main>
@@ -175,41 +177,10 @@
 <script src="{{asset "/static/js/dashboard.js"}}"></script>
 <script src="{{asset "/static/js/doctor-inbox.js"}}"></script>
 <script>
-// Doctor-specific: load stats from /api/patient/sessions
+// Doctor stat cards (Total Sessions / Today / Top Constitution) come from the MASTER inbox (/api/doctor/requests),
+// the same list the "Patient Requests" panel shows, via window.doctorStats() from doctor-inbox.js. They used to read
+// /api/patient/sessions = the logged-in doctor's OWN sessions, so every doctor saw 0 / "—" next to a 44-request inbox.
 (function(){
-  var token = localStorage.getItem('tcm-token') || '';
-  fetch('/api/patient/sessions', {
-    headers: token ? {'Authorization': 'Bearer ' + token} : {}
-  })
-  .then(function(r){ return r.ok ? r.json() : null; })
-  .then(function(data){
-    if (!data || !data.sessions) return;
-    var sessions = data.sessions;
-    document.getElementById('stat-total').textContent = sessions.length;
-    // today
-    var today = new Date().toISOString().slice(0,10);
-    var todayCount = sessions.filter(function(s){
-      return (s.created_at || '').slice(0,10) === today;
-    }).length;
-    document.getElementById('stat-today').textContent = todayCount;
-    // top constitution
-    var counts = {};
-    sessions.forEach(function(s){
-      var c = s.constitution || 'Unknown';
-      counts[c] = (counts[c] || 0) + 1;
-    });
-    var top = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; })[0] || '—';
-    document.getElementById('stat-constitution').textContent = top.length > 10 ? top.slice(0,10)+'…' : top;
-    // completion (sessions that have full_report) — optional card
-    var completeEl = document.getElementById('stat-complete');
-    if (completeEl) {
-      var complete = sessions.filter(function(s){ return !!s.full_report; }).length;
-      var pct = sessions.length > 0 ? Math.round(complete / sessions.length * 100) : 0;
-      completeEl.textContent = pct + '%';
-    }
-  })
-  .catch(function(){ /* silently leave placeholders */ });
-
   function doctorGenInquiry(){
     document.getElementById('gen-inquiry-panel').classList.remove('hidden');
     document.getElementById('gen-inquiry-panel').scrollIntoView({behavior:'smooth'});

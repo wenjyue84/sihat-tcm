@@ -1,0 +1,68 @@
+{
+  "id": "case-02",
+  "type": "text",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3921614/",
+  "source_licence": "not stated in Europe PMC metadata (open-access full text)",
+  "source_title": "A Single Case Study: Treating Migraine Headache With Acupuncture, Chinese Herbs, and Diet",
+  "paraphrase_note": "Symptoms/tongue/pulse paraphrased by the harness author from the open-access full text; source pattern and principle are the authors' own.",
+  "patient": {
+    "age": 32,
+    "sex": "female"
+  },
+  "chief_complaint": "Ten-year history of disabling migraines, one-sided, about once a week.",
+  "symptoms": [
+    "sharp pain mostly on the right side of the head",
+    "dizziness with a heavy-head feeling",
+    "nausea and weekly vomiting",
+    "irritability, prone to stress and anxiety",
+    "irregular periods",
+    "constipation with straining",
+    "cold hands and feet but warm midsection",
+    "sinus congestion and allergies"
+  ],
+  "tongue_as_reported": "slightly red, swollen and scalloped, thin yellow coating; sublingual veins dark and full",
+  "pulse_as_reported": "slippery on both sides; left wiry with a stronger middle (guan) position",
+  "source_pattern": "Flaring Liver Fire with accumulation of Damp-Phlegm (Liver Yang rising ruled out)",
+  "source_treatment_principle": "Reduce Liver Fire, eliminate dampness, resolve phlegm and stop pain",
+  "ground_truth_strength": "strong",
+  "expect_keyword_groups": [
+    [
+      "liver"
+    ],
+    [
+      "fire",
+      "heat",
+      "yang"
+    ]
+  ],
+  "consult_request": {
+    "data": {
+      "basic_info": {
+        "name": "Case 02",
+        "age": "32",
+        "gender": "female",
+        "height": "",
+        "weight": "",
+        "symptoms": [
+          "headache",
+          "anxiety",
+          "digestive",
+          "cold-limbs"
+        ]
+      },
+      "wen_inquiry": "Chief complaint: Ten-year history of disabling migraines, one-sided, about once a week. Symptoms: sharp pain mostly on the right side of the head; dizziness with a heavy-head feeling; nausea and weekly vomiting; irritability, prone to stress and anxiety; irregular periods; constipation with straining; cold hands and feet but warm midsection; sinus congestion and allergies.",
+      "wang_tongue": "slightly red, swollen and scalloped, thin yellow coating; sublingual veins dark and full",
+      "wang_face": "",
+      "wen_audio": "",
+      "qie": {
+        "bpm": "",
+        "qualities": [
+          "slippery",
+          "wiry"
+        ],
+        "note": "slippery on both sides; left wiry with a stronger middle (guan) position"
+      }
+    },
+    "language": "en"
+  }
+}

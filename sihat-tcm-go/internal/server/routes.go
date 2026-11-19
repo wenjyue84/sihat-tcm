@@ -12,6 +12,7 @@ func (s *Server) routes() {
 	// Pages (server-rendered)
 	s.Mux.HandleFunc("GET /{$}", s.handleHome)
 	s.registerPageRoutes()
+	s.registerMediaRoutes()
 
 	// API routes by group.
 	s.registerAIRoutes()
@@ -22,6 +23,7 @@ func (s *Server) routes() {
 	s.registerDoctorRoutes()
 	s.registerNotificationRoutes()
 	s.registerAdminRoutes()
+	s.registerHealthRoutes()
 }
 
 func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {

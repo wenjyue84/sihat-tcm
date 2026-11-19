@@ -1,0 +1,77 @@
+{
+  "id": "tongue-01",
+  "type": "tongue",
+  "label": "_smoke",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T01:49:55.858Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 54,
+      "bytes": 446,
+      "json_ok": true
+    }
+  ],
+  "ai": "fake",
+  "db": "fake",
+  "status": 200,
+  "ms": 56,
+  "raw": "{\"analysis_tags\":[],\"confidence\":100,\"image_description\":\"\",\"modelUsed\":1,\"notes\":\"\",\"observation\":\"Tongue body pale and slightly swollen with teeth marks along the edges; coating thin and white; moisture normal. Tongue body pale and slightly swollen with teeth marks along the edges; coating thin and white; moisture normal. \",\"pattern_suggestions\":[],\"potential_issues\":[\"Qi deficiency\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[]}\n",
+  "parsed": {
+    "analysis_tags": [],
+    "confidence": 100,
+    "image_description": "",
+    "modelUsed": 1,
+    "notes": "",
+    "observation": "Tongue body pale and slightly swollen with teeth marks along the edges; coating thin and white; moisture normal. Tongue body pale and slightly swollen with teeth marks along the edges; coating thin and white; moisture normal. ",
+    "pattern_suggestions": [],
+    "potential_issues": [
+      "Qi deficiency"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": []
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-geographic-tongue-benign-migratory-gloss.jpg",
+    "image_bytes": 451683
+  },
+  "expected": {
+    "documented_condition": "geographic tongue (benign migratory glossitis)",
+    "expected_tcm": {
+      "body_colour": "red to light red with irregular smooth red patches",
+      "coating": "patchy, map-like loss of coating (peeled/geographic) with whitish borders",
+      "thickness": "thin to absent in patches",
+      "shape": "normal size, map-like patches",
+      "moisture": "moist to slightly dry",
+      "pattern": "Stomach Yin deficiency (peeled/geographic coating), possibly Spleen-Stomach Qi/Yin deficiency with heat"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Geographic_tongue_(benign_migratory_glossitis)_%E2%80%93_adult_female.jpg"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "peel",
+          "geographic",
+          "map",
+          "patch",
+          "partial coat",
+          "missing coat",
+          "absent coat"
+        ],
+        "hit": false
+      },
+      {
+        "any_of": [
+          "yin",
+          "stomach"
+        ],
+        "hit": false
+      }
+    ],
+    "all_hit": false
+  }
+}

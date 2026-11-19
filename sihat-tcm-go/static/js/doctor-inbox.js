@@ -40,6 +40,7 @@
         });
         applyFilters();
         renderPatients();
+        updateStats();
       })
       .catch(function () { box.innerHTML = '<p class="alert alert-error">Could not load requests.</p>'; });
   }
@@ -63,7 +64,14 @@
     });
     var countEl = document.getElementById('inbox-count'); if (countEl) countEl.textContent = allRequests.length;
     var pendEl = document.getElementById('inbox-pending'); if (pendEl) pendEl.textContent = allRequests.filter(function (x) { return (x.status || 'pending') !== 'reviewed'; }).length;
-    if (!allRequests.length) { box.innerHTML = '<p class="text-muted">No patient requests yet. When a patient selects a doctor, their report appears here.</p>'; return; }
+    if (!allRequests.length) {
+      box.innerHTML = '<div class="art-empty art-empty--sm">'
+        + '<img class="art-empty__img" src="/static/img/art/empty-inbox.webp" width="900" height="700" loading="lazy" decoding="async"'
+        + ' alt="Illustration of an empty wooden tray with a sheet of paper and a bamboo sprig: no requests yet." data-i18n-alt="art.inbox">'
+        + '<p class="text-muted" data-i18n="art.inbox.d">No patient requests yet. When a patient selects a doctor, their report appears here.</p></div>';
+      if (window.tcmApplyLang) window.tcmApplyLang();
+      return;
+    }
     if (!filtered.length) { box.innerHTML = '<p class="text-muted">No requests match your filters.</p>'; return; }
     box.innerHTML = filtered.map(renderRequest).join('');
     box.querySelectorAll('button[data-reply]').forEach(function (b) { b.addEventListener('click', function () { doctorReply(b.getAttribute('data-reply')); }); });
@@ -88,7 +96,7 @@
       body: JSON.stringify({ requestId: id, plan: plan }),
     })
       .then(function (r) { return r.json(); })
-      .then(function (d) { if (!d || !d.success) throw new Error(); st.textContent = 'Saved ✓ 已保存'; st.style.color = 'var(--emerald-600)'; setTimeout(loadInbox, 900); })
+      .then(function (d) { if (!d || !d.success) throw new Error(); st.textContent = 'Saved ✓ 已保存'; st.style.color = 'var(--emerald-700)'; setTimeout(loadInbox, 900); })
       .catch(function () { st.textContent = 'Could not save. 保存失败。'; st.style.color = '#dc2626'; });
   }
 
@@ -132,7 +140,7 @@
       var reqs = groups[k].reqs.slice().sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
       var latest = reqs[0];
       var report = (latest.diagnosis_report || {}).full_report || {};
-      var pattern = (report.diagnosis && report.diagnosis.primary_pattern) || (latest.diagnosis_report || {}).ai_diagnosis || '—';
+      var pattern = (typeof report.diagnosis === 'string' ? report.diagnosis : (report.diagnosis && report.diagnosis.primary_pattern)) || (latest.diagnosis_report || {}).ai_diagnosis || '—';
       if (pattern && typeof pattern === 'object') pattern = pattern.primary_pattern || pattern.name || '—';
       var topFlag = reqs.reduce(function (acc, r) { var f = r.flag || 'normal'; return FLAG_RANK[f] > FLAG_RANK[acc] ? f : acc; }, 'normal');
       var pending = reqs.filter(function (r) { return (r.status || 'pending') !== 'reviewed'; }).length;
@@ -187,10 +195,10 @@
     var pp = rep.patient_profile || {};
     var doc = rep.selected_doctor || {};
     var report = rep.full_report || {};
-    var diag = (report.diagnosis && report.diagnosis.primary_pattern) || rep.ai_diagnosis || '—';
+    var diag = (typeof report.diagnosis === 'string' ? report.diagnosis : (report.diagnosis && report.diagnosis.primary_pattern)) || rep.ai_diagnosis || '—';
     if (diag && typeof diag === 'object') diag = diag.primary_pattern || '—';
-    var constitution = (report.constitution && report.constitution.type) || '';
-    var summary = (report.analysis && report.analysis.summary) || '';
+    var constitution = repConstitutionType(report);
+    var summary = (typeof report.analysis === 'string' ? report.analysis : (report.analysis && report.analysis.summary)) || '';
     var hasReport = !!(report && (report.diagnosis || report.constitution || report.analysis || report.recommendations));
     var msgs = (rep.messages || []).filter(function (m) { return m.role === 'doctor'; });
     var reviewed = req.status === 'reviewed' && msgs.length > 0;
@@ -217,10 +225,10 @@
         })()
       + (hasReport ? '<div class="inbox-actions" style="margin:.4rem 0"><button class="btn btn-ghost btn-sm" data-print="' + esc(req.id) + '">🖨 Print / Save PDF 打印报告</button></div>' : '')
       + '<div class="inbox-reply">'
-      + '<textarea class="form-input" id="reply-' + esc(req.id) + '" rows="2" placeholder="Write clinical feedback to the patient…"></textarea>'
+      + '<textarea class="form-input" id="reply-' + esc(req.id) + '" aria-label="Clinical feedback to the patient 给患者的反馈" rows="2" placeholder="Write clinical feedback to the patient…"></textarea>'
       + '<button class="btn btn-blue btn-sm" data-reply="' + esc(req.id) + '">Send Feedback 发送反馈</button>'
       + '</div>'
-      + '<div class="inbox-flagrow">Priority 优先级: <select class="flag-select" data-flag="' + esc(req.id) + '">'
+      + '<div class="inbox-flagrow">Priority 优先级: <select class="flag-select" aria-label="Priority 优先级" data-flag="' + esc(req.id) + '">'
       + '<option value="normal"' + (flag === 'normal' ? ' selected' : '') + '>Normal 普通</option>'
       + '<option value="watch"' + (flag === 'watch' ? ' selected' : '') + '>Watch 关注</option>'
       + '<option value="critical"' + (flag === 'critical' ? ' selected' : '') + '>Critical 紧急</option>'
@@ -228,15 +236,39 @@
       + '<div class="reply-status" id="reply-status-' + esc(req.id) + '"></div>'
       + '<details style="margin-top:.5rem"><summary style="cursor:pointer;font-size:.82rem;font-weight:600;color:var(--blue-700,#1d4ed8)">📋 Treatment Plan 治疗方案' + (rep.treatment_plan ? ' ✓' : '') + '</summary>'
       + '<div style="margin-top:.5rem;display:flex;flex-direction:column;gap:.4rem">'
-      + '<input class="form-input" id="tp-pattern-' + esc(req.id) + '" placeholder="Confirmed pattern 证型" value="' + esc(planVal(rep, 'pattern')) + '">'
-      + '<textarea class="form-input" id="tp-treat-' + esc(req.id) + '" rows="2" placeholder="Herbs / formula 方药">' + esc(planVal(rep, 'treatment')) + '</textarea>'
-      + '<textarea class="form-input" id="tp-life-' + esc(req.id) + '" rows="2" placeholder="Lifestyle advice 生活建议">' + esc(planVal(rep, 'lifestyle')) + '</textarea>'
-      + '<input class="form-input" id="tp-follow-' + esc(req.id) + '" type="date" value="' + esc(planVal(rep, 'follow_up')) + '">'
+      + '<input class="form-input" id="tp-pattern-' + esc(req.id) + '" aria-label="Confirmed pattern 证型" placeholder="Confirmed pattern 证型" value="' + esc(planVal(rep, 'pattern')) + '">'
+      + '<textarea class="form-input" id="tp-treat-' + esc(req.id) + '" aria-label="Herbs / formula 方药" rows="2" placeholder="Herbs / formula 方药">' + esc(planVal(rep, 'treatment')) + '</textarea>'
+      + '<textarea class="form-input" id="tp-life-' + esc(req.id) + '" aria-label="Lifestyle advice 生活建议" rows="2" placeholder="Lifestyle advice 生活建议">' + esc(planVal(rep, 'lifestyle')) + '</textarea>'
+      + '<input class="form-input" id="tp-follow-' + esc(req.id) + '" aria-label="Follow-up date 复诊日期" type="date" value="' + esc(planVal(rep, 'follow_up')) + '">'
       + '<button class="btn btn-blue btn-sm" data-tp="' + esc(req.id) + '">Save Plan 保存方案</button>'
       + '<div class="reply-status" id="tp-status-' + esc(req.id) + '" style="font-size:.76rem;min-height:.9rem"></div>'
       + '</div></details>'
       + '</div>';
   }
+
+  // constitution may be {type} or a plain string
+  function repConstitutionType(report) {
+    var c = (report || {}).constitution;
+    return typeof c === 'string' ? c : ((c && c.type) || '');
+  }
+
+  // Stat cards on /doctor (Total / Today / Top constitution) describe the MASTER inbox - the same list shown below them.
+  // They used to come from /api/patient/sessions = the logged-in doctor's own sessions (always 0 / "—").
+  function updateStats() {
+    var set = function (id, v) { var e = document.getElementById(id); if (e) e.textContent = v; };
+    if (!document.getElementById('stat-total')) return;
+    set('stat-total', allRequests.length);
+    var todayStr = new Date().toDateString();
+    set('stat-today', allRequests.filter(function (r) { var d = new Date(r.created_at); return !isNaN(d) && d.toDateString() === todayStr; }).length);
+    var counts = {};
+    allRequests.forEach(function (r) {
+      var c = repConstitutionType((r.diagnosis_report || {}).full_report);
+      if (c) counts[c] = (counts[c] || 0) + 1;
+    });
+    var top = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a]; })[0] || '—';
+    set('stat-constitution', top.length > 12 ? top.slice(0, 12) + '…' : top);
+  }
+  window.doctorStats = updateStats;
 
   function planVal(rep, key) { var tp = (rep && rep.treatment_plan) || {}; return tp[key] != null ? String(tp[key]) : ''; }
 
@@ -253,7 +285,7 @@
       body: JSON.stringify({ requestId: id, message: msg, targetTable: 'inquiries' }),
     })
       .then(function (r) { if (!r.ok) throw new Error('status ' + r.status); return r.json(); })
-      .then(function () { st.textContent = 'Feedback sent ✓'; st.style.color = 'var(--emerald-600)'; setTimeout(loadInbox, 900); })
+      .then(function () { st.textContent = 'Feedback sent ✓'; st.style.color = 'var(--emerald-700)'; setTimeout(loadInbox, 900); })
       .catch(function (e) { st.textContent = 'Could not send: ' + e.message; st.style.color = '#dc2626'; });
   }
 

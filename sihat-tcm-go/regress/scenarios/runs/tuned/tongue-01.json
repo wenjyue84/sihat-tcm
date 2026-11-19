@@ -1,0 +1,120 @@
+{
+  "id": "tongue-01",
+  "type": "tongue",
+  "label": "tuned",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T02:26:45.244Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 235552,
+      "bytes": 7790,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 235553,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Heat Pattern · Clear Heat \\u0026 Nourish Yin\",\"confidence\":83.7,\"description\":\"The tongue body is clearly red (紅舌), exceeding the normal light-red (淡紅舌) baseline, indicating the presence of a Heat pattern. This may reflect Excess Heat (實熱) lodged in the Heart, Stomach, or Liver, or alternatively Deficiency Heat arising from insufficiency of Yin fluids (陰虛內熱) — the relative thinness of the coating and the moist surface lean slightly toward a mixed picture.\",\"recommendations\":[\"Reduce or eliminate spicy, fried, deep-roasted, and alcohol-containing foods; favour cooling foods such as cucumber, lotus root, mung bean soup (綠豆湯), and pears to gently clear Heat without injuring fluids\",\"Establish a consistent sleep schedule before 23:00, as chronic late nights deplete Heart-Kidney Yin and fan internal Heat — combine with brief daily meditation or slow diaphragmatic breathing to settle Heart-Fire (心火)\"],\"title\":\"Red Tongue\",\"title_cn\":\"紅舌\"},{\"category\":\"Blood-Level Heat · Cool Blood \\u0026 Resolve Stasis\",\"confidence\":74.2,\"description\":\"Irregular reddish-purple patches or prominent raised spots are visible across the mid-to-posterior dorsal surface; in TCM this signals Heat penetrating the Blood level (血分熱) or early Blood stasis mixed with Heat (血熱夾瘀), particularly when the spots are raised and prickle-like (芒刺舌). If the patches correspond to bare, depapillated zones of peeled coating rather than raised lesions, they additionally suggest Stomach or Kidney Yin injury (胃腎陰虛) at the root.\",\"recommendations\":[\"Incorporate Yin-nourishing, Blood-cooling foods into daily meals: black sesame, lily bulb (百合), silver-ear fungus (銀耳), lotus seeds, and fresh dark berries help cool Blood and rebuild Yin fluids\",\"Avoid prolonged intense sun exposure, excessive physical exertion in heat, and emotional over-stimulation — all of which drive Blood-Heat upward and worsen this presentation; gentle evening walks are preferable to high-intensity midday exercise\"],\"title\":\"Red Spots / Patches on Tongue Surface\",\"title_cn\":\"紅點舌 / 舌面斑塊\"},{\"category\":\"Stomach Yin Deficiency · Nourish Stomach \\u0026 Secure Root Coat\",\"confidence\":68.9,\"description\":\"The tongue coating is thin and unevenly anchored, with certain zones barely covered while the red body shows through, suggesting that Stomach Qi and Stomach Yin (胃氣/胃陰) are insufficiently robust to generate and hold a normal rooted coat (有根苔). A patchy or peeling coating (剝苔) indicates early damage to the Stomach's fluid-generating function and can foreshadow deeper Yin insufficiency if the underlying Heat pattern is not addressed.\",\"recommendations\":[\"Support Stomach Yin with regular, unhurried meals; congee (粥) cooked with yam (山藥), Chinese yam, or white rice is the classical dietary medicine for rebuilding Stomach Yin — eat at consistent times and chew thoroughly to ease the digestive burden\",\"Strictly limit iced drinks, raw cold foods, and fasting habits, as these impair the Spleen-Stomach's transforming and transporting function (脾胃運化) and accelerate coat loss; room-temperature or lightly warm water is preferred throughout the day\"],\"title\":\"Thin / Patchy Coating\",\"title_cn\":\"薄苔 / 剝苔\"}],\"confidence\":78,\"image_description\":\"A portrait selfie of a woman with her tongue fully extended outward; the tongue is clearly visible, well-framed, and evaluable despite being embedded in a wider face photo. Warm yellow ambient indoor lighting is present.\",\"modelUsed\":1,\"notes\":\"Warm yellow ambient lighting is the primary image-quality caveat — it shifts all reds toward pink and may make a deep-red (絳舌) body appear as red (紅舌), or a red body appear as light-red; confidence in the exact shade is moderated accordingly and rated 78 overall. The mid-posterior reddish-purple patches are the single most important finding: clinical correlation with symptoms such as thirst, sensation of heat, night sweats, palpitations, or burning epigastric discomfort is essential to differentiate Excess from Deficient Heat and to assess whether stasis is a co-factor. Lipstick or food pigment staining of the tongue surface cannot be completely excluded from this image alone, though the irregular patch distribution argues against uniform cosmetic staining. A tongue inspection alone is insufficient to confirm a TCM pattern — pulse diagnosis (脈診) and full symptom inquiry (問診) are required before any herbal or therapeutic intervention.\",\"observation\":\"The tongue body presents a definite red (紅舌) colouration, clearly deeper than the normal light-red standard; the warm yellow ceiling-light cast adds a slight pink bias, but even correcting for this the body reads as genuinely red when compared against the inner lip edges and surrounding oral mucosa. The coating appears thin and unevenly distributed (薄苔/剝苔), covering some areas lightly while in other zones the red body shows through almost bare, without obvious greasiness, cheesy texture, or dryness. The dorsal surface bears irregular reddish-purple patches or prominently enlarged spots concentrated on the mid-to-posterior body — these are the most diagnostically salient feature and may represent enlarged/inflamed fungiform papillae (red prickles 芒刺), geographic peeling exposing the raw body beneath, or red-spot lesions (紅點); staining from food or lipstick cannot be fully excluded, though their distribution pattern is not consistent with uniform surface staining. Tongue shape appears broadly normal in width with no visible teeth marks, and surface moisture reads as adequate-to-moist (潤), with no signs of excessive dryness or pathological slipperiness.\",\"pattern_suggestions\":[\"Primary pattern — 心胃有熱 (Heart and Stomach Heat): the red body with prominent surface spots or prickles and an unrooted thin coat most directly supports excess Heat accumulating in the upper-middle Jiao; treatment principle: clear Heat and protect Yin (清熱護陰), with herbs such as Huanglian (黃連), Zhizi (梔子), and Shengdi (生地)\",\"Alternative pattern — 陰虛內熱 (Yin Deficiency with Empty Heat): if the surface patches represent depapillated peeled-coating zones rather than raised prickles, Stomach and Kidney Yin deficiency (胃腎陰虛) generating internal Empty Heat becomes the leading diagnosis; treatment principle: nourish Yin and clear Deficiency Heat (滋陰清虛熱), with herbs such as Maidong (麥冬), Shengdi (生地), and Zhimu (知母)\"],\"potential_issues\":[\"Primary pattern — 心胃有熱 (Heart and Stomach Heat): the red body with prominent surface spots or prickles and an unrooted thin coat most directly supports excess Heat accumulating in the upper-middle Jiao; treatment principle: clear Heat and protect Yin (清熱護陰), with herbs such as Huanglian (黃連), Zhizi (梔子), and Shengdi (生地)\",\"Alternative pattern — 陰虛內熱 (Yin Deficiency with Empty Heat): if the surface patches represent depapillated peeled-coating zones rather than raised prickles, Stomach and Kidney Yin deficiency (胃腎陰虛) generating internal Empty Heat becomes the leading diagnosis; treatment principle: nourish Yin and clear Deficiency Heat (滋陰清虛熱), with herbs such as Maidong (麥冬), Shengdi (生地), and Zhimu (知母)\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"紅舌 (Hóng Shé) — Red Tongue — indicates Heat pattern, either Excess Heat (實熱) or Yin-Deficiency Empty Heat (陰虛內熱); body colour carries the greatest diagnostic weight here\",\"紅點 / 芒刺 (Hóng Diǎn / Máng Cì) — Red Spots or Prickles — signals Heat entering the Blood level (血分熱) or intense organ-specific Heat, particularly Heart, Liver, and Stomach\",\"剝苔 / 薄苔 (Bō Tāi / Bó Tāi) — Patchy or Peeled Coating — indicates Stomach Yin insufficiency (胃陰不足) and weakened root-coat generation by Stomach Qi\",\"潤 (Rùn) — Moist Surface — body fluids are relatively preserved, suggesting Yin depletion is not yet severe and extreme fluid exhaustion has not occurred\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Heat Pattern · Clear Heat & Nourish Yin",
+        "confidence": 83.7,
+        "description": "The tongue body is clearly red (紅舌), exceeding the normal light-red (淡紅舌) baseline, indicating the presence of a Heat pattern. This may reflect Excess Heat (實熱) lodged in the Heart, Stomach, or Liver, or alternatively Deficiency Heat arising from insufficiency of Yin fluids (陰虛內熱) — the relative thinness of the coating and the moist surface lean slightly toward a mixed picture.",
+        "recommendations": [
+          "Reduce or eliminate spicy, fried, deep-roasted, and alcohol-containing foods; favour cooling foods such as cucumber, lotus root, mung bean soup (綠豆湯), and pears to gently clear Heat without injuring fluids",
+          "Establish a consistent sleep schedule before 23:00, as chronic late nights deplete Heart-Kidney Yin and fan internal Heat — combine with brief daily meditation or slow diaphragmatic breathing to settle Heart-Fire (心火)"
+        ],
+        "title": "Red Tongue",
+        "title_cn": "紅舌"
+      },
+      {
+        "category": "Blood-Level Heat · Cool Blood & Resolve Stasis",
+        "confidence": 74.2,
+        "description": "Irregular reddish-purple patches or prominent raised spots are visible across the mid-to-posterior dorsal surface; in TCM this signals Heat penetrating the Blood level (血分熱) or early Blood stasis mixed with Heat (血熱夾瘀), particularly when the spots are raised and prickle-like (芒刺舌). If the patches correspond to bare, depapillated zones of peeled coating rather than raised lesions, they additionally suggest Stomach or Kidney Yin injury (胃腎陰虛) at the root.",
+        "recommendations": [
+          "Incorporate Yin-nourishing, Blood-cooling foods into daily meals: black sesame, lily bulb (百合), silver-ear fungus (銀耳), lotus seeds, and fresh dark berries help cool Blood and rebuild Yin fluids",
+          "Avoid prolonged intense sun exposure, excessive physical exertion in heat, and emotional over-stimulation — all of which drive Blood-Heat upward and worsen this presentation; gentle evening walks are preferable to high-intensity midday exercise"
+        ],
+        "title": "Red Spots / Patches on Tongue Surface",
+        "title_cn": "紅點舌 / 舌面斑塊"
+      },
+      {
+        "category": "Stomach Yin Deficiency · Nourish Stomach & Secure Root Coat",
+        "confidence": 68.9,
+        "description": "The tongue coating is thin and unevenly anchored, with certain zones barely covered while the red body shows through, suggesting that Stomach Qi and Stomach Yin (胃氣/胃陰) are insufficiently robust to generate and hold a normal rooted coat (有根苔). A patchy or peeling coating (剝苔) indicates early damage to the Stomach's fluid-generating function and can foreshadow deeper Yin insufficiency if the underlying Heat pattern is not addressed.",
+        "recommendations": [
+          "Support Stomach Yin with regular, unhurried meals; congee (粥) cooked with yam (山藥), Chinese yam, or white rice is the classical dietary medicine for rebuilding Stomach Yin — eat at consistent times and chew thoroughly to ease the digestive burden",
+          "Strictly limit iced drinks, raw cold foods, and fasting habits, as these impair the Spleen-Stomach's transforming and transporting function (脾胃運化) and accelerate coat loss; room-temperature or lightly warm water is preferred throughout the day"
+        ],
+        "title": "Thin / Patchy Coating",
+        "title_cn": "薄苔 / 剝苔"
+      }
+    ],
+    "confidence": 78,
+    "image_description": "A portrait selfie of a woman with her tongue fully extended outward; the tongue is clearly visible, well-framed, and evaluable despite being embedded in a wider face photo. Warm yellow ambient indoor lighting is present.",
+    "modelUsed": 1,
+    "notes": "Warm yellow ambient lighting is the primary image-quality caveat — it shifts all reds toward pink and may make a deep-red (絳舌) body appear as red (紅舌), or a red body appear as light-red; confidence in the exact shade is moderated accordingly and rated 78 overall. The mid-posterior reddish-purple patches are the single most important finding: clinical correlation with symptoms such as thirst, sensation of heat, night sweats, palpitations, or burning epigastric discomfort is essential to differentiate Excess from Deficient Heat and to assess whether stasis is a co-factor. Lipstick or food pigment staining of the tongue surface cannot be completely excluded from this image alone, though the irregular patch distribution argues against uniform cosmetic staining. A tongue inspection alone is insufficient to confirm a TCM pattern — pulse diagnosis (脈診) and full symptom inquiry (問診) are required before any herbal or therapeutic intervention.",
+    "observation": "The tongue body presents a definite red (紅舌) colouration, clearly deeper than the normal light-red standard; the warm yellow ceiling-light cast adds a slight pink bias, but even correcting for this the body reads as genuinely red when compared against the inner lip edges and surrounding oral mucosa. The coating appears thin and unevenly distributed (薄苔/剝苔), covering some areas lightly while in other zones the red body shows through almost bare, without obvious greasiness, cheesy texture, or dryness. The dorsal surface bears irregular reddish-purple patches or prominently enlarged spots concentrated on the mid-to-posterior body — these are the most diagnostically salient feature and may represent enlarged/inflamed fungiform papillae (red prickles 芒刺), geographic peeling exposing the raw body beneath, or red-spot lesions (紅點); staining from food or lipstick cannot be fully excluded, though their distribution pattern is not consistent with uniform surface staining. Tongue shape appears broadly normal in width with no visible teeth marks, and surface moisture reads as adequate-to-moist (潤), with no signs of excessive dryness or pathological slipperiness.",
+    "pattern_suggestions": [
+      "Primary pattern — 心胃有熱 (Heart and Stomach Heat): the red body with prominent surface spots or prickles and an unrooted thin coat most directly supports excess Heat accumulating in the upper-middle Jiao; treatment principle: clear Heat and protect Yin (清熱護陰), with herbs such as Huanglian (黃連), Zhizi (梔子), and Shengdi (生地)",
+      "Alternative pattern — 陰虛內熱 (Yin Deficiency with Empty Heat): if the surface patches represent depapillated peeled-coating zones rather than raised prickles, Stomach and Kidney Yin deficiency (胃腎陰虛) generating internal Empty Heat becomes the leading diagnosis; treatment principle: nourish Yin and clear Deficiency Heat (滋陰清虛熱), with herbs such as Maidong (麥冬), Shengdi (生地), and Zhimu (知母)"
+    ],
+    "potential_issues": [
+      "Primary pattern — 心胃有熱 (Heart and Stomach Heat): the red body with prominent surface spots or prickles and an unrooted thin coat most directly supports excess Heat accumulating in the upper-middle Jiao; treatment principle: clear Heat and protect Yin (清熱護陰), with herbs such as Huanglian (黃連), Zhizi (梔子), and Shengdi (生地)",
+      "Alternative pattern — 陰虛內熱 (Yin Deficiency with Empty Heat): if the surface patches represent depapillated peeled-coating zones rather than raised prickles, Stomach and Kidney Yin deficiency (胃腎陰虛) generating internal Empty Heat becomes the leading diagnosis; treatment principle: nourish Yin and clear Deficiency Heat (滋陰清虛熱), with herbs such as Maidong (麥冬), Shengdi (生地), and Zhimu (知母)"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "紅舌 (Hóng Shé) — Red Tongue — indicates Heat pattern, either Excess Heat (實熱) or Yin-Deficiency Empty Heat (陰虛內熱); body colour carries the greatest diagnostic weight here",
+      "紅點 / 芒刺 (Hóng Diǎn / Máng Cì) — Red Spots or Prickles — signals Heat entering the Blood level (血分熱) or intense organ-specific Heat, particularly Heart, Liver, and Stomach",
+      "剝苔 / 薄苔 (Bō Tāi / Bó Tāi) — Patchy or Peeled Coating — indicates Stomach Yin insufficiency (胃陰不足) and weakened root-coat generation by Stomach Qi",
+      "潤 (Rùn) — Moist Surface — body fluids are relatively preserved, suggesting Yin depletion is not yet severe and extreme fluid exhaustion has not occurred"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-geographic-tongue-benign-migratory-gloss.jpg",
+    "image_bytes": 451683
+  },
+  "expected": {
+    "documented_condition": "geographic tongue (benign migratory glossitis)",
+    "expected_tcm": {
+      "body_colour": "red to light red with irregular smooth red patches",
+      "coating": "patchy, map-like loss of coating (peeled/geographic) with whitish borders",
+      "thickness": "thin to absent in patches",
+      "shape": "normal size, map-like patches",
+      "moisture": "moist to slightly dry",
+      "pattern": "Stomach Yin deficiency (peeled/geographic coating), possibly Spleen-Stomach Qi/Yin deficiency with heat"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Geographic_tongue_(benign_migratory_glossitis)_%E2%80%93_adult_female.jpg"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "peel",
+          "geographic",
+          "map",
+          "patch",
+          "partial coat",
+          "missing coat",
+          "absent coat"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "yin",
+          "stomach"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

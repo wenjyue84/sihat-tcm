@@ -1,0 +1,33 @@
+{
+  "label": "case08-r2",
+  "ai": "pc",
+  "db": "fake",
+  "port_offset": "300",
+  "concurrency": 3,
+  "started_at": "2026-10-12T04:05:05.934Z",
+  "wall_seconds": 253,
+  "selected": 1,
+  "ok": 1,
+  "failed": [],
+  "by_type": {
+    "tongue": {
+      "n": 0,
+      "ok": 0,
+      "kw_all_hit": 0,
+      "kw_miss": []
+    },
+    "face": {
+      "n": 0,
+      "ok": 0,
+      "kw_all_hit": 0,
+      "kw_miss": []
+    },
+    "text": {
+      "n": 1,
+      "ok": 1,
+      "kw_all_hit": 1,
+      "kw_miss": []
+    }
+  },
+  "note": "keyword hits are a crude lexical signal against literature-derived expectations; read the raw JSONs before drawing conclusions."
+}

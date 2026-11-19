@@ -1,0 +1,121 @@
+{
+  "id": "tongue-06",
+  "type": "tongue",
+  "label": "baseline",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T01:52:28.706Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 111343,
+      "bytes": 2472,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 111343,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Extreme Heat Toxin Accumulation · Interior Clearing \\u0026 Detoxification\",\"confidence\":93.8,\"description\":\"厚重黑色毛狀苔垢為本次最關鍵且最危重之徵象——中醫認為黑苔代表病邪深入、病情最重，可見於極度實熱灼傷津液，或寒濕深入內陷兩種情況。本例苔質膩滑，毛刺明顯，強烈傾向於濕熱或熱毒蘊積於胃腸二經，熱勢已至極深之處。\",\"recommendations\":[\"立即停食一切辛辣、油膩、燒烤及含酒精食物；改以清熱利濕之品為主，如苦瓜、綠豆湯、蓮藕，以清瀉內熱、導濕外出\",\"緊急尋求中醫師診治，視脈象考慮黃連解毒湯或大承氣湯類方；同時就診西醫，排除因抗生素過量、真菌感染（Candida）或口腔衛生問題引致之 Black Hairy Tongue（Lingua Villosa Nigra）\"],\"title\":\"Black Hairy Coating\",\"title_cn\":\"黑毛苔\"},{\"category\":\"Phlegm-Dampness Obstruction · Middle Jiao Resolution\",\"confidence\":89.4,\"description\":\"苔色既黑且厚膩，反映中焦痰濕嚴重積聚——脾胃運化失職，濁邪壅滯，氣機與津液代謝受阻。此程度之厚腻苔，顯示病邪並非一日形成，乃長期或急性內阻之結果。\",\"recommendations\":[\"戒除生冷、乳製品等生濕食物；每日以薏苡仁、山藥、陳皮茶作食療，健脾化痰、恢復中焦運化功能\",\"減少久坐時間，每日快走三十分鐘以振奮脾陽、促進濕邪代謝；配合順時針腹部按摩（腹部按摩），每次五至十分鐘，疏通胃氣\"],\"title\":\"Thick Greasy Coating\",\"title_cn\":\"厚腻苔\"},{\"category\":\"Spleen Qi Deficiency · Yang Warming \\u0026 Fluid Metabolism\",\"confidence\":76.5,\"description\":\"舌體較正常明顯寬厚胖大（胖大舌），提示脾氣虛衰、水濕泛溢——脾陽不足，無力運化水液，津液滯留於舌體組織。結合上述重症苔象，可判斷脾胃功能失調為本（根本原因），濕熱積聚為標（表象），標本同病。\",\"recommendations\":[\"以溫補脾陽之品調護根本：生薑茶、胡椒、蓮子稀粥等；避免冷飲及生冷蔬菜，直至舌體逐漸恢復正常大小\",\"每日對足三里（ST36）及脾俞（BL20）施以艾灸，每穴十至十五分鐘，溫補脾氣與脾陽，加速水濕消散\"],\"title\":\"Swollen Enlarged Tongue\",\"title_cn\":\"胖大舌\"}],\"confidence\":91,\"image_description\":\"清晰的舌部特寫照片，顯示舌背中央至後三分之二覆蓋著深黑色毛狀苔垢；舌緣與舌尖可見底部呈淡紅至微紅色；舌體略顯胖大\",\"modelUsed\":1,\"notes\":\"⚠️ 臨床緊急提示：此為中醫實踐中最嚴重的舌象表現之一——黑苔（黑苔）覆蓋範圍如此廣泛，在臨床上極為罕見，應立即尋求專業醫療評估。就西醫角度而言，此表現符合 Black Hairy Tongue（Lingua Villosa Nigra）之特徵，常與抗生素過量使用、口腔衛生欠佳、大量吸煙或 Candida 真菌過度增生有關，強烈建議同步接受西醫診查。圖像質量良好，光線充足，黑苔之膩滑質地及絲狀乳頭增長均清晰可辨。在確定治療方向前，脈診（脈診）及完整問診（問診）對於鑑別本例黑苔之熱證或寒證屬性至關重要。\",\"observation\":\"舌象異常嚴重——舌背中後段覆蓋厚重黑色毛狀苔垢（黑毛苔），質地膩滑，提示濕邪內蘊；苔下可見舌體略胖，邊緣與舌尖底色呈淡紅偏紅。\",\"pattern_suggestions\":[\"主要證型：濕熱蘊結兼熱毒（濕熱蘊結兼熱毒）——黑色膩苔配合胖大舌體，最強烈指向濕邪日久化熱、熱極成毒，蘊積於胃腸；屬實證，須急則治標，以清熱解毒、通腑瀉濁為先\",\"次要證型：脾氣虛兼痰濕（脾氣虛兼痰濕）——胖大舌體所示之根本虛候；待急性實證緩解後，長期調理仍需以健脾化濕為主，鞏固根本以防復發\",\"鑑別考慮：寒濕傷陽（寒濕傷陽）——若見四肢厥冷、畏寒、大便溏薄等症，則不能排除寒濕性黑苔；黑苔之熱寒屬性，必須結合脈診（脈診）方可最終確認，不可單憑舌象定論\"],\"potential_issues\":[\"主要證型：濕熱蘊結兼熱毒（濕熱蘊結兼熱毒）——黑色膩苔配合胖大舌體，最強烈指向濕邪日久化熱、熱極成毒，蘊積於胃腸；屬實證，須急則治標，以清熱解毒、通腑瀉濁為先\",\"次要證型：脾氣虛兼痰濕（脾氣虛兼痰濕）——胖大舌體所示之根本虛候；待急性實證緩解後，長期調理仍需以健脾化濕為主，鞏固根本以防復發\",\"鑑別考慮：寒濕傷陽（寒濕傷陽）——若見四肢厥冷、畏寒、大便溏薄等症，則不能排除寒濕性黑苔；黑苔之熱寒屬性，必須結合脈診（脈診）方可最終確認，不可單憑舌象定論\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"黑毛苔 (Hēi Máo Tāi) — 黑色毛狀苔垢 — 提示內部極重病邪：或為熱毒熾盛灼傷津液，或為寒濕深入傷陽；屬中醫苔象中最危重之徵\",\"厚腻苔 (Hòu Nì Tāi) — 厚重膩滑苔垢 — 反映中焦痰濕或濕熱嚴重阻滯，脾胃運化功能嚴重受損\",\"胖大舌 (Pàng Dà Shé) — 舌體胖大 — 提示脾氣虛、水濕泛溢；陽氣不足，無力正常輸布水液\",\"腻苔伴黑 (Nì Tāi Bàn Hēi) — 膩苔兼黑色 — 複合徵象，指向濕熱發展至最重階段，或寒濕傷陽；須結合臨床脈診加以鑑別\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Extreme Heat Toxin Accumulation · Interior Clearing & Detoxification",
+        "confidence": 93.8,
+        "description": "厚重黑色毛狀苔垢為本次最關鍵且最危重之徵象——中醫認為黑苔代表病邪深入、病情最重，可見於極度實熱灼傷津液，或寒濕深入內陷兩種情況。本例苔質膩滑，毛刺明顯，強烈傾向於濕熱或熱毒蘊積於胃腸二經，熱勢已至極深之處。",
+        "recommendations": [
+          "立即停食一切辛辣、油膩、燒烤及含酒精食物；改以清熱利濕之品為主，如苦瓜、綠豆湯、蓮藕，以清瀉內熱、導濕外出",
+          "緊急尋求中醫師診治，視脈象考慮黃連解毒湯或大承氣湯類方；同時就診西醫，排除因抗生素過量、真菌感染（Candida）或口腔衛生問題引致之 Black Hairy Tongue（Lingua Villosa Nigra）"
+        ],
+        "title": "Black Hairy Coating",
+        "title_cn": "黑毛苔"
+      },
+      {
+        "category": "Phlegm-Dampness Obstruction · Middle Jiao Resolution",
+        "confidence": 89.4,
+        "description": "苔色既黑且厚膩，反映中焦痰濕嚴重積聚——脾胃運化失職，濁邪壅滯，氣機與津液代謝受阻。此程度之厚腻苔，顯示病邪並非一日形成，乃長期或急性內阻之結果。",
+        "recommendations": [
+          "戒除生冷、乳製品等生濕食物；每日以薏苡仁、山藥、陳皮茶作食療，健脾化痰、恢復中焦運化功能",
+          "減少久坐時間，每日快走三十分鐘以振奮脾陽、促進濕邪代謝；配合順時針腹部按摩（腹部按摩），每次五至十分鐘，疏通胃氣"
+        ],
+        "title": "Thick Greasy Coating",
+        "title_cn": "厚腻苔"
+      },
+      {
+        "category": "Spleen Qi Deficiency · Yang Warming & Fluid Metabolism",
+        "confidence": 76.5,
+        "description": "舌體較正常明顯寬厚胖大（胖大舌），提示脾氣虛衰、水濕泛溢——脾陽不足，無力運化水液，津液滯留於舌體組織。結合上述重症苔象，可判斷脾胃功能失調為本（根本原因），濕熱積聚為標（表象），標本同病。",
+        "recommendations": [
+          "以溫補脾陽之品調護根本：生薑茶、胡椒、蓮子稀粥等；避免冷飲及生冷蔬菜，直至舌體逐漸恢復正常大小",
+          "每日對足三里（ST36）及脾俞（BL20）施以艾灸，每穴十至十五分鐘，溫補脾氣與脾陽，加速水濕消散"
+        ],
+        "title": "Swollen Enlarged Tongue",
+        "title_cn": "胖大舌"
+      }
+    ],
+    "confidence": 91,
+    "image_description": "清晰的舌部特寫照片，顯示舌背中央至後三分之二覆蓋著深黑色毛狀苔垢；舌緣與舌尖可見底部呈淡紅至微紅色；舌體略顯胖大",
+    "modelUsed": 1,
+    "notes": "⚠️ 臨床緊急提示：此為中醫實踐中最嚴重的舌象表現之一——黑苔（黑苔）覆蓋範圍如此廣泛，在臨床上極為罕見，應立即尋求專業醫療評估。就西醫角度而言，此表現符合 Black Hairy Tongue（Lingua Villosa Nigra）之特徵，常與抗生素過量使用、口腔衛生欠佳、大量吸煙或 Candida 真菌過度增生有關，強烈建議同步接受西醫診查。圖像質量良好，光線充足，黑苔之膩滑質地及絲狀乳頭增長均清晰可辨。在確定治療方向前，脈診（脈診）及完整問診（問診）對於鑑別本例黑苔之熱證或寒證屬性至關重要。",
+    "observation": "舌象異常嚴重——舌背中後段覆蓋厚重黑色毛狀苔垢（黑毛苔），質地膩滑，提示濕邪內蘊；苔下可見舌體略胖，邊緣與舌尖底色呈淡紅偏紅。",
+    "pattern_suggestions": [
+      "主要證型：濕熱蘊結兼熱毒（濕熱蘊結兼熱毒）——黑色膩苔配合胖大舌體，最強烈指向濕邪日久化熱、熱極成毒，蘊積於胃腸；屬實證，須急則治標，以清熱解毒、通腑瀉濁為先",
+      "次要證型：脾氣虛兼痰濕（脾氣虛兼痰濕）——胖大舌體所示之根本虛候；待急性實證緩解後，長期調理仍需以健脾化濕為主，鞏固根本以防復發",
+      "鑑別考慮：寒濕傷陽（寒濕傷陽）——若見四肢厥冷、畏寒、大便溏薄等症，則不能排除寒濕性黑苔；黑苔之熱寒屬性，必須結合脈診（脈診）方可最終確認，不可單憑舌象定論"
+    ],
+    "potential_issues": [
+      "主要證型：濕熱蘊結兼熱毒（濕熱蘊結兼熱毒）——黑色膩苔配合胖大舌體，最強烈指向濕邪日久化熱、熱極成毒，蘊積於胃腸；屬實證，須急則治標，以清熱解毒、通腑瀉濁為先",
+      "次要證型：脾氣虛兼痰濕（脾氣虛兼痰濕）——胖大舌體所示之根本虛候；待急性實證緩解後，長期調理仍需以健脾化濕為主，鞏固根本以防復發",
+      "鑑別考慮：寒濕傷陽（寒濕傷陽）——若見四肢厥冷、畏寒、大便溏薄等症，則不能排除寒濕性黑苔；黑苔之熱寒屬性，必須結合脈診（脈診）方可最終確認，不可單憑舌象定論"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "黑毛苔 (Hēi Máo Tāi) — 黑色毛狀苔垢 — 提示內部極重病邪：或為熱毒熾盛灼傷津液，或為寒濕深入傷陽；屬中醫苔象中最危重之徵",
+      "厚腻苔 (Hòu Nì Tāi) — 厚重膩滑苔垢 — 反映中焦痰濕或濕熱嚴重阻滯，脾胃運化功能嚴重受損",
+      "胖大舌 (Pàng Dà Shé) — 舌體胖大 — 提示脾氣虛、水濕泛溢；陽氣不足，無力正常輸布水液",
+      "腻苔伴黑 (Nì Tāi Bàn Hēi) — 膩苔兼黑色 — 複合徵象，指向濕熱發展至最重階段，或寒濕傷陽；須結合臨床脈診加以鑑別"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-black-hairy-tounge.jpg",
+    "image_bytes": 47083
+  },
+  "expected": {
+    "documented_condition": "black hairy tongue (lingua villosa nigra)",
+    "expected_tcm": {
+      "body_colour": "hard to judge under dark coating (reported light red in a TCM case)",
+      "coating": "black/dark brown, thick, hair-like",
+      "thickness": "thick",
+      "shape": "elongated filiform papillae",
+      "moisture": "moist or dry",
+      "pattern": "heat or cold-damp accumulation in Stomach/Spleen (grey-black coating = extreme interior heat if dry, extreme cold if moist); stains from coffee/antibiotics must be considered"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Black_hairy_tounge.jpg"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "black",
+          "dark",
+          "brown"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "thick",
+          "heat",
+          "damp",
+          "stomach",
+          "spleen"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

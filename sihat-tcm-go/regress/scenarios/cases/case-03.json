@@ -1,0 +1,64 @@
+{
+  "id": "case-03",
+  "type": "text",
+  "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12599627/",
+  "source_licence": "CC BY",
+  "source_title": "Treating steroid-dependent psoriasis from the blood-heat syndrome perspective: A case report",
+  "paraphrase_note": "Symptoms/tongue/pulse paraphrased by the harness author from the open-access full text; source pattern and principle are the authors' own.",
+  "patient": {
+    "age": 68,
+    "sex": "male"
+  },
+  "chief_complaint": "Twenty years of recurrent scaly red rash over the whole body with severe itching, worse in the last week.",
+  "symptoms": [
+    "sticky feeling in the mouth",
+    "poor appetite",
+    "fatigue",
+    "heavy body sensation",
+    "sticky stools with incomplete evacuation",
+    "yellowish exudate and crusting on skin",
+    "itching disturbing sleep"
+  ],
+  "tongue_as_reported": "red with yellow greasy coating",
+  "pulse_as_reported": "slippery and rapid",
+  "source_pattern": "Blood-Heat with Damp-Heat (dampness-wind) accumulation",
+  "source_treatment_principle": "Cool the Blood and resolve toxin, clear heat and dry dampness, dispel wind",
+  "ground_truth_strength": "strong",
+  "expect_keyword_groups": [
+    [
+      "damp"
+    ],
+    [
+      "heat"
+    ]
+  ],
+  "consult_request": {
+    "data": {
+      "basic_info": {
+        "name": "Case 03",
+        "age": "68",
+        "gender": "male",
+        "height": "",
+        "weight": "",
+        "symptoms": [
+          "digestive",
+          "fatigue",
+          "insomnia"
+        ]
+      },
+      "wen_inquiry": "Chief complaint: Twenty years of recurrent scaly red rash over the whole body with severe itching, worse in the last week. Symptoms: sticky feeling in the mouth; poor appetite; fatigue; heavy body sensation; sticky stools with incomplete evacuation; yellowish exudate and crusting on skin; itching disturbing sleep.",
+      "wang_tongue": "red with yellow greasy coating",
+      "wang_face": "",
+      "wen_audio": "",
+      "qie": {
+        "bpm": "",
+        "qualities": [
+          "slippery",
+          "rapid"
+        ],
+        "note": "slippery and rapid"
+      }
+    },
+    "language": "en"
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "id": "tongue-12",
+  "type": "tongue",
+  "label": "baseline",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T01:57:05.729Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 123295,
+      "bytes": 1892,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 123296,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Heat Pattern · Heart \\u0026 Lung Cooling\",\"confidence\":82.4,\"description\":\"舌體顯現超出正常淡紅的明顯紅色，提示熱證存在——可為實熱或虛熱。小兒體質陽氣偏盛，此類紅舌常反映體內積熱或易發熱傾向。\",\"recommendations\":[\"增加清熱食物如青瓜、西瓜翠衣、綠豆湯及菊花茶，同時減少辛辣、煎炸及燥熱食物的攝取。\",\"建立規律且早睡的作息（21:00 前入睡），使陰液得以在夜間修復，防止虛熱進一步加深。\"],\"title\":\"Red Tongue\",\"title_cn\":\"紅舌\"},{\"category\":\"Spleen-Stomach Disharmony · Digestive Regulation\",\"confidence\":86.7,\"description\":\"舌背中前區可見局部厚灰白苔，四周苔薄甚至無苔，為花剥苔的典型表現，提示胃脾氣陰不足；於幼兒而言，常伴有食積（食滯中焦）。\",\"recommendations\":[\"以溫熱易消化食物為主，如白粥、清蒸蔬菜及質地柔軟的蛋白質；嚴格避免生冷、寒涼及加工食品，以免加重脾的運化負擔。\",\"取消兩餐之間的零食，讓中焦脾胃之氣充分休息，此為中醫小兒護脾的核心原則。\"],\"title\":\"Patchy / Geographic Coating\",\"title_cn\":\"花剥苔\"},{\"category\":\"Spleen Qi Deficiency · Dampness Clearing\",\"confidence\":71.3,\"description\":\"舌體偏寬略大，提示脾氣虛弱，脾失健運，水液輸布失調，導致輕度痰濕內停。\",\"recommendations\":[\"定期食用健脾食材，如山藥、薏苡仁、蓮子及大棗，以補益脾氣、助其運化。\",\"減少生濕食物的攝取，包括乳製品、精製糖、冷飲及油膩食物，防止濕邪繼續在中焦積聚。\"],\"title\":\"Slightly Swollen Tongue\",\"title_cn\":\"胖大舌\"}],\"confidence\":80,\"image_description\":\"清晰的幼兒舌頭照片，舌體完全伸出，可見舌背中前區有明顯集中苔塊，整體舌色偏紅\",\"modelUsed\":1,\"notes\":\"本案為小兒患者，臨床意義重大——幼兒舌質本偏紅、舌苔本偏薄，因此本圖所見的明顯紅色及花剥苔在此年齡層具有相當診斷價值。照片為正面人臉構圖而非專用舌診特寫，現有光線及角度已足以進行初步分析，但若以自然光近距離拍攝舌體特寫，將有助於更精確評估苔的濕潤度、質地及舌下絡脈。從此角度未見舌體歪斜、顫動、明顯芒刺或裂紋等異常體徵。\",\"observation\":\"舌體呈中度紅色（紅舌），超出正常淡紅基準；中前區可見明顯局部厚灰白苔，形成花剥苔格局；舌體略顯寬大，整體提示內熱合併脾胃不和、輕度濕邪積聚。\",\"pattern_suggestions\":[\"主要證型 — 脾胃不和夾熱：紅舌、花剥苔與略胖大舌三者並見，提示脾失健運合併內熱積聚，為小兒最常見的臨床格局之一\",\"次要證型 — 食積：幼兒舌中前區出現局部厚苔，為食物積滯中焦的經典表現，多與飲食不規律或過食難消化食物有關\",\"參考考量 — 胃陰虛早期：剥苔伴紅舌可能提示胃陰漸耗，尤其當患兒伴有盜汗、午後潮熱或口乾等症狀時需進一步評估\"],\"potential_issues\":[\"主要證型 — 脾胃不和夾熱：紅舌、花剥苔與略胖大舌三者並見，提示脾失健運合併內熱積聚，為小兒最常見的臨床格局之一\",\"次要證型 — 食積：幼兒舌中前區出現局部厚苔，為食物積滯中焦的經典表現，多與飲食不規律或過食難消化食物有關\",\"參考考量 — 胃陰虛早期：剥苔伴紅舌可能提示胃陰漸耗，尤其當患兒伴有盜汗、午後潮熱或口乾等症狀時需進一步評估\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"紅舌 (Hóng Shé) — 舌體紅色，提示熱證（實熱／虛熱）；陽盛或陰液耗損\",\"花剥苔 (Huā Bō Tāi) — 局部厚苔伴周圍剥落，提示脾胃不和及食積（食滯）\",\"胖大舌 (Pàng Dà Shé) — 舌體偏寬略大，提示脾氣虛及痰濕內停\",\"厚苔局部 (Hòu Tāi Júbù) — 中前區局部厚苔，提示痰濕或未消化食物積於中焦\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Heat Pattern · Heart & Lung Cooling",
+        "confidence": 82.4,
+        "description": "舌體顯現超出正常淡紅的明顯紅色，提示熱證存在——可為實熱或虛熱。小兒體質陽氣偏盛，此類紅舌常反映體內積熱或易發熱傾向。",
+        "recommendations": [
+          "增加清熱食物如青瓜、西瓜翠衣、綠豆湯及菊花茶，同時減少辛辣、煎炸及燥熱食物的攝取。",
+          "建立規律且早睡的作息（21:00 前入睡），使陰液得以在夜間修復，防止虛熱進一步加深。"
+        ],
+        "title": "Red Tongue",
+        "title_cn": "紅舌"
+      },
+      {
+        "category": "Spleen-Stomach Disharmony · Digestive Regulation",
+        "confidence": 86.7,
+        "description": "舌背中前區可見局部厚灰白苔，四周苔薄甚至無苔，為花剥苔的典型表現，提示胃脾氣陰不足；於幼兒而言，常伴有食積（食滯中焦）。",
+        "recommendations": [
+          "以溫熱易消化食物為主，如白粥、清蒸蔬菜及質地柔軟的蛋白質；嚴格避免生冷、寒涼及加工食品，以免加重脾的運化負擔。",
+          "取消兩餐之間的零食，讓中焦脾胃之氣充分休息，此為中醫小兒護脾的核心原則。"
+        ],
+        "title": "Patchy / Geographic Coating",
+        "title_cn": "花剥苔"
+      },
+      {
+        "category": "Spleen Qi Deficiency · Dampness Clearing",
+        "confidence": 71.3,
+        "description": "舌體偏寬略大，提示脾氣虛弱，脾失健運，水液輸布失調，導致輕度痰濕內停。",
+        "recommendations": [
+          "定期食用健脾食材，如山藥、薏苡仁、蓮子及大棗，以補益脾氣、助其運化。",
+          "減少生濕食物的攝取，包括乳製品、精製糖、冷飲及油膩食物，防止濕邪繼續在中焦積聚。"
+        ],
+        "title": "Slightly Swollen Tongue",
+        "title_cn": "胖大舌"
+      }
+    ],
+    "confidence": 80,
+    "image_description": "清晰的幼兒舌頭照片，舌體完全伸出，可見舌背中前區有明顯集中苔塊，整體舌色偏紅",
+    "modelUsed": 1,
+    "notes": "本案為小兒患者，臨床意義重大——幼兒舌質本偏紅、舌苔本偏薄，因此本圖所見的明顯紅色及花剥苔在此年齡層具有相當診斷價值。照片為正面人臉構圖而非專用舌診特寫，現有光線及角度已足以進行初步分析，但若以自然光近距離拍攝舌體特寫，將有助於更精確評估苔的濕潤度、質地及舌下絡脈。從此角度未見舌體歪斜、顫動、明顯芒刺或裂紋等異常體徵。",
+    "observation": "舌體呈中度紅色（紅舌），超出正常淡紅基準；中前區可見明顯局部厚灰白苔，形成花剥苔格局；舌體略顯寬大，整體提示內熱合併脾胃不和、輕度濕邪積聚。",
+    "pattern_suggestions": [
+      "主要證型 — 脾胃不和夾熱：紅舌、花剥苔與略胖大舌三者並見，提示脾失健運合併內熱積聚，為小兒最常見的臨床格局之一",
+      "次要證型 — 食積：幼兒舌中前區出現局部厚苔，為食物積滯中焦的經典表現，多與飲食不規律或過食難消化食物有關",
+      "參考考量 — 胃陰虛早期：剥苔伴紅舌可能提示胃陰漸耗，尤其當患兒伴有盜汗、午後潮熱或口乾等症狀時需進一步評估"
+    ],
+    "potential_issues": [
+      "主要證型 — 脾胃不和夾熱：紅舌、花剥苔與略胖大舌三者並見，提示脾失健運合併內熱積聚，為小兒最常見的臨床格局之一",
+      "次要證型 — 食積：幼兒舌中前區出現局部厚苔，為食物積滯中焦的經典表現，多與飲食不規律或過食難消化食物有關",
+      "參考考量 — 胃陰虛早期：剥苔伴紅舌可能提示胃陰漸耗，尤其當患兒伴有盜汗、午後潮熱或口乾等症狀時需進一步評估"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "紅舌 (Hóng Shé) — 舌體紅色，提示熱證（實熱／虛熱）；陽盛或陰液耗損",
+      "花剥苔 (Huā Bō Tāi) — 局部厚苔伴周圍剥落，提示脾胃不和及食積（食滯）",
+      "胖大舌 (Pàng Dà Shé) — 舌體偏寬略大，提示脾氣虛及痰濕內停",
+      "厚苔局部 (Hòu Tāi Júbù) — 中前區局部厚苔，提示痰濕或未消化食物積於中焦"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-median-glossitis.jpg",
+    "image_bytes": 107415
+  },
+  "expected": {
+    "documented_condition": "median rhomboid glossitis in a 9-year-old",
+    "expected_tcm": {
+      "body_colour": "red central patch",
+      "coating": "absent over a central rhomboid area, coating elsewhere",
+      "thickness": "thin",
+      "shape": "central depapillated rhomboid patch on the midline",
+      "moisture": "moist",
+      "pattern": "Heat in Heart/Stomach or Stomach Yin deficiency (central area = Spleen/Stomach zone); central peeled coating"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Median_Glossitis.jpg"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "central",
+          "middle",
+          "midline",
+          "rhomb",
+          "patch",
+          "peel"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "stomach",
+          "spleen",
+          "heat",
+          "yin"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{.Title}} — Health Journey</title>
+  <title>{{.Title}} — Sihat TCM</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{asset "/static/css/app.css"}}">
+  <link rel="stylesheet" href="{{asset "/static/css/art.css"}}">
+  <link rel="stylesheet" href="{{asset "/static/css/health.css"}}">
+  {{template "favicon"}}
   <style>
     .dashboard-section { margin-top: 2rem; }
     .dashboard-section-title { font-size: 1.05rem; font-weight: 700; color: var(--emerald-800, #065f46); margin-bottom: .5rem; }
@@ -30,28 +33,30 @@
     .dietary-row .form-input { flex: 1; }
     .dietary-answer { margin-top: .6rem; background: #f0fdf4; border: 1px solid #a7f3d0; border-radius: .6rem; padding: .7rem .85rem; font-size: .85rem; color: var(--stone-700, #44403c); line-height: 1.6; white-space: pre-wrap; }
     .consult-status { font-size: .85rem; margin-bottom: .6rem; min-height: 1rem; }
-    .doctor-directory { display: grid; gap: .75rem; }
-    .doctor-card { display: flex; align-items: center; gap: .85rem; background: #fff; border: 1px solid var(--stone-200, #e7e5e4); border-radius: .75rem; padding: .9rem 1rem; }
+    .doctor-directory { display: grid; grid-template-columns: minmax(0, 1fr); gap: .75rem; }
+    .doctor-card { display: flex; align-items: center; gap: .85rem; min-width: 0; max-width: 100%; background: #fff; border: 1px solid var(--stone-200, #e7e5e4); border-radius: .75rem; padding: .9rem 1rem; }
     .doctor-avatar { flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--emerald-500, #10b981), var(--emerald-700, #047857)); color: #fff; font-weight: 700; font-size: .95rem; display: flex; align-items: center; justify-content: center; }
-    .doctor-info { flex: 1; min-width: 0; }
-    .doctor-name { font-weight: 700; color: var(--stone-800, #292524); font-size: .95rem; }
-    .doctor-specialty { font-size: .8rem; color: var(--emerald-700, #047857); margin-top: .1rem; }
-    .doctor-bio { font-size: .78rem; color: var(--color-muted, #78716c); margin-top: .25rem; }
+    .doctor-info { flex: 1; min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
+    .doctor-name { overflow-wrap: anywhere; font-weight: 700; color: var(--stone-800, #292524); font-size: .95rem; }
+    .doctor-specialty { overflow-wrap: anywhere; font-size: .8rem; color: var(--emerald-700, #047857); margin-top: .1rem; }
+    .doctor-bio { overflow-wrap: anywhere; font-size: .78rem; color: var(--color-muted, #78716c); margin-top: .25rem; }
     .doctor-actions { display: flex; flex-direction: column; gap: .35rem; flex-shrink: 0; }
     .doctor-modal { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
-    .doctor-modal-card { background: #fff; border-radius: 1rem; max-width: 440px; width: 100%; padding: 1.5rem; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,.25); max-height: 90vh; overflow-y: auto; }
+    .doctor-modal-card { overflow-wrap: anywhere; min-width: 0; background: #fff; border-radius: 1rem; max-width: 440px; width: 100%; padding: 1.5rem; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,.25); max-height: 90vh; overflow-y: auto; }
     .doctor-modal-close { position: absolute; top: .6rem; right: .8rem; border: none; background: none; font-size: 1.6rem; line-height: 1; cursor: pointer; color: var(--color-muted, #78716c); }
-    .dm-head { display: flex; align-items: center; gap: .85rem; margin-bottom: .85rem; }
+    .dm-head { display: flex; align-items: center; gap: .85rem; margin-bottom: .85rem; min-width: 0; }
+    .dm-head > div:last-child { min-width: 0; }
+    .dm-avatar { flex-shrink: 0; }
     .dm-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--emerald-500, #10b981), var(--emerald-700, #047857)); color: #fff; font-weight: 700; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
-    .dm-name { font-weight: 700; font-size: 1.05rem; color: var(--stone-800, #292524); }
+    .dm-name { overflow-wrap: anywhere; font-weight: 700; font-size: 1.05rem; color: var(--stone-800, #292524); }
     .dm-verified { font-size: .7rem; color: #047857; font-weight: 600; }
-    .dm-spec { font-size: .85rem; color: var(--emerald-700, #047857); }
-    .dm-bio { font-size: .85rem; color: var(--stone-600, #57534e); line-height: 1.6; margin-bottom: .85rem; }
+    .dm-spec { overflow-wrap: anywhere; font-size: .85rem; color: var(--emerald-700, #047857); }
+    .dm-bio { overflow-wrap: anywhere; font-size: .85rem; color: var(--stone-600, #57534e); line-height: 1.6; margin-bottom: .85rem; }
     .dm-rows { display: flex; flex-direction: column; gap: .4rem; }
-    .dm-row { display: flex; justify-content: space-between; gap: 1rem; font-size: .83rem; padding: .35rem 0; border-bottom: 1px solid var(--stone-100, #f5f5f4); }
+    .dm-row { display: flex; justify-content: space-between; gap: 1rem; min-width: 0; overflow-wrap: anywhere; font-size: .83rem; padding: .35rem 0; border-bottom: 1px solid var(--stone-100, #f5f5f4); }
     .dm-row span { color: var(--color-muted, #78716c); }
-    .dm-row strong { color: var(--stone-700, #44403c); text-align: right; }
-    .consult-item { background: #fff; border: 1px solid var(--stone-200, #e7e5e4); border-radius: .75rem; padding: .85rem 1rem; margin-bottom: .6rem; }
+    .dm-row strong { color: var(--stone-700, #44403c); text-align: right; min-width: 0; overflow-wrap: anywhere; }
+    .consult-item { overflow-wrap: anywhere; background: #fff; border: 1px solid var(--stone-200, #e7e5e4); border-radius: .75rem; padding: .85rem 1rem; margin-bottom: .6rem; }
     .consult-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .4rem; }
     .consult-badge { font-size: .72rem; font-weight: 600; padding: .2rem .55rem; border-radius: 999px; }
     .consult-badge.pending { background: #fef3c7; color: #92400e; }
@@ -72,7 +77,7 @@
 
   <!-- Hero Banner -->
   <div class="dashboard-hero">
-    <h2 data-i18n="pt.journey">Your Health Journey 健康旅程</h2>
+    <h1 data-i18n="pt.journey">Your Health Journey 健康旅程</h1>
     <p>Track your TCM constitutional assessments over time and monitor your wellness progress.</p>
     <a href="/" class="btn btn-primary">+ New Assessment 新诊断</a>
   </div>
@@ -112,7 +117,7 @@
         </div>
         <div class="form-group"><label class="form-label" for="pf-history" data-i18n="pt.history">Medical History 病史</label><input class="form-input" id="pf-history" type="text" placeholder="e.g. hypertension, allergies (optional)"></div>
         <button class="btn btn-primary btn-sm" id="pf-save" data-i18n="pt.saveprofile">Save Profile 保存</button>
-        <span id="pf-status" class="pf-status"></span>
+        <span id="pf-status" class="pf-status" role="status" aria-live="polite"></span>
       </div>
     </details>
   </section>
@@ -123,22 +128,27 @@
     <div class="spinner spinner-dark"></div> Loading your sessions…
   </div>
 
-  <div id="sessions-error" class="alert alert-error hidden"></div>
+  <div id="sessions-error" role="alert" class="alert alert-error hidden"></div>
 
   <div id="sessions-list" class="session-list hidden"></div>
 
-  <div id="sessions-empty" class="empty-state hidden">
-    <div class="empty-icon">🌿</div>
+  <div id="sessions-empty" class="empty-state art-empty hidden">
+    <img class="art-empty__img" src="{{asset "/static/img/art/empty-history.webp"}}" width="900" height="700" alt="Illustration of a blank scroll, brush and herbs: no assessments recorded yet." data-i18n-alt="art.history" loading="lazy" decoding="async">
     <h3 data-i18n="pt.noassess">No assessments yet 暂无记录</h3>
     <p class="text-muted">Complete your first TCM assessment to start your health journey.</p>
-    <a href="/" class="btn btn-primary mt-4">Start Assessment 开始诊断</a>
+    <a href="/" class="btn btn-primary mt-4" data-i18n="art.empty.cta">Start Assessment 开始诊断</a>
   </div>
 
   <!-- Find a Doctor -->
-  <section class="dashboard-section">
-    <h3 class="dashboard-section-title" data-i18n="pt.consult">Consult a Doctor 咨询医生</h3>
-    <p class="text-muted" style="font-size:.85rem;margin-bottom:.75rem">Choose a registered TCM doctor to review your latest assessment and give you personalised feedback.</p>
-    <div id="consult-status" class="consult-status"></div>
+  <section class="dashboard-section" id="consult-section">
+    <div class="art-card">
+      <img class="art-card__img" src="{{asset "/static/img/art/consult.webp"}}" width="900" height="700" alt="Illustration of a doctor and patient in a video consultation." data-i18n-alt="art.consult" loading="lazy" decoding="async">
+      <div class="art-card__text">
+        <h3 class="dashboard-section-title" data-i18n="pt.consult">Consult a Doctor 咨询医生</h3>
+        <p>Choose a registered TCM doctor to review your latest assessment and give you personalised feedback.</p>
+      </div>
+    </div>
+    <div id="consult-status" class="consult-status" role="status" aria-live="polite"></div>
     <div id="doctor-directory" class="doctor-directory">Loading doctors…</div>
   </section>
 
@@ -147,10 +157,21 @@
     <h3 class="dashboard-section-title" data-i18n="pt.dietary">Ask about Diet & Food 食疗问答</h3>
     <p class="text-muted" style="font-size:.85rem;margin-bottom:.5rem">Ask a TCM food or diet question — answered for your latest constitution.</p>
     <div class="dietary-row">
-      <input class="form-input" id="dietary-q" type="text" placeholder="e.g. Can I eat cold fruit? Is coffee okay for me?" data-i18n-ph="pt.dietary.ph">
+      <input class="form-input" id="dietary-q" type="text" aria-label="Your diet or food question 饮食问题" placeholder="e.g. Can I eat cold fruit? Is coffee okay for me?" data-i18n-ph="pt.dietary.ph">
       <button class="btn btn-primary btn-sm" id="dietary-ask" data-i18n="pt.ask">Ask 提问</button>
     </div>
     <div id="dietary-answer" class="dietary-answer hidden"></div>
+  </section>
+
+  <!-- Devices & health data (static/js/devices.js, static/js/health-connect.js) -->
+  <section class="hd-section" id="devices" aria-labelledby="hd-title">
+    <h3 class="dashboard-section-title" id="hd-title" data-i18n="health.title">Devices &amp; health data 设备与健康数据</h3>
+    <div class="hd-intro">
+      <p data-i18n="health.intro">Link a smart watch, phone or medical device so your real vitals can inform your TCM assessment. Everything stays in your account, is used only to support your own report, and you can delete it at any time.</p>
+      <img src="{{asset "/static/img/art/devices.webp"}}" width="900" height="600" alt="Illustration of a smart watch, a phone and a blood-pressure cuff connecting to a cloud." data-i18n-alt="art.devices" loading="lazy" decoding="async">
+    </div>
+    <div id="hd-banner" class="hd-banner hidden" role="status" aria-live="polite"></div>
+    <div id="hd-body"><div class="loading-row"><div class="spinner spinner-dark"></div> <span data-i18n="health.loading">Loading your device data…</span></div></div>
   </section>
 
   <!-- My Consultations -->
@@ -163,8 +184,8 @@
 
 <!-- Doctor detail modal -->
 <div id="doctor-modal" class="doctor-modal hidden" onclick="if(event.target===this)closeDoctorModal()">
-  <div class="doctor-modal-card">
-    <button class="doctor-modal-close" onclick="closeDoctorModal()" aria-label="Close">×</button>
+  <div class="doctor-modal-card" role="dialog" aria-modal="true" aria-label="Doctor details 医生详情" tabindex="-1">
+    <button class="doctor-modal-close" type="button" onclick="closeDoctorModal()" aria-label="Close">×</button>
     <div id="doctor-modal-body"></div>
   </div>
 </div>
@@ -172,6 +193,8 @@
 {{template "footer" .}}
 
 <script src="{{asset "/static/js/report-print.js"}}"></script>
+<script src="{{asset "/static/js/health-connect.js"}}"></script>
+<script src="{{asset "/static/js/devices.js"}}"></script>
 <script src="{{asset "/static/js/dashboard.js"}}"></script>
 <script src="{{asset "/static/js/consult.js"}}"></script>
 </body>

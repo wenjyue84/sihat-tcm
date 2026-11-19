@@ -1,0 +1,16 @@
+$ uv run --with playwright python scripts/capture_prod_readonly.py   (https://tcm.wenjyue.com, GET only)
+PASS home@1440.images_decode(2)
+PASS login@1440.images_decode(1)
+PASS demo-log@1440.images_decode(124)
+PASS demo-log@1440.test_log_entries
+PASS notfound@1440.images_decode(1)
+PASS home@390.images_decode(2)
+PASS login@390.images_decode(0)
+PASS demo-log@390.images_decode(124)
+PASS demo-log@390.test_log_entries
+PASS notfound@390.images_decode(1)
+PASS deploy.home_has_five_elements_band
+PASS deploy.og_image_is_absolute_jpg
+PASS deploy.apple_import_route_exists
+(+ 24 status / no-sideways-scroll / no-console-error checks, all PASS)
+35/35 checks passed

@@ -1,0 +1,118 @@
+{
+  "id": "tongue-03",
+  "type": "tongue",
+  "label": "tuned-r2",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T03:48:51.912Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 136899,
+      "bytes": 3466,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 136901,
+  "raw": "{\"analysis_tags\":[{\"category\":\"Yin Deficiency · Fluid Nourishment\",\"confidence\":92.3,\"description\":\"Multiple deep, irregular fissures are distributed across the tongue dorsum, most dense in the central and posterior regions. In TCM this pattern signals chronic Yin deficiency — primarily Stomach Yin (胃陰虛) and Kidney Yin (腎陰虛) — where depleted Yin fluids are unable to adequately moisten and nourish the tongue tissue over time.\",\"recommendations\":[\"每日加入滋陰食材：銀耳、雪梨、黑芝麻、蓮藕，以溫熱湯品或粥品方式食用，勿生食；每週至少四次。\",\"減少辛辣、煎炸、酒精類食物攝取，代以溫水或淡甜薏米水，全日少量多次補充，避免進一步耗傷陰液。\"],\"title\":\"Cracked Tongue\",\"title_cn\":\"裂紋舌\"},{\"category\":\"Stomach Yin Deficiency · Digestive Support\",\"confidence\":85.1,\"description\":\"A clearly demarcated area of absent or markedly thinned coating occupies the anterior-to-central tongue, exposing a smooth depapillated surface beneath. This geographic (地圖苔) or partially peeled (剝苔) pattern indicates damage to Stomach Yin and Stomach Qi, impairing the Stomach's capacity to generate and distribute nourishing fluids.\",\"recommendations\":[\"定時定量進食，以少量多餐、易消化食物為主；早餐建議09:00前進食溫熱粥品（如枸杞小米粥），以養胃氣。\",\"避免長時間空腹、進食大量生冷或寒涼食物；烹調方式以燉、蒸、煮為優先，減少對胃黏膜的刺激。\"],\"title\":\"Geographic / Peeled Coating\",\"title_cn\":\"地圖苔（剝苔）\"},{\"category\":\"Qi \\u0026 Mild Blood Deficiency · Tonification\",\"confidence\":74.8,\"description\":\"Assessed at the lateral edges and uncoated anterior tip — areas least obscured by coating — the tongue body colour reads as light red (淡紅) trending slightly pale, rather than a robust or vivid red. This suggests a mild tendency toward Qi deficiency (氣虛) or borderline Blood deficiency (血虛), where Qi and Blood are insufficient to fully vivify the tongue. Neutral lighting in this image supports the reliability of this assessment.\",\"recommendations\":[\"每週三至四次以紅棗、龍眼肉、枸杞泡製溫茶或加入湯品，以補氣養血；可搭配少量黃耆增強補氣效果。\",\"維持23:00前入睡的規律作息以護養肝血；每日進行20至30分鐘步行等溫和有氧活動，促進氣血循環，避免過度勞累耗氣。\"],\"title\":\"Pale-Tending Light Red Tongue Body\",\"title_cn\":\"淡紅偏淡舌\"}],\"confidence\":86,\"image_description\":\"A high-resolution close-up tongue photo with neutral, balanced lighting. The tongue is clearly extended and well-framed, permitting reliable assessment of body colour, surface features, coating, and moisture.\",\"modelUsed\":1,\"notes\":\"圖像光線中性均衡、焦距清晰，色彩判讀可信度屬中高等級。裂紋為本次最客觀且置信度最高之發現；地圖苔邊界清晰，可排除食物或藥物染苔。舌體色澤偏淡一項置信度中等，主要潛在干擾為暖色人工光源（本圖未見此情形），故評估有據。未見齒痕、偏斜、芒刺（熱性紅點）、紫色瘀斑或舌下絡脈怒張。後根薄白苔殘存為一積極信號，顯示胃氣尚存。\",\"observation\":\"舌質色呈淡紅偏淡，於舌尖及兩側邊緣可見舌體本色，與周圍口唇組織相較略顯淡粉；舌面遍布多條深淺不一的不規則裂紋，縱橫交錯，以中後部最為密集顯著；前中部可見一大片苔薄甚至剝落之光滑區域（地圖苔），後部仍保有薄白苔，分布欠均；舌面整體潤澤，未見乾燥或滑膩。\",\"pattern_suggestions\":[\"主要病機：胃腎陰虛 (Stomach \\u0026 Kidney Yin Deficiency) — 裂紋廣布、前中部剝苔、舌體偏淡三者合參，最強指向胃腎陰液慢性虧損；屬虛證（Deficiency pattern）。\",\"兼見病機：氣陰兩虛 (Qi \\u0026 Yin Dual Deficiency) — 舌體淡紅偏淡提示氣分亦有輕度受累，與胃陰虛日久、脾胃化生氣血不足的病程演變相符。\",\"注意：舌診為單一診查工具，尚需結合口渴喜冷喜熱、睡眠品質、二便、脈象及病史方可確立辨證，不可單憑舌象定論。\"],\"potential_issues\":[\"主要病機：胃腎陰虛 (Stomach \\u0026 Kidney Yin Deficiency) — 裂紋廣布、前中部剝苔、舌體偏淡三者合參，最強指向胃腎陰液慢性虧損；屬虛證（Deficiency pattern）。\",\"兼見病機：氣陰兩虛 (Qi \\u0026 Yin Dual Deficiency) — 舌體淡紅偏淡提示氣分亦有輕度受累，與胃陰虛日久、脾胃化生氣血不足的病程演變相符。\",\"注意：舌診為單一診查工具，尚需結合口渴喜冷喜熱、睡眠品質、二便、脈象及病史方可確立辨證，不可單憑舌象定論。\"],\"status\":\"Using rapid analysis...\",\"tcm_indicators\":[\"裂紋舌 (Liè Wén Shé) — Cracked Tongue — 慢性陰液不足，主要涉及胃陰與腎陰；裂紋深廣程度與陰虛嚴重程度正相關\",\"地圖苔／剝苔 (Dì Tú Tāi / Bō Tāi) — Geographic / Peeled Coating — 胃陰及胃氣受損，消化系統生化津液功能下降\",\"淡紅偏淡舌 (Dàn Hóng Piān Dàn Shé) — Pale-Tending Light Red Body — 氣血輕度不足，無法充分榮養舌體\",\"薄白苔（後部殘存）— Thin White Coating at Root — 胃氣尚存未完全衰竭，為相對正面之預後信號\",\"舌面潤澤 (Shé Miàn Rùn Zé) — Moist Surface — 津液代謝尚未嚴重失調，陰虛程度屬慢性中度而非急性\"]}\n",
+  "parsed": {
+    "analysis_tags": [
+      {
+        "category": "Yin Deficiency · Fluid Nourishment",
+        "confidence": 92.3,
+        "description": "Multiple deep, irregular fissures are distributed across the tongue dorsum, most dense in the central and posterior regions. In TCM this pattern signals chronic Yin deficiency — primarily Stomach Yin (胃陰虛) and Kidney Yin (腎陰虛) — where depleted Yin fluids are unable to adequately moisten and nourish the tongue tissue over time.",
+        "recommendations": [
+          "每日加入滋陰食材：銀耳、雪梨、黑芝麻、蓮藕，以溫熱湯品或粥品方式食用，勿生食；每週至少四次。",
+          "減少辛辣、煎炸、酒精類食物攝取，代以溫水或淡甜薏米水，全日少量多次補充，避免進一步耗傷陰液。"
+        ],
+        "title": "Cracked Tongue",
+        "title_cn": "裂紋舌"
+      },
+      {
+        "category": "Stomach Yin Deficiency · Digestive Support",
+        "confidence": 85.1,
+        "description": "A clearly demarcated area of absent or markedly thinned coating occupies the anterior-to-central tongue, exposing a smooth depapillated surface beneath. This geographic (地圖苔) or partially peeled (剝苔) pattern indicates damage to Stomach Yin and Stomach Qi, impairing the Stomach's capacity to generate and distribute nourishing fluids.",
+        "recommendations": [
+          "定時定量進食，以少量多餐、易消化食物為主；早餐建議09:00前進食溫熱粥品（如枸杞小米粥），以養胃氣。",
+          "避免長時間空腹、進食大量生冷或寒涼食物；烹調方式以燉、蒸、煮為優先，減少對胃黏膜的刺激。"
+        ],
+        "title": "Geographic / Peeled Coating",
+        "title_cn": "地圖苔（剝苔）"
+      },
+      {
+        "category": "Qi & Mild Blood Deficiency · Tonification",
+        "confidence": 74.8,
+        "description": "Assessed at the lateral edges and uncoated anterior tip — areas least obscured by coating — the tongue body colour reads as light red (淡紅) trending slightly pale, rather than a robust or vivid red. This suggests a mild tendency toward Qi deficiency (氣虛) or borderline Blood deficiency (血虛), where Qi and Blood are insufficient to fully vivify the tongue. Neutral lighting in this image supports the reliability of this assessment.",
+        "recommendations": [
+          "每週三至四次以紅棗、龍眼肉、枸杞泡製溫茶或加入湯品，以補氣養血；可搭配少量黃耆增強補氣效果。",
+          "維持23:00前入睡的規律作息以護養肝血；每日進行20至30分鐘步行等溫和有氧活動，促進氣血循環，避免過度勞累耗氣。"
+        ],
+        "title": "Pale-Tending Light Red Tongue Body",
+        "title_cn": "淡紅偏淡舌"
+      }
+    ],
+    "confidence": 86,
+    "image_description": "A high-resolution close-up tongue photo with neutral, balanced lighting. The tongue is clearly extended and well-framed, permitting reliable assessment of body colour, surface features, coating, and moisture.",
+    "modelUsed": 1,
+    "notes": "圖像光線中性均衡、焦距清晰，色彩判讀可信度屬中高等級。裂紋為本次最客觀且置信度最高之發現；地圖苔邊界清晰，可排除食物或藥物染苔。舌體色澤偏淡一項置信度中等，主要潛在干擾為暖色人工光源（本圖未見此情形），故評估有據。未見齒痕、偏斜、芒刺（熱性紅點）、紫色瘀斑或舌下絡脈怒張。後根薄白苔殘存為一積極信號，顯示胃氣尚存。",
+    "observation": "舌質色呈淡紅偏淡，於舌尖及兩側邊緣可見舌體本色，與周圍口唇組織相較略顯淡粉；舌面遍布多條深淺不一的不規則裂紋，縱橫交錯，以中後部最為密集顯著；前中部可見一大片苔薄甚至剝落之光滑區域（地圖苔），後部仍保有薄白苔，分布欠均；舌面整體潤澤，未見乾燥或滑膩。",
+    "pattern_suggestions": [
+      "主要病機：胃腎陰虛 (Stomach & Kidney Yin Deficiency) — 裂紋廣布、前中部剝苔、舌體偏淡三者合參，最強指向胃腎陰液慢性虧損；屬虛證（Deficiency pattern）。",
+      "兼見病機：氣陰兩虛 (Qi & Yin Dual Deficiency) — 舌體淡紅偏淡提示氣分亦有輕度受累，與胃陰虛日久、脾胃化生氣血不足的病程演變相符。",
+      "注意：舌診為單一診查工具，尚需結合口渴喜冷喜熱、睡眠品質、二便、脈象及病史方可確立辨證，不可單憑舌象定論。"
+    ],
+    "potential_issues": [
+      "主要病機：胃腎陰虛 (Stomach & Kidney Yin Deficiency) — 裂紋廣布、前中部剝苔、舌體偏淡三者合參，最強指向胃腎陰液慢性虧損；屬虛證（Deficiency pattern）。",
+      "兼見病機：氣陰兩虛 (Qi & Yin Dual Deficiency) — 舌體淡紅偏淡提示氣分亦有輕度受累，與胃陰虛日久、脾胃化生氣血不足的病程演變相符。",
+      "注意：舌診為單一診查工具，尚需結合口渴喜冷喜熱、睡眠品質、二便、脈象及病史方可確立辨證，不可單憑舌象定論。"
+    ],
+    "status": "Using rapid analysis...",
+    "tcm_indicators": [
+      "裂紋舌 (Liè Wén Shé) — Cracked Tongue — 慢性陰液不足，主要涉及胃陰與腎陰；裂紋深廣程度與陰虛嚴重程度正相關",
+      "地圖苔／剝苔 (Dì Tú Tāi / Bō Tāi) — Geographic / Peeled Coating — 胃陰及胃氣受損，消化系統生化津液功能下降",
+      "淡紅偏淡舌 (Dàn Hóng Piān Dàn Shé) — Pale-Tending Light Red Body — 氣血輕度不足，無法充分榮養舌體",
+      "薄白苔（後部殘存）— Thin White Coating at Root — 胃氣尚存未完全衰竭，為相對正面之預後信號",
+      "舌面潤澤 (Shé Miàn Rùn Zé) — Moist Surface — 津液代謝尚未嚴重失調，陰虛程度屬慢性中度而非急性"
+    ]
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "tongue",
+    "image_file": "images/tongue-fissured-geographic-tongue.jpg",
+    "image_bytes": 379987
+  },
+  "expected": {
+    "documented_condition": "fissured and geographic tongue (uploader notes possible B12 deficiency / oral bacteria)",
+    "expected_tcm": {
+      "body_colour": "red to pink",
+      "coating": "patchy/peeled with white coating islands",
+      "thickness": "thin, uneven",
+      "shape": "multiple fissures/cracks plus map-like patches",
+      "moisture": "moist to slightly dry",
+      "pattern": "Yin deficiency (Stomach/Kidney) with or without Spleen Qi weakness; cracks = Yin/Blood deficiency"
+    },
+    "source_url": "https://commons.wikimedia.org/wiki/File:Fissured_geographic_tongue.jpg"
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "crack",
+          "fissur"
+        ],
+        "hit": true
+      },
+      {
+        "any_of": [
+          "yin",
+          "deficien"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

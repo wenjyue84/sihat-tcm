@@ -1,39 +1,53 @@
+{{define "lang-script"}}
+<script>
+/* Language switch (en -> zh -> ms). Shared by the public header and the doctor header so every
+   ".lang-btn" on the page shows the current language and the toggle works on /doctor too. */
+(function(){
+  if (window.tcmLang) return;
+  var langs = ['en','zh','ms'];
+  var labels = {en:'EN', zh:'中文', ms:'BM'};
+  var idx = 0;
+  try { idx = langs.indexOf(localStorage.getItem('tcm-lang') || 'en'); } catch (e) { idx = 0; }
+  if (idx < 0) idx = 0;
+  function paint() {
+    var btns = document.querySelectorAll('.lang-btn');
+    for (var i = 0; i < btns.length; i++) btns[i].textContent = labels[langs[idx]];
+  }
+  paint();
+  window.tcmLang = {
+    get: function(){ return langs[idx]; },
+    toggle: function(){
+      idx = (idx + 1) % langs.length;
+      var l = langs[idx];
+      try { localStorage.setItem('tcm-lang', l); } catch (e) {}
+      paint();
+      document.dispatchEvent(new CustomEvent('tcm:langchange', {detail: l}));
+    }
+  };
+})();
+</script>
+{{end}}
+
+{{define "favicon"}}<link rel="icon" type="image/svg+xml" href="{{asset "/static/img/favicon.svg"}}">{{end}}
+
 {{define "header"}}
 <header class="site-header">
   <div class="container">
     <a href="/" class="site-logo">
       Sihat TCM <span class="logo-zh">中医</span>
     </a>
-    <nav class="header-nav">
+    <nav class="header-nav" aria-label="Main">
+      <a href="/video" id="nav-video-link" data-i18n="nav.video" title="观看介绍视频 / Watch the video">Video 视频</a>
       <span id="header-auth-link">
-        <a href="/login" id="nav-login-link">Login</a>
+        <a href="/login" id="nav-login-link" data-i18n="nav.login">Login</a>
       </span>
-      <button class="lang-btn" id="lang-toggle" onclick="window.tcmLang && window.tcmLang.toggle()">EN</button>
+      <button class="lang-btn" id="lang-toggle" type="button" title="Language 语言 / Bahasa" onclick="window.tcmLang && window.tcmLang.toggle()">EN</button>
     </nav>
   </div>
 </header>
+{{template "lang-script"}}
 <script>
 (function(){
-  var langs = ['en','zh','ms'];
-  var labels = {en:'EN', zh:'中文', ms:'BM'};
-  var idx = 0;
-  var stored = localStorage.getItem('tcm-lang') || 'en';
-  idx = langs.indexOf(stored);
-  if (idx < 0) idx = 0;
-  var btn = document.getElementById('lang-toggle');
-  if (btn) btn.textContent = labels[langs[idx]];
-
-  window.tcmLang = {
-    get: function(){ return langs[idx]; },
-    toggle: function(){
-      idx = (idx + 1) % langs.length;
-      var l = langs[idx];
-      localStorage.setItem('tcm-lang', l);
-      if (btn) btn.textContent = labels[l];
-      document.dispatchEvent(new CustomEvent('tcm:langchange', {detail: l}));
-    }
-  };
-
   // Auth link swap — show Dashboard + Logout when signed in.
   // The access token cookie is HttpOnly (invisible to JS), so detect login via
   // the non-HttpOnly tcm-user/tcm-role that storeAuth() always writes.
@@ -43,21 +57,33 @@
   var loginEl = document.getElementById('nav-login-link');
   var authSpan = document.getElementById('header-auth-link');
   if (loggedIn && loginEl) {
-    var dest = (role === 'doctor') ? '/doctor' : '/patient';
+    var isAdmin = (role === 'admin' || role === 'developer');
+    var dest = (role === 'doctor') ? '/doctor' : (isAdmin ? '/admin' : '/patient');
     loginEl.href = dest;
     loginEl.textContent = 'Dashboard';
+    loginEl.setAttribute('data-i18n', 'nav.dashboard');
+    if (isAdmin && authSpan && !document.getElementById('nav-admin-link')) {
+      var ad = document.createElement('a');
+      ad.id = 'nav-admin-link';
+      ad.href = '/admin';
+      ad.textContent = 'Admin';
+      ad.setAttribute('data-i18n', 'nav.admin');
+      ad.style.marginLeft = '.75rem';
+      authSpan.appendChild(ad);
+    }
     if (authSpan && !document.getElementById('nav-logout-link')) {
       var lo = document.createElement('a');
       lo.id = 'nav-logout-link';
       lo.href = '#';
       lo.textContent = 'Logout';
+      lo.setAttribute('data-i18n', 'nav.logout');
       lo.style.marginLeft = '.75rem';
       lo.addEventListener('click', function (e) { e.preventDefault(); window.tcmLogout(); });
       authSpan.appendChild(lo);
     }
   }
   window.tcmLogout = function () {
-    fetch('/api/auth/logout', { method: 'POST' }).finally(function () {
+    fetch('/api/auth/logout', { method: 'POST' }).then(function (r) { return r.text(); }).catch(function () {}).finally(function () {
       localStorage.removeItem('tcm-token');
       localStorage.removeItem('tcm-role');
       localStorage.removeItem('tcm-user');
@@ -78,18 +104,19 @@
     <a href="/" class="site-logo">
       Sihat TCM <span class="logo-zh">医生</span>
     </a>
-    <nav class="header-nav">
-      <a href="/patient">Patient View</a>
-      <a href="#" id="doc-logout-link">Logout</a>
-      <button class="lang-btn" id="lang-toggle-doc" onclick="window.tcmLang && window.tcmLang.toggle()">EN</button>
+    <nav class="header-nav" aria-label="Main">
+      <a href="/patient" data-i18n="nav.patientview">Patient View</a>
+      <a href="#" id="doc-logout-link" data-i18n="nav.logout">Logout</a>
+      <button class="lang-btn" id="lang-toggle" type="button" title="Language 语言 / Bahasa" onclick="window.tcmLang && window.tcmLang.toggle()">EN</button>
     </nav>
   </div>
 </header>
+{{template "lang-script"}}
 <script>
 (function(){
   document.getElementById('doc-logout-link').addEventListener('click', function(e){
     e.preventDefault();
-    fetch('/api/auth/logout', {method:'POST'}).finally(function(){
+    fetch('/api/auth/logout', {method:'POST'}).then(function (r) { return r.text(); }).catch(function () {}).finally(function(){
       localStorage.removeItem('tcm-token');
       localStorage.removeItem('tcm-role');
       localStorage.removeItem('tcm-user');
@@ -104,9 +131,10 @@
 <footer class="site-footer">
   <div class="container">
     <p>
-      &copy; 2025 Sihat TCM &mdash; AI-powered 四诊合参 diagnostics &mdash;
-      <a href="/">Home</a> &middot;
-      <a href="/login">Login</a>
+      &copy; {{year}} Sihat TCM &mdash; <span data-i18n="footer.tagline">AI-powered 四诊合参 diagnostics</span> &mdash;
+      <a href="/" data-i18n="footer.home">Home</a> &middot;
+      <a href="/video" id="footer-video-link" data-i18n="footer.video">Watch the video 观看介绍视频</a> &middot;
+      <a href="/login" data-i18n="footer.login">Login</a>
     </p>
     <p class="mt-2" style="font-size:.75rem" data-i18n="footer.disclaimer">
       For educational purposes only. Not a substitute for professional medical advice.

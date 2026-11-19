@@ -1,0 +1,741 @@
+{
+  "generated_at": "2026-10-12T01:49:11.261Z",
+  "schema": 1,
+  "note": "Online-grounded scenario corpus for sihat-tcm-go. Tongue photos are real (Wikimedia Commons, free licences); faces are synthetic (no real people); text cases are paraphrased open-access TCM case reports. Ground truth is literature/construction based, not clinical truth.",
+  "counts": {
+    "tongue": 14,
+    "face_generated": 1,
+    "face_planned": 6,
+    "text": 11
+  },
+  "tongue": [
+    {
+      "id": "tongue-01",
+      "type": "tongue",
+      "file": "images/tongue-geographic-tongue-benign-migratory-gloss.jpg",
+      "content_type": "image/jpeg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Geographic_tongue_(benign_migratory_glossitis)_%E2%80%93_adult_female.jpg",
+      "licence": "CC BY 4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0",
+      "author": "StephanieFrazier",
+      "commons_description": "Geographic tongue (benign migratory glossitis) – adult female",
+      "documented_condition": "geographic tongue (benign migratory glossitis)",
+      "condition_reference": "https://en.wikipedia.org/wiki/Geographic_tongue",
+      "expected_tcm": {
+        "body_colour": "red to light red with irregular smooth red patches",
+        "coating": "patchy, map-like loss of coating (peeled/geographic) with whitish borders",
+        "thickness": "thin to absent in patches",
+        "shape": "normal size, map-like patches",
+        "moisture": "moist to slightly dry",
+        "pattern": "Stomach Yin deficiency (peeled/geographic coating), possibly Spleen-Stomach Qi/Yin deficiency with heat"
+      },
+      "tcm_reference_urls": [
+        "https://www.attiliodalberto.com/traditional-chinese-medicine/tongue-diagnosis.php",
+        "https://www.meandqi.com/knowledge-base/conditions/cracked-tongue"
+      ],
+      "expect_keyword_groups": [
+        [
+          "peel",
+          "geographic",
+          "map",
+          "patch",
+          "partial coat",
+          "missing coat",
+          "absent coat"
+        ],
+        [
+          "yin",
+          "stomach"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x1366"
+    },
+    {
+      "id": "tongue-02",
+      "type": "tongue",
+      "file": "images/tongue-geographic-tongue-01.jpg",
+      "content_type": "image/jpeg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Geographic_tongue_01.JPG",
+      "licence": "CC BY 4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0",
+      "author": "Dimitrios Malamos",
+      "commons_description": "Geographic tongue 01",
+      "documented_condition": "geographic tongue",
+      "condition_reference": "https://en.wikipedia.org/wiki/Geographic_tongue",
+      "expected_tcm": {
+        "body_colour": "red / light red",
+        "coating": "patchy peeled areas, white margins",
+        "thickness": "thin, uneven",
+        "shape": "irregular map-like patches",
+        "moisture": "moist",
+        "pattern": "Stomach Yin deficiency / peeled coating"
+      },
+      "tcm_reference_urls": [
+        "https://www.attiliodalberto.com/traditional-chinese-medicine/tongue-diagnosis.php"
+      ],
+      "expect_keyword_groups": [
+        [
+          "peel",
+          "geographic",
+          "map",
+          "patch",
+          "uneven"
+        ],
+        [
+          "yin",
+          "stomach"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x669"
+    },
+    {
+      "id": "tongue-03",
+      "type": "tongue",
+      "file": "images/tongue-fissured-geographic-tongue.jpg",
+      "content_type": "image/jpeg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Fissured_geographic_tongue.jpg",
+      "licence": "CC BY-SA 3.0",
+      "licence_url": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "No machine-readable author provided. Kozlovsk~commonswiki assumed (based on copyright claims).",
+      "commons_description": "Fissured and geographic tongue. Caused by unhealthy bacteria in the mouth, stomach, or lack of vitamin B12.",
+      "documented_condition": "fissured and geographic tongue (uploader notes possible B12 deficiency / oral bacteria)",
+      "condition_reference": "https://en.wikipedia.org/wiki/Fissured_tongue",
+      "expected_tcm": {
+        "body_colour": "red to pink",
+        "coating": "patchy/peeled with white coating islands",
+        "thickness": "thin, uneven",
+        "shape": "multiple fissures/cracks plus map-like patches",
+        "moisture": "moist to slightly dry",
+        "pattern": "Yin deficiency (Stomach/Kidney) with or without Spleen Qi weakness; cracks = Yin/Blood deficiency"
+      },
+      "tcm_reference_urls": [
+        "https://www.meandqi.com/knowledge-base/conditions/cracked-tongue",
+        "https://www.attiliodalberto.com/traditional-chinese-medicine/tongue-diagnosis.php"
+      ],
+      "expect_keyword_groups": [
+        [
+          "crack",
+          "fissur"
+        ],
+        [
+          "yin",
+          "deficien"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x808"
+    },
+    {
+      "id": "tongue-04",
+      "type": "tongue",
+      "file": "images/tongue-fissured-tongue.jpg",
+      "content_type": "image/jpeg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Fissured_tongue.jpg",
+      "licence": "CC BY-SA 3.0",
+      "licence_url": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "No machine-readable author provided. Kozlovsk~commonswiki assumed (based on copyright claims).",
+      "commons_description": "Fissured tongue. Own work.",
+      "documented_condition": "fissured tongue (own work, Commons)",
+      "condition_reference": "https://en.wikipedia.org/wiki/Fissured_tongue",
+      "expected_tcm": {
+        "body_colour": "pink-red",
+        "coating": "thin white, partly sparse",
+        "thickness": "thin",
+        "shape": "deep central and transverse fissures",
+        "moisture": "moist",
+        "pattern": "Yin or Blood deficiency, or Spleen Qi deficiency with dampness (shallow central cracks); often asymptomatic"
+      },
+      "tcm_reference_urls": [
+        "https://www.meandqi.com/knowledge-base/conditions/cracked-tongue"
+      ],
+      "expect_keyword_groups": [
+        [
+          "crack",
+          "fissur"
+        ],
+        [
+          "yin",
+          "blood",
+          "spleen",
+          "qi"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x736"
+    },
+    {
+      "id": "tongue-05",
+      "type": "tongue",
+      "file": "images/tongue-fissured-tongue-b.jpg",
+      "content_type": "image/jpeg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Fissured_Tongue.JPG",
+      "licence": "CC BY-SA 4.0",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Laila",
+      "commons_description": "Fissured tongue.",
+      "documented_condition": "fissured tongue",
+      "condition_reference": "https://en.wikipedia.org/wiki/Fissured_tongue",
+      "expected_tcm": {
+        "body_colour": "light red",
+        "coating": "thin white",
+        "thickness": "thin",
+        "shape": "central deep fissure with side cracks",
+        "moisture": "moist",
+        "pattern": "Yin/Blood deficiency or Spleen Qi deficiency (cracks)"
+      },
+      "tcm_reference_urls": [
+        "https://www.meandqi.com/knowledge-base/conditions/cracked-tongue"
+      ],
+      "expect_keyword_groups": [
+        [
+          "crack",
+          "fissur"
+        ],
+        [
+          "yin",
+          "blood",
+          "spleen",
+          "qi"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x1024"
+    },
+    {
+      "id": "tongue-06",
+      "type": "tongue",
+      "file": "images/tongue-black-hairy-tounge.jpg",
+      "content_type": "image/jpeg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Black_hairy_tounge.jpg",
+      "licence": "CC BY-SA 4.0",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "author": "Mohammad2018",
+      "commons_description": "Le diagnostic est généralement posé sur l'aspect clinique sans qu'il soit nécessaire d'effectuer une biopsie de tissu.  Cependant, lorsque les biopsies ont été pratiquées, l'aspect histologique est celui d'un allongement marqué et d'une hyperparakératose des papilles filiformes et de nombreuses bactéries se développant à la surface de l'épithélium. \nLa langue poilue peut être confondue avec la leu",
+      "documented_condition": "black hairy tongue (lingua villosa nigra)",
+      "condition_reference": "https://en.wikipedia.org/wiki/Black_hairy_tongue",
+      "expected_tcm": {
+        "body_colour": "hard to judge under dark coating (reported light red in a TCM case)",
+        "coating": "black/dark brown, thick, hair-like",
+        "thickness": "thick",
+        "shape": "elongated filiform papillae",
+        "moisture": "moist or dry",
+        "pattern": "heat or cold-damp accumulation in Stomach/Spleen (grey-black coating = extreme interior heat if dry, extreme cold if moist); stains from coffee/antibiotics must be considered"
+      },
+      "tcm_reference_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC10615480/",
+        "https://www.attiliodalberto.com/traditional-chinese-medicine/tongue-diagnosis.php"
+      ],
+      "expect_keyword_groups": [
+        [
+          "black",
+          "dark",
+          "brown"
+        ],
+        [
+          "thick",
+          "heat",
+          "damp",
+          "stomach",
+          "spleen"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x637"
+    },
+    {
+      "id": "tongue-07",
+      "type": "tongue",
+      "file": "images/tongue-black-tongue.jpg",
+      "content_type": "image/jpeg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Black_tongue.jpg",
+      "licence": "Public domain",
+      "licence_url": "",
+      "author": "Com4 at English Wikipedia",
+      "commons_description": "A picture of black tongue.",
+      "documented_condition": "black tongue (public domain, en.wikipedia)",
+      "condition_reference": "https://en.wikipedia.org/wiki/Black_hairy_tongue",
+      "expected_tcm": {
+        "body_colour": "obscured by coating",
+        "coating": "black / dark-brown",
+        "thickness": "thick",
+        "shape": "coated dorsum",
+        "moisture": "moist or dry",
+        "pattern": "extreme interior heat (dry) or extreme cold (moist); Stomach/Spleen disharmony"
+      },
+      "tcm_reference_urls": [
+        "https://pmc.ncbi.nlm.nih.gov/articles/PMC10615480/",
+        "https://www.attiliodalberto.com/traditional-chinese-medicine/tongue-diagnosis.php"
+      ],
+      "expect_keyword_groups": [
+        [
+          "black",
+          "dark",
+          "brown"
+        ],
+        [
+          "heat",
+          "cold",
+          "damp",
+          "stomach",
+          "spleen"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x1362"
+    },
+    {
+      "id": "tongue-08",
+      "type": "tongue",
+      "file": "images/tongue-human-tongue-infected-with-oral-candidia.jpg",
+      "content_type": "image/jpeg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Human_tongue_infected_with_oral_candidiasis.jpg",
+      "licence": "CC BY-SA 3.0",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "James Heilman, MD",
+      "commons_description": "Thrush in a child who had taken antibiotics.",
+      "documented_condition": "oral candidiasis (thrush) in a child after antibiotics",
+      "condition_reference": "https://en.wikipedia.org/wiki/Oral_candidiasis",
+      "expected_tcm": {
+        "body_colour": "pink-red beneath the plaques",
+        "coating": "thick white curd-like plaques",
+        "thickness": "thick",
+        "shape": "coated dorsum, plaques",
+        "moisture": "moist/greasy",
+        "pattern": "Damp-Heat or Phlegm-Damp in Spleen/Stomach (thick white greasy/curd coating); child with Spleen Qi weakness after antibiotics"
+      },
+      "tcm_reference_urls": [
+        "https://www.meandqi.com/knowledge-base/conditions/white-tongue-coating",
+        "https://www.meandqi.com/knowledge-base/conditions/yellow-tongue-coating"
+      ],
+      "expect_keyword_groups": [
+        [
+          "white"
+        ],
+        [
+          "thick",
+          "greasy",
+          "curd",
+          "damp",
+          "phlegm",
+          "spleen"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x1331"
+    },
+    {
+      "id": "tongue-09",
+      "type": "tongue",
+      "file": "images/tongue-glossitis-in-iron-deficiency-anaemia-a-t.jpg",
+      "content_type": "image/jpeg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Glossitis_in_Iron-deficiency_Anaemia,_a_Thai_female_patient_(2025).jpg",
+      "licence": "CC BY 4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0",
+      "author": "Chainwit.",
+      "commons_description": "This case of a Thai female adult was presented to a public hospital in northern Thailand with complaints of tongue enlargement. The diagnosis of glossitis was made. Further investigation revealed anaemia where iron-deficiency anaemia was later confirmed, with suspicion of hypermenorrhoea as the cause. The patient received oral folic acid and ferrous fumarate and her glossitis slowly improved. For ",
+      "documented_condition": "glossitis in iron-deficiency anaemia (enlarged, pale/smooth tongue)",
+      "condition_reference": "https://en.wikipedia.org/wiki/Glossitis",
+      "expected_tcm": {
+        "body_colour": "pale (to pale-red)",
+        "coating": "thin/scanty to absent",
+        "thickness": "thin",
+        "shape": "swollen/enlarged, possibly smooth with loss of papillae, tooth marks",
+        "moisture": "moist",
+        "pattern": "Blood deficiency with Spleen Qi deficiency (pale + swollen); Qi/Blood deficiency"
+      },
+      "tcm_reference_urls": [
+        "https://www.meandqi.com/knowledge-base/conditions/pale-tongue",
+        "https://www.meandqi.com/knowledge-base/conditions/swollen-tongue"
+      ],
+      "expect_keyword_groups": [
+        [
+          "pale"
+        ],
+        [
+          "blood",
+          "qi",
+          "spleen",
+          "deficien"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x1365"
+    },
+    {
+      "id": "tongue-10",
+      "type": "tongue",
+      "file": "images/tongue-image-of-the-tongue-in-a-b12-deficient-p.webp",
+      "content_type": "image/webp",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Image_of_the_tongue_in_a_B12-deficient_patient_without_a_history_of_gastrectomy.webp",
+      "licence": "CC BY 4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0",
+      "author": "Jihoon Kim, Moon-Jong Kim & Hong-Seop Kho",
+      "commons_description": "Image of the tongue in a patient without a history of gastrectomy (No. 3). Erythema and depapillation of the tongue were observed",
+      "documented_condition": "vitamin B12 deficiency glossitis (erythema, depapillation: smooth red tongue)",
+      "condition_reference": "https://en.wikipedia.org/wiki/Glossitis",
+      "expected_tcm": {
+        "body_colour": "red (bright/crimson)",
+        "coating": "little or none (peeled / mirror-like)",
+        "thickness": "absent",
+        "shape": "smooth, depapillated",
+        "moisture": "dry or shiny",
+        "pattern": "Yin deficiency with empty heat (red, no coating); Stomach/Kidney Yin deficiency; Blood deficiency"
+      },
+      "tcm_reference_urls": [
+        "https://www.meandqi.com/knowledge-base/conditions/red-tongue",
+        "https://www.attiliodalberto.com/traditional-chinese-medicine/tongue-diagnosis.php"
+      ],
+      "expect_keyword_groups": [
+        [
+          "red"
+        ],
+        [
+          "no coat",
+          "little coat",
+          "peel",
+          "smooth",
+          "mirror",
+          "depapill",
+          "scanty",
+          "absent"
+        ],
+        [
+          "yin"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x683"
+    },
+    {
+      "id": "tongue-11",
+      "type": "tongue",
+      "file": "images/tongue-macroglossia-with-crenations-along-the-m.png",
+      "content_type": "image/png",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Macroglossia_with_crenations_along_the_margins_and_loss_of_papillae_on_dorsum_surface_of_the_tongue.png",
+      "licence": "CC BY 3.0",
+      "licence_url": "https://creativecommons.org/licenses/by/3.0",
+      "author": "Deshpande P1, Guledgud MV1, Patil K1, Hegde U2, Sahni A1, Huchanahalli Sheshanna S2.",
+      "commons_description": "Macroglossia with crenations along the margins and loss of papillae on dorsum surface of the tongue.",
+      "documented_condition": "macroglossia with scalloped (crenated) margins and papillary atrophy",
+      "condition_reference": "https://en.wikipedia.org/wiki/Macroglossia",
+      "expected_tcm": {
+        "body_colour": "pale to pale-red",
+        "coating": "thin / reduced",
+        "thickness": "thin",
+        "shape": "enlarged with scalloped, tooth-marked edges",
+        "moisture": "moist/wet",
+        "pattern": "Spleen Qi deficiency with Dampness; Kidney/Spleen Yang deficiency in the elderly"
+      },
+      "tcm_reference_urls": [
+        "https://www.meandqi.com/knowledge-base/conditions/teeth-marked-tongue",
+        "https://www.meandqi.com/knowledge-base/conditions/swollen-tongue"
+      ],
+      "expect_keyword_groups": [
+        [
+          "scallop",
+          "tooth",
+          "teeth",
+          "crenat",
+          "swollen",
+          "enlarg"
+        ],
+        [
+          "spleen",
+          "damp",
+          "qi"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x910"
+    },
+    {
+      "id": "tongue-12",
+      "type": "tongue",
+      "file": "images/tongue-median-glossitis.jpg",
+      "content_type": "image/jpeg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Median_Glossitis.jpg",
+      "licence": "CC BY-SA 3.0",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "author": "Halfdznroses",
+      "commons_description": "Median Glossitis on 9 year old",
+      "documented_condition": "median rhomboid glossitis in a 9-year-old",
+      "condition_reference": "https://en.wikipedia.org/wiki/Median_rhomboid_glossitis",
+      "expected_tcm": {
+        "body_colour": "red central patch",
+        "coating": "absent over a central rhomboid area, coating elsewhere",
+        "thickness": "thin",
+        "shape": "central depapillated rhomboid patch on the midline",
+        "moisture": "moist",
+        "pattern": "Heat in Heart/Stomach or Stomach Yin deficiency (central area = Spleen/Stomach zone); central peeled coating"
+      },
+      "tcm_reference_urls": [
+        "https://www.attiliodalberto.com/traditional-chinese-medicine/tongue-diagnosis.php",
+        "https://www.meandqi.com/knowledge-base/conditions/cracked-tongue"
+      ],
+      "expect_keyword_groups": [
+        [
+          "central",
+          "middle",
+          "midline",
+          "rhomb",
+          "patch",
+          "peel"
+        ],
+        [
+          "stomach",
+          "spleen",
+          "heat",
+          "yin"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x1712"
+    },
+    {
+      "id": "tongue-13",
+      "type": "tongue",
+      "file": "images/tongue-scharlach.jpg",
+      "content_type": "image/jpeg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Scharlach.JPG",
+      "licence": "CC BY-SA 2.5",
+      "licence_url": "https://creativecommons.org/licenses/by-sa/2.5",
+      "author": "Martin Kronawitter",
+      "commons_description": "Raspberry tongue, with white surface. Symptom seen in the later stage of scarlet fever. Photo by Martin Kronawitter, Kellberg",
+      "documented_condition": "raspberry/strawberry tongue in late scarlet fever (red with white surface remnants)",
+      "condition_reference": "https://en.wikipedia.org/wiki/Scarlet_fever",
+      "expected_tcm": {
+        "body_colour": "crimson / bright red with prominent red papillae (prickles)",
+        "coating": "white coating remnants peeling away",
+        "thickness": "thin to peeling",
+        "shape": "swollen red papillae (raspberry)",
+        "moisture": "moist to dry",
+        "pattern": "Heat entering Ying/Blood level (warm-febrile disease), Excess Heat; red prickly tongue"
+      },
+      "tcm_reference_urls": [
+        "https://www.meandqi.com/knowledge-base/conditions/red-tongue",
+        "https://www.attiliodalberto.com/traditional-chinese-medicine/tongue-diagnosis.php"
+      ],
+      "expect_keyword_groups": [
+        [
+          "red",
+          "crimson",
+          "scarlet"
+        ],
+        [
+          "heat",
+          "fire"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x1254"
+    },
+    {
+      "id": "tongue-14",
+      "type": "tongue",
+      "file": "images/tongue-human-geographic-tongue.jpg",
+      "content_type": "image/jpeg",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Human_geographic_tongue.jpg",
+      "licence": "CC BY-SA 3.0",
+      "licence_url": "http://creativecommons.org/licenses/by-sa/3.0/",
+      "author": "Original uploader was Ageekgal at en.wikipedia",
+      "commons_description": "Photograph of a human tongue exhibiting the condition known as en:geographic tongue.",
+      "documented_condition": "geographic tongue (en.wikipedia upload)",
+      "condition_reference": "https://en.wikipedia.org/wiki/Geographic_tongue",
+      "expected_tcm": {
+        "body_colour": "red / pink with red depapillated patches",
+        "coating": "patchy white",
+        "thickness": "thin, uneven",
+        "shape": "map-like patches",
+        "moisture": "moist",
+        "pattern": "Stomach Yin deficiency (peeled coating)"
+      },
+      "tcm_reference_urls": [
+        "https://www.attiliodalberto.com/traditional-chinese-medicine/tongue-diagnosis.php"
+      ],
+      "expect_keyword_groups": [
+        [
+          "peel",
+          "geographic",
+          "map",
+          "patch"
+        ],
+        [
+          "yin",
+          "stomach"
+        ]
+      ],
+      "note": "documented_condition is the Western label from the file page; expected_tcm is the typical TCM reading of that appearance, mapped from the cited references (not a clinical diagnosis).",
+      "image_size": "1024x979"
+    }
+  ],
+  "face": [
+    {
+      "id": "face-01",
+      "file": "images/face-pale-s1101.webp",
+      "generated": true,
+      "seed": 1101,
+      "prompt": "Studio portrait photograph of an adult East Asian woman, frontal view, neutral expression, soft even daylight, plain light-grey background, noticeably pale white complexion with bloodless pallor, dull lips, no makeup, realistic skin texture, medical documentation style",
+      "model": "HF mcp-tools/Z-Image-Turbo, 896x1152, 8 steps",
+      "intended_complexion": "pale / white (淡白)",
+      "expected_tcm": {
+        "complexion": "pale white",
+        "pattern": "Qi/Blood deficiency, Yang deficiency or cold",
+        "note": "WEAK ground truth: the generated pallor is subtle (a fairly ordinary fair complexion); treat a 'normal' reading as acceptable"
+      },
+      "expect_keyword_groups": [
+        [
+          "pale",
+          "pallid",
+          "white",
+          "light",
+          "fair"
+        ]
+      ]
+    },
+    {
+      "id": "face-02",
+      "file": null,
+      "generated": false,
+      "status": "BLOCKED: HF ZeroGPU free quota exhausted (error: 'ZeroGPU quota exceeded: 60s requested vs. 0s left') after face-01; rerun when quota resets, then drop the file at images/face-<slug>-s1102.webp and set file/generated",
+      "seed": 1102,
+      "prompt_template": "Studio portrait photograph of a(n) adult East Asian man, sallow yellowish complexion, dull waxy yellow skin tone, frontal view, neutral expression, soft even daylight, plain light-grey background, realistic skin texture, medical documentation style",
+      "model": "HF mcp-tools/Z-Image-Turbo, 896x1152, 8 steps",
+      "intended_complexion": "sallow yellow (萎黄)",
+      "expected_tcm": {
+        "complexion": "sallow yellow (萎黄)",
+        "pattern": "Spleen Qi deficiency / Damp (sallow) "
+      },
+      "expect_keyword_groups": []
+    },
+    {
+      "id": "face-03",
+      "file": null,
+      "generated": false,
+      "status": "BLOCKED: HF ZeroGPU free quota exhausted (error: 'ZeroGPU quota exceeded: 60s requested vs. 0s left') after face-01; rerun when quota resets, then drop the file at images/face-<slug>-s1103.webp and set file/generated",
+      "seed": 1103,
+      "prompt_template": "Studio portrait photograph of a(n) adult East Asian woman, flushed red cheeks with a bright red malar flush, frontal view, neutral expression, soft even daylight, plain light-grey background, realistic skin texture, medical documentation style",
+      "model": "HF mcp-tools/Z-Image-Turbo, 896x1152, 8 steps",
+      "intended_complexion": "flushed red cheeks (颧红/面红)",
+      "expected_tcm": {
+        "complexion": "flushed red cheeks (颧红/面红)",
+        "pattern": "Yin deficiency with empty heat (malar flush) or Excess Heat (whole face red)"
+      },
+      "expect_keyword_groups": []
+    },
+    {
+      "id": "face-04",
+      "file": null,
+      "generated": false,
+      "status": "BLOCKED: HF ZeroGPU free quota exhausted (error: 'ZeroGPU quota exceeded: 60s requested vs. 0s left') after face-01; rerun when quota resets, then drop the file at images/face-<slug>-s1104.webp and set file/generated",
+      "seed": 1104,
+      "prompt_template": "Studio portrait photograph of a(n) adult East Asian man, tired, dark blackish circles under the eyes, dusky dark grey-brown complexion, frontal view, neutral expression, soft even daylight, plain light-grey background, realistic skin texture, medical documentation style",
+      "model": "HF mcp-tools/Z-Image-Turbo, 896x1152, 8 steps",
+      "intended_complexion": "dark under-eye / blackish (黧黑)",
+      "expected_tcm": {
+        "complexion": "dark under-eye / blackish (黧黑)",
+        "pattern": "Kidney deficiency, Blood stasis or Phlegm-fluid retention"
+      },
+      "expect_keyword_groups": []
+    },
+    {
+      "id": "face-05",
+      "file": null,
+      "generated": false,
+      "status": "BLOCKED: HF ZeroGPU free quota exhausted (error: 'ZeroGPU quota exceeded: 60s requested vs. 0s left') after face-01; rerun when quota resets, then drop the file at images/face-<slug>-s1105.webp and set file/generated",
+      "seed": 1105,
+      "prompt_template": "Studio portrait photograph of a(n) adult East Asian woman, bluish-purple cyanotic lips, slightly bluish-purple complexion, no lipstick, frontal view, neutral expression, soft even daylight, plain light-grey background, realistic skin texture, medical documentation style",
+      "model": "HF mcp-tools/Z-Image-Turbo, 896x1152, 8 steps",
+      "intended_complexion": "bluish-purple lips (青紫)",
+      "expected_tcm": {
+        "complexion": "bluish-purple lips (青紫)",
+        "pattern": "Blood stasis / Cold / Heart Yang-Qi deficiency"
+      },
+      "expect_keyword_groups": []
+    },
+    {
+      "id": "face-06",
+      "file": null,
+      "generated": false,
+      "status": "BLOCKED: HF ZeroGPU free quota exhausted (error: 'ZeroGPU quota exceeded: 60s requested vs. 0s left') after face-01; rerun when quota resets, then drop the file at images/face-<slug>-s1106.webp and set file/generated",
+      "seed": 1106,
+      "prompt_template": "Studio portrait photograph of a(n) healthy adult East Asian man, normal healthy rosy-yellow complexion, moist lustrous skin, pink lips, frontal view, neutral expression, soft even daylight, plain light-grey background, realistic skin texture, medical documentation style",
+      "model": "HF mcp-tools/Z-Image-Turbo, 896x1152, 8 steps",
+      "intended_complexion": "normal rosy-yellow (红黄隐隐)",
+      "expected_tcm": {
+        "complexion": "normal rosy-yellow (红黄隐隐)",
+        "pattern": "Healthy complexion (control)"
+      },
+      "expect_keyword_groups": []
+    }
+  ],
+  "text": [
+    {
+      "id": "case-01",
+      "file": "cases/case-01.json",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8137033/",
+      "source_pattern": "Liver Qi stagnation with Liver Yang rising"
+    },
+    {
+      "id": "case-02",
+      "file": "cases/case-02.json",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3921614/",
+      "source_pattern": "Flaring Liver Fire with accumulation of Damp-Phlegm (Liver Yang rising ruled out)"
+    },
+    {
+      "id": "case-03",
+      "file": "cases/case-03.json",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12599627/",
+      "source_pattern": "Blood-Heat with Damp-Heat (dampness-wind) accumulation"
+    },
+    {
+      "id": "case-04",
+      "file": "cases/case-04.json",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9771247/",
+      "source_pattern": "Qi deficiency with Blood stasis (Heart Yang/Qi lacking; water-damp overflowing as edema)"
+    },
+    {
+      "id": "case-05",
+      "file": "cases/case-05.json",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13538104/",
+      "source_pattern": "Phlegm-dampness (Spleen weakness) with wind-phlegm obstructing the Lung, later phlegm plus blood stasis"
+    },
+    {
+      "id": "case-06",
+      "file": "cases/case-06.json",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11046358/",
+      "source_pattern": "Wind-Cold (with phlegm) obstructing the channels at the acute stage"
+    },
+    {
+      "id": "case-07",
+      "file": "cases/case-07.json",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6531189/",
+      "source_pattern": "Qi and Yin deficiency with Blood stasis (palpitation, 心悸)"
+    },
+    {
+      "id": "case-08",
+      "file": "cases/case-08.json",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2840555/",
+      "source_pattern": "Spleen Qi deficiency with Blood deficiency, Yin and Yang deficiency, dampness, phlegm and blood stasis (treated with modified Gui Pi Tang)"
+    },
+    {
+      "id": "case-09",
+      "file": "cases/case-09.json",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11709150/",
+      "source_pattern": "Qi and Blood deficiency (deficiency of vital energy and blood)"
+    },
+    {
+      "id": "case-10",
+      "file": "cases/case-10.json",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11608678/",
+      "source_pattern": "Yin-Yang imbalance (Yang floating upward), excessive toxic Heat, pathogenic Wind"
+    },
+    {
+      "id": "case-11",
+      "file": "cases/case-11.json",
+      "source_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10615480/",
+      "source_pattern": "Not captured in the portion read (a gastrointestinal / Spleen-Stomach damp-heat or cold-damp pattern is the usual TCM reading of a thick black coating with diarrhea and thirst)"
+    }
+  ]
+}

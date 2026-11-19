@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Sihat TCM">
+  <rect width="64" height="64" rx="14" fill="#047857"/>
+  <path d="M32 12c-9 8-14 15-14 23a14 14 0 0 0 28 0c0-8-5-15-14-23z" fill="#ecfdf5"/>
+  <path d="M32 20v32M32 36l-8-7M32 42l8-7" fill="none" stroke="#047857" stroke-width="3" stroke-linecap="round"/>
+</svg>

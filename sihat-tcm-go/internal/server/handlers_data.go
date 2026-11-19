@@ -2,13 +2,192 @@ package server
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
+
+// maxReplyChars caps a doctor/patient chat message.
+const maxReplyChars = 8000
+
+// Thread / report size bounds. The Supabase client refuses responses over 10 MB, so one oversized row would make the
+// master doctor inbox (which returns many rows at once) fail for everybody. Every JSON document the app grows on a
+// client's behalf is therefore bounded at WRITE time.
+const (
+	maxThreadMessages      = 200       // messages in one consultation thread
+	maxThreadBytes         = 1 << 20   // serialized diagnosis_report of one inquiry
+	maxRequestReportBytes  = 256 << 10 // reportData a patient attaches to a verification request
+	maxRequestsPerPatient  = 100       // consultation requests one patient may hold
+	sessionsPageDefault    = 50
+	sessionsPageMax        = 100
+	maxSessionJSONNesting  = 200
+	maxDietaryQuestionRune = 2000
+)
+
+var validIDRe = regexp.MustCompile(`^[A-Za-z0-9_-]{1,64}$`)
+
+// validID reports whether s is safe to concatenate into a PostgREST filter
+// (UUIDs, numeric ids and slug-like ids pass; filter metacharacters do not).
+func validID(s string) bool { return validIDRe.MatchString(s) }
+
+var uuidRe = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
+
+// validUUID reports whether s is a canonical UUID (profile/user ids are uuid columns, so a
+// merely "slug-safe" id would otherwise reach the database and surface as a 500).
+func validUUID(s string) bool { return uuidRe.MatchString(s) }
+
+// dtEnsureSessionRequired enforces the NOT NULL columns of the session tables
+// (full_report, primary_diagnosis) with a clean 400 instead of a database 500.
+// primary_diagnosis is derived from full_report.diagnosis.primary_pattern when omitted.
+func dtEnsureSessionRequired(payload map[string]any) string {
+	rep, ok := payload["full_report"]
+	if !ok || rep == nil {
+		return "full_report is required"
+	}
+	if pd, _ := payload["primary_diagnosis"].(string); strings.TrimSpace(pd) == "" {
+		derived := ""
+		if m, ok := rep.(map[string]any); ok {
+			switch d := m["diagnosis"].(type) {
+			case string:
+				derived = d
+			case map[string]any:
+				derived, _ = d["primary_pattern"].(string)
+			}
+		}
+		if strings.TrimSpace(derived) == "" {
+			return "primary_diagnosis is required"
+		}
+		payload["primary_diagnosis"] = derived
+	}
+	return ""
+}
+
+// dtValidateSession checks the TYPES of an already column-filtered session payload so a malformed client value is a
+// 400 instead of the database's constraint error surfacing as a 500 (score not an integer 0-100, impossible date,
+// symptoms as an object, a report that is an array, a document nested deeper than SQLite's JSON functions allow ...).
+// It normalises follow_up_date to YYYY-MM-DD. Returns "" when the payload is acceptable.
+// stripBlobs removes file bytes (data: URLs and long base64 runs) from arbitrary JSON before it is stored.
+// Rule: a database row never holds image/audio/file bytes; clients keep the files, rows keep text only.
+// Returns the number of strings replaced.
+func stripBlobs(v any) (any, int) {
+	switch t := v.(type) {
+	case string:
+		if isBlobString(t) {
+			return "", 1
+		}
+		return t, 0
+	case map[string]any:
+		n := 0
+		for k, x := range t {
+			nx, c := stripBlobs(x)
+			t[k] = nx
+			n += c
+		}
+		return t, n
+	case []any:
+		n := 0
+		for i, x := range t {
+			nx, c := stripBlobs(x)
+			t[i] = nx
+			n += c
+		}
+		return t, n
+	default:
+		return v, 0
+	}
+}
+
+var base64RunRe = regexp.MustCompile(`^[A-Za-z0-9+/=
+]+$`)
+
+func isBlobString(s string) bool {
+	if len(s) > 32 && strings.HasPrefix(strings.ToLower(s[:min(len(s), 12)]), "data:") && strings.Contains(s[:min(len(s), 128)], ";base64,") {
+		return true
+	}
+	// raw base64 of a file: long, no spaces, only the base64 alphabet
+	return len(s) > 4096 && base64RunRe.MatchString(s)
+}
+
+func dtValidateSession(p map[string]any) string {
+	stripBlobs(p)
+	if v, ok := p["overall_score"]; ok {
+		if n, ok := asInt(v); !ok || n < 0 || n > 100 {
+			return "overall_score must be a whole number between 0 and 100"
+		}
+	}
+	if v, ok := p["follow_up_date"]; ok {
+		s, isStr := v.(string)
+		if !isStr {
+			return "follow_up_date must be a date (YYYY-MM-DD)"
+		}
+		d, ok := normalizeDate(s)
+		if !ok {
+			return "follow_up_date must be a real date (YYYY-MM-DD)"
+		}
+		p["follow_up_date"] = d
+	}
+	for _, k := range []string{"symptoms", "medicines"} {
+		if v, ok := p[k]; ok {
+			arr, isArr := v.([]any)
+			if !isArr {
+				if _, isStrs := v.([]string); isStrs {
+					continue
+				}
+				return k + " must be a list of strings"
+			}
+			for _, e := range arr {
+				if _, isStr := e.(string); !isStr {
+					return k + " must be a list of strings"
+				}
+			}
+		}
+	}
+	for _, k := range []string{"primary_diagnosis", "constitution", "notes", "clinical_notes", "treatment_plan", "inquiry_summary", "guest_email", "guest_name"} {
+		if v, ok := p[k]; ok {
+			if _, isStr := v.(string); !isStr {
+				return k + " must be a string"
+			}
+		}
+	}
+	if v, ok := p["is_hidden"]; ok {
+		if _, isBool := v.(bool); !isBool {
+			return "is_hidden must be true or false"
+		}
+	}
+	if v, ok := p["full_report"]; ok {
+		if _, isObj := v.(map[string]any); !isObj {
+			return "full_report must be a JSON object"
+		}
+	}
+	if jsonDepthExceeds(p, maxSessionJSONNesting) {
+		return "report is nested too deeply"
+	}
+	return ""
+}
+
+// dtReadJSONLimit decodes a JSON body capped at max bytes. A body larger than
+// max answers 413; malformed JSON or a literal `null` answers 400.
+func dtReadJSONLimit(w http.ResponseWriter, r *http.Request, v any, max int64) bool {
+	r.Body = http.MaxBytesReader(w, r.Body, max)
+	if err := decodeJSONBody(r.Body, v); err != nil {
+		var tooBig *http.MaxBytesError
+		if errors.As(err, &tooBig) {
+			http.Error(w, `{"error":"request body too large"}`, http.StatusRequestEntityTooLarge)
+			return false
+		}
+		http.Error(w, `{"error":"invalid JSON body"}`, http.StatusBadRequest)
+		return false
+	}
+	return true
+}
 
 // dtNormalizeSymptoms coerces a "symptoms" string (e.g. "headache, fatigue")
 // into a []string, because the diagnosis_sessions/guest_diagnosis_sessions
@@ -32,6 +211,35 @@ func dtNormalizeSymptoms(payload map[string]any) {
 	payload["symptoms"] = parts
 }
 
+// Client-writable columns of diagnosis_sessions / guest_diagnosis_sessions (db/schema.sql). PostgREST rejects unknown
+// columns with a 400 (→ our 500), and explicit nulls violate NOT NULL instead of using the column default, so
+// dtFilterColumns keeps only these keys and drops nil values.
+var dtSessionColumns = map[string]bool{
+	"primary_diagnosis": true, "constitution": true, "overall_score": true, "full_report": true, "notes": true,
+	"symptoms": true, "medicines": true, "vital_signs": true, "clinical_notes": true, "treatment_plan": true,
+	"follow_up_date": true, "inquiry_summary": true, "inquiry_chat_history": true, "inquiry_report_files": true,
+	"inquiry_medicine_files": true, "tongue_analysis": true, "face_analysis": true, "body_analysis": true,
+	"audio_analysis": true, "pulse_data": true,
+}
+
+// dtFilterColumns deletes from payload every key not in allowed (and every nil value), except keys listed in keep.
+func dtFilterColumns(payload map[string]any, allowed map[string]bool, keep ...string) {
+	for k, v := range payload {
+		isKeep := false
+		for _, kk := range keep {
+			if k == kk {
+				isKeep = true
+			}
+		}
+		if isKeep {
+			continue
+		}
+		if !allowed[k] || v == nil {
+			delete(payload, k)
+		}
+	}
+}
+
 // registerDataRoutes mounts data/AI endpoints.
 func (s *Server) registerDataRoutes() {
 	// Doctor reply — requires an authenticated doctor
@@ -43,11 +251,11 @@ func (s *Server) registerDataRoutes() {
 	// Doctor treatment plan — a structured plan the doctor authors on a request
 	s.Mux.HandleFunc("POST /api/doctor/treatment-plan", s.RequireAuth(s.handleDoctorTreatmentPlan, "doctor"))
 
-	// AI patient summary — requires auth
-	s.Mux.HandleFunc("POST /api/ai/patient-summary", s.RequireAuth(s.handleAIPatientSummary))
+	// AI patient summary — clinical data: doctors/admins only
+	s.Mux.HandleFunc("POST /api/ai/patient-summary", s.RequireAuth(s.handleAIPatientSummary, "doctor", "admin"))
 
-	// Verification request — no auth (guests can submit)
-	s.Mux.HandleFunc("POST /api/verification-request", s.handleVerificationRequest)
+	// Verification request — any logged-in user (userId is forced to the caller)
+	s.Mux.HandleFunc("POST /api/verification-request", s.RequireAuth(s.handleVerificationRequest))
 
 	// Migrate guest session — requires auth
 	s.Mux.HandleFunc("POST /api/migrate-guest-session", s.RequireAuth(s.handleMigrateGuestSession))
@@ -55,6 +263,40 @@ func (s *Server) registerDataRoutes() {
 	// Patient session list + create
 	s.Mux.HandleFunc("GET /api/patient/sessions", s.RequireAuth(s.handlePatientSessionsList))
 	s.Mux.HandleFunc("POST /api/patient/sessions", s.RequireAuth(s.handlePatientSessionsCreate))
+}
+
+// inquiryLock serialises every read-modify-write of one consultation thread (reply, patient reply, treatment plan,
+// cancel). The report is a single JSON blob: two interleaved select+update cycles used to drop each other's messages
+// while both answered 200.
+func inquiryLock(table, id string) func() { return lockKey("thread:" + table + ":" + id) }
+
+// dtThreadMessages returns the messages array of a report document.
+func dtThreadMessages(report map[string]any) []any {
+	if m, ok := report["messages"]; ok {
+		if arr, ok := m.([]any); ok {
+			return arr
+		}
+	}
+	return nil
+}
+
+// dtLastRole is the role of the last message in the thread ("" if none).
+func dtLastRole(report map[string]any) string {
+	msgs := dtThreadMessages(report)
+	if len(msgs) == 0 {
+		return ""
+	}
+	if m, ok := msgs[len(msgs)-1].(map[string]any); ok {
+		r, _ := m["role"].(string)
+		return r
+	}
+	return ""
+}
+
+// dtReportTooBig reports whether the serialized thread document exceeds the per-row bound.
+func dtReportTooBig(report map[string]any) bool {
+	b, err := json.Marshal(report)
+	return err != nil || len(b) > maxThreadBytes
 }
 
 // handleDoctorReply appends a doctor message to the JSONB report column of the
@@ -69,8 +311,22 @@ func (s *Server) handleDoctorReply(w http.ResponseWriter, r *http.Request, user 
 	if !dtReadJSON(w, r, &body) {
 		return
 	}
-	if body.RequestID == "" || body.Message == "" {
+	if body.RequestID == "" || strings.TrimSpace(body.Message) == "" {
 		s.JSONError(w, http.StatusBadRequest, "requestId and message are required")
+		return
+	}
+	if !validID(body.RequestID) {
+		s.JSONError(w, http.StatusBadRequest, "invalid requestId")
+		return
+	}
+	if len([]rune(body.Message)) > maxReplyChars {
+		s.JSONError(w, http.StatusBadRequest, "message too long (max 8000 characters)")
+		return
+	}
+	// The doctor UI only knows pending and reviewed: any other value would match neither filter yet still be
+	// counted as pending.
+	if body.Status != "" && body.Status != "pending" && body.Status != "reviewed" {
+		s.JSONError(w, http.StatusBadRequest, "status must be pending or reviewed")
 		return
 	}
 
@@ -80,6 +336,8 @@ func (s *Server) handleDoctorReply(w http.ResponseWriter, r *http.Request, user 
 		table = "inquiries"
 		reportCol = "diagnosis_report"
 	}
+
+	defer inquiryLock(table, body.RequestID)()
 
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
@@ -103,11 +361,10 @@ func (s *Server) handleDoctorReply(w http.ResponseWriter, r *http.Request, user 
 	}
 
 	// 3. Append new message
-	var messages []any
-	if m, ok := currentReport["messages"]; ok {
-		if arr, ok := m.([]any); ok {
-			messages = arr
-		}
+	messages := dtThreadMessages(currentReport)
+	if len(messages) >= maxThreadMessages {
+		s.JSONError(w, http.StatusConflict, "this conversation has reached its message limit")
+		return
 	}
 	newMsg := map[string]string{
 		"role":      "doctor",
@@ -123,6 +380,10 @@ func (s *Server) handleDoctorReply(w http.ResponseWriter, r *http.Request, user 
 	}
 	currentReport["messages"] = messages
 	currentReport["status"] = status
+	if table == "inquiries" && dtReportTooBig(currentReport) {
+		s.JSONError(w, http.StatusRequestEntityTooLarge, "this conversation is too large to extend")
+		return
+	}
 
 	// 4. Update row (also mirror status to the top-level column for inquiries)
 	updateBody := map[string]any{reportCol: currentReport}
@@ -158,6 +419,16 @@ func (s *Server) handlePatientReply(w http.ResponseWriter, r *http.Request, user
 		s.JSONError(w, http.StatusBadRequest, "requestId and message are required")
 		return
 	}
+	if !validID(body.RequestID) {
+		s.JSONError(w, http.StatusBadRequest, "invalid requestId")
+		return
+	}
+	if len([]rune(body.Message)) > maxReplyChars {
+		s.JSONError(w, http.StatusBadRequest, "message too long (max 8000 characters)")
+		return
+	}
+
+	defer inquiryLock("inquiries", body.RequestID)()
 
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
@@ -177,12 +448,15 @@ func (s *Server) handlePatientReply(w http.ResponseWriter, r *http.Request, user
 	if report == nil {
 		report = map[string]any{}
 	}
+	if c, _ := report["cancelled_by_patient"].(bool); c {
+		s.JSONError(w, http.StatusConflict, "this request was cancelled")
+		return
+	}
 
-	var messages []any
-	if m, ok := report["messages"]; ok {
-		if arr, ok := m.([]any); ok {
-			messages = arr
-		}
+	messages := dtThreadMessages(report)
+	if len(messages) >= maxThreadMessages {
+		s.JSONError(w, http.StatusConflict, "this conversation has reached its message limit")
+		return
 	}
 	messages = append(messages, map[string]string{
 		"role":      "patient",
@@ -191,6 +465,10 @@ func (s *Server) handlePatientReply(w http.ResponseWriter, r *http.Request, user
 	})
 	report["messages"] = messages
 	report["status"] = "pending"
+	if dtReportTooBig(report) {
+		s.JSONError(w, http.StatusRequestEntityTooLarge, "this conversation is too large to extend")
+		return
+	}
 
 	var updated []map[string]any
 	if err := s.DB.Update(ctx, "inquiries", "id=eq."+body.RequestID,
@@ -201,6 +479,35 @@ func (s *Server) handlePatientReply(w http.ResponseWriter, r *http.Request, user
 	}
 
 	s.JSON(w, http.StatusOK, map[string]any{"success": true, "data": report})
+}
+
+// dtPlanHasContent reports whether a treatment plan carries at least one non-blank value.
+func dtPlanHasContent(plan map[string]any) bool {
+	for k, v := range plan {
+		if k == "authored_at" || k == "doctor_id" {
+			continue
+		}
+		switch x := v.(type) {
+		case nil:
+		case string:
+			if strings.TrimSpace(x) != "" {
+				return true
+			}
+		case []any:
+			for _, e := range x {
+				if str, ok := e.(string); !ok || strings.TrimSpace(str) != "" {
+					return true
+				}
+			}
+		case map[string]any:
+			if len(x) > 0 {
+				return true
+			}
+		default:
+			return true // numbers / booleans are content
+		}
+	}
+	return false
 }
 
 // handleDoctorTreatmentPlan stores a structured treatment plan authored by a
@@ -220,6 +527,20 @@ func (s *Server) handleDoctorTreatmentPlan(w http.ResponseWriter, r *http.Reques
 		s.JSONError(w, http.StatusBadRequest, "requestId and plan are required")
 		return
 	}
+	if !validID(body.RequestID) {
+		s.JSONError(w, http.StatusBadRequest, "invalid requestId")
+		return
+	}
+	if !dtPlanHasContent(body.Plan) {
+		s.JSONError(w, http.StatusBadRequest, "the treatment plan is empty: fill in at least one field")
+		return
+	}
+	if jsonDepthExceeds(body.Plan, 20) {
+		s.JSONError(w, http.StatusBadRequest, "treatment plan is nested too deeply")
+		return
+	}
+
+	defer inquiryLock("inquiries", body.RequestID)()
 
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
@@ -241,11 +562,21 @@ func (s *Server) handleDoctorTreatmentPlan(w http.ResponseWriter, r *http.Reques
 	body.Plan["authored_at"] = dtNowISO()
 	body.Plan["doctor_id"] = user.ID
 	report["treatment_plan"] = body.Plan
-	report["status"] = "reviewed"
+	// A plan answers the request unless the patient's follow-up is still waiting for an answer: then the request
+	// must stay in the pending list, otherwise the unanswered question silently disappears from it.
+	status := "reviewed"
+	if dtLastRole(report) == "patient" {
+		status = "pending"
+	}
+	report["status"] = status
+	if dtReportTooBig(report) {
+		s.JSONError(w, http.StatusRequestEntityTooLarge, "this conversation is too large to extend")
+		return
+	}
 
 	var updated []map[string]any
 	if err := s.DB.Update(ctx, "inquiries", "id=eq."+body.RequestID,
-		map[string]any{"diagnosis_report": report, "status": "reviewed"}, "", &updated); err != nil {
+		map[string]any{"diagnosis_report": report, "status": status}, "", &updated); err != nil {
 		log.Printf("doctor/treatment-plan: %v", err)
 		s.JSONError(w, http.StatusInternalServerError, "failed to save treatment plan")
 		return
@@ -264,6 +595,10 @@ func (s *Server) handleAIPatientSummary(w http.ResponseWriter, r *http.Request, 
 	}
 	if body.PatientID == "" {
 		s.JSONError(w, http.StatusBadRequest, "patientId is required")
+		return
+	}
+	if !validID(body.PatientID) {
+		s.JSONError(w, http.StatusBadRequest, "invalid patientId")
 		return
 	}
 
@@ -295,6 +630,9 @@ func (s *Server) handleAIPatientSummary(w http.ResponseWriter, r *http.Request, 
 	patType := strField(patient, "type")
 	birthDate := strField(patient, "birth_date")
 	userID := strField(patient, "user_id")
+	if !validID(userID) {
+		userID = "" // never concatenate an unvalidated stored id into a filter
+	}
 
 	age := "Unknown"
 	if birthDate != "" {
@@ -354,7 +692,7 @@ Do not include any conversational filler. Start directly with the summary.`,
 	// 4. Generate summary
 	summaryText, err := s.AI.GenerateText(ctx, "gemini-2.0-flash", "", prompt)
 	if err != nil {
-		log.Printf("ai/patient-summary gemini: %v", err)
+		log.Printf("ai/patient-summary gemini: %s", anRedactKey(err.Error()))
 		s.JSONError(w, http.StatusInternalServerError, "AI generation failed")
 		return
 	}
@@ -365,8 +703,8 @@ Do not include any conversational filler. Start directly with the summary.`,
 		lastDiagID = sessions[0].ID
 	}
 	summaryData := map[string]any{
-		"summary":          summaryText,
-		"generated_at":     dtNowISO(),
+		"summary":           summaryText,
+		"generated_at":      dtNowISO(),
 		"last_diagnosis_id": lastDiagID,
 	}
 	var ignore []map[string]any
@@ -379,11 +717,11 @@ Do not include any conversational filler. Start directly with the summary.`,
 }
 
 // handleVerificationRequest inserts a verification request row into the inquiries table.
-func (s *Server) handleVerificationRequest(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleVerificationRequest(w http.ResponseWriter, r *http.Request, user *AuthUser) {
 	var body struct {
-		UserID     string         `json:"userId"`
-		DoctorID   string         `json:"doctorId"`
-		DoctorName string         `json:"doctorName"`
+		UserID      string         `json:"userId"` // ignored: the caller's id is used
+		DoctorID    string         `json:"doctorId"`
+		DoctorName  string         `json:"doctorName"`
 		PatientData map[string]any `json:"patientData"`
 		ReportData  map[string]any `json:"reportData"`
 	}
@@ -393,6 +731,42 @@ func (s *Server) handleVerificationRequest(w http.ResponseWriter, r *http.Reques
 	if body.DoctorID == "" || body.DoctorName == "" {
 		s.JSONError(w, http.StatusBadRequest, "doctor information is required")
 		return
+	}
+	if !validID(body.DoctorID) || !validUUID(body.DoctorID) {
+		s.JSONError(w, http.StatusBadRequest, "invalid doctorId")
+		return
+	}
+	if len(body.DoctorName) > 200 {
+		s.JSONError(w, http.StatusBadRequest, "doctorName too long")
+		return
+	}
+	// One oversized report poisons the master inbox for every doctor (responses over 10 MB fail to decode), and a
+	// real report is ~35 KB: bound what a patient may attach.
+	stripBlobs(body.ReportData)
+	stripBlobs(body.PatientData)
+	if rb, err := json.Marshal(body.ReportData); err != nil || len(rb) > maxRequestReportBytes {
+		s.JSONError(w, http.StatusRequestEntityTooLarge, "reportData is too large (max 256 KB)")
+		return
+	}
+	if jsonDepthExceeds(body.ReportData, maxSessionJSONNesting) || jsonDepthExceeds(body.PatientData, 20) {
+		s.JSONError(w, http.StatusBadRequest, "reportData is nested too deeply")
+		return
+	}
+
+	// The target must be an existing doctor profile.
+	if s.DB.Configured() {
+		vctx, vcancel := context.WithTimeout(r.Context(), 10*time.Second)
+		defer vcancel()
+		var docs []map[string]json.RawMessage
+		if err := s.DB.Select(vctx, "profiles", "select=id&role=eq.doctor&is_approved=eq.true&id=eq."+body.DoctorID, "", &docs); err != nil {
+			log.Printf("verification-request doctor lookup: %v", err)
+			s.JSONError(w, http.StatusInternalServerError, "failed to verify doctor")
+			return
+		}
+		if len(docs) == 0 {
+			s.JSONError(w, http.StatusNotFound, "doctor not found")
+			return
+		}
 	}
 
 	patientName := "Anonymous"
@@ -409,16 +783,22 @@ func (s *Server) handleVerificationRequest(w http.ResponseWriter, r *http.Reques
 		aiDiagnosis = body.ReportData["diagnosis"]
 	}
 
-	var userID any
-	if body.UserID != "" {
-		userID = body.UserID
-	}
+	userID := user.ID
+
+	// Same patient + same doctor + same report while the first request is still pending = a double click / retry:
+	// answer with the existing request instead of creating a duplicate in the doctor's inbox. The fingerprint lives
+	// in the (otherwise unused) inquiries.notes column so the lookup is a plain indexed filter.
+	fp := sha256.New()
+	fpBytes, _ := json.Marshal([]any{body.DoctorID, patientName, body.ReportData})
+	fp.Write(fpBytes)
+	dedupeKey := "req:" + hex.EncodeToString(fp.Sum(nil))[:32]
 
 	record := map[string]any{
 		"user_id":   userID,
 		"doctor_id": body.DoctorID, // top-level column so the doctor inbox queries cleanly
 		"status":    "pending",
 		"symptoms":  "Request for Verification",
+		"notes":     dedupeKey,
 		"diagnosis_report": map[string]any{
 			"type":     "verification_request",
 			"status":   "pending",
@@ -437,8 +817,37 @@ func (s *Server) handleVerificationRequest(w http.ResponseWriter, r *http.Reques
 		},
 	}
 
+	defer lockKey("vr:" + userID)()
+
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
+
+	var existing []map[string]json.RawMessage
+	dq := "select=id&user_id=eq." + userID + "&doctor_id=eq." + body.DoctorID + "&status=eq.pending&notes=eq." + dedupeKey + "&limit=1"
+	if err := s.DB.Select(ctx, "inquiries", dq, "", &existing); err == nil && len(existing) > 0 {
+		dupID := ""
+		if raw, ok := existing[0]["id"]; ok {
+			_ = json.Unmarshal(raw, &dupID)
+		}
+		s.JSON(w, http.StatusOK, map[string]any{
+			"success": true,
+			"data": map[string]any{
+				"id":        dupID,
+				"doctor":    body.DoctorName,
+				"status":    "pending",
+				"duplicate": true,
+			},
+		})
+		return
+	}
+
+	// A patient may hold only so many requests: each carries a full report and all of them are served to the
+	// doctors' shared inbox.
+	var mine []map[string]json.RawMessage
+	if err := s.DB.Select(ctx, "inquiries", "select=id&user_id=eq."+userID+"&limit="+strconv.Itoa(maxRequestsPerPatient), "", &mine); err == nil && len(mine) >= maxRequestsPerPatient {
+		s.JSONError(w, http.StatusTooManyRequests, "you have reached the maximum number of consultation requests; cancel an old one first")
+		return
+	}
 
 	var inserted []map[string]json.RawMessage
 	if err := s.DB.Insert(ctx, "inquiries", record, "", &inserted); err != nil {
@@ -465,6 +874,8 @@ func (s *Server) handleVerificationRequest(w http.ResponseWriter, r *http.Reques
 }
 
 // handleMigrateGuestSession copies a guest_diagnosis_sessions row to diagnosis_sessions for the auth user.
+// The guest row is CLAIMED first with a conditional update (migrated_to_user_id IS NULL), so a double click or two
+// accounts holding the token can never both succeed; the claim is released again if the copy fails.
 func (s *Server) handleMigrateGuestSession(w http.ResponseWriter, r *http.Request, user *AuthUser) {
 	var body struct {
 		SessionToken string `json:"sessionToken"`
@@ -476,18 +887,42 @@ func (s *Server) handleMigrateGuestSession(w http.ResponseWriter, r *http.Reques
 		s.JSONError(w, http.StatusBadRequest, "sessionToken is required")
 		return
 	}
+	if !validID(body.SessionToken) {
+		s.JSONError(w, http.StatusBadRequest, "invalid sessionToken")
+		return
+	}
+
+	defer lockKey("guest:" + body.SessionToken)()
 
 	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
 	defer cancel()
 
-	// 1. Find unmigrated guest session
+	// 1. Atomically claim the unmigrated guest session (the response carries the full row).
 	var guestRows []map[string]json.RawMessage
-	q := "select=*&session_token=eq." + body.SessionToken + "&migrated_to_user_id=is.null"
-	if err := s.DB.Select(ctx, "guest_diagnosis_sessions", q, "", &guestRows); err != nil || len(guestRows) == 0 {
+	claim := map[string]any{"migrated_to_user_id": user.ID, "migrated_at": dtNowISO()}
+	q := "session_token=eq." + body.SessionToken + "&migrated_to_user_id=is.null"
+	if err := s.DB.Update(ctx, "guest_diagnosis_sessions", q, claim, "", &guestRows); err != nil {
+		log.Printf("migrate-guest-session claim: %v", err)
+		s.JSONError(w, http.StatusInternalServerError, "failed to migrate session")
+		return
+	}
+	if len(guestRows) == 0 {
 		s.JSONError(w, http.StatusBadRequest, "guest session not found or already migrated")
 		return
 	}
 	guest := guestRows[0]
+
+	guestID := ""
+	if raw, ok := guest["id"]; ok {
+		_ = json.Unmarshal(raw, &guestID)
+	}
+	release := func() {
+		if validID(guestID) {
+			var ignore []map[string]any
+			_ = s.DB.Update(ctx, "guest_diagnosis_sessions", "id=eq."+guestID,
+				map[string]any{"migrated_to_user_id": nil, "migrated_at": nil}, "", &ignore)
+		}
+	}
 
 	// Helper: copy raw field from guest row, return nil if missing
 	field := func(key string) any {
@@ -500,7 +935,8 @@ func (s *Server) handleMigrateGuestSession(w http.ResponseWriter, r *http.Reques
 		return nil
 	}
 
-	// 2. Insert into diagnosis_sessions
+	// 2. Insert into diagnosis_sessions. created_at is carried over: the assessment keeps its own date instead of
+	// becoming the registration date (history order and the "journey" day count depend on it).
 	newSession := map[string]any{
 		"user_id":                user.ID,
 		"primary_diagnosis":      field("primary_diagnosis"),
@@ -525,26 +961,16 @@ func (s *Server) handleMigrateGuestSession(w http.ResponseWriter, r *http.Reques
 		"pulse_data":             field("pulse_data"),
 		"is_guest_session":       false,
 	}
+	if created := field("created_at"); created != nil {
+		newSession["created_at"] = created
+	}
 
 	var inserted []map[string]json.RawMessage
 	if err := s.DB.Insert(ctx, "diagnosis_sessions", newSession, user.Token, &inserted); err != nil {
 		log.Printf("migrate-guest-session insert: %v", err)
+		release() // the copy failed: give the token back so the guest can retry
 		s.JSONError(w, http.StatusInternalServerError, "failed to migrate session")
 		return
-	}
-
-	// 3. Mark guest record as migrated
-	guestID := ""
-	if raw, ok := guest["id"]; ok {
-		_ = json.Unmarshal(raw, &guestID)
-	}
-	if guestID != "" {
-		var ignore []map[string]any
-		_ = s.DB.Update(ctx, "guest_diagnosis_sessions", "id=eq."+guestID,
-			map[string]any{
-				"migrated_to_user_id": user.ID,
-				"migrated_at":         dtNowISO(),
-			}, "", &ignore)
 	}
 
 	var sessionData any
@@ -557,22 +983,102 @@ func (s *Server) handleMigrateGuestSession(w http.ResponseWriter, r *http.Reques
 	})
 }
 
-// handlePatientSessionsList returns the authenticated user's diagnosis sessions.
+// dtCountRows counts the rows matching filter (skipping those for which hidden() is true), paging through the table
+// 1000 rows at a time because PostgREST caps one response (Supabase: max-rows 1000). cols must include whatever
+// hidden() reads. Stops at 50 pages (50 000 rows).
+func (s *Server) dtCountRows(ctx context.Context, table, cols, filter, userToken string, hidden func(map[string]any) bool) int {
+	total := 0
+	for page := 0; page < 50; page++ {
+		var rows []map[string]any
+		q := "select=" + cols
+		if filter != "" {
+			q += "&" + filter
+		}
+		q += "&limit=1000&offset=" + strconv.Itoa(page*1000)
+		if err := s.DB.Select(ctx, table, q, userToken, &rows); err != nil {
+			break
+		}
+		for _, row := range rows {
+			if hidden == nil || !hidden(row) {
+				total++
+			}
+		}
+		if len(rows) < 1000 {
+			break
+		}
+	}
+	return total
+}
+
+func dtIsHidden(row map[string]any) bool {
+	h, _ := row["is_hidden"].(bool)
+	return h
+}
+
+// handlePatientSessionsList returns the authenticated user's diagnosis sessions, newest first. The list is paged
+// (limit default 50, max 100; offset) and declares its total so a long history is never silently cut off; a single
+// report can be fetched by ?id=. Sessions the patient hid (is_hidden) are not listed.
 func (s *Server) handlePatientSessionsList(w http.ResponseWriter, r *http.Request, user *AuthUser) {
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()
 
-	q := "select=id,created_at,symptoms,constitution,full_report&user_id=eq." + user.ID + "&order=created_at.desc&limit=50"
-	var sessions []map[string]any
-	if err := s.DB.Select(ctx, "diagnosis_sessions", q, user.Token, &sessions); err != nil {
+	qs := r.URL.Query()
+	limit, offset := sessionsPageDefault, 0
+	if v := qs.Get("limit"); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil || n < 1 {
+			s.JSONError(w, http.StatusBadRequest, "limit must be a positive integer")
+			return
+		}
+		limit = n
+		if limit > sessionsPageMax {
+			limit = sessionsPageMax
+		}
+	}
+	if v := qs.Get("offset"); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil || n < 0 {
+			s.JSONError(w, http.StatusBadRequest, "offset must be a non-negative integer")
+			return
+		}
+		offset = n
+	}
+
+	const cols = "id,created_at,symptoms,constitution,full_report,is_hidden"
+	filter := "user_id=eq." + user.ID
+	if id := qs.Get("id"); id != "" {
+		if !validUUID(id) {
+			s.JSONError(w, http.StatusBadRequest, "invalid id")
+			return
+		}
+		filter += "&id=eq." + id
+	}
+	q := "select=" + cols + "&" + filter + "&order=created_at.desc&limit=" + strconv.Itoa(limit) + "&offset=" + strconv.Itoa(offset)
+	var rows []map[string]any
+	if err := s.DB.Select(ctx, "diagnosis_sessions", q, user.Token, &rows); err != nil {
 		log.Printf("patient/sessions list: %v", err)
 		s.JSONError(w, http.StatusInternalServerError, "failed to fetch sessions")
 		return
 	}
-	if sessions == nil {
-		sessions = []map[string]any{}
+	sessions := make([]map[string]any, 0, len(rows))
+	for _, row := range rows {
+		if dtIsHidden(row) {
+			continue
+		}
+		delete(row, "is_hidden")
+		sessions = append(sessions, row)
 	}
-	s.JSON(w, http.StatusOK, map[string]any{"sessions": sessions})
+
+	total := s.dtCountRows(ctx, "diagnosis_sessions", "id,is_hidden", filter, user.Token, dtIsHidden)
+	hasMore := offset+len(rows) < total || (len(rows) == limit && offset+limit < total)
+	s.JSON(w, http.StatusOK, map[string]any{
+		"sessions":  sessions,
+		"total":     total,
+		"limit":     limit,
+		"offset":    offset,
+		"has_more":  hasMore,
+		"truncated": hasMore,
+	})
 }
 
 // handlePatientSessionsCreate inserts a new diagnosis session for the authenticated user.
@@ -582,8 +1088,17 @@ func (s *Server) handlePatientSessionsCreate(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	// Enforce the authenticated user's ID
+	dtFilterColumns(payload, dtSessionColumns, "is_hidden")
 	payload["user_id"] = user.ID
 	dtNormalizeSymptoms(payload)
+	if msg := dtValidateSession(payload); msg != "" {
+		s.JSONError(w, http.StatusBadRequest, msg)
+		return
+	}
+	if msg := dtEnsureSessionRequired(payload); msg != "" {
+		s.JSONError(w, http.StatusBadRequest, msg)
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
 	defer cancel()

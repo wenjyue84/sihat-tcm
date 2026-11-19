@@ -21,7 +21,7 @@ func (c *Client) GenerateStream(ctx context.Context, model string, req GenerateR
 	if err != nil {
 		return "", err
 	}
-	url := fmt.Sprintf("%s/%s:streamGenerateContent?alt=sse&key=%s", baseURL, model, c.APIKey)
+	url := fmt.Sprintf("%s/%s:streamGenerateContent?alt=sse&key=%s", c.base(), model, c.APIKey)
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return "", err
@@ -40,6 +40,7 @@ func (c *Client) GenerateStream(ctx context.Context, model string, req GenerateR
 	}
 
 	var full strings.Builder
+	truncated := false
 	scanner := bufio.NewScanner(resp.Body)
 	scanner.Buffer(make([]byte, 0, 64*1024), 4*1024*1024)
 	for scanner.Scan() {
@@ -55,6 +56,11 @@ func (c *Client) GenerateStream(ctx context.Context, model string, req GenerateR
 		if err := json.Unmarshal([]byte(payload), &chunk); err != nil {
 			continue
 		}
+		if chunk.Error != nil {
+			// An error EVENT in the middle of a 200 stream (e.g. 503 UNAVAILABLE after some text): the answer is
+			// incomplete, so it must surface as a failure and not end as a clean, truncated reply.
+			return full.String(), fmt.Errorf("gemini: stream error %d: %s", chunk.Error.Code, chunk.Error.Message)
+		}
 		for _, cand := range chunk.Candidates {
 			for _, p := range cand.Content.Parts {
 				if p.Text != "" {
@@ -64,10 +70,16 @@ func (c *Client) GenerateStream(ctx context.Context, model string, req GenerateR
 					}
 				}
 			}
+			if cand.FinishReason == "MAX_TOKENS" {
+				truncated = true
+			}
 		}
 	}
 	if err := scanner.Err(); err != nil {
 		return full.String(), fmt.Errorf("gemini: stream read: %w", err)
+	}
+	if truncated {
+		return full.String(), fmt.Errorf("gemini: response cut off at the output token limit (MAX_TOKENS)")
 	}
 	return full.String(), nil
 }

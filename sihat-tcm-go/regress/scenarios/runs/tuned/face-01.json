@@ -1,0 +1,59 @@
+{
+  "id": "face-01",
+  "type": "face",
+  "label": "tuned",
+  "endpoint": "/api/analyze-image",
+  "started_at": "2026-10-12T02:43:46.235Z",
+  "attempts": [
+    {
+      "n": 1,
+      "status": 200,
+      "ms": 139624,
+      "bytes": 588,
+      "json_ok": true
+    }
+  ],
+  "ai": "pc",
+  "db": "fake",
+  "status": 200,
+  "ms": 139625,
+  "raw": "{\"confidence\":50,\"image_description\":\"一位年輕東亞女性的正面人像，深色頭髮向後梳攏，在中性灰色背景下以均勻柔散的攝影棚燈光拍攝。無明顯濃妝或色彩濾鏡。額頭、雙眼、鼻子、雙頰、嘴唇及下巴均清晰可見，解析度高。\",\"message\":\"This image does not appear to be a clear face photo. 一位年輕東亞女性的正面人像，深色頭髮向後梳攏，在中性灰色背景下以均勻柔散的攝影棚燈光拍攝。無明顯濃妝或色彩濾鏡。額頭、雙眼、鼻子、雙頰、嘴唇及下巴均清晰可見，解析度高。 Please retake it in good lighting and try again.\",\"modelUsed\":1,\"observation\":\"This image does not appear to be a clear face photo. 一位年輕東亞女性的正面人像，深色頭髮向後梳攏，在中性灰色背景下以均勻柔散的攝影棚燈光拍攝。無明顯濃妝或色彩濾鏡。額頭、雙眼、鼻子、雙頰、嘴唇及下巴均清晰可見，解析度高。 Please retake it in good lighting and try again.\",\"potential_issues\":[],\"status\":\"invalid_image\"}\n",
+  "parsed": {
+    "confidence": 50,
+    "image_description": "一位年輕東亞女性的正面人像，深色頭髮向後梳攏，在中性灰色背景下以均勻柔散的攝影棚燈光拍攝。無明顯濃妝或色彩濾鏡。額頭、雙眼、鼻子、雙頰、嘴唇及下巴均清晰可見，解析度高。",
+    "message": "This image does not appear to be a clear face photo. 一位年輕東亞女性的正面人像，深色頭髮向後梳攏，在中性灰色背景下以均勻柔散的攝影棚燈光拍攝。無明顯濃妝或色彩濾鏡。額頭、雙眼、鼻子、雙頰、嘴唇及下巴均清晰可見，解析度高。 Please retake it in good lighting and try again.",
+    "modelUsed": 1,
+    "observation": "This image does not appear to be a clear face photo. 一位年輕東亞女性的正面人像，深色頭髮向後梳攏，在中性灰色背景下以均勻柔散的攝影棚燈光拍攝。無明顯濃妝或色彩濾鏡。額頭、雙眼、鼻子、雙頰、嘴唇及下巴均清晰可見，解析度高。 Please retake it in good lighting and try again.",
+    "potential_issues": [],
+    "status": "invalid_image"
+  },
+  "ok": true,
+  "request_summary": {
+    "type": "face",
+    "image_file": "images/face-pale-s1101.webp",
+    "image_bytes": 44167
+  },
+  "expected": {
+    "intended_complexion": "pale / white (淡白)",
+    "expected_tcm": {
+      "complexion": "pale white",
+      "pattern": "Qi/Blood deficiency, Yang deficiency or cold",
+      "note": "WEAK ground truth: the generated pallor is subtle (a fairly ordinary fair complexion); treat a 'normal' reading as acceptable"
+    }
+  },
+  "keyword_check": {
+    "groups": [
+      {
+        "any_of": [
+          "pale",
+          "pallid",
+          "white",
+          "light",
+          "fair"
+        ],
+        "hit": true
+      }
+    ],
+    "all_hit": true
+  }
+}

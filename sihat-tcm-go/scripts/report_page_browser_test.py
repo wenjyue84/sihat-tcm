@@ -1,10 +1,11 @@
 """Runtime check: the standalone /patient/report/{id} page renders a saved
 report in an isolated iframe with a working Print button. Logs in as the demo
 patient via the quick-login button (no AI/quota needed). Exit 0 = all pass."""
+import os
 import sys
 from playwright.sync_api import sync_playwright
 
-BASE = "https://tcm.wenjyue.com"
+BASE = os.environ.get("E2E_BASE", "https://tcm.wenjyue.com").rstrip("/")
 RID = "e84db4a6-9691-4ac1-9eac-e8dd702c7cca"  # a real demo-patient session id
 
 with sync_playwright() as p:
@@ -15,7 +16,19 @@ with sync_playwright() as p:
     pg.click("button[data-role='patient']")
     pg.wait_for_url("**/patient", timeout=20000)
 
-    pg.goto(BASE + "/patient/report/" + RID)
+    # Use a session that really exists for this patient: reuse the newest saved one, else save a minimal report.
+    RID_LIVE = pg.evaluate("""async () => {
+      const list = async () => ((await (await fetch('/api/patient/sessions')).json()).sessions || []);
+      let s = await list();
+      if (!s.length) {
+        await fetch('/api/patient/sessions', {method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({full_report: {diagnosis: {primary_pattern: 'Qi deficiency'}, constitution: {type: 'Qi Deficiency'},
+          analysis: {summary: 'e2e', key_findings: {}}, recommendations: {lifestyle: ['rest']}}, primary_diagnosis: 'Qi deficiency', symptoms: 'fatigue'})});
+        s = await list();
+      }
+      return s.length ? s[0].id : null;
+    }""")
+    pg.goto(BASE + "/patient/report/" + (RID_LIVE or RID))
     pg.wait_for_load_state("networkidle")
     pg.wait_for_timeout(1000)
 

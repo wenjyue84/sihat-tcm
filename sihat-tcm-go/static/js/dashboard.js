@@ -64,7 +64,7 @@
     status.textContent = 'Saving…'; status.style.color = 'var(--color-muted)';
     fetch('/api/patient/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(payload) })
       .then(function (r) { return r.json(); })
-      .then(function (d) { if (!d || !d.success) throw new Error(); status.textContent = 'Saved ✓ 已保存'; status.style.color = 'var(--emerald-600)'; })
+      .then(function (d) { if (!d || !d.success) throw new Error(); status.textContent = 'Saved ✓ 已保存'; status.style.color = 'var(--emerald-700)'; })
       .catch(function () { status.textContent = 'Could not save.'; status.style.color = '#dc2626'; });
   }
 
@@ -80,7 +80,7 @@
     setV('ov-sessions', sessions.length);
 
     var newest = sessions[0];
-    var constitution = newest ? (((newest.full_report || {}).constitution || {}).type || newest.constitution || '—') : '—';
+    var constitution = newest ? (repConstitution(newest.full_report).type || newest.constitution || '—') : '—';
     setV('ov-constitution', trunc(constitution, 12));
 
     if (sessions.length) {
@@ -92,7 +92,7 @@
 
     var counts = {};
     sessions.forEach(function (s) {
-      var pp = ((s.full_report || {}).diagnosis || {}).primary_pattern;
+      var pp = repDiagnosis(s.full_report).primary_pattern;
       if (pp && typeof pp === 'object') pp = pp.name || pp.pattern;
       pp = pp || s.constitution;
       if (pp) counts[pp] = (counts[pp] || 0) + 1;
@@ -147,6 +147,12 @@
     box.innerHTML = '<div class="wellness-tip-title">🌿 Daily Wellness 养生贴士</div><div class="wellness-tip-body">' + tips[day] + '</div>';
   }
 
+  // The report JSON is model/client supplied: constitution, diagnosis and analysis may be objects
+  // ({type}, {primary_pattern}, {summary}) OR plain strings (the consult contract, reportProblems() and the wizard accept both).
+  function repConstitution(r) { var c = (r || {}).constitution; return (typeof c === 'string') ? { type: c } : (c && typeof c === 'object' ? c : {}); }
+  function repDiagnosis(r) { var d = (r || {}).diagnosis; return (typeof d === 'string') ? { primary_pattern: d } : (d && typeof d === 'object' ? d : {}); }
+  function repAnalysis(r) { var a = (r || {}).analysis; return (typeof a === 'string') ? { summary: a } : (a && typeof a === 'object' ? a : {}); }
+
   function trunc(s, n) { s = String(s == null ? '' : s); return s.length > n ? s.slice(0, n) + '…' : s; }
 
   /* ------------------------------------------------------------------ */
@@ -174,8 +180,10 @@
       .then(function (data) {
         if (!data) return;
         loadEl.classList.add('hidden');
-        renderHealthOverview(data.sessions || []); // raw = newest-first
-        var sessions = (data.sessions || []).slice().reverse(); // newest first
+        // GET /api/patient/sessions is already ordered created_at.desc (newest first): render it as is.
+        // (It used to be .reverse()d under a "newest first" comment, which listed the OLDEST assessment first.)
+        var sessions = data.sessions || [];
+        renderHealthOverview(sessions);
         if (!sessions.length) {
           emptyEl.classList.remove('hidden');
           return;
@@ -201,7 +209,7 @@
     card.className = 'session-card';
 
     var date = formatDate(session.created_at);
-    var constitution = ((session.full_report || {}).constitution || {}).type
+    var constitution = repConstitution(session.full_report).type
       || session.constitution
       || '—';
     var symptoms = session.symptoms || '';
@@ -267,7 +275,7 @@
     var html = '';
 
     // Constitution
-    var c = report.constitution || {};
+    var c = repConstitution(report);
     if (c.type) {
       html += '<div class="constitution-card" style="margin-bottom:1rem">'
         + '<div class="constitution-type">' + escHtml(c.type) + '</div>'
@@ -276,7 +284,7 @@
     }
 
     // Five elements
-    var scores = ((report.analysis || {}).five_elements || {}).scores || {};
+    var scores = (repAnalysis(report).five_elements || {}).scores || {};
     var elements = [
       { key: 'liver',  label: 'Liver 肝',  cls: 'liver'  },
       { key: 'heart',  label: 'Heart 心',  cls: 'heart'  },
@@ -299,7 +307,7 @@
     }
 
     // Diagnosis
-    var diag = report.diagnosis || {};
+    var diag = repDiagnosis(report);
     if (diag.primary_pattern) {
       var p = diag.primary_pattern;
       var pName = typeof p === 'string' ? p : (p.name || p.pattern || '');
@@ -311,7 +319,7 @@
     }
 
     // Analysis summary
-    var analysis = report.analysis || {};
+    var analysis = repAnalysis(report);
     if (analysis.summary || report.patient_summary) {
       html += '<p style="font-size:.83rem;color:var(--stone-600);margin-bottom:.75rem;line-height:1.6">'
         + escHtml(analysis.summary || report.patient_summary)
@@ -319,7 +327,7 @@
     }
 
     // Key findings (object with from_inquiry/from_visual/from_pulse)
-    var kf = (report.analysis || {}).key_findings;
+    var kf = analysis.key_findings;
     if (kf && typeof kf === 'object' && !Array.isArray(kf)) {
       [['from_inquiry', '问诊'], ['from_visual', '望诊'], ['from_pulse', '切诊']].forEach(function (p) {
         if (kf[p[0]]) html += '<div style="font-size:.8rem;margin-bottom:.3rem;color:var(--stone-600)"><strong>' + p[1] + ':</strong> ' + escHtml(String(kf[p[0]])) + '</div>';
@@ -363,6 +371,7 @@
   function injectLogoutLink() {
     var navLink = document.getElementById('nav-login-link');
     if (!navLink) return;
+    if (document.getElementById('nav-logout-link')) return; // header partial already added it
     var token = localStorage.getItem('tcm-token') || getCookie('sb-access-token');
     if (!token) return;
 
@@ -370,10 +379,11 @@
     var logoutLink = document.createElement('a');
     logoutLink.href = '#';
     logoutLink.textContent = 'Logout';
+    logoutLink.setAttribute('data-i18n', 'nav.logout');
     logoutLink.style.marginLeft = '.5rem';
     logoutLink.addEventListener('click', function (e) {
       e.preventDefault();
-      fetch('/api/auth/logout', { method: 'POST' }).finally(function () {
+      fetch('/api/auth/logout', { method: 'POST' }).then(function (r) { return r.text(); }).catch(function () {}).finally(function () {
         localStorage.removeItem('tcm-token');
         localStorage.removeItem('tcm-role');
         localStorage.removeItem('tcm-user');

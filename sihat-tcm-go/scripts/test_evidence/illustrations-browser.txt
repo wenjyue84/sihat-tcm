@@ -1,0 +1,25 @@
+$ uv run --with playwright python scripts/capture_test_evidence.py   (2026-10-12)
+PASS home-hero@1440  illustrations paint (naturalWidth>0)
+PASS home-elements@1440  illustrations paint (naturalWidth>0)
+PASS login@1440  illustrations paint (naturalWidth>0)
+PASS reset@1440  illustrations paint (naturalWidth>0)
+PASS notfound@1440  illustrations paint (naturalWidth>0)
+PASS patient-history-empty@1440  illustrations paint (naturalWidth>0)
+PASS login.patient
+PASS patient-devices@1440  illustrations paint (naturalWidth>0)
+PASS login.doctor
+PASS doctor@1440  illustrations paint (naturalWidth>0)
+PASS demo@1440  illustrations paint (naturalWidth>0)
+PASS home-hero@390  illustrations paint (naturalWidth>0)
+PASS home-elements@390  illustrations paint (naturalWidth>0)
+PASS login@390  illustrations paint (naturalWidth>0)
+PASS reset@390  illustrations paint (naturalWidth>0)
+PASS notfound@390  illustrations paint (naturalWidth>0)
+PASS patient-history-empty@390  illustrations paint (naturalWidth>0)
+PASS login.patient
+PASS patient-devices@390  illustrations paint (naturalWidth>0)
+PASS login.doctor
+PASS doctor@390  illustrations paint (naturalWidth>0)
+PASS demo@390  illustrations paint (naturalWidth>0)
+(+ 18 no-horizontal-overflow checks, all PASS)
+40/40 checks passed

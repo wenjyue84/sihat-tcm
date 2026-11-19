@@ -1,0 +1,14 @@
+$ node ~/.claude/hooks/openrouter-spend-gate.test.mjs   (2026-10-12)
+PASS  script with a billable call (uv run gen.py)        expect BLOCK got BLOCK
+PASS  same call hidden in a .bash file                   expect BLOCK got BLOCK
+PASS  same call piped in from a .txt (python - < file)   expect BLOCK got BLOCK
+PASS  inline curl to the billable endpoint               expect BLOCK got BLOCK
+PASS  read-only model list (/models)                     expect allow got allow
+PASS  read-only script (/models only)                    expect allow got allow
+PASS  budget-guarded caller (jev_client.py)              expect allow got allow
+PASS  Claude writing the approval stamp itself           expect BLOCK got BLOCK
+PASS  unrelated command                                  expect allow got allow
+9/9 passed
+
+live check: re-running the script that billed $0.014 ->
+PreToolUse:Bash hook error: openrouter-spend-gate: this command would make a BILLABLE OpenRouter request

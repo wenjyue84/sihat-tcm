@@ -4,10 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{.Title}} — Sihat TCM</title>
+  <meta property="og:title" content="Sign in — Sihat TCM 中医">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="{{absasset "/static/img/art/og.jpg"}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="{{absasset "/static/img/art/og.jpg"}}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{asset "/static/css/app.css"}}">
+  <link rel="stylesheet" href="{{asset "/static/css/art.css"}}">
+  {{template "favicon"}}
   <style>
     .quick-access { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px dashed var(--stone-300, #d6d3d1); }
     .quick-access-title { font-size: .72rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--color-muted, #78716c); text-align: center; margin-bottom: .6rem; }
@@ -32,6 +39,10 @@
 {{template "header" .}}
 
 <main class="auth-container">
+  <figure class="auth-art">
+    <img src="{{asset "/static/img/art/consult.webp"}}" width="900" height="700" alt="Illustration of a doctor and patient in a video consultation." data-i18n-alt="art.consult" loading="lazy" decoding="async">
+    <figcaption data-i18n="art.consult.t">Connect with a TCM doctor</figcaption>
+  </figure>
   <div class="auth-card">
     <div class="auth-logo">
       <a href="/">Sihat TCM <span class="logo-zh">中医</span></a>
@@ -46,7 +57,7 @@
 
     <!-- Login Panel -->
     <div class="tab-panel active" id="panel-login">
-      <div id="login-alert" class="alert hidden"></div>
+      <div id="login-alert" role="alert" class="alert hidden"></div>
       <div class="form-group">
         <label class="form-label" for="login-email" data-i18n="login.email">Email 邮箱</label>
         <input class="form-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email">
@@ -55,14 +66,14 @@
         <label class="form-label" for="login-password" data-i18n="login.password">Password 密码</label>
         <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
       </div>
-      <button class="btn btn-primary btn-full mt-2" id="login-btn" onclick="authLogin()">
+      <button class="btn btn-primary btn-full mt-2" id="login-btn" onclick="authLogin()" data-i18n="login.signin">
         Sign In 登录
       </button>
       <p class="text-center text-sm mt-3">
         <a href="#" id="forgot-link" onclick="authShowForgot();return false;" data-i18n="login.forgot">Forgot password? 忘记密码？</a>
       </p>
       <p class="text-center text-sm text-muted mt-2">
-        Don't have an account? <a href="#" onclick="authSwitchTab('signup');return false;">Sign up 注册</a>
+        <span data-i18n="login.noacct">Don't have an account?</span> <a href="#" onclick="authSwitchTab('signup');return false;" data-i18n="login.signuplink">Sign up 注册</a>
       </p>
 
       <!-- Quick test-role login (demo accounts) -->
@@ -70,38 +81,38 @@
         <div class="quick-access-title" data-i18n="login.quicktitle">Quick Test Login 测试快捷登录</div>
         <div class="quick-roles">
           <button type="button" class="quick-role" data-role="patient" style="--qc:#059669" onclick="authQuickLogin('patient')">
-            <span class="quick-role-icon">🧑</span><span class="quick-role-label">Patient <small>患者</small></span>
+            <span class="quick-role-icon">🧑</span><span class="quick-role-label" data-i18n="login.q.patient">Patient 患者</span>
           </button>
           <button type="button" class="quick-role" data-role="doctor" style="--qc:#d97706" onclick="authQuickLogin('doctor')">
-            <span class="quick-role-icon">🩺</span><span class="quick-role-label">Doctor <small>医生</small></span>
+            <span class="quick-role-icon">🩺</span><span class="quick-role-label" data-i18n="login.q.doctor">Doctor 医生</span>
           </button>
           <button type="button" class="quick-role" data-role="admin" style="--qc:#475569" onclick="authQuickLogin('admin')">
-            <span class="quick-role-icon">🛡️</span><span class="quick-role-label">Admin <small>管理</small></span>
+            <span class="quick-role-icon">🛡️</span><span class="quick-role-label" data-i18n="login.q.admin">Admin 管理</span>
           </button>
           <button type="button" class="quick-role" data-role="developer" style="--qc:#7c3aed" onclick="authQuickLogin('developer')">
-            <span class="quick-role-icon">💻</span><span class="quick-role-label">Developer <small>开发</small></span>
+            <span class="quick-role-icon">💻</span><span class="quick-role-label" data-i18n="login.q.developer">Developer 开发</span>
           </button>
         </div>
-        <p class="quick-access-hint">All demo accounts use password <code>password123</code>.</p>
+        <p class="quick-access-hint"><span data-i18n="login.demohint">All demo accounts use password</span> <code>password123</code>.</p>
       </div>
 
       <!-- Log in as a specific doctor -->
       <div class="quick-access" style="border-top:none;padding-top:.25rem;margin-top:.5rem">
         <div class="quick-access-title" data-i18n="login.docselect">Or log in as a specific doctor 医生登录</div>
-        <select class="form-input" id="doctor-login-select">
-          <option value="">Select a doctor… 选择医生</option>
+        <select class="form-input" id="doctor-login-select" aria-label="Log in as a specific doctor 医生登录">
+          <option value="" data-i18n="login.selectdoctor">Select a doctor… 选择医生</option>
         </select>
       </div>
     </div>
 
     <!-- Sign Up Panel -->
     <div class="tab-panel" id="panel-signup">
-      <div id="signup-alert" class="alert hidden"></div>
+      <div id="signup-alert" role="alert" class="alert hidden"></div>
       <div class="form-group">
         <label class="form-label" data-i18n="login.registeras">Register as 注册身份</label>
         <div class="role-toggle">
-          <button type="button" class="role-toggle-btn active" id="role-patient" onclick="authSetRole('patient')">🧑 Patient 患者</button>
-          <button type="button" class="role-toggle-btn" id="role-doctor" onclick="authSetRole('doctor')">🩺 Doctor 医生</button>
+          <button type="button" class="role-toggle-btn active" id="role-patient" onclick="authSetRole('patient')" data-i18n="login.role.patient">🧑 Patient 患者</button>
+          <button type="button" class="role-toggle-btn" id="role-doctor" onclick="authSetRole('doctor')" data-i18n="login.role.doctor">🩺 Doctor 医生</button>
         </div>
       </div>
       <div class="form-group">
@@ -132,17 +143,17 @@
         <input class="form-input" id="signup-password" type="password" placeholder="Min 8 characters" autocomplete="new-password">
         <span class="form-hint" data-i18n="login.pwhint">Minimum 8 characters</span>
       </div>
-      <button class="btn btn-primary btn-full mt-2" id="signup-btn" onclick="authSignup()">
+      <button class="btn btn-primary btn-full mt-2" id="signup-btn" onclick="authSignup()" data-i18n="login.create">
         Create Account 创建账户
       </button>
       <p class="text-center text-sm text-muted mt-4">
-        Already have an account? <a href="#" onclick="authSwitchTab('login');return false;">Sign in 登录</a>
+        <span data-i18n="login.haveacct">Already have an account?</span> <a href="#" onclick="authSwitchTab('login');return false;" data-i18n="login.signinlink">Sign in 登录</a>
       </p>
     </div>
 
     <!-- Forgot Password Panel -->
     <div class="tab-panel" id="panel-forgot">
-      <div id="forgot-alert" class="alert hidden"></div>
+      <div id="forgot-alert" role="alert" class="alert hidden"></div>
       <p class="text-sm text-muted" style="margin-bottom:.6rem" data-i18n="login.forgottext">
         Enter your account email and we'll send you a password reset link.
       </p>
@@ -150,17 +161,17 @@
         <label class="form-label" for="forgot-email" data-i18n="login.email">Email 邮箱</label>
         <input class="form-input" id="forgot-email" type="email" placeholder="you@example.com" autocomplete="email">
       </div>
-      <button class="btn btn-primary btn-full mt-2" id="forgot-btn" onclick="authSendReset()">
+      <button class="btn btn-primary btn-full mt-2" id="forgot-btn" onclick="authSendReset()" data-i18n="login.sendreset">
         Send Reset Link 发送重置链接
       </button>
       <p class="text-center text-sm text-muted mt-4">
-        <a href="#" onclick="authSwitchTab('login');return false;">← Back to login 返回登录</a>
+        <a href="#" onclick="authSwitchTab('login');return false;" data-i18n="login.backtologin">← Back to login 返回登录</a>
       </p>
     </div>
 
     <hr class="divider">
     <p class="text-center text-sm text-muted">
-      <a href="/">← Continue without account 无需账号继续</a>
+      <a href="/" data-i18n="login.continueguest">← Continue without account 无需账号继续</a>
     </p>
   </div>
 </main>
