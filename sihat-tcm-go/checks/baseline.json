@@ -1,0 +1,17 @@
+{
+  "ignored_errors": {
+    ".": 3,
+    "internal/gemini": 1,
+    "internal/localdb": 12,
+    "internal/server": 45
+  },
+  "staticcheck": {
+    "S1008": 1,
+    "S1030": 1,
+    "S1039": 2,
+    "SA4000": 1,
+    "SA4006": 1,
+    "ST1018": 1,
+    "U1000": 1
+  }
+}
