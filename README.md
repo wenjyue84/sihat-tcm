@@ -1,4 +1,5 @@
 # Sihat TCM
+> **Last updated:** 2026-07-19
 
 **AI-Powered Traditional Chinese Medicine Diagnosis System**
 
